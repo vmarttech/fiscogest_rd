@@ -34,7 +34,7 @@ class ClienteService {
   }
 
   // 📦 CREACIÓN INICIAL: Todas las tablas desde cero
-  Future<void> _onCreate(Database db, int version) async {
+  Future<void> _onCreate(Database db, int _) async {
     // Tabla Productos
     await db.execute('''
       CREATE TABLE productos (
@@ -89,7 +89,7 @@ class ClienteService {
   }
 
   // 🔄 ACTUALIZACIÓN DE ESTRUCTURA (Versiones)
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  Future<void> _onUpgrade(Database db, int oldVersion, int _) async {
     // Versión 2: Agregamos campos fiscales a productos
     if (oldVersion < 2) {
       await _agregarColumnaSiNoExiste(db, 'productos', 'categoriaId', 'TEXT DEFAULT "GENERAL"');

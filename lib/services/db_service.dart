@@ -26,7 +26,7 @@ class DbService {
   }
 
   // ✅ ESTRUCTURA 100% ALINEADA AL MODELO ACTUAL (Producto.dart)
-  Future<void> _onCreate(Database db, int version) async {
+  Future<void> _onCreate(Database db, int _) async {
     await db.execute('''
       CREATE TABLE productos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,7 +71,7 @@ class DbService {
   }
 
   // ✅ MIGRACIÓN SEGURA - HISTÓRICO COMPLETO HASTA V6
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  Future<void> _onUpgrade(Database db, int oldVersion, int _) async {
     if (oldVersion < 2) {
       await db.execute('ALTER TABLE productos ADD COLUMN gastosTransporte REAL NOT NULL DEFAULT 0');
       await db.execute('ALTER TABLE productos ADD COLUMN gastosVarios REAL NOT NULL DEFAULT 0');
