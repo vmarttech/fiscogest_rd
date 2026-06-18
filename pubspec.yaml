@@ -3,44 +3,27 @@ description: Gestor inteligente de costos, gastos e impuestos para negocios en R
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.10.0 <4.0.0' # ✅ Rango compatible y estable
+  sdk: '>=3.10.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # ==============================================
-  # ✅ GESTIÓN DE ESTADO (Riverpod - Última estable)
-  # ==============================================
   flutter_riverpod: ^2.5.1
-
-  # ==============================================
-  # ✅ BASE DE DATOS LOCAL SQLite
-  # ==============================================
-  sqflite: ^2.3.3          # Motor SQLite
-  path_provider: ^2.1.4    # Rutas de almacenamiento
-  path: ^1.9.0              # Manejo de rutas de archivos
-
-  # ==============================================
-  # ✅ CONEXIÓN WEB Y CONSULTAS DGII (OBLIGATORIO)
-  # ==============================================
-  http: ^1.2.2              # Peticiones HTTP a la DGII
-  html: ^0.15.4             # Lectura y análisis del contenido web
-
-  # ==============================================
-  # ✅ UTILIDADES Y FORMATO
-  # ==============================================
-  intl: ^0.19.0             # Formato de moneda, fechas y números
-  uuid: ^4.4.0              # Generación de identificadores únicos
+  sqflite: ^2.3.3
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  http: ^1.2.2
+  html: ^0.15.4
+  intl: ^0.19.0
+  uuid: ^4.4.0
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0     # Reglas de estilo y buenas prácticas
-  # ==============================================
-  # ✅ HERRAMIENTA DE ANÁLISIS ADICIONAL (SOLO DESARROLLO)
-  # ==============================================
-  dart_code_metrics: ^4.19.2 # Versión compatible con uuid ^4.4.0
+  flutter_lints: ^4.0.0
+  dart_code_metrics: ^4.19.2
 
 flutter:
-  uses-material-design: true # Diseño Material Design activado
+  uses-material-design: true

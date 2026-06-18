@@ -6,10 +6,9 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
   final ProductoRepository _repository;
 
   ProductoNotifier(this._repository) : super([]) {
-    _cargarDatos(); // ✅ Llamada interna, correcta
+    _cargarDatos();
   }
 
-  // ✅ Método PRIVADO (solo dentro de esta clase) - TU LÓGICA ORIGINAL
   Future<void> _cargarDatos() async {
     try {
       final lista = await _repository.obtenerTodosActivos();
@@ -19,24 +18,23 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
     }
   }
 
-  // ✅ SOLUCIÓN: MÉTODO PÚBLICO PARA LLAMAR DESDE LA UI
   Future<void> cargarDatos() async {
     await _cargarDatos();
   }
 
-  // ✅ RESTO DE TU LÓGICA, SIN CAMBIOS NI MEZCLAS
   Future<void> guardar(Producto producto) async {
     try {
       await _repository.guardar(producto);
-      await cargarDatos(); // ✅ LÍNEA CLAVE: recarga la lista automáticamente después de guardar
+      await cargarDatos();
     } catch (e) {
       rethrow;
     }
   }
 
+  // ✅ CORRECCIÓN: Cambiamos eliminarLogico por eliminarFisico (ya que no tenemos campo "activo")
   Future<void> borrar(int id) async {
     try {
-      await _repository.eliminarLogico(id);
+      await _repository.eliminarFisico(id);
       await cargarDatos();
     } catch (e) {
       rethrow;
@@ -84,3 +82,11 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
     }
   }
 }
+
+// ✅ Proveedores (los agregamos aquí para tener todo en un solo lugar)
+final productoRepositoryProvider = Provider((ref) => ProductoRepository());
+
+final productoNotifierProvider = StateNotifierProvider<ProductoNotifier, List<Producto>>((ref) {
+  final repo = ref.watch(productoRepositoryProvider);
+  return ProductoNotifier(repo);
+});

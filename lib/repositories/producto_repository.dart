@@ -1,169 +1,120 @@
-import 'package:sqflite/sqflite.dart';
-import '../services/db_service.dart';
 import '../models/producto.dart';
 import '../services/existencia_service.dart';
+import '../services/producto_service.dart';
 
 class ProductoRepository {
-  // ✅ INSTANCIA ÚNICA - MANTENIDA
+  // ✅ INSTANCIA ÚNICA
   static final ProductoRepository _instance = ProductoRepository._internal();
   factory ProductoRepository() => _instance;
   ProductoRepository._internal();
 
-  // ✅ CONEXIONES OFICIALES - SIN CAMBIOS
-  final DbService _dbService = DbService();
+  // ✅ SOLO LOS SERVICIOS QUE USAMOS
+  final ProductoService _productoService = ProductoService();
   final ExistenciaService _existenciaService = ExistenciaService();
 
-  Future<Database> get _db async => await _dbService.database;
-
   // =====================================================
-  // ✅ OBTENER TODOS ACTIVOS (MODIFICADO: AHORA TRAE TODOS)
+  // ✅ OBTENER TODOS ACTIVOS
   // =====================================================
   Future<List<Producto>> obtenerTodosActivos() async {
-    final db = await _db;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'productos',
-      orderBy: 'nombre ASC',
-    );
-    return List.generate(maps.length, (i) => Producto.fromMap(maps[i]));
+    // Como no tenemos campo "activo", devolvemos todos
+    return await _productoService.obtenerTodos();
   }
 
   // =====================================================
-  // ✅ OBTENER TODOS (SIN FILTRO) - AGREGADO PARA EVITAR ERROR
+  // ✅ OBTENER TODOS
   // =====================================================
   Future<List<Producto>> obtenerTodos() async {
-    final db = await _db;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'productos',
-      orderBy: 'nombre ASC',
-    );
-    return List.generate(maps.length, (i) => Producto.fromMap(maps[i]));
+    return await _productoService.obtenerTodos();
   }
 
   // =====================================================
-  // ✅ OBTENER POR ID (MODIFICADO: AHORA BUSCA EN TODOS)
+  // ✅ OBTENER POR ID
   // =====================================================
   Future<Producto?> obtenerPorId(int id) async {
-    final db = await _db;
-    final res = await db.query(
-      'productos',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-    if (res.isEmpty) return null;
-    return Producto.fromMap(res.first);
+    return await _productoService.obtenerPorId(id);
   }
 
   // =====================================================
-  // ✅ CREAR NUEVO PRODUCTO
+  // ✅ CREAR
   // =====================================================
   Future<int> crear(Producto producto) async {
-    final db = await _db;
-
-    // ✅ INSERCIÓN ALINEADA CON MODELO Y BD
-    final id = await db.insert(
-      'productos',
-      producto.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.abort,
-    );
-
-    // ✅ INTEGRACIÓN INVENTARIO: CREACIÓN AUTOMÁTICA
-    await _existenciaService.inicializarExistenciaDeProducto(
-      producto.copyWith(id: id),
-    );
-
+    final id = await _productoService.crear(producto);
+    if (id > 0) {
+      await _existenciaService.inicializarExistenciaDeProducto(
+        producto.copyWith(id: id),
+      );
+    }
     return id;
   }
 
   // =====================================================
-  // ✅ ACTUALIZAR PRODUCTO EXISTENTE - ✅ RESTAURADO A VERSIÓN ORIGINAL
+  // ✅ ACTUALIZAR
   // =====================================================
   Future<int> actualizar(Producto producto) async {
-    final db = await _db;
-
-    // ✅ RESTAURADO: FILTRO ORIGINAL `activo = 1`
-    final filasAfectadas = await db.update(
-      'productos',
-      producto.toMap(),
-      where: 'id = ? AND activo = ?',
-      whereArgs: [producto.id, 1],
-    );
-
-    // ✅ PUNTO 5: SINCRONIZACIÓN CRÍTICA
-    if (filasAfectadas > 0 && producto.id != null) {
+    if (producto.id == null) return -1;
+    final filas = await _productoService.actualizar(producto);
+    if (filas > 0) {
       await _existenciaService.actualizarDatosProductoRelacionado(producto);
     }
-
-    return filasAfectadas;
+    return filas;
   }
 
   // =====================================================
-  // ✅ GUARDAR: LÓGICA ÚNICA (CREA O ACTUALIZA)
+  // ✅ GUARDAR
   // =====================================================
   Future<int> guardar(Producto producto) async {
-    return producto.id == null 
-      ? await crear(producto)   
-      : await actualizar(producto); 
+    return producto.id == null ? await crear(producto) : await actualizar(producto);
   }
 
   // =====================================================
-  // ✅ BUSCAR POR TEXTO (MODIFICADO: BUSCA EN TODOS)
+  // ✅ BUSCAR
   // =====================================================
   Future<List<Producto>> buscar(String texto) async {
-    final db = await _db;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'productos',
-      where: '(codigo LIKE ? OR nombre LIKE ? OR descripcion LIKE ?)',
-      whereArgs: ['%$texto%', '%$texto%', '%$texto%'],
-      orderBy: 'nombre ASC',
-    );
-    return List.generate(maps.length, (i) => Producto.fromMap(maps[i]));
+    final todos = await _productoService.obtenerTodos();
+    final filtro = texto.trim().toUpperCase();
+    return todos.where((p) {
+      return p.codigo.toUpperCase().contains(filtro) ||
+          p.nombre.toUpperCase().contains(filtro) ||
+          (p.descripcion ?? '').toUpperCase().contains(filtro);
+    }).toList();
   }
 
   // =====================================================
-  // ✅ NUEVO: BUSCAR POR RÉGIMEN FISCAL (MODIFICADO: TRAE TODOS)
+  // ✅ BUSCAR POR RÉGIMEN
   // =====================================================
-  Future<List<Producto>> buscarPorRegimen(String nombreRegimen) async {
-    final db = await _db;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'productos',
-      where: 'regimenImpuesto = ?',
-      whereArgs: [nombreRegimen],
-      orderBy: 'nombre ASC',
-    );
-    return List.generate(maps.length, (i) => Producto.fromMap(maps[i]));
+  Future<List<Producto>> buscarPorRegimen(String regimen) async {
+    final todos = await _productoService.obtenerTodos();
+    return todos.where((p) => p.regimenImpuesto == regimen).toList();
   }
 
   // =====================================================
-  // ✅ ELIMINACIÓN LÓGICA (SE MANTIENE IGUAL, FUNCIONA BIEN)
+  // ✅ ELIMINACIÓN LÓGICA (COMENTADA POR AHORA)
   // =====================================================
-  Future<int> eliminarLogico(int id) async {
-    final db = await _db;
-    return await db.update(
-      'productos',
-      {'activo': 0},
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
+  // Future<int> eliminarLogico(int id) async {
+  //   final p = await obtenerPorId(id);
+  //   if (p == null) return -1;
+  //   return await actualizar(p.copyWith(activo: false));
+  // }
 
   // =====================================================
   // ✅ ELIMINACIÓN FÍSICA
   // =====================================================
   Future<int> eliminarFisico(int id) async {
-    final db = await _db;
     await _existenciaService.eliminarPorProductoId(id);
-    return await db.delete(
-      'productos',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await _productoService.eliminar(id);
   }
 
   // =====================================================
-  // ✅ ACTUALIZACIÓN DE STOCK
+  // ✅ ACTUALIZAR STOCK
   // =====================================================
   Future<void> actualizarNivelStock(int productoId, double nuevoValor) async {
     await _existenciaService.actualizarStockDesdeInventario(productoId, nuevoValor);
+  }
+
+  // =====================================================
+  // ✅ RESUMEN DE COSTOS
+  // =====================================================
+  Map<String, double> obtenerResumenCostos(Producto producto) {
+    return _productoService.obtenerResumenCostos(producto);
   }
 }

@@ -18,3 +18,24 @@ dart_code_metrics:
     - prefer-const-declarations
     - prefer-final-fields
     - avoid-print
+
+  # ✅ Excluimos métodos automáticos de los modelos
+  exclude:
+    - "**/*Model.dart"
+    - "**/*Producto.dart"
+    - "**/*.fromMap"
+    - "**/*.copyWith"
+
+# ==============================================
+# ✅ PROHIBIR USO DE print()
+# ==============================================
+linter:
+  rules:
+    avoid_print: error
+
+analyzer:
+  errors:
+    avoid_print: error
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"

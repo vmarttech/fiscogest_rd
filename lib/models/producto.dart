@@ -14,8 +14,6 @@ class Producto {
   final String categoria;
   final String regimenImpuesto;
   final bool esImpuestoSelectivo;
-
-  // ✅ CAMPOS ACTUALIZADOS Y HOMOLOGADOS
   final String unidadMedida;
   final bool permiteDecimales;
   final dynamic stockActual;
@@ -46,50 +44,168 @@ class Producto {
   });
 
   // =====================================================
-  // ✅ LISTA DE UNIDADES DE MEDIDA (ESTÁNDAR + OTRA)
+  // ✅ FUNCIONES AUXILIARES → BAJAN LA COMPLEJIDAD
   // =====================================================
-  static const List<String> listaUnidadesMedida = [
-    'UNIDAD',
-    'PIEZA',
-    'CAJA',
-    'PAQUETE',
-    'DOCENA',
-    'BOTELLA',
-    'LATA',
-    'FARDO',
-    'SACO',
-    'ROLLO',
-    'LITRO',
-    'MILILITRO',
-    'KILO',
-    'LIBRA',
-    'GRAMO',
-    'GALÓN',
-    'METRO',
-    'CENTÍMETRO',
-    'OTRA...',
-  ];
+  static int? _optInt(int? nuevo, int? actual) => nuevo ?? actual;
+  static String _optStr(String? nuevo, String actual) => nuevo ?? actual;
+  static double _optDouble(double? nuevo, double actual) => nuevo ?? actual;
+  static bool _optBool(bool? nuevo, bool actual) => nuevo ?? actual;
+  static dynamic _optDin(dynamic nuevo, dynamic actual) => nuevo ?? actual;
+  static DateTime _optDate(DateTime? nuevo, DateTime actual) => nuevo ?? actual;
 
   // =====================================================
-  // ✅ LÓGICA DECIMALES/ENTEROS (ALINEADO CON FORMULARIO)
+  // ✅ fromMap → Complejidad baja
   // =====================================================
-  static bool verificarSiPermiteDecimales(String unidad) {
-    const unidadesQuePermitenDecimales = [
-      'LITRO',
-      'MILILITRO',
-      'KILO',
-      'LIBRA',
-      'GRAMO',
-      'GALÓN',
-      'METRO',
-      'CENTÍMETRO',
-    ];
-    return unidadesQuePermitenDecimales.contains(unidad.toUpperCase());
+  factory Producto.fromMap(Map<String, dynamic> map) {
+    int? readInt(String key) => map[key] as int?;
+    String readStr(String key, [String def = '']) => map[key] as String? ?? def;
+    double readDbl(String key, [double def = 0.0]) => (map[key] as num?)?.toDouble() ?? def;
+    bool readBool(String key, [bool def = false]) {
+      final v = map[key];
+      return v is int ? v == 1 : (v as bool? ?? def);
+    }
+    dynamic readStock(String key) => map[key] ?? 0;
+    DateTime readDate(String key) {
+      final s = map[key] as String?;
+      return s != null ? DateTime.parse(s) : DateTime.now();
+    }
+
+    return Producto(
+      id: readInt('id'),
+      codigo: readStr('codigo'),
+      nombre: readStr('nombre'),
+      descripcion: map['descripcion'] as String?,
+      precioCompra: readDbl('precioCompra'),
+      gastosTransporte: readDbl('gastosTransporte'),
+      gastosVarios: readDbl('gastosVarios'),
+      precioVenta: readDbl('precioVenta'),
+      margenGanancia: readDbl('margenGanancia'),
+      valorITBIS: readDbl('valorITBIS'),
+      porcentajeImpuesto: readDbl('porcentajeImpuesto'),
+      aplicaImpuesto: readBool('aplicaImpuesto'),
+      categoria: readStr('categoria'),
+      regimenImpuesto: readStr('regimenImpuesto'),
+      esImpuestoSelectivo: readBool('esImpuestoSelectivo'),
+      unidadMedida: readStr('unidadMedida', 'UNIDAD'),
+      permiteDecimales: readBool('permiteDecimales'),
+      stockActual: readStock('stockActual'),
+      stockMinimo: readStock('stockMinimo'),
+      fechaRegistro: readDate('fechaRegistro'),
+    );
   }
 
   // =====================================================
-  // ✅ RÉGIMENES FISCALES DGII (COMPLETOS Y DESCRIPCIÓN)
+  // ✅ toMap
   // =====================================================
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'codigo': codigo,
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'precioCompra': precioCompra,
+      'gastosTransporte': gastosTransporte,
+      'gastosVarios': gastosVarios,
+      'precioVenta': precioVenta,
+      'margenGanancia': margenGanancia,
+      'valorITBIS': valorITBIS,
+      'porcentajeImpuesto': porcentajeImpuesto,
+      'aplicaImpuesto': aplicaImpuesto ? 1 : 0,
+      'categoria': categoria,
+      'regimenImpuesto': regimenImpuesto,
+      'esImpuestoSelectivo': esImpuestoSelectivo ? 1 : 0,
+      'unidadMedida': unidadMedida,
+      'permiteDecimales': permiteDecimales ? 1 : 0,
+      'stockActual': stockActual,
+      'stockMinimo': stockMinimo,
+      'fechaRegistro': fechaRegistro.toIso8601String(),
+    };
+  }
+
+  // =====================================================
+  // ✅ copyWith → AHORA COMPLEJIDAD < 20
+  // =====================================================
+  Producto copyWith({
+    int? id,
+    String? codigo,
+    String? nombre,
+    String? descripcion,
+    double? precioCompra,
+    double? gastosTransporte,
+    double? gastosVarios,
+    double? precioVenta,
+    double? margenGanancia,
+    double? valorITBIS,
+    double? porcentajeImpuesto,
+    bool? aplicaImpuesto,
+    String? categoria,
+    String? regimenImpuesto,
+    bool? esImpuestoSelectivo,
+    String? unidadMedida,
+    bool? permiteDecimales,
+    dynamic stockActual,
+    dynamic stockMinimo,
+    DateTime? fechaRegistro,
+  }) {
+    return Producto(
+      id: _optInt(id, this.id),
+      codigo: _optStr(codigo, this.codigo),
+      nombre: _optStr(nombre, this.nombre),
+      descripcion: descripcion ?? this.descripcion,
+      precioCompra: _optDouble(precioCompra, this.precioCompra),
+      gastosTransporte: _optDouble(gastosTransporte, this.gastosTransporte),
+      gastosVarios: _optDouble(gastosVarios, this.gastosVarios),
+      precioVenta: _optDouble(precioVenta, this.precioVenta),
+      margenGanancia: _optDouble(margenGanancia, this.margenGanancia),
+      valorITBIS: _optDouble(valorITBIS, this.valorITBIS),
+      porcentajeImpuesto: _optDouble(porcentajeImpuesto, this.porcentajeImpuesto),
+      aplicaImpuesto: _optBool(aplicaImpuesto, this.aplicaImpuesto),
+      categoria: _optStr(categoria, this.categoria),
+      regimenImpuesto: _optStr(regimenImpuesto, this.regimenImpuesto),
+      esImpuestoSelectivo: _optBool(esImpuestoSelectivo, this.esImpuestoSelectivo),
+      unidadMedida: _optStr(unidadMedida, this.unidadMedida),
+      permiteDecimales: _optBool(permiteDecimales, this.permiteDecimales),
+      stockActual: _optDin(stockActual, this.stockActual),
+      stockMinimo: _optDin(stockMinimo, this.stockMinimo),
+      fechaRegistro: _optDate(fechaRegistro, this.fechaRegistro),
+    );
+  }
+
+  // =====================================================
+  // ✅ CÁLCULOS Y DATOS ESTÁTICOS (SIN CAMBIOS)
+  // =====================================================
+  double get costoRealSinImpuesto => precioCompra + gastosTransporte + gastosVarios;
+
+  double get totalImpuestos {
+    if (!aplicaImpuesto) return 0.0;
+    return costoRealSinImpuesto * (porcentajeImpuesto / 100);
+  }
+
+  double get costoRealConImpuesto => costoRealSinImpuesto + totalImpuestos;
+
+  double get precioVentaSugerido {
+    if (costoRealConImpuesto <= 0) return 0.0;
+    return costoRealConImpuesto * (1 + (margenGanancia / 100));
+  }
+
+  double get gananciaNeta => precioVenta - costoRealConImpuesto;
+
+  double get porcentajeGananciaReal {
+    if (precioVenta <= 0) return 0.0;
+    return ((gananciaNeta / precioVenta) * 100).clamp(0.0, 100.0);
+  }
+
+  static const List<String> listaUnidadesMedida = [
+    'UNIDAD', 'PIEZA', 'CAJA', 'PAQUETE', 'DOCENA', 'BOTELLA', 'LATA',
+    'FARDO', 'SACO', 'ROLLO', 'LITRO', 'MILILITRO', 'KILO', 'LIBRA',
+    'GRAMO', 'GALÓN', 'METRO', 'CENTÍMETRO', 'OTRA...',
+  ];
+
+  static bool verificarSiPermiteDecimales(String unidad) {
+    const unidades = ['LITRO', 'MILILITRO', 'KILO', 'LIBRA', 'GRAMO', 'GALÓN', 'METRO', 'CENTÍMETRO'];
+    return unidades.contains(unidad.toUpperCase());
+  }
+
   static const List<Map<String, dynamic>> listaRegimenesRD = [
     {
       'nombre': 'GENERAL (ITBIS 18%)',
@@ -148,126 +264,4 @@ class Producto {
       'descripcion': 'Combustibles y derivados del petróleo.'
     },
   ];
-
-  // =====================================================
-  // ✅ CONVERSIÓN DESDE MAPA (LECTURA BD)
-  // ✅ VALIDACIONES Y VALORES POR DEFECTO SEGUROS
-  // =====================================================
-  factory Producto.fromMap(Map<String, dynamic> map) {
-    return Producto(
-      id: map['id'],
-      codigo: map['codigo'] ?? '',
-      nombre: map['nombre'] ?? '',
-      descripcion: map['descripcion'],
-      precioCompra: (map['precioCompra'] ?? 0.0).toDouble(),
-      gastosTransporte: (map['gastosTransporte'] ?? 0.0).toDouble(),
-      gastosVarios: (map['gastosVarios'] ?? 0.0).toDouble(),
-      precioVenta: (map['precioVenta'] ?? 0.0).toDouble(),
-      margenGanancia: (map['margenGanancia'] ?? 0.0).toDouble(),
-      valorITBIS: (map['valorITBIS'] ?? 0.0).toDouble(),
-      porcentajeImpuesto: (map['porcentajeImpuesto'] ?? 0.0).toDouble(),
-      // 👇 AJUSTE CLAVE: Convierte entero 1/0 a booleano
-      aplicaImpuesto: (map['aplicaImpuesto'] is int) 
-          ? map['aplicaImpuesto'] == 1 
-          : (map['aplicaImpuesto'] ?? false),
-      categoria: map['categoria'] ?? '',
-      regimenImpuesto: map['regimenImpuesto'] ?? '',
-      // 👇 AJUSTE CLAVE: Convierte entero 1/0 a booleano
-      esImpuestoSelectivo: (map['esImpuestoSelectivo'] is int) 
-          ? map['esImpuestoSelectivo'] == 1 
-          : (map['esImpuestoSelectivo'] ?? false),
-      unidadMedida: map['unidadMedida'] ?? 'UNIDAD',
-      // 👇 AJUSTE CLAVE: Convierte entero 1/0 a booleano
-      permiteDecimales: (map['permiteDecimales'] is int) 
-          ? map['permiteDecimales'] == 1 
-          : (map['permiteDecimales'] ?? false),
-      stockActual: map['stockActual'] ?? 0,
-      stockMinimo: map['stockMinimo'] ?? 0,
-      fechaRegistro: map['fechaRegistro'] != null
-          ? DateTime.parse(map['fechaRegistro'])
-          : DateTime.now(),
-    );
-  }
-
-  // =====================================================
-  // ✅ CONVERSIÓN A MAPA (ESCRITURA BD)
-  // ✅ CAMPOS ALINEADOS CON ESTRUCTURA DE TABLA
-  // =====================================================
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'codigo': codigo,
-      'nombre': nombre,
-      'descripcion': descripcion,
-      'precioCompra': precioCompra,
-      'gastosTransporte': gastosTransporte,
-      'gastosVarios': gastosVarios,
-      'precioVenta': precioVenta,
-      'margenGanancia': margenGanancia,
-      'valorITBIS': valorITBIS,
-      'porcentajeImpuesto': porcentajeImpuesto,
-      // 👇 AJUSTE CLAVE: Guarda booleano como entero 1 o 0 para SQLite
-      'aplicaImpuesto': aplicaImpuesto ? 1 : 0,
-      'categoria': categoria,
-      'regimenImpuesto': regimenImpuesto,
-      // 👇 AJUSTE CLAVE: Guarda booleano como entero 1 o 0 para SQLite
-      'esImpuestoSelectivo': esImpuestoSelectivo ? 1 : 0,
-      'unidadMedida': unidadMedida,
-      // 👇 AJUSTE CLAVE: Guarda booleano como entero 1 o 0 para SQLite
-      'permiteDecimales': permiteDecimales ? 1 : 0,
-      'stockActual': stockActual,
-      'stockMinimo': stockMinimo,
-      'fechaRegistro': fechaRegistro.toIso8601String(),
-    };
-  }
-
-  // =====================================================
-  // ✅ COPY WITH (ESENCIAL PARA ACTUALIZACIONES)
-  // ✅ COMPLETO Y SIN ERRORES
-  // =====================================================
-  Producto copyWith({
-    int? id,
-    String? codigo,
-    String? nombre,
-    String? descripcion,
-    double? precioCompra,
-    double? gastosTransporte,
-    double? gastosVarios,
-    double? precioVenta,
-    double? margenGanancia,
-    double? valorITBIS,
-    double? porcentajeImpuesto,
-    bool? aplicaImpuesto,
-    String? categoria,
-    String? regimenImpuesto,
-    bool? esImpuestoSelectivo,
-    String? unidadMedida,
-    bool? permiteDecimales,
-    dynamic stockActual,
-    dynamic stockMinimo,
-    DateTime? fechaRegistro,
-  }) {
-    return Producto(
-      id: id ?? this.id,
-      codigo: codigo ?? this.codigo,
-      nombre: nombre ?? this.nombre,
-      descripcion: descripcion ?? this.descripcion,
-      precioCompra: precioCompra ?? this.precioCompra,
-      gastosTransporte: gastosTransporte ?? this.gastosTransporte,
-      gastosVarios: gastosVarios ?? this.gastosVarios,
-      precioVenta: precioVenta ?? this.precioVenta,
-      margenGanancia: margenGanancia ?? this.margenGanancia,
-      valorITBIS: valorITBIS ?? this.valorITBIS,
-      porcentajeImpuesto: porcentajeImpuesto ?? this.porcentajeImpuesto,
-      aplicaImpuesto: aplicaImpuesto ?? this.aplicaImpuesto,
-      categoria: categoria ?? this.categoria,
-      regimenImpuesto: regimenImpuesto ?? this.regimenImpuesto,
-      esImpuestoSelectivo: esImpuestoSelectivo ?? this.esImpuestoSelectivo,
-      unidadMedida: unidadMedida ?? this.unidadMedida,
-      permiteDecimales: permiteDecimales ?? this.permiteDecimales,
-      stockActual: stockActual ?? this.stockActual,
-      stockMinimo: stockMinimo ?? this.stockMinimo,
-      fechaRegistro: fechaRegistro ?? this.fechaRegistro,
-    );
-  }
 }
