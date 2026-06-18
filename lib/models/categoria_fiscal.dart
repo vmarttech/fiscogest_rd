@@ -100,61 +100,32 @@ const List<CategoriaFiscal> categoriasFiscalesRD = [
   ),
 ];
 
-// ✅ FUNCIÓN DE DETECCIÓN AUTOMÁTICA (CORREGIDA)
+// ✅ MAPA DE REGLAS: CADA CATEGORÍA CON SUS PALABRAS CLAVE
+final Map<String, List<String>> _reglasDeteccion = {
+  'COMBUSTIBLES': ['gasolina', 'gasoil', 'combustible', 'glp', 'diesel'],
+  'ALCOHOL_TABACO': ['cerveza', 'ron', 'vino', 'alcohol', 'tabaco', 'cigarrillo'],
+  'MEDICAMENTOS': ['medicina', 'pastilla', 'farmacia', 'salud', 'inyeccion'],
+  'ALIMENTOS': ['arroz', 'habichuela', 'carne', 'pollo', 'leche', 'huevo', 'pan', 'azucar'],
+  'LIBROS_EDUCACION': ['libro', 'cuaderno', 'escuela', 'educacion'],
+  'BIENES_USO': ['maquinaria', 'equipo', 'herramienta'],
+};
+
+// ✅ FUNCIÓN AUXILIAR: VERIFICA SI EL TEXTO COINCIDE CON ALGUNA PALABRA CLAVE
+bool _coincideConPalabras(String texto, List<String> palabras) {
+  return palabras.any((palabra) => texto.contains(palabra));
+}
+
+// ✅ FUNCIÓN PRINCIPAL: SIMPLIFICADA Y CON BAJA COMPLEJIDAD
 CategoriaFiscal detectarCategoriaFiscal(String nombre, String codigo) {
-  // ✅ CORREGIDO: Uso interpolación en vez de concatenación con +
   final texto = '${nombre.toLowerCase()} ${codigo.toLowerCase()}';
 
-  // Reglas de detección según palabras clave
-  if (texto.contains('gasolina') || 
-      texto.contains('gasoil') || 
-      texto.contains('combustible') || 
-      texto.contains('glp') || 
-      texto.contains('diesel')) {
-    return categoriasFiscalesRD.firstWhere((c) => c.id == 'COMBUSTIBLES');
+  // Recorremos las reglas y devolvemos la categoría correspondiente
+  for (final entrada in _reglasDeteccion.entries) {
+    if (_coincideConPalabras(texto, entrada.value)) {
+      return categoriasFiscalesRD.firstWhere((cat) => cat.id == entrada.key);
+    }
   }
 
-  if (texto.contains('cerveza') || 
-      texto.contains('ron') || 
-      texto.contains('vino') || 
-      texto.contains('alcohol') || 
-      texto.contains('tabaco') || 
-      texto.contains('cigarrillo')) {
-    return categoriasFiscalesRD.firstWhere((c) => c.id == 'ALCOHOL_TABACO');
-  }
-
-  if (texto.contains('medicina') || 
-      texto.contains('pastilla') || 
-      texto.contains('farmacia') || 
-      texto.contains('salud') || 
-      texto.contains('inyeccion')) {
-    return categoriasFiscalesRD.firstWhere((c) => c.id == 'MEDICAMENTOS');
-  }
-
-  if (texto.contains('arroz') || 
-      texto.contains('habichuela') || 
-      texto.contains('carne') || 
-      texto.contains('pollo') || 
-      texto.contains('leche') || 
-      texto.contains('huevo') || 
-      texto.contains('pan') || 
-      texto.contains('azucar')) {
-    return categoriasFiscalesRD.firstWhere((c) => c.id == 'ALIMENTOS');
-  }
-
-  if (texto.contains('libro') || 
-      texto.contains('cuaderno') || 
-      texto.contains('escuela') || 
-      texto.contains('educacion')) {
-    return categoriasFiscalesRD.firstWhere((c) => c.id == 'LIBROS_EDUCACION');
-  }
-
-  if (texto.contains('maquinaria') || 
-      texto.contains('equipo') || 
-      texto.contains('herramienta')) {
-    return categoriasFiscalesRD.firstWhere((c) => c.id == 'BIENES_USO');
-  }
-
-  // Por defecto: General
-  return categoriasFiscalesRD.firstWhere((c) => c.id == 'GENERAL');
+  // Si no coincide con ninguna, devolvemos la categoría general
+  return categoriasFiscalesRD.firstWhere((cat) => cat.id == 'GENERAL');
 }

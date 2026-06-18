@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/existencia_provider.dart';
-// ✅ ELIMINADO: import '../models/existencia.dart'; (No se usaba directamente)
 import 'formulario_movimiento.dart';
 
 class ListadoInventarioScreen extends ConsumerStatefulWidget {
@@ -58,6 +57,8 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
             data: (lista) {
               final totalArticulos = lista.length;
               final bajosStock = lista.where((item) => item.estaBajoMinimo).length;
+              // ✅ NUEVO: Contador de exceso de stock (lo usaremos en Punto B)
+              final excesoStock = lista.where((item) => item.tieneExcesoStock).length;
 
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -66,12 +67,25 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Total: $totalArticulos artículos'),
-                    Text(
-                      'Bajo stock: $bajosStock',
-                      style: TextStyle(
-                        color: bajosStock > 0 ? Colors.red : Colors.green,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'Bajo: $bajosStock',
+                          style: TextStyle(
+                            color: bajosStock > 0 ? Colors.red : Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // ✅ NUEVO: Indicador de exceso
+                        Text(
+                          'Exceso: $excesoStock',
+                          style: TextStyle(
+                            color: excesoStock > 0 ? Colors.deepOrange : Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -105,12 +119,23 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                   itemBuilder: (context, indice) {
                     final item = listaFiltrada[indice];
                     return Card(
+                      // ✅ MEJORA: Resaltado visual si excede el máximo (preparado para Punto B)
+                      color: item.tieneExcesoStock ? Colors.deepOrange.shade50 : Colors.white,
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       elevation: 2,
                       child: ListTile(
                         leading: Icon(
-                          item.estaBajoMinimo ? Icons.warning_amber : Icons.inventory_2,
-                          color: item.estaBajoMinimo ? Colors.orange : Colors.blueGrey,
+                          // ✅ MEJORA: Icono cambia si hay exceso o falta
+                          item.tieneExcesoStock 
+                              ? Icons.arrow_upward 
+                              : item.estaBajoMinimo 
+                                  ? Icons.warning_amber 
+                                  : Icons.inventory_2,
+                          color: item.tieneExcesoStock 
+                              ? Colors.deepOrange 
+                              : item.estaBajoMinimo 
+                                  ? Colors.orange 
+                                  : Colors.blueGrey,
                           size: 32,
                         ),
                         title: Text('${item.codigoProducto} - ${item.nombreProducto}'),
@@ -129,6 +154,12 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                               'Stock Mín: ${item.cantidadMinima.toStringAsFixed(2)} | Máx: ${item.cantidadMaxima.toStringAsFixed(2)}',
                               style: const TextStyle(fontSize: 12),
                             ),
+                            // 👇👇👇 AQUÍ INTEGRAMOS EL PUNTO A: FECHA DE ACTUALIZACIÓN 👇👇👇
+                            Text(
+                              "Último movimiento: ${item.fechaFormateada}",
+                              style: TextStyle(fontSize: 12, color: Colors.grey[700], fontStyle: FontStyle.italic),
+                            ),
+                            // 👆👆👆 FIN DE LA INTEGRACIÓN 👆👆👆
                           ],
                         ),
                         trailing: Column(
@@ -139,7 +170,12 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: item.estaBajoMinimo ? Colors.red : Colors.green.shade700,
+                                // ✅ COLOR HOMOLOGADO: Rojo = Bajo, Naranja = Exceso, Verde = Normal
+                                color: item.tieneExcesoStock 
+                                    ? Colors.deepOrange 
+                                    : item.estaBajoMinimo 
+                                        ? Colors.red 
+                                        : Colors.green.shade700,
                               ),
                             ),
                             const Text('Real', style: TextStyle(fontSize: 11)),

@@ -37,6 +37,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0     # Reglas de estilo y buenas prácticas
+  # ==============================================
+  # ✅ HERRAMIENTA DE ANÁLISIS ADICIONAL (SOLO DESARROLLO)
+  # ==============================================
+  dart_code_metrics: ^4.19.2 # Versión compatible con uuid ^4.4.0
 
 flutter:
   uses-material-design: true # Diseño Material Design activado
