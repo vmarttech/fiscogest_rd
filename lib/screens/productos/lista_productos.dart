@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/producto_notifier.dart';
-import 'formulario_producto.dart';
+import 'package:fiscogestrd/providers/producto_notifier.dart';
+import 'package:fiscogestrd/screens/productos/formulario_producto.dart';
 
 class ListaProductosScreen extends ConsumerWidget {
   const ListaProductosScreen({super.key});
@@ -33,9 +33,13 @@ class ListaProductosScreen extends ConsumerWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Costo final: ${p.costoRealConImpuesto.toStringAsFixed(2)} RD\$'),
+                        Text(
+                          'Costo final: ${p.costoRealConImpuesto.toStringAsFixed(2)} RD\$',
+                        ),
                         Text('Venta: ${p.precioVenta.toStringAsFixed(2)} RD\$'),
-                        Text('Ganancia: ${p.porcentajeGananciaReal.toStringAsFixed(1)}%'),
+                        Text(
+                          'Ganancia: ${p.porcentajeGananciaReal.toStringAsFixed(1)}%',
+                        ),
                       ],
                     ),
                     trailing: Row(
@@ -45,7 +49,10 @@ class ListaProductosScreen extends ConsumerWidget {
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => FormularioProductoScreen(producto: p)),
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  FormularioProductoScreen(producto: p),
+                            ),
                           ),
                         ),
                         IconButton(
@@ -57,13 +64,23 @@ class ListaProductosScreen extends ConsumerWidget {
                                 title: const Text('Eliminar'),
                                 content: const Text('¿Está seguro?'),
                                 actions: [
-                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('No')),
-                                  TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Sí')),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('No'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text('Sí'),
+                                  ),
                                 ],
                               ),
                             );
                             if (confirmar == true) {
-                              await ref.read(productoNotifierProvider.notifier).borrar(p.id!);
+                              await ref
+                                  .read(productoNotifierProvider.notifier)
+                                  .borrar(p.id!);
                             }
                           },
                         ),

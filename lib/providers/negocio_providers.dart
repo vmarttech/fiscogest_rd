@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/negocio.dart';
-import '../services/negocio_service.dart';
+import 'package:fiscogestrd/models/negocio.dart';
+import 'package:fiscogestrd/services/negocio_service.dart';
 
 // Proveedor del servicio (sin estado, solo acceso a métodos)
 final negocioServiceProvider = Provider<NegocioService>((ref) {
@@ -8,17 +8,17 @@ final negocioServiceProvider = Provider<NegocioService>((ref) {
 });
 
 // Proveedor de estado: guarda y notifica los datos del negocio
-final negocioProvider = StateNotifierProvider<NegocioNotifier, AsyncValue<Negocio?>>((ref) {
-  return NegocioNotifier(ref.watch(negocioServiceProvider));
-});
+final negocioProvider =
+    StateNotifierProvider<NegocioNotifier, AsyncValue<Negocio?>>((ref) {
+      return NegocioNotifier(ref.watch(negocioServiceProvider));
+    });
 
 class NegocioNotifier extends StateNotifier<AsyncValue<Negocio?>> {
-  final NegocioService _servicio;
-
   NegocioNotifier(this._servicio) : super(const AsyncValue.loading()) {
     // Al iniciar, cargamos los datos automáticamente
     _cargarDatos();
   }
+  final NegocioService _servicio;
 
   Future<void> _cargarDatos() async {
     try {

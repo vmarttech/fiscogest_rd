@@ -1,12 +1,4 @@
 class Negocio {
-  final int? id;
-  final String nombre;
-  final String rnc;
-  final String direccion;
-  final String telefono;
-  final String correo;
-  final String actividadEconomica;
-
   Negocio({
     this.id,
     required this.nombre,
@@ -16,6 +8,13 @@ class Negocio {
     required this.correo,
     required this.actividadEconomica,
   });
+  final int? id;
+  final String nombre;
+  final String rnc;
+  final String direccion;
+  final String telefono;
+  final String correo;
+  final String actividadEconomica;
 
   // Convertir de Objeto a Mapa (para guardar en BD)
   Map<String, dynamic> toMap() {

@@ -1,6 +1,6 @@
-import '../models/negocio.dart';
+import 'package:fiscogestrd/models/negocio.dart';
 // ✅ Importación simple, misma carpeta
-import 'db_service.dart';
+import 'package:fiscogestrd/services/db_service.dart';
 
 class NegocioService {
   final DbService _db = DbService();
@@ -10,7 +10,7 @@ class NegocioService {
     final db = await _db.database;
 
     // Verificar si ya existe un registro (solo debe haber uno)
-    List<Map<String, dynamic>> existente = await db.query('negocio');
+    final List<Map<String, dynamic>> existente = await db.query('negocio');
 
     if (existente.isNotEmpty) {
       // Si existe, actualizar
@@ -29,7 +29,7 @@ class NegocioService {
   // Obtener datos guardados
   Future<Negocio?> obtenerNegocio() async {
     final db = await _db.database;
-    List<Map<String, dynamic>> resultado = await db.query('negocio');
+    final List<Map<String, dynamic>> resultado = await db.query('negocio');
 
     if (resultado.isNotEmpty) {
       return Negocio.fromMap(resultado.first);
@@ -40,10 +40,6 @@ class NegocioService {
   // Eliminar datos (poco usado, pero disponible)
   Future<int> eliminarNegocio(int id) async {
     final db = await _db.database;
-    return await db.delete(
-      'negocio',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('negocio', where: 'id = ?', whereArgs: [id]);
   }
 }

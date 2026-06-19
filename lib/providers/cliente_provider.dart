@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/cliente.dart';
-import '../services/cliente_service.dart';
+import 'package:fiscogestrd/models/cliente.dart';
+import 'package:fiscogestrd/services/cliente_service.dart';
 
 // ✅ Proveedor del Servicio: Instancia única de la lógica de datos
-final clienteServiceProvider = Provider<ClienteService>((ref) => ClienteService());
+final clienteServiceProvider = Provider<ClienteService>(
+  (ref) => ClienteService(),
+);
 
 // ✅ Proveedor de Lista General (para consultas simples si se necesita)
 final todosLosClientesProvider = FutureProvider<List<Cliente>>((ref) async {
@@ -12,12 +14,11 @@ final todosLosClientesProvider = FutureProvider<List<Cliente>>((ref) async {
 
 // ✅ NOTIFICADOR: Controla el estado, carga, guarda y elimina
 class ClienteNotifier extends StateNotifier<AsyncValue<List<Cliente>>> {
-  final ClienteService _servicio;
-
   // Iniciamos en estado de carga y ejecutamos la carga inicial
   ClienteNotifier(this._servicio) : super(const AsyncValue.loading()) {
     _cargarDatos();
   }
+  final ClienteService _servicio;
 
   /// 🔄 Carga o recarga la lista completa desde la base de datos
   Future<void> _cargarDatos() async {
@@ -64,6 +65,7 @@ class ClienteNotifier extends StateNotifier<AsyncValue<List<Cliente>>> {
 }
 
 // ✅ PROVEEDOR PRINCIPAL: Aquí se conecta todo el sistema
-final clienteNotifierProvider = StateNotifierProvider<ClienteNotifier, AsyncValue<List<Cliente>>>((ref) {
-  return ClienteNotifier(ref.watch(clienteServiceProvider));
-});
+final clienteNotifierProvider =
+    StateNotifierProvider<ClienteNotifier, AsyncValue<List<Cliente>>>((ref) {
+      return ClienteNotifier(ref.watch(clienteServiceProvider));
+    });

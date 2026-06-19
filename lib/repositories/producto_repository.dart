@@ -1,12 +1,12 @@
-import '../models/producto.dart';
-import '../services/existencia_service.dart';
-import '../services/producto_service.dart';
+import 'package:fiscogestrd/models/producto.dart';
+import 'package:fiscogestrd/services/existencia_service.dart';
+import 'package:fiscogestrd/services/producto_service.dart';
 
 class ProductoRepository {
-  // ✅ INSTANCIA ÚNICA
-  static final ProductoRepository _instance = ProductoRepository._internal();
   factory ProductoRepository() => _instance;
   ProductoRepository._internal();
+  // ✅ INSTANCIA ÚNICA
+  static final ProductoRepository _instance = ProductoRepository._internal();
 
   // ✅ SOLO LOS SERVICIOS QUE USAMOS
   final ProductoService _productoService = ProductoService();
@@ -63,7 +63,9 @@ class ProductoRepository {
   // ✅ GUARDAR
   // =====================================================
   Future<int> guardar(Producto producto) async {
-    return producto.id == null ? await crear(producto) : await actualizar(producto);
+    return producto.id == null
+        ? await crear(producto)
+        : await actualizar(producto);
   }
 
   // =====================================================
@@ -108,7 +110,10 @@ class ProductoRepository {
   // ✅ ACTUALIZAR STOCK
   // =====================================================
   Future<void> actualizarNivelStock(int productoId, double nuevoValor) async {
-    await _existenciaService.actualizarStockDesdeInventario(productoId, nuevoValor);
+    await _existenciaService.actualizarStockDesdeInventario(
+      productoId,
+      nuevoValor,
+    );
   }
 
   // =====================================================

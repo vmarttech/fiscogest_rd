@@ -1,13 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/producto.dart';
-import '../repositories/producto_repository.dart';
+import 'package:fiscogestrd/models/producto.dart';
+import 'package:fiscogestrd/repositories/producto_repository.dart';
 
 class ProductoNotifier extends StateNotifier<List<Producto>> {
-  final ProductoRepository _repository;
-
   ProductoNotifier(this._repository) : super([]) {
     _cargarDatos();
   }
+  final ProductoRepository _repository;
 
   Future<void> _cargarDatos() async {
     try {
@@ -22,6 +21,11 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
     await _cargarDatos();
   }
 
+  // ✅ AGREGADO: Método que faltaba para que funcione en las pantallas
+  Future<void> cargarTodos() async {
+    await cargarDatos();
+  }
+
   Future<void> guardar(Producto producto) async {
     try {
       await _repository.guardar(producto);
@@ -31,7 +35,6 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
     }
   }
 
-  // ✅ CORRECCIÓN: Cambiamos eliminarLogico por eliminarFisico (ya que no tenemos campo "activo")
   Future<void> borrar(int id) async {
     try {
       await _repository.eliminarFisico(id);
@@ -41,7 +44,10 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
     }
   }
 
-  Future<void> asignarRegimenAFactura(Producto producto, Map<String, dynamic> regimen) async {
+  Future<void> asignarRegimenAFactura(
+    Producto producto,
+    Map<String, dynamic> regimen,
+  ) async {
     final actualizado = producto.copyWith(
       porcentajeImpuesto: regimen['tasa'],
       aplicaImpuesto: regimen['aplicaImpuesto'],
@@ -63,10 +69,7 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
 
   Future<void> actualizarStock(int id, dynamic cantidad) async {
     try {
-      await _repository.actualizarNivelStock(
-        id,
-        (cantidad as num).toDouble(),
-      );
+      await _repository.actualizarNivelStock(id, (cantidad as num).toDouble());
       await cargarDatos();
     } catch (e) {
       rethrow;
@@ -83,10 +86,10 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
   }
 }
 
-// ✅ Proveedores (los agregamos aquí para tener todo en un solo lugar)
 final productoRepositoryProvider = Provider((ref) => ProductoRepository());
 
-final productoNotifierProvider = StateNotifierProvider<ProductoNotifier, List<Producto>>((ref) {
-  final repo = ref.watch(productoRepositoryProvider);
-  return ProductoNotifier(repo);
-});
+final productoNotifierProvider =
+    StateNotifierProvider<ProductoNotifier, List<Producto>>((ref) {
+      final repo = ref.watch(productoRepositoryProvider);
+      return ProductoNotifier(repo);
+    });

@@ -3,26 +3,43 @@ description: Gestor inteligente de costos, gastos e impuestos para negocios en R
 version: 1.0.0+1
 
 environment:
+  # ✅ Versión de SDK compatible con todas las librerías actuales
   sdk: '>=3.10.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
+  # ✅ Gestión de estado
   flutter_riverpod: ^2.5.1
+
+  # ✅ Base de datos local
   sqflite: ^2.3.3
   path_provider: ^2.1.4
   path: ^1.9.0
+
+  # ✅ Peticiones y procesamiento web
   http: ^1.2.2
   html: ^0.15.4
+
+  # ✅ Formatos de fecha, moneda y números
   intl: ^0.19.0
+
+  # ✅ Generación de identificadores únicos
   uuid: ^4.4.0
+
+  # ✅ Registro de eventos (mejor que print)
   logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # ✅ Reglas de análisis de Flutter
   flutter_lints: ^4.0.0
+
+  # ✅ Análisis avanzado de calidad y complejidad
+  # Usamos esta versión para evitar conflicto con uuid ^4.4.0
   dart_code_metrics: ^4.19.2
 
 flutter:

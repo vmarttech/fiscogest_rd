@@ -2,9 +2,9 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DbService {
-  static final DbService _instance = DbService._internal();
   factory DbService() => _instance;
   DbService._internal();
+  static final DbService _instance = DbService._internal();
 
   static Database? _database;
 
@@ -15,7 +15,7 @@ class DbService {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'fisco_gest_rd.db');
+    final String path = join(await getDatabasesPath(), 'fisco_gest_rd.db');
     return await openDatabase(
       path,
       version: 6, // ✅ VERSIÓN ACTUALIZADA (Campos nuevos + Homologación)
@@ -73,18 +73,34 @@ class DbService {
   // ✅ MIGRACIÓN SEGURA - HISTÓRICO COMPLETO HASTA V6
   Future<void> _onUpgrade(Database db, int oldVersion, int _) async {
     if (oldVersion < 2) {
-      await db.execute('ALTER TABLE productos ADD COLUMN gastosTransporte REAL NOT NULL DEFAULT 0');
-      await db.execute('ALTER TABLE productos ADD COLUMN gastosVarios REAL NOT NULL DEFAULT 0');
-      await db.execute('ALTER TABLE productos ADD COLUMN categoria TEXT NOT NULL DEFAULT "GENERAL"');
-      await db.execute('ALTER TABLE productos ADD COLUMN impuestoAdicional REAL NOT NULL DEFAULT 0');
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN gastosTransporte REAL NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN gastosVarios REAL NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN categoria TEXT NOT NULL DEFAULT "GENERAL"',
+      );
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN impuestoAdicional REAL NOT NULL DEFAULT 0',
+      );
     }
     if (oldVersion < 3) {
-      await db.execute('ALTER TABLE productos ADD COLUMN unidadMedida TEXT NOT NULL DEFAULT "UNIDAD"');
-      await db.execute('ALTER TABLE productos ADD COLUMN activo INTEGER NOT NULL DEFAULT 1');
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN unidadMedida TEXT NOT NULL DEFAULT "UNIDAD"',
+      );
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN activo INTEGER NOT NULL DEFAULT 1',
+      );
     }
     if (oldVersion < 4) {
-      await db.execute('ALTER TABLE productos ADD COLUMN exentoITBIS INTEGER NOT NULL DEFAULT 0');
-      await db.execute('ALTER TABLE productos ADD COLUMN itbis REAL NOT NULL DEFAULT 18.0');
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN exentoITBIS INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN itbis REAL NOT NULL DEFAULT 18.0',
+      );
       await db.execute('''
         CREATE TABLE IF NOT EXISTS existencias (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,29 +118,53 @@ class DbService {
       ''');
     }
     if (oldVersion < 5) {
-      await db.execute('ALTER TABLE productos ADD COLUMN regimenImpuesto TEXT NOT NULL DEFAULT "GENERAL (ITBIS 18%)"');
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN regimenImpuesto TEXT NOT NULL DEFAULT "GENERAL (ITBIS 18%)"',
+      );
     }
     // ✅ MIGRACIÓN V5 -> V6: HOMOLOGACIÓN TOTAL Y CAMPOS NUEVOS
     if (oldVersion < 6) {
       // 1. Renombrar y homologar campos existentes
-      await db.execute('ALTER TABLE productos RENAME COLUMN precioCosto TO precioCompra');
-      await db.execute('ALTER TABLE productos RENAME COLUMN exentoITBIS TO aplicaImpuesto');
-      await db.execute('ALTER TABLE productos RENAME COLUMN itbis TO porcentajeImpuesto');
+      await db.execute(
+        'ALTER TABLE productos RENAME COLUMN precioCosto TO precioCompra',
+      );
+      await db.execute(
+        'ALTER TABLE productos RENAME COLUMN exentoITBIS TO aplicaImpuesto',
+      );
+      await db.execute(
+        'ALTER TABLE productos RENAME COLUMN itbis TO porcentajeImpuesto',
+      );
 
       // 2. Agregar campos nuevos obligatorios
-      await db.execute('ALTER TABLE productos ADD COLUMN valorITBIS REAL NOT NULL DEFAULT 0');
-      await db.execute('ALTER TABLE productos ADD COLUMN esImpuestoSelectivo INTEGER NOT NULL DEFAULT 0');
-      await db.execute('ALTER TABLE productos ADD COLUMN permiteDecimales INTEGER NOT NULL DEFAULT 0');
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN valorITBIS REAL NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN esImpuestoSelectivo INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN permiteDecimales INTEGER NOT NULL DEFAULT 0',
+      );
 
       // 3. Modificar tipo de stock para permitir decimales (SQLite soporta alteración limitada, usamos estrategia segura)
       // Los valores se mantienen, solo cambia la interpretación a REAL
-      await db.execute('ALTER TABLE productos ADD COLUMN stockActual_new REAL NOT NULL DEFAULT 0');
-      await db.execute('ALTER TABLE productos ADD COLUMN stockMinimo_new REAL NOT NULL DEFAULT 5');
-      await db.execute('UPDATE productos SET stockActual_new = stockActual, stockMinimo_new = stockMinimo');
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN stockActual_new REAL NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE productos ADD COLUMN stockMinimo_new REAL NOT NULL DEFAULT 5',
+      );
+      await db.execute(
+        'UPDATE productos SET stockActual_new = stockActual, stockMinimo_new = stockMinimo',
+      );
       await db.execute('ALTER TABLE productos DROP COLUMN stockActual');
       await db.execute('ALTER TABLE productos DROP COLUMN stockMinimo');
-      await db.execute('ALTER TABLE productos RENAME COLUMN stockActual_new TO stockActual');
-      await db.execute('ALTER TABLE productos RENAME COLUMN stockMinimo_new TO stockMinimo');
+      await db.execute(
+        'ALTER TABLE productos RENAME COLUMN stockActual_new TO stockActual',
+      );
+      await db.execute(
+        'ALTER TABLE productos RENAME COLUMN stockMinimo_new TO stockMinimo',
+      );
     }
   }
 }

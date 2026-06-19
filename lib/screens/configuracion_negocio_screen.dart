@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/negocio.dart';
-import '../providers/negocio_providers.dart';
+import 'package:fiscogestrd/models/negocio.dart';
+import 'package:fiscogestrd/providers/negocio_providers.dart';
 
 class ConfiguracionNegocioScreen extends ConsumerStatefulWidget {
   const ConfiguracionNegocioScreen({super.key});
 
   @override
-  ConsumerState<ConfiguracionNegocioScreen> createState() => _ConfiguracionNegocioScreenState();
+  ConsumerState<ConfiguracionNegocioScreen> createState() =>
+      _ConfiguracionNegocioScreenState();
 }
 
-class _ConfiguracionNegocioScreenState extends ConsumerState<ConfiguracionNegocioScreen> {
+class _ConfiguracionNegocioScreenState
+    extends ConsumerState<ConfiguracionNegocioScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controladores para los campos
   final _nombreController = TextEditingController();
   final _rncController = TextEditingController();
@@ -72,9 +74,9 @@ class _ConfiguracionNegocioScreenState extends ConsumerState<ConfiguracionNegoci
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al guardar: $e ❌')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error al guardar: $e ❌')));
         }
       }
     }
@@ -85,10 +87,7 @@ class _ConfiguracionNegocioScreenState extends ConsumerState<ConfiguracionNegoci
     final estado = ref.watch(negocioProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Datos del Negocio'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Datos del Negocio'), centerTitle: true),
       body: estado.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Error: $error')),
@@ -181,7 +180,10 @@ class _ConfiguracionNegocioScreenState extends ConsumerState<ConfiguracionNegoci
                   onPressed: _guardar,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   child: const Text('GUARDAR DATOS'),
                 ),

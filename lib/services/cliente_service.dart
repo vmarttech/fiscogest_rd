@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
-import '../models/cliente.dart';
+import 'package:fiscogestrd/models/cliente.dart';
 
 class ClienteService {
-  // ✅ PATRÓN SINGLETON: Instancia única en todo el sistema
-  static final ClienteService _instance = ClienteService._internal();
   factory ClienteService() => _instance;
   ClienteService._internal();
+  // ✅ PATRÓN SINGLETON: Instancia única en todo el sistema
+  static final ClienteService _instance = ClienteService._internal();
 
   static Database? _database;
 
@@ -21,9 +21,10 @@ class ClienteService {
 
   // 🚀 INICIALIZACIÓN: Ruta y apertura
   Future<Database> _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, 'fiscogestrd.db');
-    
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, 'fiscogestrd.db');
+
     return await openDatabase(
       path,
       version: 4, // ⚠️ Aumenta este número si cambias estructura
@@ -92,11 +93,36 @@ class ClienteService {
   Future<void> _onUpgrade(Database db, int oldVersion, int _) async {
     // Versión 2: Agregamos campos fiscales a productos
     if (oldVersion < 2) {
-      await _agregarColumnaSiNoExiste(db, 'productos', 'categoriaId', 'TEXT DEFAULT "GENERAL"');
-      await _agregarColumnaSiNoExiste(db, 'productos', 'nombreCategoria', 'TEXT DEFAULT "Bienes y Servicios Generales"');
-      await _agregarColumnaSiNoExiste(db, 'productos', 'exentoITBIS', 'INTEGER DEFAULT 0');
-      await _agregarColumnaSiNoExiste(db, 'productos', 'porcentajeITBIS', 'REAL DEFAULT 18.0');
-      await _agregarColumnaSiNoExiste(db, 'productos', 'impuestoAdicional', 'REAL DEFAULT 0.0');
+      await _agregarColumnaSiNoExiste(
+        db,
+        'productos',
+        'categoriaId',
+        'TEXT DEFAULT "GENERAL"',
+      );
+      await _agregarColumnaSiNoExiste(
+        db,
+        'productos',
+        'nombreCategoria',
+        'TEXT DEFAULT "Bienes y Servicios Generales"',
+      );
+      await _agregarColumnaSiNoExiste(
+        db,
+        'productos',
+        'exentoITBIS',
+        'INTEGER DEFAULT 0',
+      );
+      await _agregarColumnaSiNoExiste(
+        db,
+        'productos',
+        'porcentajeITBIS',
+        'REAL DEFAULT 18.0',
+      );
+      await _agregarColumnaSiNoExiste(
+        db,
+        'productos',
+        'impuestoAdicional',
+        'REAL DEFAULT 0.0',
+      );
     }
 
     // Versión 3: Creamos tabla de existencias si no existe
@@ -139,7 +165,11 @@ class ClienteService {
 
   // 🛠️ FUNCIÓN AUXILIAR: Evita errores al agregar columnas nuevas
   Future<void> _agregarColumnaSiNoExiste(
-      Database db, String tabla, String columna, String definicion) async {
+    Database db,
+    String tabla,
+    String columna,
+    String definicion,
+  ) async {
     final resultado = await db.rawQuery('PRAGMA table_info($tabla)');
     final existe = resultado.any((fila) => fila['name'] == columna);
     if (!existe) {
@@ -214,11 +244,7 @@ class ClienteService {
   Future<int> eliminar(int id) async {
     try {
       final db = await database;
-      return await db.delete(
-        'clientes',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      return await db.delete('clientes', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       rethrow;
     }

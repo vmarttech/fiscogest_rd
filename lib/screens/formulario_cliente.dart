@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/cliente.dart';
-import '../providers/cliente_provider.dart';
-import '../services/dgii_service.dart';
+import 'package:fiscogestrd/models/cliente.dart';
+import 'package:fiscogestrd/providers/cliente_provider.dart';
+import 'package:fiscogestrd/services/dgii_service.dart';
 
 class FormularioClienteScreen extends ConsumerStatefulWidget {
-  final Cliente? cliente;
   const FormularioClienteScreen({super.key, this.cliente});
+  final Cliente? cliente;
 
   @override
-  ConsumerState<FormularioClienteScreen> createState() => _FormularioClienteScreenState();
+  ConsumerState<FormularioClienteScreen> createState() =>
+      _FormularioClienteScreenState();
 }
 
-class _FormularioClienteScreenState extends ConsumerState<FormularioClienteScreen> {
+class _FormularioClienteScreenState
+    extends ConsumerState<FormularioClienteScreen> {
   final _formKey = GlobalKey<FormState>();
   final IDgiiService _dgiiService = DgiiService();
 
@@ -120,13 +122,19 @@ class _FormularioClienteScreenState extends ConsumerState<FormularioClienteScree
         if (mounted) {
           Navigator.pop(context, true);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('✅ Cliente guardado exitosamente'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('✅ Cliente guardado exitosamente'),
+              backgroundColor: Colors.green,
+            ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('❌ Error al guardar: $e'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('❌ Error al guardar: $e'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -137,7 +145,9 @@ class _FormularioClienteScreenState extends ConsumerState<FormularioClienteScree
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.cliente != null ? 'Editar Cliente' : 'Nuevo Cliente'),
+        title: Text(
+          widget.cliente != null ? 'Editar Cliente' : 'Nuevo Cliente',
+        ),
         centerTitle: true,
         elevation: 4,
         actions: [
@@ -147,7 +157,7 @@ class _FormularioClienteScreenState extends ConsumerState<FormularioClienteScree
               'GUARDAR',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -163,16 +173,18 @@ class _FormularioClienteScreenState extends ConsumerState<FormularioClienteScree
                   labelText: 'RNC / CÉDULA',
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.badge),
-                  suffixIcon: _cargando 
-                    ? const CircularProgressIndicator(strokeWidth: 2) 
-                    : const Icon(Icons.search, color: Colors.blue),
+                  suffixIcon: _cargando
+                      ? const CircularProgressIndicator(strokeWidth: 2)
+                      : const Icon(Icons.search, color: Colors.blue),
                   hintText: 'Escriba 11 o 13 dígitos...',
                 ),
                 keyboardType: TextInputType.number,
                 maxLength: 13,
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Requerido';
-                  if (v.length != 11 && v.length != 13) return 'Debe tener 11 o 13 dígitos';
+                  if (v.length != 11 && v.length != 13) {
+                    return 'Debe tener 11 o 13 dígitos';
+                  }
                   return null;
                 },
               ),

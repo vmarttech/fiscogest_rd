@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
-import '../models/producto.dart';
-import 'db_service.dart';
-import '../utils/logger.dart';
+import 'package:fiscogestrd/models/producto.dart';
+import 'package:fiscogestrd/services/db_service.dart';
+import 'package:fiscogestrd/utils/logger.dart';
 
 class ProductoService {
   final DbService _dbService = DbService();
@@ -68,15 +68,16 @@ class ProductoService {
   Future<int> crear(Producto producto) async {
     try {
       final db = await database;
-      final dato = producto.copyWith(
-        fechaRegistro: DateTime.now(),
-      );
+      final dato = producto.copyWith(fechaRegistro: DateTime.now());
       final idInsertado = await db.insert(
         'productos',
         dato.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
-      AppLogger.info('Producto creado correctamente', {'id': idInsertado, 'codigo': producto.codigo});
+      AppLogger.info('Producto creado correctamente', {
+        'id': idInsertado,
+        'codigo': producto.codigo,
+      });
       return idInsertado;
     } catch (e, traza) {
       AppLogger.error('Error al crear producto', e, traza);

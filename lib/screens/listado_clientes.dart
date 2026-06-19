@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/cliente_provider.dart';
-import 'formulario_cliente.dart';
+import 'package:fiscogestrd/providers/cliente_provider.dart';
+import 'package:fiscogestrd/screens/formulario_cliente.dart';
 
 class ListadoClientes extends ConsumerWidget {
   const ListadoClientes({super.key});
@@ -27,9 +27,7 @@ class ListadoClientes extends ConsumerWidget {
         error: (error, stack) => Center(child: Text('Error: $error')),
         data: (clientes) {
           if (clientes.isEmpty) {
-            return const Center(
-              child: Text('No hay clientes registrados'),
-            );
+            return const Center(child: Text('No hay clientes registrados'));
           }
           return ListView.builder(
             padding: const EdgeInsets.all(10),
@@ -42,7 +40,9 @@ class ListadoClientes extends ConsumerWidget {
                 child: ListTile(
                   leading: const Icon(Icons.person, color: Colors.purple),
                   title: Text(cliente.nombre),
-                  subtitle: Text('${cliente.tipoIdentificacion}: ${cliente.identificacion}'),
+                  subtitle: Text(
+                    '${cliente.tipoIdentificacion}: ${cliente.identificacion}',
+                  ),
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(

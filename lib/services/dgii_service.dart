@@ -7,7 +7,9 @@ abstract class IDgiiService {
 
 class DgiiService implements IDgiiService {
   @override
-  Future<Map<String, dynamic>?> buscarContribuyente(String identificacion) async {
+  Future<Map<String, dynamic>?> buscarContribuyente(
+    String identificacion,
+  ) async {
     // --- MODO SIMULACIÓN (ACTIVO) ---
     await Future.delayed(const Duration(milliseconds: 800));
 

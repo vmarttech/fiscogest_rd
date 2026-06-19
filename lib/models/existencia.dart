@@ -1,15 +1,4 @@
 class Existencia {
-  final int? id;
-  final int productoId;
-  final String codigoProducto;
-  final String nombreProducto;
-  final double cantidadDisponible;
-  final double cantidadReservada;
-  final double cantidadMinima;
-  final double cantidadMaxima;
-  final String ubicacion;
-  final DateTime? ultimaActualizacion;
-
   Existencia({
     this.id,
     required this.productoId,
@@ -22,6 +11,16 @@ class Existencia {
     this.ubicacion = 'Almacén Principal',
     this.ultimaActualizacion,
   });
+  final int? id;
+  final int productoId;
+  final String codigoProducto;
+  final String nombreProducto;
+  final double cantidadDisponible;
+  final double cantidadReservada;
+  final double cantidadMinima;
+  final double cantidadMaxima;
+  final String ubicacion;
+  final DateTime? ultimaActualizacion;
 
   // =====================================================
   // ✅ CONVERSIÓN A MAPA (PARA BASE DE DATOS)
@@ -55,10 +54,13 @@ class Existencia {
       cantidadDisponible: _toDoubleSafe(map['cantidadDisponible']),
       cantidadReservada: _toDoubleSafe(map['cantidadReservada']),
       cantidadMinima: _toDoubleSafe(map['cantidadMinima']),
-      cantidadMaxima: _toDoubleSafe(map['cantidadMaxima'], valorDefecto: 1000.0),
+      cantidadMaxima: _toDoubleSafe(
+        map['cantidadMaxima'],
+        valorDefecto: 1000.0,
+      ),
       ubicacion: map['ubicacion'] ?? 'Almacén Principal',
-      ultimaActualizacion: map['ultimaActualizacion'] != null 
-          ? DateTime.parse(map['ultimaActualizacion']) 
+      ultimaActualizacion: map['ultimaActualizacion'] != null
+          ? DateTime.parse(map['ultimaActualizacion'])
           : null,
     );
   }
@@ -90,10 +92,10 @@ class Existencia {
   String get fechaFormateada {
     if (ultimaActualizacion == null) return 'Sin registro';
     return '${ultimaActualizacion!.day.toString().padLeft(2, '0')}/'
-           '${ultimaActualizacion!.month.toString().padLeft(2, '0')}/'
-           '${ultimaActualizacion!.year} '
-           '${ultimaActualizacion!.hour.toString().padLeft(2, '0')}:'
-           '${ultimaActualizacion!.minute.toString().padLeft(2, '0')}';
+        '${ultimaActualizacion!.month.toString().padLeft(2, '0')}/'
+        '${ultimaActualizacion!.year} '
+        '${ultimaActualizacion!.hour.toString().padLeft(2, '0')}:'
+        '${ultimaActualizacion!.minute.toString().padLeft(2, '0')}';
   }
 
   // =====================================================

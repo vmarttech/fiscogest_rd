@@ -9,7 +9,10 @@ class Formatos {
   );
 
   // Formato de fecha: 14 de Junio de 2026
-  static final DateFormat fechaLarga = DateFormat('dd \'de\' MMMM \'de\' yyyy', 'es_DO');
+  static final DateFormat fechaLarga = DateFormat(
+    'dd \'de\' MMMM \'de\' yyyy',
+    'es_DO',
+  );
 
   // Formato fecha corta: 14/06/2026
   static final DateFormat fechaCorta = DateFormat('dd/MM/yyyy');

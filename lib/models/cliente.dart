@@ -1,14 +1,5 @@
 class Cliente {
-  final int? id;
-  final String nombre;
-  final String identificacion;
-  final String tipoIdentificacion;
-  final String? direccion;
-  final String? telefono;
-  final String? correo;
-  final bool exentoITBIS;
-  final String regimenFiscal;
-  final DateTime fechaRegistro; // ✅ AHORA ES DateTime
+  // ✅ AHORA ES DateTime
 
   Cliente({
     this.id,
@@ -22,6 +13,16 @@ class Cliente {
     required this.regimenFiscal,
     required this.fechaRegistro,
   });
+  final int? id;
+  final String nombre;
+  final String identificacion;
+  final String tipoIdentificacion;
+  final String? direccion;
+  final String? telefono;
+  final String? correo;
+  final bool exentoITBIS;
+  final String regimenFiscal;
+  final DateTime fechaRegistro;
 
   // Convertir a Mapa para SQLite
   Map<String, dynamic> toMap() {
@@ -51,7 +52,9 @@ class Cliente {
       correo: map['correo'],
       exentoITBIS: map['exentoITBIS'] == 1,
       regimenFiscal: map['regimenFiscal'],
-      fechaRegistro: DateTime.parse(map['fechaRegistro']), // Convertimos a fecha
+      fechaRegistro: DateTime.parse(
+        map['fechaRegistro'],
+      ), // Convertimos a fecha
     );
   }
 }

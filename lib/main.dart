@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ✅ IMPORTACIONES SOLO DE LO QUE SE USA (LIMPIO Y HOMOLOGADO)
-import 'screens/listado_productos_screen.dart';
-import 'screens/listado_clientes.dart';
-import 'screens/formulario_cliente.dart';
+import 'package:fiscogestrd/screens/listado_productos_screen.dart';
+import 'package:fiscogestrd/screens/listado_clientes.dart';
+import 'package:fiscogestrd/screens/formulario_cliente.dart';
 
 void main() {
   runApp(const ProviderScope(child: FiscoGestApp()));
@@ -80,7 +80,9 @@ class HomeScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ListadoClientes()),
+                MaterialPageRoute(
+                  builder: (context) => const ListadoClientes(),
+                ),
               );
             },
           ),
@@ -89,7 +91,10 @@ class HomeScreen extends StatelessWidget {
             icono: Icons.receipt_long,
             texto: 'Facturación',
             color: Colors.orange,
-            onTap: () => _mostrarMensaje(context, 'Próximamente: Facturación Electrónica'),
+            onTap: () => _mostrarMensaje(
+              context,
+              'Próximamente: Facturación Electrónica',
+            ),
           ),
 
           _MenuBoton(
@@ -122,17 +127,16 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _MenuBoton extends StatelessWidget {
-  final IconData icono;
-  final String texto;
-  final Color color;
-  final VoidCallback onTap;
-
   const _MenuBoton({
     required this.icono,
     required this.texto,
     required this.color,
     required this.onTap,
   });
+  final IconData icono;
+  final String texto;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +153,7 @@ class _MenuBoton extends StatelessWidget {
               color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: Column(

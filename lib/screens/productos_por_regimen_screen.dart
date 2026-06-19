@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/producto_providers.dart';
-import '../models/producto.dart';
-import 'formulario_producto_screen.dart';
+import 'package:fiscogestrd/providers/producto_providers.dart';
+import 'package:fiscogestrd/models/producto.dart';
+import 'package:fiscogestrd/screens/formulario_producto_screen.dart';
 
 class ProductosPorRegimenScreen extends ConsumerWidget {
-  final String nombreRegimen;
-  final double tasa;
-
   const ProductosPorRegimenScreen({
     super.key,
     required this.nombreRegimen,
     required this.tasa,
   });
+  final String nombreRegimen;
+  final double tasa;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,7 +33,11 @@ class ProductosPorRegimenScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inventory_2_outlined, size: 60, color: Colors.grey),
+                  Icon(
+                    Icons.inventory_2_outlined,
+                    size: 60,
+                    color: Colors.grey,
+                  ),
                   SizedBox(height: 10),
                   Text(
                     'No hay productos registrados en este régimen',
@@ -63,16 +66,23 @@ class ProductosPorRegimenScreen extends ConsumerWidget {
                     ),
                     isThreeLine: true,
                     trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: producto.aplicaImpuesto ? Colors.red[100] : Colors.green[100],
+                        color: producto.aplicaImpuesto
+                            ? Colors.red[100]
+                            : Colors.green[100],
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text(
                         '${tasa.toStringAsFixed(0)}%',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: producto.aplicaImpuesto ? Colors.red[800] : Colors.green[800],
+                          color: producto.aplicaImpuesto
+                              ? Colors.red[800]
+                              : Colors.green[800],
                         ),
                       ),
                     ),
@@ -84,7 +94,11 @@ class ProductosPorRegimenScreen extends ConsumerWidget {
     );
   }
 
-  void _editarProducto(BuildContext context, Producto producto, WidgetRef ref) async {
+  void _editarProducto(
+    BuildContext context,
+    Producto producto,
+    WidgetRef ref,
+  ) async {
     final resultado = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -93,7 +107,7 @@ class ProductosPorRegimenScreen extends ConsumerWidget {
     );
     // ✅ LLAMADA CORRECTA A MÉTODO PÚBLICO
     if (resultado == true) {
-      ref.read(productoNotifierProvider.notifier).cargarDatos();
+      await ref.read(productoNotifierProvider.notifier).cargarTodos();
     }
   }
 }

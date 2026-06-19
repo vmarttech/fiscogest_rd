@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/existencia_provider.dart';
-import 'formulario_movimiento.dart';
+import 'package:fiscogestrd/providers/existencia_provider.dart';
+import 'package:fiscogestrd/screens/formulario_movimiento.dart';
 
 class ListadoInventarioScreen extends ConsumerStatefulWidget {
   const ListadoInventarioScreen({super.key});
 
   @override
-  ConsumerState<ListadoInventarioScreen> createState() => _ListadoInventarioScreenState();
+  ConsumerState<ListadoInventarioScreen> createState() =>
+      _ListadoInventarioScreenState();
 }
 
-class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScreen> {
+class _ListadoInventarioScreenState
+    extends ConsumerState<ListadoInventarioScreen> {
   String _terminoBusqueda = '';
 
   @override
@@ -26,7 +28,9 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
             tooltip: 'Nuevo Movimiento',
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const FormularioMovimientoScreen()),
+              MaterialPageRoute(
+                builder: (_) => const FormularioMovimientoScreen(),
+              ),
             ),
           ),
         ],
@@ -56,12 +60,19 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
             error: (error, __) => const SizedBox.shrink(),
             data: (lista) {
               final totalArticulos = lista.length;
-              final bajosStock = lista.where((item) => item.estaBajoMinimo).length;
+              final bajosStock = lista
+                  .where((item) => item.estaBajoMinimo)
+                  .length;
               // ✅ NUEVO: Contador de exceso de stock (lo usaremos en Punto B)
-              final excesoStock = lista.where((item) => item.tieneExcesoStock).length;
+              final excesoStock = lista
+                  .where((item) => item.tieneExcesoStock)
+                  .length;
 
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 color: Colors.blue.shade50,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,7 +92,9 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                         Text(
                           'Exceso: $excesoStock',
                           style: TextStyle(
-                            color: excesoStock > 0 ? Colors.deepOrange : Colors.green,
+                            color: excesoStock > 0
+                                ? Colors.deepOrange
+                                : Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -104,13 +117,22 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                 // Filtrado
                 final listaFiltrada = _terminoBusqueda.isEmpty
                     ? listaCompleta
-                    : listaCompleta.where((item) =>
-                        item.codigoProducto.toLowerCase().contains(_terminoBusqueda) ||
-                        item.nombreProducto.toLowerCase().contains(_terminoBusqueda)
-                      ).toList();
+                    : listaCompleta
+                          .where(
+                            (item) =>
+                                item.codigoProducto.toLowerCase().contains(
+                                  _terminoBusqueda,
+                                ) ||
+                                item.nombreProducto.toLowerCase().contains(
+                                  _terminoBusqueda,
+                                ),
+                          )
+                          .toList();
 
                 if (listaFiltrada.isEmpty) {
-                  return const Center(child: Text('No hay registros de inventario'));
+                  return const Center(
+                    child: Text('No hay registros de inventario'),
+                  );
                 }
 
                 return ListView.builder(
@@ -120,34 +142,42 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                     final item = listaFiltrada[indice];
                     return Card(
                       // ✅ MEJORA: Resaltado visual si excede el máximo (preparado para Punto B)
-                      color: item.tieneExcesoStock ? Colors.deepOrange.shade50 : Colors.white,
+                      color: item.tieneExcesoStock
+                          ? Colors.deepOrange.shade50
+                          : Colors.white,
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       elevation: 2,
                       child: ListTile(
                         leading: Icon(
                           // ✅ MEJORA: Icono cambia si hay exceso o falta
-                          item.tieneExcesoStock 
-                              ? Icons.arrow_upward 
-                              : item.estaBajoMinimo 
-                                  ? Icons.warning_amber 
-                                  : Icons.inventory_2,
-                          color: item.tieneExcesoStock 
-                              ? Colors.deepOrange 
-                              : item.estaBajoMinimo 
-                                  ? Colors.orange 
-                                  : Colors.blueGrey,
+                          item.tieneExcesoStock
+                              ? Icons.arrow_upward
+                              : item.estaBajoMinimo
+                              ? Icons.warning_amber
+                              : Icons.inventory_2,
+                          color: item.tieneExcesoStock
+                              ? Colors.deepOrange
+                              : item.estaBajoMinimo
+                              ? Colors.orange
+                              : Colors.blueGrey,
                           size: 32,
                         ),
-                        title: Text('${item.codigoProducto} - ${item.nombreProducto}'),
+                        title: Text(
+                          '${item.codigoProducto} - ${item.nombreProducto}',
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Ubicación: ${item.ubicacion}'),
                             Row(
                               children: [
-                                Text('Disponible: ${item.cantidadDisponible.toStringAsFixed(2)}'),
+                                Text(
+                                  'Disponible: ${item.cantidadDisponible.toStringAsFixed(2)}',
+                                ),
                                 const SizedBox(width: 16),
-                                Text('Reservado: ${item.cantidadReservada.toStringAsFixed(2)}'),
+                                Text(
+                                  'Reservado: ${item.cantidadReservada.toStringAsFixed(2)}',
+                                ),
                               ],
                             ),
                             Text(
@@ -156,8 +186,12 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                             ),
                             // 👇👇👇 AQUÍ INTEGRAMOS EL PUNTO A: FECHA DE ACTUALIZACIÓN 👇👇👇
                             Text(
-                              "Último movimiento: ${item.fechaFormateada}",
-                              style: TextStyle(fontSize: 12, color: Colors.grey[700], fontStyle: FontStyle.italic),
+                              'Último movimiento: ${item.fechaFormateada}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[700],
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
                             // 👆👆👆 FIN DE LA INTEGRACIÓN 👆👆👆
                           ],
@@ -171,11 +205,11 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 // ✅ COLOR HOMOLOGADO: Rojo = Bajo, Naranja = Exceso, Verde = Normal
-                                color: item.tieneExcesoStock 
-                                    ? Colors.deepOrange 
-                                    : item.estaBajoMinimo 
-                                        ? Colors.red 
-                                        : Colors.green.shade700,
+                                color: item.tieneExcesoStock
+                                    ? Colors.deepOrange
+                                    : item.estaBajoMinimo
+                                    ? Colors.red
+                                    : Colors.green.shade700,
                               ),
                             ),
                             const Text('Real', style: TextStyle(fontSize: 11)),
@@ -184,7 +218,8 @@ class _ListadoInventarioScreenState extends ConsumerState<ListadoInventarioScree
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => FormularioMovimientoScreen(existencia: item),
+                            builder: (_) =>
+                                FormularioMovimientoScreen(existencia: item),
                           ),
                         ),
                       ),

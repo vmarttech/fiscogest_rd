@@ -1,8 +1,8 @@
 import 'package:sqflite/sqflite.dart';
-import '../models/existencia.dart';
-import '../models/producto.dart';
-import 'db_service.dart';
-import '../utils/logger.dart';
+import 'package:fiscogestrd/models/existencia.dart';
+import 'package:fiscogestrd/models/producto.dart';
+import 'package:fiscogestrd/services/db_service.dart';
+import 'package:fiscogestrd/utils/logger.dart';
 
 class ExistenciaService {
   final DbService _dbService = DbService();
@@ -128,7 +128,11 @@ class ExistenciaService {
         whereArgs: [producto.id],
       );
     } catch (e, traza) {
-      AppLogger.error('Error al actualizar datos del producto en inventario', e, traza);
+      AppLogger.error(
+        'Error al actualizar datos del producto en inventario',
+        e,
+        traza,
+      );
     }
   }
 
@@ -138,11 +142,7 @@ class ExistenciaService {
   Future<int> eliminar(int id) async {
     try {
       final db = await database;
-      return await db.delete(
-        'existencias',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      return await db.delete('existencias', where: 'id = ?', whereArgs: [id]);
     } catch (e, traza) {
       AppLogger.error('Error al eliminar existencia', e, traza);
       return -1;
@@ -158,7 +158,11 @@ class ExistenciaService {
         whereArgs: [productoId],
       );
     } catch (e, traza) {
-      AppLogger.error('Error al eliminar existencia por ID de producto', e, traza);
+      AppLogger.error(
+        'Error al eliminar existencia por ID de producto',
+        e,
+        traza,
+      );
       return -1;
     }
   }
@@ -184,7 +188,9 @@ class ExistenciaService {
       );
 
       await crear(inventario);
-      AppLogger.info('Existencia inicializada para producto', {'id': producto.id});
+      AppLogger.info('Existencia inicializada para producto', {
+        'id': producto.id,
+      });
     } catch (e, traza) {
       AppLogger.error('Error al inicializar existencia', e, traza);
     }
@@ -193,7 +199,10 @@ class ExistenciaService {
   // =====================================================
   // ACTUALIZAR STOCK Y REFLEJAR EN PRODUCTO
   // =====================================================
-  Future<void> actualizarStockDesdeInventario(int productoId, double nuevoStock) async {
+  Future<void> actualizarStockDesdeInventario(
+    int productoId,
+    double nuevoStock,
+  ) async {
     try {
       final db = await database;
 
@@ -214,7 +223,10 @@ class ExistenciaService {
         whereArgs: [productoId],
       );
 
-      AppLogger.info('Stock actualizado', {'producto': productoId, 'nuevoValor': nuevoStock});
+      AppLogger.info('Stock actualizado', {
+        'producto': productoId,
+        'nuevoValor': nuevoStock,
+      });
     } catch (e, traza) {
       AppLogger.error('Error al actualizar stock', e, traza);
     }

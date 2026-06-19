@@ -1,25 +1,5 @@
 class Producto {
-  final int? id;
-  final String codigo;
-  final String nombre;
-  final String? descripcion;
-  final double precioCompra;
-  final double gastosTransporte;
-  final double gastosVarios;
-  final double precioVenta;
-  final double margenGanancia;
-  final double valorITBIS;
-  final double porcentajeImpuesto;
-  final bool aplicaImpuesto;
-  final String categoria;
-  final String regimenImpuesto;
-  final bool esImpuestoSelectivo;
-  final String unidadMedida;
-  final bool permiteDecimales;
-  final dynamic stockActual;
-  final dynamic stockMinimo;
-  final DateTime fechaRegistro;
-
+  // ✅ Constructor en el lugar correcto
   Producto({
     this.id,
     required this.codigo,
@@ -43,27 +23,16 @@ class Producto {
     required this.fechaRegistro,
   });
 
-  // =====================================================
-  // ✅ FUNCIONES AUXILIARES → BAJAN LA COMPLEJIDAD
-  // =====================================================
-  static int? _optInt(int? nuevo, int? actual) => nuevo ?? actual;
-  static String _optStr(String? nuevo, String actual) => nuevo ?? actual;
-  static double _optDouble(double? nuevo, double actual) => nuevo ?? actual;
-  static bool _optBool(bool? nuevo, bool actual) => nuevo ?? actual;
-  static dynamic _optDin(dynamic nuevo, dynamic actual) => nuevo ?? actual;
-  static DateTime _optDate(DateTime? nuevo, DateTime actual) => nuevo ?? actual;
-
-  // =====================================================
-  // ✅ fromMap → Complejidad baja
-  // =====================================================
   factory Producto.fromMap(Map<String, dynamic> map) {
     int? readInt(String key) => map[key] as int?;
     String readStr(String key, [String def = '']) => map[key] as String? ?? def;
-    double readDbl(String key, [double def = 0.0]) => (map[key] as num?)?.toDouble() ?? def;
+    double readDbl(String key, [double def = 0.0]) =>
+        (map[key] as num?)?.toDouble() ?? def;
     bool readBool(String key, [bool def = false]) {
       final v = map[key];
       return v is int ? v == 1 : (v as bool? ?? def);
     }
+
     dynamic readStock(String key) => map[key] ?? 0;
     DateTime readDate(String key) {
       final s = map[key] as String?;
@@ -93,10 +62,35 @@ class Producto {
       fechaRegistro: readDate('fechaRegistro'),
     );
   }
+  final int? id;
+  final String codigo;
+  final String nombre;
+  final String? descripcion;
+  final double precioCompra;
+  final double gastosTransporte;
+  final double gastosVarios;
+  final double precioVenta;
+  final double margenGanancia;
+  final double valorITBIS;
+  final double porcentajeImpuesto;
+  final bool aplicaImpuesto;
+  final String categoria;
+  final String regimenImpuesto;
+  final bool esImpuestoSelectivo;
+  final String unidadMedida;
+  final bool permiteDecimales;
+  final dynamic stockActual;
+  final dynamic stockMinimo;
+  final DateTime fechaRegistro;
 
-  // =====================================================
-  // ✅ toMap
-  // =====================================================
+  // ✅ Resto de métodos, fábricas, etc.
+  static int? _optInt(int? nuevo, int? actual) => nuevo ?? actual;
+  static String _optStr(String? nuevo, String actual) => nuevo ?? actual;
+  static double _optDouble(double? nuevo, double actual) => nuevo ?? actual;
+  static bool _optBool(bool? nuevo, bool actual) => nuevo ?? actual;
+  static dynamic _optDin(dynamic nuevo, dynamic actual) => nuevo ?? actual;
+  static DateTime _optDate(DateTime? nuevo, DateTime actual) => nuevo ?? actual;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -122,9 +116,6 @@ class Producto {
     };
   }
 
-  // =====================================================
-  // ✅ copyWith → AHORA COMPLEJIDAD < 20
-  // =====================================================
   Producto copyWith({
     int? id,
     String? codigo,
@@ -158,11 +149,17 @@ class Producto {
       precioVenta: _optDouble(precioVenta, this.precioVenta),
       margenGanancia: _optDouble(margenGanancia, this.margenGanancia),
       valorITBIS: _optDouble(valorITBIS, this.valorITBIS),
-      porcentajeImpuesto: _optDouble(porcentajeImpuesto, this.porcentajeImpuesto),
+      porcentajeImpuesto: _optDouble(
+        porcentajeImpuesto,
+        this.porcentajeImpuesto,
+      ),
       aplicaImpuesto: _optBool(aplicaImpuesto, this.aplicaImpuesto),
       categoria: _optStr(categoria, this.categoria),
       regimenImpuesto: _optStr(regimenImpuesto, this.regimenImpuesto),
-      esImpuestoSelectivo: _optBool(esImpuestoSelectivo, this.esImpuestoSelectivo),
+      esImpuestoSelectivo: _optBool(
+        esImpuestoSelectivo,
+        this.esImpuestoSelectivo,
+      ),
       unidadMedida: _optStr(unidadMedida, this.unidadMedida),
       permiteDecimales: _optBool(permiteDecimales, this.permiteDecimales),
       stockActual: _optDin(stockActual, this.stockActual),
@@ -171,10 +168,8 @@ class Producto {
     );
   }
 
-  // =====================================================
-  // ✅ CÁLCULOS Y DATOS ESTÁTICOS (SIN CAMBIOS)
-  // =====================================================
-  double get costoRealSinImpuesto => precioCompra + gastosTransporte + gastosVarios;
+  double get costoRealSinImpuesto =>
+      precioCompra + gastosTransporte + gastosVarios;
 
   double get totalImpuestos {
     if (!aplicaImpuesto) return 0.0;
@@ -195,14 +190,45 @@ class Producto {
     return ((gananciaNeta / precioVenta) * 100).clamp(0.0, 100.0);
   }
 
+  bool get estaBajoDeStock {
+    final actual = num.tryParse(stockActual.toString()) ?? 0;
+    final minimo = num.tryParse(stockMinimo.toString()) ?? 0;
+    return actual <= minimo;
+  }
+
   static const List<String> listaUnidadesMedida = [
-    'UNIDAD', 'PIEZA', 'CAJA', 'PAQUETE', 'DOCENA', 'BOTELLA', 'LATA',
-    'FARDO', 'SACO', 'ROLLO', 'LITRO', 'MILILITRO', 'KILO', 'LIBRA',
-    'GRAMO', 'GALÓN', 'METRO', 'CENTÍMETRO', 'OTRA...',
+    'UNIDAD',
+    'PIEZA',
+    'CAJA',
+    'PAQUETE',
+    'DOCENA',
+    'BOTELLA',
+    'LATA',
+    'FARDO',
+    'SACO',
+    'ROLLO',
+    'LITRO',
+    'MILILITRO',
+    'KILO',
+    'LIBRA',
+    'GRAMO',
+    'GALÓN',
+    'METRO',
+    'CENTÍMETRO',
+    'OTRA...',
   ];
 
   static bool verificarSiPermiteDecimales(String unidad) {
-    const unidades = ['LITRO', 'MILILITRO', 'KILO', 'LIBRA', 'GRAMO', 'GALÓN', 'METRO', 'CENTÍMETRO'];
+    const unidades = [
+      'LITRO',
+      'MILILITRO',
+      'KILO',
+      'LIBRA',
+      'GRAMO',
+      'GALÓN',
+      'METRO',
+      'CENTÍMETRO',
+    ];
     return unidades.contains(unidad.toUpperCase());
   }
 
@@ -212,56 +238,58 @@ class Producto {
       'tasa': 18.0,
       'aplicaImpuesto': true,
       'esSelectivo': false,
-      'descripcion': 'Régimen general aplicable a la mayoría de bienes y servicios.'
+      'descripcion':
+          'Régimen general aplicable a la mayoría de bienes y servicios.',
     },
     {
       'nombre': 'BIENES EXENTOS',
       'tasa': 0.0,
       'aplicaImpuesto': false,
       'esSelectivo': false,
-      'descripcion': 'Productos básicos, alimentos, medicinas y bienes exentos por ley.'
+      'descripcion':
+          'Productos básicos, alimentos, medicinas y bienes exentos por ley.',
     },
     {
       'nombre': 'SERVICIOS EXENTOS',
       'tasa': 0.0,
       'aplicaImpuesto': false,
       'esSelectivo': false,
-      'descripcion': 'Servicios educativos, salud, transporte y otros exentos.'
+      'descripcion': 'Servicios educativos, salud, transporte y otros exentos.',
     },
     {
       'nombre': 'ITBIS 16% (REDUCIDO)',
       'tasa': 16.0,
       'aplicaImpuesto': true,
       'esSelectivo': false,
-      'descripcion': 'Tasa reducida aplicable a ciertos productos regulados.'
+      'descripcion': 'Tasa reducida aplicable a ciertos productos regulados.',
     },
     {
       'nombre': 'ITBIS 8% (REDUCIDO)',
       'tasa': 8.0,
       'aplicaImpuesto': true,
       'esSelectivo': false,
-      'descripcion': 'Tasa especial para productos específicos.'
+      'descripcion': 'Tasa especial para productos específicos.',
     },
     {
       'nombre': 'IMPUESTO SELECTIVO AL CONSUMO - ALCOHOL',
       'tasa': 20.0,
       'aplicaImpuesto': true,
       'esSelectivo': true,
-      'descripcion': 'Aplicable a bebidas alcohólicas según normativa DGII.'
+      'descripcion': 'Aplicable a bebidas alcohólicas según normativa DGII.',
     },
     {
       'nombre': 'IMPUESTO SELECTIVO AL CONSUMO - TABACO',
       'tasa': 30.0,
       'aplicaImpuesto': true,
       'esSelectivo': true,
-      'descripcion': 'Aplicable a productos de tabaco.'
+      'descripcion': 'Aplicable a productos de tabaco.',
     },
     {
       'nombre': 'IMPUESTO SELECTIVO AL CONSUMO - GASOLINA',
       'tasa': 15.0,
       'aplicaImpuesto': true,
       'esSelectivo': true,
-      'descripcion': 'Combustibles y derivados del petróleo.'
+      'descripcion': 'Combustibles y derivados del petróleo.',
     },
   ];
 }

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/existencia.dart';
-import '../services/existencia_service.dart';
+import 'package:fiscogestrd/models/existencia.dart';
+import 'package:fiscogestrd/services/existencia_service.dart';
 
 // Servicio
 final existenciaServiceProvider = Provider<ExistenciaService>((ref) {
@@ -8,18 +8,19 @@ final existenciaServiceProvider = Provider<ExistenciaService>((ref) {
 });
 
 // Obtener todo el inventario
-final todosLosInventariosProvider = FutureProvider<List<Existencia>>((ref) async {
+final todosLosInventariosProvider = FutureProvider<List<Existencia>>((
+  ref,
+) async {
   final servicio = ref.watch(existenciaServiceProvider);
   return await servicio.obtenerTodosActivos();
 });
 
 // Estado del inventario
 class ExistenciaNotifier extends StateNotifier<AsyncValue<List<Existencia>>> {
-  final ExistenciaService _servicio;
-
   ExistenciaNotifier(this._servicio) : super(const AsyncValue.loading()) {
     _cargar();
   }
+  final ExistenciaService _servicio;
 
   Future<void> _cargar() async {
     try {
@@ -45,6 +46,9 @@ class ExistenciaNotifier extends StateNotifier<AsyncValue<List<Existencia>>> {
   }
 }
 
-final existenciaNotifierProvider = StateNotifierProvider<ExistenciaNotifier, AsyncValue<List<Existencia>>>((ref) {
-  return ExistenciaNotifier(ref.watch(existenciaServiceProvider));
-});
+final existenciaNotifierProvider =
+    StateNotifierProvider<ExistenciaNotifier, AsyncValue<List<Existencia>>>((
+      ref,
+    ) {
+      return ExistenciaNotifier(ref.watch(existenciaServiceProvider));
+    });
