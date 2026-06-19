@@ -34,9 +34,9 @@ class ListaProductosScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Costo final: ${p.costoRealConImpuesto.toStringAsFixed(2)} RD\$',
+                          'Costo: RD\$ ${p.costoReal.toStringAsFixed(2)}',
                         ),
-                        Text('Venta: ${p.precioVenta.toStringAsFixed(2)} RD\$'),
+                        Text('Venta: RD\$ ${p.precioVentaFinal.toStringAsFixed(2)}'),
                         Text(
                           'Ganancia: ${p.porcentajeGananciaReal.toStringAsFixed(1)}%',
                         ),

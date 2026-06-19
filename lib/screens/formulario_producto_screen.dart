@@ -413,7 +413,8 @@ class _FormularioProductoScreenState
                     child: Text(regimen['nombre']),
                   ))
               .toList(),
-          value: _categoriaSeleccionada,
+          // ✅ Corregido: variable correcta y propiedad actual
+          initialValue: _categoriaSeleccionada,
           onChanged: (valor) {
             if (valor != null) {
               setState(() => _categoriaSeleccionada = valor);
@@ -575,7 +576,8 @@ class _FormularioProductoScreenState
           items: _listaUnidades
               .map((v) => DropdownMenuItem(value: v, child: Text(v)))
               .toList(),
-          value: _unidadMedida,
+          // ✅ Corregido: variable correcta y propiedad actual
+          initialValue: _unidadMedida,
           onChanged: (v) {
             if (v == null) return;
             setState(() {

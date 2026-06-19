@@ -62,6 +62,7 @@ class Producto {
       fechaRegistro: readDate('fechaRegistro'),
     );
   }
+
   final int? id;
   final String codigo;
   final String nombre;
@@ -83,7 +84,7 @@ class Producto {
   final dynamic stockMinimo;
   final DateTime fechaRegistro;
 
-  // ✅ Resto de métodos, fábricas, etc.
+  // ✅ Métodos auxiliares para copyWith
   static int? _optInt(int? nuevo, int? actual) => nuevo ?? actual;
   static String _optStr(String? nuevo, String actual) => nuevo ?? actual;
   static double _optDouble(double? nuevo, double actual) => nuevo ?? actual;
@@ -149,17 +150,11 @@ class Producto {
       precioVenta: _optDouble(precioVenta, this.precioVenta),
       margenGanancia: _optDouble(margenGanancia, this.margenGanancia),
       valorITBIS: _optDouble(valorITBIS, this.valorITBIS),
-      porcentajeImpuesto: _optDouble(
-        porcentajeImpuesto,
-        this.porcentajeImpuesto,
-      ),
+      porcentajeImpuesto: _optDouble(porcentajeImpuesto, this.porcentajeImpuesto),
       aplicaImpuesto: _optBool(aplicaImpuesto, this.aplicaImpuesto),
       categoria: _optStr(categoria, this.categoria),
       regimenImpuesto: _optStr(regimenImpuesto, this.regimenImpuesto),
-      esImpuestoSelectivo: _optBool(
-        esImpuestoSelectivo,
-        this.esImpuestoSelectivo,
-      ),
+      esImpuestoSelectivo: _optBool(esImpuestoSelectivo, this.esImpuestoSelectivo),
       unidadMedida: _optStr(unidadMedida, this.unidadMedida),
       permiteDecimales: _optBool(permiteDecimales, this.permiteDecimales),
       stockActual: _optDin(stockActual, this.stockActual),
@@ -168,33 +163,66 @@ class Producto {
     );
   }
 
-  double get costoRealSinImpuesto =>
-      precioCompra + gastosTransporte + gastosVarios;
+  // ─────────────────────────────────────────────────────────────────
+  // ✅ CÁLCULOS HOMOLOGADOS SEGÚN NORMATIVA DGII
+  // ─────────────────────────────────────────────────────────────────
 
-  double get totalImpuestos {
+  /// 📌 Costo base sin impuestos: Precio de compra + transporte + gastos
+  double get costoBase => precioCompra + gastosTransporte + gastosVarios;
+
+  /// 📌 Impuesto que viene incluido en la compra (si es acreditable)
+  double get impuestoEnCompra {
+    if (!aplicaImpuesto || esImpuestoSelectivo) return 0.0;
+    return precioCompra * (porcentajeImpuesto / 100);
+  }
+
+  /// 📌 Costo REAL para el comerciante:
+  /// - Si es régimen general: se resta el ITBIS porque es acreditable
+  /// - Si es exento o impuesto selectivo: se suma todo porque NO se puede descontar
+  double get costoReal {
+    if (!aplicaImpuesto) {
+      // Bienes exentos: todo es costo
+      return costoBase;
+    }
+    if (esImpuestoSelectivo) {
+      // Impuesto selectivo: no es acreditable, pasa al costo
+      return costoBase + valorITBIS;
+    }
+    // Régimen general: ITBIS es acreditable → se resta del costo
+    return costoBase - impuestoEnCompra;
+  }
+
+  /// 📌 Base imponible para calcular el precio de venta
+  double get baseImponible => costoReal * (1 + (margenGanancia / 100));
+
+  /// 📌 Impuesto que se cobra al vender
+  double get impuestoEnVenta {
     if (!aplicaImpuesto) return 0.0;
-    return costoRealSinImpuesto * (porcentajeImpuesto / 100);
+    return baseImponible * (porcentajeImpuesto / 100);
   }
 
-  double get costoRealConImpuesto => costoRealSinImpuesto + totalImpuestos;
+  /// 📌 Precio final de venta al público
+  double get precioVentaFinal => baseImponible + impuestoEnVenta;
 
-  double get precioVentaSugerido {
-    if (costoRealConImpuesto <= 0) return 0.0;
-    return costoRealConImpuesto * (1 + (margenGanancia / 100));
-  }
+  /// 📌 Ganancia neta real por unidad
+  double get gananciaNetaReal => precioVentaFinal - costoReal;
 
-  double get gananciaNeta => precioVenta - costoRealConImpuesto;
-
+  /// 📌 Porcentaje de ganancia real
   double get porcentajeGananciaReal {
-    if (precioVenta <= 0) return 0.0;
-    return ((gananciaNeta / precioVenta) * 100).clamp(0.0, 100.0);
+    if (costoReal <= 0) return 0.0;
+    return ((gananciaNetaReal / costoReal) * 100).clamp(0.0, 999.9);
   }
 
+  /// 📌 Verificación de stock
   bool get estaBajoDeStock {
     final actual = num.tryParse(stockActual.toString()) ?? 0;
     final minimo = num.tryParse(stockMinimo.toString()) ?? 0;
     return actual <= minimo;
   }
+
+  // ─────────────────────────────────────────────────────────────────
+  // ✅ LISTAS Y MÉTODOS AUXILIARES
+  // ─────────────────────────────────────────────────────────────────
 
   static const List<String> listaUnidadesMedida = [
     'UNIDAD',
@@ -238,58 +266,56 @@ class Producto {
       'tasa': 18.0,
       'aplicaImpuesto': true,
       'esSelectivo': false,
-      'descripcion':
-          'Régimen general aplicable a la mayoría de bienes y servicios.',
+      'descripcion': 'Régimen general: el ITBIS pagado en compras es acreditable.',
     },
     {
       'nombre': 'BIENES EXENTOS',
       'tasa': 0.0,
       'aplicaImpuesto': false,
       'esSelectivo': false,
-      'descripcion':
-          'Productos básicos, alimentos, medicinas y bienes exentos por ley.',
+      'descripcion': 'Alimentos, medicinas y bienes básicos: no generan ni permiten descuento de impuesto.',
     },
     {
       'nombre': 'SERVICIOS EXENTOS',
       'tasa': 0.0,
       'aplicaImpuesto': false,
       'esSelectivo': false,
-      'descripcion': 'Servicios educativos, salud, transporte y otros exentos.',
+      'descripcion': 'Servicios educativos, salud, transporte: sin impuesto.',
     },
     {
       'nombre': 'ITBIS 16% (REDUCIDO)',
       'tasa': 16.0,
       'aplicaImpuesto': true,
       'esSelectivo': false,
-      'descripcion': 'Tasa reducida aplicable a ciertos productos regulados.',
+      'descripcion': 'Tasa reducida, el impuesto es acreditable.',
     },
     {
       'nombre': 'ITBIS 8% (REDUCIDO)',
       'tasa': 8.0,
       'aplicaImpuesto': true,
       'esSelectivo': false,
-      'descripcion': 'Tasa especial para productos específicos.',
+      'descripcion': 'Tasa especial, el impuesto es acreditable.',
     },
     {
-      'nombre': 'IMPUESTO SELECTIVO AL CONSUMO - ALCOHOL',
+      'nombre': 'IMPUESTO SELECTIVO - ALCOHOL',
       'tasa': 20.0,
       'aplicaImpuesto': true,
       'esSelectivo': true,
-      'descripcion': 'Aplicable a bebidas alcohólicas según normativa DGII.',
+      'descripcion': 'Impuesto adicional NO acreditable, pasa al costo final.',
     },
     {
-      'nombre': 'IMPUESTO SELECTIVO AL CONSUMO - TABACO',
+      'nombre': 'IMPUESTO SELECTIVO - TABACO',
       'tasa': 30.0,
       'aplicaImpuesto': true,
       'esSelectivo': true,
-      'descripcion': 'Aplicable a productos de tabaco.',
+      'descripcion': 'Impuesto adicional NO acreditable, pasa al costo final.',
     },
     {
-      'nombre': 'IMPUESTO SELECTIVO AL CONSUMO - GASOLINA',
+      'nombre': 'IMPUESTO SELECTIVO - COMBUSTIBLES',
       'tasa': 15.0,
       'aplicaImpuesto': true,
       'esSelectivo': true,
-      'descripcion': 'Combustibles y derivados del petróleo.',
+      'descripcion': 'Impuesto adicional NO acreditable, pasa al costo final.',
     },
   ];
 }

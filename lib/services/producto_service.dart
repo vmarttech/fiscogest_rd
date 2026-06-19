@@ -131,11 +131,11 @@ class ProductoService {
   /// Obtiene un resumen con todos los valores calculados del producto
   Map<String, double> obtenerResumenCostos(Producto producto) {
     return {
-      'costoSinImpuesto': producto.costoRealSinImpuesto,
-      'totalImpuestos': producto.totalImpuestos,
-      'costoConImpuesto': producto.costoRealConImpuesto,
-      'precioSugerido': producto.precioVentaSugerido,
-      'gananciaNeta': producto.gananciaNeta,
+      'costoSinImpuesto': producto.costoBase,
+      'totalImpuestos': producto.impuestoEnCompra,
+      'costoConImpuesto': producto.costoReal,
+      'precioSugerido': producto.precioVentaFinal,
+      'gananciaNeta': producto.gananciaNetaReal,
       'margenReal': producto.porcentajeGananciaReal,
     };
   }

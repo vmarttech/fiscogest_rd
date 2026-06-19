@@ -265,7 +265,7 @@ class _FormularioMovimientoScreenState
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: _tipoMovimiento,
+        initialValue: _tipoMovimiento,
           decoration: const InputDecoration(border: OutlineInputBorder()),
           items: const [
             DropdownMenuItem(value: 'entrada', child: Text('Entrada / Compra')),
