@@ -76,6 +76,29 @@ class ProductoNotifier extends StateNotifier<List<Producto>> {
     }
   }
 
+  // ✅ MÉTODOS AGREGADOS PARA COMPRAS Y VENTAS
+  /// Aumenta el stock al registrar una compra
+  Future<void> aumentarStock(int productoId, dynamic cantidad) async {
+    try {
+      await _repository.aumentarStock(productoId, cantidad);
+      await cargarDatos(); // Refresca la lista en pantalla
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Descuenta el stock al registrar una venta
+  /// Devuelve `true` si hay suficiente inventario, `false` si no
+  Future<bool> descontarStock(int productoId, dynamic cantidad) async {
+    try {
+      final exito = await _repository.descontarStock(productoId, cantidad);
+      if (exito) await cargarDatos(); // Solo refresca si se descontó
+      return exito;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> cargarTodosSinFiltro() async {
     try {
       final lista = await _repository.obtenerTodos();

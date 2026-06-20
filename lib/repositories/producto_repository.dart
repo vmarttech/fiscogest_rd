@@ -109,11 +109,44 @@ class ProductoRepository {
   // =====================================================
   // ✅ ACTUALIZAR STOCK
   // =====================================================
-  Future<void> actualizarNivelStock(int productoId, double nuevoValor) async {
+  Future<void> actualizarNivelStock(int productoId, dynamic nuevoValor) async {
+    final valor = num.tryParse(nuevoValor.toString()) ?? 0.0;
     await _existenciaService.actualizarStockDesdeInventario(
       productoId,
-      nuevoValor,
+      valor.toDouble(),
     );
+  }
+
+  // =====================================================
+  // ✅ MÉTODOS AGREGADOS PARA COMPRAS Y VENTAS
+  // =====================================================
+
+  /// ✅ Aumentar stock al registrar una compra
+  Future<void> aumentarStock(int productoId, dynamic cantidad) async {
+    final producto = await obtenerPorId(productoId);
+    if (producto == null) return;
+
+    final actual = num.tryParse(producto.stockActual.toString()) ?? 0;
+    final cant = num.tryParse(cantidad.toString()) ?? 0;
+    final nuevoStock = actual + cant;
+
+    await actualizar(producto.copyWith(stockActual: nuevoStock));
+  }
+
+  /// ✅ Descontar stock al registrar una venta
+  Future<bool> descontarStock(int productoId, dynamic cantidad) async {
+    final producto = await obtenerPorId(productoId);
+    if (producto == null) return false;
+
+    final actual = num.tryParse(producto.stockActual.toString()) ?? 0;
+    final cant = num.tryParse(cantidad.toString()) ?? 0;
+
+    if (actual >= cant) {
+      final nuevoStock = actual - cant;
+      await actualizar(producto.copyWith(stockActual: nuevoStock));
+      return true;
+    }
+    return false; // Stock insuficiente
   }
 
   // =====================================================

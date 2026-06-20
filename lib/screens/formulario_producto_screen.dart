@@ -124,20 +124,26 @@ class _FormularioProductoScreenState
     _calcularDesdeMargen();
   }
 
+  // ✅ Método corregido, sin variable sin usar
   void _calcularDesdeMargen() {
     if (_modoCalculando || _costoTotal <= 0) return;
     _modoCalculando = true;
 
     final margen = _toDoubleSeguro(_ctrlMargen.text);
+    final tasa = (_categoriaSeleccionada['tasa'] as num).toDouble();
+    final aplicaImpuesto = _categoriaSeleccionada['aplicaImpuesto'] as bool;
+
     setState(() {
       _baseImponible = _costoTotal * (1 + (margen / 100));
       _gananciaNeta = _baseImponible - _costoTotal;
 
-      if (!_categoriaSeleccionada['aplicaImpuesto']) {
+      if (!aplicaImpuesto) {
+        // Bienes Exentos
         _valorImpuesto = 0.0;
         _precioFinal = _baseImponible;
       } else {
-        _valorImpuesto = _baseImponible * (_categoriaSeleccionada['tasa'] / 100);
+        // Régimen General o Impuesto Selectivo
+        _valorImpuesto = _baseImponible * (tasa / 100);
         _precioFinal = _baseImponible + _valorImpuesto;
       }
 
@@ -147,6 +153,7 @@ class _FormularioProductoScreenState
     _modoCalculando = false;
   }
 
+  // ✅ Cálculo inverso actualizado
   void _calcularDesdePrecio() {
     if (_modoCalculando) return;
     _modoCalculando = true;
@@ -157,17 +164,24 @@ class _FormularioProductoScreenState
       return;
     }
 
+    final tasa = (_categoriaSeleccionada['tasa'] as num).toDouble();
+    final aplicaImpuesto = _categoriaSeleccionada['aplicaImpuesto'] as bool;
+
     setState(() {
-      if (!_categoriaSeleccionada['aplicaImpuesto']) {
+      if (!aplicaImpuesto) {
+        // Bienes Exentos
         _baseImponible = precioFinal;
         _valorImpuesto = 0.0;
       } else {
-        _baseImponible = precioFinal / (1 + (_categoriaSeleccionada['tasa'] / 100));
+        // General o Selectivo: misma fórmula de cálculo inverso
+        _baseImponible = precioFinal / (1 + (tasa / 100));
         _valorImpuesto = precioFinal - _baseImponible;
       }
 
       _gananciaNeta = _baseImponible - _costoTotal;
-      final margenCalc = ((_baseImponible - _costoTotal) / _costoTotal) * 100;
+      final margenCalc = _costoTotal > 0
+          ? ((_baseImponible - _costoTotal) / _costoTotal) * 100
+          : 0.0;
       _ctrlMargen.text = margenCalc.toStringAsFixed(2);
     });
 
@@ -413,7 +427,6 @@ class _FormularioProductoScreenState
                     child: Text(regimen['nombre']),
                   ))
               .toList(),
-          // ✅ Corregido: variable correcta y propiedad actual
           initialValue: _categoriaSeleccionada,
           onChanged: (valor) {
             if (valor != null) {
@@ -505,8 +518,12 @@ class _FormularioProductoScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '${_categoriaSeleccionada['esSelectivo'] ? 'Impuesto Selectivo' : 'ITBIS'} (${_categoriaSeleccionada['tasa']}%):',
+                  Expanded(
+                    child: Text(
+                      '${_categoriaSeleccionada['esSelectivo'] ? 'Impuesto Selectivo' : 'ITBIS'} (${_categoriaSeleccionada['tasa']}%):',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   ),
                   Text(
                     'RD\$ ${_valorImpuesto.toStringAsFixed(2)}',
@@ -576,7 +593,6 @@ class _FormularioProductoScreenState
           items: _listaUnidades
               .map((v) => DropdownMenuItem(value: v, child: Text(v)))
               .toList(),
-          // ✅ Corregido: variable correcta y propiedad actual
           initialValue: _unidadMedida,
           onChanged: (v) {
             if (v == null) return;
