@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Importaciones de todas las pantallas
+// Importaciones de pantallas
 import 'package:fiscogestrd/screens/listado_productos_screen.dart';
 import 'package:fiscogestrd/screens/listado_clientes.dart';
 import 'package:fiscogestrd/screens/formulario_cliente.dart';
 import 'package:fiscogestrd/compras/registro_compra_screen.dart';
-import 'package:fiscogestrd/ventas/seleccion_tipo_venta_screen.dart';
-import 'package:fiscogestrd/ventas/venta_rapida_screen.dart';
-import 'package:fiscogestrd/ventas/venta_con_comprobante_screen.dart';
+import 'package:fiscogestrd/ventas/pantalla_venta_unificada.dart';
 
 void main() {
   runApp(const ProviderScope(child: FiscoGestRdApp()));
@@ -53,9 +51,7 @@ class FiscoGestRdApp extends StatelessWidget {
         '/clientes': (context) => const ListadoClientes(),
         '/clientes/nuevo': (context) => const FormularioClienteScreen(),
         '/compras': (context) => const RegistroCompraScreen(),
-        '/ventas': (context) => const SeleccionTipoVentaScreen(),
-        '/venta-rapida': (context) => const VentaRapidaScreen(),
-        '/venta-con-comprobante': (context) => const VentaConComprobanteScreen(),
+        '/venta': (context) => const PantallaVentaUnificada(),
       },
     );
   }
@@ -73,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _paginas = const [
     _DashboardInicio(),
-    SeleccionTipoVentaScreen(),
+    PantallaVentaUnificada(),
     _VistaFacturacion(),
     ListadoClientes(),
     ListadoProductosScreen(),
@@ -91,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
         final esPantallaGrande = constraints.maxWidth >= 900;
 
         return Scaffold(
-          // ✅ Tu marca visible arriba
           appBar: AppBar(
             title: const Row(
               children: [
@@ -139,7 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ✅ Menú lateral con tu marca
 class _MenuLateral extends StatelessWidget {
   final int indiceSeleccionado;
   final Function(int) alSeleccionar;
@@ -332,10 +326,30 @@ class _DashboardInicio extends StatelessWidget {
                 spacing: 16,
                 runSpacing: 16,
                 children: [
-                  _BotonAcceso(texto: 'Nueva Venta', icono: Icons.point_of_sale, color: const Color(0xFF10B981), onTap: () => Navigator.pushNamed(context, '/ventas')),
-                  _BotonAcceso(texto: 'Nuevo Cliente', icono: Icons.person_add, color: const Color(0xFF7C3AED), onTap: () => Navigator.pushNamed(context, '/clientes/nuevo')),
-                  _BotonAcceso(texto: 'Nuevo Producto', icono: Icons.inventory_2, color: const Color(0xFFF59E0B), onTap: () => Navigator.pushNamed(context, '/productos')),
-                  _BotonAcceso(texto: 'Nueva Compra', icono: Icons.add_shopping_cart, color: const Color(0xFF3B82F6), onTap: () => Navigator.pushNamed(context, '/compras')),
+                  _BotonAcceso(
+                    texto: 'Nueva Venta',
+                    icono: Icons.point_of_sale,
+                    color: const Color(0xFF10B981),
+                    onTap: () => Navigator.pushNamed(context, '/venta'),
+                  ),
+                  _BotonAcceso(
+                    texto: 'Nuevo Cliente',
+                    icono: Icons.person_add,
+                    color: const Color(0xFF7C3AED),
+                    onTap: () => Navigator.pushNamed(context, '/clientes/nuevo'),
+                  ),
+                  _BotonAcceso(
+                    texto: 'Nuevo Producto',
+                    icono: Icons.inventory_2,
+                    color: const Color(0xFFF59E0B),
+                    onTap: () => Navigator.pushNamed(context, '/productos'),
+                  ),
+                  _BotonAcceso(
+                    texto: 'Nueva Compra',
+                    icono: Icons.add_shopping_cart,
+                    color: const Color(0xFF3B82F6),
+                    onTap: () => Navigator.pushNamed(context, '/compras'),
+                  ),
                 ],
               ),
               const SizedBox(height: 40),
@@ -353,7 +367,12 @@ class _BotonAcceso extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _BotonAcceso({required this.texto, required this.icono, required this.color, required this.onTap});
+  const _BotonAcceso({
+    required this.texto,
+    required this.icono,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -380,8 +399,37 @@ class _BotonAcceso extends StatelessWidget {
   }
 }
 
-class _VistaFacturacion extends StatelessWidget {const _VistaFacturacion();@override Widget build(BuildContext context)=>const Center(child: Text('Módulo de Facturación'));}
-class _VistaProveedores extends StatelessWidget {const _VistaProveedores();@override Widget build(BuildContext context)=>const Center(child: Text('Módulo de Proveedores'));}
-class _VistaGastos extends StatelessWidget {const _VistaGastos();@override Widget build(BuildContext context)=>const Center(child: Text('Módulo de Gastos'));}
-class _VistaReportes extends StatelessWidget {const _VistaReportes();@override Widget build(BuildContext context)=>const Center(child: Text('Módulo de Reportes'));}
-class _VistaConfiguracion extends StatelessWidget {const _VistaConfiguracion();@override Widget build(BuildContext context)=>const Center(child: Text('Configuración del Sistema'));}
+class _VistaFacturacion extends StatelessWidget {
+  const _VistaFacturacion();
+
+  @override
+  Widget build(BuildContext context) => const Center(child: Text('Módulo de Facturación'));
+}
+
+class _VistaProveedores extends StatelessWidget {
+  const _VistaProveedores();
+
+  @override
+  Widget build(BuildContext context) => const Center(child: Text('Módulo de Proveedores'));
+}
+
+class _VistaGastos extends StatelessWidget {
+  const _VistaGastos();
+
+  @override
+  Widget build(BuildContext context) => const Center(child: Text('Módulo de Gastos'));
+}
+
+class _VistaReportes extends StatelessWidget {
+  const _VistaReportes();
+
+  @override
+  Widget build(BuildContext context) => const Center(child: Text('Módulo de Reportes'));
+}
+
+class _VistaConfiguracion extends StatelessWidget {
+  const _VistaConfiguracion();
+
+  @override
+  Widget build(BuildContext context) => const Center(child: Text('Configuración del Sistema'));
+}
