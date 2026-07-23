@@ -1,0 +1,44 @@
+class Producto {
+  final int? id;
+  final String codigo;
+  final String nombre;
+  final String? descripcion; // ✅ FALTABA
+  final double costoCompra;  // ✅ En tu BD se llama así (antes era precioCompra)
+  final double gastosTransporte; // ✅ FALTABA
+  final double gastosVarios;     // ✅ FALTABA
+  final double margenGanancia;
+  final double precioVenta;
+  final String categoriaId;      // ✅ FALTABA
+  final String nombreCategoria;  // ✅ FALTABA
+  final bool exentoITBIS;        // ✅ En tu BD es INTEGER
+  final double porcentajeITBIS;
+  final double impuestoAdicional;// ✅ FALTABA
+  
+  final int stockActual;
+  final int stockMinimo;
+  final String unidadMedida;
+  final DateTime fechaRegistro;
+
+  Producto({
+    this.id,
+    required this.codigo,
+    required this.nombre,
+    this.descripcion,
+    required this.costoCompra,
+    this.gastosTransporte = 0.0,
+    this.gastosVarios = 0.0,
+    required this.margenGanancia,
+    required this.precioVenta,
+    this.categoriaId = 'GENERAL',
+    this.nombreCategoria = 'Bienes y Servicios Generales',
+    required this.exentoITBIS,
+    required this.porcentajeITBIS,
+    this.impuestoAdicional = 0.0,
+    required this.stockActual,
+    required this.stockMinimo,
+    required this.unidadMedida,
+    required this.fechaRegistro,
+  });
+
+  // ... (Mantiene copyWith, toMap, fromMap)
+}

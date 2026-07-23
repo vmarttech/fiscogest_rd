@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/main.dart';
 
@@ -24,3 +25,14 @@ void main() {
     });
   });
 }
+=======
+
+void main() {
+  testWidgets('Prueba básica funciona', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: Center(child: Text('OK')))),
+    );
+    expect(find.text('OK'), findsOneWidget);
+  });
+}
+>>>>>>> 70035f2660adffb13e491bad7cc29f11ba3fc6f2

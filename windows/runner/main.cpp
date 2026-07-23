@@ -27,7 +27,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
+<<<<<<< HEAD
   if (!window.Create(L"fiscogest_rd", origin, size)) {
+=======
+  if (!window.Create(L"fiscogestrd", origin, size)) {
+>>>>>>> 70035f2660adffb13e491bad7cc29f11ba3fc6f2
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

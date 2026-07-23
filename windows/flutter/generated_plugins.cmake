@@ -3,7 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< HEAD
   sqlite3_flutter_libs
+=======
+>>>>>>> 70035f2660adffb13e491bad7cc29f11ba3fc6f2
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
