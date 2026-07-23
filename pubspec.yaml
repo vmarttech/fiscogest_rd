@@ -1,0 +1,41 @@
+name: fiscogest_rd
+description: Plataforma Empresarial Modular - FiscoGest RD 3.0
+publish_to: 'none'
+version: 3.0.0+1
+
+environment:
+  sdk: '>=3.12.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Estado e Inyección de Dependencias
+  flutter_riverpod: ^2.5.1
+  
+  # Navegación Declarativa
+  go_router: ^13.2.0
+  
+  # Base de Datos Local y ORM
+  drift: ^2.16.0
+  sqlite3_flutter_libs: ^0.5.18
+  path_provider: ^2.1.2
+  path: ^1.9.0
+
+  # Modelos Inmutables y Serialización
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  
+  # Generadores de Código Oficiales
+  build_runner: ^2.4.8
+  drift_dev: ^2.16.0
+  freezed: ^2.4.7
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true

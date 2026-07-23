@@ -1,0 +1,52 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/entities/cliente_completo.dart';
+
+class ClienteCompletoNotifier extends StateNotifier<AsyncValue<List<ClienteCompleto>>> {
+  ClienteCompletoNotifier() : super(AsyncValue.data([
+    ClienteCompleto(
+      id: 1,
+      nombre: 'Consumidor Final',
+      direccion: 'Santo Domingo',
+      telefono: '809-000-0000',
+      correo: 'ventas@fiscogest.rd',
+      rncCedula: '001-0000000-0',
+      observaciones: 'Cliente genérico por defecto.',
+      historial: 'Creado por defecto en el sistema.',
+    ),
+  ]));
+
+  Future<void> guardar(ClienteCompleto cliente) async {
+    state.whenData((lista) {
+      final existe = lista.any((c) => c.rncCedula.trim() == cliente.rncCedula.trim());
+      if (existe) {
+        throw Exception('Ya existe un cliente registrado con ese RNC o Cédula.');
+      }
+      final nuevoId = lista.isEmpty ? 1 : (lista.map((e) => e.id ?? 0).reduce((a, b) => a > b ? a : b) + 1);
+      final nuevoCliente = cliente.copyWith(id: nuevoId);
+      state = AsyncValue.data([...lista, nuevoCliente]);
+    });
+  }
+
+  Future<void> actualizar(ClienteCompleto cliente) async {
+    state.whenData((lista) {
+      final duplicado = lista.any((c) => c.id != cliente.id && c.rncCedula.trim() == cliente.rncCedula.trim());
+      if (duplicado) {
+        throw Exception('Ya existe otro cliente con ese RNC o Cédula.');
+      }
+      state = AsyncValue.data([
+        for (var c in lista)
+          if (c.id == cliente.id) cliente else c
+      ]);
+    });
+  }
+
+  Future<void> eliminar(int id) async {
+    state.whenData((lista) {
+      state = AsyncValue.data(lista.where((c) => c.id != id).toList());
+    });
+  }
+}
+
+final clienteCompletoControllerProvider = StateNotifierProvider<ClienteCompletoNotifier, AsyncValue<List<ClienteCompleto>>>((ref) {
+  return ClienteCompletoNotifier();
+});
