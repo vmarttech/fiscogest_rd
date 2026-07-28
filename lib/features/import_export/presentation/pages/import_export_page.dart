@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/import_export_providers.dart';
+import 'package:fiscogest_rd/features/import_export/presentation/providers/import_export_providers.dart';
 
 class ImportExportPage extends ConsumerWidget {
   const ImportExportPage({super.key});
@@ -152,7 +152,7 @@ class ImportExportPage extends ConsumerWidget {
   }
 
   void _mostrarResultadoExportacion(BuildContext context, String tituloArchivo, String contenido) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Exportación Exitosa: $tituloArchivo', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -179,10 +179,6 @@ class ImportExportPage extends ConsumerWidget {
 }
 
 class _CardAccion extends StatelessWidget {
-  final String titulo;
-  final String descripcion;
-  final IconData icono;
-  final List<Widget> botones;
 
   const _CardAccion({
     required this.titulo,
@@ -190,6 +186,10 @@ class _CardAccion extends StatelessWidget {
     required this.icono,
     required this.botones,
   });
+  final String titulo;
+  final String descripcion;
+  final IconData icono;
+  final List<Widget> botones;
 
   @override
   Widget build(BuildContext context) {

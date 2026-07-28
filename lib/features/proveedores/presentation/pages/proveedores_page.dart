@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/proveedor_providers.dart';
-import '../../domain/entities/proveedor.dart';
+import 'package:fiscogest_rd/features/proveedores/presentation/providers/proveedor_providers.dart';
+import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
 
 class ProveedoresPage extends ConsumerStatefulWidget {
   const ProveedoresPage({super.key});
@@ -189,7 +189,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                       icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
                                       tooltip: 'Eliminar Proveedor',
                                       onPressed: () {
-                                        showDialog(
+                                        showDialog<void>(
                                           context: context,
                                           builder: (ctx) => AlertDialog(
                                             title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -244,7 +244,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
     final rncController = TextEditingController(text: proveedorToEdit?.rnc ?? '');
     final isEditing = proveedorToEdit != null;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/marca_providers.dart';
-import '../../domain/entities/marca.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_providers.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/marca.dart';
 
 class MarcasPage extends ConsumerStatefulWidget {
   const MarcasPage({super.key});
@@ -107,7 +107,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                     data: (marcas) {
                       final filtradas = marcas.where((m) =>
                         m.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                        m.descripcion.toLowerCase().contains(_filtroBusqueda)
+                        (m.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false)
                       ).toList();
 
                       if (filtradas.isEmpty) {
@@ -149,7 +149,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        marca.descripcion.isEmpty ? 'Sin descripción' : marca.descripcion,
+                                        marca.descripcion?.isEmpty ?? true ? 'Sin descripción' : marca.descripcion!,
                                         style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
                                       ),
                                     ],
@@ -167,7 +167,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                       icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
                                       tooltip: 'Eliminar Marca',
                                       onPressed: () {
-                                        showDialog(
+                                        showDialog<void>(
                                           context: context,
                                           builder: (ctx) => AlertDialog(
                                             title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -218,7 +218,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
     final descripcionController = TextEditingController(text: marcaToEdit?.descripcion ?? '');
     final isEditing = marcaToEdit != null;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Editar Marca' : 'Nueva Marca', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
@@ -232,7 +232,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                 TextFormField(
                   controller: nombreController,
                   decoration: const InputDecoration(labelText: 'Nombre de la Marca'),
-                  validator: (v) => v!.isEmpty ? 'Ingrese el nombre' : null,
+                  validator: (v) => v?.isEmpty ?? true ? 'Ingrese el nombre' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -258,6 +258,8 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                     id: marcaToEdit?.id,
                     nombre: nombreController.text.trim(),
                     descripcion: descripcionController.text.trim(),
+                    creadoEn: marcaToEdit?.creadoEn ?? DateTime.now(),
+                    actualizadoEn: isEditing ? DateTime.now() : null,
                   );
 
                   if (isEditing) {

@@ -1,4 +1,4 @@
-import '../../domain/entities/presentacion.dart';
+import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
 
 class PresentacionRepository {
   final List<Presentacion> _presentacionesLocales = [

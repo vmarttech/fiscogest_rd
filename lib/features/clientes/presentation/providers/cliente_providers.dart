@@ -9,7 +9,8 @@ import 'package:fiscogest_rd/features/clientes/domain/usecases/obtener_clientes_
 
 /// Proveedor del DAO de Clientes
 final clienteDaoProvider = Provider<ClienteDao>((ref) {
-  final db = ref.watch(databaseProvider);
+  // ✅ Única fuente de verdad para acceso a datos
+  final db = ref.read(databaseProvider);
   return ClienteDao(db);
 });
 
@@ -31,7 +32,8 @@ final guardarClienteUseCaseProvider = Provider<GuardarClienteUseCase>((ref) {
   return GuardarClienteUseCase(repository);
 });
 
-/// Notifier Provider para gestionar el estado reactivo de la lista de clientes
+/// Controlador de Clientes: SOLO gestiona estado y llamadas a casos de uso
+/// NO contiene reglas de negocio (prohibido por arquitectura)
 final clientesControllerProvider = AsyncNotifierProvider<ClientesController, List<ClienteEntity>>(() {
   return ClientesController();
 });

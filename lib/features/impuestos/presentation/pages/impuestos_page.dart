@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/impuesto_providers.dart';
-import '../../domain/entities/impuesto_entity.dart';
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 
 class ImpuestosPage extends ConsumerStatefulWidget {
   const ImpuestosPage({super.key});
@@ -205,7 +205,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                       icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
                                       tooltip: 'Eliminar Impuesto',
                                       onPressed: () {
-                                        showDialog(
+                                        showDialog<void>(
                                           context: context,
                                           builder: (ctx) => AlertDialog(
                                             title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -259,7 +259,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
     bool esExento = impuestoToEdit?.esExento ?? false;
     final isEditing = impuestoToEdit != null;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setStateModal) => AlertDialog(

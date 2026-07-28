@@ -1,4 +1,4 @@
-import '../../domain/entities/unidad.dart';
+import 'package:fiscogest_rd/features/unidades/domain/entities/unidad.dart';
 
 class UnidadRepository {
   final List<Unidad> _unidadesLocales = [

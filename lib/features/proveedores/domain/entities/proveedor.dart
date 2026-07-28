@@ -1,12 +1,4 @@
 class Proveedor {
-  final int? id;
-  final String nombre;
-  final String contacto;
-  final String direccion;
-  final String telefono;
-  final String correo;
-  final String rnc;
-  final bool activo;
 
   Proveedor({
     this.id,
@@ -18,6 +10,14 @@ class Proveedor {
     required this.rnc,
     this.activo = true,
   });
+  final int? id;
+  final String nombre;
+  final String contacto;
+  final String direccion;
+  final String telefono;
+  final String correo;
+  final String rnc;
+  final bool activo;
 
   Proveedor copyWith({
     int? id,

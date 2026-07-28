@@ -1,4 +1,4 @@
-import '../../domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 
 class ClienteCompletoRepository {
   final List<ClienteCompleto> _clientesLocales = [

@@ -1,25 +1,38 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/database/database_provider.dart';
-import '../../data/repositories/entrada_repository_impl.dart';
-import '../../domain/entities/entrada.dart';
-import '../../domain/interfaces/i_entrada_repository.dart';
-import 'producto_providers.dart' hide databaseProvider;
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/servicios_transversales/operaciones_entrada_service.dart';
+import 'package:fiscogest_rd/features/inventario/data/repositories/entrada_repository_impl.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/entrada.dart';
+import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_entrada_repository.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
+/// Proveedor Repositorio Entradas: BD SOLO del núcleo central (SSOT)
 final entradaRepositoryProvider = Provider<IEntradaRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return EntradaRepositoryImpl(db);
 });
 
+/// Proveedor Servicio Entradas: inyección estricta de dependencias
+final operacionesEntradaServiceProvider = Provider<OperacionesEntradaService>((ref) {
+  return OperacionesEntradaService(
+    entradaRepository: ref.watch(entradaRepositoryProvider),
+    productoRepository: ref.watch(productoRepositoryProvider),
+    db: ref.watch(databaseProvider),
+  );
+});
+
+/// Historial de entradas: solo consulta, sin lógica
 final historialEntradasProvider = FutureProvider<List<Entrada>>((ref) async {
   final repository = ref.watch(entradaRepositoryProvider);
   return await repository.obtenerHistorialEntradas();
 });
 
+/// Controlador Entradas: SOLO UI/ESTADO — NUNCA LÓGICA DE NEGOCIO
 class EntradaController extends StateNotifier<AsyncValue<void>> {
-  final IEntradaRepository _repository;
+  EntradaController(this._operacionesEntrada, this._ref) : super(const AsyncValue.data(null));
+  
+  final OperacionesEntradaService _operacionesEntrada;
   final Ref _ref;
-
-  EntradaController(this._repository, this._ref) : super(const AsyncValue.data(null));
 
   Future<void> registrarEntrada({
     required int productoId,
@@ -29,19 +42,18 @@ class EntradaController extends StateNotifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      final entrada = Entrada(
+      // ✅ DELEGACIÓN EXCLUSIVA AL SERVICIO (flujo obligatorio)
+      await _operacionesEntrada.registrarEntradaConAjusteStock(
         productoId: productoId,
         cantidad: cantidad,
         motivo: motivo,
         usuario: usuario,
-        fecha: DateTime.now(),
       );
 
-      await _repository.registrarEntrada(entrada);
-      
+      // ✅ REFRESCO SELECTIVO Y ORDENADO
       _ref.invalidate(historialEntradasProvider);
       _ref.invalidate(productoControllerProvider);
-
+      
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -50,6 +62,6 @@ class EntradaController extends StateNotifier<AsyncValue<void>> {
 }
 
 final entradaControllerProvider = StateNotifierProvider<EntradaController, AsyncValue<void>>((ref) {
-  final repository = ref.watch(entradaRepositoryProvider);
-  return EntradaController(repository, ref);
+  final servicio = ref.watch(operacionesEntradaServiceProvider);
+  return EntradaController(servicio, ref);
 });

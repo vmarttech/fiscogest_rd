@@ -1,4 +1,4 @@
-import '../../domain/entities/proveedor.dart';
+import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
 
 class ProveedorRepository {
   final List<Proveedor> _proveedoresLocales = [

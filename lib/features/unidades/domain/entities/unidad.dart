@@ -1,8 +1,4 @@
 class Unidad {
-  final int? id;
-  final String nombre;
-  final String abreviatura;
-  final bool activo;
 
   Unidad({
     this.id,
@@ -10,6 +6,10 @@ class Unidad {
     required this.abreviatura,
     this.activo = true,
   });
+  final int? id;
+  final String nombre;
+  final String abreviatura;
+  final bool activo;
 
   Unidad copyWith({
     int? id,

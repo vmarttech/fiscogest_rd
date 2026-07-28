@@ -1,73 +1,25 @@
-<<<<<<< HEAD
-# This file configures the analyzer, which statically analyzes Dart code to
-# check for errors, warnings, and lints.
-#
-# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
-# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
-# invoked from the command line by running `flutter analyze`.
-
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
-include: package:flutter_lints/flutter.yaml
-
-linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at https://dart.dev/lints.
-  #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
-  rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
-
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
-=======
-# ✅ Reglas base recomendadas por Flutter
-include: package:flutter_lints/flutter.yaml
-
-# ==============================================
-# ✅ CONFIGURACIÓN DE DART CODE METRICS
-# ==============================================
-dart_code_metrics:
-  # Límites de complejidad y tamaño
-  metrics:
-    cyclomatic-complexity: 15       # Complejidad máxima permitida
-    maximum-nesting-level: 4        # Niveles de anidación máximos
-    number-of-parameters: 6         # Cantidad máxima de parámetros por método
-    source-lines-of-code: 250       # Líneas máximas por método/clase
-
-  # Reglas de calidad de código
-  rules:
-    - avoid-unused-parameters
-    - avoid-unnecessary-type-casts
-    - no-empty-block
-    - no-equal-then-else
-    - prefer-const-declarations
-    - prefer-final-fields
-    - avoid-print
-
-  # Excluimos archivos y métodos generados o estructurales para no generar falsas alertas
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors:
+    avoid_print: error
+    unused_import: error
+    unused_local_variable: error
+    dead_code: error
+    invalid_assignment: error
+    deprecated_member_use: warning
+    uri_has_not_been_generated: ignore
   exclude:
-    - "**/*Model.dart"
-    - "**/*Producto.dart"
-    - "**/*.fromMap"
-    - "**/*.toMap"
-    - "**/*.copyWith"
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "**/*.drift.dart"
+    - "**/generated/**"
 
-# ==============================================
-# ✅ REGLAS DE LINTER
-# ==============================================
 linter:
   rules:
-    - avoid_print: error                    # Prohibir completamente el uso de print()
+    - avoid_print
     - always_declare_return_types
     - always_use_package_imports
     - annotate_overrides
@@ -96,23 +48,3 @@ linter:
     - unnecessary_new
     - unnecessary_null_in_if_null_operators
     - use_key_in_widget_constructors
-
-# ==============================================
-# ✅ CONFIGURACIÓN DEL ANALIZADOR
-# ==============================================
-analyzer:
-  strong-mode:
-    implicit-casts: false                  # Evitar conversiones de tipo implícitas
-    implicit-dynamic: false               # Evitar el uso de tipo dinámico sin declaración
-  errors:
-    avoid_print: error
-    unused_import: error
-    unused_local_variable: error
-    dead_code: error
-    invalid_assignment: error
-    deprecated_member_use: warning
-  exclude:
-    - "**/*.g.dart"
-    - "**/*.freezed.dart"
-    - "**/generated/**"
->>>>>>> 70035f2660adffb13e491bad7cc29f11ba3fc6f2

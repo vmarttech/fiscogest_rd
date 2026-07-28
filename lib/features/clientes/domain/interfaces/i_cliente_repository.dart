@@ -1,4 +1,4 @@
-import '../entities/cliente_entity.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 
 abstract class IClienteRepository {
   Future<List<ClienteEntity>> obtenerClientes();

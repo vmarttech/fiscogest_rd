@@ -1,0 +1,132 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/entrada_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+
+class RegistrarEntradaPage extends ConsumerStatefulWidget {
+  const RegistrarEntradaPage({
+    super.key,
+    required this.productoId,
+    required this.nombreProducto,
+  });
+
+  final int productoId;
+  final String nombreProducto;
+
+  @override
+  ConsumerState<RegistrarEntradaPage> createState() => _RegistrarEntradaPageState();
+}
+
+class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
+  final _cantidadController = TextEditingController();
+  final _motivoController = TextEditingController();
+  DateTime _fechaSeleccionada = DateTime.now();
+
+  @override
+  void dispose() {
+    _cantidadController.dispose();
+    _motivoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _seleccionarFecha() async {
+    final fecha = await showDatePicker(
+      context: context,
+      initialDate: _fechaSeleccionada,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (fecha != null) setState(() => _fechaSeleccionada = fecha);
+  }
+
+  Future<void> _guardarEntrada() async {
+    final cantidad = double.tryParse(_cantidadController.text);
+    if (cantidad == null || cantidad <= 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ingrese una cantidad válida mayor a cero')),
+        );
+      }
+      return;
+    }
+
+    await ref.read(entradaControllerProvider.notifier).registrarEntrada(
+      productoId: widget.productoId,
+      cantidad: cantidad,
+      motivo: _motivoController.text.trim().isEmpty ? 'Entrada por compra' : _motivoController.text.trim(),
+      usuario: 'UsuarioActual',
+    );
+
+    ref.invalidate(productoControllerProvider);
+    await ref.read(productoControllerProvider.future);
+
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ Entrada registrada y existencias actualizadas')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Registrar Entrada de Inventario'),
+        backgroundColor: const Color(0xFF1E293B),
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Producto: ${widget.nombreProducto}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: _cantidadController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Cantidad a ingresar',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.add_circle_outline),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _motivoController,
+              decoration: const InputDecoration(
+                labelText: 'Motivo (opcional)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.description_outlined),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              title: const Text('Fecha de entrada'),
+              subtitle: Text('${_fechaSeleccionada.day}/${_fechaSeleccionada.month}/${_fechaSeleccionada.year}'),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: _seleccionarFecha,
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal.shade700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: _guardarEntrada,
+                child: const Text('Guardar Entrada', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

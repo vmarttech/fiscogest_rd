@@ -1,13 +1,4 @@
 class ClienteCompleto {
-  final int? id;
-  final String nombre;
-  final String direccion;
-  final String telefono;
-  final String correo;
-  final String rncCedula;
-  final bool activo;
-  final String observaciones;
-  final String historial;
 
   ClienteCompleto({
     this.id,
@@ -20,6 +11,15 @@ class ClienteCompleto {
     this.observaciones = '',
     this.historial = 'Cliente registrado en el sistema.',
   });
+  final int? id;
+  final String nombre;
+  final String direccion;
+  final String telefono;
+  final String correo;
+  final String rncCedula;
+  final bool activo;
+  final String observaciones;
+  final String historial;
 
   ClienteCompleto copyWith({
     int? id,

@@ -1,10 +1,10 @@
-import '../entities/cliente_entity.dart';
-import '../interfaces/i_cliente_repository.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
+import 'package:fiscogest_rd/features/clientes/domain/interfaces/i_cliente_repository.dart';
 
 class GuardarClienteUseCase {
-  final IClienteRepository _repository;
 
   GuardarClienteUseCase(this._repository);
+  final IClienteRepository _repository;
 
   Future<int> ejecutar(ClienteEntity cliente) {
     // Aquí se pueden aplicar validaciones de negocio estrictas antes de persistir

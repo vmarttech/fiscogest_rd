@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/presentacion.dart';
+import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
 
 class PresentacionNotifier extends StateNotifier<AsyncValue<List<Presentacion>>> {
   PresentacionNotifier() : super(AsyncValue.data([

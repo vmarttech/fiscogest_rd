@@ -1,92 +1,46 @@
-<<<<<<< HEAD
 name: fiscogest_rd
 description: Plataforma Empresarial Modular - FiscoGest RD 3.0
 publish_to: 'none'
 version: 3.0.0+1
 
 environment:
-  sdk: '>=3.12.0 <4.0.0'
-=======
-name: fiscogestrd
-description: Gestor inteligente de costos, gastos e impuestos para negocios en República Dominicana
-version: 1.0.0+1
-
-environment:
-  # ✅ Versión de SDK compatible con todas las librerías actuales
   sdk: '>=3.10.0 <4.0.0'
->>>>>>> 70035f2660adffb13e491bad7cc29f11ba3fc6f2
 
 dependencies:
   flutter:
     sdk: flutter
-<<<<<<< HEAD
   
-  # Estado e Inyección de Dependencias
+  # ✅ ESTADO Y NAVEGACIÓN (OFICIALES: Riverpod + GoRouter)
   flutter_riverpod: ^2.5.1
-  
-  # Navegación Declarativa
   go_router: ^13.2.0
-  
-  # Base de Datos Local y ORM
-  drift: ^2.16.0
-  sqlite3_flutter_libs: ^0.5.18
-  path_provider: ^2.1.2
-  path: ^1.9.0
 
-  # Modelos Inmutables y Serialización
-  freezed_annotation: ^2.4.1
-  json_annotation: ^4.8.1
-=======
-
-  # ✅ Gestión de estado
-  flutter_riverpod: ^2.5.1
-
-  # ✅ Base de datos local
-  sqflite: ^2.3.3
+  # ✅ BASE DE DATOS (OFICIAL: Drift; ELIMINADO sqflite PROHIBIDO)
+  drift: ^2.20.0
   path_provider: ^2.1.4
   path: ^1.9.0
+  sqlite3_flutter_libs: ^0.5.27
 
-  # ✅ Peticiones y procesamiento web
+  # ✅ UTILIDADES
+  intl: ^0.19.0
+  uuid: ^4.4.0
+  logger: ^2.5.0
   http: ^1.2.2
   html: ^0.15.4
 
-  # ✅ Formatos de fecha, moneda y números
-  intl: ^0.19.0
-
-  # ✅ Generación de identificadores únicos
-  uuid: ^4.4.0
-
-  # ✅ Registro de eventos (mejor que print)
-  logger: ^2.5.0
->>>>>>> 70035f2660adffb13e491bad7cc29f11ba3fc6f2
+  # ✅ INMUTABILIDAD Y SERIALIZACIÓN (OFICIALES: Freezed + Json Serializable)
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-<<<<<<< HEAD
-  flutter_lints: ^3.0.0
-  
-  # Generadores de Código Oficiales
-  build_runner: ^2.4.8
-  drift_dev: ^2.16.0
-  freezed: ^2.4.7
-  json_serializable: ^6.8.0
+  # ✅ GENERADORES DE CÓDIGO
+  build_runner: ^2.4.14
+  json_serializable: ^6.9.2
+  drift_dev: ^2.20.0
+  freezed: ^2.5.7
 
 flutter:
   uses-material-design: true
-=======
-
-  # ✅ Reglas de análisis de Flutter
-  flutter_lints: ^4.0.0
-
-  # ✅ Análisis avanzado de calidad y complejidad
-  # Usamos esta versión para evitar conflicto con uuid ^4.4.0
-  dart_code_metrics: ^4.19.2
-
-flutter:
-  uses-material-design: true
-
-  # ✅ ESTA ES LA PARTE QUE AGREGAMOS PARA LA IMAGEN
   assets:
     - assets/logo_fiscogest.png
->>>>>>> 70035f2660adffb13e491bad7cc29f11ba3fc6f2

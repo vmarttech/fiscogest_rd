@@ -1,0 +1,1 @@
+enum TipoMovimiento { entrada, salida }

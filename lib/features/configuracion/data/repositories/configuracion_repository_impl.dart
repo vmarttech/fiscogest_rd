@@ -1,11 +1,11 @@
-import '../../domain/entities/configuracion_entity.dart';
-import '../../domain/interfaces/i_configuracion_repository.dart';
-import '../dao/configuracion_dao.dart';
+import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
+import 'package:fiscogest_rd/features/configuracion/domain/interfaces/i_configuracion_repository.dart';
+import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_dao.dart';
 
 class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
-  final ConfiguracionDao _configuracionDao;
 
   ConfiguracionRepositoryImpl(this._configuracionDao);
+  final ConfiguracionDao _configuracionDao;
 
   @override
   Future<ConfiguracionEntity> obtenerConfiguracion() async {

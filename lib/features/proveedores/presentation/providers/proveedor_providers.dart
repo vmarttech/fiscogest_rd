@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/proveedor.dart';
+import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
 
 class ProveedorNotifier extends StateNotifier<AsyncValue<List<Proveedor>>> {
   ProveedorNotifier() : super(AsyncValue.data([

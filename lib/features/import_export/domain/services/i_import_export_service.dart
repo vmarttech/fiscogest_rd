@@ -1,4 +1,4 @@
-import '../../data/services/import_export_service.dart';
+import 'package:fiscogest_rd/features/import_export/data/services/import_export_service.dart';
 
 abstract class IImportExportService {
   Future<String> exportarProductos(List<Map<String, dynamic>> productos);

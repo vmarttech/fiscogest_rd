@@ -1,4 +1,4 @@
-import '../entities/entrada.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/entrada.dart';
 
 abstract class IEntradaRepository {
   Future<void> registrarEntrada(Entrada entrada);

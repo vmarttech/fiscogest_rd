@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/unidad_providers.dart';
-import '../../domain/entities/unidad.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/unidad_medida.dart';
 
 class UnidadesPage extends ConsumerStatefulWidget {
   const UnidadesPage({super.key});
@@ -22,7 +22,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final unidadesAsync = ref.watch(unidadControllerProvider);
+    final unidadesAsync = ref.watch(unidadMedidaControllerProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
@@ -107,7 +107,8 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                     data: (unidades) {
                       final filtradas = unidades.where((u) =>
                         u.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                        u.abreviatura.toLowerCase().contains(_filtroBusqueda)
+                        (u.abreviatura?.toLowerCase().contains(_filtroBusqueda) ?? false) ||
+                        (u.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false)
                       ).toList();
 
                       if (filtradas.isEmpty) {
@@ -138,8 +139,12 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                   ),
                                   child: Center(
                                     child: Text(
-                                      unidad.abreviatura,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 11),
+                                      unidad.abreviatura ?? '---',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0F172A),
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -154,7 +159,11 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Abreviatura: ${unidad.abreviatura}',
+                                        unidad.abreviatura != null && unidad.abreviatura!.isNotEmpty
+                                            ? 'Abreviatura: ${unidad.abreviatura}'
+                                            : unidad.descripcion?.isNotEmpty ?? true
+                                                ? 'Sin descripción'
+                                                : unidad.descripcion!,
                                         style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
                                       ),
                                     ],
@@ -172,7 +181,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                       icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
                                       tooltip: 'Eliminar Unidad',
                                       onPressed: () {
-                                        showDialog(
+                                        showDialog<void>(
                                           context: context,
                                           builder: (ctx) => AlertDialog(
                                             title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -186,7 +195,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626), foregroundColor: Colors.white),
                                                 onPressed: () {
                                                   if (unidad.id != null) {
-                                                    ref.read(unidadControllerProvider.notifier).eliminar(unidad.id!);
+                                                    ref.read(unidadMedidaControllerProvider.notifier).eliminar(unidad.id!);
                                                   }
                                                   Navigator.pop(ctx);
                                                 },
@@ -217,13 +226,14 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
     );
   }
 
-  void _mostrarModalRegistro(BuildContext context, {Unidad? unidadToEdit}) {
+  void _mostrarModalRegistro(BuildContext context, {UnidadMedida? unidadToEdit}) {
     final formKey = GlobalKey<FormState>();
     final nombreController = TextEditingController(text: unidadToEdit?.nombre ?? '');
     final abreviaturaController = TextEditingController(text: unidadToEdit?.abreviatura ?? '');
+    final descripcionController = TextEditingController(text: unidadToEdit?.descripcion ?? '');
     final isEditing = unidadToEdit != null;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Editar Unidad' : 'Nueva Unidad', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
@@ -237,13 +247,19 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                 TextFormField(
                   controller: nombreController,
                   decoration: const InputDecoration(labelText: 'Nombre de la Unidad'),
-                  validator: (v) => v!.isEmpty ? 'Ingrese el nombre' : null,
+                  validator: (v) => v?.isEmpty ?? true ? 'Ingrese el nombre' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: abreviaturaController,
                   decoration: const InputDecoration(labelText: 'Abreviatura (ej. UND, KG)'),
-                  validator: (v) => v!.isEmpty ? 'Ingrese la abreviatura' : null,
+                  maxLength: 8,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: descripcionController,
+                  decoration: const InputDecoration(labelText: 'Descripción'),
+                  maxLines: 2,
                 ),
               ],
             ),
@@ -259,16 +275,19 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 try {
-                  final und = Unidad(
+                  final und = UnidadMedida(
                     id: unidadToEdit?.id,
                     nombre: nombreController.text.trim(),
-                    abreviatura: abreviaturaController.text.trim().toUpperCase(),
+                    abreviatura: abreviaturaController.text.trim().isEmpty ? null : abreviaturaController.text.trim().toUpperCase(),
+                    descripcion: descripcionController.text.trim().isEmpty ? null : descripcionController.text.trim(),
+                    creadoEn: unidadToEdit?.creadoEn ?? DateTime.now(),
+                    actualizadoEn: isEditing ? DateTime.now() : null,
                   );
 
                   if (isEditing) {
-                    ref.read(unidadControllerProvider.notifier).actualizar(und);
+                    ref.read(unidadMedidaControllerProvider.notifier).actualizar(und);
                   } else {
-                    ref.read(unidadControllerProvider.notifier).guardar(und);
+                    ref.read(unidadMedidaControllerProvider.notifier).guardar(und);
                   }
                   Navigator.pop(context);
                 } catch (e) {

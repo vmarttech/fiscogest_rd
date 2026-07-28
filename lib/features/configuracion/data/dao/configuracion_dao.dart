@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'configuracion_table.dart';
+import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
 
 part 'configuracion_dao.g.dart';
 

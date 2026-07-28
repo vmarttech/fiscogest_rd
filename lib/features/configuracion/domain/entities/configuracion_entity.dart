@@ -1,18 +1,4 @@
 class ConfiguracionEntity {
-  final String id;
-  final String nombreComercial;
-  final String razonSocial;
-  final String rnc;
-  final String direccion;
-  final String telefono;
-  final String correo;
-  final String logoUrl;
-  final String moneda;
-  final String zonaHoraria;
-  final String formatoImpresion; // e.g., 'Ticket 80mm', 'Factura Carta (PDF)'
-  final String formatoFecha;
-  final double impuestoPorcentaje;
-  final String idioma;
 
   const ConfiguracionEntity({
     required this.id,
@@ -30,6 +16,20 @@ class ConfiguracionEntity {
     required this.impuestoPorcentaje,
     required this.idioma,
   });
+  final String id;
+  final String nombreComercial;
+  final String razonSocial;
+  final String rnc;
+  final String direccion;
+  final String telefono;
+  final String correo;
+  final String logoUrl;
+  final String moneda;
+  final String zonaHoraria;
+  final String formatoImpresion; // e.g., 'Ticket 80mm', 'Factura Carta (PDF)'
+  final String formatoFecha;
+  final double impuestoPorcentaje;
+  final String idioma;
 
   ConfiguracionEntity copyWith({
     String? id,

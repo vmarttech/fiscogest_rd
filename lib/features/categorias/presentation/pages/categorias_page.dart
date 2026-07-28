@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/categoria_providers.dart';
-import '../../domain/entities/categoria.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
 
 class CategoriasPage extends ConsumerStatefulWidget {
   const CategoriasPage({super.key});
@@ -107,7 +107,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                     data: (categorias) {
                       final filtradas = categorias.where((c) =>
                         c.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                        c.descripcion.toLowerCase().contains(_filtroBusqueda)
+                        (c.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false)
                       ).toList();
 
                       if (filtradas.isEmpty) {
@@ -149,7 +149,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        categoria.descripcion.isEmpty ? 'Sin descripción' : categoria.descripcion,
+                                        categoria.descripcion?.isEmpty ?? true ? 'Sin descripción' : categoria.descripcion!,
                                         style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
                                       ),
                                     ],
@@ -167,7 +167,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                       icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
                                       tooltip: 'Eliminar Categoría',
                                       onPressed: () {
-                                        showDialog(
+                                        showDialog<void>(
                                           context: context,
                                           builder: (ctx) => AlertDialog(
                                             title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -218,7 +218,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
     final descripcionController = TextEditingController(text: categoriaToEdit?.descripcion ?? '');
     final isEditing = categoriaToEdit != null;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Editar Categoría' : 'Nueva Categoría', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
@@ -232,7 +232,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                 TextFormField(
                   controller: nombreController,
                   decoration: const InputDecoration(labelText: 'Nombre de la Categoría'),
-                  validator: (v) => v!.isEmpty ? 'Ingrese el nombre' : null,
+                  validator: (v) => v?.isEmpty ?? true ? 'Ingrese el nombre' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -258,6 +258,8 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                     id: categoriaToEdit?.id,
                     nombre: nombreController.text.trim(),
                     descripcion: descripcionController.text.trim(),
+                    creadoEn: categoriaToEdit?.creadoEn ?? DateTime.now(),
+                    actualizadoEn: isEditing ? DateTime.now() : null,
                   );
 
                   if (isEditing) {

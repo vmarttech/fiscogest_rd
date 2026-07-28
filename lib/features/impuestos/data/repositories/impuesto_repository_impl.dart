@@ -1,4 +1,4 @@
-import '../../domain/entities/impuesto_entity.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 
 class ImpuestoRepositoryImpl {
   final List<ImpuestoEntity> _impuestosLocales = [

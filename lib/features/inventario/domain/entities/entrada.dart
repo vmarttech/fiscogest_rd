@@ -1,10 +1,4 @@
 class Entrada {
-  final int? id;
-  final int productoId;
-  final double cantidad;
-  final String motivo;
-  final String usuario;
-  final DateTime fecha;
 
   const Entrada({
     this.id,
@@ -15,17 +9,6 @@ class Entrada {
     required this.fecha,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'productoId': productoId,
-      'cantidad': cantidad,
-      'motivo': motivo,
-      'usuario': usuario,
-      'fecha': fecha.toIso8601String(),
-    };
-  }
-
   factory Entrada.fromMap(Map<String, dynamic> map) {
     return Entrada(
       id: map['id'] as int?,
@@ -35,5 +18,22 @@ class Entrada {
       usuario: map['usuario'] as String,
       fecha: DateTime.parse(map['fecha'] as String),
     );
+  }
+  final int? id;
+  final int productoId;
+  final double cantidad;
+  final String motivo;
+  final String usuario;
+  final DateTime fecha;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'productoId': productoId,
+      'cantidad': cantidad,
+      'motivo': motivo,
+      'usuario': usuario,
+      'fecha': fecha.toIso8601String(),
+    };
   }
 }

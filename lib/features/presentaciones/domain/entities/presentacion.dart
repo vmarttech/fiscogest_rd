@@ -1,8 +1,4 @@
 class Presentacion {
-  final int? id;
-  final String nombre;
-  final String abreviatura;
-  final bool activo;
 
   Presentacion({
     this.id,
@@ -10,6 +6,10 @@ class Presentacion {
     required this.abreviatura,
     this.activo = true,
   });
+  final int? id;
+  final String nombre;
+  final String abreviatura;
+  final bool activo;
 
   Presentacion copyWith({
     int? id,

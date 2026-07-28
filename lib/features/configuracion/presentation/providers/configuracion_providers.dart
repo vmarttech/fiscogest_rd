@@ -7,26 +7,32 @@ import 'package:fiscogest_rd/features/configuracion/domain/interfaces/i_configur
 import 'package:fiscogest_rd/features/configuracion/domain/usecases/guardar_configuracion_usecase.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/usecases/obtener_configuracion_usecase.dart';
 
+/// Proveedor DAO Configuración: obtiene BD SOLO del núcleo central
 final configuracionDaoProvider = Provider<ConfiguracionDao>((ref) {
-  final db = ref.watch(databaseProvider);
+  // ✅ Single Source of Truth: única instancia global
+  final db = ref.read(databaseProvider);
   return ConfiguracionDao(db);
 });
 
+/// Proveedor Repositorio Configuración
 final configuracionRepositoryProvider = Provider<IConfiguracionRepository>((ref) {
   final dao = ref.watch(configuracionDaoProvider);
   return ConfiguracionRepositoryImpl(dao);
 });
 
+/// Proveedor Caso de Uso: Obtener Configuración
 final obtenerConfiguracionUseCaseProvider = Provider<ObtenerConfiguracionUseCase>((ref) {
   final repo = ref.watch(configuracionRepositoryProvider);
   return ObtenerConfiguracionUseCase(repo);
 });
 
+/// Proveedor Caso de Uso: Guardar Configuración
 final guardarConfiguracionUseCaseProvider = Provider<GuardarConfiguracionUseCase>((ref) {
   final repo = ref.watch(configuracionRepositoryProvider);
   return GuardarConfiguracionUseCase(repo);
 });
 
+/// Controlador Configuración: SOLO gestiona estado, NUNCA lógica de negocio
 final configuracionControllerProvider = AsyncNotifierProvider<ConfiguracionController, ConfiguracionEntity?>(() {
   return ConfiguracionController();
 });
@@ -43,8 +49,7 @@ class ConfiguracionController extends AsyncNotifier<ConfiguracionEntity?> {
     state = await AsyncValue.guard(() async {
       final guardarUseCase = ref.read(guardarConfiguracionUseCaseProvider);
       await guardarUseCase.ejecutar(configuracion);
-      final obtener = ref.read(obtenerConfiguracionUseCaseProvider);
-      return await obtener.ejecutar();
+      return await ref.read(obtenerConfiguracionUseCaseProvider).ejecutar();
     });
   }
 }

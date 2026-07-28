@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 
 class ClienteCompletoNotifier extends StateNotifier<AsyncValue<List<ClienteCompleto>>> {
   ClienteCompletoNotifier() : super(AsyncValue.data([

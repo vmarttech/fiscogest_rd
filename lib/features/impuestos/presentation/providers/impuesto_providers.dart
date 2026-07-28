@@ -1,17 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/impuesto_entity.dart';
-import '../../data/repositories/impuesto_repository_impl.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
+import 'package:fiscogest_rd/features/impuestos/data/repositories/impuesto_repository_impl.dart';
 
 final impuestoRepositoryProvider = Provider<ImpuestoRepositoryImpl>((ref) {
   return ImpuestoRepositoryImpl();
 });
 
 class ImpuestoNotifier extends StateNotifier<AsyncValue<List<ImpuestoEntity>>> {
-  final ImpuestoRepositoryImpl _repository;
 
   ImpuestoNotifier(this._repository) : super(const AsyncValue.loading()) {
     cargarImpuestos();
   }
+  final ImpuestoRepositoryImpl _repository;
 
   Future<void> cargarImpuestos() async {
     try {

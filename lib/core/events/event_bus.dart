@@ -2,9 +2,9 @@ import 'dart:async';
 
 // Bus de eventos centralizado para la comunicación desacoplada entre módulos (SSOT / Core)
 class EventBus {
-  static final EventBus _instance = EventBus._internal();
   factory EventBus() => _instance;
   EventBus._internal();
+  static final EventBus _instance = EventBus._internal();
 
   final _controller = StreamController<AppEvent>.broadcast();
 
@@ -28,10 +28,6 @@ abstract class AppEvent {
 }
 
 class ModuleCommunicationEvent extends AppEvent {
-  final String sourceModule;
-  final String targetModule;
-  final String action;
-  final Map<String, dynamic>? payload;
 
   const ModuleCommunicationEvent({
     required this.sourceModule,
@@ -39,4 +35,8 @@ class ModuleCommunicationEvent extends AppEvent {
     required this.action,
     this.payload,
   });
+  final String sourceModule;
+  final String targetModule;
+  final String action;
+  final Map<String, dynamic>? payload;
 }

@@ -1,14 +1,14 @@
 
 class ImportExportLog {
-  final int fila;
-  final String entidad;
-  final String mensajeError;
 
   const ImportExportLog({
     required this.fila,
     required this.entidad,
     required this.mensajeError,
   });
+  final int fila;
+  final String entidad;
+  final String mensajeError;
 }
 
 class ImportExportService {

@@ -1,4 +1,4 @@
-import '../entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 
 abstract class IProductoRepository {
   Future<List<Producto>> obtenerProductos();

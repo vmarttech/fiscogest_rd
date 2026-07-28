@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart' as drift;
-import '../../../../core/database/app_database.dart';
-import '../../domain/entities/producto.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 
 class ProductoDataMapper {
   static Producto toDomain(ProductosTableData row) {

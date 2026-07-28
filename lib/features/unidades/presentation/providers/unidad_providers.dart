@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/unidad.dart';
+import 'package:fiscogest_rd/features/unidades/domain/entities/unidad.dart';
 
 class UnidadNotifier extends StateNotifier<AsyncValue<List<Unidad>>> {
   UnidadNotifier() : super(AsyncValue.data([

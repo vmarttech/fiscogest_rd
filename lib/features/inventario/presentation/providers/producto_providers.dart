@@ -1,56 +1,71 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/database/app_database.dart';
-import '../../data/repositories/producto_repository_impl.dart';
-import '../../domain/entities/producto.dart';
-import '../../domain/interfaces/i_producto_repository.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
+import 'package:fiscogest_rd/features/inventario/data/repositories/producto_repository_impl.dart';
+import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_repository_impl.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
+import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 
-// Provider global de la base de datos
-final databaseProvider = Provider<AppDatabase>((ref) {
-  return AppDatabase();
+final driftKardexDatasourceProvider = Provider<DriftKardexDatasource>((ref) {
+  return DriftKardexDatasource(ref.watch(databaseProvider));
 });
 
-// Provider del Repositorio de Productos
+final kardexRepositoryProvider = Provider<IKardexRepository>((ref) {
+  return KardexRepositoryImpl(ref.watch(driftKardexDatasourceProvider));
+});
+
 final productoRepositoryProvider = Provider<IProductoRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return ProductoRepositoryImpl(db);
+  final kardexRepo = ref.watch(kardexRepositoryProvider);
+  return ProductoRepositoryImpl(db, kardexRepo);
 });
 
-// Notifier / StateNotifier para la gestión de la lista de productos
 class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
-  final IProductoRepository _repository;
-
   ProductoController(this._repository) : super(const AsyncValue.loading()) {
     cargarProductos();
   }
+  final IProductoRepository _repository;
 
   Future<void> cargarProductos() async {
     state = const AsyncValue.loading();
     try {
       final productos = await _repository.obtenerProductos();
-      state = AsyncValue.data(productos);
+      // ✅ FUERZA NUEVA REFERENCIA PARA QUE EL WIDGET DETECTE EL CAMBIO
+      state = AsyncValue.data(List.unmodifiable(productos));
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
   }
 
   Future<void> guardar(Producto producto) async {
-    await _repository.guardarProducto(producto);
-    await cargarProductos();
+    try {
+      await _repository.guardarProducto(producto);
+      await cargarProductos(); // ✅ YA ESTABA, PERO ASEGURAMOS LA NUEVA LISTA
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
   }
 
   Future<void> actualizar(Producto producto) async {
-    await _repository.actualizarProducto(producto);
-    await cargarProductos();
+    try {
+      await _repository.actualizarProducto(producto);
+      await cargarProductos();
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
   }
 
   Future<void> eliminar(int id) async {
-    await _repository.eliminarProducto(id);
-    await cargarProductos();
+    try {
+      await _repository.eliminarProducto(id);
+      await cargarProductos();
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
   }
 }
 
-// Provider del controlador de productos
 final productoControllerProvider = StateNotifierProvider<ProductoController, AsyncValue<List<Producto>>>((ref) {
-  final repository = ref.watch(productoRepositoryProvider);
-  return ProductoController(repository);
+  return ProductoController(ref.watch(productoRepositoryProvider));
 });

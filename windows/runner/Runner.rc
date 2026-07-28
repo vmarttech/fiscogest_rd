@@ -99,12 +99,12 @@ BEGIN
             VALUE "ProductName", "fiscogest_rd" "\0"
 =======
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "fiscogestrd" "\0"
+            VALUE "FileDescription", "fiscogest_rd" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "fiscogestrd" "\0"
+            VALUE "InternalName", "fiscogest_rd" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "fiscogestrd.exe" "\0"
-            VALUE "ProductName", "fiscogestrd" "\0"
+            VALUE "OriginalFilename", "fiscogest_rd.exe" "\0"
+            VALUE "ProductName", "fiscogest_rd" "\0"
 >>>>>>> 70035f2660adffb13e491bad7cc29f11ba3fc6f2
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

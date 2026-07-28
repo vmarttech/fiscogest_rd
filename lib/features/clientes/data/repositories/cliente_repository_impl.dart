@@ -1,27 +1,29 @@
 import 'package:drift/drift.dart' as drift;
-import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart'; // <-- Importante: Asegúrate de importar tu AppDatabase
 import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/domain/interfaces/i_cliente_repository.dart';
 
 class ClienteRepositoryImpl implements IClienteRepository {
-  final ClienteDao _clienteDao;
-
   ClienteRepositoryImpl(this._clienteDao);
+
+  final ClienteDao _clienteDao;
 
   @override
   Future<List<ClienteEntity>> obtenerClientes() async {
     final resultados = await _clienteDao.obtenerTodos();
-    return resultados.map((row) => ClienteEntity(
-      id: row.id,
-      codigo: row.codigo,
-      nombre: row.nombre,
-      rncCedula: row.rncCedula,
-      telefono: row.telefono,
-      correo: row.correo,
-      direccion: row.direccion,
-      activo: row.activo,
-    )).toList();
+    return resultados
+        .map((row) => ClienteEntity(
+              id: row.id,
+              codigo: row.codigo,
+              nombre: row.nombre,
+              rncCedula: row.rncCedula,
+              telefono: row.telefono,
+              correo: row.correo,
+              direccion: row.direccion,
+              activo: row.activo,
+            ))
+        .toList();
   }
 
   @override
@@ -43,7 +45,9 @@ class ClienteRepositoryImpl implements IClienteRepository {
   @override
   Future<int> guardarCliente(ClienteEntity cliente) async {
     final companion = ClientesTableCompanion(
-      id: cliente.id != null ? drift.Value(cliente.id!) : const drift.Value.absent(),
+      id: cliente.id != null
+          ? drift.Value(cliente.id!)
+          : const drift.Value<int>.absent(),
       codigo: drift.Value(cliente.codigo),
       nombre: drift.Value(cliente.nombre),
       rncCedula: drift.Value(cliente.rncCedula),

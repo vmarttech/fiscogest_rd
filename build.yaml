@@ -1,0 +1,18 @@
+targets:
+  $default:
+    sources:
+      - "lib/**"
+      - "test/**"
+      - "$package$"
+    builders:
+      drift_dev:
+        options:
+          fatal_warnings: false # ✅ ANTES: true → AHORA: false
+      freezed:
+        generate_for:
+          include:
+            - lib/**/*.dart
+      json_serializable:
+        generate_for:
+          include:
+            - lib/**/*.dart

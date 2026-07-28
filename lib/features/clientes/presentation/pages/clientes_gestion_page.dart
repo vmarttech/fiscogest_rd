@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/cliente_completo_providers.dart';
-import '../../domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 
 class ClientesGestionPage extends ConsumerStatefulWidget {
   const ClientesGestionPage({super.key});
@@ -194,7 +194,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                                       icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
                                       tooltip: 'Eliminar Cliente',
                                       onPressed: () {
-                                        showDialog(
+                                        showDialog<void>(
                                           context: context,
                                           builder: (ctx) => AlertDialog(
                                             title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -240,7 +240,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
   }
 
   void _mostrarDetallesCliente(BuildContext context, ClienteCompleto cliente) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Historial y Detalles: ${cliente.nombre}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
@@ -289,7 +289,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
     final observacionesController = TextEditingController(text: clienteToEdit?.observaciones ?? '');
     final isEditing = clienteToEdit != null;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Editar Cliente' : 'Nuevo Cliente', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),

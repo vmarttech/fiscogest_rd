@@ -1,16 +1,4 @@
 class Producto {
-  final int? id;
-  final String codigo;
-  final String nombre;
-  final String? descripcion;
-  final double precioCompra;
-  final double precioVenta;
-  final double stock;
-  final double stockMinimo;
-  final int categoriaId;
-  final int marcaId;
-  final int unidadId;
-  final bool activo;
 
   const Producto({
     this.id,
@@ -27,6 +15,18 @@ class Producto {
     this.activo = true,
   }) : assert(stock >= 0, 'El stock no puede ser negativo'),
        assert(stockMinimo >= 0, 'El stock mínimo no puede ser negativo');
+  final int? id;
+  final String codigo;
+  final String nombre;
+  final String? descripcion;
+  final double precioCompra;
+  final double precioVenta;
+  final double stock;
+  final double stockMinimo;
+  final int categoriaId;
+  final int marcaId;
+  final int unidadId;
+  final bool activo;
 
   /// Existencia actual en almacén
   double get existenciaActual => stock;

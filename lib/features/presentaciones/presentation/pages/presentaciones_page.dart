@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/presentacion_providers.dart';
-import '../../domain/entities/presentacion.dart';
+import 'package:fiscogest_rd/features/presentaciones/presentation/providers/presentacion_providers.dart';
+import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
 
 class PresentacionesPage extends ConsumerStatefulWidget {
   const PresentacionesPage({super.key});
@@ -172,7 +172,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                       icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
                                       tooltip: 'Eliminar Presentación',
                                       onPressed: () {
-                                        showDialog(
+                                        showDialog<void>(
                                           context: context,
                                           builder: (ctx) => AlertDialog(
                                             title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -223,7 +223,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
     final abreviaturaController = TextEditingController(text: presentacionToEdit?.abreviatura ?? '');
     final isEditing = presentacionToEdit != null;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Editar Presentación' : 'Nueva Presentación', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),

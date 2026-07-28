@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/services/import_export_service.dart';
+import 'package:fiscogest_rd/features/import_export/data/services/import_export_service.dart';
 
 final importExportServiceProvider = Provider<ImportExportService>((ref) {
   return ImportExportService();
 });
 
 class ImportExportNotifier extends StateNotifier<AsyncValue<String>> {
-  final ImportExportService _service;
 
   ImportExportNotifier(this._service) : super(const AsyncValue.data('Módulo listo para procesar datos.'));
+  final ImportExportService _service;
 
   List<ImportExportLog> get errores => _service.registroErrores;
 
