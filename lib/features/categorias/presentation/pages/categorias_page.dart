@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
 
@@ -24,85 +34,52 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
   Widget build(BuildContext context) {
     final categoriasAsync = ref.watch(categoriaControllerProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+    return AppScaffold(
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1000),
-          padding: const EdgeInsets.all(24.0),
+          padding: AppSpacing.allM,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Catálogo de Categorías',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
-                        ),
+                        style: AppTypography.h2,
                       ),
-                      SizedBox(height: 4),
+                      AppLayout.vXs,
                       Text(
                         'Organización y clasificación de productos por categoría.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF64748B),
-                        ),
+                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
+                  AppButton(
+                    text: 'Nueva Categoría',
+                    icon: Icons.add,
                     onPressed: () => _mostrarModalRegistro(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F172A),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 2,
-                    ),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text(
-                      'Nueva Categoría',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: TextField(
+              AppLayout.vM,
+              AppCard(
+                padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
+                child: AppTextField(
                   controller: _searchController,
+                  hint: 'Buscar categoría por nombre...',
+                  prefixIcon: Icons.search,
                   onChanged: (value) => setState(() => _filtroBusqueda = value.toLowerCase()),
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar categoría por nombre...',
-                    hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                    prefixIcon: Icon(Icons.search, color: Color(0xFF64748B), size: 18),
-                    border: InputBorder.none,
-                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              AppLayout.vM,
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
+                child: AppCard(
+                  padding: EdgeInsets.zero,
                   child: categoriasAsync.when(
                     data: (categorias) {
                       final filtradas = categorias.where((c) =>
@@ -114,43 +91,43 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                         return const Center(
                           child: Text(
                             'No hay categorías registradas o coincidentes.',
-                            style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                            style: AppTypography.bodyMedium,
                           ),
                         );
                       }
 
                       return ListView.separated(
-                        padding: const EdgeInsets.all(12),
+                        padding: AppSpacing.allS,
                         itemCount: filtradas.length,
-                        separatorBuilder: (context, index) => const Divider(color: Color(0xFFE2E8F0), height: 1),
+                        separatorBuilder: (context, index) => const Divider(color: AppColors.grey200, height: 1),
                         itemBuilder: (context, index) {
                           final categoria = filtradas[index];
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                            padding: AppSpacing.vS,
                             child: Row(
                               children: [
                                 Container(
                                   width: 42,
                                   height: 42,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(8),
+                                    color: AppColors.grey50,
+                                    borderRadius: AppRadius.allM,
                                   ),
-                                  child: const Icon(Icons.category_outlined, color: Color(0xFF0F172A), size: 20),
+                                  child: const Icon(Icons.category_outlined, color: AppColors.textPrimary, size: 20),
                                 ),
-                                const SizedBox(width: 16),
+                                AppLayout.hM,
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         categoria.nombre,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 14),
+                                        style: AppTypography.labelLarge,
                                       ),
-                                      const SizedBox(height: 2),
+                                      AppLayout.vXs,
                                       Text(
                                         categoria.descripcion?.isEmpty ?? true ? 'Sin descripción' : categoria.descripcion!,
-                                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                                        style: AppTypography.bodySmall,
                                       ),
                                     ],
                                   ),
@@ -159,36 +136,33 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF3B82F6), size: 20),
+                                      icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
                                       tooltip: 'Editar Categoría',
                                       onPressed: () => _mostrarModalRegistro(context, categoriaToEdit: categoria),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
+                                      icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
                                       tooltip: 'Eliminar Categoría',
                                       onPressed: () {
-                                        showDialog<void>(
-                                          context: context,
-                                          builder: (ctx) => AlertDialog(
-                                            title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
-                                            content: Text('¿Está seguro de eliminar la categoría "${categoria.nombre}"?'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(ctx),
-                                                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
-                                              ),
-                                              ElevatedButton(
-                                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626), foregroundColor: Colors.white),
-                                                onPressed: () {
-                                                  if (categoria.id != null) {
-                                                    ref.read(categoriaControllerProvider.notifier).eliminar(categoria.id!);
-                                                  }
-                                                  Navigator.pop(ctx);
-                                                },
-                                                child: const Text('Eliminar'),
-                                              ),
-                                            ],
-                                          ),
+                                        AppDialog.show<void>(
+                                          context,
+                                          title: 'Confirmar Eliminación',
+                                          message: '¿Está seguro de eliminar la categoría "${categoria.nombre}"?',
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            AppButton(
+                                              text: 'Eliminar',
+                                              onPressed: () {
+                                                if (categoria.id != null) {
+                                                  ref.read(categoriaControllerProvider.notifier).eliminar(categoria.id!);
+                                                }
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
                                         );
                                       },
                                     ),
@@ -201,7 +175,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                       );
                     },
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, st) => Center(child: Text('Error: $e')),
+                    error: (e, st) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium)),
                   ),
                 ),
               ),
@@ -218,67 +192,62 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
     final descripcionController = TextEditingController(text: categoriaToEdit?.descripcion ?? '');
     final isEditing = categoriaToEdit != null;
 
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isEditing ? 'Editar Categoría' : 'Nueva Categoría', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        content: SizedBox(
-          width: 380,
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nombreController,
-                  decoration: const InputDecoration(labelText: 'Nombre de la Categoría'),
-                  validator: (v) => v?.isEmpty ?? true ? 'Ingrese el nombre' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: descripcionController,
-                  decoration: const InputDecoration(labelText: 'Descripción'),
-                  maxLines: 2,
-                ),
-              ],
-            ),
+    AppDialog.show<void>(
+      context,
+      title: isEditing ? 'Editar Categoría' : 'Nueva Categoría',
+      content: SizedBox(
+        width: 380,
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppTextField(
+                label: 'Nombre de la Categoría',
+                controller: nombreController,
+              ),
+              AppLayout.vM,
+              AppTextField(
+                label: 'Descripción',
+                controller: descripcionController,
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white),
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                try {
-                  final cat = Categoria(
-                    id: categoriaToEdit?.id,
-                    nombre: nombreController.text.trim(),
-                    descripcion: descripcionController.text.trim(),
-                    creadoEn: categoriaToEdit?.creadoEn ?? DateTime.now(),
-                    actualizadoEn: isEditing ? DateTime.now() : null,
-                  );
-
-                  if (isEditing) {
-                    ref.read(categoriaControllerProvider.notifier).actualizar(cat);
-                  } else {
-                    ref.read(categoriaControllerProvider.notifier).guardar(cat);
-                  }
-                  Navigator.pop(context);
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
-                  );
-                }
-              }
-            },
-            child: Text(isEditing ? 'Actualizar' : 'Guardar'),
-          ),
-        ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        AppButton(
+          text: isEditing ? 'Actualizar' : 'Guardar',
+          onPressed: () {
+            if (formKey.currentState!.validate()) {
+              try {
+                final cat = Categoria(
+                  id: categoriaToEdit?.id,
+                  nombre: nombreController.text.trim(),
+                  descripcion: descripcionController.text.trim(),
+                  creadoEn: categoriaToEdit?.creadoEn ?? DateTime.now(),
+                  actualizadoEn: isEditing ? DateTime.now() : null,
+                );
+
+                if (isEditing) {
+                  ref.read(categoriaControllerProvider.notifier).actualizar(cat);
+                } else {
+                  ref.read(categoriaControllerProvider.notifier).guardar(cat);
+                }
+                Navigator.pop(context);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                );
+              }
+            }
+          },
+        ),
+      ],
     );
   }
 }

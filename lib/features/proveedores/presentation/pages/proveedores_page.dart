@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/providers/proveedor_providers.dart';
 import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
 
@@ -24,85 +34,52 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
   Widget build(BuildContext context) {
     final proveedoresAsync = ref.watch(proveedorControllerProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+    return AppScaffold(
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1100),
-          padding: const EdgeInsets.all(24.0),
+          padding: AppSpacing.allM,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Directorio de Proveedores',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
-                        ),
+                        style: AppTypography.h2,
                       ),
-                      SizedBox(height: 4),
+                      AppLayout.vXs,
                       Text(
                         'Administración de datos generales, contactos, RNC y direcciones comerciales.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF64748B),
-                        ),
+                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
+                  AppButton(
+                    text: 'Nuevo Proveedor',
+                    icon: Icons.business,
                     onPressed: () => _mostrarModalRegistro(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F172A),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 2,
-                    ),
-                    icon: const Icon(Icons.business, size: 18),
-                    label: const Text(
-                      'Nuevo Proveedor',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: TextField(
+              AppLayout.vM,
+              AppCard(
+                padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
+                child: AppTextField(
                   controller: _searchController,
+                  hint: 'Buscar proveedor por nombre, RNC, contacto o correo...',
+                  prefixIcon: Icons.search,
                   onChanged: (value) => setState(() => _filtroBusqueda = value.toLowerCase()),
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar proveedor por nombre, RNC, contacto o correo...',
-                    hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                    prefixIcon: Icon(Icons.search, color: Color(0xFF64748B), size: 18),
-                    border: InputBorder.none,
-                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              AppLayout.vM,
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
+                child: AppCard(
+                  padding: EdgeInsets.zero,
                   child: proveedoresAsync.when(
                     data: (proveedores) {
                       final filtrados = proveedores.where((p) =>
@@ -116,31 +93,31 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         return const Center(
                           child: Text(
                             'No hay proveedores registrados o coincidentes.',
-                            style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                            style: AppTypography.bodyMedium,
                           ),
                         );
                       }
 
                       return ListView.separated(
-                        padding: const EdgeInsets.all(12),
+                        padding: AppSpacing.allS,
                         itemCount: filtrados.length,
-                        separatorBuilder: (context, index) => const Divider(color: Color(0xFFE2E8F0), height: 1),
+                        separatorBuilder: (context, index) => const Divider(color: AppColors.grey200, height: 1),
                         itemBuilder: (context, index) {
                           final proveedor = filtrados[index];
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                            padding: AppSpacing.vS,
                             child: Row(
                               children: [
                                 Container(
                                   width: 44,
                                   height: 44,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(8),
+                                    color: AppColors.grey50,
+                                    borderRadius: AppRadius.allM,
                                   ),
-                                  child: const Icon(Icons.store_mall_directory_outlined, color: Color(0xFF0F172A), size: 22),
+                                  child: const Icon(Icons.store_mall_directory_outlined, color: AppColors.textPrimary, size: 22),
                                 ),
-                                const SizedBox(width: 16),
+                                AppLayout.hM,
                                 Expanded(
                                   flex: 2,
                                   child: Column(
@@ -148,12 +125,12 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                     children: [
                                       Text(
                                         proveedor.nombre,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 14),
+                                        style: AppTypography.labelLarge,
                                       ),
-                                      const SizedBox(height: 2),
+                                      AppLayout.vXs,
                                       Text(
                                         'RNC: ${proveedor.rnc} | Contacto: ${proveedor.contacto}',
-                                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                                        style: AppTypography.bodySmall,
                                       ),
                                     ],
                                   ),
@@ -165,12 +142,12 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                     children: [
                                       Text(
                                         'Tel: ${proveedor.telefono} | ${proveedor.correo}',
-                                        style: const TextStyle(color: Color(0xFF334155), fontSize: 13),
+                                        style: AppTypography.bodyMedium,
                                       ),
-                                      const SizedBox(height: 2),
+                                      AppLayout.vXs,
                                       Text(
                                         proveedor.direccion,
-                                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                                        style: AppTypography.bodySmall,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -181,36 +158,33 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF3B82F6), size: 20),
+                                      icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
                                       tooltip: 'Editar Proveedor',
                                       onPressed: () => _mostrarModalRegistro(context, proveedorToEdit: proveedor),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
+                                      icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
                                       tooltip: 'Eliminar Proveedor',
                                       onPressed: () {
-                                        showDialog<void>(
-                                          context: context,
-                                          builder: (ctx) => AlertDialog(
-                                            title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
-                                            content: Text('¿Está seguro de eliminar al proveedor "${proveedor.nombre}"?'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(ctx),
-                                                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
-                                              ),
-                                              ElevatedButton(
-                                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626), foregroundColor: Colors.white),
-                                                onPressed: () {
-                                                  if (proveedor.id != null) {
-                                                    ref.read(proveedorControllerProvider.notifier).eliminar(proveedor.id!);
-                                                  }
-                                                  Navigator.pop(ctx);
-                                                },
-                                                child: const Text('Eliminar'),
-                                              ),
-                                            ],
-                                          ),
+                                        AppDialog.show<void>(
+                                          context,
+                                          title: 'Confirmar Eliminación',
+                                          message: '¿Está seguro de eliminar al proveedor "${proveedor.nombre}"?',
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            AppButton(
+                                              text: 'Eliminar',
+                                              onPressed: () {
+                                                if (proveedor.id != null) {
+                                                  ref.read(proveedorControllerProvider.notifier).eliminar(proveedor.id!);
+                                                }
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
                                         );
                                       },
                                     ),
@@ -223,7 +197,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                       );
                     },
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, st) => Center(child: Text('Error: $e')),
+                    error: (e, st) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium)),
                   ),
                 ),
               ),
@@ -244,95 +218,86 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
     final rncController = TextEditingController(text: proveedorToEdit?.rnc ?? '');
     final isEditing = proveedorToEdit != null;
 
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        content: SizedBox(
-          width: 450,
-          child: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: nombreController,
-                    decoration: const InputDecoration(labelText: 'Razón Social / Nombre Comercial'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el nombre' : null,
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: rncController,
-                    decoration: const InputDecoration(labelText: 'RNC del Proveedor'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el RNC' : null,
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: contactoController,
-                    decoration: const InputDecoration(labelText: 'Persona de Contacto'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el contacto' : null,
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: telefonoController,
-                    decoration: const InputDecoration(labelText: 'Teléfono'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el teléfono' : null,
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: correoController,
-                    decoration: const InputDecoration(labelText: 'Correo Electrónico'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el correo' : null,
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: direccionController,
-                    decoration: const InputDecoration(labelText: 'Dirección'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese la dirección' : null,
-                  ),
-                ],
-              ),
+    AppDialog.show<void>(
+      context,
+      title: isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor',
+      content: SizedBox(
+        width: 450,
+        child: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTextField(
+                  label: 'Razón Social / Nombre Comercial',
+                  controller: nombreController,
+                ),
+                AppLayout.vM,
+                AppTextField(
+                  label: 'RNC del Proveedor',
+                  controller: rncController,
+                ),
+                AppLayout.vM,
+                AppTextField(
+                  label: 'Persona de Contacto',
+                  controller: contactoController,
+                ),
+                AppLayout.vM,
+                AppTextField(
+                  label: 'Teléfono',
+                  controller: telefonoController,
+                ),
+                AppLayout.vM,
+                AppTextField(
+                  label: 'Correo Electrónico',
+                  controller: correoController,
+                ),
+                AppLayout.vM,
+                AppTextField(
+                  label: 'Dirección',
+                  controller: direccionController,
+                ),
+              ],
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white),
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                try {
-                  final prov = Proveedor(
-                    id: proveedorToEdit?.id,
-                    nombre: nombreController.text.trim(),
-                    contacto: contactoController.text.trim(),
-                    direccion: direccionController.text.trim(),
-                    telefono: telefonoController.text.trim(),
-                    correo: correoController.text.trim(),
-                    rnc: rncController.text.trim(),
-                  );
-
-                  if (isEditing) {
-                    ref.read(proveedorControllerProvider.notifier).actualizar(prov);
-                  } else {
-                    ref.read(proveedorControllerProvider.notifier).guardar(prov);
-                  }
-                  Navigator.pop(context);
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
-                  );
-                }
-              }
-            },
-            child: Text(isEditing ? 'Actualizar' : 'Guardar'),
-          ),
-        ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        AppButton(
+          text: isEditing ? 'Actualizar' : 'Guardar',
+          onPressed: () {
+            if (formKey.currentState!.validate()) {
+              try {
+                final prov = Proveedor(
+                  id: proveedorToEdit?.id,
+                  nombre: nombreController.text.trim(),
+                  contacto: contactoController.text.trim(),
+                  direccion: direccionController.text.trim(),
+                  telefono: telefonoController.text.trim(),
+                  correo: correoController.text.trim(),
+                  rnc: rncController.text.trim(),
+                );
+
+                if (isEditing) {
+                  ref.read(proveedorControllerProvider.notifier).actualizar(prov);
+                } else {
+                  ref.read(proveedorControllerProvider.notifier).guardar(prov);
+                }
+                Navigator.pop(context);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                );
+              }
+            }
+          },
+        ),
+      ],
     );
   }
 }

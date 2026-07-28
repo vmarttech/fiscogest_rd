@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
+import 'package:fiscogest_rd/core/ui/app_card.dart';
 
 class ClientesPage extends ConsumerStatefulWidget {
   const ClientesPage({super.key});
@@ -36,14 +46,14 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
           content: const Row(
             children: [
               Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 12),
+              AppLayout.hM,
               Text('Cliente registrado correctamente en el sistema'),
             ],
           ),
-          backgroundColor: Colors.teal.shade700,
+          backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
+          margin: AppSpacing.allM,
         ),
       );
       _formKey.currentState!.reset();
@@ -53,20 +63,17 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Configuración global (por defecto modo completo habilitado, adaptable al estado de sesión)
-    const bool esModoCompleto = true; 
+    const bool esModoCompleto = true;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+    return AppScaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 28.0),
+        padding: AppSpacing.hL.copyWith(top: AppSpacing.l, bottom: AppSpacing.l),
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 850),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- ENCABEZADO PRÉMIUM ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -75,232 +82,124 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                       children: [
                         const Text(
                           'Directorio de Clientes y Negocios',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1E293B),
-                          ),
+                          style: AppTypography.h1,
                         ),
-                        const SizedBox(height: 6),
+                        AppLayout.vXs,
                         Text(
                           'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade600,
-                          ),
+                          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: AppSpacing.hS.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
                       decoration: BoxDecoration(
-                        color: Colors.indigo.shade50,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.indigo.shade200),
+                        color: AppColors.grey50,
+                        borderRadius: AppRadius.allL,
+                        border: Border.all(color: AppColors.grey200),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.shield_outlined, size: 18, color: Colors.indigo.shade700),
-                          const SizedBox(width: 8),
+                          const Icon(Icons.shield_outlined, size: 18, color: AppColors.primary),
+                          AppLayout.hS,
                           Text(
                             'Modo Unificado Activo',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.indigo.shade800,
-                            ),
+                            style: AppTypography.labelSmall.copyWith(color: AppColors.textPrimary),
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 28),
+                AppLayout.vL,
 
-                // --- TARJETA CONTENEDORA DEL FORMULARIO ---
-                Container(
-                  padding: const EdgeInsets.all(32.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 15,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                AppCard(
+                  padding: AppSpacing.allL,
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Sección: Datos Generales
-                        Row(
+                        const Row(
                           children: [
-                            Icon(Icons.person_outline, color: Colors.blue.shade700, size: 22),
-                            const SizedBox(width: 10),
-                            const Text(
+                            Icon(Icons.person_outline, color: AppColors.primary, size: 22),
+                            AppLayout.hS,
+                            Text(
                               'Información General',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF334155),
-                              ),
+                              style: AppTypography.h3,
                             ),
                           ],
                         ),
-                        const SizedBox(height: 18),
-                        TextFormField(
+                        AppLayout.vM,
+                        AppTextField(
+                          label: 'Nombre / Razón Social / Negocio *',
+                          hint: 'Ej. Colmado Mendoza o Juan Pérez',
                           controller: _nombreController,
-                          decoration: InputDecoration(
-                            labelText: 'Nombre / Razón Social / Negocio *',
-                            hintText: 'Ej. Colmado Mendoza o Juan Pérez',
-                            filled: true,
-                            fillColor: const Color(0xFFF8FAFC),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                          ),
-                          validator: (value) => value == null || value.isEmpty ? 'Este campo es obligatorio' : null,
                         ),
-                        const SizedBox(height: 20),
+                        AppLayout.vM,
                         Row(
                           children: [
                             Expanded(
-                              child: TextFormField(
+                              child: AppTextField(
+                                label: 'Teléfono / Celular',
+                                hint: '809-000-0000',
                                 controller: _telefonoController,
-                                decoration: InputDecoration(
-                                  labelText: 'Teléfono / Celular',
-                                  hintText: '809-000-0000',
-                                  filled: true,
-                                  fillColor: const Color(0xFFF8FAFC),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
-                                  ),
-                                ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            AppLayout.hM,
                             Expanded(
-                              child: TextFormField(
+                              child: AppTextField(
+                                label: 'Tipo de Establecimiento',
+                                hint: 'Colmado, Salón, Barbería...',
                                 controller: _establecimientoController,
-                                decoration: InputDecoration(
-                                  labelText: 'Tipo de Establecimiento',
-                                  hintText: 'Colmado, Salón, Barbería...',
-                                  filled: true,
-                                  fillColor: const Color(0xFFF8FAFC),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
-                                  ),
-                                ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                        TextFormField(
+                        AppLayout.vM,
+                        AppTextField(
+                          label: 'Dirección o Sector',
+                          hint: 'Calle Principal #12, Sector...',
                           controller: _direccionController,
-                          decoration: InputDecoration(
-                            labelText: 'Dirección o Sector',
-                            hintText: 'Calle Principal #12, Sector...',
-                            filled: true,
-                            fillColor: const Color(0xFFF8FAFC),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                          ),
                         ),
 
-                        // Sección: Información Fiscal (Condicionada al Modo Completo global)
                         if (esModoCompleto) ...[
-                          const SizedBox(height: 32),
-                          const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                          const SizedBox(height: 24),
-                          Row(
+                          AppLayout.vL,
+                          const Divider(height: 1, color: AppColors.grey200),
+                          AppLayout.vM,
+                          const Row(
                             children: [
-                              Icon(Icons.receipt_long_outlined, color: Colors.indigo.shade700, size: 22),
-                              const SizedBox(width: 10),
-                              const Text(
+                              Icon(Icons.receipt_long_outlined, color: AppColors.primary, size: 22),
+                              AppLayout.hS,
+                              Text(
                                 'Información Fiscal y Tributaria (DGII)',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF334155),
-                                ),
+                                style: AppTypography.h3,
                               ),
                             ],
                           ),
-                          const SizedBox(height: 18),
+                          AppLayout.vM,
                           Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
+                                child: AppTextField(
+                                  label: 'RNC o Cédula',
+                                  hint: 'Ej. 00112345678',
                                   controller: _rncController,
-                                  decoration: InputDecoration(
-                                    labelText: 'RNC o Cédula',
-                                    hintText: 'Ej. 00112345678',
-                                    filled: true,
-                                    fillColor: const Color(0xFFF8FAFC),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(color: Colors.grey.shade300),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(color: Colors.grey.shade300),
-                                    ),
-                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              AppLayout.hM,
                               Expanded(
-                                child: DropdownButtonFormField<String>(
+                                child: AppDropdown<String>(
+                                  label: 'Tipo de Comprobante',
                                   initialValue: _tipoComprobanteSeleccionado,
-                                  decoration: InputDecoration(
-                                    labelText: 'Tipo de Comprobante',
-                                    filled: true,
-                                    fillColor: const Color(0xFFF8FAFC),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(color: Colors.grey.shade300),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(color: Colors.grey.shade300),
-                                    ),
-                                  ),
                                   items: const [
                                     DropdownMenuItem(value: 'B01 - Crédito Fiscal', child: Text('B01 - Crédito Fiscal')),
                                     DropdownMenuItem(value: 'B02 - Consumidor Final', child: Text('B02 - Consumidor Final')),
                                     DropdownMenuItem(value: 'B14 - Regímenes Especiales', child: Text('B14 - Regímenes Especiales')),
                                   ],
-                                  onChanged: (val) {
+                                  onChanged: (String? val) {
                                     if (val != null) {
-                                      setState(() {
-                                        _tipoComprobanteSeleccionado = val;
-                                      });
+                                      setState(() => _tipoComprobanteSeleccionado = val);
                                     }
                                   },
                                 ),
@@ -309,27 +208,14 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                           ),
                         ],
 
-                        const SizedBox(height: 40),
+                        AppLayout.vL,
 
-                        // --- BOTÓN DE ACCIÓN PRÉMIUM ---
                         SizedBox(
                           width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E293B),
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
+                          child: AppButton(
+                            text: 'Guardar Cliente en el Sistema',
+                            icon: Icons.save_rounded,
                             onPressed: _guardarCliente,
-                            icon: const Icon(Icons.save_rounded, size: 20),
-                            label: const Text(
-                              'Guardar Cliente en el Sistema',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
                           ),
                         ),
                       ],

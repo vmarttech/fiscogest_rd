@@ -1,15 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
-ListTile menuLateral({
+// Elemento individual del menú
+Widget menuLateral({
   required IconData icono,
   required String texto,
   required VoidCallback onTap,
 }) {
   return ListTile(
-    leading: Icon(icono, color: const Color(0xFF64748B)),
-    title: Text(texto, style: const TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.w500)),
+    leading: Icon(icono, color: AppColors.textSecondary),
+    title: Text(texto, style: AppTypography.labelMedium),
     onTap: onTap,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
+    contentPadding: AppSpacing.hM.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
   );
+}
+
+// Contenedor adaptable del menú lateral
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final drawerWidth = AppBreakpoints.isMobile(context) ? 260.0 : 320.0;
+
+    return SizedBox(
+      width: drawerWidth,
+      child: Drawer(
+        child: child,
+      ),
+    );
+  }
 }
