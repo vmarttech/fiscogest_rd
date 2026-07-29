@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/entrada_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 class RegistrarEntradaPage extends ConsumerStatefulWidget {
   const RegistrarEntradaPage({
@@ -57,7 +62,6 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
       usuario: 'UsuarioActual',
     );
 
-    // ✅ Para StateNotifier: usamos refresh en lugar de invalidar + future
     ref.invalidate(productoControllerProvider);
 
     if (mounted) {
@@ -70,25 +74,20 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: const Text('Registrar Entrada de Inventario', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-        backgroundColor: const Color(0xFF1E293B),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
+    return AppScaffold(
+      title: 'Registrar Entrada de Inventario',
+      padding: AppSpacing.allL,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 650),
             child: Card(
               elevation: 2,
               shadowColor: Colors.black.withValues(alpha: 0.1),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: AppSpacing.allXl,
               child: Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: AppSpacing.allXl,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -96,26 +95,26 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: AppSpacing.allM,
                           decoration: BoxDecoration(
                             color: Colors.teal.shade50,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(Icons.add_shopping_cart, color: Colors.teal.shade700, size: 24),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpacing.m),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 'Ingreso de mercancía',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                style: AppTypography.h4,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: AppSpacing.xs),
                               Text(
                                 widget.nombreProducto,
-                                style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                                style: AppTypography.bodyMedium.copyWith(color: Colors.grey.shade600),
                               ),
                             ],
                           ),
@@ -126,60 +125,24 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                       padding: EdgeInsets.symmetric(vertical: 24.0),
                       child: Divider(height: 1, color: Color(0xFFE2E8F0)),
                     ),
-                    TextField(
+                    AppTextField(
                       controller: _cantidadController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(fontSize: 15),
-                      decoration: InputDecoration(
-                        labelText: 'Cantidad a ingresar',
-                        hintText: 'Ej. 10',
-                        filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.teal.shade700, width: 2),
-                        ),
-                        prefixIcon: Icon(Icons.add_circle_outline, color: Colors.teal.shade700),
-                      ),
+                      label: 'Cantidad a ingresar',
+                      hint: 'Ej. 10',
                     ),
-                    const SizedBox(height: 20),
-                    TextField(
+                    const SizedBox(height: AppSpacing.l),
+                    AppTextField(
                       controller: _motivoController,
-                      style: const TextStyle(fontSize: 15),
-                      decoration: InputDecoration(
-                        labelText: 'Motivo (opcional)',
-                        hintText: 'Ej. Compra a proveedor / Devolución',
-                        filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.teal.shade700, width: 2),
-                        ),
-                        prefixIcon: const Icon(Icons.description_outlined, color: Color(0xFF64748B)),
-                      ),
+                      label: 'Motivo (opcional)',
+                      hint: 'Ej. Compra a proveedor / Devolución',
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.l),
                     InkWell(
                       onTap: _seleccionarFecha,
                       borderRadius: BorderRadius.circular(8),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        padding: AppSpacing.hM,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(8),
@@ -188,16 +151,16 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                         child: Row(
                           children: [
                             const Icon(Icons.calendar_today, color: Color(0xFF64748B), size: 20),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.s),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Fecha de entrada', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                  Text('Fecha de entrada', style: AppTypography.labelSmall.copyWith(color: Colors.grey.shade600)),
                                   const SizedBox(height: 2),
                                   Text(
                                     '${_fechaSeleccionada.day.toString().padLeft(2, '0')}/${_fechaSeleccionada.month.toString().padLeft(2, '0')}/${_fechaSeleccionada.year}',
-                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF1E293B)),
+                                    style: AppTypography.bodyMedium,
                                   ),
                                 ],
                               ),
@@ -207,19 +170,12 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xl),
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal.shade700,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
+                      child: AppButton(
+                        text: 'Guardar Entrada',
                         onPressed: _guardarEntrada,
-                        child: const Text('Guardar Entrada', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
