@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/providers/core_providers.dart'; // ✅ Import agregado
 import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/producto_repository_impl.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_repository_impl.dart';
@@ -22,16 +23,16 @@ final productoRepositoryProvider = Provider<IProductoRepository>((ref) {
 });
 
 class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
-  ProductoController(this._repository) : super(const AsyncValue.loading()) {
+  ProductoController(this._repository, this._ref) : super(const AsyncValue.loading()) { // ✅ Agregamos parámetro ref
     cargarProductos();
   }
   final IProductoRepository _repository;
+  final Ref _ref; // ✅ Guardamos la referencia para leer proveedores
 
   Future<void> cargarProductos() async {
     state = const AsyncValue.loading();
     try {
       final productos = await _repository.obtenerProductos();
-      // ✅ FUERZA NUEVA REFERENCIA PARA QUE EL WIDGET DETECTE EL CAMBIO
       state = AsyncValue.data(List.unmodifiable(productos));
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -40,8 +41,10 @@ class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
 
   Future<void> guardar(Producto producto) async {
     try {
-      await _repository.guardarProducto(producto);
-      await cargarProductos(); // ✅ YA ESTABA, PERO ASEGURAMOS LA NUEVA LISTA
+      // ✅ Leemos el usuario aquí (capa permitida) y se lo pasamos al repositorio
+      final idUsuario = _ref.read(usuarioAutenticadoProvider)!;
+      await _repository.guardarProducto(producto, idUsuario);
+      await cargarProductos();
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
@@ -66,6 +69,7 @@ class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
   }
 }
 
+// ✅ Actualizamos la creación del controlador para pasar la referencia
 final productoControllerProvider = StateNotifierProvider<ProductoController, AsyncValue<List<Producto>>>((ref) {
-  return ProductoController(ref.watch(productoRepositoryProvider));
+  return ProductoController(ref.watch(productoRepositoryProvider), ref);
 });

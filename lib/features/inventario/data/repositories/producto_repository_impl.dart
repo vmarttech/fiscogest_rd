@@ -1,4 +1,7 @@
+// ELIMINAS el import que no se usa:
+// import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
@@ -25,7 +28,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
   }
 
   @override
-  Future<int> guardarProducto(Producto producto) async {
+  Future<int> guardarProducto(Producto producto, int idUsuario) async {
     return await _db.transaction(() async {
       final idGenerado = await _db.into(_db.productosTable).insert(
         ProductoDataMapper.toCompanion(producto),
@@ -43,7 +46,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
         fechaMovimiento: DateTime.now(),
         documentoReferencia: 'INGRESO INICIAL',
         observacion: 'Registro al crear producto',
-        usuarioId: 1,
+        usuarioId: idUsuario,
       ));
 
       return idGenerado;

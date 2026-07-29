@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';

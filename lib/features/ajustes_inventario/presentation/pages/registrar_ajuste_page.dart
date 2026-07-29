@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_dialog.dart';
+import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/providers/core_providers.dart'; // ✅ Ruta EXACTA confirmada
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
@@ -19,6 +26,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
   final _codigoCtrl = TextEditingController();
   final _cantidadCtrl = TextEditingController();
   final _motivoCtrl = TextEditingController();
+  final _observacionesCtrl = TextEditingController(); // ✅ Punto 2: Observaciones
   String _tipoSeleccionado = 'entrada';
   Producto? _productoSeleccionado;
 
@@ -27,6 +35,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
     _codigoCtrl.dispose();
     _cantidadCtrl.dispose();
     _motivoCtrl.dispose();
+    _observacionesCtrl.dispose();
     super.dispose();
   }
 
@@ -52,103 +61,93 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
   @override
   Widget build(BuildContext context) {
     final productosAsync = ref.watch(productoControllerProvider);
-    return Scaffold(
+    return AppScaffold( // ✅ Punto 4: Migración UI
       appBar: AppBar(
         title: const Text('Registrar Ajuste'),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
       ),
+      padding: AppSpacing.allM,
       body: productosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (todos) => SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Producto', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 8),
+                const Text('Producto', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppSpacing.s),
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
+                      child: AppTextField( // ✅ Parámetros reales confirmados
                         controller: _codigoCtrl,
-                        decoration: const InputDecoration(
-                          hintText: 'Seleccione o escriba el código',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                        ),
+                        hint: 'Seleccione o escriba el código',
                         onChanged: (val) {
                           setState(() => _productoSeleccionado = null);
                         },
-                        validator: (v) => v == null || v.isEmpty ? 'Seleccione un producto' : null,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.s),
                     IconButton(
                       icon: const Icon(Icons.search, color: Colors.blue),
-                      style: IconButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.horizontal(right: Radius.circular(4)),
-                          side: BorderSide(color: Colors.grey),
-                        ),
-                      ),
                       onPressed: () => _abrirBuscador(todos),
                     ),
                   ],
                 ),
                 if (_productoSeleccionado != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 6, bottom: 16),
+                    padding: const EdgeInsets.only(top: 6, bottom: AppSpacing.m),
                     child: Text(
                       '✅ ${_productoSeleccionado!.nombre} | Stock actual: ${_productoSeleccionado!.stock}',
                       style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
                     ),
                   ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.m),
 
-                const Text('Tipo de Ajuste', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
+                const Text('Tipo de Ajuste', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppSpacing.s),
+                AppDropdown<String>( // ✅ Parámetros reales confirmados
                   initialValue: _tipoSeleccionado,
-                  decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14)),
                   items: const [
                     DropdownMenuItem(value: 'entrada', child: Text('Entrada (Sumar stock)')),
                     DropdownMenuItem(value: 'salida', child: Text('Salida (Restar stock)')),
                   ],
                   onChanged: (v) => setState(() => _tipoSeleccionado = v!),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.m),
 
-                const Text('Cantidad', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 8),
-                TextFormField(
+                const Text('Cantidad', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppSpacing.s),
+                AppTextField(
                   controller: _cantidadCtrl,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(hintText: 'Ej: 5.5', border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14)),
-                  validator: (v) => v == null || v.isEmpty ? 'Ingrese cantidad' : null,
+                  hint: 'Ej: 5.5',
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.m),
 
-                const Text('Motivo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 8),
-                TextFormField(
+                const Text('Motivo', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppSpacing.s),
+                AppTextField(
                   controller: _motivoCtrl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(hintText: 'Ej: Conteo físico / Pérdida', border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14)),
-                  validator: (v) => v == null || v.isEmpty ? 'Ingrese motivo' : null,
+                  hint: 'Ej: Conteo físico / Pérdida',
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: AppSpacing.m),
+
+                // ✅ Punto 2: Campo Observaciones
+                const Text('Observaciones', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppSpacing.s),
+                AppTextField(
+                  controller: _observacionesCtrl,
+                  hint: 'Comentarios adicionales (opcional)',
+                ),
+                const SizedBox(height: AppSpacing.l),
 
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                  child: AppButton( // ✅ Parámetros reales confirmados
+                    text: 'Guardar Ajuste',
                     onPressed: () async {
                       if (!_formKey.currentState!.validate()) return;
 
@@ -158,25 +157,40 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                         orElse: () => throw Exception('Producto no encontrado'),
                       );
 
+                      // ✅ Punto 3: Validación visual refuerzo (definitiva en Caso de Uso)
+                      final cant = double.tryParse(_cantidadCtrl.text);
+                      if (cant == null || cant <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('La cantidad debe ser mayor a cero')),
+                        );
+                        return;
+                      }
+                      if (_tipoSeleccionado == 'salida' && cant > producto.stock) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Stock insuficiente. Disponible: ${producto.stock}')),
+                        );
+                        return;
+                      }
+
                       final ajuste = AjusteInventario(
                         idProducto: producto.id!,
                         codigoBusqueda: codigo,
-                        cantidad: double.parse(_cantidadCtrl.text),
+                        cantidad: cant,
                         tipoAjuste: _tipoSeleccionado,
                         motivo: _motivoCtrl.text,
-                        usuarioId: 1,
+                        // observaciones: _observacionesCtrl.text.trim(), // Habilitar al agregar en entidad
+                        // ✅ Punto 1: Usuario real EXACTO confirmado
+                        usuarioId: ref.read(usuarioAutenticadoProvider)!,
                         fechaCreacion: DateTime.now(),
                       );
 
-                      await ref.read(registrarAjusteProvider).call(ajuste);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('✅ Ajuste guardado — stock actualizado en inventario')),
-                        );
-                        context.pop();
-                      }
+                      final exito = await ref.read(ajusteInventarioProvider.notifier).registrar(ajuste);
+                      if (!exito || !context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('✅ Ajuste guardado — stock actualizado en inventario')),
+                      );
+                      context.pop();
                     },
-                    child: const Text('Guardar Ajuste'),
                   ),
                 ),
               ],
@@ -225,26 +239,23 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Buscar Producto'),
+    return AppDialog( // ✅ Punto 4: Migración UI
+      title: 'Buscar Producto',
       content: SizedBox(
         width: 520,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
+            AppTextField(
               controller: _buscarCtrl,
-              decoration: const InputDecoration(
-                hintText: 'Buscar por código o nombre...',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-              ),
+              hint: 'Buscar por código o nombre...',
+              prefixIcon: Icons.search,
               onChanged: _filtrar,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.s),
             Flexible(
               child: _resultados.isEmpty
-                  ? const Center(child: Padding(padding: EdgeInsets.all(20), child: Text('Sin resultados')))
+                  ? const Center(child: Padding(padding: AppSpacing.allM, child: Text('Sin resultados')))
                   : ListView.builder(
                       shrinkWrap: true,
                       itemCount: _resultados.length,

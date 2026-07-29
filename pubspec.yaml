@@ -16,7 +16,7 @@ dependencies:
 
   # ✅ BASE DE DATOS (OFICIAL: Drift; ELIMINADO sqflite PROHIBIDO)
   drift: ^2.20.0
-  path_provider: ^2.1.4
+  path_provider: ^2.1.6
   path: ^1.9.0
   sqlite3_flutter_libs: ^0.5.27
 

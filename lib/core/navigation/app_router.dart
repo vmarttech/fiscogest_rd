@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/features/transferencias/presentation/pages/registrar_transferencia_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
 import 'package:fiscogest_rd/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -49,6 +50,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AppShell(child: DiferenciasConteoPage(conteoId: conteoId));
         },
       ),
+  // ETAPA 3.7 - Transferencias entre almacenes
+  GoRoute(
+    path: '/transferencias/registrar',
+    name: 'registrar_transferencia',
+    builder: (context, state) => const AppShell(child: RegistrarTransferenciaPage()),
+  ),
     ],
   );
 });

@@ -1,8 +1,8 @@
-
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
@@ -68,8 +68,9 @@ class AppDatabase extends _$AppDatabase {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final carpetaFija = Directory('/home/martin/fiscogest_rd/');
-    if (!await carpetaFija.exists()) await carpetaFija.create(recursive: true);
-    return NativeDatabase(File(p.join(carpetaFija.path, 'fiscogest.sqlite')));
+    // ✅ Ruta automática válida en ANDROID, iOS, Windows, Linux y macOS
+    final carpetaBase = await getApplicationDocumentsDirectory();
+    final archivoDb = File(p.join(carpetaBase.path, 'fiscogest.sqlite'));
+    return NativeDatabase(archivoDb);
   });
 }

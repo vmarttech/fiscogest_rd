@@ -7,6 +7,7 @@ class AjusteInventario {
     required this.tipoAjuste,
     required this.cantidad,
     required this.motivo,
+    this.observaciones, // ✅ ÚNICA LÍNEA AGREGADA
     required this.usuarioId,
     required this.fechaCreacion,
   });
@@ -16,6 +17,7 @@ class AjusteInventario {
   final String tipoAjuste;
   final double cantidad;
   final String motivo;
+  final String? observaciones; // ✅ ÚNICA LÍNEA AGREGADA
   final int usuarioId;
   final DateTime fechaCreacion;
 }

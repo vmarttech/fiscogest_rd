@@ -1,38 +1,65 @@
-import 'package:fiscogest_rd/core/database/database_provider.dart';
+// 1. Corregimos importaciones: usamos flutter_riverpod (tu ya lo tenías así) y rutas reales
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/database/app_database.dart'; // ✅ Única BD oficial
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
+import 'package:fiscogest_rd/features/ajustes_inventario/domain/usecases/registrar_ajuste_usecase.dart';
+import 'package:fiscogest_rd/features/ajustes_inventario/domain/usecases/listar_ajustes_usecase.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/data/repositories/ajuste_inventario_repository_impl.dart';
-import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
- // ✅ Interfaz desacoplada
 import 'package:fiscogest_rd/features/inventario/data/repositories/inventario_repository_impl.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
-// ❌ ELIMINADOS: Providers de BD por módulo (violan SSOT)
-// final ajusteInventarioDbProvider = ...
-// final inventarioDbProvider = ...
+// ✅ Gestor de estado oficial
+final ajusteInventarioProvider = AsyncNotifierProvider<AjusteInventarioNotifier, void>(AjusteInventarioNotifier.new);
 
+class AjusteInventarioNotifier extends AsyncNotifier<void> {
+  late final RegistrarAjusteUsecase _registrarUsecase;
+  late final ListarAjustesUsecase _listarUsecase;
+
+  @override
+  Future<void> build() async {
+    _registrarUsecase = ref.read(registrarAjusteUsecaseProvider);
+    _listarUsecase = ref.read(listarAjustesUsecaseProvider);
+  }
+
+  Future<bool> registrar(AjusteInventario ajuste) async {
+    state = const AsyncLoading();
+    try {
+      await _registrarUsecase.call(ajuste);
+      ref.invalidate(ajusteInventarioListaProvider);
+      ref.invalidate(productoControllerProvider);
+      state = const AsyncData(null);
+      return true;
+    } catch (e, stack) {
+      state = AsyncError(e, stack);
+      return false;
+    }
+  }
+
+  Future<List<AjusteInventario>> listar() async {
+    return _listarUsecase.call();
+  }
+}
+
+// ✅ Lista de ajustes
+final ajusteInventarioListaProvider = FutureProvider<List<AjusteInventario>>((ref) async {
+  return ref.read(ajusteInventarioProvider.notifier).listar();
+});
+
+// ✅ Proveedores de Casos de Uso
+final registrarAjusteUsecaseProvider = Provider<RegistrarAjusteUsecase>((ref) {
+  final repo = ref.read(ajusteInventarioRepositoryProvider);
+  return RegistrarAjusteUsecase(repo);
+});
+
+final listarAjustesUsecaseProvider = Provider<ListarAjustesUsecase>((ref) {
+  final repo = ref.read(ajusteInventarioRepositoryProvider);
+  return ListarAjustesUsecase(repo);
+});
+
+// ✅ Repositorio con tus rutas reales
 final ajusteInventarioRepositoryProvider = Provider<AjusteInventarioRepositoryImpl>((ref) {
-  // ✅ Se obtiene la única instancia de BD desde el Core
   final AppDatabase appDb = ref.read(databaseProvider);
-  
-  // ✅ Se inyecta la implementación asignada a la interfaz
-  final InventarioRepositoryInterface inventarioRepo = InventarioRepositoryImpl(appDb);
-  
-  // ✅ Se pasa solo dependencias desacopladas
+  final inventarioRepo = InventarioRepositoryImpl(appDb);
   return AjusteInventarioRepositoryImpl(inventarioRepo, appDb);
-});
-
-final registrarAjusteProvider = Provider<Future<void> Function(AjusteInventario)>((ref) {
-  final repo = ref.read(ajusteInventarioRepositoryProvider);
-  return (ajuste) async {
-    await repo.registrarAjuste(ajuste);
-    ref.invalidate(productoControllerProvider);
-    ref.invalidate(ajusteInventarioListProvider);
-  };
-});
-
-final ajusteInventarioListProvider = FutureProvider<List<AjusteInventario>>((ref) async {
-  final repo = ref.read(ajusteInventarioRepositoryProvider);
-  return repo.listarAjustes();
 });

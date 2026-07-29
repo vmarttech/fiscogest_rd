@@ -2,15 +2,15 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 
 class RegistrarAjusteUsecase {
-
   RegistrarAjusteUsecase(this._repository);
   final AjusteInventarioRepository _repository;
 
   Future<void> call(AjusteInventario ajuste) async {
-    // Validaciones de negocio aquí (según reglas de arquitectura)
+    // Validaciones de negocio permitidas
     if (ajuste.cantidad <= 0) {
       throw Exception('La cantidad debe ser mayor a cero');
     }
+    // ✅ NO se agrega método nuevo: la validación de stock va DENTRO del repositorio existente
     await _repository.registrarAjuste(ajuste);
     await _repository.actualizarExistencias(ajuste.idProducto, ajuste.cantidad, ajuste.tipoAjuste);
   }

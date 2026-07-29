@@ -1,7 +1,10 @@
 import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
-import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart'; // ✅ FALTABA ESTA
+import 'package:fiscogest_rd/features/inventario/data/repositories/inventario_repository_impl.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/movimiento_kardex.dart';
@@ -40,7 +43,6 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
     );
     final idAjuste = await _db.into(_db.ajusteInventarioTable).insert(companion);
 
-    // ✅ REGISTRO OBLIGATORIO EN KÁRDEX
     await _db.into(_db.kardexTable).insert(
       KardexTableCompanion(
         idProducto: Value(producto.id!),
@@ -74,15 +76,17 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
     )).toList();
   }
 
-  // ✅ IMPLEMENTACIÓN EXACTA A LA INTERFAZ
   @override
   Future<void> actualizarExistencias(int idProducto, double cantidad, String tipo) async {
     await _inventarioRepo.actualizarStock(idProducto, cantidad);
   }
 
-  // ✅ IMPLEMENTACIÓN CON EL TIPO CORRECTO
   @override
-  Future<void> registrarEnKardex(MovimientoKardex movimiento) async {
-    // Si más adelante quieres reutilizar esta lógica, la mueves aquí
-  }
+  Future<void> registrarEnKardex(MovimientoKardex movimiento) async {}
 }
+
+final ajusteInventarioRepositoryProvider = Provider<AjusteInventarioRepositoryImpl>((ref) {
+  final appDb = ref.read(databaseProvider);
+  final inventarioRepo = InventarioRepositoryImpl(appDb);
+  return AjusteInventarioRepositoryImpl(inventarioRepo, appDb);
+});

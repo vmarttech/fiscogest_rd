@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_sizes.dart';
-import 'package:fiscogest_rd/core/ui/app_radius.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 class AppTextField extends StatelessWidget {
-
   const AppTextField({
     super.key,
     this.label,
@@ -21,8 +18,9 @@ class AppTextField extends StatelessWidget {
     this.onSuffixTap,
     this.onChanged,
     this.onSubmitted,
-    this.height = AppSizes.inputHeightMd,
+    this.height,
   });
+
   final String? label;
   final String? hint;
   final String? errorText;
@@ -39,6 +37,7 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ SIN Expanded AQUÍ: solo el SizedBox con altura opcional
     return SizedBox(
       height: height,
       child: TextFormField(
@@ -53,37 +52,23 @@ class AppTextField extends StatelessWidget {
           labelText: label,
           hintText: hint,
           errorText: errorText,
-          contentPadding: AppSpacing.allM,
-          labelStyle: AppTypography.labelMedium,
-          hintStyle: AppTypography.bodySmall.copyWith(color: AppColors.grey400),
-          errorStyle: AppTypography.error,
-          border: OutlineInputBorder(borderRadius: AppRadius.allM),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: AppRadius.allM,
-            borderSide: const BorderSide(color: AppColors.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: AppRadius.allM,
-            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: AppRadius.allM,
-            borderSide: const BorderSide(color: AppColors.error),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: AppRadius.allM,
-            borderSide: const BorderSide(color: AppColors.error, width: 1.5),
-          ),
-          prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: AppSizes.iconMd, color: AppColors.grey600) : null,
+          prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20, color: AppColors.grey600) : null,
           suffixIcon: suffixIcon != null
-              ? InkWell(
-                  onTap: onSuffixTap,
-                  borderRadius: AppRadius.allM,
-                  child: Icon(suffixIcon, size: AppSizes.iconMd, color: AppColors.grey600),
+              ? IconButton(
+                  icon: Icon(suffixIcon, size: 20, color: AppColors.grey600),
+                  onPressed: onSuffixTap,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 )
               : null,
+          contentPadding: AppSpacing.allM,
+          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+          enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)), borderSide: BorderSide(color: AppColors.grey300)),
+          focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)), borderSide: BorderSide(color: AppColors.primary)),
+          errorBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)), borderSide: BorderSide(color: AppColors.error)),
+          focusedErrorBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)), borderSide: BorderSide(color: AppColors.error)),
           filled: true,
-          fillColor: enabled ? AppColors.white : AppColors.grey100,
+          fillColor: AppColors.white,
         ),
       ),
     );
