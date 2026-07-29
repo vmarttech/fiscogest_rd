@@ -1,15 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 
 part 'kardex.freezed.dart';
-
-enum TipoMovimiento {
-  entrada,
-  salida,
-  ajuste,
-  transferencia,
-  devolucion,
-  traslado,
-}
 
 @freezed
 class Kardex with _$Kardex {

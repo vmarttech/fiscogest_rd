@@ -1,1 +1,8 @@
-enum TipoMovimiento { entrada, salida }
+enum TipoMovimiento {
+  entrada,
+  salida,
+  ajuste,
+  transferencia,
+  devolucion,
+  traslado,
+}
