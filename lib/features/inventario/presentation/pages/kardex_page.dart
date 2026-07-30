@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 class KardexPage extends ConsumerStatefulWidget {
   const KardexPage({super.key, this.productoId});
@@ -28,77 +33,56 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       kardexPorProductoProvider(_productoIdFijo?.toString() ?? ''),
     );
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+    return AppScaffold(
+      title: 'Historial de Movimientos (Kárdex)',
+      padding: AppSpacing.allL,
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1000),
-          padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Historial de Movimientos (Kárdex)',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                    style: AppTypography.h2,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Entradas, salidas, ajustes, transferencias y traslados del inventario.',
-                    style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                    style: AppTypography.labelMedium.copyWith(color: const Color(0xFF64748B)),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.l),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: TextField(
-                        onChanged: (valor) => setState(
-                          () => _filtroBusqueda = valor.trim().toLowerCase(),
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: 'Buscar por producto, documento o fecha...',
-                          hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                          prefixIcon: Icon(Icons.search, color: Color(0xFF64748B), size: 18),
-                          border: InputBorder.none,
-                          isDense: true,
-                        ),
+                    child: AppTextField(
+                      hint: 'Buscar por producto, documento o fecha...',
+                      onChanged: (valor) => setState(
+                        () => _filtroBusqueda = valor.trim().toLowerCase(),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.s),
                   Expanded(
-                    child: DropdownButtonFormField<TipoMovimiento>(
+                    child: AppDropdown<TipoMovimiento>(
                       initialValue: _filtroTipo,
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
-                        filled: true,
-                        fillColor: Colors.white,
-                        isDense: true,
-                      ),
-                      hint: const Text('Tipo Movimiento', style: TextStyle(fontSize: 13)),
+                      hint: 'Tipo Movimiento',
                       items: TipoMovimiento.values.map((tipo) => DropdownMenuItem<TipoMovimiento>(
                         value: tipo,
-                        child: Text(tipo.name.toUpperCase(), style: const TextStyle(fontSize: 12)),
+                        child: Text(tipo.name.toUpperCase(), style: AppTypography.bodySmall),
                       )).toList(),
                       onChanged: (valor) => setState(() => _filtroTipo = valor),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -110,11 +94,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (error, pila) => Center(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppSpacing.allM,
                         child: Text(
                           'Error al cargar movimientos: $error',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.red, fontSize: 13),
+                          style: AppTypography.labelMedium.copyWith(color: Colors.red),
                         ),
                       ),
                     ),
@@ -128,19 +112,19 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                       }).toList();
 
                       if (filtrados.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Padding(
-                            padding: EdgeInsets.all(24),
+                            padding: AppSpacing.allL,
                             child: Text(
                               'No hay movimientos registrados o coincidentes.',
-                              style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                              style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF64748B)),
                             ),
                           ),
                         );
                       }
 
                       return ListView.separated(
-                        padding: const EdgeInsets.all(12),
+                        padding: AppSpacing.allS,
                         itemCount: filtrados.length,
                         separatorBuilder: (_, __) => const Divider(color: Color(0xFFE2E8F0), height: 1),
                         itemBuilder: (_, indice) {
@@ -153,7 +137,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                             _ => const Color(0xFF8B5CF6),
                           };
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            padding: AppSpacing.vS,
                             child: Row(
                               children: [
                                 Container(
@@ -161,23 +145,23 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                   height: 48,
                                   decoration: BoxDecoration(color: colorTipo, borderRadius: BorderRadius.circular(4)),
                                 ),
-                                const SizedBox(width: 16),
+                                const SizedBox(width: AppSpacing.m),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         mov.tipoMovimiento.name.toUpperCase(),
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                        style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
                                         'Prod: ${mov.productoId} • Doc: ${mov.documentoReferencia ?? 'Sin documento'}',
-                                        style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                        style: AppTypography.bodySmall.copyWith(color: const Color(0xFF64748B)),
                                       ),
                                       Text(
                                         'Cant: ${mov.cantidad} • Saldo: ${mov.saldoAnterior} → ${mov.saldoNuevo}',
-                                        style: const TextStyle(fontSize: 12),
+                                        style: AppTypography.bodySmall,
                                       ),
                                     ],
                                   ),
@@ -186,7 +170,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                   '${mov.fechaMovimiento!.day.toString().padLeft(2,'0')}/'
                                   '${mov.fechaMovimiento!.month.toString().padLeft(2,'0')}/'
                                   '${mov.fechaMovimiento!.year}',
-                                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                                  style: AppTypography.bodySmall.copyWith(color: const Color(0xFF94A3B8)),
                                 ),
                               ],
                             ),
