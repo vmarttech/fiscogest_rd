@@ -6187,6 +6187,332 @@ class DiferenciasConteoCompanion
   }
 }
 
+class $ExistenciasTableTable extends ExistenciasTable
+    with TableInfo<$ExistenciasTableTable, ExistenciaData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExistenciasTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _idProductoMeta = const VerificationMeta(
+    'idProducto',
+  );
+  @override
+  late final GeneratedColumn<int> idProducto = GeneratedColumn<int>(
+    'id_producto',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES productos_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _existenciaActualMeta = const VerificationMeta(
+    'existenciaActual',
+  );
+  @override
+  late final GeneratedColumn<double> existenciaActual = GeneratedColumn<double>(
+    'existencia_actual',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _existenciaDisponibleMeta =
+      const VerificationMeta('existenciaDisponible');
+  @override
+  late final GeneratedColumn<double> existenciaDisponible =
+      GeneratedColumn<double>(
+        'existencia_disponible',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    idProducto,
+    existenciaActual,
+    existenciaDisponible,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'existencias_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExistenciaData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('id_producto')) {
+      context.handle(
+        _idProductoMeta,
+        idProducto.isAcceptableOrUnknown(data['id_producto']!, _idProductoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_idProductoMeta);
+    }
+    if (data.containsKey('existencia_actual')) {
+      context.handle(
+        _existenciaActualMeta,
+        existenciaActual.isAcceptableOrUnknown(
+          data['existencia_actual']!,
+          _existenciaActualMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_existenciaActualMeta);
+    }
+    if (data.containsKey('existencia_disponible')) {
+      context.handle(
+        _existenciaDisponibleMeta,
+        existenciaDisponible.isAcceptableOrUnknown(
+          data['existencia_disponible']!,
+          _existenciaDisponibleMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_existenciaDisponibleMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExistenciaData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExistenciaData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      idProducto: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id_producto'],
+      )!,
+      existenciaActual: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}existencia_actual'],
+      )!,
+      existenciaDisponible: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}existencia_disponible'],
+      )!,
+    );
+  }
+
+  @override
+  $ExistenciasTableTable createAlias(String alias) {
+    return $ExistenciasTableTable(attachedDatabase, alias);
+  }
+}
+
+class ExistenciaData extends DataClass implements Insertable<ExistenciaData> {
+  final int id;
+  final int idProducto;
+  final double existenciaActual;
+  final double existenciaDisponible;
+  const ExistenciaData({
+    required this.id,
+    required this.idProducto,
+    required this.existenciaActual,
+    required this.existenciaDisponible,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['id_producto'] = Variable<int>(idProducto);
+    map['existencia_actual'] = Variable<double>(existenciaActual);
+    map['existencia_disponible'] = Variable<double>(existenciaDisponible);
+    return map;
+  }
+
+  ExistenciasTableCompanion toCompanion(bool nullToAbsent) {
+    return ExistenciasTableCompanion(
+      id: Value(id),
+      idProducto: Value(idProducto),
+      existenciaActual: Value(existenciaActual),
+      existenciaDisponible: Value(existenciaDisponible),
+    );
+  }
+
+  factory ExistenciaData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExistenciaData(
+      id: serializer.fromJson<int>(json['id']),
+      idProducto: serializer.fromJson<int>(json['idProducto']),
+      existenciaActual: serializer.fromJson<double>(json['existenciaActual']),
+      existenciaDisponible: serializer.fromJson<double>(
+        json['existenciaDisponible'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'idProducto': serializer.toJson<int>(idProducto),
+      'existenciaActual': serializer.toJson<double>(existenciaActual),
+      'existenciaDisponible': serializer.toJson<double>(existenciaDisponible),
+    };
+  }
+
+  ExistenciaData copyWith({
+    int? id,
+    int? idProducto,
+    double? existenciaActual,
+    double? existenciaDisponible,
+  }) => ExistenciaData(
+    id: id ?? this.id,
+    idProducto: idProducto ?? this.idProducto,
+    existenciaActual: existenciaActual ?? this.existenciaActual,
+    existenciaDisponible: existenciaDisponible ?? this.existenciaDisponible,
+  );
+  ExistenciaData copyWithCompanion(ExistenciasTableCompanion data) {
+    return ExistenciaData(
+      id: data.id.present ? data.id.value : this.id,
+      idProducto: data.idProducto.present
+          ? data.idProducto.value
+          : this.idProducto,
+      existenciaActual: data.existenciaActual.present
+          ? data.existenciaActual.value
+          : this.existenciaActual,
+      existenciaDisponible: data.existenciaDisponible.present
+          ? data.existenciaDisponible.value
+          : this.existenciaDisponible,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExistenciaData(')
+          ..write('id: $id, ')
+          ..write('idProducto: $idProducto, ')
+          ..write('existenciaActual: $existenciaActual, ')
+          ..write('existenciaDisponible: $existenciaDisponible')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, idProducto, existenciaActual, existenciaDisponible);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExistenciaData &&
+          other.id == this.id &&
+          other.idProducto == this.idProducto &&
+          other.existenciaActual == this.existenciaActual &&
+          other.existenciaDisponible == this.existenciaDisponible);
+}
+
+class ExistenciasTableCompanion extends UpdateCompanion<ExistenciaData> {
+  final Value<int> id;
+  final Value<int> idProducto;
+  final Value<double> existenciaActual;
+  final Value<double> existenciaDisponible;
+  const ExistenciasTableCompanion({
+    this.id = const Value.absent(),
+    this.idProducto = const Value.absent(),
+    this.existenciaActual = const Value.absent(),
+    this.existenciaDisponible = const Value.absent(),
+  });
+  ExistenciasTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int idProducto,
+    required double existenciaActual,
+    required double existenciaDisponible,
+  }) : idProducto = Value(idProducto),
+       existenciaActual = Value(existenciaActual),
+       existenciaDisponible = Value(existenciaDisponible);
+  static Insertable<ExistenciaData> custom({
+    Expression<int>? id,
+    Expression<int>? idProducto,
+    Expression<double>? existenciaActual,
+    Expression<double>? existenciaDisponible,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (idProducto != null) 'id_producto': idProducto,
+      if (existenciaActual != null) 'existencia_actual': existenciaActual,
+      if (existenciaDisponible != null)
+        'existencia_disponible': existenciaDisponible,
+    });
+  }
+
+  ExistenciasTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? idProducto,
+    Value<double>? existenciaActual,
+    Value<double>? existenciaDisponible,
+  }) {
+    return ExistenciasTableCompanion(
+      id: id ?? this.id,
+      idProducto: idProducto ?? this.idProducto,
+      existenciaActual: existenciaActual ?? this.existenciaActual,
+      existenciaDisponible: existenciaDisponible ?? this.existenciaDisponible,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (idProducto.present) {
+      map['id_producto'] = Variable<int>(idProducto.value);
+    }
+    if (existenciaActual.present) {
+      map['existencia_actual'] = Variable<double>(existenciaActual.value);
+    }
+    if (existenciaDisponible.present) {
+      map['existencia_disponible'] = Variable<double>(
+        existenciaDisponible.value,
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExistenciasTableCompanion(')
+          ..write('id: $id, ')
+          ..write('idProducto: $idProducto, ')
+          ..write('existenciaActual: $existenciaActual, ')
+          ..write('existenciaDisponible: $existenciaDisponible')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6205,6 +6531,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ConteosFisicosTable conteosFisicos = $ConteosFisicosTable(this);
   late final $DiferenciasConteoTable diferenciasConteo =
       $DiferenciasConteoTable(this);
+  late final $ExistenciasTableTable existenciasTable = $ExistenciasTableTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6222,7 +6551,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ajusteInventarioTable,
     conteosFisicos,
     diferenciasConteo,
+    existenciasTable,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'productos_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('existencias_table', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$ClientesTableTableCreateCompanionBuilder =
@@ -6764,6 +7104,43 @@ typedef $$ProductosTableTableUpdateCompanionBuilder =
       Value<bool> activo,
     });
 
+final class $$ProductosTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ProductosTableTable,
+          ProductosTableData
+        > {
+  $$ProductosTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$ExistenciasTableTable, List<ExistenciaData>>
+  _existenciasTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.existenciasTable,
+    aliasName: $_aliasNameGenerator(
+      db.productosTable.id,
+      db.existenciasTable.idProducto,
+    ),
+  );
+
+  $$ExistenciasTableTableProcessedTableManager get existenciasTableRefs {
+    final manager = $$ExistenciasTableTableTableManager(
+      $_db,
+      $_db.existenciasTable,
+    ).filter((f) => f.idProducto.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _existenciasTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
 class $$ProductosTableTableFilterComposer
     extends Composer<_$AppDatabase, $ProductosTableTable> {
   $$ProductosTableTableFilterComposer({
@@ -6837,6 +7214,31 @@ class $$ProductosTableTableFilterComposer
     column: $table.activo,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> existenciasTableRefs(
+    Expression<bool> Function($$ExistenciasTableTableFilterComposer f) f,
+  ) {
+    final $$ExistenciasTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.existenciasTable,
+      getReferencedColumn: (t) => t.idProducto,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExistenciasTableTableFilterComposer(
+            $db: $db,
+            $table: $db.existenciasTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProductosTableTableOrderingComposer
@@ -6975,6 +7377,31 @@ class $$ProductosTableTableAnnotationComposer
 
   GeneratedColumn<bool> get activo =>
       $composableBuilder(column: $table.activo, builder: (column) => column);
+
+  Expression<T> existenciasTableRefs<T extends Object>(
+    Expression<T> Function($$ExistenciasTableTableAnnotationComposer a) f,
+  ) {
+    final $$ExistenciasTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.existenciasTable,
+      getReferencedColumn: (t) => t.idProducto,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExistenciasTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.existenciasTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProductosTableTableTableManager
@@ -6988,16 +7415,9 @@ class $$ProductosTableTableTableManager
           $$ProductosTableTableAnnotationComposer,
           $$ProductosTableTableCreateCompanionBuilder,
           $$ProductosTableTableUpdateCompanionBuilder,
-          (
-            ProductosTableData,
-            BaseReferences<
-              _$AppDatabase,
-              $ProductosTableTable,
-              ProductosTableData
-            >,
-          ),
+          (ProductosTableData, $$ProductosTableTableReferences),
           ProductosTableData,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool existenciasTableRefs})
         > {
   $$ProductosTableTableTableManager(
     _$AppDatabase db,
@@ -7073,9 +7493,45 @@ class $$ProductosTableTableTableManager
                 activo: activo,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ProductosTableTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({existenciasTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (existenciasTableRefs) db.existenciasTable,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (existenciasTableRefs)
+                    await $_getPrefetchedData<
+                      ProductosTableData,
+                      $ProductosTableTable,
+                      ExistenciaData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ProductosTableTableReferences
+                          ._existenciasTableRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ProductosTableTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).existenciasTableRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.idProducto == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -7090,12 +7546,9 @@ typedef $$ProductosTableTableProcessedTableManager =
       $$ProductosTableTableAnnotationComposer,
       $$ProductosTableTableCreateCompanionBuilder,
       $$ProductosTableTableUpdateCompanionBuilder,
-      (
-        ProductosTableData,
-        BaseReferences<_$AppDatabase, $ProductosTableTable, ProductosTableData>,
-      ),
+      (ProductosTableData, $$ProductosTableTableReferences),
       ProductosTableData,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool existenciasTableRefs})
     >;
 typedef $$EntradasTableTableCreateCompanionBuilder =
     EntradasTableCompanion Function({
@@ -9365,6 +9818,316 @@ typedef $$DiferenciasConteoTableProcessedTableManager =
       DiferenciasConteoData,
       PrefetchHooks Function()
     >;
+typedef $$ExistenciasTableTableCreateCompanionBuilder =
+    ExistenciasTableCompanion Function({
+      Value<int> id,
+      required int idProducto,
+      required double existenciaActual,
+      required double existenciaDisponible,
+    });
+typedef $$ExistenciasTableTableUpdateCompanionBuilder =
+    ExistenciasTableCompanion Function({
+      Value<int> id,
+      Value<int> idProducto,
+      Value<double> existenciaActual,
+      Value<double> existenciaDisponible,
+    });
+
+final class $$ExistenciasTableTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $ExistenciasTableTable, ExistenciaData> {
+  $$ExistenciasTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ProductosTableTable _idProductoTable(_$AppDatabase db) =>
+      db.productosTable.createAlias(
+        $_aliasNameGenerator(
+          db.existenciasTable.idProducto,
+          db.productosTable.id,
+        ),
+      );
+
+  $$ProductosTableTableProcessedTableManager get idProducto {
+    final $_column = $_itemColumn<int>('id_producto')!;
+
+    final manager = $$ProductosTableTableTableManager(
+      $_db,
+      $_db.productosTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_idProductoTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ExistenciasTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ExistenciasTableTable> {
+  $$ExistenciasTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get existenciaActual => $composableBuilder(
+    column: $table.existenciaActual,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get existenciaDisponible => $composableBuilder(
+    column: $table.existenciaDisponible,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ProductosTableTableFilterComposer get idProducto {
+    final $$ProductosTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idProducto,
+      referencedTable: $db.productosTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductosTableTableFilterComposer(
+            $db: $db,
+            $table: $db.productosTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExistenciasTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExistenciasTableTable> {
+  $$ExistenciasTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get existenciaActual => $composableBuilder(
+    column: $table.existenciaActual,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get existenciaDisponible => $composableBuilder(
+    column: $table.existenciaDisponible,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ProductosTableTableOrderingComposer get idProducto {
+    final $$ProductosTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idProducto,
+      referencedTable: $db.productosTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductosTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.productosTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExistenciasTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExistenciasTableTable> {
+  $$ExistenciasTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get existenciaActual => $composableBuilder(
+    column: $table.existenciaActual,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get existenciaDisponible => $composableBuilder(
+    column: $table.existenciaDisponible,
+    builder: (column) => column,
+  );
+
+  $$ProductosTableTableAnnotationComposer get idProducto {
+    final $$ProductosTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idProducto,
+      referencedTable: $db.productosTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductosTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.productosTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExistenciasTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExistenciasTableTable,
+          ExistenciaData,
+          $$ExistenciasTableTableFilterComposer,
+          $$ExistenciasTableTableOrderingComposer,
+          $$ExistenciasTableTableAnnotationComposer,
+          $$ExistenciasTableTableCreateCompanionBuilder,
+          $$ExistenciasTableTableUpdateCompanionBuilder,
+          (ExistenciaData, $$ExistenciasTableTableReferences),
+          ExistenciaData,
+          PrefetchHooks Function({bool idProducto})
+        > {
+  $$ExistenciasTableTableTableManager(
+    _$AppDatabase db,
+    $ExistenciasTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExistenciasTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExistenciasTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExistenciasTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> idProducto = const Value.absent(),
+                Value<double> existenciaActual = const Value.absent(),
+                Value<double> existenciaDisponible = const Value.absent(),
+              }) => ExistenciasTableCompanion(
+                id: id,
+                idProducto: idProducto,
+                existenciaActual: existenciaActual,
+                existenciaDisponible: existenciaDisponible,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int idProducto,
+                required double existenciaActual,
+                required double existenciaDisponible,
+              }) => ExistenciasTableCompanion.insert(
+                id: id,
+                idProducto: idProducto,
+                existenciaActual: existenciaActual,
+                existenciaDisponible: existenciaDisponible,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ExistenciasTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({idProducto = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (idProducto) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.idProducto,
+                                referencedTable:
+                                    $$ExistenciasTableTableReferences
+                                        ._idProductoTable(db),
+                                referencedColumn:
+                                    $$ExistenciasTableTableReferences
+                                        ._idProductoTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ExistenciasTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExistenciasTableTable,
+      ExistenciaData,
+      $$ExistenciasTableTableFilterComposer,
+      $$ExistenciasTableTableOrderingComposer,
+      $$ExistenciasTableTableAnnotationComposer,
+      $$ExistenciasTableTableCreateCompanionBuilder,
+      $$ExistenciasTableTableUpdateCompanionBuilder,
+      (ExistenciaData, $$ExistenciasTableTableReferences),
+      ExistenciaData,
+      PrefetchHooks Function({bool idProducto})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9393,4 +10156,6 @@ class $AppDatabaseManager {
       $$ConteosFisicosTableTableManager(_db, _db.conteosFisicos);
   $$DiferenciasConteoTableTableManager get diferenciasConteo =>
       $$DiferenciasConteoTableTableManager(_db, _db.diferenciasConteo);
+  $$ExistenciasTableTableTableManager get existenciasTable =>
+      $$ExistenciasTableTableTableManager(_db, _db.existenciasTable);
 }

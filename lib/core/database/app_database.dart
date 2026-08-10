@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/entradas_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/salidas_table.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/existencias_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/database/tables/categoria_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/database/tables/marca_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/database/tables/unidad_medida_table.dart';
@@ -32,12 +33,16 @@ part 'app_database.g.dart';
   AjusteInventarioTable,
   ConteosFisicos,
   DiferenciasConteo,
+  ExistenciasTable,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  late final $ExistenciasTableTable existenciasTable;
+
+  @override
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -62,13 +67,15 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(conteosFisicos);
             await m.createTable(diferenciasConteo);
           }
+          if (from < 8) {
+            await m.createTable(existenciasTable);
+          }
         },
       );
 }
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    // ✅ Ruta automática válida en ANDROID, iOS, Windows, Linux y macOS
     final carpetaBase = await getApplicationDocumentsDirectory();
     final archivoDb = File(p.join(carpetaBase.path, 'fiscogest.sqlite'));
     return NativeDatabase(archivoDb);
