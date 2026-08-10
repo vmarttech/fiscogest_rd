@@ -14,10 +14,10 @@ function create_kardex_table($conexion)
         saldo_actual DECIMAL(10,2) NOT NULL,
         referencia_id INT NULL, -- ID del ajuste o documento
         motivo VARCHAR(100) NOT NULL,
-        usuario_id INT NOT NULL,
+        usuarioId_id INT NOT NULL,
         fecha_movimiento DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (id_producto) REFERENCES inventario(id),
-        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        FOREIGN KEY (usuarioId_id) REFERENCES usuarioIds(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 
     if ($conexion->query($sql) === TRUE) {

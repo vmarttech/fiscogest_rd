@@ -6,7 +6,7 @@
         <th>Tipo</th>
         <th>Cantidad</th>
         <th>Motivo</th>
-        <th>Usuario</th>
+        <th>usuarioId</th>
     </tr>
     <?php foreach($lista as $fila): ?>
     <tr>
@@ -15,7 +15,7 @@
         <td><?= $fila['tipo_ajuste'] ?></td>
         <td><?= $fila['cantidad'] ?></td>
         <td><?= $fila['motivo'] ?></td>
-        <td><?= $fila['usuario'] ?></td>
+        <td><?= $fila['usuarioId'] ?></td>
     </tr>
     <?php endforeach; ?>
 </table>

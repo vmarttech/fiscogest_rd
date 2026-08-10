@@ -13,10 +13,10 @@ function create_ajuste_inventario_table($conexion)
         cantidad DECIMAL(10,2) NOT NULL,
         motivo VARCHAR(100) NOT NULL,
         observaciones TEXT NULL,
-        usuario_id INT NOT NULL,
+        usuarioId_id INT NOT NULL,
         fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (id_producto) REFERENCES inventario(id),
-        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        FOREIGN KEY (usuarioId_id) REFERENCES usuarioIds(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 
     if ($conexion->query($sql) === TRUE) {

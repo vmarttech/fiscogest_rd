@@ -1,58 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_sizes.dart';
-import 'package:fiscogest_rd/core/ui/app_radius.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_sizes.dart';
 
 class AppDropdown<T> extends StatelessWidget {
-
   const AppDropdown({
     super.key,
     this.label,
-    required this.initialValue,
-    required this.items,
-    required this.onChanged,
     this.hint,
     this.errorText,
-    this.enabled = true,
+    this.initialValue, // ✅ Parámetro agregado para que tus páginas no fallen
+    required this.items,
+    required this.onChanged,
     this.height = AppSizes.inputHeightMd,
   });
+
   final String? label;
-  final T? initialValue;
-  final List<DropdownMenuItem<T>> items;
-  final ValueChanged<T?>? onChanged;
   final String? hint;
   final String? errorText;
-  final bool enabled;
-  final double? height;
+  final T? initialValue; // Reemplaza el antiguo 'value'
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?>? onChanged;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: height,
       child: DropdownButtonFormField<T>(
+        // ✅ Usamos el parámetro actualizado que recomienda Flutter
         initialValue: initialValue,
         items: items,
-        onChanged: enabled ? onChanged : null,
+        onChanged: onChanged,
+        isExpanded: true,
+        menuMaxHeight: 350,
         style: AppTypography.bodyMedium,
-        icon: const Icon(Icons.expand_more, color: AppColors.grey600),
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
           errorText: errorText,
-          contentPadding: AppSpacing.allM,
-          labelStyle: AppTypography.labelMedium,
-          hintStyle: AppTypography.bodySmall.copyWith(color: AppColors.grey400),
-          errorStyle: AppTypography.error,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.m,
+            vertical: 12,
+          ),
           border: OutlineInputBorder(borderRadius: AppRadius.allM),
           enabledBorder: OutlineInputBorder(
             borderRadius: AppRadius.allM,
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: const BorderSide(color: AppColors.grey300),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: AppRadius.allM,
-            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            borderSide: const BorderSide(color: AppColors.primary),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: AppRadius.allM,
@@ -60,10 +60,10 @@ class AppDropdown<T> extends StatelessWidget {
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: AppRadius.allM,
-            borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+            borderSide: const BorderSide(color: AppColors.error),
           ),
           filled: true,
-          fillColor: enabled ? AppColors.white : AppColors.grey100,
+          fillColor: AppColors.white,
         ),
       ),
     );

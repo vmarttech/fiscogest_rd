@@ -1,53 +1,66 @@
+import 'package:drift/drift.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/interfaces/i_configuracion_repository.dart';
-import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_dao.dart';
+// ✅ QUITADO import sin uso que generaba advertencia
 
 class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
-
-  ConfiguracionRepositoryImpl(this._configuracionDao);
-  final ConfiguracionDao _configuracionDao;
+  ConfiguracionRepositoryImpl(this.db);
+  // ✅ CONSTRUCTOR PRIMERO: corrige aviso sort_constructors_first
+  final AppDatabase db;
 
   @override
-  Future<ConfiguracionEntity> obtenerConfiguracion() async {
-    final model = await _configuracionDao.obtenerConfiguracion();
-    if (model == null) {
-      return const ConfiguracionEntity(
-        id: '1',
-        nombreComercial: 'FiscoGest RD',
-        razonSocial: 'FiscoGest RD, S.R.L.',
-        rnc: '131-00000-1',
-        direccion: 'Av. Principal, Santo Domingo',
-        telefono: '809-000-0000',
-        correo: 'admin@fiscogest.rd',
+  Future<ConfiguracionEmpresa?> obtenerConfiguracion() async {
+    final registro = await db.select(db.configuracionTable).getSingleOrNull();
+    if (registro != null) {
+      return ConfiguracionEmpresa(
+        id: registro.id,
+        nombreComercial: registro.nombreNegocio,
+        razonSocial: registro.nombreNegocio,
+        rnc: registro.rncCedula,
+        direccion: '',
+        telefono: '',
+        correo: '',
         logoUrl: '',
-        moneda: 'DOP (\$)',
-        zonaHoraria: 'America/Santo_Domingo',
-        formatoImpresion: 'Ticket 80mm',
-        formatoFecha: 'DD/MM/YYYY',
-        impuestoPorcentaje: 18.0,
-        idioma: 'Español',
+        moneda: registro.moneda,
+        zonaHoraria: '',
+        formatoImpresion: '',
+        formatoFecha: registro.formatoFecha,
+        impuestoPorcentaje: registro.impuestoPorcentaje,
+        idioma: registro.idioma,
       );
     }
-    return ConfiguracionEntity(
-      id: model.id.toString(),
-      nombreComercial: model.nombreNegocio,
-      razonSocial: 'FiscoGest RD, S.R.L.',
-      rnc: model.rncCedula,
-      direccion: 'Av. Principal, Santo Domingo',
-      telefono: '809-000-0000',
-      correo: 'admin@fiscogest.rd',
-      logoUrl: '',
-      moneda: model.moneda,
-      zonaHoraria: 'America/Santo_Domingo',
-      formatoImpresion: 'Ticket 80mm',
-      formatoFecha: model.formatoFecha,
-      impuestoPorcentaje: model.impuestoPorcentaje,
-      idioma: model.idioma,
-    );
+    return null;
   }
 
   @override
-  Future<void> guardarConfiguracion(ConfiguracionEntity configuracion) async {
-    // Implementación de persistencia local adaptada
+  Future<void> guardarConfiguracion(ConfiguracionEmpresa configuracion) async {
+    // ✅ RESUELTO int? → int: validación + conversión segura
+    if (configuracion.id != null) {
+      final idSeguro = configuracion.id!;
+      await db.update(db.configuracionTable).replace(
+        ConfiguracionTableCompanion(
+          id: Value(idSeguro),
+          nombreNegocio: Value(configuracion.nombreComercial),
+          rncCedula: Value(configuracion.rnc),
+          moneda: Value(configuracion.moneda),
+          formatoFecha: Value(configuracion.formatoFecha),
+          impuestoPorcentaje: Value(configuracion.impuestoPorcentaje),
+          idioma: Value(configuracion.idioma),
+        ),
+      );
+    } else {
+      // ✅ SINTAXIS DRIFT CORREGIDA: usa into + insert correcto
+      await db.into(db.configuracionTable).insert(
+        ConfiguracionTableCompanion(
+          nombreNegocio: Value(configuracion.nombreComercial),
+          rncCedula: Value(configuracion.rnc),
+          moneda: Value(configuracion.moneda),
+          formatoFecha: Value(configuracion.formatoFecha),
+          impuestoPorcentaje: Value(configuracion.impuestoPorcentaje),
+          idioma: Value(configuracion.idioma),
+        ),
+      );
+    }
   }
 }

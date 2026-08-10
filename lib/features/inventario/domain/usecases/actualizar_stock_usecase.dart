@@ -1,20 +1,46 @@
+import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
+import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
-import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
 
+// ✅ CONSTRUCTOR PRIMERO: corrige aviso sort_constructors_first
 class ActualizarStockUseCase {
-  ActualizarStockUseCase(this.servicio);
-  // ✅ Constructor PRIMERO
-  final IInventarioService servicio;
+  final IKardexRepository _kardexRepo;
+  ActualizarStockUseCase(this._kardexRepo);
 
-  Future<void> ejecutar({
+  Future<void> call({
     required int productoId,
+    required String tipoMovimientoStr,
     required double cantidad,
-    required TipoMovimiento tipo,
+    required double saldoAnterior,
+    required double saldoNuevo,
+    required double costoUnitario,
+    required double totalMovimiento,
+    required int usuarioId,
+    String? documentoReferencia,
+    String? observacion,
+    DateTime? fechaMovimiento,
   }) async {
-    if (tipo == TipoMovimiento.entrada) {
-      await servicio.sumarStock(productoId, cantidad);
-    } else {
-      await servicio.restarStock(productoId, cantidad);
-    }
+    // ✅ CONVERSIÓN SEGURA: String → Enum TipoMovimiento, elimina error asignación
+    final tipoMovimiento = TipoMovimiento.values.firstWhere(
+      (e) => e.name == tipoMovimientoStr,
+      orElse: () => TipoMovimiento.ajuste,
+    );
+
+    final movimientoKardex = Kardex(
+      id: null,
+      productoId: productoId,
+      tipoMovimiento: tipoMovimiento.name,
+      cantidad: cantidad,
+      saldoAnterior: saldoAnterior,
+      saldoNuevo: saldoNuevo,
+      costoUnitario: costoUnitario,
+      totalMovimiento: totalMovimiento,
+      documentoReferencia: documentoReferencia,
+      observacion: observacion,
+      usuarioId: usuarioId,
+      fechaMovimiento: fechaMovimiento ?? DateTime.now(),
+    );
+
+    await _kardexRepo.registrarMovimiento(movimientoKardex);
   }
 }

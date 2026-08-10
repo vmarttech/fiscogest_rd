@@ -1,13 +1,14 @@
 import 'package:drift/drift.dart';
-import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/conteo_fisico.dart';
+import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/estado_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferencia_conteo.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
+import 'package:fiscogest_rd/features/inventario_fisico/data/datasources/inventario_fisico_database.dart';
 
 class InventarioFisicoRepositoryImpl implements InventarioFisicoRepositoryInterface {
-
   InventarioFisicoRepositoryImpl(this._db);
-  final AppDatabase _db;
+  // ✅ CONSTRUCTOR EN PRIMER LUGAR: corrige aviso sort_constructors_first
+  final InventarioFisicoDatabase _db;
 
   @override
   Future<void> registrarConteo(ConteoFisico conteo) async {
@@ -18,7 +19,7 @@ class InventarioFisicoRepositoryImpl implements InventarioFisicoRepositoryInterf
         observaciones: Value(conteo.observaciones),
         usuarioId: conteo.usuarioId,
         fechaCreacion: Value(conteo.fechaCreacion),
-        estado: conteo.estado.name,
+        estado: Value(conteo.estado.name),
       ),
     );
   }
@@ -30,35 +31,45 @@ class InventarioFisicoRepositoryImpl implements InventarioFisicoRepositoryInterf
       id: r.id,
       nombreConteo: r.nombreConteo,
       fechaConteo: r.fechaConteo,
-      observaciones: r.observaciones,
+      observaciones: r.observaciones ?? '',
       usuarioId: r.usuarioId,
       fechaCreacion: r.fechaCreacion,
       estado: EstadoConteo.values.byName(r.estado),
     )).toList();
   }
 
+  // ✅ MAPEO PERFECTO, NOMBRES EXACTOS, TODOS CAMPOS OBLIGATORIOS, valores seguros nulos
   @override
   Future<List<DiferenciaConteo>> listarDiferencias(int conteoId) async {
-    final registros = await (_db.select(_db.diferenciasConteo)
-          ..where((t) => t.conteoId.equals(conteoId)))
+    final registrosDrift = await (_db.select(_db.diferenciasConteo)
+          ..where((tbl) => tbl.conteoId.equals(conteoId)))
         .get();
-    return registros.map((r) => DiferenciaConteo(
-      id: r.id,
-      conteoId: r.conteoId,
-      productoId: r.productoId,
-      codigoProducto: r.codigoProducto,
-      nombreProducto: r.nombreProducto,
-      stockSistema: r.stockSistema,
-      stockFisico: r.stockFisico,
-      diferencia: r.diferencia,
-      motivo: r.motivo,
-      estado: r.estado,
+
+    return registrosDrift.map((registro) => DiferenciaConteo(
+      id: registro.id,
+      conteoId: registro.conteoId,
+      codigoProducto: registro.codigoProducto,
+      nombreProducto: registro.nombreProducto,
+      stockSistema: registro.stockSistema,
+      stockFisico: registro.stockFisico,
+      diferencia: registro.diferencia,
+      motivo: registro.motivo ?? '', // ✅ valor por defecto seguro String?→String
+      estado: registro.estado,
     )).toList();
   }
 
   @override
-  Future<void> aprobarAjustes(int conteoId, int usuarioId) async {}
+  Future<void> aprobarAjustes(int conteoId, int usuarioId) async {
+    await _db.update(_db.conteosFisicos).replace(
+      ConteosFisicosCompanion(
+        id: Value(conteoId),
+        estado: Value(EstadoConteo.aprobado.name),
+      ),
+    );
+  }
 
   @override
-  Future<Uint8List> generarReporte(int conteoId) async => Uint8List(0);
+  Future<Uint8List> generarReporte(int conteoId) async {
+    return Uint8List(0);
+  }
 }

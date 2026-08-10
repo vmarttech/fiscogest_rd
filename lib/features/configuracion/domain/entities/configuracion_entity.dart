@@ -1,7 +1,9 @@
-class ConfiguracionEntity {
+import 'package:equatable/equatable.dart';
 
-  const ConfiguracionEntity({
-    required this.id,
+class ConfiguracionEmpresa extends Equatable {
+
+  const ConfiguracionEmpresa({
+    this.id,
     required this.nombreComercial,
     required this.razonSocial,
     required this.rnc,
@@ -16,7 +18,7 @@ class ConfiguracionEntity {
     required this.impuestoPorcentaje,
     required this.idioma,
   });
-  final String id;
+  final int? id;
   final String nombreComercial;
   final String razonSocial;
   final String rnc;
@@ -26,42 +28,26 @@ class ConfiguracionEntity {
   final String logoUrl;
   final String moneda;
   final String zonaHoraria;
-  final String formatoImpresion; // e.g., 'Ticket 80mm', 'Factura Carta (PDF)'
+  final String formatoImpresion;
   final String formatoFecha;
   final double impuestoPorcentaje;
   final String idioma;
 
-  ConfiguracionEntity copyWith({
-    String? id,
-    String? nombreComercial,
-    String? razonSocial,
-    String? rnc,
-    String? direccion,
-    String? telefono,
-    String? correo,
-    String? logoUrl,
-    String? moneda,
-    String? zonaHoraria,
-    String? formatoImpresion,
-    String? formatoFecha,
-    double? impuestoPorcentaje,
-    String? idioma,
-  }) {
-    return ConfiguracionEntity(
-      id: id ?? this.id,
-      nombreComercial: nombreComercial ?? this.nombreComercial,
-      razonSocial: razonSocial ?? this.razonSocial,
-      rnc: rnc ?? this.rnc,
-      direccion: direccion ?? this.direccion,
-      telefono: telefono ?? this.telefono,
-      correo: correo ?? this.correo,
-      logoUrl: logoUrl ?? this.logoUrl,
-      moneda: moneda ?? this.moneda,
-      zonaHoraria: zonaHoraria ?? this.zonaHoraria,
-      formatoImpresion: formatoImpresion ?? this.formatoImpresion,
-      formatoFecha: formatoFecha ?? this.formatoFecha,
-      impuestoPorcentaje: impuestoPorcentaje ?? this.impuestoPorcentaje,
-      idioma: idioma ?? this.idioma,
-    );
-  }
+  @override
+  List<Object?> get props => [
+        id,
+        nombreComercial,
+        razonSocial,
+        rnc,
+        direccion,
+        telefono,
+        correo,
+        logoUrl,
+        moneda,
+        zonaHoraria,
+        formatoImpresion,
+        formatoFecha,
+        impuestoPorcentaje,
+        idioma,
+      ];
 }

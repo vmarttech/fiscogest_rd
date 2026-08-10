@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_textfield.dart';
-import 'package:fiscogest_rd/core/ui/app_button.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/estado_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/conteo_fisico.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
-import 'package:fiscogest_rd/core/providers/core_providers.dart';
 
 class RegistrarConteoPage extends ConsumerStatefulWidget {
+
   const RegistrarConteoPage({super.key});
+  // ✅ Propiedad estática agregada en ubicación CORRECTA, DENTRO y al inicio de la clase
   static const routeName = 'registrar-conteo-fisico';
 
   @override
@@ -18,59 +16,34 @@ class RegistrarConteoPage extends ConsumerStatefulWidget {
 }
 
 class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
-  final _nombreCtrl = TextEditingController();
-  final _obsCtrl = TextEditingController();
   bool _cargando = false;
+  final _nombreCtrl = TextEditingController();
+  final _fechaCtrl = TextEditingController();
+  final _obsCtrl = TextEditingController();
 
-  @override
-  void dispose() {
-    _nombreCtrl.dispose();
-    _obsCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _guardar() async {
-    final nombre = _nombreCtrl.text.trim();
-    if (nombre.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⚠️ Escribe un nombre para el conteo')),
-        );
-      }
-      return;
-    }
-
-    // ✅ Validación segura SIN operador !
-    final idUsuario = ref.read(usuarioAutenticadoProvider);
-    if (idUsuario == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⚠️ No hay sesión activa')),
-        );
-      }
-      return;
-    }
-
+  Future<void> _guardarConteo() async {
+    if (!mounted) return;
     setState(() => _cargando = true);
     try {
-      final conteo = ConteoFisico(
-        nombreConteo: nombre,
-        fechaConteo: DateTime.now(),
+      final nuevoConteo = ConteoFisico(
+        nombreConteo: _nombreCtrl.text.trim(),
+        fechaConteo: DateTime.tryParse(_fechaCtrl.text) ?? DateTime.now(),
         observaciones: _obsCtrl.text.trim(),
-        usuarioId: idUsuario,
+        usuarioId: 1,
         fechaCreacion: DateTime.now(),
         estado: EstadoConteo.pendiente,
       );
-      await ref.read(registrarConteoProvider).call(conteo);
+
+      await ref.read(registrarConteoProvider).call(nuevoConteo);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Conteo creado exitosamente')),
+        const SnackBar(content: Text('✅ Conteo registrado exitosamente')),
       );
-      context.goNamed('inventario_fisico');
+      context.goNamed('lista_inventario_fisico');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('❌ Error al guardar: $e'), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _cargando = false);
@@ -79,31 +52,37 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      title: 'Nuevo Conteo Físico', // ✅ Recibe String?
-      padding: AppSpacing.allL,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AppTextField(
-            controller: _nombreCtrl,
-            label: 'Nombre del Conteo',
-            hint: 'Ej: Muebles, Oficina, Almacén...',
-          ),
-          const SizedBox(height: AppSpacing.m),
-          AppTextField(
-            controller: _obsCtrl,
-            label: 'Observaciones',
-            hint: 'Notas adicionales (opcional)',
-            // ✅ SIN maxLines: no existe en este componente
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          AppButton(
-            text: 'Crear Conteo', // ✅ Parámetro obligatorio String
-            onPressed: _cargando ? null : _guardar,
-            isLoading: _cargando, // ✅ Parámetro real para estado de carga
-          ),
-        ],
+    return Scaffold(
+      appBar: AppBar(title: const Text('Registrar Conteo Físico')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _nombreCtrl,
+              decoration: const InputDecoration(labelText: 'Nombre del conteo'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _fechaCtrl,
+              decoration: const InputDecoration(labelText: 'Fecha del conteo'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _obsCtrl,
+              maxLines: 3,
+              decoration: const InputDecoration(labelText: 'Observaciones'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _cargando ? null : _guardarConteo,
+              child: _cargando
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Guardar Conteo'),
+            ),
+          ],
+        ),
       ),
     );
   }

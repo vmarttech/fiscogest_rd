@@ -2,10 +2,10 @@ import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacio
 
 class PresentacionRepository {
   final List<Presentacion> _presentacionesLocales = [
-    Presentacion(id: 1, nombre: 'Unidad', abreviatura: 'UND'),
-    Presentacion(id: 2, nombre: 'Caja', abreviatura: 'CAJ'),
-    Presentacion(id: 3, nombre: 'Kilogramo', abreviatura: 'KG'),
-    Presentacion(id: 4, nombre: 'Litro', abreviatura: 'LT'),
+    const Presentacion(id: 1, nombre: 'Unidad', abreviatura: 'UND'),
+    const Presentacion(id: 2, nombre: 'Caja', abreviatura: 'CAJ'),
+    const Presentacion(id: 3, nombre: 'Kilogramo', abreviatura: 'KG'),
+    const Presentacion(id: 4, nombre: 'Litro', abreviatura: 'LT'),
   ];
 
   Future<List<Presentacion>> obtenerPresentaciones() async {
@@ -26,7 +26,7 @@ class PresentacionRepository {
     if (duplicada) {
       throw Exception('Ya existe otra presentación con ese nombre.');
     }
-    final index = _presentacionesLocales.indexWhere((p) => p.id == presentacion.id);
+    final index = _presentacionesLocales.indexWhere((p) => p.id == presentacion.id!);
     if (index != -1) {
       _presentacionesLocales[index] = presentacion;
     }

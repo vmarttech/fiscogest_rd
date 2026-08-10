@@ -2,7 +2,7 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.
 
 class ClienteCompletoRepository {
   final List<ClienteCompleto> _clientesLocales = [
-    ClienteCompleto(
+    const ClienteCompleto(
       id: 1,
       nombre: 'Consumidor Final',
       direccion: 'Santo Domingo',
@@ -32,7 +32,7 @@ class ClienteCompletoRepository {
     if (duplicado) {
       throw Exception('Ya existe otro cliente con ese RNC o Cédula.');
     }
-    final index = _clientesLocales.indexWhere((c) => c.id == cliente.id);
+    final index = _clientesLocales.indexWhere((c) => c.id == cliente.id!);
     if (index != -1) {
       _clientesLocales[index] = cliente;
     }

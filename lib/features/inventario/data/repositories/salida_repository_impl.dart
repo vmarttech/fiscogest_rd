@@ -14,7 +14,7 @@ class SalidaRepositoryImpl implements ISalidaRepository {
         productoId: salida.productoId,
         cantidad: salida.cantidad,
         motivo: salida.motivo,
-        usuario: salida.usuario,
+        usuarioId: salida.usuarioId,
         fecha: salida.fecha,
       ),
     );
@@ -28,7 +28,7 @@ class SalidaRepositoryImpl implements ISalidaRepository {
       productoId: r.productoId,
       cantidad: r.cantidad,
       motivo: r.motivo,
-      usuario: r.usuario,
+      usuarioId: r.usuarioId,
       fecha: r.fecha,
     )).toList();
   }
@@ -43,7 +43,7 @@ class SalidaRepositoryImpl implements ISalidaRepository {
       productoId: r.productoId,
       cantidad: r.cantidad,
       motivo: r.motivo,
-      usuario: r.usuario,
+      usuarioId: r.usuarioId,
       fecha: r.fecha,
     )).toList();
   }

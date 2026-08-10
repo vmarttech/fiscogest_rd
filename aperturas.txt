@@ -1,0 +1,24 @@
+61:        actions: [
+72:                    children: [
+107:          tabs: const [
+118:        children: [
+135:        children: [
+138:            children: [
+168:                        final prod = filtrados[i];
+179:                              children: [
+192:                                    children: [
+194:                                        children: [
+230:                                            children: [
+242:                                        children: [
+246:                                              children: [
+255:                                              children: [
+266:                                        children: [
+270:                                              children: [
+279:                                              children: [
+291:                                  children: [
+336:        children: [
+343:            children: [
+395:                    final m = filtrados[i];
+409:                          children: [
+418:                                children: [
+439:                              children: [

@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/unidades/domain/entities/unidad.dart';
 
 class UnidadNotifier extends StateNotifier<AsyncValue<List<Unidad>>> {
-  UnidadNotifier() : super(AsyncValue.data([
+  UnidadNotifier() : super(const AsyncValue.data([
     Unidad(id: 1, nombre: 'Unidad', abreviatura: 'UND'),
     Unidad(id: 2, nombre: 'Kilogramo', abreviatura: 'KG'),
     Unidad(id: 3, nombre: 'Litro', abreviatura: 'LT'),
@@ -29,7 +29,7 @@ class UnidadNotifier extends StateNotifier<AsyncValue<List<Unidad>>> {
       }
       state = AsyncValue.data([
         for (var u in lista)
-          if (u.id == unidad.id) unidad else u
+          if (u.id == unidad.id!) unidad else u
       ]);
     });
   }

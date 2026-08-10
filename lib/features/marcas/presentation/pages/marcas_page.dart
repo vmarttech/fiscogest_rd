@@ -126,7 +126,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                       ),
                                       AppLayout.vXs,
                                       Text(
-                                        marca.descripcion?.isEmpty ?? true ? 'Sin descripción' : marca.descripcion!,
+                                        marca.descripcion?.isEmpty ?? true ? 'Sin descripción' : marca.descripcion,
                                         style: AppTypography.bodySmall,
                                       ),
                                     ],

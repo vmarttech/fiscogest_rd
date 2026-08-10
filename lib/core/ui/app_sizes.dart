@@ -1,12 +1,13 @@
 abstract class AppSizes {
-  // Alturas estándar de controles
+  // Alturas estándar de botones
   static const double buttonHeightSm = 36;
   static const double buttonHeightMd = 44;
   static const double buttonHeightLg = 52;
 
-  static const double inputHeightSm = 36;
-  static const double inputHeightMd = 44;
-  static const double inputHeightLg = 52;
+  // Alturas estándar de campos de entrada (AJUSTADOS a Material 3)
+  static const double inputHeightSm = 40;
+  static const double inputHeightMd = 56; // Estándar oficial Material 3
+  static const double inputHeightLg = 64;
 
   // Dimensiones de tarjetas y contenedores
   static const double cardMinHeight = 80;

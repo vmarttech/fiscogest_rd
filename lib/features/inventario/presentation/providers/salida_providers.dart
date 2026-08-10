@@ -31,9 +31,9 @@ class SalidaController extends StateNotifier<AsyncValue<void>> {
 
   Future<void> registrarSalida({
     required int productoId,
-    required int cantidad,
+    required double cantidad, // ✅ corregido: double para coincidir servicio
     required String motivo,
-    required String usuario,
+    required String usuarioId,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -41,7 +41,7 @@ class SalidaController extends StateNotifier<AsyncValue<void>> {
         productoId: productoId,
         cantidad: cantidad,
         motivo: motivo,
-        usuario: usuario,
+        usuarioId: usuarioId,
       );
 
       _ref.invalidate(productoControllerProvider);

@@ -45,7 +45,7 @@ class MarcaRepositoryImpl implements MarcaRepository {
   @override
   Future<void> actualizar(Marca marca) async {
     await (_db.update(_db.marcas)
-      ..where((t) => t.id.equals(marca.id!))
+      ..where((t) => t.id.equals(marca.id ?? 0))
     ).write(MarcasCompanion(
       nombre: Value(marca.nombre),
       descripcion: Value(marca.descripcion),

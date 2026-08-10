@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart' as drift;
-import 'package:fiscogest_rd/core/database/app_database.dart'; // <-- Importante: Asegúrate de importar tu AppDatabase
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/domain/interfaces/i_cliente_repository.dart';

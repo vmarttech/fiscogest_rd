@@ -3,25 +3,34 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_
 class AjusteInventarioModel extends AjusteInventario {
   const AjusteInventarioModel({
     super.id,
+    required super.codigoBusqueda,
     required super.idProducto,
-    super.codigoBusqueda,
-    required super.tipoAjuste,
     required super.cantidad,
+    required super.tipoAjuste,
     required super.motivo,
     required super.usuarioId,
     required super.fechaCreacion,
   });
 
-  // Ejemplo desde mapa
-  factory AjusteInventarioModel.fromMap(Map<String, dynamic> map) {
-    return AjusteInventarioModel(
-      id: map['id'] as int?,
-      idProducto: map['idProducto'] as int,
-      tipoAjuste: map['tipoAjuste'] as String,
-      cantidad: map['cantidad'] as double,
-      motivo: map['motivo'] as String,
-      usuarioId: map['usuarioId'] as int,
-      fechaCreacion: DateTime.parse(map['fechaCreacion'] as String),
-    );
-  }
+  factory AjusteInventarioModel.fromJson(Map<String, dynamic> json) => AjusteInventarioModel(
+    id: json['id'] as int?,
+    codigoBusqueda: json['codigoBusqueda'] as String? ?? '',
+    idProducto: json['idProducto'] as int,
+    cantidad: (json['cantidad'] as num).toDouble(),
+    tipoAjuste: json['tipoAjuste'] as String,
+    motivo: json['motivo'] as String,
+    usuarioId: json['usuarioId'] as int,
+    fechaCreacion: DateTime.parse(json['fechaCreacion'] as String),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'codigoBusqueda': codigoBusqueda,
+    'idProducto': idProducto,
+    'cantidad': cantidad,
+    'tipoAjuste': tipoAjuste,
+    'motivo': motivo,
+    'usuarioId': usuarioId,
+    'fechaCreacion': fechaCreacion.toIso8601String(),
+  };
 }

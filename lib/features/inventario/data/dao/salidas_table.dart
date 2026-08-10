@@ -5,6 +5,6 @@ class SalidasTable extends Table {
   IntColumn get productoId => integer()();
   IntColumn get cantidad => integer()();
   TextColumn get motivo => text()();
-  TextColumn get usuario => text()();
+  TextColumn get usuarioId => text()();
   DateTimeColumn get fecha => dateTime()();
 }

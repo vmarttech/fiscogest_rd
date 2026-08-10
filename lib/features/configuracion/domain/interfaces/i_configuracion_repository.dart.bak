@@ -1,0 +1,6 @@
+import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
+
+abstract class IConfiguracionRepository {
+  Future<Configuracion?> obtenerConfiguracion();
+  Future<void> guardarConfiguracion(Configuracion configuracion);
+}

@@ -48,18 +48,18 @@ final ajusteInventarioListaProvider = FutureProvider<List<AjusteInventario>>((re
 
 // ✅ Proveedores de Casos de Uso
 final registrarAjusteUsecaseProvider = Provider<RegistrarAjusteUsecase>((ref) {
-  final repo = ref.read(ajusteInventarioRepositoryProvider);
+  final repo = ref.read(AjusteInventarioRepositoryImplProvider);
   return RegistrarAjusteUsecase(repo);
 });
 
 final listarAjustesUsecaseProvider = Provider<ListarAjustesUsecase>((ref) {
-  final repo = ref.read(ajusteInventarioRepositoryProvider);
+  final repo = ref.read(AjusteInventarioRepositoryImplProvider);
   return ListarAjustesUsecase(repo);
 });
 
 // ✅ Repositorio con tus rutas reales
-final ajusteInventarioRepositoryProvider = Provider<AjusteInventarioRepositoryImpl>((ref) {
+final AjusteInventarioRepositoryImplProvider = Provider<AjusteInventarioRepositoryImplImpl>((ref) {
   final AppDatabase appDb = ref.read(databaseProvider);
   final inventarioRepo = InventarioRepositoryImpl(appDb);
-  return AjusteInventarioRepositoryImpl(inventarioRepo, appDb);
+  return AjusteInventarioRepositoryImplImpl(inventarioRepo, appDb);
 });

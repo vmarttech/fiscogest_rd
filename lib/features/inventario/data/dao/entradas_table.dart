@@ -5,6 +5,6 @@ class EntradasTable extends Table {
   IntColumn get productoId => integer()();
   RealColumn get cantidad => real()();
   TextColumn get motivo => text()();
-  TextColumn get usuario => text()();
+  TextColumn get usuarioId => text()();
   DateTimeColumn get fecha => dateTime()();
 }

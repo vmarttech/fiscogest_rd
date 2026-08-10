@@ -59,7 +59,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
       productoId: widget.productoId,
       cantidad: cantidad,
       motivo: _motivoController.text.trim().isEmpty ? 'Entrada por compra' : _motivoController.text.trim(),
-      usuario: 'UsuarioActual',
+      usuarioId: 'usuarioIdActual',
     );
 
     ref.invalidate(productoControllerProvider);

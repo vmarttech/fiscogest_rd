@@ -179,7 +179,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                               text: 'Eliminar',
                                               onPressed: () {
                                                 if (proveedor.id != null) {
-                                                  ref.read(proveedorControllerProvider.notifier).eliminar(proveedor.id!);
+                                                  ref.read(proveedorControllerProvider.notifier).eliminar(proveedor ?? 0);
                                                 }
                                                 Navigator.pop(context);
                                               },

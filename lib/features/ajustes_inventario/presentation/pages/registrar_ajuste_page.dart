@@ -173,14 +173,14 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                       }
 
                       final ajuste = AjusteInventario(
-                        idProducto: producto.id!,
+                        idProducto: producto.id ?? 0,
                         codigoBusqueda: codigo,
                         cantidad: cant,
                         tipoAjuste: _tipoSeleccionado,
                         motivo: _motivoCtrl.text,
                         // observaciones: _observacionesCtrl.text.trim(), // Habilitar al agregar en entidad
-                        // ✅ Punto 1: Usuario real EXACTO confirmado
-                        usuarioId: ref.read(usuarioAutenticadoProvider)!,
+                        // ✅ Punto 1: usuarioId real EXACTO confirmado
+                        usuarioId: ref.read(usuarioIdAutenticadoProvider)!,
                         fechaCreacion: DateTime.now(),
                       );
 

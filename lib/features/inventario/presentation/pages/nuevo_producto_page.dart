@@ -8,7 +8,8 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_pr
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
-  const NuevoProductoPage({super.key});
+  const NuevoProductoPage({super.key, this.idProducto});
+  final int? idProducto;
 
   @override
   ConsumerState<NuevoProductoPage> createState() => _NuevoProductoPageState();
@@ -26,6 +27,34 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   int? _marcaSel;
   int? _unidadSel;
   bool _activo = true;
+  Producto? _productoEditar;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatosSiEdita();
+  }
+
+  Future<void> _cargarDatosSiEdita() async {
+    if (widget.idProducto == null) return;
+    final lista = ref.read(productoControllerProvider);
+    lista.whenData((productos) {
+      final prod = productos.firstWhere((p) => p.id == widget.idProducto);
+      setState(() {
+        _productoEditar = prod;
+        _nombreCtrl.text = prod.nombre;
+        _skuCtrl.text = prod.codigo;
+        _costoCtrl.text = prod.precioCompra.toString();
+        _ventaCtrl.text = prod.precioVenta.toString();
+        _stockCtrl.text = prod.stock.toString();
+        _stockMinCtrl.text = prod.stockMinimo.toString();
+        _catSel = prod.categoriaId;
+        _marcaSel = prod.marcaId;
+        _unidadSel = prod.unidadId;
+        _activo = prod.activo;
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -43,11 +72,12 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final cats = ref.watch(categoriaControllerProvider);
     final marcas = ref.watch(marcaControllerProvider);
     final unids = ref.watch(unidadMedidaControllerProvider);
+    final esEdicion = widget.idProducto != null;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Registrar Nuevo Producto'),
+        title: Text(esEdicion ? 'Editar Producto' : 'Registrar Nuevo Producto'),
         backgroundColor: const Color(0xFF1E293B),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -67,18 +97,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                   filled: true,
                   fillColor: Colors.white,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                 ),
                 validator: (v) => v?.trim().isEmpty ?? true ? 'Campo obligatorio' : null,
               ),
@@ -92,18 +113,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                   filled: true,
                   fillColor: Colors.white,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -117,20 +129,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                   ),
-                  items: lista.map((c) => DropdownMenuItem(value: c.id, child: Text(c.nombre))).toList(),
+                  items: lista.map((c) => DropdownMenuItem(value: c.id!, child: Text(c.nombre))).toList(),
                   onChanged: (v) => setState(() => _catSel = v),
                   validator: (v) => v == null ? 'Seleccione una categoría' : null,
                 ),
@@ -148,20 +151,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                   ),
-                  items: lista.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nombre))).toList(),
+                  items: lista.map((m) => DropdownMenuItem(value: m.id!, child: Text(m.nombre))).toList(),
                   onChanged: (v) => setState(() => _marcaSel = v),
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -178,20 +172,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                   ),
-                  items: lista.map((u) => DropdownMenuItem(value: u.id, child: Text(u.nombre))).toList(),
+                  items: lista.map((u) => DropdownMenuItem(value: u.id!, child: Text(u.nombre))).toList(),
                   onChanged: (v) => setState(() => _unidadSel = v),
                   validator: (v) => v == null ? 'Seleccione unidad de medida' : null,
                 ),
@@ -212,18 +197,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                       ),
                     ),
                   ),
@@ -238,18 +214,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                       ),
                     ),
                   ),
@@ -269,18 +236,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                       ),
                     ),
                   ),
@@ -295,18 +253,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
-                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5)),
                       ),
                     ),
                   ),
@@ -315,10 +264,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
               const SizedBox(height: 24),
 
               SwitchListTile(
-                title: const Text(
-                  'Producto Activo para la Venta',
-                  style: TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.w500),
-                ),
+                title: const Text('Producto Activo para la Venta', style: TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.w500)),
                 value: _activo,
                 activeThumbColor: const Color(0xFF0A2463),
                 onChanged: (v) => setState(() => _activo = v),
@@ -347,25 +293,29 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                       );
                       return;
                     }
-                    final nuevoProd = Producto(
+
+                    // ✅ CORRECCIÓN PRINCIPAL: sin ! innecesarios, con valores seguros
+                    final prodGuardar = Producto(
+                      id: esEdicion ? _productoEditar?.id : null,
                       codigo: _skuCtrl.text.trim().isEmpty ? 'SKU-${DateTime.now().millisecondsSinceEpoch}' : _skuCtrl.text.trim(),
                       nombre: _nombreCtrl.text.trim(),
                       precioCompra: double.tryParse(_costoCtrl.text) ?? 0,
                       precioVenta: double.tryParse(_ventaCtrl.text) ?? 0,
                       stock: stockVal,
                       stockMinimo: stockMinVal,
-                      categoriaId: _catSel!,
+                      categoriaId: _catSel ?? 0, // o valor por defecto válido
                       marcaId: _marcaSel ?? 1,
-                      unidadId: _unidadSel!,
+                      unidadId: _unidadSel ?? 0, // o valor por defecto válido
                       activo: _activo,
                     );
-                    ref.read(productoControllerProvider.notifier).guardar(nuevoProd);
+
+                    ref.read(productoControllerProvider.notifier).guardar(prodGuardar);
                     context.pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('¡Producto registrado y movimiento en Kardex creado!')),
+                      SnackBar(content: Text(esEdicion ? '¡Producto actualizado correctamente!' : '¡Producto registrado y movimiento en Kardex creado!')),
                     );
                   },
-                  child: const Text('Guardar Producto'),
+                  child: Text(esEdicion ? 'Actualizar Producto' : 'Guardar Producto'),
                 ),
               ),
             ],

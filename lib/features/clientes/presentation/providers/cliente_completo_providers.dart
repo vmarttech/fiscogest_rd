@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 
 class ClienteCompletoNotifier extends StateNotifier<AsyncValue<List<ClienteCompleto>>> {
-  ClienteCompletoNotifier() : super(AsyncValue.data([
+  ClienteCompletoNotifier() : super(const AsyncValue.data([
     ClienteCompleto(
       id: 1,
       nombre: 'Consumidor Final',
@@ -35,7 +35,7 @@ class ClienteCompletoNotifier extends StateNotifier<AsyncValue<List<ClienteCompl
       }
       state = AsyncValue.data([
         for (var c in lista)
-          if (c.id == cliente.id) cliente else c
+          if (c.id == cliente.id!) cliente else c
       ]);
     });
   }

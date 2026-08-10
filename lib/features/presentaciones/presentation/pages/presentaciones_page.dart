@@ -162,7 +162,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                               text: 'Eliminar',
                                               onPressed: () {
                                                 if (presentacion.id != null) {
-                                                  ref.read(presentacionControllerProvider.notifier).eliminar(presentacion.id!);
+                                                  ref.read(presentacionControllerProvider.notifier).eliminar(presentacion ?? 0);
                                                 }
                                                 Navigator.pop(context);
                                               },

@@ -219,7 +219,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626), foregroundColor: Colors.white),
                                                 onPressed: () {
                                                   if (impuesto.id != null) {
-                                                    ref.read(impuestoControllerProvider.notifier).eliminar(impuesto.id!);
+                                                    ref.read(impuestoControllerProvider.notifier).eliminar(impuesto ?? 0);
                                                   }
                                                   Navigator.pop(ctx);
                                                 },
@@ -250,7 +250,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
     );
   }
 
-  void _mostrarModalRegistro(BuildContext context, {ImpuestoEntity? impuestoToEdit}) {
+  void _mostrarModalRegistro(BuildContext context, {Impuesto? impuestoToEdit}) {
     final formKey = GlobalKey<FormState>();
     final nombreController = TextEditingController(text: impuestoToEdit?.nombre ?? '');
     final porcentajeController = TextEditingController(text: impuestoToEdit != null ? impuestoToEdit.porcentaje.toString() : '');
@@ -338,7 +338,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
               onPressed: () {
                 if (formKey.currentState!.validate()) {
                   try {
-                    final impuesto = ImpuestoEntity(
+                    final impuesto = Impuesto(
                       id: impuestoToEdit?.id,
                       nombre: nombreController.text.trim(),
                       porcentaje: double.parse(porcentajeController.text.trim()),

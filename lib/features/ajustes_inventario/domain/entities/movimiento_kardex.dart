@@ -1,4 +1,6 @@
-class MovimientoKardex {
+import 'package:equatable/equatable.dart';
+
+class MovimientoKardex extends Equatable {
 
   const MovimientoKardex({
     this.id,
@@ -20,4 +22,17 @@ class MovimientoKardex {
   final String motivo;
   final int usuarioId;
   final DateTime fechaMovimiento;
+
+  @override
+  List<Object?> get props => [
+        id,
+        idProducto,
+        tipoMovimiento,
+        cantidad,
+        saldoActual,
+        referenciaId,
+        motivo,
+        usuarioId,
+        fechaMovimiento,
+      ];
 }

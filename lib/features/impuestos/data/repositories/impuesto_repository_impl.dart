@@ -1,18 +1,18 @@
 import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 
 class ImpuestoRepositoryImpl {
-  final List<ImpuestoEntity> _impuestosLocales = [
-    const ImpuestoEntity(id: 1, nombre: 'ITBIS 18%', porcentaje: 18.0, tipo: 'ITBIS', esExento: false, descripcion: 'Tasa general estándar DGII'),
-    const ImpuestoEntity(id: 2, nombre: 'ITBIS 16%', porcentaje: 16.0, tipo: 'ITBIS', esExento: false, descripcion: 'Tasa reducida DGII'),
-    const ImpuestoEntity(id: 3, nombre: 'ITBIS 0% (Exento)', porcentaje: 0.0, tipo: 'Exento', esExento: true, descripcion: 'Bienes y servicios exentos de ITBIS'),
-    const ImpuestoEntity(id: 4, nombre: 'Propina Legal 10%', porcentaje: 10.0, tipo: 'Adicional', esExento: false, descripcion: 'Ley de protección al consumidor / sector gastronómico'),
+  final List<Impuesto> _impuestosLocales = [
+    const Impuesto(id: 1, nombre: 'ITBIS 18%', porcentaje: 18.0, tipo: 'ITBIS', esExento: false, descripcion: 'Tasa general estándar DGII'),
+    const Impuesto(id: 2, nombre: 'ITBIS 16%', porcentaje: 16.0, tipo: 'ITBIS', esExento: false, descripcion: 'Tasa reducida DGII'),
+    const Impuesto(id: 3, nombre: 'ITBIS 0% (Exento)', porcentaje: 0.0, tipo: 'Exento', esExento: true, descripcion: 'Bienes y servicios exentos de ITBIS'),
+    const Impuesto(id: 4, nombre: 'Propina Legal 10%', porcentaje: 10.0, tipo: 'Adicional', esExento: false, descripcion: 'Ley de protección al consumidor / sector gastronómico'),
   ];
 
-  Future<List<ImpuestoEntity>> obtenerImpuestos() async {
+  Future<List<Impuesto>> obtenerImpuestos() async {
     return _impuestosLocales;
   }
 
-  Future<void> guardarImpuesto(ImpuestoEntity impuesto) async {
+  Future<void> guardarImpuesto(Impuesto impuesto) async {
     if (impuesto.porcentaje < 0) {
       throw Exception('El porcentaje del impuesto no puede ser negativo.');
     }
@@ -24,7 +24,7 @@ class ImpuestoRepositoryImpl {
     _impuestosLocales.add(impuesto.copyWith(id: nuevoId));
   }
 
-  Future<void> actualizarImpuesto(ImpuestoEntity impuesto) async {
+  Future<void> actualizarImpuesto(Impuesto impuesto) async {
     if (impuesto.porcentaje < 0) {
       throw Exception('El porcentaje del impuesto no puede ser negativo.');
     }
@@ -32,7 +32,7 @@ class ImpuestoRepositoryImpl {
     if (duplicado) {
       throw Exception('Ya existe otro impuesto con este nombre.');
     }
-    final index = _impuestosLocales.indexWhere((i) => i.id == impuesto.id);
+    final index = _impuestosLocales.indexWhere((i) => i.id == impuesto.id!);
     if (index != -1) {
       _impuestosLocales[index] = impuesto;
     }

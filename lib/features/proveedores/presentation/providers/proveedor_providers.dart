@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
 
 class ProveedorNotifier extends StateNotifier<AsyncValue<List<Proveedor>>> {
-  ProveedorNotifier() : super(AsyncValue.data([
+  ProveedorNotifier() : super(const AsyncValue.data([
     Proveedor(
       id: 1,
       nombre: 'Distribuidora Global, S.A.',
@@ -34,7 +34,7 @@ class ProveedorNotifier extends StateNotifier<AsyncValue<List<Proveedor>>> {
       }
       state = AsyncValue.data([
         for (var p in lista)
-          if (p.id == proveedor.id) proveedor else p
+          if (p.id == proveedor.id!) proveedor else p
       ]);
     });
   }

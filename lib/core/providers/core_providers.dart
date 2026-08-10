@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
 
-// ✅ Opcional válido: el usuario puede no estar autenticado
-final usuarioAutenticadoProvider = Provider<int?>((ref) => null);
+// ✅ Opcional válido: el usuarioId puede no estar autenticado
+final usuarioIdAutenticadoProvider = Provider<int?>((ref) => null);
 
 // ✅ OBLIGATORIO POR ARQUITECTURA: No nulo, exige inicialización explícita en main.dart
 final inventarioRepositoryProvider = Provider<InventarioRepositoryInterface>((ref) {
