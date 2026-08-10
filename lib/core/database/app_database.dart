@@ -38,8 +38,19 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  // ✅ CORRECCIÓN DE TIPOS DE SOBRESCRITURA: Usamos los tipos generados con '$' que exige _$AppDatabase
   @override
-  late final $ExistenciasTableTable existenciasTable;
+  $CategoriasTable get categorias => super.categorias;
+  @override
+  $MarcasTable get marcas => super.marcas;
+  @override
+  $UnidadesMedidaTable get unidadesMedida => super.unidadesMedida;
+  @override
+  $ConteosFisicosTable get conteosFisicos => super.conteosFisicos;
+  @override
+  $DiferenciasConteoTable get diferenciasConteo => super.diferenciasConteo;
+  @override
+  $ExistenciasTableTable get existenciasTable => super.existenciasTable;
 
   @override
   int get schemaVersion => 8;
