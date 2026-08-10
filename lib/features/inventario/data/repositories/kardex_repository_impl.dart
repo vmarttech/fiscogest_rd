@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
+// ✅ CORREGIDO: SOLO IMPORTAMOS app_database.dart, TRAE TODO automáticamente
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
@@ -12,7 +13,7 @@ class KardexRepositoryImpl implements IKardexRepository {
   @override
   Future<void> registrarMovimiento(Kardex kardex) async {
     final companion = KardexTableCompanion(
-      id: kardex.id != null ? Value(kardex.id!) : const Value.absent(),
+      id: kardex.id != null ? Value(kardex.id!) : const Value<int>.absent(),
       idProducto: Value(kardex.productoId),
       tipoMovimiento: Value(kardex.tipoMovimiento.name),
       cantidad: Value(kardex.cantidad),
