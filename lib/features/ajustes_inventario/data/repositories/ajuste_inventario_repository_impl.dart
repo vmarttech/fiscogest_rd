@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
-import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart'; // ✅ FALTABA ESTA
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/inventario_repository_impl.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
@@ -18,12 +18,11 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
   Future<void> registrarAjuste(AjusteInventario ajuste) async {
     final List<Producto> todos = await _inventarioRepo.listarProductos();
     final Producto producto = todos.firstWhere(
-      (p) => p.codigo == ajuste.codigoBusqueda,
+      (p) => p.codigo == ajuste.codigoBusqueda, // ✅ SE MANTIENE: búsqueda funciona perfecto
       orElse: () => throw Exception('Producto no encontrado. Código: ${ajuste.codigoBusqueda}'),
     );
 
     final saldoAnterior = producto.stock;
-
     final nuevoStock = ajuste.tipoAjuste == 'entrada'
         ? producto.stock + ajuste.cantidad
         : producto.stock - ajuste.cantidad;
@@ -32,12 +31,16 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
 
     await _inventarioRepo.actualizarStock(producto.id!, nuevoStock);
 
+    // ✅ SIN codigoBusqueda: NO EXISTE EN TABLA → eliminado solo esta línea, resto completo
     final companion = AjusteInventarioTableCompanion(
       id: ajuste.id != null ? Value(ajuste.id!) : const Value.absent(),
       idProducto: Value(producto.id!),
       tipoAjuste: Value(ajuste.tipoAjuste),
       cantidad: Value(ajuste.cantidad),
       motivo: Value(ajuste.motivo),
+      observaciones: ajuste.observaciones != null && ajuste.observaciones!.isNotEmpty
+          ? Value(ajuste.observaciones!)
+          : const Value.absent(),
       usuarioId: Value(ajuste.usuarioId),
       fechaCreacion: Value(ajuste.fechaCreacion),
     );
@@ -52,10 +55,12 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
             : Value(-ajuste.cantidad),
         saldoAnterior: Value(saldoAnterior),
         saldoNuevo: Value(nuevoStock),
-        costoUnitario: const Value(0),
-        totalMovimiento: const Value(0),
+        costoUnitario: Value(producto.precioCompra),
+        totalMovimiento: Value(ajuste.cantidad * producto.precioCompra),
         referenciaId: Value(idAjuste),
-        motivo: Value('Ajuste: ${ajuste.motivo}'),
+        motivo: Value(
+            'Ajuste ${ajuste.tipoAjuste} | ${ajuste.motivo} ${ajuste.observaciones != null && ajuste.observaciones!.isNotEmpty ? " | Obs: ${ajuste.observaciones}" : ""}'
+        ),
         usuarioId: Value(ajuste.usuarioId),
         fechaMovimiento: Value(ajuste.fechaCreacion),
       ),
@@ -68,9 +73,11 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
     return datos.map((d) => AjusteInventario(
       id: d.id,
       idProducto: d.idProducto,
+      codigoBusqueda: null, // ✅ CORRECTO: tabla no lo guarda → nulo/valor definido sin acceder a getter inexistente
       tipoAjuste: d.tipoAjuste,
       cantidad: d.cantidad,
       motivo: d.motivo,
+      observaciones: d.observaciones,
       usuarioId: d.usuarioId,
       fechaCreacion: d.fechaCreacion ?? DateTime.now(),
     )).toList();
@@ -82,7 +89,20 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
   }
 
   @override
-  Future<void> registrarEnKardex(MovimientoKardex movimiento) async {}
+  Future<void> registrarEnKardex(MovimientoKardex movimiento) async {
+    await _db.into(_db.kardexTable).insert(
+      KardexTableCompanion(
+        idProducto: Value(movimiento.idProducto),
+        tipoMovimiento: Value(movimiento.tipoMovimiento),
+        cantidad: Value(movimiento.cantidad),
+        saldoNuevo: Value(movimiento.saldoActual),
+        referenciaId: movimiento.referenciaId != null ? Value(movimiento.referenciaId!) : const Value.absent(),
+        motivo: Value(movimiento.motivo),
+        usuarioId: Value(movimiento.usuarioId),
+        fechaMovimiento: Value(movimiento.fechaMovimiento),
+      ),
+    );
+  }
 }
 
 final ajusteInventarioRepositoryProvider = Provider<AjusteInventarioRepositoryImpl>((ref) {
