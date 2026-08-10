@@ -30,7 +30,7 @@ class ajusteInventarioController
     public function guardar()
     {
         // 1. Recibir datos del formulario
-        // 2. Validar: tipo (+/-), cantidad > 0, motivo, usuarioId de sesión
+        // 2. Validar: tipo (+/-), cantidad > 0, motivo, usuario de sesión
         // 3. Registrar en ajuste_inventario
         // 4. Actualizar existencias en inventario
         // 5. Registrar movimiento en kardex

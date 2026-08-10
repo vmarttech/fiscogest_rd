@@ -1,19 +1,16 @@
-import 'package:equatable/equatable.dart';
+class Unidad {
 
-class Unidad extends Equatable {
-  const Unidad({
+  Unidad({
     this.id,
     required this.nombre,
     required this.abreviatura,
-    required this.activo,
+    this.activo = true,
   });
-
   final int? id;
   final String nombre;
   final String abreviatura;
   final bool activo;
 
-  // ✅ Método copyWith completo, TODOS campos, nombres EXACTOS
   Unidad copyWith({
     int? id,
     String? nombre,
@@ -27,8 +24,4 @@ class Unidad extends Equatable {
       activo: activo ?? this.activo,
     );
   }
-
-  // ✅ Propiedades para Equatable
-  @override
-  List<Object?> get props => [id, nombre, abreviatura, activo];
 }

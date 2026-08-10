@@ -93,7 +93,7 @@ class InventarioRepositoryImpl implements InventarioRepositoryInterface {
   Future<void> actualizarProducto(Producto producto) async {
     await (_db.update(_db.productosTable)
       // ✅ Se agrega '!' para asegurar que el id no es nulo
-      ..where((p) => p.id.equals(producto.id ?? 0)))
+      ..where((p) => p.id.equals(producto.id!)))
       .write(ProductosTableCompanion(
         codigo: Value(producto.codigo),
         nombre: Value(producto.nombre),

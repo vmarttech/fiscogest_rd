@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 class AppForm extends StatelessWidget {
+
   const AppForm({
     super.key,
     required this.fields,
@@ -11,7 +12,6 @@ class AppForm extends StatelessWidget {
     this.columnsDesktop = 3,
     this.padding,
   });
-
   final List<Widget> fields;
   final int columnsMobile;
   final int columnsTablet;
@@ -30,24 +30,16 @@ class AppForm extends StatelessWidget {
 
     return Padding(
       padding: padding ?? AppSpacing.allM,
-      // ✅ Usamos LayoutBuilder para calcular el ancho REAL disponible
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final anchoDisponible = constraints.maxWidth;
-          final anchoCampo = (anchoDisponible / columns) - (AppSpacing.m * (columns - 1) / columns);
-
-          return Wrap(
-            spacing: AppSpacing.m,
-            runSpacing: AppSpacing.m,
-            crossAxisAlignment: WrapCrossAlignment.start,
-            children: fields.map((campo) {
-              return SizedBox(
-                width: anchoCampo,
-                child: campo,
-              );
-            }).toList(),
+      child: Wrap(
+        spacing: AppSpacing.m,
+        runSpacing: AppSpacing.m,
+        crossAxisAlignment: WrapCrossAlignment.start,
+        children: fields.map((field) {
+          return SizedBox(
+            width: MediaQuery.of(context).size.width / columns - AppSpacing.m * 1.5,
+            child: field,
           );
-        },
+        }).toList(),
       ),
     );
   }

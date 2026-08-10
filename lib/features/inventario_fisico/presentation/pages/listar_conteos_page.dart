@@ -50,7 +50,7 @@ class ListarConteosPage extends ConsumerWidget {
                   title: Text(c.nombreConteo, style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF1E293B))),
                   subtitle: Text('Fecha: ${c.fechaConteo.day}/${c.fechaConteo.month}/${c.fechaConteo.year} • Estado: ${c.estado.name.toUpperCase()}', style: const TextStyle(fontSize: 13)),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF94A3B8)),
-                  onTap: () => context.pushNamed('diferencias-conteo', extra: c.id!),
+                  onTap: () => context.pushNamed('diferencias-conteo', extra: c.id),
                 ),
               );
             },

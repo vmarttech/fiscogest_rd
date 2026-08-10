@@ -2,11 +2,10 @@ import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracio
 import 'package:fiscogest_rd/features/configuracion/domain/interfaces/i_configuracion_repository.dart';
 
 class GuardarConfiguracionUseCase {
-  GuardarConfiguracionUseCase(this._repo);
-  // ✅ Constructor primero
-  final IConfiguracionRepository _repo;
+  GuardarConfiguracionUseCase(this._repository);
+  final IConfiguracionRepository _repository;
 
-  Future<void> call(ConfiguracionEmpresa datos) async {
-    await _repo.guardarConfiguracion(datos);
+  Future<void> ejecutar(ConfiguracionEntity configuracion) async {
+    await _repository.guardarConfiguracion(configuracion);
   }
 }

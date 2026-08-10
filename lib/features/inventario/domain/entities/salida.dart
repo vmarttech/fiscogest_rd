@@ -1,29 +1,17 @@
-import 'package:equatable/equatable.dart';
-
-class Salida extends Equatable {
-
-  const Salida({
+class Salida {
+  Salida({
     this.id,
     required this.productoId,
     required this.cantidad,
     required this.motivo,
-    required this.usuarioId,
+    required this.usuario,
     required this.fecha,
   });
+
   final int? id;
   final int productoId;
-  final double cantidad;
+  final int cantidad;
   final String motivo;
-  final int usuarioId;
+  final String usuario;
   final DateTime fecha;
-
-  @override
-  List<Object?> get props => [
-        id,
-        productoId,
-        cantidad,
-        motivo,
-        usuarioId,
-        fecha,
-      ];
 }

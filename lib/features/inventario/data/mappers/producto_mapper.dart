@@ -20,14 +20,11 @@ class ProductoDataMapper {
     );
   }
 
- static ProductosTableCompanion toCompanion(Producto producto) {
-  // ✅ Declara la variable AQUÍ, fuera del constructor
-  final _id = producto.id;
-
-  return ProductosTableCompanion(
-    id: _id != null ? drift.Value(_id) : const drift.Value.absent(),
-    codigo: drift.Value(producto.codigo),
-    nombre: drift.Value(producto.nombre),
+  static ProductosTableCompanion toCompanion(Producto producto) {
+    return ProductosTableCompanion(
+      id: producto.id != null ? drift.Value(producto.id!) : const drift.Value.absent(),
+      codigo: drift.Value(producto.codigo),
+      nombre: drift.Value(producto.nombre),
       descripcion: drift.Value(producto.descripcion),
       precioCompra: drift.Value(producto.precioCompra),
       precioVenta: drift.Value(producto.precioVenta),

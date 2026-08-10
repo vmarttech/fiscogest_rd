@@ -2,10 +2,10 @@ import 'package:fiscogest_rd/features/unidades/domain/entities/unidad.dart';
 
 class UnidadRepository {
   final List<Unidad> _unidadesLocales = [
-    const Unidad(id: 1, nombre: 'Unidad', abreviatura: 'UND'),
-    const Unidad(id: 2, nombre: 'Kilogramo', abreviatura: 'KG'),
-    const Unidad(id: 3, nombre: 'Litro', abreviatura: 'LT'),
-    const Unidad(id: 4, nombre: 'Metro', abreviatura: 'MT'),
+    Unidad(id: 1, nombre: 'Unidad', abreviatura: 'UND'),
+    Unidad(id: 2, nombre: 'Kilogramo', abreviatura: 'KG'),
+    Unidad(id: 3, nombre: 'Litro', abreviatura: 'LT'),
+    Unidad(id: 4, nombre: 'Metro', abreviatura: 'MT'),
   ];
 
   Future<List<Unidad>> obtenerUnidades() async {
@@ -26,7 +26,7 @@ class UnidadRepository {
     if (duplicada) {
       throw Exception('Ya existe otra unidad con ese nombre.');
     }
-    final index = _unidadesLocales.indexWhere((u) => u.id == unidad.id!);
+    final index = _unidadesLocales.indexWhere((u) => u.id == unidad.id);
     if (index != -1) {
       _unidadesLocales[index] = unidad;
     }

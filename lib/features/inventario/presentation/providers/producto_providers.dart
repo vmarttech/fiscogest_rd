@@ -34,8 +34,8 @@ class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
 
   Future<void> guardar(Producto producto) async {
     try {
-      final idusuarioId = _ref.read(usuarioIdAutenticadoProvider)!;
-      await _repository.guardarProducto(producto, idusuarioId);
+      final idUsuario = _ref.read(usuarioAutenticadoProvider)!;
+      await _repository.guardarProducto(producto, idUsuario);
       await cargarProductos();
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);

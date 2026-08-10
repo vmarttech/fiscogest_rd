@@ -27,7 +27,7 @@ class _RegistrarTransferenciaPageState extends ConsumerState<RegistrarTransferen
 
     final cantidad = double.parse(_cantidadCtrl.text);
     final costo = double.parse(_costoCtrl.text);
-    final usuarioId = ref.read(usuarioIdAutenticadoProvider)!;
+    final usuario = ref.read(usuarioAutenticadoProvider)!;
     final casoUso = ref.read(registrarTransferenciaProvider);
 
     try {
@@ -37,7 +37,7 @@ class _RegistrarTransferenciaPageState extends ConsumerState<RegistrarTransferen
         saldoAnterior: 0,
         saldoNuevo: 0,
         costoUnitario: costo,
-        usuarioId: usuarioId,
+        usuarioId: usuario,
         observacion: _obsCtrl.text,
       );
       if (mounted) Navigator.pop(context);

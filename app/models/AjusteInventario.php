@@ -12,7 +12,7 @@ class AjusteInventario
     // Registrar ajuste positivo / negativo
     public function registrar($datos)
     {
-        // lógica: tipo, cantidad, motivo, usuarioId, observaciones
+        // lógica: tipo, cantidad, motivo, usuario, observaciones
     }
 
     // Obtener listado de ajustes

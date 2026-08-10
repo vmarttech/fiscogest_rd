@@ -1,54 +1,39 @@
-import 'package:equatable/equatable.dart';
+class ImpuestoEntity {
 
-class Impuesto extends Equatable {
-  const Impuesto({
+  const ImpuestoEntity({
     this.id,
     required this.nombre,
     required this.porcentaje,
     required this.tipo,
     required this.esExento,
-    required this.descripcion,
-    required this.activo,
+    this.activo = true,
+    this.descripcion = '',
   });
-
   final int? id;
   final String nombre;
   final double porcentaje;
-  final String tipo;
+  final String tipo; // e.g., 'ITBIS', 'Selectivo al Consumo', 'Propina Legal', 'Exento'
   final bool esExento;
-  final String descripcion;
   final bool activo;
+  final String descripcion;
 
-  // ✅ Método copyWith AGREGADO COMPLETO, coincide cada campo existente
-  Impuesto copyWith({
+  ImpuestoEntity copyWith({
     int? id,
     String? nombre,
     double? porcentaje,
     String? tipo,
     bool? esExento,
-    String? descripcion,
     bool? activo,
+    String? descripcion,
   }) {
-    return Impuesto(
+    return ImpuestoEntity(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
       porcentaje: porcentaje ?? this.porcentaje,
       tipo: tipo ?? this.tipo,
       esExento: esExento ?? this.esExento,
-      descripcion: descripcion ?? this.descripcion,
       activo: activo ?? this.activo,
+      descripcion: descripcion ?? this.descripcion,
     );
   }
-
-  // ✅ Lista props COMPLETADA Y CERRADA, incluye TODOS campos
-  @override
-  List<Object?> get props => [
-        id,
-        nombre,
-        porcentaje,
-        tipo,
-        esExento,
-        descripcion,
-        activo,
-      ];
 }

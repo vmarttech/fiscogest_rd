@@ -14,7 +14,7 @@ class EntradaRepositoryImpl implements IEntradaRepository {
         productoId: entrada.productoId,
         cantidad: entrada.cantidad,
         motivo: entrada.motivo,
-        usuarioId: entrada.usuarioId,
+        usuario: entrada.usuario,
         fecha: entrada.fecha,
       ),
     );
@@ -28,7 +28,7 @@ class EntradaRepositoryImpl implements IEntradaRepository {
       productoId: row.productoId,
       cantidad: row.cantidad,
       motivo: row.motivo,
-      usuarioId: row.usuarioId,
+      usuario: row.usuario,
       fecha: row.fecha,
     )).toList();
   }
@@ -43,7 +43,7 @@ class EntradaRepositoryImpl implements IEntradaRepository {
       productoId: row.productoId,
       cantidad: row.cantidad,
       motivo: row.motivo,
-      usuarioId: row.usuarioId,
+      usuario: row.usuario,
       fecha: row.fecha,
     )).toList();
   }

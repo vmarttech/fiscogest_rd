@@ -136,7 +136,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                             ? 'Abreviatura: ${unidad.abreviatura}'
                                             : unidad.descripcion?.isNotEmpty ?? true
                                                 ? 'Sin descripción'
-                                                : unidad ?? 'Sin descripción',
+                                                : unidad.descripcion!,
                                         style: AppTypography.bodySmall,
                                       ),
                                     ],
@@ -167,7 +167,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                               text: 'Eliminar',
                                               onPressed: () {
                                                 if (unidad.id != null) {
-                                                  ref.read(unidadMedidaControllerProvider.notifier).eliminar(unidad ?? 0);
+                                                  ref.read(unidadMedidaControllerProvider.notifier).eliminar(unidad.id!);
                                                 }
                                                 Navigator.pop(context);
                                               },

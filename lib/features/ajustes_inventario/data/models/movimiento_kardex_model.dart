@@ -1,39 +1,53 @@
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/movimiento_kardex.dart';
 
-class MovimientoKardexModel extends MovimientoKardex {
+class MovimientoKardexModel {
+
   const MovimientoKardexModel({
-    super.id,
-    required super.idProducto,
-    required super.tipoMovimiento,
-    required super.cantidad,
-    required super.saldoActual,
-    super.referenciaId,
-    required super.motivo,
-    required super.usuarioId,
-    required super.fechaMovimiento,
+    this.id,
+    required this.idProducto,
+    required this.tipoMovimiento,
+    required this.cantidad,
+    required this.saldoActual,
+    this.referenciaId,
+    required this.motivo,
+    required this.usuarioId,
+    required this.fechaMovimiento,
   });
 
-  factory MovimientoKardexModel.fromJson(Map<String, dynamic> json) => MovimientoKardexModel(
-    id: json['id'] as int?,
-    idProducto: json['idProducto'] as int,
-    tipoMovimiento: json['tipoMovimiento'] as String,
-    cantidad: (json['cantidad'] as num).toDouble(),
-    saldoActual: (json['saldoActual'] as num).toDouble(),
-    referenciaId: json['referenciaId'] as int?,
-    motivo: json['motivo'] as String,
-    usuarioId: json['usuarioId'] as int,
-    fechaMovimiento: DateTime.parse(json['fechaMovimiento'] as String),
-  );
+  factory MovimientoKardexModel.fromEntity(MovimientoKardex entity) {
+    return MovimientoKardexModel(
+      id: entity.id,
+      idProducto: entity.idProducto,
+      tipoMovimiento: entity.tipoMovimiento,
+      cantidad: entity.cantidad,
+      saldoActual: entity.saldoActual,
+      referenciaId: entity.referenciaId,
+      motivo: entity.motivo,
+      usuarioId: entity.usuarioId,
+      fechaMovimiento: entity.fechaMovimiento,
+    );
+  }
+  final int? id;
+  final int idProducto;
+  final String tipoMovimiento;
+  final double cantidad;
+  final double saldoActual;
+  final int? referenciaId;
+  final String motivo;
+  final int usuarioId;
+  final DateTime fechaMovimiento;
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'idProducto': idProducto,
-    'tipoMovimiento': tipoMovimiento,
-    'cantidad': cantidad,
-    'saldoActual': saldoActual,
-    'referenciaId': referenciaId,
-    'motivo': motivo,
-    'usuarioId': usuarioId,
-    'fechaMovimiento': fechaMovimiento.toIso8601String(),
-  };
+  MovimientoKardex toEntity() {
+    return MovimientoKardex(
+      id: id,
+      idProducto: idProducto,
+      tipoMovimiento: tipoMovimiento,
+      cantidad: cantidad,
+      saldoActual: saldoActual,
+      referenciaId: referenciaId,
+      motivo: motivo,
+      usuarioId: usuarioId,
+      fechaMovimiento: fechaMovimiento,
+    );
+  }
 }

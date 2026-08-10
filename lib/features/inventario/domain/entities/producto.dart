@@ -1,12 +1,10 @@
-import 'package:equatable/equatable.dart';
-
-class Producto extends Equatable {
+class Producto {
 
   const Producto({
     this.id,
     required this.codigo,
     required this.nombre,
-    required this.descripcion,
+    this.descripcion,
     required this.precioCompra,
     required this.precioVenta,
     required this.stock,
@@ -14,12 +12,13 @@ class Producto extends Equatable {
     required this.categoriaId,
     required this.marcaId,
     required this.unidadId,
-    required this.activo,
-  });
+    this.activo = true,
+  }) : assert(stock >= 0, 'El stock no puede ser negativo'),
+       assert(stockMinimo >= 0, 'El stock mínimo no puede ser negativo');
   final int? id;
   final String codigo;
   final String nombre;
-  final String descripcion;
+  final String? descripcion;
   final double precioCompra;
   final double precioVenta;
   final double stock;
@@ -28,6 +27,12 @@ class Producto extends Equatable {
   final int marcaId;
   final int unidadId;
   final bool activo;
+
+  /// Existencia actual en almacén
+  double get existenciaActual => stock;
+
+  /// Existencia disponible (puede descontar apartados o reservas futuras si aplica)
+  double get existenciaDisponible => stock;
 
   Producto copyWith({
     int? id,
@@ -58,20 +63,4 @@ class Producto extends Equatable {
       activo: activo ?? this.activo,
     );
   }
-
-  @override
-  List<Object?> get props => [
-        id,
-        codigo,
-        nombre,
-        descripcion,
-        precioCompra,
-        precioVenta,
-        stock,
-        stockMinimo,
-        categoriaId,
-        marcaId,
-        unidadId,
-        activo,
-      ];
 }

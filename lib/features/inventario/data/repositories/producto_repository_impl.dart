@@ -28,7 +28,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
   }
 
   @override
-  Future<int> guardarProducto(Producto producto, int idusuarioId) async {
+  Future<int> guardarProducto(Producto producto, int idUsuario) async {
     return await _db.transaction(() async {
       final idGenerado = await _db.into(_db.productosTable).insert(
         ProductoDataMapper.toCompanion(producto),
@@ -46,7 +46,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
         fechaMovimiento: DateTime.now(),
         documentoReferencia: 'INGRESO INICIAL',
         observacion: 'Registro al crear producto',
-        usuarioId: idusuarioId,
+        usuarioId: idUsuario,
       ));
 
       return idGenerado;
@@ -57,7 +57,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
   Future<bool> actualizarProducto(Producto producto) async {
     if (producto.id == null) return false;
     final rowsAffected = await (_db.update(_db.productosTable)
-      ..where((t) => t.id.equals(producto.id ?? 0))).write(
+      ..where((t) => t.id.equals(producto.id!))).write(
         ProductoDataMapper.toCompanion(producto),
       );
     return rowsAffected > 0;

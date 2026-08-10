@@ -38,7 +38,7 @@ class EntradaController extends StateNotifier<AsyncValue<void>> {
     required int productoId,
     required double cantidad,
     required String motivo,
-    required String usuarioId,
+    required String usuario,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -47,7 +47,7 @@ class EntradaController extends StateNotifier<AsyncValue<void>> {
         productoId: productoId,
         cantidad: cantidad,
         motivo: motivo,
-        usuarioId: usuarioId,
+        usuario: usuario,
       );
 
       // ✅ REFRESCO SELECTIVO Y ORDENADO

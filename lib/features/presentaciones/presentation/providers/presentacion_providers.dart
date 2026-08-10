@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
 
 class PresentacionNotifier extends StateNotifier<AsyncValue<List<Presentacion>>> {
-  PresentacionNotifier() : super(const AsyncValue.data([
+  PresentacionNotifier() : super(AsyncValue.data([
     Presentacion(id: 1, nombre: 'Unidad', abreviatura: 'UND'),
     Presentacion(id: 2, nombre: 'Caja', abreviatura: 'CAJ'),
     Presentacion(id: 3, nombre: 'Kilogramo', abreviatura: 'KG'),
@@ -29,7 +29,7 @@ class PresentacionNotifier extends StateNotifier<AsyncValue<List<Presentacion>>>
       }
       state = AsyncValue.data([
         for (var p in lista)
-          if (p.id == presentacion.id!) presentacion else p
+          if (p.id == presentacion.id) presentacion else p
       ]);
     });
   }

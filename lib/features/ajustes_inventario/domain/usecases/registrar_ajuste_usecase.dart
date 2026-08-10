@@ -1,9 +1,9 @@
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
-import 'package:fiscogest_rd/features/ajustes_inventario/data/repositories/ajuste_inventario_repository_impl.dart';
+import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 
 class RegistrarAjusteUsecase {
   RegistrarAjusteUsecase(this._repository);
-  final AjusteInventarioRepositoryImpl _repository;
+  final AjusteInventarioRepository _repository;
 
   Future<void> call(AjusteInventario ajuste) async {
     // Validaciones de negocio permitidas

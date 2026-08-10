@@ -1806,12 +1806,12 @@ class $EntradasTableTable extends EntradasTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _usuarioIdMeta = const VerificationMeta(
-    'usuarioId',
+  static const VerificationMeta _usuarioMeta = const VerificationMeta(
+    'usuario',
   );
   @override
-  late final GeneratedColumn<String> usuarioId = GeneratedColumn<String>(
-    'usuario_id',
+  late final GeneratedColumn<String> usuario = GeneratedColumn<String>(
+    'usuario',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -1832,7 +1832,7 @@ class $EntradasTableTable extends EntradasTable
     productoId,
     cantidad,
     motivo,
-    usuarioId,
+    usuario,
     fecha,
   ];
   @override
@@ -1874,13 +1874,13 @@ class $EntradasTableTable extends EntradasTable
     } else if (isInserting) {
       context.missing(_motivoMeta);
     }
-    if (data.containsKey('usuario_id')) {
+    if (data.containsKey('usuario')) {
       context.handle(
-        _usuarioIdMeta,
-        usuarioId.isAcceptableOrUnknown(data['usuario_id']!, _usuarioIdMeta),
+        _usuarioMeta,
+        usuario.isAcceptableOrUnknown(data['usuario']!, _usuarioMeta),
       );
     } else if (isInserting) {
-      context.missing(_usuarioIdMeta);
+      context.missing(_usuarioMeta);
     }
     if (data.containsKey('fecha')) {
       context.handle(
@@ -1915,9 +1915,9 @@ class $EntradasTableTable extends EntradasTable
         DriftSqlType.string,
         data['${effectivePrefix}motivo'],
       )!,
-      usuarioId: attachedDatabase.typeMapping.read(
+      usuario: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}usuario_id'],
+        data['${effectivePrefix}usuario'],
       )!,
       fecha: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -1938,14 +1938,14 @@ class EntradasTableData extends DataClass
   final int productoId;
   final double cantidad;
   final String motivo;
-  final String usuarioId;
+  final String usuario;
   final DateTime fecha;
   const EntradasTableData({
     required this.id,
     required this.productoId,
     required this.cantidad,
     required this.motivo,
-    required this.usuarioId,
+    required this.usuario,
     required this.fecha,
   });
   @override
@@ -1955,7 +1955,7 @@ class EntradasTableData extends DataClass
     map['producto_id'] = Variable<int>(productoId);
     map['cantidad'] = Variable<double>(cantidad);
     map['motivo'] = Variable<String>(motivo);
-    map['usuario_id'] = Variable<String>(usuarioId);
+    map['usuario'] = Variable<String>(usuario);
     map['fecha'] = Variable<DateTime>(fecha);
     return map;
   }
@@ -1966,7 +1966,7 @@ class EntradasTableData extends DataClass
       productoId: Value(productoId),
       cantidad: Value(cantidad),
       motivo: Value(motivo),
-      usuarioId: Value(usuarioId),
+      usuario: Value(usuario),
       fecha: Value(fecha),
     );
   }
@@ -1981,7 +1981,7 @@ class EntradasTableData extends DataClass
       productoId: serializer.fromJson<int>(json['productoId']),
       cantidad: serializer.fromJson<double>(json['cantidad']),
       motivo: serializer.fromJson<String>(json['motivo']),
-      usuarioId: serializer.fromJson<String>(json['usuarioId']),
+      usuario: serializer.fromJson<String>(json['usuario']),
       fecha: serializer.fromJson<DateTime>(json['fecha']),
     );
   }
@@ -1993,7 +1993,7 @@ class EntradasTableData extends DataClass
       'productoId': serializer.toJson<int>(productoId),
       'cantidad': serializer.toJson<double>(cantidad),
       'motivo': serializer.toJson<String>(motivo),
-      'usuarioId': serializer.toJson<String>(usuarioId),
+      'usuario': serializer.toJson<String>(usuario),
       'fecha': serializer.toJson<DateTime>(fecha),
     };
   }
@@ -2003,14 +2003,14 @@ class EntradasTableData extends DataClass
     int? productoId,
     double? cantidad,
     String? motivo,
-    String? usuarioId,
+    String? usuario,
     DateTime? fecha,
   }) => EntradasTableData(
     id: id ?? this.id,
     productoId: productoId ?? this.productoId,
     cantidad: cantidad ?? this.cantidad,
     motivo: motivo ?? this.motivo,
-    usuarioId: usuarioId ?? this.usuarioId,
+    usuario: usuario ?? this.usuario,
     fecha: fecha ?? this.fecha,
   );
   EntradasTableData copyWithCompanion(EntradasTableCompanion data) {
@@ -2021,7 +2021,7 @@ class EntradasTableData extends DataClass
           : this.productoId,
       cantidad: data.cantidad.present ? data.cantidad.value : this.cantidad,
       motivo: data.motivo.present ? data.motivo.value : this.motivo,
-      usuarioId: data.usuarioId.present ? data.usuarioId.value : this.usuarioId,
+      usuario: data.usuario.present ? data.usuario.value : this.usuario,
       fecha: data.fecha.present ? data.fecha.value : this.fecha,
     );
   }
@@ -2033,7 +2033,7 @@ class EntradasTableData extends DataClass
           ..write('productoId: $productoId, ')
           ..write('cantidad: $cantidad, ')
           ..write('motivo: $motivo, ')
-          ..write('usuarioId: $usuarioId, ')
+          ..write('usuario: $usuario, ')
           ..write('fecha: $fecha')
           ..write(')'))
         .toString();
@@ -2041,7 +2041,7 @@ class EntradasTableData extends DataClass
 
   @override
   int get hashCode =>
-      Object.hash(id, productoId, cantidad, motivo, usuarioId, fecha);
+      Object.hash(id, productoId, cantidad, motivo, usuario, fecha);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2050,7 +2050,7 @@ class EntradasTableData extends DataClass
           other.productoId == this.productoId &&
           other.cantidad == this.cantidad &&
           other.motivo == this.motivo &&
-          other.usuarioId == this.usuarioId &&
+          other.usuario == this.usuario &&
           other.fecha == this.fecha);
 }
 
@@ -2059,14 +2059,14 @@ class EntradasTableCompanion extends UpdateCompanion<EntradasTableData> {
   final Value<int> productoId;
   final Value<double> cantidad;
   final Value<String> motivo;
-  final Value<String> usuarioId;
+  final Value<String> usuario;
   final Value<DateTime> fecha;
   const EntradasTableCompanion({
     this.id = const Value.absent(),
     this.productoId = const Value.absent(),
     this.cantidad = const Value.absent(),
     this.motivo = const Value.absent(),
-    this.usuarioId = const Value.absent(),
+    this.usuario = const Value.absent(),
     this.fecha = const Value.absent(),
   });
   EntradasTableCompanion.insert({
@@ -2074,19 +2074,19 @@ class EntradasTableCompanion extends UpdateCompanion<EntradasTableData> {
     required int productoId,
     required double cantidad,
     required String motivo,
-    required String usuarioId,
+    required String usuario,
     required DateTime fecha,
   }) : productoId = Value(productoId),
        cantidad = Value(cantidad),
        motivo = Value(motivo),
-       usuarioId = Value(usuarioId),
+       usuario = Value(usuario),
        fecha = Value(fecha);
   static Insertable<EntradasTableData> custom({
     Expression<int>? id,
     Expression<int>? productoId,
     Expression<double>? cantidad,
     Expression<String>? motivo,
-    Expression<String>? usuarioId,
+    Expression<String>? usuario,
     Expression<DateTime>? fecha,
   }) {
     return RawValuesInsertable({
@@ -2094,7 +2094,7 @@ class EntradasTableCompanion extends UpdateCompanion<EntradasTableData> {
       if (productoId != null) 'producto_id': productoId,
       if (cantidad != null) 'cantidad': cantidad,
       if (motivo != null) 'motivo': motivo,
-      if (usuarioId != null) 'usuario_id': usuarioId,
+      if (usuario != null) 'usuario': usuario,
       if (fecha != null) 'fecha': fecha,
     });
   }
@@ -2104,7 +2104,7 @@ class EntradasTableCompanion extends UpdateCompanion<EntradasTableData> {
     Value<int>? productoId,
     Value<double>? cantidad,
     Value<String>? motivo,
-    Value<String>? usuarioId,
+    Value<String>? usuario,
     Value<DateTime>? fecha,
   }) {
     return EntradasTableCompanion(
@@ -2112,7 +2112,7 @@ class EntradasTableCompanion extends UpdateCompanion<EntradasTableData> {
       productoId: productoId ?? this.productoId,
       cantidad: cantidad ?? this.cantidad,
       motivo: motivo ?? this.motivo,
-      usuarioId: usuarioId ?? this.usuarioId,
+      usuario: usuario ?? this.usuario,
       fecha: fecha ?? this.fecha,
     );
   }
@@ -2132,8 +2132,8 @@ class EntradasTableCompanion extends UpdateCompanion<EntradasTableData> {
     if (motivo.present) {
       map['motivo'] = Variable<String>(motivo.value);
     }
-    if (usuarioId.present) {
-      map['usuario_id'] = Variable<String>(usuarioId.value);
+    if (usuario.present) {
+      map['usuario'] = Variable<String>(usuario.value);
     }
     if (fecha.present) {
       map['fecha'] = Variable<DateTime>(fecha.value);
@@ -2148,7 +2148,7 @@ class EntradasTableCompanion extends UpdateCompanion<EntradasTableData> {
           ..write('productoId: $productoId, ')
           ..write('cantidad: $cantidad, ')
           ..write('motivo: $motivo, ')
-          ..write('usuarioId: $usuarioId, ')
+          ..write('usuario: $usuario, ')
           ..write('fecha: $fecha')
           ..write(')'))
         .toString();
@@ -2205,12 +2205,12 @@ class $SalidasTableTable extends SalidasTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _usuarioIdMeta = const VerificationMeta(
-    'usuarioId',
+  static const VerificationMeta _usuarioMeta = const VerificationMeta(
+    'usuario',
   );
   @override
-  late final GeneratedColumn<String> usuarioId = GeneratedColumn<String>(
-    'usuario_id',
+  late final GeneratedColumn<String> usuario = GeneratedColumn<String>(
+    'usuario',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -2231,7 +2231,7 @@ class $SalidasTableTable extends SalidasTable
     productoId,
     cantidad,
     motivo,
-    usuarioId,
+    usuario,
     fecha,
   ];
   @override
@@ -2273,13 +2273,13 @@ class $SalidasTableTable extends SalidasTable
     } else if (isInserting) {
       context.missing(_motivoMeta);
     }
-    if (data.containsKey('usuario_id')) {
+    if (data.containsKey('usuario')) {
       context.handle(
-        _usuarioIdMeta,
-        usuarioId.isAcceptableOrUnknown(data['usuario_id']!, _usuarioIdMeta),
+        _usuarioMeta,
+        usuario.isAcceptableOrUnknown(data['usuario']!, _usuarioMeta),
       );
     } else if (isInserting) {
-      context.missing(_usuarioIdMeta);
+      context.missing(_usuarioMeta);
     }
     if (data.containsKey('fecha')) {
       context.handle(
@@ -2314,9 +2314,9 @@ class $SalidasTableTable extends SalidasTable
         DriftSqlType.string,
         data['${effectivePrefix}motivo'],
       )!,
-      usuarioId: attachedDatabase.typeMapping.read(
+      usuario: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}usuario_id'],
+        data['${effectivePrefix}usuario'],
       )!,
       fecha: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -2337,14 +2337,14 @@ class SalidasTableData extends DataClass
   final int productoId;
   final int cantidad;
   final String motivo;
-  final String usuarioId;
+  final String usuario;
   final DateTime fecha;
   const SalidasTableData({
     required this.id,
     required this.productoId,
     required this.cantidad,
     required this.motivo,
-    required this.usuarioId,
+    required this.usuario,
     required this.fecha,
   });
   @override
@@ -2354,7 +2354,7 @@ class SalidasTableData extends DataClass
     map['producto_id'] = Variable<int>(productoId);
     map['cantidad'] = Variable<int>(cantidad);
     map['motivo'] = Variable<String>(motivo);
-    map['usuario_id'] = Variable<String>(usuarioId);
+    map['usuario'] = Variable<String>(usuario);
     map['fecha'] = Variable<DateTime>(fecha);
     return map;
   }
@@ -2365,7 +2365,7 @@ class SalidasTableData extends DataClass
       productoId: Value(productoId),
       cantidad: Value(cantidad),
       motivo: Value(motivo),
-      usuarioId: Value(usuarioId),
+      usuario: Value(usuario),
       fecha: Value(fecha),
     );
   }
@@ -2380,7 +2380,7 @@ class SalidasTableData extends DataClass
       productoId: serializer.fromJson<int>(json['productoId']),
       cantidad: serializer.fromJson<int>(json['cantidad']),
       motivo: serializer.fromJson<String>(json['motivo']),
-      usuarioId: serializer.fromJson<String>(json['usuarioId']),
+      usuario: serializer.fromJson<String>(json['usuario']),
       fecha: serializer.fromJson<DateTime>(json['fecha']),
     );
   }
@@ -2392,7 +2392,7 @@ class SalidasTableData extends DataClass
       'productoId': serializer.toJson<int>(productoId),
       'cantidad': serializer.toJson<int>(cantidad),
       'motivo': serializer.toJson<String>(motivo),
-      'usuarioId': serializer.toJson<String>(usuarioId),
+      'usuario': serializer.toJson<String>(usuario),
       'fecha': serializer.toJson<DateTime>(fecha),
     };
   }
@@ -2402,14 +2402,14 @@ class SalidasTableData extends DataClass
     int? productoId,
     int? cantidad,
     String? motivo,
-    String? usuarioId,
+    String? usuario,
     DateTime? fecha,
   }) => SalidasTableData(
     id: id ?? this.id,
     productoId: productoId ?? this.productoId,
     cantidad: cantidad ?? this.cantidad,
     motivo: motivo ?? this.motivo,
-    usuarioId: usuarioId ?? this.usuarioId,
+    usuario: usuario ?? this.usuario,
     fecha: fecha ?? this.fecha,
   );
   SalidasTableData copyWithCompanion(SalidasTableCompanion data) {
@@ -2420,7 +2420,7 @@ class SalidasTableData extends DataClass
           : this.productoId,
       cantidad: data.cantidad.present ? data.cantidad.value : this.cantidad,
       motivo: data.motivo.present ? data.motivo.value : this.motivo,
-      usuarioId: data.usuarioId.present ? data.usuarioId.value : this.usuarioId,
+      usuario: data.usuario.present ? data.usuario.value : this.usuario,
       fecha: data.fecha.present ? data.fecha.value : this.fecha,
     );
   }
@@ -2432,7 +2432,7 @@ class SalidasTableData extends DataClass
           ..write('productoId: $productoId, ')
           ..write('cantidad: $cantidad, ')
           ..write('motivo: $motivo, ')
-          ..write('usuarioId: $usuarioId, ')
+          ..write('usuario: $usuario, ')
           ..write('fecha: $fecha')
           ..write(')'))
         .toString();
@@ -2440,7 +2440,7 @@ class SalidasTableData extends DataClass
 
   @override
   int get hashCode =>
-      Object.hash(id, productoId, cantidad, motivo, usuarioId, fecha);
+      Object.hash(id, productoId, cantidad, motivo, usuario, fecha);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2449,7 +2449,7 @@ class SalidasTableData extends DataClass
           other.productoId == this.productoId &&
           other.cantidad == this.cantidad &&
           other.motivo == this.motivo &&
-          other.usuarioId == this.usuarioId &&
+          other.usuario == this.usuario &&
           other.fecha == this.fecha);
 }
 
@@ -2458,14 +2458,14 @@ class SalidasTableCompanion extends UpdateCompanion<SalidasTableData> {
   final Value<int> productoId;
   final Value<int> cantidad;
   final Value<String> motivo;
-  final Value<String> usuarioId;
+  final Value<String> usuario;
   final Value<DateTime> fecha;
   const SalidasTableCompanion({
     this.id = const Value.absent(),
     this.productoId = const Value.absent(),
     this.cantidad = const Value.absent(),
     this.motivo = const Value.absent(),
-    this.usuarioId = const Value.absent(),
+    this.usuario = const Value.absent(),
     this.fecha = const Value.absent(),
   });
   SalidasTableCompanion.insert({
@@ -2473,19 +2473,19 @@ class SalidasTableCompanion extends UpdateCompanion<SalidasTableData> {
     required int productoId,
     required int cantidad,
     required String motivo,
-    required String usuarioId,
+    required String usuario,
     required DateTime fecha,
   }) : productoId = Value(productoId),
        cantidad = Value(cantidad),
        motivo = Value(motivo),
-       usuarioId = Value(usuarioId),
+       usuario = Value(usuario),
        fecha = Value(fecha);
   static Insertable<SalidasTableData> custom({
     Expression<int>? id,
     Expression<int>? productoId,
     Expression<int>? cantidad,
     Expression<String>? motivo,
-    Expression<String>? usuarioId,
+    Expression<String>? usuario,
     Expression<DateTime>? fecha,
   }) {
     return RawValuesInsertable({
@@ -2493,7 +2493,7 @@ class SalidasTableCompanion extends UpdateCompanion<SalidasTableData> {
       if (productoId != null) 'producto_id': productoId,
       if (cantidad != null) 'cantidad': cantidad,
       if (motivo != null) 'motivo': motivo,
-      if (usuarioId != null) 'usuario_id': usuarioId,
+      if (usuario != null) 'usuario': usuario,
       if (fecha != null) 'fecha': fecha,
     });
   }
@@ -2503,7 +2503,7 @@ class SalidasTableCompanion extends UpdateCompanion<SalidasTableData> {
     Value<int>? productoId,
     Value<int>? cantidad,
     Value<String>? motivo,
-    Value<String>? usuarioId,
+    Value<String>? usuario,
     Value<DateTime>? fecha,
   }) {
     return SalidasTableCompanion(
@@ -2511,7 +2511,7 @@ class SalidasTableCompanion extends UpdateCompanion<SalidasTableData> {
       productoId: productoId ?? this.productoId,
       cantidad: cantidad ?? this.cantidad,
       motivo: motivo ?? this.motivo,
-      usuarioId: usuarioId ?? this.usuarioId,
+      usuario: usuario ?? this.usuario,
       fecha: fecha ?? this.fecha,
     );
   }
@@ -2531,8 +2531,8 @@ class SalidasTableCompanion extends UpdateCompanion<SalidasTableData> {
     if (motivo.present) {
       map['motivo'] = Variable<String>(motivo.value);
     }
-    if (usuarioId.present) {
-      map['usuario_id'] = Variable<String>(usuarioId.value);
+    if (usuario.present) {
+      map['usuario'] = Variable<String>(usuario.value);
     }
     if (fecha.present) {
       map['fecha'] = Variable<DateTime>(fecha.value);
@@ -2547,7 +2547,7 @@ class SalidasTableCompanion extends UpdateCompanion<SalidasTableData> {
           ..write('productoId: $productoId, ')
           ..write('cantidad: $cantidad, ')
           ..write('motivo: $motivo, ')
-          ..write('usuarioId: $usuarioId, ')
+          ..write('usuario: $usuario, ')
           ..write('fecha: $fecha')
           ..write(')'))
         .toString();
@@ -7103,7 +7103,7 @@ typedef $$EntradasTableTableCreateCompanionBuilder =
       required int productoId,
       required double cantidad,
       required String motivo,
-      required String usuarioId,
+      required String usuario,
       required DateTime fecha,
     });
 typedef $$EntradasTableTableUpdateCompanionBuilder =
@@ -7112,7 +7112,7 @@ typedef $$EntradasTableTableUpdateCompanionBuilder =
       Value<int> productoId,
       Value<double> cantidad,
       Value<String> motivo,
-      Value<String> usuarioId,
+      Value<String> usuario,
       Value<DateTime> fecha,
     });
 
@@ -7145,8 +7145,8 @@ class $$EntradasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get usuarioId => $composableBuilder(
-    column: $table.usuarioId,
+  ColumnFilters<String> get usuario => $composableBuilder(
+    column: $table.usuario,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7185,8 +7185,8 @@ class $$EntradasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get usuarioId => $composableBuilder(
-    column: $table.usuarioId,
+  ColumnOrderings<String> get usuario => $composableBuilder(
+    column: $table.usuario,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7219,8 +7219,8 @@ class $$EntradasTableTableAnnotationComposer
   GeneratedColumn<String> get motivo =>
       $composableBuilder(column: $table.motivo, builder: (column) => column);
 
-  GeneratedColumn<String> get usuarioId =>
-      $composableBuilder(column: $table.usuarioId, builder: (column) => column);
+  GeneratedColumn<String> get usuario =>
+      $composableBuilder(column: $table.usuario, builder: (column) => column);
 
   GeneratedColumn<DateTime> get fecha =>
       $composableBuilder(column: $table.fecha, builder: (column) => column);
@@ -7265,14 +7265,14 @@ class $$EntradasTableTableTableManager
                 Value<int> productoId = const Value.absent(),
                 Value<double> cantidad = const Value.absent(),
                 Value<String> motivo = const Value.absent(),
-                Value<String> usuarioId = const Value.absent(),
+                Value<String> usuario = const Value.absent(),
                 Value<DateTime> fecha = const Value.absent(),
               }) => EntradasTableCompanion(
                 id: id,
                 productoId: productoId,
                 cantidad: cantidad,
                 motivo: motivo,
-                usuarioId: usuarioId,
+                usuario: usuario,
                 fecha: fecha,
               ),
           createCompanionCallback:
@@ -7281,14 +7281,14 @@ class $$EntradasTableTableTableManager
                 required int productoId,
                 required double cantidad,
                 required String motivo,
-                required String usuarioId,
+                required String usuario,
                 required DateTime fecha,
               }) => EntradasTableCompanion.insert(
                 id: id,
                 productoId: productoId,
                 cantidad: cantidad,
                 motivo: motivo,
-                usuarioId: usuarioId,
+                usuario: usuario,
                 fecha: fecha,
               ),
           withReferenceMapper: (p0) => p0
@@ -7322,7 +7322,7 @@ typedef $$SalidasTableTableCreateCompanionBuilder =
       required int productoId,
       required int cantidad,
       required String motivo,
-      required String usuarioId,
+      required String usuario,
       required DateTime fecha,
     });
 typedef $$SalidasTableTableUpdateCompanionBuilder =
@@ -7331,7 +7331,7 @@ typedef $$SalidasTableTableUpdateCompanionBuilder =
       Value<int> productoId,
       Value<int> cantidad,
       Value<String> motivo,
-      Value<String> usuarioId,
+      Value<String> usuario,
       Value<DateTime> fecha,
     });
 
@@ -7364,8 +7364,8 @@ class $$SalidasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get usuarioId => $composableBuilder(
-    column: $table.usuarioId,
+  ColumnFilters<String> get usuario => $composableBuilder(
+    column: $table.usuario,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7404,8 +7404,8 @@ class $$SalidasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get usuarioId => $composableBuilder(
-    column: $table.usuarioId,
+  ColumnOrderings<String> get usuario => $composableBuilder(
+    column: $table.usuario,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7438,8 +7438,8 @@ class $$SalidasTableTableAnnotationComposer
   GeneratedColumn<String> get motivo =>
       $composableBuilder(column: $table.motivo, builder: (column) => column);
 
-  GeneratedColumn<String> get usuarioId =>
-      $composableBuilder(column: $table.usuarioId, builder: (column) => column);
+  GeneratedColumn<String> get usuario =>
+      $composableBuilder(column: $table.usuario, builder: (column) => column);
 
   GeneratedColumn<DateTime> get fecha =>
       $composableBuilder(column: $table.fecha, builder: (column) => column);
@@ -7480,14 +7480,14 @@ class $$SalidasTableTableTableManager
                 Value<int> productoId = const Value.absent(),
                 Value<int> cantidad = const Value.absent(),
                 Value<String> motivo = const Value.absent(),
-                Value<String> usuarioId = const Value.absent(),
+                Value<String> usuario = const Value.absent(),
                 Value<DateTime> fecha = const Value.absent(),
               }) => SalidasTableCompanion(
                 id: id,
                 productoId: productoId,
                 cantidad: cantidad,
                 motivo: motivo,
-                usuarioId: usuarioId,
+                usuario: usuario,
                 fecha: fecha,
               ),
           createCompanionCallback:
@@ -7496,14 +7496,14 @@ class $$SalidasTableTableTableManager
                 required int productoId,
                 required int cantidad,
                 required String motivo,
-                required String usuarioId,
+                required String usuario,
                 required DateTime fecha,
               }) => SalidasTableCompanion.insert(
                 id: id,
                 productoId: productoId,
                 cantidad: cantidad,
                 motivo: motivo,
-                usuarioId: usuarioId,
+                usuario: usuario,
                 fecha: fecha,
               ),
           withReferenceMapper: (p0) => p0

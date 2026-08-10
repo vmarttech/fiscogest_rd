@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.da
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 
 class RegistrarMovimientoKardex {
+
   RegistrarMovimientoKardex(this._repo);
   final IKardexRepository _repo;
 
@@ -17,7 +18,7 @@ class RegistrarMovimientoKardex {
     DateTime? fechaMovimiento,
     String? documentoReferencia,
     String? observacion,
-    required int usuarioId,
+    required int usuarioId, // ✅ PARÁMETRO AGREGADO
   }) async {
     final movimiento = Kardex(
       id: null,
@@ -31,7 +32,7 @@ class RegistrarMovimientoKardex {
       fechaMovimiento: fechaMovimiento ?? DateTime.now(),
       documentoReferencia: documentoReferencia,
       observacion: observacion,
-      usuarioId: usuarioId,
+      usuarioId: usuarioId, // ✅ CAMPO OBLIGATORIO
     );
 
     await _repo.registrarMovimiento(movimiento);

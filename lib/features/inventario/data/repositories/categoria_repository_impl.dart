@@ -45,7 +45,7 @@ class CategoriaRepositoryImpl implements CategoriaRepository {
   @override
   Future<void> actualizar(Categoria categoria) async {
     await (_db.update(_db.categorias)
-      ..where((t) => t.id.equals(categoria.id ?? 0))
+      ..where((t) => t.id.equals(categoria.id!))
     ).write(CategoriasCompanion(
       nombre: Value(categoria.nombre),
       descripcion: Value(categoria.descripcion),

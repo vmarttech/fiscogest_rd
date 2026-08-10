@@ -1,19 +1,16 @@
-import 'package:equatable/equatable.dart';
+class Presentacion {
 
-class Presentacion extends Equatable {
-  const Presentacion({
+  Presentacion({
     this.id,
     required this.nombre,
     required this.abreviatura,
-    required this.activo,
+    this.activo = true,
   });
-
   final int? id;
   final String nombre;
   final String abreviatura;
   final bool activo;
 
-  // ✅ Método copyWith AGREGADO COMPLETO, coincide cada campo existente
   Presentacion copyWith({
     int? id,
     String? nombre,
@@ -27,13 +24,4 @@ class Presentacion extends Equatable {
       activo: activo ?? this.activo,
     );
   }
-
-  // ✅ Lista props ya completa y correcta → MANTENIDA INTACTA
-  @override
-  List<Object?> get props => [
-        id,
-        nombre,
-        abreviatura,
-        activo,
-      ];
 }

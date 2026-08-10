@@ -1,7 +1,6 @@
-import 'package:equatable/equatable.dart';
+class Proveedor {
 
-class Proveedor extends Equatable {
-  const Proveedor({
+  Proveedor({
     this.id,
     required this.nombre,
     required this.contacto,
@@ -9,9 +8,8 @@ class Proveedor extends Equatable {
     required this.telefono,
     required this.correo,
     required this.rnc,
-    required this.activo,
+    this.activo = true,
   });
-
   final int? id;
   final String nombre;
   final String contacto;
@@ -21,7 +19,6 @@ class Proveedor extends Equatable {
   final String rnc;
   final bool activo;
 
-  // ✅ Método copyWith AGREGADO COMPLETO, cada parámetro IGUAL nombre/tipo a campos existentes
   Proveedor copyWith({
     int? id,
     String? nombre,
@@ -43,17 +40,4 @@ class Proveedor extends Equatable {
       activo: activo ?? this.activo,
     );
   }
-
-  // ✅ Lista props COMPLETADA Y CERRADA: incluye TODOS los campos declarados
-  @override
-  List<Object?> get props => [
-        id,
-        nombre,
-        contacto,
-        direccion,
-        telefono,
-        correo,
-        rnc,
-        activo,
-      ];
 }

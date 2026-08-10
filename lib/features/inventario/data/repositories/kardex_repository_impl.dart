@@ -10,11 +10,9 @@ class KardexRepositoryImpl implements IKardexRepository {
   final DriftKardexDatasource _datasource;
 
   @override
-Future<void> registrarMovimiento(Kardex kardex) async {
-  final _kid = kardex.id;
-  final companion = KardexTableCompanion(
-    id: _kid != null ? Value(_kid) : const Value.absent(),
-
+  Future<void> registrarMovimiento(Kardex kardex) async {
+    final companion = KardexTableCompanion(
+      id: kardex.id != null ? Value(kardex.id!) : const Value.absent(),
       idProducto: Value(kardex.productoId),
       tipoMovimiento: Value(kardex.tipoMovimiento.name),
       cantidad: Value(kardex.cantidad),

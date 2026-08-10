@@ -2,7 +2,7 @@ import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart
 
 class ProveedorRepository {
   final List<Proveedor> _proveedoresLocales = [
-    const Proveedor(
+    Proveedor(
       id: 1,
       nombre: 'Distribuidora Global, S.A.',
       contacto: 'Lic. Juan Pérez',
@@ -31,7 +31,7 @@ class ProveedorRepository {
     if (duplicado) {
       throw Exception('Ya existe otro proveedor registrado con ese RNC.');
     }
-    final index = _proveedoresLocales.indexWhere((p) => p.id == proveedor.id!);
+    final index = _proveedoresLocales.indexWhere((p) => p.id == proveedor.id);
     if (index != -1) {
       _proveedoresLocales[index] = proveedor;
     }

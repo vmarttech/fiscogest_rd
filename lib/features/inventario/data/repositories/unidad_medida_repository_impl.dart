@@ -48,7 +48,7 @@ class UnidadMedidaRepositoryImpl implements UnidadMedidaRepository {
   @override
   Future<void> actualizar(UnidadMedida unidad) async {
     await (_db.update(_db.unidadesMedida)
-      ..where((t) => t.id.equals(unidad.id ?? 0))
+      ..where((t) => t.id.equals(unidad.id!))
     ).write(UnidadesMedidaCompanion(
       nombre: Value(unidad.nombre),
       abreviatura: Value(unidad.abreviatura),

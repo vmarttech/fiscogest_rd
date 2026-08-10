@@ -59,7 +59,7 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
       productoId: widget.productoId,
       cantidad: cantidad.toInt(),
       motivo: _motivoController.text.trim().isEmpty ? 'Salida por consumo' : _motivoController.text.trim(),
-      usuarioId: 'usuarioIdActual',
+      usuario: 'UsuarioActual',
     );
 
     ref.invalidate(productoControllerProvider);

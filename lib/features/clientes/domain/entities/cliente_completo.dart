@@ -1,18 +1,16 @@
-import 'package:equatable/equatable.dart';
+class ClienteCompleto {
 
-class ClienteCompleto extends Equatable {
-  const ClienteCompleto({
+  ClienteCompleto({
     this.id,
     required this.nombre,
     required this.direccion,
     required this.telefono,
     required this.correo,
     required this.rncCedula,
-    required this.activo,
-    required this.observaciones,
-    required this.historial,
+    this.activo = true,
+    this.observaciones = '',
+    this.historial = 'Cliente registrado en el sistema.',
   });
-
   final int? id;
   final String nombre;
   final String direccion;
@@ -23,7 +21,6 @@ class ClienteCompleto extends Equatable {
   final String observaciones;
   final String historial;
 
-  // ✅ Método copyWith COMPLETO, NOMBRES IGUALES A CADA CAMPO
   ClienteCompleto copyWith({
     int? id,
     String? nombre,
@@ -47,18 +44,4 @@ class ClienteCompleto extends Equatable {
       historial: historial ?? this.historial,
     );
   }
-
-  // ✅ Lista props COMPLETA: TODOS campos incluidos, coinciden con declaración
-  @override
-  List<Object?> get props => [
-        id,
-        nombre,
-        direccion,
-        telefono,
-        correo,
-        rncCedula,
-        activo,
-        observaciones,
-        historial,
-      ];
 }
