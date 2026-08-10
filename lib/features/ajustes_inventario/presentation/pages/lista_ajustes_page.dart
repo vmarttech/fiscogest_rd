@@ -16,8 +16,7 @@ class ListaAjustesPage extends ConsumerStatefulWidget {
 class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
   @override
   Widget build(BuildContext context) {
-    // ✅ Usamos el nombre CORRECTO del proveedor + tipo explícito
-    final listaAsync = ref.watch<AsyncValue<List<AjusteInventario>>>(ajusteInventarioListaProvider);
+    final listaAsync = ref.watch<AsyncValue<List<AjusteInventario>>>(ajusteinventariolistaprovider);
 
     return Scaffold(
       appBar: AppBar(
@@ -35,8 +34,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
         ],
       ),
       body: RefreshIndicator(
-        // ✅ Nombre correcto al refrescar
-        onRefresh: () => ref.refresh(ajusteInventarioListaProvider.future),
+        onRefresh: () => ref.refresh(ajusteinventariolistaprovider.future),
         child: listaAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (Object e, _) => Center(child: Text('Error: $e')),

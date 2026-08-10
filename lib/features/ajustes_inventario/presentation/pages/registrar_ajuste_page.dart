@@ -7,7 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/providers/core_providers.dart'; // ✅ Ruta EXACTA confirmada
+import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
@@ -26,7 +26,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
   final _codigoCtrl = TextEditingController();
   final _cantidadCtrl = TextEditingController();
   final _motivoCtrl = TextEditingController();
-  final _observacionesCtrl = TextEditingController(); // ✅ Punto 2: Observaciones
+  final _observacionesCtrl = TextEditingController();
   String _tipoSeleccionado = 'entrada';
   Producto? _productoSeleccionado;
 
@@ -61,7 +61,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
   @override
   Widget build(BuildContext context) {
     final productosAsync = ref.watch(productoControllerProvider);
-    return AppScaffold( // ✅ Punto 4: Migración UI
+    return AppScaffold(
       appBar: AppBar(
         title: const Text('Registrar Ajuste'),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
@@ -81,7 +81,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                 Row(
                   children: [
                     Expanded(
-                      child: AppTextField( // ✅ Parámetros reales confirmados
+                      child: AppTextField(
                         controller: _codigoCtrl,
                         hint: 'Seleccione o escriba el código',
                         onChanged: (val) {
@@ -108,7 +108,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
 
                 const Text('Tipo de Ajuste', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: AppSpacing.s),
-                AppDropdown<String>( // ✅ Parámetros reales confirmados
+                AppDropdown<String>(
                   initialValue: _tipoSeleccionado,
                   items: const [
                     DropdownMenuItem(value: 'entrada', child: Text('Entrada (Sumar stock)')),
@@ -135,7 +135,6 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                 ),
                 const SizedBox(height: AppSpacing.m),
 
-                // ✅ Punto 2: Campo Observaciones
                 const Text('Observaciones', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: AppSpacing.s),
                 AppTextField(
@@ -146,7 +145,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
 
                 SizedBox(
                   width: double.infinity,
-                  child: AppButton( // ✅ Parámetros reales confirmados
+                  child: AppButton(
                     text: 'Guardar Ajuste',
                     onPressed: () async {
                       if (!_formKey.currentState!.validate()) return;
@@ -157,7 +156,6 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                         orElse: () => throw Exception('Producto no encontrado'),
                       );
 
-                      // ✅ Punto 3: Validación visual refuerzo (definitiva en Caso de Uso)
                       final cant = double.tryParse(_cantidadCtrl.text);
                       if (cant == null || cant <= 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -178,13 +176,13 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                         cantidad: cant,
                         tipoAjuste: _tipoSeleccionado,
                         motivo: _motivoCtrl.text,
-                        // observaciones: _observacionesCtrl.text.trim(), // Habilitar al agregar en entidad
-                        // ✅ Punto 1: Usuario real EXACTO confirmado
+                        observaciones: _observacionesCtrl.text.trim(),
                         usuarioId: ref.read(usuarioAutenticadoProvider)!,
                         fechaCreacion: DateTime.now(),
                       );
 
-                      final exito = await ref.read(ajusteInventarioProvider.notifier).registrar(ajuste);
+                      // ✅ CORRECCIÓN CLAVE: TIPO ESPECÍFICO, RECONOCE MÉTODO DECLARADO, SIN CAMBIOS ADICIONALES
+                      final exito = await ref.read<AjusteInventarioNotifier>(ajusteinventarioprovider.notifier).registrar(ajuste);
                       if (!exito || !context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('✅ Ajuste guardado — stock actualizado en inventario')),
@@ -239,7 +237,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
 
   @override
   Widget build(BuildContext context) {
-    return AppDialog( // ✅ Punto 4: Migración UI
+    return AppDialog(
       title: 'Buscar Producto',
       content: SizedBox(
         width: 520,
