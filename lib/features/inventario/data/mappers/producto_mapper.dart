@@ -25,14 +25,14 @@ class ProductoDataMapper {
       id: producto.id != null ? drift.Value(producto.id!) : const drift.Value.absent(),
       codigo: drift.Value(producto.codigo),
       nombre: drift.Value(producto.nombre),
-      descripcion: drift.Value(producto.descripcion),
+      descripcion: producto.descripcion != null ? drift.Value(producto.descripcion!) : const drift.Value.absent(),
       precioCompra: drift.Value(producto.precioCompra),
       precioVenta: drift.Value(producto.precioVenta),
       stock: drift.Value(producto.stock),
       stockMinimo: drift.Value(producto.stockMinimo),
-      categoriaId: drift.Value(producto.categoriaId),
-      marcaId: drift.Value(producto.marcaId),
-      unidadMedidaId: drift.Value(producto.unidadId),
+      categoriaId: producto.categoriaId != null ? drift.Value(producto.categoriaId!) : const drift.Value.absent(),
+      marcaId: producto.marcaId != null ? drift.Value(producto.marcaId!) : const drift.Value.absent(),
+      unidadMedidaId: producto.unidadId != null ? drift.Value(producto.unidadId!) : const drift.Value.absent(),
       activo: drift.Value(producto.activo),
     );
   }

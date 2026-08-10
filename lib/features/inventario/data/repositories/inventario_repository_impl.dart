@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
+import 'package:fiscogest_rd/features/inventario/data/mappers/producto_mapper.dart';
 
 class InventarioRepositoryImpl implements InventarioRepositoryInterface {
 
@@ -11,20 +12,7 @@ class InventarioRepositoryImpl implements InventarioRepositoryInterface {
   @override
   Future<List<Producto>> listarProductos() async {
     final datos = await _db.select(_db.productosTable).get();
-    return datos.map((d) => Producto(
-      id: d.id,
-      codigo: d.codigo,
-      nombre: d.nombre,
-      descripcion: d.descripcion,
-      precioCompra: d.precioCompra,
-      precioVenta: d.precioVenta,
-      stock: d.stock,
-      stockMinimo: d.stockMinimo,
-      categoriaId: d.categoriaId,
-      marcaId: d.marcaId,
-      unidadId: d.unidadMedidaId,
-      activo: d.activo,
-    )).toList();
+    return datos.map((d) => ProductoDataMapper.toDomain(d)).toList();
   }
 
   @override
@@ -32,81 +20,29 @@ class InventarioRepositoryImpl implements InventarioRepositoryInterface {
     final query = _db.select(_db.productosTable)..where((p) => p.id.equals(id));
     final dato = await query.getSingleOrNull();
     if (dato == null) return null;
-    return Producto(
-      id: dato.id,
-      codigo: dato.codigo,
-      nombre: dato.nombre,
-      descripcion: dato.descripcion,
-      precioCompra: dato.precioCompra,
-      precioVenta: dato.precioVenta,
-      stock: dato.stock,
-      stockMinimo: dato.stockMinimo,
-      categoriaId: dato.categoriaId,
-      marcaId: dato.marcaId,
-      unidadId: dato.unidadMedidaId,
-      activo: dato.activo,
-    );
+    return ProductoDataMapper.toDomain(dato);
   }
 
-  // ✅ Método implementado para satisfacer la interfaz faltante
   @override
   Future<Producto?> obtenerProductoPorCodigo(String codigo) async {
     final query = _db.select(_db.productosTable)..where((p) => p.codigo.equals(codigo));
     final dato = await query.getSingleOrNull();
     if (dato == null) return null;
-    return Producto(
-      id: dato.id,
-      codigo: dato.codigo,
-      nombre: dato.nombre,
-      descripcion: dato.descripcion,
-      precioCompra: dato.precioCompra,
-      precioVenta: dato.precioVenta,
-      stock: dato.stock,
-      stockMinimo: dato.stockMinimo,
-      categoriaId: dato.categoriaId,
-      marcaId: dato.marcaId,
-      unidadId: dato.unidadMedidaId,
-      activo: dato.activo,
-    );
+    return ProductoDataMapper.toDomain(dato);
   }
 
   @override
   Future<void> crearProducto(Producto producto) async {
-    await _db.into(_db.productosTable).insert(
-      ProductosTableCompanion.insert(
-        codigo: producto.codigo,
-        nombre: producto.nombre,
-        descripcion: Value(producto.descripcion),
-        precioCompra: producto.precioCompra,
-        precioVenta: producto.precioVenta,
-        stock: producto.stock,
-        stockMinimo: producto.stockMinimo,
-        categoriaId: producto.categoriaId,
-        marcaId: producto.marcaId,
-        unidadMedidaId: producto.unidadId,
-        activo: Value(producto.activo),
-      ),
-    );
+    final companion = ProductoDataMapper.toCompanion(producto);
+    await _db.into(_db.productosTable).insert(companion);
   }
 
   @override
   Future<void> actualizarProducto(Producto producto) async {
+    final companion = ProductoDataMapper.toCompanion(producto);
     await (_db.update(_db.productosTable)
-      // ✅ Se agrega '!' para asegurar que el id no es nulo
       ..where((p) => p.id.equals(producto.id!)))
-      .write(ProductosTableCompanion(
-        codigo: Value(producto.codigo),
-        nombre: Value(producto.nombre),
-        descripcion: Value(producto.descripcion),
-        precioCompra: Value(producto.precioCompra),
-        precioVenta: Value(producto.precioVenta),
-        stock: Value(producto.stock),
-        stockMinimo: Value(producto.stockMinimo),
-        categoriaId: Value(producto.categoriaId),
-        marcaId: Value(producto.marcaId),
-        unidadMedidaId: Value(producto.unidadId),
-        activo: Value(producto.activo),
-      ));
+      .write(companion);
   }
 
   @override

@@ -136,6 +136,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                             TipoMovimiento.transferencia => const Color(0xFF6366F1),
                             _ => const Color(0xFF8B5CF6),
                           };
+                          
+                          final fechaValida = mov.fechaMovimiento ?? DateTime.now();
+
                           return Padding(
                             padding: AppSpacing.vS,
                             child: Row(
@@ -167,9 +170,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                   ),
                                 ),
                                 Text(
-                                  '${mov.fechaMovimiento!.day.toString().padLeft(2,'0')}/'
-                                  '${mov.fechaMovimiento!.month.toString().padLeft(2,'0')}/'
-                                  '${mov.fechaMovimiento!.year}',
+                                  '${fechaValida.day.toString().padLeft(2,'0')}/'
+                                  '${fechaValida.month.toString().padLeft(2,'0')}/'
+                                  '${fechaValida.year}',
                                   style: AppTypography.bodySmall.copyWith(color: const Color(0xFF94A3B8)),
                                 ),
                               ],

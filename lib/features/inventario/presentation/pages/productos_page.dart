@@ -255,6 +255,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage>
                       TipoMovimiento.ajuste => const Color(0xFFF59E0B),
                       _ => const Color(0xFF6366F1),
                     };
+                    
+                    final fechaValida = mov.fechaMovimiento ?? DateTime.now();
+
                     return Card(
                       elevation: 2,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -275,7 +278,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage>
                           const SizedBox(width: 12),
                           Flexible(
                             child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                              Text('${mov.fechaMovimiento!.day}/${mov.fechaMovimiento!.month}/${mov.fechaMovimiento!.year}', style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                              Text('${fechaValida.day}/${fechaValida.month}/${fechaValida.year}', style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
                               const SizedBox(height: 4),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

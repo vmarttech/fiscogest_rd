@@ -9,12 +9,13 @@ class Producto {
     required this.precioVenta,
     required this.stock,
     required this.stockMinimo,
-    required this.categoriaId,
-    required this.marcaId,
-    required this.unidadId,
+    this.categoriaId,
+    this.marcaId,
+    this.unidadId,
     this.activo = true,
   }) : assert(stock >= 0, 'El stock no puede ser negativo'),
        assert(stockMinimo >= 0, 'El stock mínimo no puede ser negativo');
+
   final int? id;
   final String codigo;
   final String nombre;
@@ -23,9 +24,9 @@ class Producto {
   final double precioVenta;
   final double stock;
   final double stockMinimo;
-  final int categoriaId;
-  final int marcaId;
-  final int unidadId;
+  final int? categoriaId;
+  final int? marcaId;
+  final int? unidadId;
   final bool activo;
 
   /// Existencia actual en almacén
