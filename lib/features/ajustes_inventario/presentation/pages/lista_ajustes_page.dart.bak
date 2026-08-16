@@ -55,7 +55,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Producto ID: ${a.idProducto}',
+                              'Producto ID: ${a.productoId}',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text('Tipo: ${a.tipoAjuste} • Cantidad: ${a.cantidad}'),

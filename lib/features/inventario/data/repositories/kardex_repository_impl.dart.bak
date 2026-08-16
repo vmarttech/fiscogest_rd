@@ -15,7 +15,7 @@ Future<void> registrarMovimiento(Kardex kardex) async {
   final companion = KardexTableCompanion(
     id: _kid != null ? Value(_kid) : const Value.absent(),
 
-      idProducto: Value(kardex.productoId),
+      productoId: Value(kardex.productoId),
       tipoMovimiento: Value(kardex.tipoMovimiento.name),
       cantidad: Value(kardex.cantidad),
       saldoAnterior: Value(kardex.saldoAnterior),
@@ -37,7 +37,7 @@ Future<void> registrarMovimiento(Kardex kardex) async {
     final datos = await _datasource.obtenerHistorialPorProducto(idProd);
     return datos.map((d) => Kardex(
       id: d.id,
-      productoId: d.idProducto,
+      productoId: d.productoId,
       tipoMovimiento: TipoMovimiento.values.byName(d.tipoMovimiento),
       cantidad: d.cantidad,
       saldoAnterior: d.saldoAnterior,
@@ -56,7 +56,7 @@ Future<void> registrarMovimiento(Kardex kardex) async {
     final datos = await _datasource.obtenerTodoElHistorial(desde: desde, hasta: hasta);
     return datos.map((d) => Kardex(
       id: d.id,
-      productoId: d.idProducto,
+      productoId: d.productoId,
       tipoMovimiento: TipoMovimiento.values.byName(d.tipoMovimiento),
       cantidad: d.cantidad,
       saldoAnterior: d.saldoAnterior,

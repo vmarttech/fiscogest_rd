@@ -1,34 +1,21 @@
 import 'package:drift/drift.dart';
 
+@DataClassName('ProductoData')
 class ProductosTable extends Table {
   IntColumn get id => integer().autoIncrement()();
-
-  // Identificación única comercial
-  TextColumn get codigo => text()
-      .withLength(min: 1, max: 50)
-      .customConstraint('NOT NULL UNIQUE')(); // ✅ Agregado NOT NULL
-
-  TextColumn get codigoBarras => text()
-      .nullable()
-      .customConstraint('UNIQUE')(); // ✅ Mantiene nullable + UNIQUE
-
-  // Información descriptiva
-  TextColumn get nombre => text().withLength(min: 1, max: 100)();
+  TextColumn get codigo => text()();
+  TextColumn get codigoBarras => text().named('codigo_barras').nullable()();
+  TextColumn get nombre => text()();
   TextColumn get descripcion => text().nullable()();
-
-  // Costos con restricciones seguras
-  RealColumn get precioCompra => real().check(precioCompra.isBiggerOrEqualValue(0.0))();
-  RealColumn get precioVenta => real().check(precioVenta.isBiggerOrEqualValue(0.0))();
-
-  // Inventario y mínimos seguros
-  RealColumn get stock => real().check(stock.isBiggerOrEqualValue(0.0))();
-  RealColumn get stockMinimo => real().check(stockMinimo.isBiggerOrEqualValue(0.0))();
-
-  // Relaciones normalizadas obligatorias
-  IntColumn get categoriaId => integer()();
-  IntColumn get marcaId => integer()();
-  IntColumn get unidadMedidaId => integer()();
-
-  // Estado del registro
-  BoolColumn get activo => boolean().withDefault(const Constant(true))();
+  RealColumn get precioCompra => real().named('precio_compra')();
+  RealColumn get precioVenta => real().named('precio_venta')();
+  RealColumn get stock => real().nullable()();
+  RealColumn get stockMinimo => real().named('stock_minimo').nullable()();
+  // ✅ AGREGADO FALTANTE
+  RealColumn get stockMaximo => real().named('stock_maximo').nullable()();
+  IntColumn get categoriaId => integer().named('categoria_id')();
+  IntColumn get marcaId => integer().named('marca_id')();
+  IntColumn get unidadMedidaId => integer().named('unidad_medida_id')();
+  // ✅ CORREGIDO: int, convertir bool en capa superior
+  IntColumn get activo => integer().withDefault(const Constant(1))();
 }

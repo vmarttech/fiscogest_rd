@@ -6,12 +6,14 @@ class Salida {
     required this.motivo,
     required this.usuario,
     required this.fecha,
+    this.observacion,
   });
 
   final int? id;
   final int productoId;
-  final int cantidad;
+  final double cantidad;
   final String motivo;
   final String usuario;
   final DateTime fecha;
+  final String? observacion;
 }

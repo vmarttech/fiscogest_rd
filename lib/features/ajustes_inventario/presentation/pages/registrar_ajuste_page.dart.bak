@@ -173,7 +173,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                       }
 
                       final ajuste = AjusteInventario(
-                        idProducto: producto.id ?? 0,
+                        productoId: producto.id ?? 0,
                         codigoBusqueda: codigo,
                         cantidad: cant,
                         tipoAjuste: _tipoSeleccionado,

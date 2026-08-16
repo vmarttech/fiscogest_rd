@@ -10,9 +10,9 @@ class ExistenciaRepositoryImpl implements IExistenciaRepository {
   final AppDatabase _db;
 
   @override
-  Future<Existencia?> obtenerPorProducto(int idProducto) async {
+  Future<Existencia?> obtenerPorProducto(int productoId) async {
     final registro = await (_db.select(_db.existenciasTable)
-        ..where((ExistenciasTable tbl) => tbl.idProducto.equals(idProducto)))
+        ..where((ExistenciasTable tbl) => tbl.productoId.equals(productoId)))
         .getSingleOrNull();
     return registro != null ? _mapearAEntidad(registro) : null;
   }
@@ -26,7 +26,7 @@ class ExistenciaRepositoryImpl implements IExistenciaRepository {
     }
     return await _db.into(_db.existenciasTable).insert(
       ExistenciasTableCompanion(
-        idProducto: Value(existencia.idProducto),
+        productoId: Value(existencia.productoId),
         existenciaActual: Value(existencia.existenciaActual),
         existenciaDisponible: Value(existencia.existenciaDisponible),
       ),
@@ -45,7 +45,7 @@ class ExistenciaRepositoryImpl implements IExistenciaRepository {
     final bool actualizado = await _db.update(_db.existenciasTable).replace(
       ExistenciasTableCompanion(
         id: Value(existencia.id!),
-        idProducto: Value(existencia.idProducto),
+        productoId: Value(existencia.productoId),
         existenciaActual: Value(existencia.existenciaActual),
         existenciaDisponible: Value(existencia.existenciaDisponible),
       ),
@@ -62,7 +62,7 @@ class ExistenciaRepositoryImpl implements IExistenciaRepository {
   Existencia _mapearAEntidad(ExistenciaData datos) {
     return Existencia(
       id: datos.id,
-      idProducto: datos.idProducto,
+      productoId: datos.productoId,
       existenciaActual: datos.existenciaActual,
       existenciaDisponible: datos.existenciaDisponible,
     );

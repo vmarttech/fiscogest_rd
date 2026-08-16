@@ -83,7 +83,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 validator: (v) => v?.trim().isEmpty ?? true ? 'Campo obligatorio' : null,
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _skuCtrl,
                 decoration: InputDecoration(
@@ -107,7 +106,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 ),
               ),
               const SizedBox(height: 16),
-
               cats.when(
                 data: (lista) => DropdownButtonFormField<int>(
                   initialValue: _catSel,
@@ -138,7 +136,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 error: (e,_) => Text('Error cargando categorías: $e', style: const TextStyle(color: Colors.red)),
               ),
               const SizedBox(height: 16),
-
               marcas.when(
                 data: (lista) => DropdownButtonFormField<int>(
                   initialValue: _marcaSel,
@@ -168,7 +165,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 error: (e,_) => Text('Error cargando marcas: $e', style: const TextStyle(color: Colors.red)),
               ),
               const SizedBox(height: 16),
-
               unids.when(
                 data: (lista) => DropdownButtonFormField<int>(
                   initialValue: _unidadSel,
@@ -199,7 +195,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 error: (e,_) => Text('Error cargando unidades: $e', style: const TextStyle(color: Colors.red)),
               ),
               const SizedBox(height: 16),
-
               Row(
                 children: [
                   Expanded(
@@ -256,7 +251,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 ],
               ),
               const SizedBox(height: 16),
-
               Row(
                 children: [
                   Expanded(
@@ -313,7 +307,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 ],
               ),
               const SizedBox(height: 24),
-
               SwitchListTile(
                 title: const Text(
                   'Producto Activo para la Venta',
@@ -325,7 +318,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 contentPadding: EdgeInsets.zero,
               ),
               const SizedBox(height: 32),
-
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -356,7 +348,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                       stockMinimo: stockMinVal,
                       categoriaId: _catSel!,
                       marcaId: _marcaSel ?? 1,
-                      unidadId: _unidadSel!,
+                      unidadMedidaId: _unidadSel!,
                       activo: _activo,
                     );
                     ref.read(productoControllerProvider.notifier).guardar(nuevoProd);

@@ -2,7 +2,7 @@ class AjusteInventario {
 
   const AjusteInventario({
     this.id,
-    required this.idProducto,
+    required this.productoId,
     this.codigoBusqueda,
     required this.tipoAjuste,
     required this.cantidad,
@@ -12,7 +12,7 @@ class AjusteInventario {
     required this.fechaCreacion,
   });
   final int? id;
-  final int idProducto;
+  final int productoId;
   final String? codigoBusqueda;
   final String tipoAjuste;
   final double cantidad;

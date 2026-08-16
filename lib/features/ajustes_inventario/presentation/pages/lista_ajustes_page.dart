@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_
 
 class ListaAjustesPage extends ConsumerStatefulWidget {
   const ListaAjustesPage({super.key});
+
   static const routeName = 'lista-ajustes';
 
   @override
@@ -16,7 +17,7 @@ class ListaAjustesPage extends ConsumerStatefulWidget {
 class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
   @override
   Widget build(BuildContext context) {
-    final listaAsync = ref.watch<AsyncValue<List<AjusteInventario>>>(ajusteinventariolistaprovider);
+    final listaAsync = ref.watch(ajusteInventarioListaProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -34,7 +35,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(ajusteinventariolistaprovider.future),
+        onRefresh: () => ref.refresh(ajusteInventarioListaProvider.future),
         child: listaAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (Object e, _) => Center(child: Text('Error: $e')),
@@ -53,7 +54,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Producto ID: ${a.idProducto}',
+                              'Producto ID: ${a.productoId}',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text('Tipo: ${a.tipoAjuste} • Cantidad: ${a.cantidad}'),

@@ -4,7 +4,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/existencia.dart
 
 abstract class IExistenciaRepository {
   /// Consultar registro de existencias por identificador de producto
-  Future<Existencia?> obtenerPorProducto(int idProducto);
+  Future<Existencia?> obtenerPorProducto(int productoId);
 
   /// Crear nuevo registro inicial de existencias con validaciones
   Future<int> crear(Existencia existencia);

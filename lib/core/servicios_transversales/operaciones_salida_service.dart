@@ -1,51 +1,54 @@
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/salida.dart';
-import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_salida_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
+import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_salida_repository.dart';
 
 class OperacionesSalidaService {
   OperacionesSalidaService({
-    required ISalidaRepository salidaRepository,
-    required IProductoRepository productoRepository,
-    required AppDatabase db,
-  })  : _salidaRepository = salidaRepository,
-        _productoRepository = productoRepository,
-        _db = db;
+    required this.salidaRepository,
+    required this.productoRepository,
+    required this.db,
+  });
 
-  final ISalidaRepository _salidaRepository;
-  final IProductoRepository _productoRepository;
-  final AppDatabase _db;
+  final ISalidaRepository salidaRepository;
+  final IProductoRepository productoRepository;
+  final AppDatabase db;
 
-  /// ÚNICO punto autorizado para registrar salida: valida stock, registra y actualiza existencias en transacción segura.
+  bool puedeDescontar(Producto producto, double cantidad) {
+    final double stockActual = producto.stock ?? 0.0;
+    return stockActual >= cantidad;
+  }
+
+  Producto descontarStock(Producto producto, double cantidad) {
+    final double stockActual = producto.stock ?? 0.0;
+    final double nuevoStock = stockActual - cantidad;
+    return producto.copyWith(stock: nuevoStock);
+  }
+
   Future<void> registrarSalidaConValidacionStock({
     required int productoId,
-    required int cantidad,
+    required double cantidad,
     required String motivo,
     required String usuario,
   }) async {
-    await _db.transaction(() async {
-      // 1. Validar stock disponible
-      final producto = await _productoRepository.obtenerProductoPorId(productoId);
+    await db.transaction(() async {
+      final producto = await productoRepository.obtenerProductoPorId(productoId);
       if (producto == null) throw Exception('Producto no encontrado');
-      if (producto.stock < cantidad) {
-        throw Exception('Stock insuficiente: Disponible ${producto.stock}, solicitado $cantidad');
+      if (!puedeDescontar(producto, cantidad)) {
+        throw Exception('Stock insuficiente para realizar la salida');
       }
 
-      // 2. Crear entidad (ÚNICO lugar válido)
-      final nuevaSalida = Salida(
+      await salidaRepository.registrarSalida(Salida(
         productoId: productoId,
         cantidad: cantidad,
         motivo: motivo,
         usuario: usuario,
         fecha: DateTime.now(),
-      );
+      ));
 
-      // 3. Registrar salida
-      await _salidaRepository.registrarSalida(nuevaSalida);
-
-      // 4. Actualizar existencias
-      final productoActualizado = producto.copyWith(stock: producto.stock - cantidad);
-      await _productoRepository.actualizarProducto(productoActualizado);
+      final actualizado = descontarStock(producto, cantidad);
+      await productoRepository.actualizarProducto(actualizado);
     });
   }
 }

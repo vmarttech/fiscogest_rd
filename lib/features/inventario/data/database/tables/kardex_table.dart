@@ -1,18 +1,20 @@
 import 'package:drift/drift.dart';
 
+@DataClassName('KardexData')
 class KardexTable extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idProducto => integer()();
-  TextColumn get tipoMovimiento => text()();
+  // ✅ UNIFICADO: productoId -> columna producto_id
+  IntColumn get productoId => integer().named('producto_id')();
+  TextColumn get tipoMovimiento => text().named('tipo_movimiento')();
   RealColumn get cantidad => real()();
-  RealColumn get saldoAnterior => real()();
-  RealColumn get saldoNuevo => real()();
-  RealColumn get costoUnitario => real()();
-  RealColumn get totalMovimiento => real()();
-  IntColumn get referenciaId => integer().nullable()();
-  TextColumn get documentoReferencia => text().nullable()();
-  TextColumn get motivo => text()();
-  IntColumn get usuarioId => integer()();
-  DateTimeColumn get fechaMovimiento => dateTime().nullable().withDefault(currentDateAndTime)();
+  RealColumn get saldoAnterior => real().named('saldo_anterior')();
+  RealColumn get saldoNuevo => real().named('saldo_nuevo')();
+  RealColumn get costoUnitario => real().named('costo_unitario')();
+  RealColumn get totalMovimiento => real().named('total_movimiento')();
+  IntColumn get referenciaId => integer().named('referencia_id').nullable()();
+  TextColumn get documentoReferencia => text().named('documento_referencia').nullable()();
+  TextColumn get motivo => text().nullable()();
+  IntColumn get usuarioId => integer().named('usuario_id').nullable()();
+  IntColumn get fechaMovimiento => integer().named('fecha_movimiento')(); // timestamp
   TextColumn get observacion => text().nullable()();
 }

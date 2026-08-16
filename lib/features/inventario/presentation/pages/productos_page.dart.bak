@@ -178,7 +178,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> with SingleTicker
                         final nombre = prod.nombre;
                         final codigo = prod.codigo;
                         final activo = prod.activo;
-                        final idProducto = prod.id ?? 0;
+                        final productoId = prod.id ?? 0;
 
                         return Card(
                           elevation: 2,
@@ -303,12 +303,12 @@ class _ProductosPageState extends ConsumerState<ProductosPage> with SingleTicker
                                     IconButton(
                                       icon: const Icon(Icons.edit_outlined, color: Color(0xFF1E293B), size: 20),
                                       tooltip: 'Editar Producto',
-                                      onPressed: () => context.push('/productos/$idProducto/editar'),
+                                      onPressed: () => context.push('/productos/$productoId/editar'),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete_outline, color: Color(0xFFDC2626), size: 20),
                                       tooltip: 'Eliminar Producto',
-                                      onPressed: () => ref.read(productoControllerProvider.notifier).eliminar(idProducto),
+                                      onPressed: () => ref.read(productoControllerProvider.notifier).eliminar(productoId),
                                     ),
                                   ],
                                 ),

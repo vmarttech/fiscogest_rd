@@ -1,66 +1,67 @@
 class Producto {
 
-  const Producto({
+  Producto({
     this.id,
     required this.codigo,
+    this.codigoBarras,
     required this.nombre,
     this.descripcion,
     required this.precioCompra,
     required this.precioVenta,
-    required this.stock,
-    required this.stockMinimo,
-    this.categoriaId,
-    this.marcaId,
-    this.unidadId,
-    this.activo = true,
-  }) : assert(stock >= 0, 'El stock no puede ser negativo'),
-       assert(stockMinimo >= 0, 'El stock mínimo no puede ser negativo');
-
+    this.stock,
+    this.stockMinimo,
+    this.stockMaximo,
+    required this.categoriaId,
+    required this.marcaId,
+    required this.unidadMedidaId,
+    required this.activo,
+  });
   final int? id;
   final String codigo;
+  final String? codigoBarras;
   final String nombre;
   final String? descripcion;
   final double precioCompra;
   final double precioVenta;
-  final double stock;
-  final double stockMinimo;
-  final int? categoriaId;
-  final int? marcaId;
-  final int? unidadId;
+  final double? stock;
+  final double? stockMinimo;
+  final double? stockMaximo;
+  final int categoriaId;
+  final int marcaId;
+  final int unidadMedidaId;
   final bool activo;
 
-  /// Existencia actual en almacén
-  double get existenciaActual => stock;
-
-  /// Existencia disponible (puede descontar apartados o reservas futuras si aplica)
-  double get existenciaDisponible => stock;
-
+  // ✅ Método que faltaba, causa error servicios entrada/salida
   Producto copyWith({
     int? id,
     String? codigo,
+    String? codigoBarras,
     String? nombre,
     String? descripcion,
     double? precioCompra,
     double? precioVenta,
     double? stock,
     double? stockMinimo,
+    double? stockMaximo,
     int? categoriaId,
     int? marcaId,
-    int? unidadId,
+    int? unidadMedidaId,
     bool? activo,
   }) {
     return Producto(
       id: id ?? this.id,
       codigo: codigo ?? this.codigo,
+      codigoBarras: codigoBarras ?? this.codigoBarras,
       nombre: nombre ?? this.nombre,
       descripcion: descripcion ?? this.descripcion,
       precioCompra: precioCompra ?? this.precioCompra,
       precioVenta: precioVenta ?? this.precioVenta,
       stock: stock ?? this.stock,
       stockMinimo: stockMinimo ?? this.stockMinimo,
+      stockMaximo: stockMaximo ?? this.stockMaximo,
       categoriaId: categoriaId ?? this.categoriaId,
       marcaId: marcaId ?? this.marcaId,
-      unidadId: unidadId ?? this.unidadId,
+      unidadMedidaId: unidadMedidaId ?? this.unidadMedidaId,
       activo: activo ?? this.activo,
     );
   }

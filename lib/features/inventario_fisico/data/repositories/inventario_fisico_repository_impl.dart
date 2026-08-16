@@ -5,8 +5,8 @@ import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferenc
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
 
 class InventarioFisicoRepositoryImpl implements InventarioFisicoRepositoryInterface {
-
   InventarioFisicoRepositoryImpl(this._db);
+
   final AppDatabase _db;
 
   @override
@@ -52,7 +52,7 @@ class InventarioFisicoRepositoryImpl implements InventarioFisicoRepositoryInterf
       stockFisico: r.stockFisico,
       diferencia: r.diferencia,
       motivo: r.motivo,
-      estado: r.estado,
+      estado: r.estado ?? '',
     )).toList();
   }
 

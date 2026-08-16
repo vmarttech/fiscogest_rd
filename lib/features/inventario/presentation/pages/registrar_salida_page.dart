@@ -57,7 +57,7 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
 
     await ref.read(salidaControllerProvider.notifier).registrarSalida(
       productoId: widget.productoId,
-      cantidad: cantidad.toInt(),
+      cantidad: cantidad,
       motivo: _motivoController.text.trim().isEmpty ? 'Salida por consumo' : _motivoController.text.trim(),
       usuario: 'UsuarioActual',
     );
@@ -188,4 +188,3 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
     );
   }
 }
-

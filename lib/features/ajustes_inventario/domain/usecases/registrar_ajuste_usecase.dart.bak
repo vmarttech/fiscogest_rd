@@ -12,6 +12,6 @@ class RegistrarAjusteUsecase {
     }
     // ✅ NO se agrega método nuevo: la validación de stock va DENTRO del repositorio existente
     await _repository.registrarAjuste(ajuste);
-    await _repository.actualizarExistencias(ajuste.idProducto, ajuste.cantidad, ajuste.tipoAjuste);
+    await _repository.actualizarExistencias(ajuste.productoId, ajuste.cantidad, ajuste.tipoAjuste);
   }
 }

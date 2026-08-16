@@ -3733,11 +3733,11 @@ class $KardexTableTable extends KardexTable
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _idProductoMeta = const VerificationMeta(
-    'idProducto',
+  static const VerificationMeta _productoIdMeta = const VerificationMeta(
+    'productoId',
   );
   @override
-  late final GeneratedColumn<int> idProducto = GeneratedColumn<int>(
+  late final GeneratedColumn<int> productoId = GeneratedColumn<int>(
     'id_producto',
     aliasedName,
     false,
@@ -3879,7 +3879,7 @@ class $KardexTableTable extends KardexTable
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    idProducto,
+    productoId,
     tipoMovimiento,
     cantidad,
     saldoAnterior,
@@ -3910,11 +3910,11 @@ class $KardexTableTable extends KardexTable
     }
     if (data.containsKey('id_producto')) {
       context.handle(
-        _idProductoMeta,
-        idProducto.isAcceptableOrUnknown(data['id_producto']!, _idProductoMeta),
+        _productoIdMeta,
+        productoId.isAcceptableOrUnknown(data['id_producto']!, _productoIdMeta),
       );
     } else if (isInserting) {
-      context.missing(_idProductoMeta);
+      context.missing(_productoIdMeta);
     }
     if (data.containsKey('tipo_movimiento')) {
       context.handle(
@@ -4041,7 +4041,7 @@ class $KardexTableTable extends KardexTable
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      idProducto: attachedDatabase.typeMapping.read(
+      productoId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id_producto'],
       )!,
@@ -4104,7 +4104,7 @@ class $KardexTableTable extends KardexTable
 
 class KardexTableData extends DataClass implements Insertable<KardexTableData> {
   final int id;
-  final int idProducto;
+  final int productoId;
   final String tipoMovimiento;
   final double cantidad;
   final double saldoAnterior;
@@ -4119,7 +4119,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
   final String? observacion;
   const KardexTableData({
     required this.id,
-    required this.idProducto,
+    required this.productoId,
     required this.tipoMovimiento,
     required this.cantidad,
     required this.saldoAnterior,
@@ -4137,7 +4137,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['id_producto'] = Variable<int>(idProducto);
+    map['id_producto'] = Variable<int>(productoId);
     map['tipo_movimiento'] = Variable<String>(tipoMovimiento);
     map['cantidad'] = Variable<double>(cantidad);
     map['saldo_anterior'] = Variable<double>(saldoAnterior);
@@ -4164,7 +4164,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
   KardexTableCompanion toCompanion(bool nullToAbsent) {
     return KardexTableCompanion(
       id: Value(id),
-      idProducto: Value(idProducto),
+      productoId: Value(productoId),
       tipoMovimiento: Value(tipoMovimiento),
       cantidad: Value(cantidad),
       saldoAnterior: Value(saldoAnterior),
@@ -4195,7 +4195,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return KardexTableData(
       id: serializer.fromJson<int>(json['id']),
-      idProducto: serializer.fromJson<int>(json['idProducto']),
+      productoId: serializer.fromJson<int>(json['productoId']),
       tipoMovimiento: serializer.fromJson<String>(json['tipoMovimiento']),
       cantidad: serializer.fromJson<double>(json['cantidad']),
       saldoAnterior: serializer.fromJson<double>(json['saldoAnterior']),
@@ -4217,7 +4217,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'idProducto': serializer.toJson<int>(idProducto),
+      'productoId': serializer.toJson<int>(productoId),
       'tipoMovimiento': serializer.toJson<String>(tipoMovimiento),
       'cantidad': serializer.toJson<double>(cantidad),
       'saldoAnterior': serializer.toJson<double>(saldoAnterior),
@@ -4235,7 +4235,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
 
   KardexTableData copyWith({
     int? id,
-    int? idProducto,
+    int? productoId,
     String? tipoMovimiento,
     double? cantidad,
     double? saldoAnterior,
@@ -4250,7 +4250,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
     Value<String?> observacion = const Value.absent(),
   }) => KardexTableData(
     id: id ?? this.id,
-    idProducto: idProducto ?? this.idProducto,
+    productoId: productoId ?? this.productoId,
     tipoMovimiento: tipoMovimiento ?? this.tipoMovimiento,
     cantidad: cantidad ?? this.cantidad,
     saldoAnterior: saldoAnterior ?? this.saldoAnterior,
@@ -4271,9 +4271,9 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
   KardexTableData copyWithCompanion(KardexTableCompanion data) {
     return KardexTableData(
       id: data.id.present ? data.id.value : this.id,
-      idProducto: data.idProducto.present
-          ? data.idProducto.value
-          : this.idProducto,
+      productoId: data.productoId.present
+          ? data.productoId.value
+          : this.productoId,
       tipoMovimiento: data.tipoMovimiento.present
           ? data.tipoMovimiento.value
           : this.tipoMovimiento,
@@ -4311,7 +4311,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
   String toString() {
     return (StringBuffer('KardexTableData(')
           ..write('id: $id, ')
-          ..write('idProducto: $idProducto, ')
+          ..write('productoId: $productoId, ')
           ..write('tipoMovimiento: $tipoMovimiento, ')
           ..write('cantidad: $cantidad, ')
           ..write('saldoAnterior: $saldoAnterior, ')
@@ -4331,7 +4331,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
   @override
   int get hashCode => Object.hash(
     id,
-    idProducto,
+    productoId,
     tipoMovimiento,
     cantidad,
     saldoAnterior,
@@ -4350,7 +4350,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
       identical(this, other) ||
       (other is KardexTableData &&
           other.id == this.id &&
-          other.idProducto == this.idProducto &&
+          other.productoId == this.productoId &&
           other.tipoMovimiento == this.tipoMovimiento &&
           other.cantidad == this.cantidad &&
           other.saldoAnterior == this.saldoAnterior &&
@@ -4367,7 +4367,7 @@ class KardexTableData extends DataClass implements Insertable<KardexTableData> {
 
 class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
   final Value<int> id;
-  final Value<int> idProducto;
+  final Value<int> productoId;
   final Value<String> tipoMovimiento;
   final Value<double> cantidad;
   final Value<double> saldoAnterior;
@@ -4382,7 +4382,7 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
   final Value<String?> observacion;
   const KardexTableCompanion({
     this.id = const Value.absent(),
-    this.idProducto = const Value.absent(),
+    this.productoId = const Value.absent(),
     this.tipoMovimiento = const Value.absent(),
     this.cantidad = const Value.absent(),
     this.saldoAnterior = const Value.absent(),
@@ -4398,7 +4398,7 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
   });
   KardexTableCompanion.insert({
     this.id = const Value.absent(),
-    required int idProducto,
+    required int productoId,
     required String tipoMovimiento,
     required double cantidad,
     required double saldoAnterior,
@@ -4411,7 +4411,7 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
     required int usuarioId,
     this.fechaMovimiento = const Value.absent(),
     this.observacion = const Value.absent(),
-  }) : idProducto = Value(idProducto),
+  }) : productoId = Value(productoId),
        tipoMovimiento = Value(tipoMovimiento),
        cantidad = Value(cantidad),
        saldoAnterior = Value(saldoAnterior),
@@ -4422,7 +4422,7 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
        usuarioId = Value(usuarioId);
   static Insertable<KardexTableData> custom({
     Expression<int>? id,
-    Expression<int>? idProducto,
+    Expression<int>? productoId,
     Expression<String>? tipoMovimiento,
     Expression<double>? cantidad,
     Expression<double>? saldoAnterior,
@@ -4438,7 +4438,7 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (idProducto != null) 'id_producto': idProducto,
+      if (productoId != null) 'id_producto': productoId,
       if (tipoMovimiento != null) 'tipo_movimiento': tipoMovimiento,
       if (cantidad != null) 'cantidad': cantidad,
       if (saldoAnterior != null) 'saldo_anterior': saldoAnterior,
@@ -4457,7 +4457,7 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
 
   KardexTableCompanion copyWith({
     Value<int>? id,
-    Value<int>? idProducto,
+    Value<int>? productoId,
     Value<String>? tipoMovimiento,
     Value<double>? cantidad,
     Value<double>? saldoAnterior,
@@ -4473,7 +4473,7 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
   }) {
     return KardexTableCompanion(
       id: id ?? this.id,
-      idProducto: idProducto ?? this.idProducto,
+      productoId: productoId ?? this.productoId,
       tipoMovimiento: tipoMovimiento ?? this.tipoMovimiento,
       cantidad: cantidad ?? this.cantidad,
       saldoAnterior: saldoAnterior ?? this.saldoAnterior,
@@ -4495,8 +4495,8 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (idProducto.present) {
-      map['id_producto'] = Variable<int>(idProducto.value);
+    if (productoId.present) {
+      map['id_producto'] = Variable<int>(productoId.value);
     }
     if (tipoMovimiento.present) {
       map['tipo_movimiento'] = Variable<String>(tipoMovimiento.value);
@@ -4541,7 +4541,7 @@ class KardexTableCompanion extends UpdateCompanion<KardexTableData> {
   String toString() {
     return (StringBuffer('KardexTableCompanion(')
           ..write('id: $id, ')
-          ..write('idProducto: $idProducto, ')
+          ..write('productoId: $productoId, ')
           ..write('tipoMovimiento: $tipoMovimiento, ')
           ..write('cantidad: $cantidad, ')
           ..write('saldoAnterior: $saldoAnterior, ')
@@ -4578,11 +4578,11 @@ class $AjusteInventarioTableTable extends AjusteInventarioTable
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _idProductoMeta = const VerificationMeta(
-    'idProducto',
+  static const VerificationMeta _productoIdMeta = const VerificationMeta(
+    'productoId',
   );
   @override
-  late final GeneratedColumn<int> idProducto = GeneratedColumn<int>(
+  late final GeneratedColumn<int> productoId = GeneratedColumn<int>(
     'id_producto',
     aliasedName,
     false,
@@ -4662,7 +4662,7 @@ class $AjusteInventarioTableTable extends AjusteInventarioTable
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    idProducto,
+    productoId,
     tipoAjuste,
     cantidad,
     motivo,
@@ -4687,11 +4687,11 @@ class $AjusteInventarioTableTable extends AjusteInventarioTable
     }
     if (data.containsKey('id_producto')) {
       context.handle(
-        _idProductoMeta,
-        idProducto.isAcceptableOrUnknown(data['id_producto']!, _idProductoMeta),
+        _productoIdMeta,
+        productoId.isAcceptableOrUnknown(data['id_producto']!, _productoIdMeta),
       );
     } else if (isInserting) {
-      context.missing(_idProductoMeta);
+      context.missing(_productoIdMeta);
     }
     if (data.containsKey('tipo_ajuste')) {
       context.handle(
@@ -4759,7 +4759,7 @@ class $AjusteInventarioTableTable extends AjusteInventarioTable
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      idProducto: attachedDatabase.typeMapping.read(
+      productoId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id_producto'],
       )!,
@@ -4799,7 +4799,7 @@ class $AjusteInventarioTableTable extends AjusteInventarioTable
 class AjusteInventarioTableData extends DataClass
     implements Insertable<AjusteInventarioTableData> {
   final int id;
-  final int idProducto;
+  final int productoId;
   final String tipoAjuste;
   final double cantidad;
   final String motivo;
@@ -4808,7 +4808,7 @@ class AjusteInventarioTableData extends DataClass
   final DateTime? fechaCreacion;
   const AjusteInventarioTableData({
     required this.id,
-    required this.idProducto,
+    required this.productoId,
     required this.tipoAjuste,
     required this.cantidad,
     required this.motivo,
@@ -4820,7 +4820,7 @@ class AjusteInventarioTableData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['id_producto'] = Variable<int>(idProducto);
+    map['id_producto'] = Variable<int>(productoId);
     map['tipo_ajuste'] = Variable<String>(tipoAjuste);
     map['cantidad'] = Variable<double>(cantidad);
     map['motivo'] = Variable<String>(motivo);
@@ -4837,7 +4837,7 @@ class AjusteInventarioTableData extends DataClass
   AjusteInventarioTableCompanion toCompanion(bool nullToAbsent) {
     return AjusteInventarioTableCompanion(
       id: Value(id),
-      idProducto: Value(idProducto),
+      productoId: Value(productoId),
       tipoAjuste: Value(tipoAjuste),
       cantidad: Value(cantidad),
       motivo: Value(motivo),
@@ -4858,7 +4858,7 @@ class AjusteInventarioTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AjusteInventarioTableData(
       id: serializer.fromJson<int>(json['id']),
-      idProducto: serializer.fromJson<int>(json['idProducto']),
+      productoId: serializer.fromJson<int>(json['productoId']),
       tipoAjuste: serializer.fromJson<String>(json['tipoAjuste']),
       cantidad: serializer.fromJson<double>(json['cantidad']),
       motivo: serializer.fromJson<String>(json['motivo']),
@@ -4872,7 +4872,7 @@ class AjusteInventarioTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'idProducto': serializer.toJson<int>(idProducto),
+      'productoId': serializer.toJson<int>(productoId),
       'tipoAjuste': serializer.toJson<String>(tipoAjuste),
       'cantidad': serializer.toJson<double>(cantidad),
       'motivo': serializer.toJson<String>(motivo),
@@ -4884,7 +4884,7 @@ class AjusteInventarioTableData extends DataClass
 
   AjusteInventarioTableData copyWith({
     int? id,
-    int? idProducto,
+    int? productoId,
     String? tipoAjuste,
     double? cantidad,
     String? motivo,
@@ -4893,7 +4893,7 @@ class AjusteInventarioTableData extends DataClass
     Value<DateTime?> fechaCreacion = const Value.absent(),
   }) => AjusteInventarioTableData(
     id: id ?? this.id,
-    idProducto: idProducto ?? this.idProducto,
+    productoId: productoId ?? this.productoId,
     tipoAjuste: tipoAjuste ?? this.tipoAjuste,
     cantidad: cantidad ?? this.cantidad,
     motivo: motivo ?? this.motivo,
@@ -4910,9 +4910,9 @@ class AjusteInventarioTableData extends DataClass
   ) {
     return AjusteInventarioTableData(
       id: data.id.present ? data.id.value : this.id,
-      idProducto: data.idProducto.present
-          ? data.idProducto.value
-          : this.idProducto,
+      productoId: data.productoId.present
+          ? data.productoId.value
+          : this.productoId,
       tipoAjuste: data.tipoAjuste.present
           ? data.tipoAjuste.value
           : this.tipoAjuste,
@@ -4932,7 +4932,7 @@ class AjusteInventarioTableData extends DataClass
   String toString() {
     return (StringBuffer('AjusteInventarioTableData(')
           ..write('id: $id, ')
-          ..write('idProducto: $idProducto, ')
+          ..write('productoId: $productoId, ')
           ..write('tipoAjuste: $tipoAjuste, ')
           ..write('cantidad: $cantidad, ')
           ..write('motivo: $motivo, ')
@@ -4946,7 +4946,7 @@ class AjusteInventarioTableData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
-    idProducto,
+    productoId,
     tipoAjuste,
     cantidad,
     motivo,
@@ -4959,7 +4959,7 @@ class AjusteInventarioTableData extends DataClass
       identical(this, other) ||
       (other is AjusteInventarioTableData &&
           other.id == this.id &&
-          other.idProducto == this.idProducto &&
+          other.productoId == this.productoId &&
           other.tipoAjuste == this.tipoAjuste &&
           other.cantidad == this.cantidad &&
           other.motivo == this.motivo &&
@@ -4971,7 +4971,7 @@ class AjusteInventarioTableData extends DataClass
 class AjusteInventarioTableCompanion
     extends UpdateCompanion<AjusteInventarioTableData> {
   final Value<int> id;
-  final Value<int> idProducto;
+  final Value<int> productoId;
   final Value<String> tipoAjuste;
   final Value<double> cantidad;
   final Value<String> motivo;
@@ -4980,7 +4980,7 @@ class AjusteInventarioTableCompanion
   final Value<DateTime?> fechaCreacion;
   const AjusteInventarioTableCompanion({
     this.id = const Value.absent(),
-    this.idProducto = const Value.absent(),
+    this.productoId = const Value.absent(),
     this.tipoAjuste = const Value.absent(),
     this.cantidad = const Value.absent(),
     this.motivo = const Value.absent(),
@@ -4990,21 +4990,21 @@ class AjusteInventarioTableCompanion
   });
   AjusteInventarioTableCompanion.insert({
     this.id = const Value.absent(),
-    required int idProducto,
+    required int productoId,
     required String tipoAjuste,
     required double cantidad,
     required String motivo,
     this.observaciones = const Value.absent(),
     required int usuarioId,
     this.fechaCreacion = const Value.absent(),
-  }) : idProducto = Value(idProducto),
+  }) : productoId = Value(productoId),
        tipoAjuste = Value(tipoAjuste),
        cantidad = Value(cantidad),
        motivo = Value(motivo),
        usuarioId = Value(usuarioId);
   static Insertable<AjusteInventarioTableData> custom({
     Expression<int>? id,
-    Expression<int>? idProducto,
+    Expression<int>? productoId,
     Expression<String>? tipoAjuste,
     Expression<double>? cantidad,
     Expression<String>? motivo,
@@ -5014,7 +5014,7 @@ class AjusteInventarioTableCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (idProducto != null) 'id_producto': idProducto,
+      if (productoId != null) 'id_producto': productoId,
       if (tipoAjuste != null) 'tipo_ajuste': tipoAjuste,
       if (cantidad != null) 'cantidad': cantidad,
       if (motivo != null) 'motivo': motivo,
@@ -5026,7 +5026,7 @@ class AjusteInventarioTableCompanion
 
   AjusteInventarioTableCompanion copyWith({
     Value<int>? id,
-    Value<int>? idProducto,
+    Value<int>? productoId,
     Value<String>? tipoAjuste,
     Value<double>? cantidad,
     Value<String>? motivo,
@@ -5036,7 +5036,7 @@ class AjusteInventarioTableCompanion
   }) {
     return AjusteInventarioTableCompanion(
       id: id ?? this.id,
-      idProducto: idProducto ?? this.idProducto,
+      productoId: productoId ?? this.productoId,
       tipoAjuste: tipoAjuste ?? this.tipoAjuste,
       cantidad: cantidad ?? this.cantidad,
       motivo: motivo ?? this.motivo,
@@ -5052,8 +5052,8 @@ class AjusteInventarioTableCompanion
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (idProducto.present) {
-      map['id_producto'] = Variable<int>(idProducto.value);
+    if (productoId.present) {
+      map['id_producto'] = Variable<int>(productoId.value);
     }
     if (tipoAjuste.present) {
       map['tipo_ajuste'] = Variable<String>(tipoAjuste.value);
@@ -5080,7 +5080,7 @@ class AjusteInventarioTableCompanion
   String toString() {
     return (StringBuffer('AjusteInventarioTableCompanion(')
           ..write('id: $id, ')
-          ..write('idProducto: $idProducto, ')
+          ..write('productoId: $productoId, ')
           ..write('tipoAjuste: $tipoAjuste, ')
           ..write('cantidad: $cantidad, ')
           ..write('motivo: $motivo, ')
@@ -8149,7 +8149,7 @@ typedef $$UnidadesMedidaTableProcessedTableManager =
 typedef $$KardexTableTableCreateCompanionBuilder =
     KardexTableCompanion Function({
       Value<int> id,
-      required int idProducto,
+      required int productoId,
       required String tipoMovimiento,
       required double cantidad,
       required double saldoAnterior,
@@ -8166,7 +8166,7 @@ typedef $$KardexTableTableCreateCompanionBuilder =
 typedef $$KardexTableTableUpdateCompanionBuilder =
     KardexTableCompanion Function({
       Value<int> id,
-      Value<int> idProducto,
+      Value<int> productoId,
       Value<String> tipoMovimiento,
       Value<double> cantidad,
       Value<double> saldoAnterior,
@@ -8195,8 +8195,8 @@ class $$KardexTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get idProducto => $composableBuilder(
-    column: $table.idProducto,
+  ColumnFilters<int> get productoId => $composableBuilder(
+    column: $table.productoId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8275,8 +8275,8 @@ class $$KardexTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get idProducto => $composableBuilder(
-    column: $table.idProducto,
+  ColumnOrderings<int> get productoId => $composableBuilder(
+    column: $table.productoId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -8353,8 +8353,8 @@ class $$KardexTableTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get idProducto => $composableBuilder(
-    column: $table.idProducto,
+  GeneratedColumn<int> get productoId => $composableBuilder(
+    column: $table.productoId,
     builder: (column) => column,
   );
 
@@ -8445,7 +8445,7 @@ class $$KardexTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> idProducto = const Value.absent(),
+                Value<int> productoId = const Value.absent(),
                 Value<String> tipoMovimiento = const Value.absent(),
                 Value<double> cantidad = const Value.absent(),
                 Value<double> saldoAnterior = const Value.absent(),
@@ -8460,7 +8460,7 @@ class $$KardexTableTableTableManager
                 Value<String?> observacion = const Value.absent(),
               }) => KardexTableCompanion(
                 id: id,
-                idProducto: idProducto,
+                productoId: productoId,
                 tipoMovimiento: tipoMovimiento,
                 cantidad: cantidad,
                 saldoAnterior: saldoAnterior,
@@ -8477,7 +8477,7 @@ class $$KardexTableTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required int idProducto,
+                required int productoId,
                 required String tipoMovimiento,
                 required double cantidad,
                 required double saldoAnterior,
@@ -8492,7 +8492,7 @@ class $$KardexTableTableTableManager
                 Value<String?> observacion = const Value.absent(),
               }) => KardexTableCompanion.insert(
                 id: id,
-                idProducto: idProducto,
+                productoId: productoId,
                 tipoMovimiento: tipoMovimiento,
                 cantidad: cantidad,
                 saldoAnterior: saldoAnterior,
@@ -8534,7 +8534,7 @@ typedef $$KardexTableTableProcessedTableManager =
 typedef $$AjusteInventarioTableTableCreateCompanionBuilder =
     AjusteInventarioTableCompanion Function({
       Value<int> id,
-      required int idProducto,
+      required int productoId,
       required String tipoAjuste,
       required double cantidad,
       required String motivo,
@@ -8545,7 +8545,7 @@ typedef $$AjusteInventarioTableTableCreateCompanionBuilder =
 typedef $$AjusteInventarioTableTableUpdateCompanionBuilder =
     AjusteInventarioTableCompanion Function({
       Value<int> id,
-      Value<int> idProducto,
+      Value<int> productoId,
       Value<String> tipoAjuste,
       Value<double> cantidad,
       Value<String> motivo,
@@ -8568,8 +8568,8 @@ class $$AjusteInventarioTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get idProducto => $composableBuilder(
-    column: $table.idProducto,
+  ColumnFilters<int> get productoId => $composableBuilder(
+    column: $table.productoId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8618,8 +8618,8 @@ class $$AjusteInventarioTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get idProducto => $composableBuilder(
-    column: $table.idProducto,
+  ColumnOrderings<int> get productoId => $composableBuilder(
+    column: $table.productoId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -8666,8 +8666,8 @@ class $$AjusteInventarioTableTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get idProducto => $composableBuilder(
-    column: $table.idProducto,
+  GeneratedColumn<int> get productoId => $composableBuilder(
+    column: $table.productoId,
     builder: (column) => column,
   );
 
@@ -8743,7 +8743,7 @@ class $$AjusteInventarioTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> idProducto = const Value.absent(),
+                Value<int> productoId = const Value.absent(),
                 Value<String> tipoAjuste = const Value.absent(),
                 Value<double> cantidad = const Value.absent(),
                 Value<String> motivo = const Value.absent(),
@@ -8752,7 +8752,7 @@ class $$AjusteInventarioTableTableTableManager
                 Value<DateTime?> fechaCreacion = const Value.absent(),
               }) => AjusteInventarioTableCompanion(
                 id: id,
-                idProducto: idProducto,
+                productoId: productoId,
                 tipoAjuste: tipoAjuste,
                 cantidad: cantidad,
                 motivo: motivo,
@@ -8763,7 +8763,7 @@ class $$AjusteInventarioTableTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required int idProducto,
+                required int productoId,
                 required String tipoAjuste,
                 required double cantidad,
                 required String motivo,
@@ -8772,7 +8772,7 @@ class $$AjusteInventarioTableTableTableManager
                 Value<DateTime?> fechaCreacion = const Value.absent(),
               }) => AjusteInventarioTableCompanion.insert(
                 id: id,
-                idProducto: idProducto,
+                productoId: productoId,
                 tipoAjuste: tipoAjuste,
                 cantidad: cantidad,
                 motivo: motivo,

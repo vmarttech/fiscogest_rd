@@ -10,13 +10,13 @@ class Inventario
     }
 
     // Actualizar existencias tras el ajuste
-    public function actualizarExistencias($idProducto, $cantidad, $tipoAjuste)
+    public function actualizarExistencias($productoId, $cantidad, $tipoAjuste)
     {
         // si es positivo += cantidad, si negativo -= cantidad
     }
 
     // Consultar stock actual
-    public function obtenerStock($idProducto)
+    public function obtenerStock($productoId)
     {
         // lógica de consulta
     }

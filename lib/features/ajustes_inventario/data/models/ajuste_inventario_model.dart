@@ -3,7 +3,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_
 class AjusteInventarioModel extends AjusteInventario {
   const AjusteInventarioModel({
     super.id,
-    required super.idProducto,
+    required super.productoId,
     super.codigoBusqueda,
     required super.tipoAjuste,
     required super.cantidad,
@@ -16,7 +16,7 @@ class AjusteInventarioModel extends AjusteInventario {
   factory AjusteInventarioModel.fromMap(Map<String, dynamic> map) {
     return AjusteInventarioModel(
       id: map['id'] as int?,
-      idProducto: map['idProducto'] as int,
+      productoId: map['productoId'] as int,
       tipoAjuste: map['tipoAjuste'] as String,
       cantidad: map['cantidad'] as double,
       motivo: map['motivo'] as String,

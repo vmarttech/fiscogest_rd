@@ -2,7 +2,7 @@ class MovimientoKardex {
 
   const MovimientoKardex({
     this.id,
-    required this.idProducto,
+    required this.productoId,
     required this.tipoMovimiento,
     required this.cantidad,
     required this.saldoActual,
@@ -12,7 +12,7 @@ class MovimientoKardex {
     required this.fechaMovimiento,
   });
   final int? id;
-  final int idProducto;
+  final int productoId;
   final String tipoMovimiento;
   final double cantidad;
   final double saldoActual;

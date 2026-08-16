@@ -8,8 +8,8 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_pr
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
-  const NuevoProductoPage({super.key, this.idProducto});
-  final int? idProducto;
+  const NuevoProductoPage({super.key, this.productoId});
+  final int? productoId;
 
   @override
   ConsumerState<NuevoProductoPage> createState() => _NuevoProductoPageState();
@@ -36,10 +36,10 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   }
 
   Future<void> _cargarDatosSiEdita() async {
-    if (widget.idProducto == null) return;
+    if (widget.productoId == null) return;
     final lista = ref.read(productoControllerProvider);
     lista.whenData((productos) {
-      final prod = productos.firstWhere((p) => p.id == widget.idProducto);
+      final prod = productos.firstWhere((p) => p.id == widget.productoId);
       setState(() {
         _productoEditar = prod;
         _nombreCtrl.text = prod.nombre;
@@ -72,7 +72,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final cats = ref.watch(categoriaControllerProvider);
     final marcas = ref.watch(marcaControllerProvider);
     final unids = ref.watch(unidadMedidaControllerProvider);
-    final esEdicion = widget.idProducto != null;
+    final esEdicion = widget.productoId != null;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),

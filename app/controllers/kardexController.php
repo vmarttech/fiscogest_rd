@@ -14,7 +14,7 @@ class kardexController
     }
 
     // Ver movimientos de un producto
-    public function verMovimientos($idProducto)
+    public function verMovimientos($productoId)
     {
         // lógica de visualización
     }

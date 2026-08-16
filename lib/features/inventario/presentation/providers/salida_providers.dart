@@ -31,7 +31,7 @@ class SalidaController extends StateNotifier<AsyncValue<void>> {
 
   Future<void> registrarSalida({
     required int productoId,
-    required int cantidad,
+    required double cantidad,
     required String motivo,
     required String usuario,
   }) async {
@@ -43,10 +43,8 @@ class SalidaController extends StateNotifier<AsyncValue<void>> {
         motivo: motivo,
         usuario: usuario,
       );
-
       _ref.invalidate(productoControllerProvider);
       _ref.invalidate(historialSalidasProvider);
-
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

@@ -6,13 +6,11 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/entrada.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_entrada_repository.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
-/// Proveedor Repositorio Entradas: BD SOLO del núcleo central (SSOT)
 final entradaRepositoryProvider = Provider<IEntradaRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return EntradaRepositoryImpl(db);
 });
 
-/// Proveedor Servicio Entradas: inyección estricta de dependencias
 final operacionesEntradaServiceProvider = Provider<OperacionesEntradaService>((ref) {
   return OperacionesEntradaService(
     entradaRepository: ref.watch(entradaRepositoryProvider),
@@ -21,16 +19,14 @@ final operacionesEntradaServiceProvider = Provider<OperacionesEntradaService>((r
   );
 });
 
-/// Historial de entradas: solo consulta, sin lógica
 final historialEntradasProvider = FutureProvider<List<Entrada>>((ref) async {
   final repository = ref.watch(entradaRepositoryProvider);
   return await repository.obtenerHistorialEntradas();
 });
 
-/// Controlador Entradas: SOLO UI/ESTADO — NUNCA LÓGICA DE NEGOCIO
 class EntradaController extends StateNotifier<AsyncValue<void>> {
   EntradaController(this._operacionesEntrada, this._ref) : super(const AsyncValue.data(null));
-  
+
   final OperacionesEntradaService _operacionesEntrada;
   final Ref _ref;
 
@@ -42,18 +38,14 @@ class EntradaController extends StateNotifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      // ✅ DELEGACIÓN EXCLUSIVA AL SERVICIO (flujo obligatorio)
       await _operacionesEntrada.registrarEntradaConAjusteStock(
         productoId: productoId,
         cantidad: cantidad,
         motivo: motivo,
         usuario: usuario,
       );
-
-      // ✅ REFRESCO SELECTIVO Y ORDENADO
       _ref.invalidate(historialEntradasProvider);
       _ref.invalidate(productoControllerProvider);
-      
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

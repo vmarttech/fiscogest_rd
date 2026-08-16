@@ -5,7 +5,7 @@ import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
 import 'package:fiscogest_rd/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/productos_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/kardex_page.dart';
-import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_producto_page.dart'; // ✅ AGREGADO
+import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_producto_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/registrar_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/diferencias_conteo_page.dart';
 import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
@@ -26,7 +26,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/sales', name: 'facturacion', builder: (_, __) => const AppShell(child: SalesPage())),
       GoRoute(path: '/inventory', name: 'inventario', builder: (_, __) => const AppShell(child: ProductosPage())),
       GoRoute(path: '/kardex', name: 'kardex', builder: (_, __) => const AppShell(child: KardexPage())),
-      // ✅ RUTA ACTUALIZADA — YA NO ES TEMPORAL
+      // ✅ CORREGIDO: QUITADO const que causaba valor inválido
       GoRoute(
         path: '/productos/nuevo',
         name: 'nuevo-producto',
@@ -50,12 +50,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AppShell(child: DiferenciasConteoPage(conteoId: conteoId));
         },
       ),
-  // ETAPA 3.7 - Transferencias entre almacenes
-  GoRoute(
-    path: '/transferencias/registrar',
-    name: 'registrar_transferencia',
-    builder: (context, state) => const AppShell(child: RegistrarTransferenciaPage()),
-  ),
+      GoRoute(
+        path: '/transferencias/registrar',
+        name: 'registrar_transferencia',
+        builder: (context, state) => const AppShell(child: RegistrarTransferenciaPage()),
+      ),
     ],
   );
 });

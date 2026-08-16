@@ -1,12 +1,14 @@
 import 'package:drift/drift.dart';
 
+@DataClassName('AjusteInventarioData')
 class AjusteInventarioTable extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idProducto => integer()();
-  TextColumn get tipoAjuste => text().withLength(min: 1, max: 20)();
+  // ✅ CORREGIDO nombre propiedad
+  IntColumn get productoId => integer().named('id_producto')();
+  TextColumn get tipoAjuste => text().named('tipo_ajuste')();
   RealColumn get cantidad => real()();
   TextColumn get motivo => text()();
   TextColumn get observaciones => text().nullable()();
-  IntColumn get usuarioId => integer()();
-  DateTimeColumn get fechaCreacion => dateTime().nullable().withDefault(currentDateAndTime)();
+  IntColumn get usuarioId => integer().named('usuario_id')();
+  IntColumn get fechaCreacion => integer().named('fecha_creacion')();
 }

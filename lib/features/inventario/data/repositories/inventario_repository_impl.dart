@@ -1,61 +1,32 @@
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
-import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
-import 'package:fiscogest_rd/features/inventario/data/mappers/producto_mapper.dart';
+import 'package:fiscogest_rd/features/inventario/domain/repositories/inventario_repository.dart';
 
-class InventarioRepositoryImpl implements InventarioRepositoryInterface {
+/// Implementación concreta | Capa Datos | Cumple contrato InventarioRepository
+class InventarioRepositoryImpl implements InventarioRepository {
 
   InventarioRepositoryImpl(this._db);
   final AppDatabase _db;
 
   @override
-  Future<List<Producto>> listarProductos() async {
-    final datos = await _db.select(_db.productosTable).get();
-    return datos.map((d) => ProductoDataMapper.toDomain(d)).toList();
-  }
-
-  @override
-  Future<Producto?> obtenerProductoPorId(int id) async {
-    final query = _db.select(_db.productosTable)..where((p) => p.id.equals(id));
-    final dato = await query.getSingleOrNull();
-    if (dato == null) return null;
-    return ProductoDataMapper.toDomain(dato);
-  }
-
-  @override
-  Future<Producto?> obtenerProductoPorCodigo(String codigo) async {
-    final query = _db.select(_db.productosTable)..where((p) => p.codigo.equals(codigo));
-    final dato = await query.getSingleOrNull();
-    if (dato == null) return null;
-    return ProductoDataMapper.toDomain(dato);
-  }
-
-  @override
-  Future<void> crearProducto(Producto producto) async {
-    final companion = ProductoDataMapper.toCompanion(producto);
-    await _db.into(_db.productosTable).insert(companion);
-  }
-
-  @override
-  Future<void> actualizarProducto(Producto producto) async {
-    final companion = ProductoDataMapper.toCompanion(producto);
+  Future<void> actualizarStock(int idProducto, double nuevoValor) async {
     await (_db.update(_db.productosTable)
-      ..where((p) => p.id.equals(producto.id!)))
-      .write(companion);
+      ..where((fila) => fila.id.equals(idProducto)))
+      .write(ProductosTableCompanion(stock: Value(nuevoValor)));
   }
 
   @override
-  Future<void> eliminarProducto(int id) async {
-    await (_db.delete(_db.productosTable)..where((p) => p.id.equals(id))).go();
+  Future<double?> obtenerStockActual(int idProducto) async {
+    final registro = await (_db.select(_db.productosTable)
+      ..where((fila) => fila.id.equals(idProducto))
+      ..limit(1))
+      .getSingleOrNull();
+    return registro?.stock;
   }
 
   @override
-  Future<void> actualizarStock(int productoId, double nuevoStock) async {
-    await (_db.update(_db.productosTable)
-      ..where((p) => p.id.equals(productoId)))
-      .write(ProductosTableCompanion(
-        stock: Value(nuevoStock),
-      ));
+  Future<bool> hayStockSuficiente(int idProducto, double cantidadRequerida) async {
+    final actual = await obtenerStockActual(idProducto) ?? 0.0;
+    return actual >= cantidadRequerida;
   }
 }

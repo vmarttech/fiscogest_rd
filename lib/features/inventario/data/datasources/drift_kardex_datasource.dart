@@ -9,24 +9,29 @@ class DriftKardexDatasource {
     await _db.into(_db.kardexTable).insert(companion);
   }
 
-  Future<List<KardexTableData>> obtenerHistorialPorProducto(int idProducto) async {
+  Future<List<KardexData>> obtenerHistorialPorProducto(int idProducto) async {
     return await (_db.select(_db.kardexTable)
-          ..where((t) => t.idProducto.equals(idProducto))
+          ..where((t) => t.productoId.equals(idProducto))
           ..orderBy([(t) => OrderingTerm(expression: t.fechaMovimiento, mode: OrderingMode.desc)]))
         .get();
   }
 
-  Future<List<KardexTableData>> obtenerTodoElHistorial({DateTime? desde, DateTime? hasta}) async {
+  Future<List<KardexData>> obtenerTodoElHistorial({DateTime? desde, DateTime? hasta}) async {
     final query = _db.select(_db.kardexTable);
-    if (desde != null) query.where((t) => t.fechaMovimiento.isBiggerOrEqualValue(desde));
-    if (hasta != null) query.where((t) => t.fechaMovimiento.isSmallerOrEqualValue(hasta));
-    query.orderBy([(t) => OrderingTerm(expression: t.fechaMovimiento, mode: OrderingMode.desc)]);
+    if (desde != null) {
+      query.where((t) => t.fechaMovimiento.isBiggerOrEqualValue(desde.millisecondsSinceEpoch));
+    }
+    if (hasta != null) {
+      query.where((t) => t.fechaMovimiento.isSmallerOrEqualValue(hasta.millisecondsSinceEpoch));
+    }
+    query.orderBy([(t) => OrderingTerm.desc(t.fechaMovimiento)]);
     return await query.get();
   }
 
-  Future<KardexTableData?> obtenerUltimo(int idProducto) async {
+  // ✅ Método faltante, elimina error repositorio
+  Future<KardexData?> obtenerUltimo(int idProducto) async {
     return await (_db.select(_db.kardexTable)
-          ..where((t) => t.idProducto.equals(idProducto))
+          ..where((t) => t.productoId.equals(idProducto))
           ..orderBy([(t) => OrderingTerm.desc(t.fechaMovimiento)])
           ..limit(1))
         .getSingleOrNull();

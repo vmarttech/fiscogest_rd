@@ -4,7 +4,7 @@ class MovimientoKardexModel {
 
   const MovimientoKardexModel({
     this.id,
-    required this.idProducto,
+    required this.productoId,
     required this.tipoMovimiento,
     required this.cantidad,
     required this.saldoActual,
@@ -17,7 +17,7 @@ class MovimientoKardexModel {
   factory MovimientoKardexModel.fromEntity(MovimientoKardex entity) {
     return MovimientoKardexModel(
       id: entity.id,
-      idProducto: entity.idProducto,
+      productoId: entity.productoId,
       tipoMovimiento: entity.tipoMovimiento,
       cantidad: entity.cantidad,
       saldoActual: entity.saldoActual,
@@ -28,7 +28,7 @@ class MovimientoKardexModel {
     );
   }
   final int? id;
-  final int idProducto;
+  final int productoId;
   final String tipoMovimiento;
   final double cantidad;
   final double saldoActual;
@@ -40,7 +40,7 @@ class MovimientoKardexModel {
   MovimientoKardex toEntity() {
     return MovimientoKardex(
       id: id,
-      idProducto: idProducto,
+      productoId: productoId,
       tipoMovimiento: tipoMovimiento,
       cantidad: cantidad,
       saldoActual: saldoActual,

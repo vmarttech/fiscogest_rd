@@ -1,5 +1,3 @@
-// ELIMINAS el import que no se usa:
-// import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
@@ -10,6 +8,7 @@ import 'package:fiscogest_rd/features/inventario/data/mappers/producto_mapper.da
 
 class ProductoRepositoryImpl implements IProductoRepository {
   ProductoRepositoryImpl(this._db, this._kardexRepo);
+
   final AppDatabase _db;
   final IKardexRepository _kardexRepo;
 
@@ -33,22 +32,20 @@ class ProductoRepositoryImpl implements IProductoRepository {
       final idGenerado = await _db.into(_db.productosTable).insert(
         ProductoDataMapper.toCompanion(producto),
       );
-
       await _kardexRepo.registrarMovimiento(Kardex(
         id: null,
         productoId: idGenerado,
         tipoMovimiento: TipoMovimiento.entrada,
-        cantidad: producto.stock,
+        cantidad: producto.stock ?? 0.0,
         saldoAnterior: 0,
-        saldoNuevo: producto.stock,
+        saldoNuevo: producto.stock ?? 0.0,
         costoUnitario: producto.precioCompra,
-        totalMovimiento: producto.precioCompra * producto.stock,
+        totalMovimiento: producto.precioCompra * (producto.stock ?? 0.0),
         fechaMovimiento: DateTime.now(),
         documentoReferencia: 'INGRESO INICIAL',
         observacion: 'Registro al crear producto',
         usuarioId: idUsuario,
       ));
-
       return idGenerado;
     });
   }

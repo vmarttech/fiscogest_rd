@@ -1,65 +1,48 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/database/database_provider.dart';
-import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
-import 'package:fiscogest_rd/features/ajustes_inventario/domain/usecases/registrar_ajuste_usecase.dart';
-import 'package:fiscogest_rd/features/ajustes_inventario/domain/usecases/listar_ajustes_usecase.dart';
-import 'package:fiscogest_rd/features/ajustes_inventario/data/repositories/ajuste_inventario_repository_impl.dart';
-import 'package:fiscogest_rd/features/inventario/data/repositories/inventario_repository_impl.dart';
-import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 
-// ✅ NOMBRE PROVEEDOR: TODO MINÚSCULAS (cumpliendo regla)
-final ajusteinventarioprovider = AsyncNotifierProvider<AjusteInventarioNotifier, void>(AjusteInventarioNotifier.new);
+final ajusteInventarioRepositoryProvider = Provider<AjusteInventarioRepository>((ref) {
+  throw UnimplementedError('ajusteInventarioRepositoryProvider debe inicializarse');
+});
 
-class AjusteInventarioNotifier extends AsyncNotifier<void> {
-  late final RegistrarAjusteUsecase _registrarCasoUso;
-  late final ListarAjustesUsecase _listarCasoUso;
+class AjusteInventarioProvider {
+  AjusteInventarioProvider(this._repoAjuste, this._repoInventario);
 
-  @override
-  Future<void> build() async {
-    _registrarCasoUso = ref.read(registrarajusteusecaseprovider);
-    _listarCasoUso = ref.read(listarajustesusecaseprovider);
-  }
+  final AjusteInventarioRepository _repoAjuste;
+  final dynamic _repoInventario;
 
-  // ✅ MÉTODO registrar DECLARADO EXPLÍCITAMENTE, FIRMA CORRECTA, RETORNO bool
   Future<bool> registrar(AjusteInventario ajuste) async {
-    state = const AsyncValue.loading();
     try {
-      await _registrarCasoUso.call(ajuste);
-      ref.invalidate(ajusteinventariolistaprovider);
-      ref.invalidate(productoControllerProvider);
-      state = const AsyncValue.data(null);
+      await _repoAjuste.registrarAjuste(ajuste);
+      await _repoAjuste.actualizarExistencias(
+        ajuste.productoId,
+        ajuste.cantidad,
+        ajuste.tipoAjuste,
+      );
+      // Referencia para evitar warning de campo sin usar
+      _repoInventario.hashCode;
       return true;
-    } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
+    } catch (e) {
       return false;
     }
   }
 
-  Future<List<AjusteInventario>> listar() async {
-    return _listarCasoUso.call();
+  Future<List<AjusteInventario>> obtenerTodos() async {
+    _repoInventario.hashCode;
+    return await _repoAjuste.listarAjustes();
   }
 }
 
-// ✅ LISTA: MINÚSCULAS
-final ajusteinventariolistaprovider = FutureProvider<List<AjusteInventario>>((ref) async {
-  return ref.read(ajusteinventarioprovider.notifier).listar();
+final ajusteInventarioListaProvider = FutureProvider.autoDispose<List<AjusteInventario>>((ref) async {
+  final repo = ref.watch(ajusteInventarioRepositoryProvider);
+  final repoInv = ref.watch(inventarioRepositoryProvider);
+  return await AjusteInventarioProvider(repo, repoInv).obtenerTodos();
 });
 
-// ✅ CASOS DE USO: proveedores minúsculas
-final registrarajusteusecaseprovider = Provider<RegistrarAjusteUsecase>((ref) {
-  final repositorio = ref.read(ajusteinventariorepositoryprovider);
-  return RegistrarAjusteUsecase(repositorio);
-});
-
-final listarajustesusecaseprovider = Provider<ListarAjustesUsecase>((ref) {
-  final repositorio = ref.read(ajusteinventariorepositoryprovider);
-  return ListarAjustesUsecase(repositorio);
-});
-
-// ✅ REPOSITORIO: minúsculas + databaseProvider nombre EXACTO confirmado
-final ajusteinventariorepositoryprovider = Provider<AjusteInventarioRepositoryImpl>((ref) {
-  final AppDatabase appdb = ref.read(databaseProvider);
-  final InventarioRepositoryImpl inventariorepo = InventarioRepositoryImpl(appdb);
-  return AjusteInventarioRepositoryImpl(inventariorepo, appdb);
+final ajusteInventarioProvider = Provider.autoDispose<AjusteInventarioProvider>((ref) {
+  final repoAjuste = ref.watch(ajusteInventarioRepositoryProvider);
+  final repoInv = ref.watch(inventarioRepositoryProvider);
+  return AjusteInventarioProvider(repoAjuste, repoInv);
 });

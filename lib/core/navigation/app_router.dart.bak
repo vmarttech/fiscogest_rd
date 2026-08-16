@@ -40,7 +40,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'editar-producto',
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
-          return AppShell(child: NuevoProductoPage(idProducto: id));
+          return AppShell(child: NuevoProductoPage(productoId: id));
         },
       ),
 

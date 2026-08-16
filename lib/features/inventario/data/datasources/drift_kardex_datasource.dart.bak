@@ -9,9 +9,9 @@ class DriftKardexDatasource {
     await _db.into(_db.kardexTable).insert(companion);
   }
 
-  Future<List<KardexTableData>> obtenerHistorialPorProducto(int idProducto) async {
+  Future<List<KardexTableData>> obtenerHistorialPorProducto(int productoId) async {
     return await (_db.select(_db.kardexTable)
-          ..where((t) => t.idProducto.equals(idProducto))
+          ..where((t) => t.productoId.equals(productoId))
           ..orderBy([(t) => OrderingTerm(expression: t.fechaMovimiento, mode: OrderingMode.desc)]))
         .get();
   }
@@ -24,9 +24,9 @@ class DriftKardexDatasource {
     return await query.get();
   }
 
-  Future<KardexTableData?> obtenerUltimo(int idProducto) async {
+  Future<KardexTableData?> obtenerUltimo(int productoId) async {
     return await (_db.select(_db.kardexTable)
-          ..where((t) => t.idProducto.equals(idProducto))
+          ..where((t) => t.productoId.equals(productoId))
           ..orderBy([(t) => OrderingTerm.desc(t.fechaMovimiento)])
           ..limit(1))
         .getSingleOrNull();
