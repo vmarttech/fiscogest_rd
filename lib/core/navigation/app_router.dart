@@ -9,6 +9,10 @@ import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_produc
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/registrar_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/diferencias_conteo_page.dart';
 import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/lista_ventas_page.dart';
+import 'package:fiscogest_rd/features/cotizaciones/presentation/pages/lista_cotizaciones_page.dart';
+import 'package:fiscogest_rd/features/apartados/presentation/pages/lista_apartados_page.dart';
+import 'package:fiscogest_rd/features/devoluciones/presentation/pages/lista_devoluciones_page.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_page.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/pages/proveedores_page.dart';
 import 'package:fiscogest_rd/features/reports/presentation/pages/reports_page.dart';
@@ -24,9 +28,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/', name: 'dashboard', builder: (_, __) => const AppShell(child: DashboardPage())),
       GoRoute(path: '/sales', name: 'facturacion', builder: (_, __) => const AppShell(child: SalesPage())),
+      GoRoute(path: '/ventas', name: ListaVentasPage.routeName, builder: (_, __) => const AppShell(child: ListaVentasPage())),
+      GoRoute(path: '/cotizaciones', name: ListaCotizacionesPage.routeName, builder: (_, __) => const AppShell(child: ListaCotizacionesPage())),
+      GoRoute(path: '/apartados', name: ListaApartadosPage.routeName, builder: (_, __) => const AppShell(child: ListaApartadosPage())),
+      GoRoute(path: '/devoluciones', name: ListaDevolucionesPage.routeName, builder: (_, __) => const AppShell(child: ListaDevolucionesPage())),
       GoRoute(path: '/inventory', name: 'inventario', builder: (_, __) => const AppShell(child: ProductosPage())),
       GoRoute(path: '/kardex', name: 'kardex', builder: (_, __) => const AppShell(child: KardexPage())),
-      // ✅ CORREGIDO: QUITADO const que causaba valor inválido
       GoRoute(
         path: '/productos/nuevo',
         name: 'nuevo-producto',
