@@ -92,7 +92,8 @@ class AppDatabase extends _$AppDatabase {
             await m.alterTable(TableMigration(entradasTable, newColumns: [entradasTable.costoUnitario, entradasTable.observacion]));
             await m.alterTable(TableMigration(salidasTable, newColumns: [salidasTable.observacion]));
             await m.alterTable(TableMigration(existenciasTable, newColumns: [existenciasTable.ubicacion, existenciasTable.fechaActualizacion]));
-            await m.alterTable(TableMigration(kardexTable));
+            // ✅ ELIMINADO: TableMigration(kardexTable) — no agrega columnas nuevas
+            // y falla por discrepancia histórica de nombres (snake_case vs camelCase)
             await m.alterTable(TableMigration(ajusteInventarioTable));
             await m.alterTable(TableMigration(diferenciasConteo));
           }
