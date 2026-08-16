@@ -1,33 +1,52 @@
 import 'package:fiscogest_rd/features/comercial/domain/entities/promocion.dart';
-import 'package:fiscogest_rd/features/comercial/domain/repositories/promocion_repository.dart';
+import 'package:fiscogest_rd/features/comercial/domain/repositories/i_promocion_repository.dart';
 import 'package:fiscogest_rd/features/comercial/data/datasources/promocion_datasource.dart';
 
-class PromocionRepositoryImpl implements PromocionRepository {
+class PromocionRepositoryImpl implements IPromocionRepository {
 
   PromocionRepositoryImpl(this._datasource);
   final PromocionDatasource _datasource;
 
   @override
-  Future<List<Promocion>> obtenerTodas() async {
-    final registros = await _datasource.listarTodos();
-    return registros.map((Map<String, dynamic> modelo) {
-      return Promocion(
-        id: modelo['id'] as String,
-        nombre: modelo['nombre'] as String,
-        descripcion: modelo['descripcion'] as String,
-        tipo: modelo['tipo'] as String,
-        valor: modelo['valor'] as double,
-        fechaInicio: _parsearFecha(modelo['fechaInicio']),
-        fechaFin: _parsearFecha(modelo['fechaFin']),
-        activa: modelo['activa'] as bool,
-      );
-    }).toList();
+  Future<Promocion> crear(Promocion promocion) async {
+    await _datasource.registrar(promocion);
+    return promocion;
   }
 
   @override
   Future<Promocion?> obtenerPorId(String id) async {
     final modelo = await _datasource.buscarPorId(id);
     if (modelo == null) return null;
+    return _deserializar(modelo);
+  }
+
+  @override
+  Future<List<Promocion>> listarTodas() async {
+    final registros = await _datasource.listarTodos();
+    return registros.map((m) => _deserializar(m)).toList();
+  }
+
+  @override
+  Future<List<Promocion>> listarActivas(DateTime fechaReferencia) async {
+    final registros = await _datasource.listarActivas();
+    return registros
+        .map((m) => _deserializar(m))
+        .where((p) => p.estaVigente(fechaReferencia))
+        .toList();
+  }
+
+  @override
+  Future<Promocion> actualizar(Promocion promocion) async {
+    await _datasource.modificar(promocion);
+    return promocion;
+  }
+
+  @override
+  Future<void> eliminar(String id) async {
+    await _datasource.eliminar(id);
+  }
+
+  static Promocion _deserializar(Map<String, dynamic> modelo) {
     return Promocion(
       id: modelo['id'] as String,
       nombre: modelo['nombre'] as String,
@@ -37,39 +56,9 @@ class PromocionRepositoryImpl implements PromocionRepository {
       fechaInicio: _parsearFecha(modelo['fechaInicio']),
       fechaFin: _parsearFecha(modelo['fechaFin']),
       activa: modelo['activa'] as bool,
+      minimoCantidad: modelo['minimoCantidad'] as int?,
+      minimoMonto: modelo['minimoMonto'] as double?,
     );
-  }
-
-  @override
-  Future<void> crear(Promocion promocion) async {
-    await _datasource.registrar(promocion);
-  }
-
-  @override
-  Future<void> actualizar(Promocion promocion) async {
-    await _datasource.modificar(promocion);
-  }
-
-  @override
-  Future<void> eliminar(String id) async {
-    await _datasource.eliminar(id);
-  }
-
-  @override
-  Future<List<Promocion>> obtenerActivas() async {
-    final registros = await _datasource.listarActivas();
-    return registros.map((Map<String, dynamic> modelo) {
-      return Promocion(
-        id: modelo['id'] as String,
-        nombre: modelo['nombre'] as String,
-        descripcion: modelo['descripcion'] as String,
-        tipo: modelo['tipo'] as String,
-        valor: modelo['valor'] as double,
-        fechaInicio: _parsearFecha(modelo['fechaInicio']),
-        fechaFin: _parsearFecha(modelo['fechaFin']),
-        activa: modelo['activa'] as bool,
-      );
-    }).toList();
   }
 
   static DateTime? _parsearFecha(Object? valor) {
