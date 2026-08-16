@@ -10,10 +10,12 @@ class RegistrarRecepcionPage extends ConsumerWidget {
     required this.compraId,
     required this.proveedorId,
     this.proveedorNombre,
+    this.usuarioResponsable = 'usuario_actual',
   });
   final String compraId;
   final String proveedorId;
   final String? proveedorNombre;
+  final String usuarioResponsable;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,10 +71,10 @@ class RegistrarRecepcionPage extends ConsumerWidget {
                         fechaRecepcion: DateTime.now(),
                         estado: 'pendiente',
                         detalles: <DetalleRecepcion>[],
-                        usuarioResponsable: 'usuario_actual',
+                        usuarioResponsable: usuarioResponsable,
                         fechaCreacion: DateTime.now(),
                       );
-                      await ref.read(recepcionServiceProvider).registrar(recepcion);
+                      await ref.read(recepcionServiceProvider).registrar(recepcion, usuarioResponsable);
                       if (context.mounted) {
                         Navigator.of(context).pop();
                       }

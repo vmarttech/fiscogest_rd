@@ -13,12 +13,12 @@ class RecepcionService {
   late final RegistrarRecepcion registrarRecepcion;
   late final ValidarDiferencias validarDiferencias;
 
-  Future<String> registrar(Recepcion recepcion) async {
+  Future<String> registrar(Recepcion recepcion, String usuarioResponsable) async {
     final detallesConDiferencia = recepcion.detalles != null
         ? validarDiferencias.ejecutar(recepcion.detalles!)
         : <DetalleRecepcion>[];
 
     final recepcionValidada = recepcion.copyWith(detalles: detallesConDiferencia);
-    return registrarRecepcion.ejecutar(recepcionValidada);
+    return registrarRecepcion.ejecutar(recepcionValidada, usuarioResponsable);
   }
 }

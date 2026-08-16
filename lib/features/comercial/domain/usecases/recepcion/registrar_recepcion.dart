@@ -1,15 +1,28 @@
 import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_recepcion_repository.dart';
+import 'package:fiscogest_rd/core/domain/eventos/recepcion_eventos.dart';
+import 'package:fiscogest_rd/core/services/sincronizacion_service.dart';
 
 class RegistrarRecepcion {
 
   RegistrarRecepcion(this._repo);
   final IRecepcionRepository _repo;
 
-  Future<String> ejecutar(Recepcion recepcion) async {
+  Future<String> ejecutar(Recepcion recepcion, String usuarioResponsable) async {
     validar(recepcion);
     final recepcionConEstado = _determinarEstado(recepcion);
-    return _repo.crear(recepcionConEstado);
+    final recepcionId = await _repo.crear(recepcionConEstado);
+
+    if (recepcionConEstado.estado == 'completa' || recepcionConEstado.estado == 'parcial') {
+      final evento = RecepcionConfirmada(
+        recepcionId: recepcionId,
+        compraId: recepcionConEstado.compraId ?? '',
+        usuarioResponsable: usuarioResponsable,
+      );
+      SincronizacionService.instancia.disparar(evento);
+    }
+
+    return recepcionId;
   }
 
   void validar(Recepcion recepcion) {

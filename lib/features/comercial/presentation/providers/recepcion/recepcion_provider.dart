@@ -13,10 +13,10 @@ class RecepcionNotifier extends StateNotifier<AsyncValue<List<Recepcion>>> {
   RecepcionNotifier(this._service) : super(const AsyncValue.data([]));
   final RecepcionService _service;
 
-  Future<void> registrar(Recepcion recepcion) async {
+  Future<void> registrar(Recepcion recepcion, String usuarioResponsable) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await _service.registrar(recepcion);
+      await _service.registrar(recepcion, usuarioResponsable);
       return <Recepcion>[];
     });
   }
