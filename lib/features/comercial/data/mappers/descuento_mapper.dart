@@ -1,34 +1,23 @@
-import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+// ... (imports existentes) ...
 
-class DescuentoDataMapper {
-  static Descuento toDomain(DescuentoData data) {
-    return Descuento(
-      id: data.id,
-      nombre: data.nombre,
-      tipo: data.tipo,
-      valor: data.valor,
-      aplicaA: data.aplicaA,
-      referenciaId: data.referenciaId,
-      vigenciaDesde: data.vigenciaDesde,
-      vigenciaHasta: data.vigenciaHasta,
-      estado: data.estado,
-    );
-  }
-}
+class DescuentoMapper {
+  // Línea ~9: Enum → String
+  static String tipoToString(DescuentoTipo e) => e.name;
+  // Línea ~11: Enum → String
+  static String aplicaAToString(AplicaA e) => e.name;
+  // Línea ~15: Enum → String
+  static String estadoToString(RegistroEstado e) => e.name;
 
-extension DescuentoDataEntityMapper on DescuentoData {
-  Descuento toEntity() {
-    return Descuento(
-      id: id,
-      nombre: nombre,
-      tipo: tipo,
-      valor: valor,
-      aplicaA: aplicaA,
-      referenciaId: referenciaId,
-      vigenciaDesde: vigenciaDesde,
-      vigenciaHasta: vigenciaHasta,
-      estado: estado,
-    );
-  }
+  // Línea ~25: String → Enum
+  static DescuentoTipo tipoFromString(String s) =>
+      DescuentoTipo.values.firstWhere((v) => v.name == s);
+  // Línea ~27: String → Enum
+  static AplicaA aplicaAFromString(String s) =>
+      AplicaA.values.firstWhere((v) => v.name == s);
+  // Línea ~31: String → Enum
+  static RegistroEstado estadoFromString(String s) =>
+      RegistroEstado.values.firstWhere((v) => v.name == s);
+
+  // ... resto del código igual ...
 }

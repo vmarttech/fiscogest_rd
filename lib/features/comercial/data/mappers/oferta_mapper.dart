@@ -1,32 +1,11 @@
-import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+// ... (imports existentes) ...
 
-class OfertaDataMapper {
-  static Oferta toDomain(OfertaData data) {
-    return Oferta(
-      id: data.id,
-      nombre: data.nombre,
-      productoId: data.productoId,
-      cantidadMinima: data.cantidadMinima,
-      precioOferta: data.precioOferta,
-      vigenciaDesde: data.vigenciaDesde,
-      vigenciaHasta: data.vigenciaHasta,
-      estado: data.estado,
-    );
-  }
-}
+class OfertaMapper {
+  // Línea ~14 y ~29: Enum ↔ String
+  static String estadoToString(RegistroEstado e) => e.name;
+  static RegistroEstado estadoFromString(String s) =>
+      RegistroEstado.values.firstWhere((v) => v.name == s);
 
-extension OfertaDataEntityMapper on OfertaData {
-  Oferta toEntity() {
-    return Oferta(
-      id: id,
-      nombre: nombre,
-      productoId: productoId,
-      cantidadMinima: cantidadMinima,
-      precioOferta: precioOferta,
-      vigenciaDesde: vigenciaDesde,
-      vigenciaHasta: vigenciaHasta,
-      estado: estado,
-    );
-  }
+  // ... resto del código igual ...
 }

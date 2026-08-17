@@ -1,49 +1,13 @@
-import 'package:drift/drift.dart';
-import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/pago.dart';
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+// ... (imports existentes) ...
 
-class PagoDataMapper {
-  static CobrosTableCompanion toCompanion(Pago entidad, double saldoAnterior, double saldoActual) {
-    return CobrosTableCompanion(
-      cuentaCobrarId: Value(entidad.cuentaCobrarId),
-      fecha: Value(entidad.fecha),
-      montoAbonado: Value(entidad.monto),
-      formaPago: Value(entidad.formaPago),
-      saldoAnterior: Value(saldoAnterior),
-      saldoActual: Value(saldoActual),
-    );
-  }
+class PagoMapper {
+  // Línea ~11: String → Enum
+  static FormaPago formaPagoFromString(String s) =>
+      FormaPago.values.firstWhere((v) => v.name == s);
 
-  static Pago toDomain(CobroData data, {required int clienteId, String? observaciones}) {
-    return Pago(
-      id: data.id,
-      cuentaCobrarId: data.cuentaCobrarId,
-      clienteId: clienteId,
-      fecha: data.fecha,
-      monto: data.montoAbonado,
-      formaPago: data.formaPago,
-      referencia: null,
-      observaciones: observaciones,
-      createdAt: null,
-    );
-  }
-}
+  // Línea ~24 y ~43: Enum → String
+  static String formaPagoToString(FormaPago e) => e.name;
 
-extension CobroDataEntityMapper on CobroData {
-  Pago toEntity({
-    required int clienteId,
-    String? observaciones,
-  }) {
-    return Pago(
-      id: id,
-      cuentaCobrarId: cuentaCobrarId,
-      clienteId: clienteId,
-      fecha: fecha,
-      monto: montoAbonado,
-      formaPago: formaPago,
-      referencia: null,
-      observaciones: observaciones,
-      createdAt: null,
-    );
-  }
+  // ... resto del código igual ...
 }

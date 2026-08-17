@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 // ignore_for_file: experimental_member_use
 import 'dart:io';
 import 'package:drift/drift.dart';
