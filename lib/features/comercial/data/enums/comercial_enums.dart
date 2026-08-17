@@ -1,15 +1,15 @@
-enum FormaPago { Efectivo, Tarjeta, Transferencia, Credito, Cheque }
-enum VentaEstado { Borrador, Confirmada, Anulada }
-enum CotizacionEstado { Pendiente, Aceptada, Rechazada, Vencida, Convertida }
-enum ApartadoEstado { Reservado, Parcial, Pagado, Vencido, Cancelado, Convertido }
-enum DevolucionTipo { Parcial, Total }
-enum DevolucionEstado { Registrada, Procesada, Rechazada }
-enum CobrarEstado { Pendiente, Parcial, Pagado, Vencido }
-enum PagarEstado { Pendiente, Parcial, Pagado, Vencido }
-enum TipoGasto { Compra, Servicio, Impuesto, Nomina, Otro }
-enum DescuentoTipo { Porcentaje, Monto }
-enum AplicaA { Todo, Categoria, Producto, Cliente }
-enum RegistroEstado { Vigente, Vencido, Inactivo }
-enum MovimientoInventario { Entrada, Salida, Ajuste, Devolucion }
-enum ReferenciaTipo { Compra, Venta, Ajuste, Devolucion, Apartado, Cobro, Pago }
-enum MovimientoCaja { INGRESO, EGRESO }
+enum FormaPago { efectivo, tarjeta, transferencia, credito, cheque }
+enum VentaEstado { borrador, confirmada, anulada }
+enum CotizacionEstado { pendiente, aceptada, rechazada, vencida, convertida }
+enum ApartadoEstado { reservado, parcial, pagado, vencido, cancelado, convertido }
+enum DevolucionTipo { parcial, total }
+enum DevolucionEstado { registrada, procesada, rechazada }
+enum CobrarEstado { pendiente, parcial, pagado, vencido }
+enum PagarEstado { pendiente, parcial, pagado, vencido }
+enum TipoGasto { compra, servicio, impuesto, nomina, otro }
+enum DescuentoTipo { porcentaje, monto }
+enum AplicaA { todo, categoria, producto, cliente }
+enum RegistroEstado { vigente, vencido, inactivo }
+enum MovimientoInventario { entrada, salida, ajuste, devolucion }
+enum ReferenciaTipo { compra, venta, ajuste, devolucion, apartado, cobro, pago }
+enum MovimientoCaja { ingreso, egreso }

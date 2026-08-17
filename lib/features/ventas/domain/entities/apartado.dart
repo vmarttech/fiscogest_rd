@@ -1,7 +1,6 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 
 class Apartado {
-
   const Apartado({
     this.id,
     required this.numero,
@@ -15,9 +14,10 @@ class Apartado {
     required this.estado,
     this.createdAt,
   });
-  final String? id;
+
+  final int? id;
   final String numero;
-  final String clienteId;
+  final int clienteId;
   final List<DetalleVenta> productos;
   final double montoTotal;
   final double montoAbonado;

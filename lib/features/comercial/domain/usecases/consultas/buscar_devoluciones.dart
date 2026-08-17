@@ -15,9 +15,9 @@ class BuscarDevoluciones {
     return _repositorio.listarDevoluciones(
       desde: desde,
       hasta: hasta,
-      clienteId: clienteId,
-      proveedorId: proveedorId,
-      usuarioId: usuarioId,
+      clienteId: int.tryParse(clienteId ?? ''),
+      proveedorId: int.tryParse(proveedorId ?? ''),
+      usuarioId: int.tryParse(usuarioId ?? ''),
       tipoOrigen: tipoOrigen,
     );
   }

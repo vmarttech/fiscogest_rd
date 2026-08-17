@@ -1,5 +1,4 @@
 class Venta {
-
   const Venta({
     this.id,
     required this.numero,
@@ -16,9 +15,10 @@ class Venta {
     this.createdAt,
     this.updatedAt,
   });
-  final String? id;
+
+  final int? id;
   final String numero;
-  final String clienteId;
+  final int clienteId;
   final DateTime fecha;
   final List<DetalleVenta> detalles;
   final double subtotal;
@@ -26,14 +26,13 @@ class Venta {
   final double total;
   final String tipoPago;
   final bool esCredito;
-  final String? cotizacionOrigenId;
-  final String? apartadoOrigenId;
+  final int? cotizacionOrigenId;
+  final int? apartadoOrigenId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 }
 
 class DetalleVenta {
-
   const DetalleVenta({
     required this.productoId,
     required this.nombreProducto,
@@ -43,7 +42,8 @@ class DetalleVenta {
     this.descuentoPorcentaje,
     this.montoDescuento,
   });
-  final String productoId;
+
+  final int productoId;
   final String nombreProducto;
   final double cantidad;
   final double precioUnitario;

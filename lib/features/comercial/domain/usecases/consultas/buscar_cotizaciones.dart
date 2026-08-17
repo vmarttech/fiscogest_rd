@@ -13,8 +13,8 @@ class BuscarCotizaciones {
     return _repositorio.listarCotizaciones(
       desde: desde,
       hasta: hasta,
-      clienteId: clienteId,
-      usuarioId: usuarioId,
+      clienteId: int.tryParse(clienteId ?? ''),
+      usuarioId: int.tryParse(usuarioId ?? ''),
     );
   }
 }

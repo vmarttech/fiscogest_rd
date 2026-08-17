@@ -1,25 +1,23 @@
 class Descuento {
-
   const Descuento({
     this.id,
-    required this.codigo,
     required this.nombre,
-    this.porcentaje,
-    this.montoFijo,
-    required this.fechaInicio,
-    required this.fechaFin,
-    this.activo = true,
-    this.aplicableAProductoId,
-    this.montoMinimo,
+    required this.tipo,
+    required this.valor,
+    required this.aplicaA,
+    this.referenciaId,
+    required this.vigenciaDesde,
+    required this.vigenciaHasta,
+    required this.estado,
   });
-  final String? id;
-  final String codigo;
+
+  final int? id;
   final String nombre;
-  final double? porcentaje;
-  final double? montoFijo;
-  final DateTime fechaInicio;
-  final DateTime fechaFin;
-  final bool activo;
-  final String? aplicableAProductoId;
-  final double? montoMinimo;
+  final String tipo;
+  final double valor;
+  final String aplicaA;
+  final int? referenciaId;
+  final DateTime vigenciaDesde;
+  final DateTime vigenciaHasta;
+  final String estado;
 }

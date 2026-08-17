@@ -14,8 +14,8 @@ class BuscarApartados {
     return _repositorio.listarApartados(
       desde: desde,
       hasta: hasta,
-      clienteId: clienteId,
-      usuarioId: usuarioId,
+      clienteId: int.tryParse(clienteId ?? ''),
+      usuarioId: int.tryParse(usuarioId ?? ''),
       estado: estado,
     );
   }

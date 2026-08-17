@@ -1,5 +1,4 @@
 class Devolucion {
-
   const Devolucion({
     this.id,
     required this.numero,
@@ -12,10 +11,11 @@ class Devolucion {
     required this.estado,
     this.createdAt,
   });
-  final String? id;
+
+  final int? id;
   final String numero;
-  final String ventaId;
-  final String productoId;
+  final int ventaId;
+  final int productoId;
   final double cantidadDevuelta;
   final double montoReembolsado;
   final String motivo;

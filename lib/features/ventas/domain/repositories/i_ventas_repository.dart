@@ -10,19 +10,31 @@ abstract class IVentasRepository {
   Future<List<Map<String, dynamic>>> listarVentas({
     DateTime? desde,
     DateTime? hasta,
-    String? clienteId,
-    String? usuarioId,
+    int? clienteId,
+    int? usuarioId,
   });
+
   Future<Venta> registrarVenta(Venta venta);
+
   Future<Cotizacion> registrarCotizacion(Cotizacion cotizacion);
-  Future<Venta> convertirCotizacionAVenta(String cotizacionId);
+
+  Future<Venta> convertirCotizacionAVenta(int cotizacionId);
+
   Future<Apartado> registrarApartado(Apartado apartado);
+
   Future<Devolucion> registrarDevolucion(Devolucion devolucion);
+
   Future<Pago> registrarPago(Pago pago);
-  Future<double> consultarSaldoCliente(String clienteId);
+
+  Future<double> consultarSaldoCliente(int clienteId);
+
   Future<List<Descuento>> obtenerDescuentosActivos();
+
   Future<List<Oferta>> obtenerOfertasActivas();
-  Future<bool> aplicarDescuento(String ventaId, String descuentoId);
-  Future<bool> validarOferta(String ofertaId, double montoCompra);
-  Future<void> actualizarEnCascada(String ventaId);
+
+  Future<bool> aplicarDescuento(int ventaId, int descuentoId);
+
+  Future<bool> validarOferta(int ofertaId, double montoCompra);
+
+  Future<void> actualizarEnCascada(int ventaId);
 }

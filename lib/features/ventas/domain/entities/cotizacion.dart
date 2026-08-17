@@ -1,7 +1,6 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 
 class Cotizacion {
-
   const Cotizacion({
     this.id,
     required this.numero,
@@ -16,9 +15,10 @@ class Cotizacion {
     this.ventaId,
     this.createdAt,
   });
-  final String? id;
+
+  final int? id;
   final String numero;
-  final String clienteId;
+  final int clienteId;
   final DateTime fechaEmision;
   final DateTime fechaVencimiento;
   final List<DetalleVenta> detalles;
@@ -26,6 +26,6 @@ class Cotizacion {
   final double itbis;
   final double total;
   final bool convertidaAVenta;
-  final String? ventaId;
+  final int? ventaId;
   final DateTime? createdAt;
 }

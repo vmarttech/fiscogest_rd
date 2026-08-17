@@ -1,27 +1,21 @@
 class Oferta {
-
   const Oferta({
     this.id,
     required this.nombre,
-    required this.descripcion,
-    required this.tipo,
-    required this.valor,
-    required this.validoDesde,
-    required this.validoHasta,
-    this.activa = true,
-    this.productosAplicables,
-    this.usosMaximos,
-    this.usosRealizados = 0,
+    required this.productoId,
+    required this.cantidadMinima,
+    required this.precioOferta,
+    required this.vigenciaDesde,
+    required this.vigenciaHasta,
+    required this.estado,
   });
-  final String? id;
+
+  final int? id;
   final String nombre;
-  final String descripcion;
-  final String tipo;
-  final double valor;
-  final DateTime validoDesde;
-  final DateTime validoHasta;
-  final bool activa;
-  final List<String>? productosAplicables;
-  final int? usosMaximos;
-  final int usosRealizados;
+  final int productoId;
+  final int cantidadMinima;
+  final double precioOferta;
+  final DateTime vigenciaDesde;
+  final DateTime vigenciaHasta;
+  final String estado;
 }

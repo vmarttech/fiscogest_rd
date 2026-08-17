@@ -1,23 +1,23 @@
 class Pago {
-
   const Pago({
     this.id,
-    required this.numero,
-    required this.ventaId,
-    this.clienteId,
-    required this.monto,
-    required this.metodoPago,
+    required this.cuentaCobrarId,
+    required this.clienteId,
     required this.fecha,
+    required this.monto,
+    required this.formaPago,
     this.referencia,
-    required this.tipoTransaccion,
+    this.observaciones,
+    this.createdAt,
   });
-  final String? id;
-  final String numero;
-  final String ventaId;
-  final String? clienteId;
-  final double monto;
-  final String metodoPago;
+
+  final int? id;
+  final int cuentaCobrarId;
+  final int clienteId;
   final DateTime fecha;
+  final double monto;
+  final String formaPago;
   final String? referencia;
-  final String tipoTransaccion;
+  final String? observaciones;
+  final DateTime? createdAt;
 }
