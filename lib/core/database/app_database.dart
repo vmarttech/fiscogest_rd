@@ -1,44 +1,50 @@
 // ignore_for_file: experimental_member_use
-
 import 'dart:io';
-
 import 'package:drift/drift.dart';
-
 import 'package:drift/native.dart';
-
 import 'package:path/path.dart' as p;
-
 import 'package:path_provider/path_provider.dart';
 
+// Tablas existentes
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
-
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
-
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_table.dart';
-
 import 'package:fiscogest_rd/features/inventario/data/dao/entradas_table.dart';
-
 import 'package:fiscogest_rd/features/inventario/data/dao/salidas_table.dart';
-
 import 'package:fiscogest_rd/features/inventario/data/dao/existencias_table.dart';
-
 import 'package:fiscogest_rd/features/inventario/data/database/tables/categoria_table.dart';
-
 import 'package:fiscogest_rd/features/inventario/data/database/tables/marca_table.dart';
-
 import 'package:fiscogest_rd/features/inventario/data/database/tables/unidad_medida_table.dart';
-
 import 'package:fiscogest_rd/features/inventario/data/database/tables/kardex_table.dart';
-
 import 'package:fiscogest_rd/features/ajustes_inventario/data/datasources/ajuste_inventario_database.dart';
-
 import 'package:fiscogest_rd/features/inventario_fisico/data/database/tables/conteo_fisico_table.dart';
-
 import 'package:fiscogest_rd/features/inventario_fisico/data/database/tables/diferencia_conteo_table.dart';
+
+// NUEVAS: Tablas base Fase 4
+import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dart';
+import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_table.dart';
+
+// NUEVAS: Tablas Fase 4 - Módulo Comercial
+import 'package:fiscogest_rd/features/comercial/data/dao/ventas_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/ventas_detalle_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cotizaciones_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cotizaciones_detalle_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/apartados_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/apartados_detalle_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_detalle_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cobros_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/kardex_comercial_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_table.dart';
 
 part 'app_database.g.dart';
 
 @DriftDatabase(tables: [
+  // Tablas existentes
   ClientesTable,
   ConfiguracionTable,
   ProductosTable,
@@ -52,30 +58,51 @@ part 'app_database.g.dart';
   ConteosFisicos,
   DiferenciasConteo,
   ExistenciasTable,
+  // NUEVAS: Tablas base
+  ProveedoresTable,
+  UsuariosTable,
+  // NUEVAS: Fase 4 - Ventas
+  VentasTable,
+  VentasDetalleTable,
+  // NUEVAS: Fase 4 - Cotizaciones
+  CotizacionesTable,
+  CotizacionesDetalleTable,
+  // NUEVAS: Fase 4 - Apartados
+  ApartadosTable,
+  ApartadosDetalleTable,
+  // NUEVAS: Fase 4 - Devoluciones
+  DevolucionesTable,
+  DevolucionesDetalleTable,
+  // NUEVAS: Fase 4 - Cuentas por Cobrar
+  CuentasCobrarTable,
+  CobrosTable,
+  // NUEVAS: Fase 4 - Cuentas por Pagar
+  CuentasPagarTable,
+  // NUEVAS: Fase 4 - Configuración comercial
+  DescuentosTable,
+  OfertasTable,
+  // NUEVAS: Fase 4 - Integración en cascada
+  KardexComercialTable,
+  CajaMovimientosTable,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
   $CategoriasTable get categorias => super.categorias;
-
   @override
   $MarcasTable get marcas => super.marcas;
-
   @override
   $UnidadesMedidaTable get unidadesMedida => super.unidadesMedida;
-
   @override
   $ConteosFisicosTable get conteosFisicos => super.conteosFisicos;
-
   @override
   $DiferenciasConteoTable get diferenciasConteo => super.diferenciasConteo;
-
   @override
   $ExistenciasTableTable get existenciasTable => super.existenciasTable;
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -92,10 +119,28 @@ class AppDatabase extends _$AppDatabase {
             await m.alterTable(TableMigration(entradasTable, newColumns: [entradasTable.costoUnitario, entradasTable.observacion]));
             await m.alterTable(TableMigration(salidasTable, newColumns: [salidasTable.observacion]));
             await m.alterTable(TableMigration(existenciasTable, newColumns: [existenciasTable.ubicacion, existenciasTable.fechaActualizacion]));
-            // ✅ ELIMINADO: TableMigration(kardexTable) — no agrega columnas nuevas
-            // y falla por discrepancia histórica de nombres (snake_case vs camelCase)
             await m.alterTable(TableMigration(ajusteInventarioTable));
             await m.alterTable(TableMigration(diferenciasConteo));
+          }
+          // NUEVA VERSIÓN 10: Fase 4 - Módulo Comercial completo
+          if (from < 10) {
+            await m.createTable(proveedoresTable);
+            await m.createTable(usuariosTable);
+            await m.createTable(ventasTable);
+            await m.createTable(ventasDetalleTable);
+            await m.createTable(cotizacionesTable);
+            await m.createTable(cotizacionesDetalleTable);
+            await m.createTable(apartadosTable);
+            await m.createTable(apartadosDetalleTable);
+            await m.createTable(devolucionesTable);
+            await m.createTable(devolucionesDetalleTable);
+            await m.createTable(cuentasCobrarTable);
+            await m.createTable(cobrosTable);
+            await m.createTable(cuentasPagarTable);
+            await m.createTable(descuentosTable);
+            await m.createTable(ofertasTable);
+            await m.createTable(kardexComercialTable);
+            await m.createTable(cajaMovimientosTable);
           }
         },
       );
