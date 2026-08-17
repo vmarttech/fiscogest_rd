@@ -100,20 +100,29 @@ class AppShell extends StatelessWidget {
       child: Material(
         color: isSelected ? const Color(0xFF1E293B) : Colors.transparent,
         borderRadius: AppRadius.allM,
-        child: ListTile(
-          dense: true,
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
-          leading: Icon(icon, color: isSelected ? Colors.white : AppColors.textSecondary, size: 20),
-          title: Text(
-            title,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            style: AppTypography.labelMedium.copyWith(
-              color: isSelected ? Colors.white : AppColors.textSecondary,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        child: InkWell(
+          borderRadius: AppRadius.allM,
+          onTap: () => context.go(routePath),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Icon(icon, color: isSelected ? Colors.white : AppColors.textSecondary, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          onTap: () => context.go(routePath),
         ),
       ),
     );

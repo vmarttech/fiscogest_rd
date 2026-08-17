@@ -7,7 +7,6 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
 class VentasPage extends StatefulWidget {
-
   const VentasPage({super.key});
   static const routeName = '/ventas';
 
@@ -39,7 +38,6 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ Pestañas SUPERIORES — Navegación directa
           TabBar(
             controller: _controladorPestanas,
             isScrollable: true,
@@ -56,35 +54,14 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
             ],
           ),
           const Divider(height: 1),
-
-          // ✅ Área de contenido
           Expanded(
             child: TabBarView(
               controller: _controladorPestanas,
               children: [
-                // =====================================================
-                // PESTAÑA 0 — REGISTRAR VENTA (CARGA POR DEFECTO)
-                // =====================================================
                 _buildRegistrarVenta(esPantallaGrande),
-
-                // =====================================================
-                // PESTAÑA 1 — COTIZACIONES
-                // =====================================================
                 const Center(child: Text('📄 Cotizaciones — En construcción')),
-
-                // =====================================================
-                // PESTAÑA 2 — APARTADOS
-                // =====================================================
                 const Center(child: Text('📝 Apartados — En construcción')),
-
-                // =====================================================
-                // PESTAÑA 3 — NOTAS DE CRÉDITO
-                // =====================================================
                 const Center(child: Text('↩️ Notas de Crédito — En construcción')),
-
-                // =====================================================
-                // PESTAÑA 4 — HISTORIAL
-                // =====================================================
                 const Center(child: Text('📊 Historial de Ventas — En construcción')),
               ],
             ),
@@ -94,15 +71,11 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
     );
   }
 
-  // =====================================================
-  // VISTA DE REGISTRAR VENTA — Adaptable por tamaño
-  // =====================================================
   Widget _buildRegistrarVenta(bool esPantallaGrande) {
     if (esPantallaGrande) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // PANEL IZQUIERDO — Búsqueda + Lista de Artículos
           Expanded(
             flex: 3,
             child: SingleChildScrollView(
@@ -115,26 +88,26 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
                     prefixIcon: Icons.search,
                   ),
                   AppLayout.vM,
-                  DataTable(
-                    columnSpacing: 16,
-                    horizontalMargin: 8,
-                    columns: const [
-                      DataColumn(label: Text('Código')),
-                      DataColumn(label: Text('Descripción')),
-                      DataColumn(label: Text('Cantidad en Stock')),
-                      DataColumn(label: Text('Precio Unitario')),
-                      DataColumn(label: Text('Acción')),
-                    ],
-                    rows: _generarFilasArticulos(),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      columnSpacing: 16,
+                      horizontalMargin: 8,
+                      columns: const [
+                        DataColumn(label: Text('Código')),
+                        DataColumn(label: Text('Descripción')),
+                        DataColumn(label: Text('Cantidad en Stock')),
+                        DataColumn(label: Text('Precio Unitario')),
+                        DataColumn(label: Text('Acción')),
+                      ],
+                      rows: _generarFilasArticulos(),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-
           const VerticalDivider(width: 1, thickness: 1),
-
-          // PANEL DERECHO — Carrito + Resumen + Opciones + Total
           Expanded(
             flex: 2,
             child: SingleChildScrollView(
@@ -144,40 +117,41 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
                 children: [
                   AppSection(
                     title: 'Carrito / Resumen de Factura',
-                    children:  [
+                    children: [
                       const Text('Venta Actual • Ticket #10594 • Cajero: Ana G.'),
                       const SizedBox(height: 12),
-                      DataTable(
-                        columnSpacing: 12,
-                        horizontalMargin: 4,
-                        columns: [
-                          const DataColumn(label: Text('Cant.')),
-                          const DataColumn(label: Text('Descripción')),
-                          const DataColumn(label: Text('Total Parcial')),
-                          const DataColumn(label: Text('')),
-                        ],
-                        rows: [
-                          const DataRow(cells: [
-                            DataCell(Text('1')),
-                            DataCell(Text('Canttotal (2%)')),
-                            DataCell(Text('\$255.00')),
-                            DataCell(Icon(Icons.close, size: 16)),
-                          ]),
-                          const DataRow(cells: [
-                            DataCell(SizedBox.shrink()),
-                            DataCell(Text('ITBIS (ITBIS)')),
-                            DataCell(Text('\$0.00')),
-                            DataCell(SizedBox.shrink()),
-                          ]),
-                          const DataRow(
-                            cells: [
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          columnSpacing: 12,
+                          horizontalMargin: 4,
+                          columns: const [
+                            DataColumn(label: Text('Cant.')),
+                            DataColumn(label: Text('Descripción')),
+                            DataColumn(label: Text('Total Parcial')),
+                            DataColumn(label: Text('')),
+                          ],
+                          rows: const [
+                            DataRow(cells: [
+                              DataCell(Text('1')),
+                              DataCell(Text('Canttotal (2%)')),
+                              DataCell(Text('\$255.00')),
+                              DataCell(Icon(Icons.close, size: 16)),
+                            ]),
+                            DataRow(cells: [
+                              DataCell(SizedBox.shrink()),
+                              DataCell(Text('ITBIS (ITBIS)')),
+                              DataCell(Text('\$0.00')),
+                              DataCell(SizedBox.shrink()),
+                            ]),
+                            DataRow(cells: [
                               DataCell(SizedBox.shrink()),
                               DataCell(Text('Total', style: TextStyle(fontWeight: FontWeight.bold))),
                               DataCell(Text('RD\$ 3,450.00', style: TextStyle(fontWeight: FontWeight.bold))),
                               DataCell(SizedBox.shrink()),
-                            ],
-                          ),
-                        ],
+                            ]),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -230,7 +204,6 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
         ],
       );
     } else {
-      // En celular: todo apilado verticalmente
       return SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -263,7 +236,7 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
   }
 
   static List<DataRow> _generarFilasArticulos() {
-    const articulos = [
+    const List<(String, String, String, String)> articulos = [
       ('SATTT', 'Descripción', '—', '—'),
       ('Artículd', 'Cantidad en Stock', '—', '—'),
       ('Categoría', 'Cantidad en Stock', '—', '—'),
