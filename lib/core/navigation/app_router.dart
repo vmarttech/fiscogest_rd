@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:fiscogest_rd/features/transferencias/presentation/pages/registrar_transferencia_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
 import 'package:fiscogest_rd/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -9,10 +8,15 @@ import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_produc
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/registrar_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/diferencias_conteo_page.dart';
 import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/lista_ventas_page.dart';
-import 'package:fiscogest_rd/features/cotizaciones/presentation/pages/lista_cotizaciones_page.dart';
-import 'package:fiscogest_rd/features/apartados/presentation/pages/lista_apartados_page.dart';
-import 'package:fiscogest_rd/features/devoluciones/presentation/pages/lista_devoluciones_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/ventas_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/cotizaciones_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_page.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/pages/proveedores_page.dart';
 import 'package:fiscogest_rd/features/reports/presentation/pages/reports_page.dart';
@@ -21,6 +25,7 @@ import 'package:fiscogest_rd/features/import_export/presentation/pages/import_ex
 import 'package:fiscogest_rd/features/configuracion/presentation/pages/configuracion_page.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/lista_ajustes_page.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart';
+import 'package:fiscogest_rd/features/transferencias/presentation/pages/registrar_transferencia_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -28,10 +33,53 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/', name: 'dashboard', builder: (_, __) => const AppShell(child: DashboardPage())),
       GoRoute(path: '/sales', name: 'facturacion', builder: (_, __) => const AppShell(child: SalesPage())),
-      GoRoute(path: '/ventas', name: ListaVentasPage.routeName, builder: (_, __) => const AppShell(child: ListaVentasPage())),
-      GoRoute(path: '/cotizaciones', name: ListaCotizacionesPage.routeName, builder: (_, __) => const AppShell(child: ListaCotizacionesPage())),
-      GoRoute(path: '/apartados', name: ListaApartadosPage.routeName, builder: (_, __) => const AppShell(child: ListaApartadosPage())),
-      GoRoute(path: '/devoluciones', name: ListaDevolucionesPage.routeName, builder: (_, __) => const AppShell(child: ListaDevolucionesPage())),
+      GoRoute(
+        path: '/ventas',
+        name: VentasPage.routeName,
+        builder: (_, __) => const AppShell(child: VentasPage()),
+        routes: [
+          GoRoute(
+            path: 'registrar',
+            name: RegistrarVentaPage.routeName,
+            builder: (_, __) => const AppShell(child: RegistrarVentaPage()),
+          ),
+          GoRoute(
+            path: 'cotizaciones',
+            name: CotizacionesPage.routeName,
+            builder: (_, __) => const AppShell(child: CotizacionesPage()),
+          ),
+          GoRoute(
+            path: 'apartados',
+            name: ApartadosPage.routeName,
+            builder: (_, __) => const AppShell(child: ApartadosPage()),
+          ),
+          GoRoute(
+            path: 'devoluciones',
+            name: DevolucionesPage.routeName,
+            builder: (_, __) => const AppShell(child: DevolucionesPage()),
+          ),
+          GoRoute(
+            path: 'cobrar',
+            name: CobrarPage.routeName,
+            builder: (_, __) => const AppShell(child: CobrarPage()),
+          ),
+          GoRoute(
+            path: 'pagar',
+            name: PagarPage.routeName,
+            builder: (_, __) => const AppShell(child: PagarPage()),
+          ),
+          GoRoute(
+            path: 'descuentos',
+            name: DescuentosPage.routeName,
+            builder: (_, __) => const AppShell(child: DescuentosPage()),
+          ),
+          GoRoute(
+            path: 'ofertas',
+            name: OfertasPage.routeName,
+            builder: (_, __) => const AppShell(child: OfertasPage()),
+          ),
+        ],
+      ),
       GoRoute(path: '/inventory', name: 'inventario', builder: (_, __) => const AppShell(child: ProductosPage())),
       GoRoute(path: '/kardex', name: 'kardex', builder: (_, __) => const AppShell(child: KardexPage())),
       GoRoute(

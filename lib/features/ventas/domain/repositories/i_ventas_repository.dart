@@ -7,6 +7,12 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 
 abstract class IVentasRepository {
+  Future<List<Map<String, dynamic>>> listarVentas({
+    DateTime? desde,
+    DateTime? hasta,
+    String? clienteId,
+    String? usuarioId,
+  });
   Future<Venta> registrarVenta(Venta venta);
   Future<Cotizacion> registrarCotizacion(Cotizacion cotizacion);
   Future<Venta> convertirCotizacionAVenta(String cotizacionId);

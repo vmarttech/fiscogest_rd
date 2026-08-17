@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 
 class CotizacionesPage extends StatelessWidget {
 
@@ -7,9 +8,6 @@ class CotizacionesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Cotizaciones')),
-      body: const Center(child: Text('Listado y Gestión de Cotizaciones')),
-    );
+    return const AppScaffold(title: 'Cotizaciones', body: SizedBox.shrink());
   }
 }

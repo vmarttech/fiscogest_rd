@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 
 class ApartadosPage extends StatelessWidget {
 
@@ -7,9 +8,6 @@ class ApartadosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Apartados')),
-      body: const Center(child: Text('Gestión de Apartados')),
-    );
+    return const AppScaffold(title: 'Apartados', body: SizedBox.shrink());
   }
 }
