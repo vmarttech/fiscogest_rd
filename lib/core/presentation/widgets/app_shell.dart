@@ -104,10 +104,15 @@ class AppShell extends StatelessWidget {
           dense: true,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
           leading: Icon(icon, color: isSelected ? Colors.white : AppColors.textSecondary, size: 20),
-          title: Text(title, style: AppTypography.labelMedium.copyWith(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          )),
+          title: Text(
+            title,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: AppTypography.labelMedium.copyWith(
+              color: isSelected ? Colors.white : AppColors.textSecondary,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
           onTap: () => context.go(routePath),
         ),
       ),
