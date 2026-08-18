@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_layout.dart';
-import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 
 class VentasPage extends StatefulWidget {
   const VentasPage({super.key});
-  static const routeName = '/ventas';
+  static const String routeName = '/ventas';
 
   @override
   State<VentasPage> createState() => _VentasPageState();
@@ -20,7 +19,7 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _controladorPestanas = TabController(length: 5, vsync: this);
+    _controladorPestanas = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -31,7 +30,7 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final esPantallaGrande = AppBreakpoints.isDesktop(context);
+    final esPantallaAncha = AppBreakpoints.isDesktop(context);
 
     return AppScaffold(
       title: 'Módulo de Ventas',
@@ -46,11 +45,10 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
             indicatorColor: Colors.blueAccent,
             indicatorWeight: 3,
             tabs: const [
-              Tab(text: '[Activo] Registrar Venta'),
-              Tab(text: '[Inactivo] Cotizaciones'),
-              Tab(text: '[Inactivo] Apartados'),
-              Tab(text: '[Inactivo] Notas de Crédito'),
-              Tab(text: '[Inactivo] Historial de Ventas'),
+              Tab(text: 'Registrar Venta'),
+              Tab(text: 'Cotizaciones'),
+              Tab(text: 'Apartados'),
+              Tab(text: 'Historial de Ventas'),
             ],
           ),
           const Divider(height: 1),
@@ -58,11 +56,10 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
             child: TabBarView(
               controller: _controladorPestanas,
               children: [
-                _buildRegistrarVenta(esPantallaGrande),
-                const Center(child: Text('📄 Cotizaciones — En construcción')),
-                const Center(child: Text('📝 Apartados — En construcción')),
-                const Center(child: Text('↩️ Notas de Crédito — En construcción')),
-                const Center(child: Text('📊 Historial de Ventas — En construcción')),
+                _buildRegistrarVenta(esPantallaAncha),
+                const Center(child: Text('Cotizaciones — En construcción')),
+                const Center(child: Text('Apartados — En construcción')),
+                const Center(child: Text('Historial de Ventas — En construcción')),
               ],
             ),
           ),
@@ -71,191 +68,283 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildRegistrarVenta(bool esPantallaGrande) {
-    if (esPantallaGrande) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 3,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: AppSection(
-                title: 'Artículos / Búsqueda',
+  Widget _buildRegistrarVenta(bool esPantallaAncha) {
+    final contenidoIzquierda = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 🔍 BUSCADOR PROTAGONISTA
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade400, width: 1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const Expanded(
+                child: AppTextField(
+                  label: 'Buscar producto por código, nombre o código de barras',
+                  prefixIcon: Icons.search,
+                ),
+              ),
+              const SizedBox(width: 16),
+              AppButton(text: '', icon: Icons.qr_code_scanner, onPressed: () {}),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 📋 PRODUCTOS DISPONIBLES
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade400, width: 1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Productos disponibles',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              Table(
+                columnWidths: const {
+                  0: FlexColumnWidth(2),
+                  1: FixedColumnWidth(100),
+                  2: FixedColumnWidth(80),
+                  3: FixedColumnWidth(120),
+                },
                 children: [
-                  const AppTextField(
-                    label: 'Buscar artículo por nombre, código o EAN',
-                    prefixIcon: Icons.search,
+                  const TableRow(
+                    children: [
+                      Text('Producto', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text('Precio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), textAlign: TextAlign.right),
+                      Text('Stock', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), textAlign: TextAlign.center),
+                      SizedBox.shrink(),
+                    ],
                   ),
-                  AppLayout.vM,
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columnSpacing: 16,
-                      horizontalMargin: 8,
-                      columns: const [
-                        DataColumn(label: Text('Código')),
-                        DataColumn(label: Text('Descripción')),
-                        DataColumn(label: Text('Cantidad en Stock')),
-                        DataColumn(label: Text('Precio Unitario')),
-                        DataColumn(label: Text('Acción')),
-                      ],
-                      rows: _generarFilasArticulos(),
-                    ),
+                  TableRow(
+                    children: [
+                      const Text('Producto A\nPROD001', style: TextStyle(fontSize: 13)),
+                      const Text('RD\$ 250.00', style: TextStyle(fontSize: 13), textAlign: TextAlign.right),
+                      const Text('18', style: TextStyle(fontSize: 13), textAlign: TextAlign.center),
+                      AppButton(text: '+ Agregar', onPressed: () {}),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      const Text('Producto B\nPROD002', style: TextStyle(fontSize: 13)),
+                      const Text('RD\$ 450.00', style: TextStyle(fontSize: 13), textAlign: TextAlign.right),
+                      const Text('7', style: TextStyle(fontSize: 13), textAlign: TextAlign.center),
+                      AppButton(text: '+ Agregar', onPressed: () {}),
+                    ],
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-          const VerticalDivider(width: 1, thickness: 1),
-          Expanded(
-            flex: 2,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        ),
+      ],
+    );
+
+    final contenidoDerecha = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 📋 ENCABEZADO + CLIENTE
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade400, width: 1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AppSection(
-                    title: 'Carrito / Resumen de Factura',
-                    children: [
-                      const Text('Venta Actual • Ticket #10594 • Cajero: Ana G.'),
-                      const SizedBox(height: 12),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: DataTable(
-                          columnSpacing: 12,
-                          horizontalMargin: 4,
-                          columns: const [
-                            DataColumn(label: Text('Cant.')),
-                            DataColumn(label: Text('Descripción')),
-                            DataColumn(label: Text('Total Parcial')),
-                            DataColumn(label: Text('')),
-                          ],
-                          rows: const [
-                            DataRow(cells: [
-                              DataCell(Text('1')),
-                              DataCell(Text('Canttotal (2%)')),
-                              DataCell(Text('\$255.00')),
-                              DataCell(Icon(Icons.close, size: 16)),
-                            ]),
-                            DataRow(cells: [
-                              DataCell(SizedBox.shrink()),
-                              DataCell(Text('ITBIS (ITBIS)')),
-                              DataCell(Text('\$0.00')),
-                              DataCell(SizedBox.shrink()),
-                            ]),
-                            DataRow(cells: [
-                              DataCell(SizedBox.shrink()),
-                              DataCell(Text('Total', style: TextStyle(fontWeight: FontWeight.bold))),
-                              DataCell(Text('RD\$ 3,450.00', style: TextStyle(fontWeight: FontWeight.bold))),
-                              DataCell(SizedBox.shrink()),
-                            ]),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  AppLayout.vM,
-                  AppSection(
-                    title: 'Opciones de Venta',
-                    children: [
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          AppButton(text: 'Cotización', icon: Icons.description_outlined, onPressed: () {}),
-                          AppButton(text: 'Apartado', icon: Icons.bookmark_border, onPressed: () {}),
-                          AppButton(text: 'Nota de Crédito', icon: Icons.receipt_long, onPressed: () {}),
-                          AppButton(text: 'Descuento %', icon: Icons.percent, onPressed: () {}),
-                        ],
-                      ),
-                    ],
-                  ),
-                  AppLayout.vL,
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'TOTAL A PAGAR: RD\$ 3,450.00',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: AppButton(
-                            text: 'COBRAR E IMPRIMIR (F12)',
-                            icon: Icons.payment,
-                            onPressed: () {},
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  Text('Ticket #10594', style: TextStyle(fontSize: 12)),
+                  Text('Ana G', style: TextStyle(fontSize: 12)),
+                  Text('Hoy', style: TextStyle(fontSize: 12)),
                 ],
               ),
-            ),
+              const SizedBox(height: 12),
+              AppDropdown<String>(
+                initialValue: 'Consumidor final',
+                items: const [
+                  DropdownMenuItem(value: 'Consumidor final', child: Text('Consumidor final')),
+                  DropdownMenuItem(value: 'buscar', child: Text('Buscar cliente')),
+                  DropdownMenuItem(value: 'nuevo', child: Text('Nuevo cliente')),
+                ],
+                onChanged: (_) {},
+              ),
+            ],
           ),
-        ],
-      );
-    } else {
+        ),
+        const SizedBox(height: 16),
+
+        // 🛒 CARRITO
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade400, width: 1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('CARRITO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  Text('2 productos', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 280),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    _buildFilaCarrito('Producto A', 2, 250.00),
+                    _buildFilaCarrito('Producto B', 1, 450.00),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              _buildFilaTotal('Subtotal', 950.00),
+              _buildFilaTotal('Descuento', 0.00),
+              _buildFilaTotal('ITBIS (18%)', 171.00),
+              const SizedBox(height: 12),
+              const Divider(height: 2, thickness: 2),
+              const SizedBox(height: 12),
+              _buildFilaTotal('TOTAL', 1121.00, esResaltado: true),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // ⚙️ ACCIONES SECUNDARIAS
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade400, width: 1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              AppButton(text: '% Descuento', icon: Icons.percent, onPressed: () {}),
+              AppButton(text: 'Cotización', icon: Icons.description_outlined, onPressed: () {}),
+              AppButton(text: 'Apartado', icon: Icons.bookmark_border, onPressed: () {}),
+              AppButton(text: 'Nota Crédito', icon: Icons.receipt_long, onPressed: () {}),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 💰 TOTAL + BOTÓN COBRAR
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.blueAccent, width: 2),
+            borderRadius: BorderRadius.circular(6),
+            color: Colors.white,
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              const Text('TOTAL A PAGAR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              const Text('RD\$ 1,121.00', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: AppButton(
+                  text: 'COBRAR',
+                  icon: Icons.payment,
+                  onPressed: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (esPantallaAncha) {
       return SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AppSection(
-              title: 'Artículos / Búsqueda',
-              children: [
-                AppTextField(label: 'Buscar artículo por nombre, código o EAN', prefixIcon: Icons.search),
-              ],
-            ),
-            AppLayout.vM,
-            const AppSection(
-              title: 'Carrito / Resumen de Factura',
-              children: [Text('Resumen de venta...')],
-            ),
-            AppLayout.vM,
-            const AppSection(
-              title: 'Opciones de Venta',
-              children: [Text('Botones de cotización, apartado, descuento...')],
-            ),
-            AppLayout.vL,
-            SizedBox(
-              width: double.infinity,
-              child: AppButton(text: 'COBRAR E IMPRIMIR', onPressed: () {}),
-            ),
+            Expanded(flex: 52, child: contenidoIzquierda),
+            const SizedBox(width: 16),
+            Expanded(flex: 48, child: contenidoDerecha),
           ],
         ),
       );
     }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          contenidoIzquierda,
+          const SizedBox(height: 16),
+          contenidoDerecha,
+        ],
+      ),
+    );
   }
 
-  static List<DataRow> _generarFilasArticulos() {
-    const List<(String, String, String, String)> articulos = [
-      ('SATTT', 'Descripción', '—', '—'),
-      ('Artículd', 'Cantidad en Stock', '—', '—'),
-      ('Categoría', 'Cantidad en Stock', '—', '—'),
-      ('Categonta', 'Cantidad en Stock', '—', '—'),
-      ('Collectáivin', '—', '—', '—'),
-      ('Colleccio', '—', '—', '—'),
-      ('Categoría', '—', '—', '—'),
-      ('Cobdito', '—', '—', '—'),
-      ('Descuento %', '—', '—', '—'),
-    ];
+  // ✅ SINTAXIS CORREGIDA — todos los corchetes cerrados
+  Widget _buildFilaCarrito(String nombre, int cantidad, double precio) {
+    final subtotal = precio * cantidad;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(flex: 3, child: Text(nombre, style: const TextStyle(fontSize: 13))),
+          Expanded(
+            flex: 4,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppButton(text: '-', onPressed: () {}),
+                const SizedBox(width: 4),
+                Text('$cantidad', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 4),
+                AppButton(text: '+', onPressed: () {}),
+              ],
+            ),
+          ),
+          Expanded(flex: 3, child: Text('RD\$ ${subtotal.toStringAsFixed(2)}', textAlign: TextAlign.right, style: const TextStyle(fontSize: 13))),
+          const SizedBox(width: 4),
+          AppButton(text: '✕', onPressed: () {}),
+        ],
+      ),
+    );
+  }
 
-    return articulos.map((a) => DataRow(
-      cells: [
-        DataCell(Text(a.$1)),
-        DataCell(Text(a.$2)),
-        DataCell(Text(a.$3)),
-        DataCell(Text(a.$4)),
-        DataCell(AppButton(text: '+ Agregar', height: 36, onPressed: () {})),
-      ],
-    )).toList();
+  Widget _buildFilaTotal(String etiqueta, double monto, {bool esResaltado = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(etiqueta, style: esResaltado ? const TextStyle(fontSize: 14, fontWeight: FontWeight.bold) : const TextStyle(fontSize: 13)),
+          Text('RD\$ ${monto.toStringAsFixed(2)}', style: esResaltado ? const TextStyle(fontSize: 14, fontWeight: FontWeight.bold) : const TextStyle(fontSize: 13)),
+        ],
+      ),
+    );
   }
 }

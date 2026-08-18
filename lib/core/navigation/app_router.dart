@@ -26,7 +26,6 @@ import 'package:fiscogest_rd/features/configuracion/presentation/pages/configura
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/lista_ajustes_page.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart';
 import 'package:fiscogest_rd/features/transferencias/presentation/pages/registrar_transferencia_page.dart';
-
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
