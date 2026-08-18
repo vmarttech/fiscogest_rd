@@ -11,7 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 // =====================================================================
 class VentasPage extends StatefulWidget {
   const VentasPage({super.key});
-  static const String routeName = '/ventas';
+  static const String routeName = 'ventas';
 
   @override
   State<VentasPage> createState() => _VentasPageState();

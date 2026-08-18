@@ -7,7 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 
 class RegistrarVentaPage extends StatefulWidget {
   const RegistrarVentaPage({super.key});
-  static const String routeName = '/ventas/registrar';
+  static const String routeName = 'registrar-ventas';
 
   @override
   State<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
