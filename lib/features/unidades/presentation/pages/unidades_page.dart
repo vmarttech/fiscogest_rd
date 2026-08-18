@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/unidad_medida.d
 
 class UnidadesPage extends ConsumerStatefulWidget {
   const UnidadesPage({super.key});
+  static const String routeName = 'unidades';
 
   @override
   ConsumerState<UnidadesPage> createState() => _UnidadesPageState();

@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 class KardexPage extends ConsumerStatefulWidget {
   const KardexPage({super.key, this.productoId});
+  static const String routeName = 'kardex';
   final String? productoId;
 
   @override

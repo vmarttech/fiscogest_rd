@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart
 
 class ProveedoresPage extends ConsumerStatefulWidget {
   const ProveedoresPage({super.key});
+  static const String routeName = 'proveedores';
 
   @override
   ConsumerState<ProveedoresPage> createState() => _ProveedoresPageState();

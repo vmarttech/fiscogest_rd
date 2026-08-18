@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.da
 
 class ProductosPage extends ConsumerStatefulWidget {
   const ProductosPage({super.key});
+  static const String routeName = 'inventario';
 
   @override
   ConsumerState<ProductosPage> createState() => _ProductosPageState();

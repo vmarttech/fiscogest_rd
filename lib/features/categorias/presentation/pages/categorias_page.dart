@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart'
 
 class CategoriasPage extends ConsumerStatefulWidget {
   const CategoriasPage({super.key});
+  static const String routeName = 'categorias';
 
   @override
   ConsumerState<CategoriasPage> createState() => _CategoriasPageState();

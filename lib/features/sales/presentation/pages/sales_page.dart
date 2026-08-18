@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class SalesPage extends StatelessWidget {
   const SalesPage({super.key});
+  static const String routeName = 'facturacion';
 
   @override
   Widget build(BuildContext context) {

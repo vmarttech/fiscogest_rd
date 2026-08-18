@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.
 
 class ClientesGestionPage extends ConsumerStatefulWidget {
   const ClientesGestionPage({super.key});
+  static const String routeName = 'clientes-gestion';
 
   @override
   ConsumerState<ClientesGestionPage> createState() => _ClientesGestionPageState();

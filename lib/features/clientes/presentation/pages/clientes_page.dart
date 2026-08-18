@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 
 class ClientesPage extends ConsumerStatefulWidget {
   const ClientesPage({super.key});
+  static const String routeName = 'clientes';
 
   @override
   ConsumerState<ClientesPage> createState() => _ClientesPageState();

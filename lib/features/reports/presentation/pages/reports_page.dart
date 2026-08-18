@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class ReportsPage extends StatelessWidget {
   const ReportsPage({super.key});
+  static const String routeName = 'reportes';
 
   @override
   Widget build(BuildContext context) {

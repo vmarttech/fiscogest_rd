@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ConfiguracionPage extends ConsumerStatefulWidget {
   const ConfiguracionPage({super.key});
+  static const String routeName = 'configuracion';
 
   @override
   ConsumerState<ConfiguracionPage> createState() => _ConfiguracionPageState();

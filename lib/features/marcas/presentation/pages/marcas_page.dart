@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/marca.dart';
 
 class MarcasPage extends ConsumerStatefulWidget {
   const MarcasPage({super.key});
+  static const String routeName = 'marcas';
 
   @override
   ConsumerState<MarcasPage> createState() => _MarcasPageState();

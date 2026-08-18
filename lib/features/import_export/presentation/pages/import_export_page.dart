@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/features/import_export/presentation/providers/impor
 
 class ImportExportPage extends ConsumerWidget {
   const ImportExportPage({super.key});
+  static const String routeName = 'importar-exportar';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

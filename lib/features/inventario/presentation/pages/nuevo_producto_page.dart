@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_m
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
   const NuevoProductoPage({super.key});
+  static const String routeName = 'nuevo-producto';
 
   @override
   ConsumerState<NuevoProductoPage> createState() => _NuevoProductoPageState();

@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.
 
 class ImpuestosPage extends ConsumerStatefulWidget {
   const ImpuestosPage({super.key});
+  static const String routeName = 'impuestos';
 
   @override
   ConsumerState<ImpuestosPage> createState() => _ImpuestosPageState();
