@@ -5,8 +5,11 @@ import 'package:fiscogest_rd/features/dashboard/presentation/pages/dashboard_pag
 import 'package:fiscogest_rd/features/inventario/presentation/pages/productos_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/kardex_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_producto_page.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/pages/registrar_entrada_page.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/pages/registrar_salida_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/registrar_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/diferencias_conteo_page.dart';
+import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/listar_conteos_page.dart';
 import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ventas_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_page.dart';
@@ -26,6 +29,9 @@ import 'package:fiscogest_rd/features/configuracion/presentation/pages/configura
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/lista_ajustes_page.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart';
 import 'package:fiscogest_rd/features/transferencias/presentation/pages/registrar_transferencia_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/recepcion/registrar_recepcion_page.dart';
+import 'package:fiscogest_rd/features/presentaciones/presentation/pages/presentaciones_page.dart';
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
@@ -37,65 +43,51 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: VentasPage.routeName,
         builder: (_, __) => const AppShell(child: VentasPage()),
         routes: [
-          GoRoute(
-            path: 'registrar',
-            name: RegistrarVentaPage.routeName,
-            builder: (_, __) => const AppShell(child: RegistrarVentaPage()),
-          ),
-          GoRoute(
-            path: 'cotizaciones',
-            name: CotizacionesPage.routeName,
-            builder: (_, __) => const AppShell(child: CotizacionesPage()),
-          ),
-          GoRoute(
-            path: 'apartados',
-            name: ApartadosPage.routeName,
-            builder: (_, __) => const AppShell(child: ApartadosPage()),
-          ),
-          GoRoute(
-            path: 'devoluciones',
-            name: DevolucionesPage.routeName,
-            builder: (_, __) => const AppShell(child: DevolucionesPage()),
-          ),
-          GoRoute(
-            path: 'cobrar',
-            name: CobrarPage.routeName,
-            builder: (_, __) => const AppShell(child: CobrarPage()),
-          ),
-          GoRoute(
-            path: 'pagar',
-            name: PagarPage.routeName,
-            builder: (_, __) => const AppShell(child: PagarPage()),
-          ),
-          GoRoute(
-            path: 'descuentos',
-            name: DescuentosPage.routeName,
-            builder: (_, __) => const AppShell(child: DescuentosPage()),
-          ),
-          GoRoute(
-            path: 'ofertas',
-            name: OfertasPage.routeName,
-            builder: (_, __) => const AppShell(child: OfertasPage()),
-          ),
+          GoRoute(path: 'registrar', name: RegistrarVentaPage.routeName, builder: (_, __) => const AppShell(child: RegistrarVentaPage())),
+          GoRoute(path: 'cotizaciones', name: CotizacionesPage.routeName, builder: (_, __) => const AppShell(child: CotizacionesPage())),
+          GoRoute(path: 'apartados', name: ApartadosPage.routeName, builder: (_, __) => const AppShell(child: ApartadosPage())),
+          GoRoute(path: 'devoluciones', name: DevolucionesPage.routeName, builder: (_, __) => const AppShell(child: DevolucionesPage())),
+          GoRoute(path: 'cobrar', name: CobrarPage.routeName, builder: (_, __) => const AppShell(child: CobrarPage())),
+          GoRoute(path: 'pagar', name: PagarPage.routeName, builder: (_, __) => const AppShell(child: PagarPage())),
+          GoRoute(path: 'descuentos', name: DescuentosPage.routeName, builder: (_, __) => const AppShell(child: DescuentosPage())),
+          GoRoute(path: 'ofertas', name: OfertasPage.routeName, builder: (_, __) => const AppShell(child: OfertasPage())),
         ],
       ),
       GoRoute(path: '/inventory', name: 'inventario', builder: (_, __) => const AppShell(child: ProductosPage())),
       GoRoute(path: '/kardex', name: 'kardex', builder: (_, __) => const AppShell(child: KardexPage())),
+      GoRoute(path: '/productos/nuevo', name: 'nuevo-producto', builder: (_, __) => const AppShell(child: NuevoProductoPage())),
+
       GoRoute(
-        path: '/productos/nuevo',
-        name: 'nuevo-producto',
-        builder: (_, __) => const AppShell(child: NuevoProductoPage()),
+        path: '/inventario/entrada/:productoId/:nombreProducto',
+        name: RegistrarEntradaPage.routeName,
+        builder: (context, state) {
+          final productoId = int.tryParse(state.pathParameters['productoId'] ?? '0') ?? 0;
+          final nombreProducto = Uri.decodeComponent(state.pathParameters['nombreProducto'] ?? '');
+          return AppShell(child: RegistrarEntradaPage(productoId: productoId, nombreProducto: nombreProducto));
+        },
       ),
+      GoRoute(
+        path: '/inventario/salida/:productoId/:nombreProducto',
+        name: RegistrarSalidaPage.routeName,
+        builder: (context, state) {
+          final productoId = int.tryParse(state.pathParameters['productoId'] ?? '0') ?? 0;
+          final nombreProducto = Uri.decodeComponent(state.pathParameters['nombreProducto'] ?? '');
+          return AppShell(child: RegistrarSalidaPage(productoId: productoId, nombreProducto: nombreProducto));
+        },
+      ),
+
       GoRoute(path: '/inventario-fisico', name: 'inventario_fisico', builder: (_, __) => const AppShell(child: RegistrarConteoPage())),
-      GoRoute(path: '/lista-ajustes', name: 'lista-ajustes', builder: (_, __) => const AppShell(child: ListaAjustesPage())),
-      GoRoute(path: '/registrar-ajuste', name: 'registrar-ajuste', builder: (_, __) => const AppShell(child: RegistrarAjustePage())),
-      GoRoute(path: '/customers', name: 'clientes', builder: (_, __) => const AppShell(child: ClientesPage())),
-      GoRoute(path: '/suppliers', name: 'proveedores', builder: (_, __) => const AppShell(child: ProveedoresPage())),
+      GoRoute(path: '/inventario-fisico/listar', name: ListarConteosPage.routeName, builder: (_, __) => const AppShell(child: ListarConteosPage())),
+      GoRoute(path: '/lista-ajustes', name: ListaAjustesPage.routeName, builder: (_, __) => const AppShell(child: ListaAjustesPage())),
+      GoRoute(path: '/registrar-ajuste', name: RegistrarAjustePage.routeName, builder: (_, __) => const AppShell(child: RegistrarAjustePage())),
+      GoRoute(path: '/clientes', name: 'clientes', builder: (_, __) => const AppShell(child: ClientesPage())),
+      GoRoute(path: '/proveedores', name: 'proveedores', builder: (_, __) => const AppShell(child: ProveedoresPage())),
       GoRoute(path: '/reports', name: 'reportes', builder: (_, __) => const AppShell(child: ReportsPage())),
-      GoRoute(path: '/taxes', name: 'impuestos', builder: (_, __) => const AppShell(child: ImpuestosPage())),
+      GoRoute(path: '/impuestos', name: 'impuestos', builder: (_, __) => const AppShell(child: ImpuestosPage())),
       GoRoute(path: '/import-export', name: 'importar_exportar', builder: (_, __) => const AppShell(child: ImportExportPage())),
-      GoRoute(path: '/settings', name: 'configuracion', builder: (_, __) => const AppShell(child: ConfiguracionPage())),
+      GoRoute(path: '/configuracion', name: 'configuracion', builder: (_, __) => const AppShell(child: ConfiguracionPage())),
       GoRoute(path: '/registrar-conteo-fisico', name: RegistrarConteoPage.routeName, builder: (_, __) => const AppShell(child: RegistrarConteoPage())),
+
       GoRoute(
         path: '/diferencias-conteo-fisico/:conteoId',
         name: DiferenciasConteoPage.routeName,
@@ -104,11 +96,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AppShell(child: DiferenciasConteoPage(conteoId: conteoId));
         },
       ),
+
+      GoRoute(path: '/transferencias/registrar', name: RegistrarTransferenciaPage.routeName, builder: (_, __) => const AppShell(child: RegistrarTransferenciaPage())),
+
       GoRoute(
-        path: '/transferencias/registrar',
-        name: 'registrar_transferencia',
-        builder: (context, state) => const AppShell(child: RegistrarTransferenciaPage()),
+        path: '/recepcion/:compraId/:proveedorId',
+        name: RegistrarRecepcionPage.routeName,
+        builder: (context, state) {
+          final compraId = state.pathParameters['compraId'] ?? '';
+          final proveedorId = state.pathParameters['proveedorId'] ?? '';
+          return AppShell(child: RegistrarRecepcionPage(compraId: compraId, proveedorId: proveedorId));
+        },
       ),
+
+      GoRoute(path: '/presentaciones', name: PresentacionesPage.routeName, builder: (_, __) => const AppShell(child: PresentacionesPage())),
     ],
   );
 });

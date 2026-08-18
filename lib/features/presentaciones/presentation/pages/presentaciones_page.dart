@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacio
 
 class PresentacionesPage extends ConsumerStatefulWidget {
   const PresentacionesPage({super.key});
+  static const String routeName = 'presentaciones';
 
   @override
   ConsumerState<PresentacionesPage> createState() => _PresentacionesPageState();
@@ -35,6 +36,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
     final presentacionesAsync = ref.watch(presentacionControllerProvider);
 
     return AppScaffold(
+      title: 'Presentaciones',
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1000),
@@ -48,10 +50,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Catálogo de Presentaciones',
-                        style: AppTypography.h2,
-                      ),
+                      const Text('Catálogo de Presentaciones', style: AppTypography.h2),
                       AppLayout.vXs,
                       Text(
                         'Administración de unidades y presentaciones de productos.',
@@ -125,10 +124,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        presentacion.nombre,
-                                        style: AppTypography.labelLarge,
-                                      ),
+                                      Text(presentacion.nombre, style: AppTypography.labelLarge),
                                       AppLayout.vXs,
                                       Text(
                                         'Abreviatura: ${presentacion.abreviatura}',
@@ -211,7 +207,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                 label: 'Nombre de la Presentación',
                 controller: nombreController,
               ),
-              AppLayout.vM,
+              const SizedBox(height: AppSpacing.m),
               AppTextField(
                 label: 'Abreviatura (ej. UND, CAJ)',
                 controller: abreviaturaController,
@@ -235,7 +231,6 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                   nombre: nombreController.text.trim(),
                   abreviatura: abreviaturaController.text.trim().toUpperCase(),
                 );
-
                 if (isEditing) {
                   ref.read(presentacionControllerProvider.notifier).actualizar(pres);
                 } else {

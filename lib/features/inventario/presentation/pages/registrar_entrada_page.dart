@@ -11,9 +11,10 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 class RegistrarEntradaPage extends ConsumerStatefulWidget {
   const RegistrarEntradaPage({
     super.key,
-    required this.productoId,
-    required this.nombreProducto,
+    this.productoId = 0,
+    this.nombreProducto = '',
   });
+  static const String routeName = 'registrar-entrada';
 
   final int productoId;
   final String nombreProducto;

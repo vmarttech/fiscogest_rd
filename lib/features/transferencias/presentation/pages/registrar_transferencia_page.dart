@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 class RegistrarTransferenciaPage extends ConsumerWidget {
   const RegistrarTransferenciaPage({super.key});
+  static const String routeName = 'registrar-transferencia';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

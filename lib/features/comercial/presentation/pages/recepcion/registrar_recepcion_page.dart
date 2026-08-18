@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/recepcion/recepcion_provider.dart';
 
@@ -7,11 +12,13 @@ class RegistrarRecepcionPage extends ConsumerWidget {
 
   const RegistrarRecepcionPage({
     super.key,
-    required this.compraId,
-    required this.proveedorId,
+    this.compraId = '',
+    this.proveedorId = '',
     this.proveedorNombre,
     this.usuarioResponsable = 'usuario_actual',
   });
+  static const String routeName = 'registrar-recepcion';
+
   final String compraId;
   final String proveedorId;
   final String? proveedorNombre;
@@ -23,44 +30,37 @@ class RegistrarRecepcionPage extends ConsumerWidget {
     final fechaController = TextEditingController(
       text: DateTime.now().toLocal().toString().split(' ')[0],
     );
+    final proveedorController = TextEditingController(
+      text: proveedorNombre ?? proveedorId,
+    );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registrar Recepción'),
-      ),
+    return AppScaffold(
+      title: 'Registrar Recepción',
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: AppSpacing.allM,
         child: Form(
           key: formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Datos de Recepción',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
+              const Text('Datos de Recepción', style: AppTypography.h4),
+              const SizedBox(height: AppSpacing.m),
+              AppTextField(
                 controller: fechaController,
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de Recepción',
-                  border: OutlineInputBorder(),
-                ),
-                readOnly: true,
+                label: 'Fecha de Recepción',
+                enabled: false,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                initialValue: proveedorNombre ?? proveedorId,
-                decoration: const InputDecoration(
-                  labelText: 'Proveedor',
-                  border: OutlineInputBorder(),
-                ),
-                readOnly: true,
+              const SizedBox(height: AppSpacing.m),
+              AppTextField(
+                controller: proveedorController,
+                label: 'Proveedor',
+                enabled: false,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.l),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: AppButton(
+                  text: 'Confirmar Recepción',
                   onPressed: () async {
                     if (formKey.currentState?.validate() ?? false) {
                       final recepcion = Recepcion(
@@ -70,7 +70,7 @@ class RegistrarRecepcionPage extends ConsumerWidget {
                         proveedorNombre: proveedorNombre,
                         fechaRecepcion: DateTime.now(),
                         estado: 'pendiente',
-                        detalles: <DetalleRecepcion>[],
+                        detalles: const [],
                         usuarioResponsable: usuarioResponsable,
                         fechaCreacion: DateTime.now(),
                       );
@@ -80,7 +80,6 @@ class RegistrarRecepcionPage extends ConsumerWidget {
                       }
                     }
                   },
-                  child: const Text('Confirmar Recepción'),
                 ),
               ),
             ],
