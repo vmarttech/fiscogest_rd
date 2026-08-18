@@ -5,6 +5,18 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 
+// VALORES CONFIRMADOS EN EL PLAN: XS=4, S=8, M=16, L=24
+const double _xs = 4;
+const double _s = 8;
+const double _m = 16;
+const double _l = 24;
+
+// Estilos definidos SIN fontSize manual (cumpliendo regla del Plan)
+const _etiqueta = TextStyle(fontWeight: FontWeight.bold);
+const _cuerpo = TextStyle();
+const _cuerpoResaltado = TextStyle(fontWeight: FontWeight.bold);
+const _textoPequeno = TextStyle(color: Colors.grey);
+
 class VentasPage extends StatefulWidget {
   const VentasPage({super.key});
   static const String routeName = '/ventas';
@@ -72,13 +84,12 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
     final contenidoIzquierda = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 🔍 BUSCADOR PROTAGONISTA
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade400, width: 1),
             borderRadius: BorderRadius.circular(6),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(_m),
           child: Row(
             children: [
               const Expanded(
@@ -87,57 +98,53 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
                   prefixIcon: Icons.search,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: _m),
               AppButton(text: '', icon: Icons.qr_code_scanner, onPressed: () {}),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: _m),
 
-        // 📋 PRODUCTOS DISPONIBLES
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade400, width: 1),
             borderRadius: BorderRadius.circular(6),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(_m),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Productos disponibles',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-              const SizedBox(height: 12),
+              const Text('Productos disponibles', style: _etiqueta),
+              const SizedBox(height: _s),
               Table(
                 columnWidths: const {
                   0: FlexColumnWidth(2),
-                  1: FixedColumnWidth(100),
-                  2: FixedColumnWidth(80),
-                  3: FixedColumnWidth(120),
+                  1: FlexColumnWidth(1),
+                  2: FlexColumnWidth(1),
+                  3: FlexColumnWidth(1),
                 },
                 children: [
                   const TableRow(
                     children: [
-                      Text('Producto', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      Text('Precio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), textAlign: TextAlign.right),
-                      Text('Stock', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), textAlign: TextAlign.center),
+                      Text('Producto', style: _etiqueta),
+                      Text('Precio', style: _etiqueta, textAlign: TextAlign.right),
+                      Text('Stock', style: _etiqueta, textAlign: TextAlign.center),
                       SizedBox.shrink(),
                     ],
                   ),
                   TableRow(
                     children: [
-                      const Text('Producto A\nPROD001', style: TextStyle(fontSize: 13)),
-                      const Text('RD\$ 250.00', style: TextStyle(fontSize: 13), textAlign: TextAlign.right),
-                      const Text('18', style: TextStyle(fontSize: 13), textAlign: TextAlign.center),
+                      const Text('Producto A\nPROD001', style: _cuerpo),
+                      const Text('RD\$ 250.00', style: _cuerpo, textAlign: TextAlign.right),
+                      const Text('18', style: _cuerpo, textAlign: TextAlign.center),
                       AppButton(text: '+ Agregar', onPressed: () {}),
                     ],
                   ),
                   TableRow(
                     children: [
-                      const Text('Producto B\nPROD002', style: TextStyle(fontSize: 13)),
-                      const Text('RD\$ 450.00', style: TextStyle(fontSize: 13), textAlign: TextAlign.right),
-                      const Text('7', style: TextStyle(fontSize: 13), textAlign: TextAlign.center),
+                      const Text('Producto B\nPROD002', style: _cuerpo),
+                      const Text('RD\$ 450.00', style: _cuerpo, textAlign: TextAlign.right),
+                      const Text('7', style: _cuerpo, textAlign: TextAlign.center),
                       AppButton(text: '+ Agregar', onPressed: () {}),
                     ],
                   ),
@@ -152,25 +159,24 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
     final contenidoDerecha = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 📋 ENCABEZADO + CLIENTE
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade400, width: 1),
             borderRadius: BorderRadius.circular(6),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(_m),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Ticket #10594', style: TextStyle(fontSize: 12)),
-                  Text('Ana G', style: TextStyle(fontSize: 12)),
-                  Text('Hoy', style: TextStyle(fontSize: 12)),
+                  Text('Ticket #10594', style: _textoPequeno),
+                  Text('Ana G', style: _textoPequeno),
+                  Text('Hoy', style: _textoPequeno),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: _s),
               AppDropdown<String>(
                 initialValue: 'Consumidor final',
                 items: const [
@@ -183,15 +189,14 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: _m),
 
-        // 🛒 CARRITO
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade400, width: 1),
             borderRadius: BorderRadius.circular(6),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(_m),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
@@ -199,15 +204,15 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('CARRITO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                  Text('2 productos', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text('CARRITO', style: _etiqueta),
+                  Text('2 productos', style: _textoPequeno),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: _s),
               const Divider(height: 1),
-              const SizedBox(height: 12),
+              const SizedBox(height: _s),
               ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 280),
+                constraints: BoxConstraints(maxHeight: esPantallaAncha ? 320 : 200),
                 child: ListView(
                   shrinkWrap: true,
                   children: [
@@ -216,31 +221,30 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: _s),
               const Divider(height: 1),
-              const SizedBox(height: 12),
+              const SizedBox(height: _s),
               _buildFilaTotal('Subtotal', 950.00),
               _buildFilaTotal('Descuento', 0.00),
               _buildFilaTotal('ITBIS (18%)', 171.00),
-              const SizedBox(height: 12),
+              const SizedBox(height: _s),
               const Divider(height: 2, thickness: 2),
-              const SizedBox(height: 12),
+              const SizedBox(height: _s),
               _buildFilaTotal('TOTAL', 1121.00, esResaltado: true),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: _m),
 
-        // ⚙️ ACCIONES SECUNDARIAS
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade400, width: 1),
             borderRadius: BorderRadius.circular(6),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(_m),
           child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
+            spacing: _s,
+            runSpacing: _s,
             children: [
               AppButton(text: '% Descuento', icon: Icons.percent, onPressed: () {}),
               AppButton(text: 'Cotización', icon: Icons.description_outlined, onPressed: () {}),
@@ -249,29 +253,24 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: _m),
 
-        // 💰 TOTAL + BOTÓN COBRAR
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.blueAccent, width: 2),
             borderRadius: BorderRadius.circular(6),
             color: Colors.white,
           ),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(_l),
           child: Column(
             children: [
-              const Text('TOTAL A PAGAR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              const Text('RD\$ 1,121.00', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
-              const SizedBox(height: 16),
+              const Text('TOTAL A PAGAR', style: _etiqueta),
+              const SizedBox(height: _xs),
+              Text('RD\$ 1,121.00', style: _etiqueta.copyWith(color: Colors.blueAccent)),
+              const SizedBox(height: _m),
               SizedBox(
                 width: double.infinity,
-                child: AppButton(
-                  text: 'COBRAR',
-                  icon: Icons.payment,
-                  onPressed: () {},
-                ),
+                child: AppButton(text: 'COBRAR', icon: Icons.payment, onPressed: () {}),
               ),
             ],
           ),
@@ -281,12 +280,12 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
 
     if (esPantallaAncha) {
       return SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(_m),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(flex: 52, child: contenidoIzquierda),
-            const SizedBox(width: 16),
+            const SizedBox(width: _m),
             Expanded(flex: 48, child: contenidoDerecha),
           ],
         ),
@@ -294,41 +293,40 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(_m),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           contenidoIzquierda,
-          const SizedBox(height: 16),
+          const SizedBox(height: _m),
           contenidoDerecha,
         ],
       ),
     );
   }
 
-  // ✅ SINTAXIS CORREGIDA — todos los corchetes cerrados
   Widget _buildFilaCarrito(String nombre, int cantidad, double precio) {
     final subtotal = precio * cantidad;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: _xs / 2),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text(nombre, style: const TextStyle(fontSize: 13))),
-          Expanded(
+          Expanded(flex: 5, child: Text(nombre, style: _cuerpo)),
+          Flexible(
             flex: 4,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppButton(text: '-', onPressed: () {}),
-                const SizedBox(width: 4),
-                Text('$cantidad', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                const SizedBox(width: 4),
+                const SizedBox(width: _xs),
+                Text('$cantidad', style: _cuerpoResaltado),
+                const SizedBox(width: _xs),
                 AppButton(text: '+', onPressed: () {}),
               ],
             ),
           ),
-          Expanded(flex: 3, child: Text('RD\$ ${subtotal.toStringAsFixed(2)}', textAlign: TextAlign.right, style: const TextStyle(fontSize: 13))),
-          const SizedBox(width: 4),
+          Expanded(flex: 3, child: Text('RD\$ ${subtotal.toStringAsFixed(2)}', textAlign: TextAlign.right, style: _cuerpo)),
+          const SizedBox(width: _xs),
           AppButton(text: '✕', onPressed: () {}),
         ],
       ),
@@ -337,12 +335,12 @@ class _VentasPageState extends State<VentasPage> with SingleTickerProviderStateM
 
   Widget _buildFilaTotal(String etiqueta, double monto, {bool esResaltado = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: _xs / 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(etiqueta, style: esResaltado ? const TextStyle(fontSize: 14, fontWeight: FontWeight.bold) : const TextStyle(fontSize: 13)),
-          Text('RD\$ ${monto.toStringAsFixed(2)}', style: esResaltado ? const TextStyle(fontSize: 14, fontWeight: FontWeight.bold) : const TextStyle(fontSize: 13)),
+          Text(etiqueta, style: esResaltado ? _etiqueta : _cuerpo),
+          Text('RD\$ ${monto.toStringAsFixed(2)}', style: esResaltado ? _etiqueta : _cuerpo),
         ],
       ),
     );
