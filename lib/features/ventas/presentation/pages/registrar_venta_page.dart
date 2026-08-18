@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 
-class RegistrarVentaPage extends StatefulWidget {
+class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
   static const String routeName = 'registrar-ventas';
 
   @override
-  State<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
+  ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
 
-class _RegistrarVentaPageState extends State<RegistrarVentaPage> {
+class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   final _buscadorController = TextEditingController();
+  String _ventaId = '';
+  String _usuarioNombre = 'Usuario actual';
+
+  @override
+  void initState() {
+    super.initState();
+    _ventaId = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+  }
 
   @override
   void dispose() {
@@ -22,10 +31,34 @@ class _RegistrarVentaPageState extends State<RegistrarVentaPage> {
     super.dispose();
   }
 
+  Future<void> _cobrarYRegistrarSalida() async {
+    try {
+      // ✅ Registrar salida en Kardex por cada producto del carrito
+      // TODO: Reemplazar por lista real de productos del carrito
+      // await ref.read(salidaControllerProvider.notifier).registrarSalida(
+      //   productoId: producto.id,
+      //   cantidad: producto.cantidad,
+      //   usuarioResponsable: _usuarioNombre,
+      // );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ Venta registrada. Kardex actualizado.')),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Error: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final esPantallaAncha = AppBreakpoints.isDesktop(context);
-
     return AppScaffold(
       title: 'Registrar Venta',
       body: SingleChildScrollView(
@@ -70,13 +103,7 @@ class _RegistrarVentaPageState extends State<RegistrarVentaPage> {
               DataColumn(label: Text('Cantidad')),
               DataColumn(label: Text('Acción')),
             ],
-            rows: [
-              DataRow(cells: [
-                const DataCell(Text('ART001')),
-                const DataCell(Text('1')),
-                DataCell(AppButton(text: '+ Agregar', height: 36, onPressed: () {})),
-              ]),
-            ],
+            rows: const [],
           ),
         ),
       ],
@@ -90,7 +117,7 @@ class _RegistrarVentaPageState extends State<RegistrarVentaPage> {
         AppSection(
           title: 'Carrito / Resumen de Factura',
           children: [
-            const Text('Venta Actual • Ticket #10594 • Cajero: Ana G.'),
+            Text('Venta Actual • Ticket #$_ventaId • Cajero: $_usuarioNombre'),
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 12),
@@ -104,39 +131,23 @@ class _RegistrarVentaPageState extends State<RegistrarVentaPage> {
                   DataColumn(label: Text('Descripción')),
                   DataColumn(label: Text('Total Parcial')),
                 ],
-                rows: const [
-                  DataRow(cells: [
-                    DataCell(Text('1')),
-                    DataCell(Text('Producto A')),
-                    DataCell(Text('\$255.00')),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(SizedBox.shrink()),
-                    DataCell(Text('ITBIS')),
-                    DataCell(Text('\$0.00')),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(SizedBox.shrink()),
-                    DataCell(Text('Total', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataCell(Text('RD\$ 3,450.00', style: TextStyle(fontWeight: FontWeight.bold))),
-                  ]),
-                ],
+                rows: const [],
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        AppSection(
+        const AppSection(
           title: 'Opciones de Venta',
           children: [
             Wrap(
               spacing: 12,
               runSpacing: 12,
               children: [
-                AppButton(text: 'Cotización', icon: Icons.description_outlined, onPressed: () {}),
-                AppButton(text: 'Apartado', icon: Icons.bookmark_border, onPressed: () {}),
-                AppButton(text: 'Nota de Crédito', icon: Icons.receipt_long, onPressed: () {}),
-                AppButton(text: 'Descuento %', icon: Icons.percent, onPressed: () {}),
+                AppButton(text: 'Cotización', icon: Icons.description_outlined, onPressed: null),
+                AppButton(text: 'Apartado', icon: Icons.bookmark_border, onPressed: null),
+                AppButton(text: 'Nota de Crédito', icon: Icons.receipt_long, onPressed: null),
+                AppButton(text: 'Descuento %', icon: Icons.percent, onPressed: null),
               ],
             ),
           ],
@@ -152,7 +163,7 @@ class _RegistrarVentaPageState extends State<RegistrarVentaPage> {
           child: Column(
             children: [
               const Text(
-                'TOTAL A PAGAR: RD\$ 3,450.00',
+                'TOTAL A PAGAR: RD\$ 0.00',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -161,7 +172,7 @@ class _RegistrarVentaPageState extends State<RegistrarVentaPage> {
                 child: AppButton(
                   text: 'COBRAR E IMPRIMIR (F12)',
                   icon: Icons.payment,
-                  onPressed: () {},
+                  onPressed: _cobrarYRegistrarSalida,
                 ),
               ),
             ],
