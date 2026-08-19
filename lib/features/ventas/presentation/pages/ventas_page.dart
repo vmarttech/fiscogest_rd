@@ -10,6 +10,9 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/salida_providers.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 // =====================================================================
 // PANTALLA PRINCIPAL — MÓDULO DE VENTAS · SIN ERRORES
@@ -23,8 +26,10 @@ class VentasPage extends ConsumerStatefulWidget {
 
 class _VentasPageState extends ConsumerState<VentasPage> with SingleTickerProviderStateMixin {
   late final TabController _controladorPestanas;
-  String _ticketId = '';
-  String _clienteSeleccionado = 'Consumidor final';
+  String _numeroVenta = '';
+  int? _clienteSeleccionadoId;
+  String _clienteNombre = 'Consumidor final';
+  String _tipoPago = 'Efectivo';
   final List<ItemCarrito> _carrito = [];
   String _terminoBusqueda = '';
 
@@ -32,7 +37,7 @@ class _VentasPageState extends ConsumerState<VentasPage> with SingleTickerProvid
   void initState() {
     super.initState();
     _controladorPestanas = TabController(length: 4, vsync: this);
-    _ticketId = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    _numeroVenta = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
   }
 
   @override
@@ -59,10 +64,21 @@ class _VentasPageState extends ConsumerState<VentasPage> with SingleTickerProvid
   double get _itbis => _subtotal * 0.18;
   double get _total => _subtotal + _itbis;
 
-  void _cambiarCliente(String valor) {
-    if (valor != _clienteSeleccionado) {
-      setState(() => _clienteSeleccionado = valor);
-    }
+  List<DetalleVenta> get _detallesVenta {
+    return _carrito.map((item) => DetalleVenta(
+      productoId: item.producto.id!,
+      nombreProducto: item.producto.nombre,
+      cantidad: item.cantidad,
+      precioUnitario: item.precio,
+      subtotalLinea: item.precio * item.cantidad,
+    )).toList();
+  }
+
+  void _seleccionarCliente(int? clienteId, String nombre) {
+    setState(() {
+      _clienteSeleccionadoId = clienteId;
+      _clienteNombre = nombre;
+    });
   }
 
   void _agregarAlCarrito(Producto producto) {
@@ -108,7 +124,7 @@ class _VentasPageState extends ConsumerState<VentasPage> with SingleTickerProvid
     });
   }
 
-  Future<void> _cobrarYRegistrarSalida() async {
+  Future<void> _cobrarYRegistrarVenta() async {
     if (_carrito.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -119,22 +135,41 @@ class _VentasPageState extends ConsumerState<VentasPage> with SingleTickerProvid
     }
 
     try {
+      // ✅ Garantizar valor NO nulo para clienteId
+      final int clienteId = _clienteSeleccionadoId ?? 0;
+
+      final venta = Venta(
+        numero: _numeroVenta,
+        clienteId: clienteId,
+        fecha: DateTime.now(),
+        detalles: _detallesVenta,
+        subtotal: _subtotal,
+        itbis: _itbis,
+        total: _total,
+        tipoPago: _tipoPago,
+      );
+
+      final orquestador = ref.read(ventaOrquestadorServiceProvider);
+      final ventaRegistrada = await orquestador.ejecutarVentaCompleta(venta);
+
       for (final item in _carrito) {
         await ref.read(salidaControllerProvider.notifier).registrarSalida(
           productoId: item.producto.id!,
           cantidad: item.cantidad,
-          motivo: 'Venta',
+          motivo: 'Venta — N° $_numeroVenta',
           usuario: 'Usuario actual',
         );
       }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Venta registrada. Kardex actualizado.'), backgroundColor: Colors.green),
+          SnackBar(content: Text('✅ Venta N° ${ventaRegistrada.numero} registrada. Kardex actualizado.'), backgroundColor: Colors.green),
         );
         setState(_carrito.clear);
         setState(() {
-          _ticketId = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+          _numeroVenta = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+          _clienteSeleccionadoId = null;
+          _clienteNombre = 'Consumidor final';
         });
       }
     } catch (e) {
@@ -467,49 +502,86 @@ class _TarjetaProductoMovil extends StatelessWidget {
 }
 
 // =====================================================================
-// PANEL CARRITO — Conectado al carrito local + Kardex
+// PANEL CARRITO — LÍNEA 352 CORREGIDA
 // =====================================================================
 class _PanelCarrito extends ConsumerWidget {
   const _PanelCarrito();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final padre = context.findAncestorStateOfType<_VentasPageState>();
-    final ticketId = padre?._ticketId ?? '';
-    final clienteSeleccionado = padre?._clienteSeleccionado ?? 'Consumidor final';
+    final numeroVenta = padre?._numeroVenta ?? '';
+    final clienteNombre = padre?._clienteNombre ?? 'Consumidor final';
+    final clienteSeleccionadoId = padre?._clienteSeleccionadoId;
+    final tipoPago = padre?._tipoPago ?? 'Efectivo';
     final carrito = padre?._carrito ?? <ItemCarrito>[];
     final subtotal = padre?._subtotal ?? 0.0;
     final itbis = padre?._itbis ?? 0.0;
     final total = padre?._total ?? 0.0;
-    final cambiarCliente = padre?._cambiarCliente;
-    final cobrar = padre?._cobrarYRegistrarSalida;
+    final seleccionarCliente = padre?._seleccionarCliente;
+    final cobrar = padre?._cobrarYRegistrarVenta;
     final modificar = padre?._modificarCantidad;
     final eliminar = padre?._eliminarDelCarrito;
+
+    final listaClientes = ref.watch(clientesControllerProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Text('Resumen de Venta', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.xs),
-        Text('Información del ticket, cliente y artículos', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+        Text('Información del comprobante, cliente y artículos', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
         const SizedBox(height: AppSpacing.m),
 
         _TarjetaProfesional(
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              _DatoTicket(etiqueta: 'TICKET', valor: '#$ticketId', icono: Icons.receipt_outlined),
-              _DatoTicket(etiqueta: 'CLIENTE', valor: clienteSeleccionado, icono: Icons.person_outline),
+              _DatoTicket(etiqueta: 'N° VENTA', valor: numeroVenta, icono: Icons.receipt_outlined),
+              _DatoTicket(etiqueta: 'CLIENTE', valor: clienteNombre, icono: Icons.person_outline),
               const _DatoTicket(etiqueta: 'FECHA', valor: 'Hoy', icono: Icons.calendar_today_outlined),
             ]),
             const SizedBox(height: AppSpacing.m),
+            listaClientes.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Text('No se pudo cargar clientes: $e', style: AppTypography.bodySmall.copyWith(color: AppColors.error)),
+              data: (clientes) {
+                final items = <DropdownMenuItem<int?>>[
+                  const DropdownMenuItem<int?>(value: null, child: Text('Consumidor final')),
+                  ...clientes.map((c) => DropdownMenuItem<int?>(
+                    value: c.id,
+                    child: Text(c.nombre),
+                  )),
+                ];
+                return AppDropdown<int?>(
+                  initialValue: clienteSeleccionadoId,
+                  items: items,
+                  onChanged: (valor) {
+                    if (seleccionarCliente != null) {
+                      // ✅ LÍNEA 352 CORREGIDA: ELIMINADO operador ?? redundante
+                      final String nombre;
+                      if (valor != null) {
+                        nombre = clientes.firstWhere((c) => c.id == valor).nombre;
+                      } else {
+                        nombre = 'Consumidor final';
+                      }
+                      seleccionarCliente(valor, nombre);
+                    }
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: AppSpacing.m),
             AppDropdown<String>(
-              initialValue: clienteSeleccionado,
+              initialValue: tipoPago,
               items: const [
-                DropdownMenuItem(value: 'Consumidor final', child: Text('Consumidor final')),
-                DropdownMenuItem(value: 'buscar', child: Text('Buscar cliente registrado')),
-                DropdownMenuItem(value: 'nuevo', child: Text('Registrar nuevo cliente')),
+                DropdownMenuItem(value: 'Efectivo', child: Text('Efectivo')),
+                DropdownMenuItem(value: 'Tarjeta', child: Text('Tarjeta')),
+                DropdownMenuItem(value: 'Transferencia', child: Text('Transferencia')),
+                DropdownMenuItem(value: 'Crédito', child: Text('Crédito')),
               ],
               onChanged: (valor) {
-                if (cambiarCliente != null && valor != null) cambiarCliente(valor);
+                if (valor != null && padre != null) {
+                  padre._tipoPago = valor;
+                }
               },
             ),
           ]),
@@ -588,7 +660,7 @@ class _PanelCarrito extends ConsumerWidget {
 }
 
 // =====================================================================
-// COMPONENTE: DATO DEL TICKET
+// COMPONENTE: DATO DEL COMPROBANTE
 // =====================================================================
 class _DatoTicket extends StatelessWidget {
   const _DatoTicket({required this.etiqueta, required this.valor, required this.icono});
