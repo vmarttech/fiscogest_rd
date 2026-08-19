@@ -15,7 +15,6 @@ class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
     int? usuarioId,
   }) async {
     final query = select(ventasTable);
-
     if (desde != null) {
       query.where((VentasTable t) => t.fecha.isBiggerOrEqualValue(desde));
     }
@@ -28,9 +27,7 @@ class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
     if (usuarioId != null) {
       query.where((VentasTable t) => t.usuarioId.equals(usuarioId));
     }
-
     query.orderBy([(VentasTable t) => OrderingTerm(expression: t.fecha, mode: OrderingMode.desc)]);
-
     final List<VentaData> resultados = await query.get();
     return resultados.map((VentaData v) => v.toJson()).toList();
   }
@@ -46,5 +43,17 @@ class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
 
   Future<int> eliminarVenta(int ventaId) async {
     return await (delete(ventasTable)..where((VentasTable t) => t.id.equals(ventaId))).go();
+  }
+
+  Future<VentaData?> buscarPorId(int ventaId) async {
+    final consulta = select(ventasTable)
+      ..where((t) => t.id.equals(ventaId));
+    return consulta.getSingleOrNull();
+  }
+
+  Future<List<VentaDetalleData>> listarDetallePorVenta(int ventaId) async {
+    final consulta = select(ventasDetalleTable)
+      ..where((t) => t.ventaId.equals(ventaId));
+    return consulta.get();
   }
 }

@@ -169,8 +169,29 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Devolucion> registrarDevolucion(Devolucion devolucion) async {
-    throw UnimplementedError(
-      'DevolucionesDao: método insertarDevolucion aún no implementado.'
+    final estadoEnum = DevolucionEstado.values.byName(devolucion.estado);
+    final companion = DevolucionesTableCompanion(
+      ventaId: Value(devolucion.ventaId),
+      fecha: Value(devolucion.fecha),
+      motivo: Value(devolucion.motivo),
+      tipo: const Value(DevolucionTipo.parcial),
+      montoDevuelto: Value(devolucion.montoReembolsado),
+      estado: Value(estadoEnum),
+      afectaInventario: const Value(true),
+      afectaCaja: const Value(true),
+    );
+    final idGenerado = await devolucionesDao.insertarDevolucion(companion);
+    return Devolucion(
+      id: idGenerado,
+      numero: devolucion.numero,
+      ventaId: devolucion.ventaId,
+      productoId: devolucion.productoId,
+      cantidadDevuelta: devolucion.cantidadDevuelta,
+      montoReembolsado: devolucion.montoReembolsado,
+      motivo: devolucion.motivo,
+      fecha: devolucion.fecha,
+      estado: estadoEnum.name,
+      createdAt: devolucion.createdAt ?? DateTime.now(),
     );
   }
 
@@ -247,7 +268,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   @override
   Future<void> actualizarEnCascada(int ventaId) async {
     throw UnimplementedError(
-      'Actualización en cascada: lógica pendiente según reglas de negocio.'
+      'Actualización en cascada: requiere definir lógica de inventario, kardex, saldos y estadísticas tras registrar venta.'
     );
   }
 }
