@@ -118,9 +118,26 @@ class VentasRepositoryImpl implements IVentasRepository {
     if (cotizacion == null) {
       throw Exception('Cotización con ID $cotizacionId no encontrada');
     }
-    throw UnimplementedError(
-      'Agregar en CotizacionesDao: Future<void> marcarConvertida(int cotizacionId, int ventaId). '
-      'Una vez exista, inserta la venta, llama al método y retorna la instancia Venta.'
+    final ventaCompanion = VentasTableCompanion(
+      clienteId: Value(cotizacion.clienteId),
+      fecha: Value(DateTime.now()),
+      montoTotal: Value(cotizacion.montoTotal),
+    );
+    final ventaId = await ventasDao.insertarVenta(ventaCompanion);
+    await cotizacionesDao.marcarComoConvertida(cotizacionId, ventaId);
+    return Venta(
+      id: ventaId,
+      numero: 'V-$ventaId',
+      clienteId: cotizacion.clienteId,
+      fecha: DateTime.now(),
+      detalles: const [],
+      subtotal: cotizacion.montoTotal * 0.84,
+      itbis: cotizacion.montoTotal * 0.16,
+      total: cotizacion.montoTotal,
+      tipoPago: '',
+      esCredito: false,
+      cotizacionOrigenId: cotizacionId,
+      createdAt: DateTime.now(),
     );
   }
 
@@ -153,8 +170,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   @override
   Future<Devolucion> registrarDevolucion(Devolucion devolucion) async {
     throw UnimplementedError(
-      'DevolucionesDao: método insertarDevolucion aún no implementado. '
-      'Agregar al DAO: Future<int> insertarDevolucion(DevolucionesTableCompanion data).'
+      'DevolucionesDao: método insertarDevolucion aún no implementado.'
     );
   }
 
@@ -183,45 +199,55 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<double> consultarSaldoCliente(int clienteId) async {
-    throw UnimplementedError(
-      'CuentasCobrarDao no implementa consultar saldo por cliente. '
-      'Agregar: Future<double?> obtenerSaldoPorCliente(int clienteId).'
-    );
+    final saldo = await cuentasCobrarDao.obtenerSaldoPorCliente(clienteId);
+    return saldo ?? 0.0;
   }
 
   @override
   Future<List<Descuento>> obtenerDescuentosActivos() async {
-    throw UnimplementedError(
-      'DescuentosDao: método listarDescuentosActivos aún no implementado.'
-    );
+    final datos = await descuentosDao.listarDescuentosActivos();
+    return datos.map((d) => Descuento(
+      id: d.id,
+      nombre: d.nombre,
+      tipo: d.tipo.name,
+      valor: d.valor,
+      aplicaA: d.aplicaA.name,
+      referenciaId: d.referenciaId,
+      vigenciaDesde: d.vigenciaDesde,
+      vigenciaHasta: d.vigenciaHasta,
+      estado: d.estado.name,
+    )).toList();
   }
 
   @override
   Future<List<Oferta>> obtenerOfertasActivas() async {
-    throw UnimplementedError(
-      'OfertasDao: método listarOfertasActivas aún no implementado.'
-    );
+    final datos = await ofertasDao.listarOfertasActivas();
+    return datos.map((o) => Oferta(
+      id: o.id,
+      nombre: o.nombre,
+      productoId: o.productoId,
+      cantidadMinima: o.cantidadMinima,
+      precioOferta: o.precioOferta,
+      vigenciaDesde: o.vigenciaDesde,
+      vigenciaHasta: o.vigenciaHasta,
+      estado: o.estado.name,
+    )).toList();
   }
 
   @override
   Future<bool> aplicarDescuento(int ventaId, int descuentoId) async {
-    throw UnimplementedError(
-      'DescuentosDao: método aplicarDescuento aún no implementado.'
-    );
+    return descuentosDao.aplicarDescuento(ventaId, descuentoId);
   }
 
   @override
   Future<bool> validarOferta(int ofertaId, double montoCompra) async {
-    throw UnimplementedError(
-      'OfertasDao: método validarOferta aún no implementado.'
-    );
+    return ofertasDao.validarOferta(ofertaId, montoCompra);
   }
 
   @override
   Future<void> actualizarEnCascada(int ventaId) async {
     throw UnimplementedError(
-      'Actualización en cascada: lógica pendiente. '
-      'Implementar: actualizar inventario, kardex, saldos y estadísticas tras registrar venta.'
+      'Actualización en cascada: lógica pendiente según reglas de negocio.'
     );
   }
 }

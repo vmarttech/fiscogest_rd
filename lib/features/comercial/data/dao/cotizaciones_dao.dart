@@ -11,7 +11,6 @@ class CotizacionesDao extends DatabaseAccessor<AppDatabase> with _$CotizacionesD
   Future<List<Map<String, dynamic>>> listarCotizaciones() async {
     final query = select(cotizacionesTable)
       ..orderBy([(CotizacionesTable t) => OrderingTerm(expression: t.fechaEmision, mode: OrderingMode.desc)]);
-
     final List<CotizacionData> resultados = await query.get();
     return resultados.map((CotizacionData c) {
       final json = c.toJson();
