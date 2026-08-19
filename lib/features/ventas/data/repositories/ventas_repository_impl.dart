@@ -15,7 +15,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_dao.dart';
 
 class VentasRepositoryImpl implements IVentasRepository {
-
   VentasRepositoryImpl({
     required this.ventasDao,
     required this.cotizacionesDao,
@@ -25,6 +24,7 @@ class VentasRepositoryImpl implements IVentasRepository {
     required this.descuentosDao,
     required this.ofertasDao,
   });
+
   final VentasDao ventasDao;
   final CotizacionesDao cotizacionesDao;
   final ApartadosDao apartadosDao;
@@ -41,6 +41,16 @@ class VentasRepositoryImpl implements IVentasRepository {
     int? usuarioId,
   }) async {
     throw UnimplementedError('listarVentas: Consultar ventas filtradas por rango, cliente y usuario');
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listarCotizaciones() async {
+    throw UnimplementedError('listarCotizaciones: Consultar todas las cotizaciones desde cotizacionesDao');
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listarApartados() async {
+    throw UnimplementedError('listarApartados: Consultar todos los apartados desde apartadosDao');
   }
 
   @override

@@ -11,6 +11,9 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/item_carrito.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/vistas.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_ventas.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_cotizaciones.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_apartados.dart';
 
 class VentasPage extends ConsumerStatefulWidget {
   const VentasPage({super.key});
@@ -19,7 +22,6 @@ class VentasPage extends ConsumerStatefulWidget {
   ConsumerState<VentasPage> createState() => VentasPageState();
 }
 
-// ✅ QUITADO EL GUION BAJO → clase pública accesible desde widgets hermanos
 class VentasPageState extends ConsumerState<VentasPage> with SingleTickerProviderStateMixin {
   late final TabController controladorPestanas;
   String numeroVenta = '';
@@ -212,9 +214,9 @@ class VentasPageState extends ConsumerState<VentasPage> with SingleTickerProvide
                   controller: controladorPestanas,
                   children: [
                     esPantallaAncha ? const VistaEscritorio() : const VistaMovil(),
-                    const Center(child: Text('Cotizaciones — En construcción', style: AppTypography.bodyLarge)),
-                    const Center(child: Text('Apartados — En construcción', style: AppTypography.bodyLarge)),
-                    const Center(child: Text('Historial de Ventas — En construcción', style: AppTypography.bodyLarge)),
+                    const HistorialCotizaciones(),
+                    const HistorialApartados(),
+                    const HistorialVentas(),
                   ],
                 );
               },

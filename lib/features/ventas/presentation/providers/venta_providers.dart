@@ -31,3 +31,27 @@ final ventaOrquestadorServiceProvider = Provider<VentaOrquestadorService>((ref) 
     actualizarEnCascada: actualizarEnCascada,
   );
 });
+
+/// ============================================================
+/// Historial de Ventas
+/// ============================================================
+final listaVentasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
+  return repositorio.listarVentas();
+});
+
+/// ============================================================
+/// Historial de Cotizaciones
+/// ============================================================
+final listaCotizacionesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
+  return repositorio.listarCotizaciones();
+});
+
+/// ============================================================
+/// Historial de Apartados
+/// ============================================================
+final listaApartadosProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
+  return repositorio.listarApartados();
+});
