@@ -14,14 +14,11 @@ class RegistrarVentaPage extends ConsumerStatefulWidget {
 
 class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   final TextEditingController _buscadorController = TextEditingController();
-  String _ventaNumero = '';
   bool _cargando = false;
 
   @override
   void initState() {
     super.initState();
-    _ventaNumero =
-        DateTime.now().millisecondsSinceEpoch.toString().substring(8);
   }
 
   @override
@@ -46,7 +43,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     setState(() => _cargando = true);
     try {
       final venta = Venta(
-        numero: _ventaNumero,
+        numero: estado.numero,
         clienteId: (estado.clienteId ?? 0),
         fecha: DateTime.now(),
         detalles: estado.detalles,
@@ -200,6 +197,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   }
 
   Widget _buildNumeroVenta() {
+    final estadoLocal = ref.watch(registrarVentaProvider);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 14,
@@ -226,7 +224,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           ),
           const SizedBox(height: 2),
           Text(
-            _ventaNumero,
+            estadoLocal.numero,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -501,7 +499,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         _buildDatoFila(
           icono: Icons.confirmation_number_outlined,
           titulo: 'Número de venta',
-          valor: _ventaNumero,
+          valor: estadoLocal.numero,
         ),
         const SizedBox(height: 10),
         _buildDatoFila(
