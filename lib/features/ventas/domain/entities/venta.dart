@@ -3,6 +3,7 @@ class Venta {
     this.id,
     required this.numero,
     required this.clienteId,
+    required this.usuarioId,
     required this.fecha,
     required this.detalles,
     required this.subtotal,
@@ -19,6 +20,7 @@ class Venta {
   final int? id;
   final String numero;
   final int clienteId;
+  final int usuarioId;
   final DateTime fecha;
   final List<DetalleVenta> detalles;
   final double subtotal;

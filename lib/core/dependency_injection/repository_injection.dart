@@ -12,9 +12,11 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart
 import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/existencias_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/salidas_dao.dart';
 
 class RepositoryInjection {
-
   RepositoryInjection._({
     required this.ventasRepository,
     required this.apartadoRepository,
@@ -22,6 +24,7 @@ class RepositoryInjection {
     required this.devolucionRepository,
     required this.cajaRepository,
   });
+
   static RepositoryInjection? _instance;
 
   static RepositoryInjection get instance {
@@ -38,7 +41,6 @@ class RepositoryInjection {
   final CajaRepositoryImpl cajaRepository;
 
   static Future<RepositoryInjection> initialize(AppDatabase db) async {
-
     final ventasDao = VentasDao(db);
     final cotizacionesDao = CotizacionesDao(db);
     final apartadosDao = ApartadosDao(db);
@@ -47,6 +49,9 @@ class RepositoryInjection {
     final descuentosDao = DescuentosDao(db);
     final ofertasDao = OfertasDao(db);
     final cajaMovimientosDao = CajaMovimientosDao(db);
+    final productosDao = ProductosDao(db);
+    final existenciasDao = ExistenciasDao(db);
+    final salidasDao = SalidasDao(db);
 
     final ventasRepository = VentasRepositoryImpl(
       ventasDao: ventasDao,
@@ -56,6 +61,9 @@ class RepositoryInjection {
       cuentasCobrarDao: cuentasCobrarDao,
       descuentosDao: descuentosDao,
       ofertasDao: ofertasDao,
+      productosDao: productosDao,
+      existenciasDao: existenciasDao,
+      salidasDao: salidasDao,
     );
 
     final apartadoRepository = ApartadoRepositoryImpl(

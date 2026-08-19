@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/navigation/app_router.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
@@ -125,9 +126,13 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   }
 }
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
+
+  // ✅ INICIALIZAR REPOSITORIOS — FALTABA ESTA LÍNEA
+  await RepositoryInjection.initialize(db);
+
   final InventarioRepositoryInterface inventarioRepo = _InventarioRepositoryAdapter(db);
   final InventarioFisicoRepositoryInterface inventarioFisicoRepo = InventarioFisicoRepositoryImpl(db);
   final AjusteInventarioRepository ajusteInventarioRepo = AjusteInventarioRepositoryImpl(db);

@@ -8,6 +8,9 @@ import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/existencias_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/salidas_dao.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/cotizacion.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
@@ -26,6 +29,9 @@ class VentasRepositoryImpl implements IVentasRepository {
     required this.cuentasCobrarDao,
     required this.descuentosDao,
     required this.ofertasDao,
+    required this.productosDao,
+    required this.existenciasDao,
+    required this.salidasDao,
   });
 
   final VentasDao ventasDao;
@@ -35,6 +41,9 @@ class VentasRepositoryImpl implements IVentasRepository {
   final CuentasCobrarDao cuentasCobrarDao;
   final DescuentosDao descuentosDao;
   final OfertasDao ofertasDao;
+  final ProductosDao productosDao;
+  final ExistenciasDao existenciasDao;
+  final SalidasDao salidasDao;
 
   @override
   Future<List<Map<String, dynamic>>> listarVentas({
@@ -63,16 +72,27 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta> registrarVenta(Venta venta) async {
+    final formaPagoEnum = FormaPago.values.firstWhere(
+      (e) => e.name == venta.tipoPago || e.name.toLowerCase() == venta.tipoPago.toLowerCase(),
+      orElse: () => FormaPago.efectivo,
+    );
+
     final companion = VentasTableCompanion(
       clienteId: Value(venta.clienteId),
+      usuarioId: Value(venta.usuarioId),
       fecha: Value(venta.fecha),
+      montoSubtotal: Value(venta.subtotal),
+      itbis: Value(venta.itbis),
       montoTotal: Value(venta.total),
+      formaPago: Value(formaPagoEnum),
     );
+
     final idGenerado = await ventasDao.insertarVenta(companion);
     return Venta(
       id: idGenerado,
       numero: venta.numero,
       clienteId: venta.clienteId,
+      usuarioId: venta.usuarioId,
       fecha: venta.fecha,
       detalles: venta.detalles,
       subtotal: venta.subtotal,
@@ -93,6 +113,8 @@ class VentasRepositoryImpl implements IVentasRepository {
       clienteId: Value(cotizacion.clienteId),
       fechaEmision: Value(cotizacion.fechaEmision),
       fechaVigencia: Value(cotizacion.fechaVencimiento),
+      montoSubtotal: Value(cotizacion.subtotal),
+      itbis: Value(cotizacion.itbis),
       montoTotal: Value(cotizacion.total),
     );
     final idGenerado = await cotizacionesDao.insertarCotizacion(companion);
@@ -120,8 +142,12 @@ class VentasRepositoryImpl implements IVentasRepository {
     }
     final ventaCompanion = VentasTableCompanion(
       clienteId: Value(cotizacion.clienteId),
+      usuarioId: const Value.absent(),
       fecha: Value(DateTime.now()),
+      montoSubtotal: Value(cotizacion.montoTotal * 0.84),
+      itbis: Value(cotizacion.montoTotal * 0.16),
       montoTotal: Value(cotizacion.montoTotal),
+      formaPago: const Value(FormaPago.efectivo),
     );
     final ventaId = await ventasDao.insertarVenta(ventaCompanion);
     await cotizacionesDao.marcarComoConvertida(cotizacionId, ventaId);
@@ -129,12 +155,13 @@ class VentasRepositoryImpl implements IVentasRepository {
       id: ventaId,
       numero: 'V-$ventaId',
       clienteId: cotizacion.clienteId,
+      usuarioId: 0,
       fecha: DateTime.now(),
       detalles: const [],
       subtotal: cotizacion.montoTotal * 0.84,
       itbis: cotizacion.montoTotal * 0.16,
       total: cotizacion.montoTotal,
-      tipoPago: '',
+      tipoPago: 'efectivo',
       esCredito: false,
       cotizacionOrigenId: cotizacionId,
       createdAt: DateTime.now(),
@@ -267,8 +294,30 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<void> actualizarEnCascada(int ventaId) async {
-    throw UnimplementedError(
-      'Actualización en cascada: requiere definir lógica de inventario, kardex, saldos y estadísticas tras registrar venta.'
-    );
+    final venta = await ventasDao.buscarPorId(ventaId);
+    if (venta == null) throw Exception('Venta no encontrada');
+
+    final detalle = await ventasDao.listarDetallePorVenta(ventaId);
+
+    for (final linea in detalle) {
+      await productosDao.descontarStock(linea.productoId, linea.cantidad);
+      await existenciasDao.descontarExistencia(linea.productoId, linea.cantidad);
+      await salidasDao.registrarSalida(
+        productoId: linea.productoId,
+        cantidad: linea.cantidad,
+        motivo: 'Venta',
+      );
+    }
+
+    final esCredito = venta.formaPago == FormaPago.credito;
+    if (esCredito) {
+      final fechaVencimiento = venta.fecha.add(const Duration(days: 30));
+      await cuentasCobrarDao.crearCuentaPorVenta(
+        clienteId: venta.clienteId,
+        ventaId: ventaId,
+        montoOriginal: venta.montoTotal,
+        fechaVencimiento: fechaVencimiento,
+      );
+    }
   }
 }
