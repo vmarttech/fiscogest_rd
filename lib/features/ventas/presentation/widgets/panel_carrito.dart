@@ -65,11 +65,22 @@ class PanelCarrito extends ConsumerWidget {
             _buildFilaTotal('Subtotal', estado.subtotal),
             const SizedBox(height: 6),
             _buildFilaTotal('ITBIS (16%)', estado.itbis),
-            const SizedBox(height: 10),
+            const SizedBox(height: 14),
             Container(
-              padding: const EdgeInsets.only(top: 10),
-              decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0xFFE3E6EA)))),
-              child: _buildFilaTotal('TOTAL', estado.total, esResaltado: true),
+              padding: const EdgeInsets.only(top: 14),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: Color(0xFFE3E6EA))),
+              ),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text('TOTAL',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF20242A))),
+                  ),
+                  Text('RD\$ ${estado.total.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: Color(0xFF1565C0))),
+                ],
+              ),
             ),
           ],
         ),
@@ -77,18 +88,14 @@ class PanelCarrito extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilaTotal(String etiqueta, double valor, {bool esResaltado = false}) {
+  Widget _buildFilaTotal(String etiqueta, double valor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(etiqueta,
-            style: TextStyle(fontSize: esResaltado ? 15 : 13,
-                fontWeight: esResaltado ? FontWeight.w700 : FontWeight.w500,
-                color: esResaltado ? const Color(0xFF20242A) : const Color(0xFF495057))),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF495057))),
         Text('RD\$ ${valor.toStringAsFixed(2)}',
-            style: TextStyle(fontSize: esResaltado ? 17 : 14,
-                fontWeight: esResaltado ? FontWeight.w800 : FontWeight.w600,
-                color: esResaltado ? const Color(0xFF1565C0) : const Color(0xFF212529))),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF343A40))),
       ],
     );
   }
