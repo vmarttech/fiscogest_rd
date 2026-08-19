@@ -5,6 +5,8 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
@@ -16,13 +18,13 @@ class RegistrarVentaPage extends ConsumerStatefulWidget {
 
 class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   final _buscadorController = TextEditingController();
-  String _ventaId = '';
-  String _usuarioNombre = 'Usuario actual';
+  String _ventaNumero = '';
+  bool _cargando = false;
 
   @override
   void initState() {
     super.initState();
-    _ventaId = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    _ventaNumero = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
   }
 
   @override
@@ -32,18 +34,27 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   }
 
   Future<void> _cobrarYRegistrarSalida() async {
+    setState(() => _cargando = true);
     try {
-      // ✅ Registrar salida en Kardex por cada producto del carrito
-      // TODO: Reemplazar por lista real de productos del carrito
-      // await ref.read(salidaControllerProvider.notifier).registrarSalida(
-      //   productoId: producto.id,
-      //   cantidad: producto.cantidad,
-      //   usuarioResponsable: _usuarioNombre,
-      // );
+      final venta = Venta(
+        numero: _ventaNumero,
+        clienteId: 1,
+        fecha: DateTime.now(),
+        detalles: const [],
+        subtotal: 0.0,
+        itbis: 0.0,
+        total: 0.0,
+        tipoPago: '',
+        esCredito: false,
+        createdAt: DateTime.now(),
+      );
+
+      final casoUso = ref.read(registrarVentaUseCaseProvider);
+      final ventaGuardada = await casoUso(venta);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Venta registrada. Kardex actualizado.')),
+          SnackBar(content: Text('✅ Venta registrada. ID: ${ventaGuardada.id}')),
         );
         Navigator.of(context).pop();
       }
@@ -53,12 +64,15 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           SnackBar(content: Text('❌ Error: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _cargando = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final esPantallaAncha = AppBreakpoints.isDesktop(context);
+
     return AppScaffold(
       title: 'Registrar Venta',
       body: SingleChildScrollView(
@@ -111,72 +125,19 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   }
 
   Widget _buildZonaDerecha() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return AppSection(
+      title: 'Resumen de Venta',
       children: [
-        AppSection(
-          title: 'Carrito / Resumen de Factura',
-          children: [
-            Text('Venta Actual • Ticket #$_ventaId • Cajero: $_usuarioNombre'),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columnSpacing: 12,
-                horizontalMargin: 4,
-                columns: const [
-                  DataColumn(label: Text('Cant.')),
-                  DataColumn(label: Text('Descripción')),
-                  DataColumn(label: Text('Total Parcial')),
-                ],
-                rows: const [],
-              ),
-            ),
-          ],
-        ),
+        Text('Venta N°: $_ventaNumero', style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        const Text('Items: 0'),
+        const Text('Subtotal: RD\$ 0.00'),
+        const Text('ITBIS: RD\$ 0.00'),
+        const Text('TOTAL: RD\$ 0.00', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-        const AppSection(
-          title: 'Opciones de Venta',
-          children: [
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                AppButton(text: 'Cotización', icon: Icons.description_outlined, onPressed: null),
-                AppButton(text: 'Apartado', icon: Icons.bookmark_border, onPressed: null),
-                AppButton(text: 'Nota de Crédito', icon: Icons.receipt_long, onPressed: null),
-                AppButton(text: 'Descuento %', icon: Icons.percent, onPressed: null),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Column(
-            children: [
-              const Text(
-                'TOTAL A PAGAR: RD\$ 0.00',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  text: 'COBRAR E IMPRIMIR (F12)',
-                  icon: Icons.payment,
-                  onPressed: _cobrarYRegistrarSalida,
-                ),
-              ),
-            ],
-          ),
+        AppButton(
+          text: _cargando ? 'Guardando...' : '✅ Cobrar y Registrar Salida',
+          onPressed: _cargando ? null : _cobrarYRegistrarSalida,
         ),
       ],
     );

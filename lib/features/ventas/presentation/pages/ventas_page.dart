@@ -1,228 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
-import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
-import 'package:fiscogest_rd/features/inventario/presentation/providers/salida_providers.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/core/ui/app_section.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/item_carrito.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/vistas.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_ventas.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_cotizaciones.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_apartados.dart';
 
 class VentasPage extends ConsumerStatefulWidget {
   const VentasPage({super.key});
   static const String routeName = 'ventas';
+
   @override
-  ConsumerState<VentasPage> createState() => VentasPageState();
+  ConsumerState<VentasPage> createState() => _VentasPageState();
 }
 
-class VentasPageState extends ConsumerState<VentasPage> with SingleTickerProviderStateMixin {
-  late final TabController controladorPestanas;
-  String numeroVenta = '';
-  int? clienteSeleccionadoId;
-  String clienteNombre = 'Consumidor final';
-  String tipoPago = 'Efectivo';
-  final List<ItemCarrito> carrito = [];
-  String terminoBusqueda = '';
-
-  @override
-  void initState() {
-    super.initState();
-    controladorPestanas = TabController(length: 4, vsync: this);
-    numeroVenta = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
-  }
+class _VentasPageState extends ConsumerState<VentasPage> {
+  final _buscadorController = TextEditingController();
 
   @override
   void dispose() {
-    controladorPestanas.dispose();
+    _buscadorController.dispose();
     super.dispose();
-  }
-
-  List<Producto> get productosFiltrados {
-    final todos = ref.watch(productoControllerProvider).value ?? <Producto>[];
-    if (terminoBusqueda.trim().isEmpty) return todos;
-    final busqueda = terminoBusqueda.toLowerCase();
-    return todos.where((Producto p) =>
-      p.nombre.toLowerCase().contains(busqueda) ||
-      p.codigo.toLowerCase().contains(busqueda) ||
-      (p.codigoBarras?.toLowerCase().contains(busqueda) ?? false)
-    ).toList();
-  }
-
-  double get subtotal {
-    return carrito.fold(0.0, (sum, item) => sum + (item.precio * item.cantidad));
-  }
-
-  double get itbis => subtotal * 0.18;
-  double get total => subtotal + itbis;
-
-  List<DetalleVenta> get detallesVenta {
-    return carrito.map((item) => DetalleVenta(
-      productoId: item.producto.id!,
-      nombreProducto: item.producto.nombre,
-      cantidad: item.cantidad,
-      precioUnitario: item.precio,
-      subtotalLinea: item.precio * item.cantidad,
-    )).toList();
-  }
-
-  void seleccionarCliente(int? clienteId, String nombre) {
-    setState(() {
-      clienteSeleccionadoId = clienteId;
-      clienteNombre = nombre;
-    });
-  }
-
-  void agregarAlCarrito(Producto producto) {
-    setState(() {
-      final indice = carrito.indexWhere((item) => item.producto.id == producto.id);
-      if (indice >= 0) {
-        carrito[indice] = ItemCarrito(
-          producto: producto,
-          cantidad: carrito[indice].cantidad + 1.0,
-          precio: carrito[indice].precio,
-        );
-      } else {
-        carrito.add(ItemCarrito(
-          producto: producto,
-          cantidad: 1.0,
-          precio: producto.precioVenta,
-        ));
-      }
-    });
-  }
-
-  void modificarCantidad(int productoId, double delta) {
-    setState(() {
-      final indice = carrito.indexWhere((item) => item.producto.id == productoId);
-      if (indice >= 0) {
-        final nueva = carrito[indice].cantidad + delta;
-        if (nueva < 1.0) {
-          carrito.removeAt(indice);
-        } else {
-          carrito[indice] = ItemCarrito(
-            producto: carrito[indice].producto,
-            cantidad: nueva,
-            precio: carrito[indice].precio,
-          );
-        }
-      }
-    });
-  }
-
-  void eliminarDelCarrito(int productoId) {
-    setState(() {
-      carrito.removeWhere((item) => item.producto.id == productoId);
-    });
-  }
-
-  Future<void> cobrarYRegistrarVenta() async {
-    if (carrito.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⚠️ Agregue productos al carrito antes de cobrar')),
-        );
-      }
-      return;
-    }
-
-    try {
-      final int clienteId = clienteSeleccionadoId ?? 0;
-
-      final venta = Venta(
-        numero: numeroVenta,
-        clienteId: clienteId,
-        fecha: DateTime.now(),
-        detalles: detallesVenta,
-        subtotal: subtotal,
-        itbis: itbis,
-        total: total,
-        tipoPago: tipoPago,
-      );
-
-      final orquestador = ref.read(ventaOrquestadorServiceProvider);
-      final ventaRegistrada = await orquestador.ejecutarVentaCompleta(venta);
-
-      for (final item in carrito) {
-        await ref.read(salidaControllerProvider.notifier).registrarSalida(
-          productoId: item.producto.id!,
-          cantidad: item.cantidad,
-          motivo: 'Venta — N° $numeroVenta',
-          usuario: 'Usuario actual',
-        );
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Venta N° ${ventaRegistrada.numero} registrada. Kardex actualizado.'), backgroundColor: Colors.green),
-        );
-        setState(carrito.clear);
-        setState(() {
-          numeroVenta = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
-          clienteSeleccionadoId = null;
-          clienteNombre = 'Consumidor final';
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Error: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final listaVentas = ref.watch(listaVentasProvider);
+
     return AppScaffold(
-      title: 'Módulo de Ventas',
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            color: Colors.white,
-            child: TabBar(
-              controller: controladorPestanas,
-              isScrollable: true,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textSecondary,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
-              labelStyle: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600),
-              unselectedLabelStyle: AppTypography.bodyMedium,
-              padding: AppSpacing.hM,
-              tabs: const [
-                Tab(text: 'Registrar Venta'),
-                Tab(text: 'Cotizaciones'),
-                Tab(text: 'Apartados'),
-                Tab(text: 'Historial de Ventas'),
-              ],
+      title: 'Historial de Ventas',
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppTextField(
+              label: 'Buscar venta',
+              prefixIcon: Icons.search,
+              controller: _buscadorController,
             ),
-          ),
-          const Divider(height: 1, thickness: 1),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final esPantallaAncha = constraints.maxWidth >= 900;
-                return TabBarView(
-                  controller: controladorPestanas,
-                  children: [
-                    esPantallaAncha ? const VistaEscritorio() : const VistaMovil(),
-                    const HistorialCotizaciones(),
-                    const HistorialApartados(),
-                    const HistorialVentas(),
-                  ],
-                );
-              },
+            const SizedBox(height: 16),
+            Expanded(
+              child: listaVentas.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text('❌ Error al cargar ventas: $error'),
+                ),
+                data: (ventas) {
+                  if (ventas.isEmpty) {
+                    return const Center(child: Text('No hay ventas registradas'));
+                  }
+                  return AppSection(
+                    title: 'Ventas (${ventas.length})',
+                    children: [
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          columnSpacing: 20,
+                          columns: const [
+                            DataColumn(label: Text('ID')),
+                            DataColumn(label: Text('Fecha')),
+                            DataColumn(label: Text('Cliente')),
+                            DataColumn(label: Text('Total')),
+                            DataColumn(label: Text('Estado')),
+                          ],
+                          rows: ventas.map((venta) {
+                            return DataRow(cells: [
+                              DataCell(Text('${venta['id']}')),
+                              DataCell(Text('${venta['fecha']}')),
+                              DataCell(Text('${venta['clienteNombre'] ?? '-'}')),
+                              DataCell(Text('RD\$ ${venta['montoTotal'] ?? 0}')),
+                              DataCell(Text('${venta['estado'] ?? '-'}')),
+                            ]);
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
