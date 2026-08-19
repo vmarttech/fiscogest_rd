@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cotizaciones_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/apartados_dao.dart';
@@ -7,7 +8,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_dao.dart';
-import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/cotizacion.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
@@ -18,7 +18,6 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 
 class VentasRepositoryImpl implements IVentasRepository {
-
   VentasRepositoryImpl({
     required this.ventasDao,
     required this.cotizacionesDao,
@@ -28,6 +27,7 @@ class VentasRepositoryImpl implements IVentasRepository {
     required this.descuentosDao,
     required this.ofertasDao,
   });
+
   final VentasDao ventasDao;
   final CotizacionesDao cotizacionesDao;
   final ApartadosDao apartadosDao;
@@ -106,7 +106,7 @@ class VentasRepositoryImpl implements IVentasRepository {
       subtotal: cotizacion.subtotal,
       itbis: cotizacion.itbis,
       total: cotizacion.total,
-      convertidaAVenta: true,
+      convertidaAVenta: false,
       ventaId: null,
       createdAt: cotizacion.createdAt ?? DateTime.now(),
     );
@@ -118,38 +118,17 @@ class VentasRepositoryImpl implements IVentasRepository {
     if (cotizacion == null) {
       throw Exception('Cotización con ID $cotizacionId no encontrada');
     }
-    final companion = VentasTableCompanion(
-      clienteId: Value(cotizacion.clienteId),
-      fecha: Value(DateTime.now()),
-      montoTotal: Value(cotizacion.montoTotal),
-    );
-    final ventaId = await ventasDao.insertarVenta(companion);
-    await cotizacionesDao.marcarComoConvertida(cotizacionId, ventaId);
-    return Venta(
-      id: ventaId,
-      numero: 'VTA-$ventaId',
-      clienteId: cotizacion.clienteId,
-      fecha: DateTime.now(),
-      detalles: const [],
-      subtotal: cotizacion.montoTotal * 0.87,
-      itbis: cotizacion.itbis,
-      total: cotizacion.montoTotal,
-      tipoPago: 'Crédito',
-      esCredito: true,
-      cotizacionOrigenId: cotizacionId,
+    throw UnimplementedError(
+      'Agregar en CotizacionesDao: Future<void> marcarConvertida(int cotizacionId, int ventaId). '
+      'Una vez exista, inserta la venta, llama al método y retorna la instancia Venta.'
     );
   }
 
   @override
   Future<Apartado> registrarApartado(Apartado apartado) async {
-    final estadoEnum = ApartadoEstado.values.firstWhere(
-      (ApartadoEstado e) => e.name == apartado.estado.toLowerCase(),
-      orElse: () => ApartadoEstado.reservado,
-    );
+    final estadoEnum = ApartadoEstado.values.byName(apartado.estado);
     final companion = ApartadosTableCompanion(
       clienteId: Value(apartado.clienteId),
-      fechaReserva: Value(apartado.fechaApartado),
-      fechaLimite: Value(apartado.fechaLimitePago ?? apartado.fechaApartado.add(const Duration(days: 30))),
       montoTotal: Value(apartado.montoTotal),
       montoAbonado: Value(apartado.montoAbonado),
       saldoPendiente: Value(apartado.saldoPendiente),
@@ -173,18 +152,21 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Devolucion> registrarDevolucion(Devolucion devolucion) async {
-    throw UnimplementedError('registrarDevolucion: pendiente');
+    throw UnimplementedError(
+      'DevolucionesDao: método insertarDevolucion aún no implementado. '
+      'Agregar al DAO: Future<int> insertarDevolucion(DevolucionesTableCompanion data).'
+    );
   }
 
   @override
   Future<Pago> registrarPago(Pago pago) async {
-    final actualizado = await apartadosDao.actualizarSaldo(
+    final exito = await apartadosDao.actualizarSaldo(
       pago.cuentaCobrarId,
       pago.monto,
       0.0,
     );
-    if (!actualizado) {
-      throw Exception('Apartado no encontrado al registrar pago');
+    if (!exito) {
+      throw Exception('No se pudo registrar el pago: ID de cuenta por cobrar no válido.');
     }
     return Pago(
       id: pago.id,
@@ -201,31 +183,45 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<double> consultarSaldoCliente(int clienteId) async {
-    throw UnimplementedError('consultarSaldoCliente: pendiente');
+    throw UnimplementedError(
+      'CuentasCobrarDao no implementa consultar saldo por cliente. '
+      'Agregar: Future<double?> obtenerSaldoPorCliente(int clienteId).'
+    );
   }
 
   @override
   Future<List<Descuento>> obtenerDescuentosActivos() async {
-    throw UnimplementedError('obtenerDescuentosActivos: pendiente');
+    throw UnimplementedError(
+      'DescuentosDao: método listarDescuentosActivos aún no implementado.'
+    );
   }
 
   @override
   Future<List<Oferta>> obtenerOfertasActivas() async {
-    throw UnimplementedError('obtenerOfertasActivas: pendiente');
+    throw UnimplementedError(
+      'OfertasDao: método listarOfertasActivas aún no implementado.'
+    );
   }
 
   @override
   Future<bool> aplicarDescuento(int ventaId, int descuentoId) async {
-    throw UnimplementedError('aplicarDescuento: pendiente');
+    throw UnimplementedError(
+      'DescuentosDao: método aplicarDescuento aún no implementado.'
+    );
   }
 
   @override
   Future<bool> validarOferta(int ofertaId, double montoCompra) async {
-    throw UnimplementedError('validarOferta: pendiente');
+    throw UnimplementedError(
+      'OfertasDao: método validarOferta aún no implementado.'
+    );
   }
 
   @override
   Future<void> actualizarEnCascada(int ventaId) async {
-    throw UnimplementedError('actualizarEnCascada: pendiente');
+    throw UnimplementedError(
+      'Actualización en cascada: lógica pendiente. '
+      'Implementar: actualizar inventario, kardex, saldos y estadísticas tras registrar venta.'
+    );
   }
 }
