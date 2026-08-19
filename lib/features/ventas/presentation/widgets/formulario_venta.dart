@@ -13,17 +13,14 @@ class FormularioVenta extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTituloSeccion(
-          icono: Icons.person_outline_rounded,
-          titulo: 'Datos de la venta',
-        ),
+        const Text('Datos de la venta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: 16),
         InkWell(
-          onTap: () => notificador.seleccionarCliente(1),
+          onTap: () => notificador.seleccionarCliente(null),
           borderRadius: BorderRadius.circular(10),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
             decoration: BoxDecoration(
               color: const Color(0xFFF8F9FB),
               borderRadius: BorderRadius.circular(10),
@@ -31,17 +28,15 @@ class FormularioVenta extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.person_outline_rounded,
-                    size: 20, color: Color(0xFF68717D)),
+                const Icon(Icons.person_outline_rounded, size: 20, color: Color(0xFF68717D)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Cliente',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B737D))),
+                      const Text('Cliente', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B737D))),
                       const SizedBox(height: 2),
-                      Text(estado.clienteId != null ? 'Cliente seleccionado' : 'Consumidor final',
+                      Text(estado.clienteId != null ? 'Cliente seleccionado' : 'Seleccionar cliente',
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF30363D))),
                     ],
                   ),
@@ -53,11 +48,11 @@ class FormularioVenta extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         InkWell(
-          onTap: () => notificador.cambiarFormaPago('efectivo', false),
+          onTap: () => notificador.cambiarFormaPago('', false),
           borderRadius: BorderRadius.circular(10),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
             decoration: BoxDecoration(
               color: const Color(0xFFF8F9FB),
               borderRadius: BorderRadius.circular(10),
@@ -65,19 +60,17 @@ class FormularioVenta extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.payments_outlined,
-                    size: 20, color: Color(0xFF68717D)),
+                const Icon(Icons.payments_outlined, size: 20, color: Color(0xFF68717D)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Forma de pago',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B737D))),
+                      const Text('Forma de pago', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B737D))),
                       const SizedBox(height: 2),
                       Text(estado.tipoPago.isNotEmpty
                           ? '${estado.tipoPago[0].toUpperCase()}${estado.tipoPago.substring(1)}${estado.esCredito ? ' (Crédito)' : ''}'
-                          : 'Seleccionar',
+                          : 'Seleccionar forma de pago',
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF30363D))),
                     ],
                   ),
@@ -87,25 +80,6 @@ class FormularioVenta extends ConsumerWidget {
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildTituloSeccion({required IconData icono, required String titulo}) {
-    return Row(
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: const Color(0xFFEAF2FC),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icono, size: 18, color: const Color(0xFF1565C0)),
-        ),
-        const SizedBox(width: 10),
-        Text(titulo,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF252A30))),
       ],
     );
   }

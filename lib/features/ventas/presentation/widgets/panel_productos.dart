@@ -19,13 +19,13 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
     super.dispose();
   }
 
-  void _agregarProductoPrueba() {
+  void _agregarProducto() {
     final linea = const DetalleVenta(
-      productoId: 1,
-      nombreProducto: 'Producto de prueba',
+      productoId: 0,
+      nombreProducto: 'Producto desde búsqueda',
       cantidad: 1,
-      precioUnitario: 100.00,
-      subtotalLinea: 100.00,
+      precioUnitario: 0.0,
+      subtotalLinea: 0.0,
     );
     ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
     _buscador.clear();
@@ -34,66 +34,25 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE1E5EA)),
-        boxShadow: const [
-          BoxShadow(color: Color(0x08000000), blurRadius: 14, offset: Offset(0, 4)),
-        ],
-      ),
+      width: double.infinity,
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFE1E5EA))),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEAF2FC),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.inventory_2_outlined,
-                      size: 20, color: Color(0xFF1565C0)),
-                ),
-                const SizedBox(width: 11),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Productos',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF252A30))),
-                    Text('Busca y agrega artículos',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF868E96))),
-                  ],
-                ),
-              ],
-            ),
+            const Text('Productos', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
             TextField(
               controller: _buscador,
-              textInputAction: TextInputAction.search,
               decoration: InputDecoration(
-                hintText: 'Buscar por nombre, código o EAN...',
-                hintStyle: const TextStyle(fontSize: 14, color: Color(0xFFADB5BD)),
+                hintText: 'Buscar producto...',
                 filled: true,
                 fillColor: const Color(0xFFF8FAFC),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(11), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF68717D)),
-                suffixIcon: ElevatedButton.icon(
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Agregar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1565C0),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: _agregarProductoPrueba,
-                ),
+                suffixIcon: ElevatedButton.icon(icon: const Icon(Icons.add, size: 18), label: const Text('Agregar'), onPressed: _agregarProducto),
               ),
-              onSubmitted: (_) => _agregarProductoPrueba(),
+              onSubmitted: (_) => _agregarProducto(),
             ),
           ],
         ),

@@ -14,7 +14,7 @@ class ItemCarrito extends ConsumerWidget {
     final notificador = ref.read(registrarVentaProvider.notifier);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -23,30 +23,10 @@ class ItemCarrito extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-            flex: 5,
-            child: Text(linea.nombreProducto,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF2D3136))),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text('${linea.cantidad}', textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF343A40))),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text('RD\$ ${linea.subtotalLinea.toStringAsFixed(2)}', textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1565C0))),
-          ),
-          SizedBox(
-            width: 36,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              icon: const Icon(Icons.close_rounded, size: 18, color: Color(0xFFD32F2F)),
-              onPressed: () => notificador.quitarProducto(indice),
-            ),
-          ),
+          Expanded(flex: 5, child: Text(linea.nombreProducto, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500))),
+          Expanded(flex: 2, child: Text('${linea.cantidad}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
+          Expanded(flex: 3, child: Text('RD\$ ${linea.subtotalLinea.toStringAsFixed(2)}', textAlign: TextAlign.right, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1565C0)))),
+          SizedBox(width: 36, child: IconButton(padding: EdgeInsets.zero, icon: const Icon(Icons.close_rounded, size: 18, color: Color(0xFFD32F2F)), onPressed: () => notificador.quitarProducto(indice))),
         ],
       ),
     );

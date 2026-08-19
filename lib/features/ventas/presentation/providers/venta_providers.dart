@@ -6,24 +6,23 @@ import 'package:fiscogest_rd/features/ventas/domain/usecases/actualizar_ventas_e
 import 'package:fiscogest_rd/features/ventas/domain/services/venta_orquestador_service.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 
-/// Provider del Repositorio de Ventas — Usa instancia YA CONSTRUIDA
+/// ============================================================
+/// DEPENDENCIAS
+/// ============================================================
 final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
   return RepositoryInjection.instance.ventasRepository;
 });
 
-/// Provider del Caso de Uso: Registrar Venta
 final registrarVentaUseCaseProvider = Provider<RegistrarVenta>((ref) {
   final IVentasRepository repository = ref.watch(ventasRepositoryProvider);
   return RegistrarVenta(repository);
 });
 
-/// Provider del Caso de Uso: Actualizar Ventas en Cascada
 final actualizarVentasEnCascadaUseCaseProvider = Provider<ActualizarVentasEnCascada>((ref) {
   final IVentasRepository repository = ref.watch(ventasRepositoryProvider);
   return ActualizarVentasEnCascada(repository);
 });
 
-/// Provider del Orquestador de Ventas
 final ventaOrquestadorServiceProvider = Provider<VentaOrquestadorService>((ref) {
   final RegistrarVenta registrarVenta = ref.watch(registrarVentaUseCaseProvider);
   final ActualizarVentasEnCascada actualizarEnCascada = ref.watch(actualizarVentasEnCascadaUseCaseProvider);
@@ -34,33 +33,35 @@ final ventaOrquestadorServiceProvider = Provider<VentaOrquestadorService>((ref) 
 });
 
 /// ============================================================
-/// Historial de Ventas
+/// HISTORIALES
 /// ============================================================
 final listaVentasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
   return repositorio.listarVentas();
 });
 
-/// ============================================================
-/// Historial de Cotizaciones
-/// ============================================================
 final listaCotizacionesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
   return repositorio.listarCotizaciones();
 });
 
-/// ============================================================
-/// Historial de Apartados
-/// ============================================================
 final listaApartadosProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
   return repositorio.listarApartados();
 });
 
 /// ============================================================
-/// FASE 2 — GESTIÓN DE ESTADO: Registrar Venta
+/// SESIÓN DEL USUARIO — ID DESDE AUTENTICACIÓN
 /// ============================================================
+final usuarioSesionIdProvider = Provider<int>((ref) {
+  // ⚠️ Reemplaza por el provider real de autenticación
+  // return ref.watch(usuarioAutenticadoProvider).id;
+  throw UnimplementedError('Conectar al provider de sesión real');
+});
 
+/// ============================================================
+/// GESTIÓN DE ESTADO: REGISTRAR VENTA
+/// ============================================================
 class RegistrarVentaState {
 
   const RegistrarVentaState({
@@ -110,10 +111,19 @@ class RegistrarVentaState {
 }
 
 class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
-  RegistrarVentaNotifier()
+
+  RegistrarVentaNotifier(this._ref)
       : super(RegistrarVentaState(
           numero: DateTime.now().millisecondsSinceEpoch.toString().substring(8),
-        ));
+        )) {
+    _cargarUsuarioSesion();
+  }
+  final Ref _ref;
+
+  void _cargarUsuarioSesion() {
+    final idUsuario = _ref.read(usuarioSesionIdProvider);
+    state = state.copiarCon(usuarioId: idUsuario);
+  }
 
   void seleccionarCliente(int? idCliente) {
     state = state.copiarCon(clienteId: idCliente);
@@ -150,10 +160,6 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
     );
   }
 
-  void asignarUsuarioDesdeSesion(int idUsuario) {
-    state = state.copiarCon(usuarioId: idUsuario);
-  }
-
   bool validarAntesDeGuardar() {
     return state.clienteId != null &&
         state.tipoPago.isNotEmpty &&
@@ -165,5 +171,5 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
 
 final registrarVentaProvider =
     StateNotifierProvider<RegistrarVentaNotifier, RegistrarVentaState>((ref) {
-  return RegistrarVentaNotifier();
+  return RegistrarVentaNotifier(ref);
 });
