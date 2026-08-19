@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 class FormularioVenta extends ConsumerWidget {
@@ -15,8 +16,11 @@ class FormularioVenta extends ConsumerWidget {
       children: [
         const Text('Datos de la venta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: 16),
+
         InkWell(
-          onTap: () => notificador.seleccionarCliente(null),
+          onTap: () async {
+            notificador.seleccionarCliente(1);
+          },
           borderRadius: BorderRadius.circular(10),
           child: Container(
             width: double.infinity,
@@ -36,7 +40,7 @@ class FormularioVenta extends ConsumerWidget {
                     children: [
                       const Text('Cliente', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B737D))),
                       const SizedBox(height: 2),
-                      Text(estado.clienteId != null ? 'Cliente seleccionado' : 'Seleccionar cliente',
+                      Text(estado.clienteId != null ? 'Cliente ID ${estado.clienteId}' : 'Seleccionar cliente',
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF30363D))),
                     ],
                   ),
@@ -46,9 +50,11 @@ class FormularioVenta extends ConsumerWidget {
             ),
           ),
         ),
+
         const SizedBox(height: 12),
+
         InkWell(
-          onTap: () => notificador.cambiarFormaPago('', false),
+          onTap: () => _mostrarSelectorFormaPago(context, notificador),
           borderRadius: BorderRadius.circular(10),
           child: Container(
             width: double.infinity,
@@ -81,6 +87,27 @@ class FormularioVenta extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _mostrarSelectorFormaPago(BuildContext context, RegistrarVentaNotifier notificador) {
+    showModalBottomSheet<FormaPago>(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: FormaPago.values.map((fp) {
+            final credito = fp == FormaPago.credito;
+            return ListTile(
+              title: Text('${fp.name[0].toUpperCase()}${fp.name.substring(1)}'),
+              onTap: () {
+                notificador.cambiarFormaPago(fp.name, credito);
+                Navigator.pop<FormaPago>(context);
+              },
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

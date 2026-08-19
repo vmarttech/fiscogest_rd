@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
@@ -19,13 +21,15 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
     super.dispose();
   }
 
-  void _agregarProducto() {
-    final linea = const DetalleVenta(
-      productoId: 0,
-      nombreProducto: 'Producto desde búsqueda',
-      cantidad: 1,
-      precioUnitario: 0.0,
-      subtotalLinea: 0.0,
+  void _agregarProductoSeleccionado(Producto producto) {
+    final precio = producto.precioVenta.toDouble();
+    const cantidad = 1.0;
+    final linea = DetalleVenta(
+      productoId: producto.id ?? 0,
+      nombreProducto: producto.nombre,
+      cantidad: cantidad,
+      precioUnitario: precio,
+      subtotalLinea: cantidad * precio,
     );
     ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
     _buscador.clear();
@@ -33,9 +37,15 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
 
   @override
   Widget build(BuildContext context) {
+    final productosAsync = ref.watch(productoControllerProvider);
+
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFE1E5EA))),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE1E5EA)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -50,9 +60,33 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                 filled: true,
                 fillColor: const Color(0xFFF8FAFC),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(11), borderSide: BorderSide.none),
-                suffixIcon: ElevatedButton.icon(icon: const Icon(Icons.add, size: 18), label: const Text('Agregar'), onPressed: _agregarProducto),
+                prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF68717D)),
               ),
-              onSubmitted: (_) => _agregarProducto(),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: productosAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(child: Text('Error: $e')),
+                data: (productos) {
+                  final filtro = productos.where((p) {
+                    final termino = _buscador.text.toLowerCase();
+                    return termino.isEmpty || p.nombre.toLowerCase().contains(termino);
+                  }).toList();
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: filtro.length,
+                    itemBuilder: (_, i) {
+                      final p = filtro[i];
+                      return ListTile(
+                        title: Text(p.nombre),
+                        subtitle: Text('RD\$ ${p.precioVenta.toStringAsFixed(2)}'),
+                        onTap: () => _agregarProductoSeleccionado(p),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/usecases/actualizar_ventas_en_cascada.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/venta_orquestador_service.dart';
+import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 
 /// ============================================================
@@ -51,12 +52,11 @@ final listaApartadosProvider = FutureProvider<List<Map<String, dynamic>>>((ref) 
 });
 
 /// ============================================================
-/// SESIÓN DEL USUARIO — ID DESDE AUTENTICACIÓN
+/// SESIÓN DEL USUARIO — IGUAL QUE EL RESTO DEL SISTEMA
 /// ============================================================
 final usuarioSesionIdProvider = Provider<int>((ref) {
-  // ⚠️ Reemplaza por el provider real de autenticación
-  // return ref.watch(usuarioAutenticadoProvider).id;
-  throw UnimplementedError('Conectar al provider de sesión real');
+  final id = ref.watch(usuarioAutenticadoProvider);
+  return id ?? 0;
 });
 
 /// ============================================================
@@ -165,6 +165,7 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
         state.tipoPago.isNotEmpty &&
         state.detalles.isNotEmpty &&
         state.usuarioId != null &&
+        state.usuarioId != 0 &&
         state.total > 0;
   }
 }
