@@ -10,14 +10,27 @@ class ApartadosDao extends DatabaseAccessor<AppDatabase> with _$ApartadosDaoMixi
 
   Future<List<Map<String, dynamic>>> listarApartados() async {
     final query = select(apartadosTable)
-      ..orderBy([(t) => OrderingTerm(expression: t.fechaReserva, mode: OrderingMode.desc)]);
+      ..orderBy([(ApartadosTable t) => OrderingTerm(expression: t.fechaReserva, mode: OrderingMode.desc)]);
 
-    final resultados = await query.get();
-    return resultados.map((a) {
-      final json = a.toJson();
-      json['fechaApartado'] = a.fechaReserva;
-      json['fechaLimitePago'] = a.fechaLimite;
-      return json;
-    }).toList();
+    final List<ApartadoData> resultados = await query.get();
+    return resultados.map((ApartadoData a) => a.toJson()).toList();
+  }
+
+  Future<int> insertarApartado(ApartadosTableCompanion apartado) async {
+    return into(apartadosTable).insert(apartado);
+  }
+
+  Future<bool> actualizarSaldo(int apartadoId, double montoAbonado, double saldoPendiente) async {
+    final filasAfectadas = await (update(apartadosTable)
+      ..where((ApartadosTable t) => t.id.equals(apartadoId)))
+      .write(ApartadosTableCompanion(
+        montoAbonado: Value(montoAbonado),
+        saldoPendiente: Value(saldoPendiente),
+      ));
+    return filasAfectadas > 0;
+  }
+
+  Future<ApartadoData?> buscarPorId(int apartadoId) async {
+    return (select(apartadosTable)..where((ApartadosTable t) => t.id.equals(apartadoId))).getSingleOrNull();
   }
 }

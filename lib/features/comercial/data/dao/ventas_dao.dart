@@ -34,4 +34,17 @@ class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
     final List<VentaData> resultados = await query.get();
     return resultados.map((VentaData v) => v.toJson()).toList();
   }
+
+  Future<int> insertarVenta(VentasTableCompanion venta) async {
+    return into(ventasTable).insert(venta);
+  }
+
+  Future<bool> actualizarVenta(int ventaId, VentasTableCompanion venta) async {
+    final filasAfectadas = await (update(ventasTable)..where((VentasTable t) => t.id.equals(ventaId))).write(venta);
+    return filasAfectadas > 0;
+  }
+
+  Future<int> eliminarVenta(int ventaId) async {
+    return await (delete(ventasTable)..where((VentasTable t) => t.id.equals(ventaId))).go();
+  }
 }

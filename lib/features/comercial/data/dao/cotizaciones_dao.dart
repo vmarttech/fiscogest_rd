@@ -10,13 +10,28 @@ class CotizacionesDao extends DatabaseAccessor<AppDatabase> with _$CotizacionesD
 
   Future<List<Map<String, dynamic>>> listarCotizaciones() async {
     final query = select(cotizacionesTable)
-      ..orderBy([(t) => OrderingTerm(expression: t.fechaEmision, mode: OrderingMode.desc)]);
+      ..orderBy([(CotizacionesTable t) => OrderingTerm(expression: t.fechaEmision, mode: OrderingMode.desc)]);
 
-    final resultados = await query.get();
-    return resultados.map((c) {
+    final List<CotizacionData> resultados = await query.get();
+    return resultados.map((CotizacionData c) {
       final json = c.toJson();
       json['convertida_a_venta'] = c.ventaConvertidaId != null;
       return json;
     }).toList();
+  }
+
+  Future<int> insertarCotizacion(CotizacionesTableCompanion cotizacion) async {
+    return into(cotizacionesTable).insert(cotizacion);
+  }
+
+  Future<bool> marcarComoConvertida(int cotizacionId, int ventaId) async {
+    final filasAfectadas = await (update(cotizacionesTable)
+      ..where((CotizacionesTable t) => t.id.equals(cotizacionId)))
+      .write(CotizacionesTableCompanion(ventaConvertidaId: Value(ventaId)));
+    return filasAfectadas > 0;
+  }
+
+  Future<CotizacionData?> buscarPorId(int cotizacionId) async {
+    return (select(cotizacionesTable)..where((CotizacionesTable t) => t.id.equals(cotizacionId))).getSingleOrNull();
   }
 }
