@@ -18,12 +18,12 @@ class HistorialApartados extends ConsumerWidget {
   }
 
   String _valorComoString(Map<String, dynamic> mapa, String clave, [String defecto = '']) {
-    final v = mapa[clave] ?? mapa[clave.replaceAllMapped(RegExp(r'_([a-z])'), (m) => m.group(1)!.toUpperCase())];
+    final dynamic v = mapa[clave];
     return v != null ? v.toString() : defecto;
   }
 
   double _valorComoDouble(Map<String, dynamic> mapa, String clave) {
-    final v = mapa[clave] ?? mapa[clave.replaceAllMapped(RegExp(r'_([a-z])'), (m) => m.group(1)!.toUpperCase())];
+    final dynamic v = mapa[clave];
     if (v == null) return 0.0;
     if (v is double) return v;
     if (v is int) return v.toDouble();
@@ -47,7 +47,7 @@ class HistorialApartados extends ConsumerWidget {
           Expanded(
             child: apartadosAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
+              error: (Object e, StackTrace? _) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -57,13 +57,13 @@ class HistorialApartados extends ConsumerWidget {
                   ],
                 ),
               ),
-              data: (apartados) {
+              data: (List<Map<String, dynamic>> apartados) {
                 if (apartados.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.inventory_2_outlined, size: 64, color: AppColors.textSecondary.withValues(alpha: 0.4)),
+                        const Icon(Icons.inventory_2_outlined, size: 64, color: Color(0x409E9E9E)),
                         const SizedBox(height: AppSpacing.m),
                         Text('No hay apartados registrados', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
                         const SizedBox(height: AppSpacing.xs),
@@ -75,15 +75,15 @@ class HistorialApartados extends ConsumerWidget {
                 return ListView.separated(
                   itemCount: apartados.length,
                   separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
-                  itemBuilder: (_, i) {
-                    final a = apartados[i];
-                    final numero = _valorComoString(a, 'numero', 'S/N');
-                    final fechaApartado = _formatearFecha(a['fechaApartado'] ?? a['fecha_apartado']);
-                    final fechaLimite = _formatearFecha(a['fechaLimitePago'] ?? a['fecha_limite_pago']);
-                    final montoTotal = _valorComoDouble(a, 'montoTotal');
-                    final montoAbonado = _valorComoDouble(a, 'montoAbonado');
-                    final saldoPendiente = _valorComoDouble(a, 'saldoPendiente');
-                    final estado = _valorComoString(a, 'estado', 'PENDIENTE');
+                  itemBuilder: (_, int i) {
+                    final Map<String, dynamic> a = apartados[i];
+                    final String numero = _valorComoString(a, 'numero', 'S/N');
+                    final String fechaApartado = _formatearFecha(a['fechaApartado'] ?? a['fechaReserva'] ?? a['fecha_reserva']);
+                    final String fechaLimite = _formatearFecha(a['fechaLimitePago'] ?? a['fechaLimite'] ?? a['fecha_limite']);
+                    final double montoTotal = _valorComoDouble(a, 'montoTotal') + _valorComoDouble(a, 'monto_total');
+                    final double montoAbonado = _valorComoDouble(a, 'montoAbonado') + _valorComoDouble(a, 'monto_abonado');
+                    final double saldoPendiente = _valorComoDouble(a, 'saldoPendiente') + _valorComoDouble(a, 'saldo_pendiente');
+                    final String estado = _valorComoString(a, 'estado', 'Reservado');
 
                     return _TarjetaApartado(
                       numero: numero,
@@ -125,7 +125,7 @@ class _TarjetaApartado extends StatelessWidget {
   final String estado;
 
   Color _colorEstado() {
-    final e = estado.toUpperCase();
+    final String e = estado.toUpperCase();
     if (e == 'PAGADO' || e == 'COMPLETADO') return Colors.green;
     if (e == 'VENCIDO') return AppColors.error;
     if (e == 'CANCELADO') return Colors.grey;
@@ -134,7 +134,7 @@ class _TarjetaApartado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final porcentajePagado = montoTotal > 0 ? (montoAbonado / montoTotal).clamp(0.0, 1.0) : 0.0;
+    final double porcentajePagado = montoTotal > 0 ? (montoAbonado / montoTotal).clamp(0.0, 1.0) : 0.0;
 
     return Padding(
       padding: AppSpacing.vS,

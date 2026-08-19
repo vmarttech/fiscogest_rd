@@ -19,12 +19,12 @@ class HistorialCotizaciones extends ConsumerWidget {
   }
 
   String _valorComoString(Map<String, dynamic> mapa, String clave, [String defecto = '']) {
-    final v = mapa[clave];
+    final dynamic v = mapa[clave];
     return v != null ? v.toString() : defecto;
   }
 
   double _valorComoDouble(Map<String, dynamic> mapa, String clave) {
-    final v = mapa[clave];
+    final dynamic v = mapa[clave];
     if (v == null) return 0.0;
     if (v is double) return v;
     if (v is int) return v.toDouble();
@@ -32,13 +32,13 @@ class HistorialCotizaciones extends ConsumerWidget {
     return 0.0;
   }
 
-  bool _valorComoBooleano(Map<String, dynamic> mapa, String clave) {
-    final v = mapa[clave] ?? mapa[clave.replaceAllMapped(RegExp(r'_([a-z])'), (m) => m.group(1)!.toUpperCase())];
-    if (v == null) return false;
+  bool _valorComoBooleano(Map<String, dynamic> mapa, String clave, [bool defecto = false]) {
+    final dynamic v = mapa[clave];
+    if (v == null) return defecto;
     if (v is bool) return v;
     if (v is int) return v == 1;
     if (v is String) return v == '1' || v.toLowerCase() == 'true';
-    return false;
+    return defecto;
   }
 
   @override
@@ -57,7 +57,7 @@ class HistorialCotizaciones extends ConsumerWidget {
           Expanded(
             child: cotizacionesAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
+              error: (Object e, StackTrace? _) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -67,13 +67,13 @@ class HistorialCotizaciones extends ConsumerWidget {
                   ],
                 ),
               ),
-              data: (cotizaciones) {
+              data: (List<Map<String, dynamic>> cotizaciones) {
                 if (cotizaciones.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.description_outlined, size: 64, color: AppColors.textSecondary.withValues(alpha: 0.4)),
+                        const Icon(Icons.description_outlined, size: 64, color: Color(0x409E9E9E)),
                         const SizedBox(height: AppSpacing.m),
                         Text('No hay cotizaciones registradas', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
                         const SizedBox(height: AppSpacing.xs),
@@ -85,14 +85,14 @@ class HistorialCotizaciones extends ConsumerWidget {
                 return ListView.separated(
                   itemCount: cotizaciones.length,
                   separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
-                  itemBuilder: (_, i) {
-                    final c = cotizaciones[i];
-                    final numero = _valorComoString(c, 'numero', 'S/N');
-                    final fechaEmision = _formatearFecha(c['fechaEmision'] ?? c['fecha_emision']);
-                    final fechaVencimiento = _formatearFecha(c['fechaVencimiento'] ?? c['fecha_vencimiento']);
-                    final total = _valorComoDouble(c, 'total');
-                    final convertida = _valorComoBooleano(c, 'convertidaAVenta') || _valorComoBooleano(c, 'convertida_a_venta');
-                    final cotizacionId = c['id'] as int?;
+                  itemBuilder: (_, int i) {
+                    final Map<String, dynamic> c = cotizaciones[i];
+                    final String numero = _valorComoString(c, 'numero', 'S/N');
+                    final String fechaEmision = _formatearFecha(c['fechaEmision'] ?? c['fecha_emision']);
+                    final String fechaVencimiento = _formatearFecha(c['fechaVigencia'] ?? c['fecha_vigencia']);
+                    final double total = _valorComoDouble(c, 'montoTotal') + _valorComoDouble(c, 'monto_total');
+                    final bool convertida = _valorComoBooleano(c, 'convertida_a_venta', false) || _valorComoBooleano(c, 'convertidaAVenta', false);
+                    final int? cotizacionId = c['id'] as int?;
 
                     return _TarjetaCotizacion(
                       numero: numero,
@@ -134,7 +134,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
     if (cotizacionId == null) return;
     final confirmar = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (BuildContext _) => AlertDialog(
         title: const Text('Convertir a Venta'),
         content: Text('¿Convertir la Cotización N° $numero en una Venta?'),
         actions: [
@@ -143,7 +143,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
         ],
       ),
     );
-    if (confirmar != true || !ref.context.mounted) return;
+    if (confirmar != true || !context.mounted) return;
 
     try {
       final repo = ref.read(ventasRepositoryProvider);
