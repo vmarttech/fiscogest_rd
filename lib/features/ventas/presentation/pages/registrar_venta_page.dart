@@ -4,6 +4,11 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/encabezado_venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/buscador_productos_venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/carrito_venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/datos_venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/botones_accion_venta.dart';
 
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
@@ -40,24 +45,21 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             ListTile(
               title: const Text('Efectivo'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier)
-                   .cambiarFormaPago('efectivo', false);
+                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('efectivo', false);
                 Navigator.pop(ctx);
               },
             ),
             ListTile(
               title: const Text('Tarjeta'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier)
-                   .cambiarFormaPago('tarjeta', false);
+                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('tarjeta', false);
                 Navigator.pop(ctx);
               },
             ),
             ListTile(
               title: const Text('Crédito'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier)
-                   .cambiarFormaPago('credito', true);
+                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito', true);
                 Navigator.pop(ctx);
               },
             ),
@@ -88,15 +90,11 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                 Navigator.pop(ctx);
                 final termino = await _mostrarBusquedaDialog('Buscar Cliente');
                 if (termino != null && termino.trim().isNotEmpty) {
-                  final resultados = await ref
-                      .read(clienteCompletoControllerProvider.notifier)
-                      .buscarPorNombre(termino);
+                  final resultados = await ref.read(clienteCompletoControllerProvider.notifier).buscarPorNombre(termino);
                   if (resultados.isNotEmpty && mounted) {
                     _mostrarResultadosClientes(resultados);
                   } else if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No se encontraron clientes')),
-                    );
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se encontraron clientes')));
                   }
                 }
               },
@@ -120,14 +118,8 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           onSubmitted: (valor) => Navigator.pop(ctx, valor),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, control.text),
-            child: const Text('Buscar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx, control.text), child: const Text('Buscar')),
         ],
       ),
     );
@@ -170,10 +162,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         title: const Text('Limpiar Venta'),
         content: const Text('¿Desea reiniciar la venta actual?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
           TextButton(
             onPressed: () {
               ref.read(registrarVentaProvider.notifier).vaciarVenta();
@@ -190,12 +179,9 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   Future<void> _cobrarYRegistrarSalida() async {
     final estado = ref.read(registrarVentaProvider);
     if (!ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Complete los datos antes de registrar')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Complete los datos antes de registrar')));
       return;
     }
-
     setState(() => _cargando = true);
     try {
       final venta = Venta(
@@ -210,22 +196,16 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         esCredito: estado.esCredito,
         usuarioId: estado.usuarioId ?? 0,
       );
-
       final casoUso = ref.read(registrarVentaUseCaseProvider);
       final ventaGuardada = await casoUso(venta);
-
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Venta registrada. ID: ${ventaGuardada.id}')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('✅ Venta registrada. ID: ${ventaGuardada.id}')));
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
         _buscadorController.clear();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _cargando = false);
@@ -233,17 +213,11 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   }
 
   Future<void> _buscarYAgregarProducto(String termino) async {
-    final resultados = await ref
-        .read(productoControllerProvider.notifier)
-        .buscarPorNombre(termino);
-
+    final resultados = await ref.read(productoControllerProvider.notifier).buscarPorNombre(termino);
     if (resultados.isEmpty && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Producto no encontrado')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto no encontrado')));
       return;
     }
-
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
       final linea = DetalleVenta(
@@ -256,7 +230,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
       _buscadorController.clear();
     } else if (mounted) {
-      // ignore: unawaited_futures
       showDialog<dynamic>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -299,229 +272,36 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       appBar: AppBar(title: const Text('Registrar Venta')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildEncabezado(),
-            const SizedBox(height: 20),
-            _buildBuscadorProductos(),
-            const SizedBox(height: 24),
-            _buildCarrito(),
-            const SizedBox(height: 24),
-            _buildDatosVenta(),
-            const SizedBox(height: 32),
-            _buildBotonesAccion(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEncabezado() {
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Nueva Venta',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            _buildNumeroVenta(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNumeroVenta() {
-    return Text(
-      'Nº $_ventaNumero',
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blueGrey),
-    );
-  }
-
-  Widget _buildBuscadorProductos() {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Agregar Producto', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _buscadorController,
-              decoration: InputDecoration(
-                hintText: 'Buscar por nombre...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.add_circle, color: Colors.blue),
-                  onPressed: () {
-                    final valor = _buscadorController.text.trim();
-                    if (valor.isNotEmpty) {
-                      _buscarYAgregarProducto(valor);
-                    }
-                  },
-                ),
-                border: const OutlineInputBorder(),
-              ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (valor) {
-                if (valor.trim().isNotEmpty) {
-                  _buscarYAgregarProducto(valor.trim());
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCarrito() {
-    final estadoLocal = ref.watch(registrarVentaProvider);
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Carrito', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('${estadoLocal.detalles.length} productos'),
+                EncabezadoVenta(numeroVenta: _ventaNumero),
+                const SizedBox(height: 20),
+                BuscadorProductosVenta(
+                  controlador: _buscadorController,
+                  alBuscar: _buscarYAgregarProducto,
+                ),
+                const SizedBox(height: 24),
+                const CarritoVenta(),
+                const SizedBox(height: 24),
+                DatosVenta(
+                  alSeleccionarCliente: _abrirSelectorCliente,
+                  alSeleccionarFormaPago: _abrirSelectorFormaPago,
+                ),
+                const SizedBox(height: 32),
+                BotonesAccionVenta(
+                  cargando: _cargando,
+                  alLimpiar: _limpiarVenta,
+                  alGuardar: _cobrarYRegistrarSalida,
+                ),
               ],
             ),
-            const Divider(),
-            if (estadoLocal.detalles.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(24),
-                child: Center(child: Text('Busque y agregue productos arriba')),
-              )
-            else
-              ...estadoLocal.detalles.map((detalle) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: ListTile(
-                  title: Text(detalle.nombreProducto),
-                  subtitle: Text('Cant: ${detalle.cantidad} • RD\$ ${detalle.subtotalLinea.toStringAsFixed(2)}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    onPressed: () => ref
-                        .read(registrarVentaProvider.notifier)
-                        .quitarProducto(estadoLocal.detalles.indexOf(detalle)),
-                  ),
-                ),
-              )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDatosVenta() {
-    final estadoLocal = ref.watch(registrarVentaProvider);
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const Text('Datos de la Venta', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            _buildFilaDato(
-              Icons.person,
-              'Cliente',
-              estadoLocal.clienteId != null ? 'Cliente ID ${estadoLocal.clienteId}' : 'Seleccionar',
-              _abrirSelectorCliente,
-            ),
-            const SizedBox(height: 10),
-            _buildFilaDato(
-              Icons.payment,
-              'Forma de Pago',
-              estadoLocal.tipoPago.isNotEmpty
-                  ? '${estadoLocal.tipoPago[0].toUpperCase()}${estadoLocal.tipoPago.substring(1)}${estadoLocal.esCredito ? ' (Crédito)' : ''}'
-                  : 'Seleccionar',
-              _abrirSelectorFormaPago,
-            ),
-            const Divider(height: 24),
-            _buildFilaTotal('Subtotal', estadoLocal.subtotal),
-            _buildFilaTotal('ITBIS (18%)', estadoLocal.itbis),
-            const Divider(),
-            _buildFilaTotal('TOTAL A PAGAR', estadoLocal.total, esTotal: true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilaDato(IconData icono, String etiqueta, String valor, VoidCallback alPresionar) {
-    return InkWell(
-      onTap: alPresionar,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-        child: Row(
-          children: [
-            Icon(icono, color: Colors.blueGrey),
-            const SizedBox(width: 12),
-            Expanded(child: Text(etiqueta)),
-            Row(children: [
-              Text(valor, style: const TextStyle(fontWeight: FontWeight.w500)),
-              const SizedBox(width: 4),
-              const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
-            ]),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilaTotal(String etiqueta, double monto, {bool esTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(etiqueta, style: TextStyle(fontWeight: esTotal ? FontWeight.bold : FontWeight.normal, fontSize: esTotal ? 16 : 14)),
-          Text('RD\$ ${monto.toStringAsFixed(2)}', style: TextStyle(fontWeight: esTotal ? FontWeight.bold : FontWeight.normal, fontSize: esTotal ? 18 : 14, color: esTotal ? Colors.green : Colors.black87)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBotonesAccion() {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _limpiarVenta,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Limpiar Venta'),
-            style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
           ),
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: _cargando ? null : _cobrarYRegistrarSalida,
-            icon: _cargando
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                : const Icon(Icons.save),
-            label: Text(_cargando ? 'Guardando...' : 'Registrar Venta'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
