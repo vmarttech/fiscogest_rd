@@ -54,11 +54,21 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       return;
     }
 
-    // ✅ AGREGADO 'await' FALTANTE EN LÍNEA 97
     final ofertasActivas = await ref.watch(ofertasActivosProvider.future);
 
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
+
+      if ((p.stock ?? 0) <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('⚠️ "${p.nombre}" sin existencias disponibles'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       final oferta = _buscarOfertaAplicable(ofertasActivas, p.id ?? 0, 1);
 
       double precioUnitario = p.precioVenta.toDouble();
@@ -95,164 +105,178 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         );
       }
     } else if (mounted) {
-      showDialog<dynamic>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Seleccione Producto'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: resultados.length,
-              itemBuilder: (ctx, i) {
-                final p = resultados[i];
-                final oferta = _buscarOfertaAplicable(ofertasActivas, p.id ?? 0, 1);
-                return ListTile(
-                  title: Row(
-                    children: [
-                      Text(p.nombre),
-                      if (oferta != null)
-                        Container(
-                          margin: const EdgeInsets.only(left: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade100,
-                            borderRadius: BorderRadius.circular(4),
+      unawaitedShowDialog(context, AlertDialog(
+        title: const Text('Seleccione Producto'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: resultados.length,
+            itemBuilder: (ctx, i) {
+              final p = resultados[i];
+              final oferta = _buscarOfertaAplicable(ofertasActivas, p.id ?? 0, 1);
+              final hayStock = (p.stock ?? 0) > 0;
+              return ListTile(
+                title: Row(
+                  children: [
+                    Expanded(child: Text(p.nombre)),
+                    if (!hayStock)
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'SIN STOCK',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade700,
                           ),
-                          child: Text(
-                            'OFERTA',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange.shade700,
+                        ),
+                      ),
+                    if (oferta != null && hayStock)
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'OFERTA',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange.shade700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                subtitle: Text(
+                  hayStock
+                      ? (oferta != null
+                          ? 'Oferta: RD\$ ${oferta.precioOferta.toStringAsFixed(2)} (antes RD\$ ${p.precioVenta.toStringAsFixed(2)}) — Stock: ${p.stock ?? 0}'
+                          : 'RD\$ ${p.precioVenta.toStringAsFixed(2)} — Stock: ${p.stock ?? 0}')
+                      : 'Sin existencias',
+                ),
+                enabled: hayStock,
+                onTap: hayStock
+                    ? () {
+                        double precioUnitario = p.precioVenta.toDouble();
+                        double? precioOriginal;
+                        int? ofertaId;
+                        String? ofertaNombre;
+
+                        if (oferta != null) {
+                          precioOriginal = p.precioVenta.toDouble();
+                          precioUnitario = oferta.precioOferta;
+                          ofertaId = oferta.id;
+                          ofertaNombre = oferta.nombre;
+                        }
+
+                        final linea = DetalleVenta(
+                          productoId: p.id ?? 0,
+                          nombreProducto: p.nombre,
+                          cantidad: 1,
+                          precioUnitario: precioUnitario,
+                          subtotalLinea: precioUnitario,
+                          ofertaId: ofertaId,
+                          ofertaNombre: ofertaNombre,
+                          precioOriginal: precioOriginal,
+                        );
+                        ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
+                        _buscadorController.clear();
+                        Navigator.pop(ctx);
+
+                        if (oferta != null && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('🎉 Oferta aplicada: ${oferta.nombre}'),
+                              backgroundColor: Colors.orange,
                             ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    oferta != null
-                        ? 'Oferta: RD\$ ${oferta.precioOferta.toStringAsFixed(2)} (antes RD\$ ${p.precioVenta.toStringAsFixed(2)})'
-                        : 'RD\$ ${p.precioVenta.toStringAsFixed(2)}',
-                  ),
-                  onTap: () {
-                    double precioUnitario = p.precioVenta.toDouble();
-                    double? precioOriginal;
-                    int? ofertaId;
-                    String? ofertaNombre;
-
-                    if (oferta != null) {
-                      precioOriginal = p.precioVenta.toDouble();
-                      precioUnitario = oferta.precioOferta;
-                      ofertaId = oferta.id;
-                      ofertaNombre = oferta.nombre;
-                    }
-
-                    final linea = DetalleVenta(
-                      productoId: p.id ?? 0,
-                      nombreProducto: p.nombre,
-                      cantidad: 1,
-                      precioUnitario: precioUnitario,
-                      subtotalLinea: precioUnitario,
-                      ofertaId: ofertaId,
-                      ofertaNombre: ofertaNombre,
-                      precioOriginal: precioOriginal,
-                    );
-                    ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
-                    _buscadorController.clear();
-                    Navigator.pop(ctx);
-
-                    if (oferta != null && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('🎉 Oferta aplicada: ${oferta.nombre}'),
-                          backgroundColor: Colors.orange,
-                        ),
-                      );
-                    }
-                  },
-                );
-              },
-            ),
+                          );
+                        }
+                      }
+                    : null,
+              );
+            },
           ),
         ),
-      );
+      ));
     }
   }
 
   void _abrirSelectorFormaPago() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Forma de Pago'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('Efectivo'),
-              onTap: () {
-                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('efectivo', false);
-                Navigator.pop(ctx);
-              },
-            ),
-            ListTile(
-              title: const Text('Tarjeta'),
-              onTap: () {
-                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('tarjeta', false);
-                Navigator.pop(ctx);
-              },
-            ),
-            ListTile(
-              title: const Text('Crédito'),
-              onTap: () {
-                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito', true);
-                Navigator.pop(ctx);
-              },
-            ),
-          ],
-        ),
+    unawaitedShowDialog(context, AlertDialog(
+      title: const Text('Forma de Pago'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: const Text('Efectivo'),
+            onTap: () {
+              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('efectivo', false);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Tarjeta'),
+            onTap: () {
+              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('tarjeta', false);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Crédito'),
+            onTap: () {
+              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito', true);
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
-    );
+    ));
   }
 
   void _abrirSelectorCliente() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Seleccionar Cliente'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('Consumidor Final'),
-              onTap: () {
-                ref.read(registrarVentaProvider.notifier).seleccionarCliente(1);
-                Navigator.pop(ctx);
-              },
-            ),
-            ListTile(
-              title: const Text('Buscar Cliente...'),
-              onTap: () async {
-                Navigator.pop(ctx);
-                final termino = await _mostrarBusquedaDialog('Buscar Cliente');
-                if (termino != null && termino.trim().isNotEmpty && mounted) {
-                  final resultados = await ref
-                      .read(clienteCompletoControllerProvider.notifier)
-                      .buscarPorNombre(termino);
-                  if (resultados.isNotEmpty && mounted) {
-                    _mostrarResultadosClientes(resultados);
-                  } else if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No se encontraron clientes')),
-                    );
-                  }
+    unawaitedShowDialog(context, AlertDialog(
+      title: const Text('Seleccionar Cliente'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: const Text('Consumidor Final'),
+            onTap: () {
+              ref.read(registrarVentaProvider.notifier).seleccionarCliente(1);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Buscar Cliente...'),
+            onTap: () async {
+              Navigator.pop(context);
+              final termino = await _mostrarBusquedaDialog('Buscar Cliente');
+              if (termino != null && termino.trim().isNotEmpty && mounted) {
+                final resultados = await ref
+                    .read(clienteCompletoControllerProvider.notifier)
+                    .buscarPorNombre(termino);
+                if (resultados.isNotEmpty && mounted) {
+                  _mostrarResultadosClientes(resultados);
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No se encontraron clientes')),
+                  );
                 }
-              },
-            ),
-          ],
-        ),
+              }
+            },
+          ),
+        ],
       ),
-    );
+    ));
   }
 
   Future<String?> _mostrarBusquedaDialog(String titulo) async {
@@ -276,61 +300,59 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   }
 
   void _mostrarResultadosClientes(List<dynamic> lista) {
-    showDialog<dynamic>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Clientes Encontrados'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: lista.length,
-            itemBuilder: (ctx, i) {
-              final cliente = lista[i];
-              final nombre = cliente.nombre as String? ?? '';
-              final rnc = cliente.rncCedula as String? ?? '';
-              final id = cliente.id as int? ?? 1;
-              return ListTile(
-                title: Text(nombre),
-                subtitle: Text(rnc),
-                onTap: () {
-                  ref.read(registrarVentaProvider.notifier).seleccionarCliente(id);
-                  Navigator.pop(ctx);
-                },
-              );
-            },
-          ),
+    unawaitedShowDialog(context, AlertDialog(
+      title: const Text('Clientes Encontrados'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: lista.length,
+          itemBuilder: (ctx, i) {
+            final cliente = lista[i];
+            final nombre = cliente.nombre as String? ?? '';
+            final rnc = cliente.rncCedula as String? ?? '';
+            final id = cliente.id as int? ?? 1;
+            return ListTile(
+              title: Text(nombre),
+              subtitle: Text(rnc),
+              onTap: () {
+                ref.read(registrarVentaProvider.notifier).seleccionarCliente(id);
+                Navigator.pop(ctx);
+              },
+            );
+          },
         ),
       ),
-    );
+    ));
   }
 
   void _limpiarVenta() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Limpiar Venta'),
-        content: const Text('¿Desea reiniciar la venta actual?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () {
-              ref.read(registrarVentaProvider.notifier).vaciarVenta();
-              _buscadorController.clear();
-              Navigator.pop(ctx);
-            },
-            child: const Text('Aceptar'),
-          ),
-        ],
-      ),
-    );
+    unawaitedShowDialog(context, AlertDialog(
+      title: const Text('Limpiar Venta'),
+      content: const Text('¿Desea reiniciar la venta actual?'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(
+          onPressed: () {
+            ref.read(registrarVentaProvider.notifier).vaciarVenta();
+            _buscadorController.clear();
+            Navigator.pop(context);
+          },
+          child: const Text('Aceptar'),
+        ),
+      ],
+    ));
   }
 
   Future<void> _cobrarYRegistrarSalida() async {
     final estado = ref.read(registrarVentaProvider);
+
     if (!ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Complete los datos antes de registrar')),
+        const SnackBar(
+          content: Text('⚠️ Complete los datos: Cliente, Forma de Pago y al menos un producto'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -338,7 +360,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     setState(() => _cargando = true);
     try {
       final venta = Venta(
-        numero: estado.numero,
+        numero: _ventaNumero,
         clienteId: estado.clienteId ?? 0,
         fecha: DateTime.now(),
         detalles: estado.detalles,
@@ -347,7 +369,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         total: estado.total,
         tipoPago: estado.tipoPago,
         esCredito: estado.esCredito,
-        usuarioId: estado.usuarioId ?? 0,
+        usuarioId: estado.usuarioId ?? 1,
       );
 
       final casoUso = ref.read(registrarVentaUseCaseProvider);
@@ -355,7 +377,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Venta registrada. ID: ${ventaGuardada.id}')),
+          SnackBar(
+            content: Text('✅ Venta registrada. Nº $_ventaNumero — ID: ${ventaGuardada.id}'),
+            backgroundColor: Colors.green,
+          ),
         );
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
         _buscadorController.clear();
@@ -363,7 +388,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('❌ Error al registrar: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -375,7 +403,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   Widget build(BuildContext context) {
     ref.watch(registrarVentaProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Registrar Venta'),),
+      appBar: AppBar(title: const Text('Registrar Venta')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
@@ -455,4 +483,9 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       ),
     );
   }
+}
+
+/// Función auxiliar local para silenciar advertencia de Future sin await
+void unawaitedShowDialog(BuildContext context, Widget dialog) {
+  showDialog<dynamic>(context: context, builder: (_) => dialog);
 }

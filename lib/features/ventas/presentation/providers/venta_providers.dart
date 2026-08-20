@@ -25,6 +25,22 @@ final ofertasActivosProvider = FutureProvider<List<Oferta>>((ref) async {
   return repo.obtenerOfertasActivas();
 });
 
+// ✅ PROVIDERS QUE FALTABAN Y YA USABAN OTRAS PÁGINAS
+final listaVentasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final repo = ref.watch(ventasRepositoryProvider);
+  return repo.listarVentas();
+});
+
+final listaCotizacionesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final repo = ref.watch(ventasRepositoryProvider);
+  return repo.listarCotizaciones();
+});
+
+final listaApartadosProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final repo = ref.watch(ventasRepositoryProvider);
+  return repo.listarApartados();
+});
+
 class RegistrarVentaState {
   const RegistrarVentaState({
     this.numero = '',
@@ -169,10 +185,11 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
   }
 
   bool validarAntesDeGuardar() {
-    return state.clienteId != null &&
-        state.tipoPago.isNotEmpty &&
-        state.detalles.isNotEmpty &&
-        state.total > 0;
+    if (state.clienteId == null) return false;
+    if (state.tipoPago.isEmpty) return false;
+    if (state.detalles.isEmpty) return false;
+    if (state.total <= 0) return false;
+    return true;
   }
 }
 
@@ -180,15 +197,3 @@ final registrarVentaProvider =
     StateNotifierProvider<RegistrarVentaNotifier, RegistrarVentaState>(
   (ref) => RegistrarVentaNotifier(),
 );
-
-final listaVentasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  return [];
-});
-
-final listaCotizacionesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  return [];
-});
-
-final listaApartadosProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  return [];
-});
