@@ -4,11 +4,9 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/encabezado_venta.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/buscador_productos_venta.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/carrito_venta.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/datos_venta.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_secciones/botones_accion_venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
@@ -310,24 +308,64 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                EncabezadoVenta(numeroVenta: _ventaNumero),
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Nueva Venta',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Nº $_ventaNumero',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
-                BuscadorProductosVenta(
+                PanelProductos(
                   controlador: _buscadorController,
-                  alBuscar: _buscarYAgregarProducto,
+                  alAgregar: _buscarYAgregarProducto,
                 ),
                 const SizedBox(height: 24),
-                const CarritoVenta(),
-                const SizedBox(height: 24),
-                DatosVenta(
+                FormularioVenta(
                   alSeleccionarCliente: _abrirSelectorCliente,
                   alSeleccionarFormaPago: _abrirSelectorFormaPago,
                 ),
+                const SizedBox(height: 24),
+                const PanelCarrito(),
                 const SizedBox(height: 32),
-                BotonesAccionVenta(
-                  cargando: _cargando,
-                  alLimpiar: _limpiarVenta,
-                  alGuardar: _cobrarYRegistrarSalida,
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _limpiarVenta,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Limpiar Venta'),
+                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _cargando ? null : _cobrarYRegistrarSalida,
+                        icon: _cargando
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
+                            : const Icon(Icons.save),
+                        label: Text(_cargando ? 'Guardando...' : 'Registrar Venta'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -1,26 +1,25 @@
 class Venta {
+
   const Venta({
     this.id,
     required this.numero,
     required this.clienteId,
-    required this.usuarioId,
     required this.fecha,
     required this.detalles,
     required this.subtotal,
     required this.itbis,
     required this.total,
     required this.tipoPago,
-    this.esCredito = false,
+    required this.esCredito,
     this.cotizacionOrigenId,
     this.apartadoOrigenId,
+    this.usuarioId,
     this.createdAt,
     this.updatedAt,
   });
-
   final int? id;
   final String numero;
-  final int clienteId;
-  final int usuarioId;
+  final int? clienteId;
   final DateTime fecha;
   final List<DetalleVenta> detalles;
   final double subtotal;
@@ -30,11 +29,13 @@ class Venta {
   final bool esCredito;
   final int? cotizacionOrigenId;
   final int? apartadoOrigenId;
+  final int? usuarioId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 }
 
 class DetalleVenta {
+
   const DetalleVenta({
     required this.productoId,
     required this.nombreProducto,
@@ -43,8 +44,8 @@ class DetalleVenta {
     required this.subtotalLinea,
     this.descuentoPorcentaje,
     this.montoDescuento,
+    this.tasaImpuesto = 18.0,
   });
-
   final int productoId;
   final String nombreProducto;
   final double cantidad;
@@ -52,4 +53,5 @@ class DetalleVenta {
   final double subtotalLinea;
   final double? descuentoPorcentaje;
   final double? montoDescuento;
+  final double tasaImpuesto;
 }

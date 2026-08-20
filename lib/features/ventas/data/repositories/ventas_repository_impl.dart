@@ -78,8 +78,8 @@ class VentasRepositoryImpl implements IVentasRepository {
     );
 
     final companion = VentasTableCompanion(
-      clienteId: Value(venta.clienteId),
-      usuarioId: Value(venta.usuarioId),
+      clienteId: Value(venta.clienteId ?? 0),
+      usuarioId: Value(venta.usuarioId ?? 0),
       fecha: Value(venta.fecha),
       montoSubtotal: Value(venta.subtotal),
       itbis: Value(venta.itbis),
