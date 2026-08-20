@@ -45,21 +45,24 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             ListTile(
               title: const Text('Efectivo'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('efectivo', false);
+                ref.read(registrarVentaProvider.notifier)
+                   .cambiarFormaPago('efectivo', false);
                 Navigator.pop(ctx);
               },
             ),
             ListTile(
               title: const Text('Tarjeta'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('tarjeta', false);
+                ref.read(registrarVentaProvider.notifier)
+                   .cambiarFormaPago('tarjeta', false);
                 Navigator.pop(ctx);
               },
             ),
             ListTile(
               title: const Text('Crédito'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito', true);
+                ref.read(registrarVentaProvider.notifier)
+                   .cambiarFormaPago('credito', true);
                 Navigator.pop(ctx);
               },
             ),
@@ -90,11 +93,15 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                 Navigator.pop(ctx);
                 final termino = await _mostrarBusquedaDialog('Buscar Cliente');
                 if (termino != null && termino.trim().isNotEmpty) {
-                  final resultados = await ref.read(clienteCompletoControllerProvider.notifier).buscarPorNombre(termino);
+                  final resultados = await ref
+                      .read(clienteCompletoControllerProvider.notifier)
+                      .buscarPorNombre(termino);
                   if (resultados.isNotEmpty && mounted) {
                     _mostrarResultadosClientes(resultados);
                   } else if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se encontraron clientes')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('No se encontraron clientes')),
+                    );
                   }
                 }
               },
@@ -118,8 +125,14 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           onSubmitted: (valor) => Navigator.pop(ctx, valor),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(ctx, control.text), child: const Text('Buscar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, control.text),
+            child: const Text('Buscar'),
+          ),
         ],
       ),
     );
@@ -162,7 +175,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         title: const Text('Limpiar Venta'),
         content: const Text('¿Desea reiniciar la venta actual?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
           TextButton(
             onPressed: () {
               ref.read(registrarVentaProvider.notifier).vaciarVenta();
@@ -179,9 +195,12 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   Future<void> _cobrarYRegistrarSalida() async {
     final estado = ref.read(registrarVentaProvider);
     if (!ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar()) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Complete los datos antes de registrar')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Complete los datos antes de registrar')),
+      );
       return;
     }
+
     setState(() => _cargando = true);
     try {
       final venta = Venta(
@@ -196,16 +215,22 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         esCredito: estado.esCredito,
         usuarioId: estado.usuarioId ?? 0,
       );
+
       final casoUso = ref.read(registrarVentaUseCaseProvider);
       final ventaGuardada = await casoUso(venta);
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('✅ Venta registrada. ID: ${ventaGuardada.id}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('✅ Venta registrada. ID: ${ventaGuardada.id}')),
+        );
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
         _buscadorController.clear();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
       }
     } finally {
       if (mounted) setState(() => _cargando = false);
@@ -213,11 +238,17 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   }
 
   Future<void> _buscarYAgregarProducto(String termino) async {
-    final resultados = await ref.read(productoControllerProvider.notifier).buscarPorNombre(termino);
+    final resultados = await ref
+        .read(productoControllerProvider.notifier)
+        .buscarPorNombre(termino);
+
     if (resultados.isEmpty && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto no encontrado')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Producto no encontrado')),
+      );
       return;
     }
+
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
       final linea = DetalleVenta(
@@ -230,6 +261,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
       _buscadorController.clear();
     } else if (mounted) {
+      // ignore: unawaited_futures
       showDialog<dynamic>(
         context: context,
         builder: (ctx) => AlertDialog(
