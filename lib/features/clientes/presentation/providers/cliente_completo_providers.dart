@@ -45,6 +45,14 @@ class ClienteCompletoNotifier extends StateNotifier<AsyncValue<List<ClienteCompl
       state = AsyncValue.data(lista.where((c) => c.id != id).toList());
     });
   }
+
+  Future<List<ClienteCompleto>> buscarPorNombre(String nombre) async {
+    final termino = nombre.toLowerCase().trim();
+    return state.whenData((lista) => lista
+        .where((cliente) => cliente.nombre.toLowerCase().contains(termino))
+        .toList(),
+    ).value ?? [];
+  }
 }
 
 final clienteCompletoControllerProvider = StateNotifierProvider<ClienteCompletoNotifier, AsyncValue<List<ClienteCompleto>>>((ref) {

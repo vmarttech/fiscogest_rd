@@ -38,7 +38,6 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
   @override
   Widget build(BuildContext context) {
     final productosAsync = ref.watch(productoControllerProvider);
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -62,31 +61,32 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(11), borderSide: BorderSide.none),
                 prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF68717D)),
               ),
+              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 12),
-            Expanded(
-              child: productosAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
-                data: (productos) {
-                  final filtro = productos.where((p) {
-                    final termino = _buscador.text.toLowerCase();
-                    return termino.isEmpty || p.nombre.toLowerCase().contains(termino);
-                  }).toList();
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: filtro.length,
-                    itemBuilder: (_, i) {
-                      final p = filtro[i];
-                      return ListTile(
-                        title: Text(p.nombre),
-                        subtitle: Text('RD\$ ${p.precioVenta.toStringAsFixed(2)}'),
-                        onTap: () => _agregarProductoSeleccionado(p),
+            productosAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e')),
+              data: (productos) {
+                final filtro = productos.where((p) {
+                  final termino = _buscador.text.toLowerCase();
+                  return termino.isEmpty || p.nombre.toLowerCase().contains(termino);
+                }).toList();
+                return filtro.isEmpty
+                    ? const Padding(padding: EdgeInsets.all(32), child: Center(child: Text('No se encontraron productos')))
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filtro.length,
+                        itemBuilder: (_, i) {
+                          final p = filtro[i];
+                          return ListTile(
+                            title: Text(p.nombre),
+                            subtitle: Text('RD\$ ${p.precioVenta.toStringAsFixed(2)}'),
+                            onTap: () => _agregarProductoSeleccionado(p),
+                          );
+                        },
                       );
-                    },
-                  );
-                },
-              ),
+              },
             ),
           ],
         ),

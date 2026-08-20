@@ -6,12 +6,9 @@ import 'package:fiscogest_rd/features/inventario/data/repositories/producto_repo
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
 
-// ❌ SE ELIMINÓ: final kardexRepositoryProvider = ... (está en inventario_providers.dart)
-// ❌ SE ELIMINARON IMPORTS SOBRANTES: database_provider.dart, kardex_repository_impl.dart, ikardex_repository.dart
-
 final productoRepositoryProvider = Provider<IProductoRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  final kardexRepo = ref.watch(kardexRepositoryProvider); // ✅ SIGUE FUNCIONANDO: viene de inventario_providers.dart
+  final kardexRepo = ref.watch(kardexRepositoryProvider);
   return ProductoRepositoryImpl(db, kardexRepo);
 });
 
@@ -58,6 +55,14 @@ class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
+  }
+
+  Future<List<Producto>> buscarPorNombre(String nombre) async {
+    final termino = nombre.toLowerCase().trim();
+    return state.whenData((lista) => lista
+        .where((producto) => producto.nombre.toLowerCase().contains(termino))
+        .toList(),
+    ).value ?? [];
   }
 }
 

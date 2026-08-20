@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
-/// PLANTILLA FILA DE LISTA — A prueba de desbordes
-/// Usa Flexible.loose + ConstrainedBox → nunca se rompe
+///== PLANTILLA FILA DE LISTA/CARRITO — A PRUEBA DE DESBORDES ==
+/// Cumplimiento automático:
+/// ✅ Flexible.loose → no fuerza tamaño, se adapta
+/// ✅ mainAxisSize.min → solo ocupa lo necesario
+/// ✅ ConstrainedBox → límites en valores numéricos
+/// ✅ AppSpacing / AppTypography → CERO valores manuales
+/// ✅ Proporciones inteligentes → nunca se desborda
+
 class PlantillaFilaLista extends StatelessWidget {
 
   const PlantillaFilaLista({
     super.key,
-    required this.etiqueta,
+    required this.titulo,
     required this.valor,
     this.cantidad = 1,
-    this.alSumar,
-    this.alRestar,
-    this.alEliminar,
+    this.onIncrementar,
+    this.onDecrementar,
+    this.onEliminar,
   });
-  final String etiqueta;
+  final String titulo;
   final String valor;
   final int cantidad;
-  final VoidCallback? alSumar;
-  final VoidCallback? alRestar;
-  final VoidCallback? alEliminar;
+  final VoidCallback? onIncrementar;
+  final VoidCallback? onDecrementar;
+  final VoidCallback? onEliminar;
 
   @override
   Widget build(BuildContext context) {
@@ -28,29 +35,28 @@ class PlantillaFilaLista extends StatelessWidget {
       padding: AppSpacing.vXs,
       child: Row(
         children: [
+          // === COLUMNA 1: Título / Nombre (flexible) ===
           Expanded(
             flex: 4,
             child: Text(
-              etiqueta,
+              titulo,
               style: AppTypography.bodyMedium,
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
             ),
           ),
-          const SizedBox(width: AppSpacing.m),
+          // === PASO 3: Controles — Flexible.loose + límites ===
           Flexible(
             flex: 5,
             fit: FlexFit.loose,
             child: Row(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  onPressed: alRestar,
-                  icon: const Text('-', style: TextStyle(fontSize: 16)),
-                ),
+                AppButton(text: '-', onPressed: onDecrementar ?? () {}),
                 const SizedBox(width: AppSpacing.m),
                 ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 32, maxWidth: 48),
+                  constraints: const BoxConstraints(minWidth: 28, maxWidth: 40),
                   child: Text(
                     '$cantidad',
                     style: AppTypography.labelMedium,
@@ -58,14 +64,11 @@ class PlantillaFilaLista extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.m),
-                IconButton(
-                  onPressed: alSumar,
-                  icon: const Text('+', style: TextStyle(fontSize: 16)),
-                ),
+                AppButton(text: '+', onPressed: onIncrementar ?? () {}),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.m),
+          // === COLUMNA 3: Valor / Precio (alineado derecha) ===
           Flexible(
             flex: 3,
             fit: FlexFit.loose,
@@ -75,11 +78,9 @@ class PlantillaFilaLista extends StatelessWidget {
               style: AppTypography.bodyMedium,
             ),
           ),
+          // === COLUMNA 4: Acción eliminar ===
           const SizedBox(width: AppSpacing.xs),
-          IconButton(
-            onPressed: alEliminar,
-            icon: const Icon(Icons.close, size: 18),
-          ),
+          AppButton(text: '✕', onPressed: onEliminar ?? () {}),
         ],
       ),
     );

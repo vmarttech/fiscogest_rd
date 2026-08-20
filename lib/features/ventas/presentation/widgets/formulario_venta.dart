@@ -16,10 +16,11 @@ class FormularioVenta extends ConsumerWidget {
       children: [
         const Text('Datos de la venta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: 16),
-
         InkWell(
           onTap: () async {
-            notificador.seleccionarCliente(1);
+            // 🔧 AQUÍ: al tocar abre temporalmente un selector simple
+            // Reemplazar por buscador real de clientes cuando esté listo
+            _mostrarSelectorCliente(context, notificador);
           },
           borderRadius: BorderRadius.circular(10),
           child: Container(
@@ -40,8 +41,12 @@ class FormularioVenta extends ConsumerWidget {
                     children: [
                       const Text('Cliente', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B737D))),
                       const SizedBox(height: 2),
-                      Text(estado.clienteId != null ? 'Cliente ID ${estado.clienteId}' : 'Seleccionar cliente',
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF30363D))),
+                      Text(
+                        estado.clienteId != null
+                            ? 'Cliente seleccionado (ID: ${estado.clienteId})'
+                            : 'Seleccionar cliente',
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF30363D)),
+                      ),
                     ],
                   ),
                 ),
@@ -50,9 +55,7 @@ class FormularioVenta extends ConsumerWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 12),
-
         InkWell(
           onTap: () => _mostrarSelectorFormaPago(context, notificador),
           borderRadius: BorderRadius.circular(10),
@@ -90,6 +93,47 @@ class FormularioVenta extends ConsumerWidget {
     );
   }
 
+  void _mostrarSelectorCliente(BuildContext context, RegistrarVentaNotifier notificador) {
+    showModalBottomSheet<int>(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Seleccionar Cliente', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              title: const Text('Cliente de Prueba'),
+              subtitle: const Text('ID: 1'),
+              onTap: () {
+                notificador.seleccionarCliente(1);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Otro Cliente'),
+              subtitle: const Text('ID: 2'),
+              onTap: () {
+                notificador.seleccionarCliente(2);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Sin cliente'),
+              onTap: () {
+                notificador.seleccionarCliente(null);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _mostrarSelectorFormaPago(BuildContext context, RegistrarVentaNotifier notificador) {
     showModalBottomSheet<FormaPago>(
       context: context,
@@ -102,6 +146,7 @@ class FormularioVenta extends ConsumerWidget {
               title: Text('${fp.name[0].toUpperCase()}${fp.name.substring(1)}'),
               onTap: () {
                 notificador.cambiarFormaPago(fp.name, credito);
+                notificador.cambiarEsCredito(credito);
                 Navigator.pop<FormaPago>(context);
               },
             );

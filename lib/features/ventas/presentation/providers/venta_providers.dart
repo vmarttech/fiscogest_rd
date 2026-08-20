@@ -6,24 +6,20 @@ import 'package:fiscogest_rd/features/ventas/domain/usecases/actualizar_ventas_e
 import 'package:fiscogest_rd/features/ventas/domain/services/venta_orquestador_service.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
-
 /// ============================================================
 /// DEPENDENCIAS
 /// ============================================================
 final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
   return RepositoryInjection.instance.ventasRepository;
 });
-
 final registrarVentaUseCaseProvider = Provider<RegistrarVenta>((ref) {
   final IVentasRepository repository = ref.watch(ventasRepositoryProvider);
   return RegistrarVenta(repository);
 });
-
 final actualizarVentasEnCascadaUseCaseProvider = Provider<ActualizarVentasEnCascada>((ref) {
   final IVentasRepository repository = ref.watch(ventasRepositoryProvider);
   return ActualizarVentasEnCascada(repository);
 });
-
 final ventaOrquestadorServiceProvider = Provider<VentaOrquestadorService>((ref) {
   final RegistrarVenta registrarVenta = ref.watch(registrarVentaUseCaseProvider);
   final ActualizarVentasEnCascada actualizarEnCascada = ref.watch(actualizarVentasEnCascadaUseCaseProvider);
@@ -32,7 +28,6 @@ final ventaOrquestadorServiceProvider = Provider<VentaOrquestadorService>((ref) 
     actualizarEnCascada: actualizarEnCascada,
   );
 });
-
 /// ============================================================
 /// HISTORIALES
 /// ============================================================
@@ -40,17 +35,14 @@ final listaVentasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) asy
   final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
   return repositorio.listarVentas();
 });
-
 final listaCotizacionesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
   return repositorio.listarCotizaciones();
 });
-
 final listaApartadosProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
   return repositorio.listarApartados();
 });
-
 /// ============================================================
 /// SESIÓN DEL USUARIO — IGUAL QUE EL RESTO DEL SISTEMA
 /// ============================================================
@@ -58,12 +50,10 @@ final usuarioSesionIdProvider = Provider<int>((ref) {
   final id = ref.watch(usuarioAutenticadoProvider);
   return id ?? 0;
 });
-
 /// ============================================================
 /// GESTIÓN DE ESTADO: REGISTRAR VENTA
 /// ============================================================
 class RegistrarVentaState {
-
   const RegistrarVentaState({
     required this.numero,
     this.clienteId,
@@ -75,6 +65,22 @@ class RegistrarVentaState {
     this.total = 0.0,
     this.usuarioId,
   });
+
+  /// Constructor para reiniciar venta a estado vacío
+  factory RegistrarVentaState.vacio({required String numero, int? usuarioId}) {
+    return RegistrarVentaState(
+      numero: numero,
+      clienteId: null,
+      tipoPago: '',
+      esCredito: false,
+      detalles: const [],
+      subtotal: 0.0,
+      itbis: 0.0,
+      total: 0.0,
+      usuarioId: usuarioId,
+    );
+  }
+
   final String numero;
   final int? clienteId;
   final String tipoPago;
@@ -111,7 +117,6 @@ class RegistrarVentaState {
 }
 
 class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
-
   RegistrarVentaNotifier(this._ref)
       : super(RegistrarVentaState(
           numero: DateTime.now().millisecondsSinceEpoch.toString().substring(8),
@@ -119,20 +124,19 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
     _cargarUsuarioSesion();
   }
   final Ref _ref;
-
   void _cargarUsuarioSesion() {
     final idUsuario = _ref.read(usuarioSesionIdProvider);
     state = state.copiarCon(usuarioId: idUsuario);
   }
-
   void seleccionarCliente(int? idCliente) {
     state = state.copiarCon(clienteId: idCliente);
   }
-
   void cambiarFormaPago(String formaPago, bool credito) {
     state = state.copiarCon(tipoPago: formaPago, esCredito: credito);
   }
-
+  void cambiarEsCredito(bool valor) {
+    state = state.copiarCon(esCredito: valor);
+  }
   void agregarProducto(DetalleVenta linea) {
     final nuevaLista = List<DetalleVenta>.from(state.detalles)..add(linea);
     final subtotal = nuevaLista.fold<double>(0.0, (s, l) => s + l.subtotalLinea);
@@ -145,7 +149,6 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
       total: total,
     );
   }
-
   void quitarProducto(int indice) {
     if (indice < 0 || indice >= state.detalles.length) return;
     final nuevaLista = List<DetalleVenta>.from(state.detalles)..removeAt(indice);
@@ -159,7 +162,13 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
       total: total,
     );
   }
-
+  void vaciarVenta() {
+    final nuevoNumero = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    state = RegistrarVentaState.vacio(
+      numero: nuevoNumero,
+      usuarioId: _ref.read(usuarioSesionIdProvider),
+    );
+  }
   bool validarAntesDeGuardar() {
     return state.clienteId != null &&
         state.tipoPago.isNotEmpty &&
