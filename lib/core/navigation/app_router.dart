@@ -13,7 +13,7 @@ import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/lista
 import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ventas_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_page.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/cotizaciones_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_cotizacion_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
@@ -48,7 +48,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const AppShell(child: VentasPage()),
         routes: [
           GoRoute(path: 'registrar', name: RegistrarVentaPage.routeName, builder: (_, __) => const AppShell(child: RegistrarVentaPage())),
-          GoRoute(path: 'cotizaciones', name: CotizacionesPage.routeName, builder: (_, __) => const AppShell(child: CotizacionesPage())),
+          GoRoute(path: 'cotizaciones/nueva', name: NuevaCotizacionPage.routeName, builder: (_, __) => const AppShell(child: NuevaCotizacionPage())),
           GoRoute(path: 'apartados', name: ApartadosPage.routeName, builder: (_, __) => const AppShell(child: ApartadosPage())),
           GoRoute(path: 'devoluciones', name: DevolucionesPage.routeName, builder: (_, __) => const AppShell(child: DevolucionesPage())),
           GoRoute(path: 'cobrar', name: CobrarPage.routeName, builder: (_, __) => const AppShell(child: CobrarPage())),

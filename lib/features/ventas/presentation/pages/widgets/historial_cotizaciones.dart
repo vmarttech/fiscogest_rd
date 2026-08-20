@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_cotizacion_page.dart';
 
 class HistorialCotizaciones extends ConsumerWidget {
   const HistorialCotizaciones({super.key});
@@ -44,13 +46,28 @@ class HistorialCotizaciones extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cotizacionesAsync = ref.watch(listaCotizacionesProvider);
-
     return Padding(
       padding: AppSpacing.allM,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Cotizaciones', style: AppTypography.h4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Cotizaciones', style: AppTypography.h4),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Nueva Cotización'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  context.goNamed(NuevaCotizacionPage.routeName);
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: AppSpacing.xs),
           Text('Lista de cotizaciones emitidas y su estado', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.m),
@@ -93,7 +110,6 @@ class HistorialCotizaciones extends ConsumerWidget {
                     final double total = _valorComoDouble(c, 'montoTotal') + _valorComoDouble(c, 'monto_total');
                     final bool convertida = _valorComoBooleano(c, 'convertida_a_venta', false) || _valorComoBooleano(c, 'convertidaAVenta', false);
                     final int? cotizacionId = c['id'] as int?;
-
                     return _TarjetaCotizacion(
                       numero: numero,
                       fechaEmision: fechaEmision,
@@ -144,7 +160,6 @@ class _TarjetaCotizacion extends ConsumerWidget {
       ),
     );
     if (confirmar != true || !context.mounted) return;
-
     try {
       final repo = ref.read(ventasRepositoryProvider);
       await repo.convertirCotizacionAVenta(cotizacionId!);
