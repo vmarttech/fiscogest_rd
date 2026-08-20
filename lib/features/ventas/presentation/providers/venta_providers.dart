@@ -1,4 +1,5 @@
 import 'package:riverpod/riverpod.dart';
+import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
@@ -6,7 +7,7 @@ import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_venta.dar
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
 
 final ventasRepositoryProvider = Provider<VentasRepositoryImpl>((ref) {
-  throw UnimplementedError('Inyectar dependencias del repositorio en el punto de arranque');
+  return RepositoryInjection.instance.ventasRepository;
 });
 
 final registrarVentaUseCaseProvider = Provider<RegistrarVenta>((ref) {

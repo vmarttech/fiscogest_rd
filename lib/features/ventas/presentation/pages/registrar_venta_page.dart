@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
@@ -32,6 +33,153 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     super.dispose();
   }
 
+  Oferta? _buscarOfertaAplicable(List<Oferta> ofertas, int productoId, double cantidad) {
+    for (final oferta in ofertas) {
+      if (oferta.productoId == productoId && cantidad >= oferta.cantidadMinima) {
+        return oferta;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _buscarYAgregarProducto(String termino) async {
+    final resultados = await ref
+        .read(productoControllerProvider.notifier)
+        .buscarPorNombre(termino);
+
+    if (resultados.isEmpty && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Producto no encontrado')),
+      );
+      return;
+    }
+
+    // ✅ AGREGADO 'await' FALTANTE EN LÍNEA 97
+    final ofertasActivas = await ref.watch(ofertasActivosProvider.future);
+
+    if (resultados.length == 1 && mounted) {
+      final p = resultados.first;
+      final oferta = _buscarOfertaAplicable(ofertasActivas, p.id ?? 0, 1);
+
+      double precioUnitario = p.precioVenta.toDouble();
+      double? precioOriginal;
+      int? ofertaId;
+      String? ofertaNombre;
+
+      if (oferta != null) {
+        precioOriginal = p.precioVenta.toDouble();
+        precioUnitario = oferta.precioOferta;
+        ofertaId = oferta.id;
+        ofertaNombre = oferta.nombre;
+      }
+
+      final linea = DetalleVenta(
+        productoId: p.id ?? 0,
+        nombreProducto: p.nombre,
+        cantidad: 1,
+        precioUnitario: precioUnitario,
+        subtotalLinea: precioUnitario,
+        ofertaId: ofertaId,
+        ofertaNombre: ofertaNombre,
+        precioOriginal: precioOriginal,
+      );
+      ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
+      _buscadorController.clear();
+
+      if (oferta != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('🎉 Oferta aplicada: ${oferta.nombre}'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } else if (mounted) {
+      showDialog<dynamic>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Seleccione Producto'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: resultados.length,
+              itemBuilder: (ctx, i) {
+                final p = resultados[i];
+                final oferta = _buscarOfertaAplicable(ofertasActivas, p.id ?? 0, 1);
+                return ListTile(
+                  title: Row(
+                    children: [
+                      Text(p.nombre),
+                      if (oferta != null)
+                        Container(
+                          margin: const EdgeInsets.only(left: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'OFERTA',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange.shade700,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  subtitle: Text(
+                    oferta != null
+                        ? 'Oferta: RD\$ ${oferta.precioOferta.toStringAsFixed(2)} (antes RD\$ ${p.precioVenta.toStringAsFixed(2)})'
+                        : 'RD\$ ${p.precioVenta.toStringAsFixed(2)}',
+                  ),
+                  onTap: () {
+                    double precioUnitario = p.precioVenta.toDouble();
+                    double? precioOriginal;
+                    int? ofertaId;
+                    String? ofertaNombre;
+
+                    if (oferta != null) {
+                      precioOriginal = p.precioVenta.toDouble();
+                      precioUnitario = oferta.precioOferta;
+                      ofertaId = oferta.id;
+                      ofertaNombre = oferta.nombre;
+                    }
+
+                    final linea = DetalleVenta(
+                      productoId: p.id ?? 0,
+                      nombreProducto: p.nombre,
+                      cantidad: 1,
+                      precioUnitario: precioUnitario,
+                      subtotalLinea: precioUnitario,
+                      ofertaId: ofertaId,
+                      ofertaNombre: ofertaNombre,
+                      precioOriginal: precioOriginal,
+                    );
+                    ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
+                    _buscadorController.clear();
+                    Navigator.pop(ctx);
+
+                    if (oferta != null && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('🎉 Oferta aplicada: ${oferta.nombre}'),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   void _abrirSelectorFormaPago() {
     showDialog<dynamic>(
       context: context,
@@ -43,24 +191,21 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             ListTile(
               title: const Text('Efectivo'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier)
-                   .cambiarFormaPago('efectivo', false);
+                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('efectivo', false);
                 Navigator.pop(ctx);
               },
             ),
             ListTile(
               title: const Text('Tarjeta'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier)
-                   .cambiarFormaPago('tarjeta', false);
+                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('tarjeta', false);
                 Navigator.pop(ctx);
               },
             ),
             ListTile(
               title: const Text('Crédito'),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier)
-                   .cambiarFormaPago('credito', true);
+                ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito', true);
                 Navigator.pop(ctx);
               },
             ),
@@ -90,7 +235,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
               onTap: () async {
                 Navigator.pop(ctx);
                 final termino = await _mostrarBusquedaDialog('Buscar Cliente');
-                if (termino != null && termino.trim().isNotEmpty) {
+                if (termino != null && termino.trim().isNotEmpty && mounted) {
                   final resultados = await ref
                       .read(clienteCompletoControllerProvider.notifier)
                       .buscarPorNombre(termino);
@@ -123,14 +268,8 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           onSubmitted: (valor) => Navigator.pop(ctx, valor),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, control.text),
-            child: const Text('Buscar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx, control.text), child: const Text('Buscar')),
         ],
       ),
     );
@@ -173,10 +312,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         title: const Text('Limpiar Venta'),
         content: const Text('¿Desea reiniciar la venta actual?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
           TextButton(
             onPressed: () {
               ref.read(registrarVentaProvider.notifier).vaciarVenta();
@@ -235,111 +371,52 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     }
   }
 
-  Future<void> _buscarYAgregarProducto(String termino) async {
-    final resultados = await ref
-        .read(productoControllerProvider.notifier)
-        .buscarPorNombre(termino);
-
-    if (resultados.isEmpty && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Producto no encontrado')),
-      );
-      return;
-    }
-
-    if (resultados.length == 1 && mounted) {
-      final p = resultados.first;
-      final linea = DetalleVenta(
-        productoId: p.id ?? 0,
-        nombreProducto: p.nombre,
-        cantidad: 1,
-        precioUnitario: p.precioVenta.toDouble(),
-        subtotalLinea: p.precioVenta.toDouble(),
-      );
-      ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
-      _buscadorController.clear();
-    } else if (mounted) {
-      // ignore: unawaited_futures
-      showDialog<dynamic>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Seleccione Producto'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: resultados.length,
-              itemBuilder: (ctx, i) {
-                final p = resultados[i];
-                return ListTile(
-                  title: Text(p.nombre),
-                  subtitle: Text('RD\$ ${p.precioVenta.toStringAsFixed(2)}'),
-                  onTap: () {
-                    final linea = DetalleVenta(
-                      productoId: p.id ?? 0,
-                      nombreProducto: p.nombre,
-                      cantidad: 1,
-                      precioUnitario: p.precioVenta.toDouble(),
-                      subtotalLinea: p.precioVenta.toDouble(),
-                    );
-                    ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
-                    _buscadorController.clear();
-                    Navigator.pop(ctx);
-                  },
-                );
-              },
-            ),
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.watch(registrarVentaProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Registrar Venta')),
+      appBar: AppBar(title: const Text('Registrar Venta'),),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900),
+            constraints: const BoxConstraints(maxWidth: 850),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Card(
-                  elevation: 4,
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           'Nueva Venta',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Nº $_ventaNumero',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                          style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 PanelProductos(
                   controlador: _buscadorController,
                   alAgregar: _buscarYAgregarProducto,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 FormularioVenta(
                   alSeleccionarCliente: _abrirSelectorCliente,
                   alSeleccionarFormaPago: _abrirSelectorFormaPago,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 const PanelCarrito(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
@@ -347,7 +424,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         onPressed: _limpiarVenta,
                         icon: const Icon(Icons.refresh),
                         label: const Text('Limpiar Venta'),
-                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -355,13 +435,14 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                       child: ElevatedButton.icon(
                         onPressed: _cargando ? null : _cobrarYRegistrarSalida,
                         icon: _cargando
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),)
                             : const Icon(Icons.save),
                         label: Text(_cargando ? 'Guardando...' : 'Registrar Venta'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Colors.green.shade600,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                       ),
                     ),

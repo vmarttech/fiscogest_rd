@@ -45,6 +45,9 @@ class DetalleVenta {
     this.descuentoPorcentaje,
     this.montoDescuento,
     this.tasaImpuesto = 18.0,
+    this.ofertaId,
+    this.ofertaNombre,
+    this.precioOriginal,
   });
   final int productoId;
   final String nombreProducto;
@@ -54,4 +57,7 @@ class DetalleVenta {
   final double? descuentoPorcentaje;
   final double? montoDescuento;
   final double tasaImpuesto;
+  final int? ofertaId;
+  final String? ofertaNombre;
+  final double? precioOriginal;
 }
