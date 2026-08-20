@@ -40,7 +40,7 @@ class DatosVenta extends ConsumerWidget {
             ),
             const Divider(height: 24),
             _buildFilaTotal('Subtotal', estadoLocal.subtotal),
-            _buildFilaTotal('ITBIS (18%)', estadoLocal.itbis),
+            _buildFilaTotal('ITBIS (16%)', estadoLocal.itbis),
             const Divider(),
             _buildFilaTotal('TOTAL A PAGAR', estadoLocal.total, esTotal: true),
           ],
