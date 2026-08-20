@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 
 class NuevaCotizacionPage extends ConsumerStatefulWidget {
   const NuevaCotizacionPage({super.key});
@@ -25,6 +27,16 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     super.dispose();
   }
 
+  Future<void> _seleccionarCliente() async {
+    final ClienteEntity? cliente = await SeleccionarClienteDialog.mostrar(context);
+    if (cliente != null && mounted) {
+      ref.read(cotizacionProvider.notifier).seleccionarCliente(
+        cliente.id ?? 0,
+        cliente.nombre,
+      );
+    }
+  }
+
   Future<void> _seleccionarVencimiento() async {
     final hoy = DateTime.now();
     final fecha = await showDatePicker(
@@ -34,16 +46,14 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
       lastDate: hoy.add(const Duration(days: 365)),
     );
     if (fecha != null) {
-      setState(() {
-        _fechaVencimientoSeleccionada = fecha;
-      });
+      setState(() => _fechaVencimientoSeleccionada = fecha);
       ref.read(cotizacionProvider.notifier).establecerVencimiento(fecha);
     }
   }
 
   Future<void> _alAgregar(String textoBusqueda) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Buscando: $textoBusqueda — integración pendiente')),
+      SnackBar(content: Text('Buscando producto: $textoBusqueda')),
     );
   }
 
@@ -53,13 +63,13 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('⚠️ Seleccione cliente, fecha de vencimiento futura y al menos un producto'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('✅ Cotización guardada'), backgroundColor: Colors.green),
+      const SnackBar(content: Text('✅ Cotización guardada'), backgroundColor: AppColors.success),
     );
     ref.invalidate(listaCotizacionesProvider);
     ref.read(cotizacionProvider.notifier).vaciar();
@@ -68,6 +78,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final estado = ref.watch(cotizacionProvider);
     return AppScaffold(
       title: 'Nueva Cotización',
       body: Column(
@@ -77,7 +88,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final esPantallaAncha = constraints.maxWidth >= 720;
-                return _buildCuerpo(esPantallaAncha);
+                return _buildCuerpo(esPantallaAncha, estado);
               },
             ),
           ),
@@ -86,7 +97,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     );
   }
 
-  Widget _buildCuerpo(bool esPantallaAncha) {
+  Widget _buildCuerpo(bool esPantallaAncha, CotizacionState estado) {
     if (esPantallaAncha) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +106,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
             flex: 5,
             child: SingleChildScrollView(
               padding: AppSpacing.allM,
-              child: _buildColumnaIzquierda(),
+              child: _buildColumnaIzquierda(estado),
             ),
           ),
           const SizedBox(width: AppSpacing.m),
@@ -103,7 +114,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
             flex: 5,
             child: SingleChildScrollView(
               padding: AppSpacing.allM,
-              child: _buildColumnaDerecha(),
+              child: _buildColumnaDerecha(estado),
             ),
           ),
         ],
@@ -114,15 +125,15 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildColumnaIzquierda(),
+          _buildColumnaIzquierda(estado),
           const SizedBox(height: AppSpacing.m),
-          _buildColumnaDerecha(),
+          _buildColumnaDerecha(estado),
         ],
       ),
     );
   }
 
-  Widget _buildColumnaIzquierda() {
+  Widget _buildColumnaIzquierda(CotizacionState estado) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -137,14 +148,10 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
               children: [
                 ListTile(
                   title: const Text('Cliente'),
-                  subtitle: Text(ref.watch(cotizacionProvider).clienteNombre ?? 'No seleccionado'),
+                  subtitle: Text(estado.clienteNombre ?? 'No seleccionado'),
                   trailing: const Icon(Icons.search),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Buscador de clientes — pendiente')),
-                    );
-                  },
+                  onTap: _seleccionarCliente,
                 ),
                 const SizedBox(height: AppSpacing.m),
                 ListTile(
@@ -171,8 +178,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     );
   }
 
-  Widget _buildColumnaDerecha() {
-    final estado = ref.watch(cotizacionProvider);
+  Widget _buildColumnaDerecha(CotizacionState estado) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -200,14 +206,22 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
                     Text('RD\$ ${estado.itbis.toStringAsFixed(2)}'),
                   ],
                 ),
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Descuento:', style: AppTypography.labelMedium),
+                    Text('RD\$ ${estado.descuento.toStringAsFixed(2)}'),
+                  ],
+                ),
                 const Divider(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Total:', style: AppTypography.h4.copyWith(color: Colors.green.shade700)),
+                    Text('Total:', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)),
                     Text(
                       'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
-                      style: AppTypography.h4.copyWith(color: Colors.green.shade700),
+                      style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -215,17 +229,13 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.l),
-        const Text('Detalle', style: AppTypography.h4),
-        const SizedBox(height: AppSpacing.s),
-        const PanelCarrito(),
         const SizedBox(height: AppSpacing.xl),
         ElevatedButton.icon(
           icon: const Icon(Icons.save),
           label: const Text('Guardar Cotización'),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(double.infinity, 48),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
             foregroundColor: Colors.white,
           ),
           onPressed: _guardarCotizacion,
