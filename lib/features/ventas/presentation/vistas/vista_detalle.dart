@@ -3,14 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 
-/// Vista de detalle: carrito + formulario + totales + confirmación
-/// ✅ Imports limpios + const aplicado donde corresponde
+/// Vista de detalle — Selectores de Cliente y Forma de Pago INTEGRADOS
+/// ✅ REUTILIZA: SeleccionarClienteDialog existente
+/// ✅ REUTILIZA: enum FormaPago de comercio_enums.dart
+/// ✅ CONECTA: registrarVentaProvider.seleccionarCliente / cambiarFormaPago
 class VistaDetalle extends ConsumerStatefulWidget {
   const VistaDetalle({super.key});
 
@@ -19,16 +23,50 @@ class VistaDetalle extends ConsumerStatefulWidget {
 }
 
 class _VistaDetalleState extends ConsumerState<VistaDetalle> {
-  void _alSeleccionarCliente() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Selector de clientes se integrará aquí')),
-    );
+  Future<void> _alSeleccionarCliente() async {
+    final cliente = await SeleccionarClienteDialog.mostrar(context);
+    if (cliente != null && cliente.id != null) {
+      ref.read(registrarVentaProvider.notifier).seleccionarCliente(cliente.id!);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cliente seleccionado: ${cliente.nombre}')),
+        );
+      }
+    }
   }
 
   void _alSeleccionarFormaPago() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Selector de pago se integrará aquí')),
-    );
+    showDialog<FormaPago>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Forma de Pago'),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: FormaPago.values.map((forma) {
+            final etiqueta = switch (forma) {
+              FormaPago.efectivo => 'Efectivo',
+              FormaPago.tarjeta => 'Tarjeta',
+              FormaPago.transferencia => 'Transferencia',
+              FormaPago.credito => 'Crédito',
+              FormaPago.cheque => 'Cheque',
+            };
+            return ListTile(
+              title: Text(etiqueta),
+              onTap: () => Navigator.pop(ctx, forma),
+            );
+          }).toList(),
+        ),
+      ),
+    ).then((seleccion) {
+      if (seleccion != null) {
+        final etiqueta = seleccion.name;
+        final esCredito = seleccion == FormaPago.credito;
+        ref
+            .read(registrarVentaProvider.notifier)
+            .cambiarFormaPago(etiqueta, esCredito);
+      }
+    });
   }
 
   Future<void> _confirmarVenta() async {
