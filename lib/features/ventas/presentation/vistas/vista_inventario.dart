@@ -5,13 +5,14 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 /// Vista de listado y selección de productos
 /// ✅ REUTILIZA: entidad Producto + productoControllerProvider existentes
-/// ✅ FILTRA: según categoría seleccionada en barra inferior
-/// ✅ NAVEGA: al detalle al seleccionar producto
+/// ✅ CONECTA: selección → crea DetalleVenta → agrega al carrito → navega a detalle
 class VistaInventario extends ConsumerStatefulWidget {
   const VistaInventario({super.key});
 
@@ -22,6 +23,7 @@ class VistaInventario extends ConsumerStatefulWidget {
 class _VistaInventarioState extends ConsumerState<VistaInventario> {
   final _busqueda = TextEditingController();
   String? _terminoBusqueda;
+  static const double _tasaItbis = 18.0;
 
   @override
   void dispose() {
@@ -32,7 +34,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
   List<Producto> _filtrar(List<Producto> lista, CategoriaProducto categoria) {
     var resultados = lista.where((p) => p.activo).toList();
 
-    // Filtrar por término de búsqueda
     if (_terminoBusqueda != null && _terminoBusqueda!.isNotEmpty) {
       final termino = _terminoBusqueda!.toLowerCase().trim();
       resultados = resultados
@@ -42,9 +43,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
           .toList();
     }
 
-    // TODO: Cuando tengas categorías reales asignadas a productos,
-    // aquí se cruza categoriaId con la categoría seleccionada
-    // Por ahora: Manufactura → productos con descripción indicadora
     switch (categoria) {
       case CategoriaProducto.productos:
         return resultados;
@@ -54,9 +52,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                 p.descripcion?.toLowerCase().contains('manufactura') == true)
             .toList();
       case CategoriaProducto.servicios:
-        return resultados
-            .where((p) => p.unidadMedidaId == 99)
-            .toList();
+        return resultados.where((p) => p.unidadMedidaId == 99).toList();
       case CategoriaProducto.scanner:
         return resultados
             .where((p) => p.codigoBarras?.isNotEmpty == true)
@@ -65,8 +61,20 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
   }
 
   void _seleccionarProducto(Producto producto) {
-    // TODO: Conectar con carrito/línea de venta
-    // Por ahora: navegar a VistaDetalle llevando el producto
+    final cantidad = 1.0;
+    final precioUnitario = producto.precioVenta;
+    final subtotal = cantidad * precioUnitario;
+
+    final linea = DetalleVenta(
+      productoId: producto.id ?? 0,
+      nombreProducto: producto.nombre,
+      cantidad: cantidad,
+      precioUnitario: precioUnitario,
+      subtotalLinea: subtotal,
+      tasaImpuesto: _tasaItbis,
+    );
+
+    ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
     ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.detalle);
   }
 
@@ -79,7 +87,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
 
     return Column(
       children: [
-        // Buscador
         Padding(
           padding: AppSpacing.allM,
           child: TextField(
@@ -97,8 +104,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
             },
           ),
         ),
-
-        // Listado
         Expanded(
           child: estadoProductos.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -154,15 +159,9 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    producto.nombre,
-                                    style: AppTypography.labelLarge,
-                                  ),
+                                  Text(producto.nombre, style: AppTypography.labelLarge),
                                   const SizedBox(height: AppSpacing.xs),
-                                  Text(
-                                    producto.codigo,
-                                    style: AppTypography.bodySmall,
-                                  ),
+                                  Text(producto.codigo, style: AppTypography.bodySmall),
                                 ],
                               ),
                             ),

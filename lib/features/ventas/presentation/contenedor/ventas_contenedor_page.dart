@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/barra_navegacion_inferior.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inventario.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_detalle.dart';
 
-/// CONTENEDOR ÚNICO DEL MÓDULO VENTAS
-/// ✅ Integra VistaInventario conectada a tu fuente real de productos
+/// CONTENEDOR ÚNICO DEL MÓDULO VENTAS — FASE 4 COMPLETA
+/// ✅ Flujo: Inicio → Inventario → Detalle
+/// ✅ Imports estrictamente necesarios
 class VentasContenedorPage extends ConsumerStatefulWidget {
   const VentasContenedorPage({
     super.key,
@@ -62,13 +63,20 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
             icon: const Icon(Icons.delete_sweep_outlined),
             tooltip: 'Limpiar operación',
             color: AppColors.textSecondary,
-            onPressed: _limpiarOperacion,
+            onPressed: () {
+              ref.read(registrarVentaProvider.notifier).vaciarVenta();
+              ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
+            },
           ),
           IconButton(
             icon: const Icon(Icons.check_circle_outline),
             tooltip: 'Confirmar',
             color: AppColors.primary,
-            onPressed: _confirmarOperacion,
+            onPressed: () {
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.detalle);
+            },
           ),
         ],
       ),
@@ -77,82 +85,15 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
           Expanded(
             child: IndexedStack(
               index: vistaActual.index,
-              children: [
-                const VistaInicioVacia(),
-                const VistaInventario(),
-                _construirVistaDetalle(),
+              children: const [
+                VistaInicioVacia(),
+                VistaInventario(),
+                VistaDetalle(),
               ],
             ),
           ),
           const BarraNavegacionInferior(),
         ],
-      ),
-    );
-  }
-
-  Widget _construirVistaDetalle() {
-    return const _VistaPlaceholder(
-      icono: Icons.receipt_long_outlined,
-      titulo: 'Detalle de operación',
-      descripcion:
-          'Aquí se integrará el formulario completo: cantidad, precio, descuento, cliente, pago',
-    );
-  }
-
-  void _limpiarOperacion() {
-    ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
-  }
-
-  void _confirmarOperacion() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Confirmación conectará con caso de uso oficial'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-}
-
-class _VistaPlaceholder extends StatelessWidget {
-  const _VistaPlaceholder({
-    required this.icono,
-    required this.titulo,
-    required this.descripcion,
-  });
-
-  final IconData icono;
-  final String titulo;
-  final String descripcion;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: AppSpacing.allXl,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icono,
-              size: 64,
-              color: AppColors.primary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: AppSpacing.m),
-            Text(
-              titulo,
-              style: AppTypography.h3,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.s),
-            Text(
-              descripcion,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
       ),
     );
   }
