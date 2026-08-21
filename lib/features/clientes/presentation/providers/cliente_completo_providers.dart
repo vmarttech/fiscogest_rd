@@ -1,9 +1,12 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/data/repositories/cliente_completo_repository.dart';
 
+// ✅ PROVEEDOR: OBTIENE LA BASE ÚNICA Y LA PASA AL REPOSITORIO
 final clienteCompletoRepositoryProvider = Provider<ClienteCompletoRepository>((ref) {
-  return ClienteCompletoRepository();
+  final db = ref.watch(appDatabaseProvider);
+  return ClienteCompletoRepository(db);
 });
 
 final clienteCompletoControllerProvider = AsyncNotifierProvider<ClienteCompletoController, List<ClienteCompleto>>(() {

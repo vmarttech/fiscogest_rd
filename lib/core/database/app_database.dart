@@ -5,7 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-
+import 'package:riverpod/riverpod.dart';
 // Tablas existentes
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
@@ -20,11 +20,9 @@ import 'package:fiscogest_rd/features/inventario/data/database/tables/kardex_tab
 import 'package:fiscogest_rd/features/ajustes_inventario/data/datasources/ajuste_inventario_database.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/data/database/tables/conteo_fisico_table.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/data/database/tables/diferencia_conteo_table.dart';
-
 // NUEVAS: Tablas base Fase 4
 import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dart';
 import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_table.dart';
-
 // NUEVAS: Tablas Fase 4 - Módulo Comercial
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_detalle_table.dart';
@@ -41,7 +39,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/kardex_comercial_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_table.dart';
-
 part 'app_database.g.dart';
 
 @DriftDatabase(tables: [
@@ -87,7 +84,10 @@ part 'app_database.g.dart';
   CajaMovimientosTable,
 ])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  factory AppDatabase() => _instance;
+  AppDatabase._internal() : super(_openConnection());
+  // ✅ SINGLETON: UNA SOLA INSTANCIA EN TODA LA APP
+  static final AppDatabase _instance = AppDatabase._internal();
 
   @override
   $CategoriasTable get categorias => super.categorias;
@@ -123,7 +123,6 @@ class AppDatabase extends _$AppDatabase {
             await m.alterTable(TableMigration(ajusteInventarioTable));
             await m.alterTable(TableMigration(diferenciasConteo));
           }
-          // NUEVA VERSIÓN 10: Fase 4 - Módulo Comercial completo
           if (from < 10) {
             await m.createTable(proveedoresTable);
             await m.createTable(usuariosTable);
@@ -151,6 +150,13 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final carpetaBase = await getApplicationDocumentsDirectory();
     final archivoDb = File(p.join(carpetaBase.path, 'fiscogest_rd.sqlite'));
-    return NativeDatabase(archivoDb);
+    return NativeDatabase.createInBackground(archivoDb);
   });
 }
+
+// ✅ PROVIDER GLOBAL: ÚNICA INSTANCIA COMPARTIDA
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(() => db.close());
+  return db;
+});

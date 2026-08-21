@@ -11,8 +11,8 @@ class ProductoDataMapper {
       codigoBarras: fila.codigoBarras,
       nombre: fila.nombre,
       descripcion: fila.descripcion,
-      precioCompra: fila.precioCompra,
-      precioVenta: fila.precioVenta,
+      precioCompra: fila.precioCompra ?? 0.0,
+      precioVenta: fila.precioVenta ?? 0.0,
       stock: fila.stock,
       stockMinimo: fila.stockMinimo,
       // ✅ Agregados campos que faltaban y generaban error

@@ -4,7 +4,10 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 
 class ClienteCompletoRepository {
-  final ClienteDao _dao = ClienteDao(AppDatabase());
+
+  // ✅ RECIBE LA BASE POR PARÁMETRO
+  ClienteCompletoRepository(AppDatabase db) : _dao = ClienteDao(db);
+  final ClienteDao _dao;
 
   Future<List<ClienteCompleto>> obtenerClientes() async {
     final registros = await _dao.obtenerTodos();

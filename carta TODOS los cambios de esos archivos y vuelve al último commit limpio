@@ -1,0 +1,1572 @@
+[1mdiff --git a/.flutter-plugins-dependencies b/.flutter-plugins-dependencies[m
+[1mindex 2e16b07..470272f 100644[m
+[1m--- a/.flutter-plugins-dependencies[m
+[1m+++ b/.flutter-plugins-dependencies[m
+[36m@@ -1 +1 @@[m
+[31m-{"info":"This is a generated file; do not edit or check into version control.","plugins":{"ios":[{"name":"path_provider_foundation","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_foundation-2.6.0/","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","shared_darwin_source":true,"native_build":true,"dependencies":[],"dev_dependency":false}],"android":[{"name":"jni","path":"/home/martin/.pub-cache/hosted/pub.dev/jni-1.0.3/","native_build":true,"dependencies":[],"dev_dependency":false},{"name":"jni_flutter","path":"/home/martin/.pub-cache/hosted/pub.dev/jni_flutter-1.0.2/","native_build":true,"dependencies":["jni"],"dev_dependency":false},{"name":"path_provider_android","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_android-2.3.1/","native_build":false,"dependencies":["jni","jni_flutter"],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","native_build":true,"dependencies":[],"dev_dependency":false}],"macos":[{"name":"path_provider_foundation","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_foundation-2.6.0/","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","shared_darwin_source":true,"native_build":true,"dependencies":[],"dev_dependency":false}],"linux":[{"name":"jni","path":"/home/martin/.pub-cache/hosted/pub.dev/jni-1.0.3/","native_build":true,"dependencies":[],"dev_dependency":false},{"name":"path_provider_linux","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.2/","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","native_build":true,"dependencies":[],"dev_dependency":false}],"windows":[{"name":"jni","path":"/home/martin/.pub-cache/hosted/pub.dev/jni-1.0.3/","native_build":true,"dependencies":[],"dev_dependency":false},{"name":"path_provider_windows","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","native_build":true,"dependencies":[],"dev_dependency":false}],"web":[]},"dependencyGraph":[{"name":"jni","dependencies":[]},{"name":"jni_flutter","dependencies":["jni"]},{"name":"path_provider","dependencies":["path_provider_android","path_provider_foundation","path_provider_linux","path_provider_windows"]},{"name":"path_provider_android","dependencies":["jni","jni_flutter"]},{"name":"path_provider_foundation","dependencies":[]},{"name":"path_provider_linux","dependencies":[]},{"name":"path_provider_windows","dependencies":[]},{"name":"sqlite3_flutter_libs","dependencies":[]}],"date_created":"2026-08-21 11:29:22.412130","version":"3.44.7","swift_package_manager_enabled":{"ios":false,"macos":false}}[m
+\ No newline at end of file[m
+[32m+[m[32m{"info":"This is a generated file; do not edit or check into version control.","plugins":{"ios":[{"name":"path_provider_foundation","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_foundation-2.6.0/","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","shared_darwin_source":true,"native_build":true,"dependencies":[],"dev_dependency":false}],"android":[{"name":"jni","path":"/home/martin/.pub-cache/hosted/pub.dev/jni-1.0.3/","native_build":true,"dependencies":[],"dev_dependency":false},{"name":"jni_flutter","path":"/home/martin/.pub-cache/hosted/pub.dev/jni_flutter-1.0.2/","native_build":true,"dependencies":["jni"],"dev_dependency":false},{"name":"path_provider_android","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_android-2.3.1/","native_build":false,"dependencies":["jni","jni_flutter"],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","native_build":true,"dependencies":[],"dev_dependency":false}],"macos":[{"name":"path_provider_foundation","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_foundation-2.6.0/","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","shared_darwin_source":true,"native_build":true,"dependencies":[],"dev_dependency":false}],"linux":[{"name":"jni","path":"/home/martin/.pub-cache/hosted/pub.dev/jni-1.0.3/","native_build":true,"dependencies":[],"dev_dependency":false},{"name":"path_provider_linux","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.2/","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","native_build":true,"dependencies":[],"dev_dependency":false}],"windows":[{"name":"jni","path":"/home/martin/.pub-cache/hosted/pub.dev/jni-1.0.3/","native_build":true,"dependencies":[],"dev_dependency":false},{"name":"path_provider_windows","path":"/home/martin/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/","native_build":false,"dependencies":[],"dev_dependency":false},{"name":"sqlite3_flutter_libs","path":"/home/martin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.42/","native_build":true,"dependencies":[],"dev_dependency":false}],"web":[]},"dependencyGraph":[{"name":"jni","dependencies":[]},{"name":"jni_flutter","dependencies":["jni"]},{"name":"path_provider","dependencies":["path_provider_android","path_provider_foundation","path_provider_linux","path_provider_windows"]},{"name":"path_provider_android","dependencies":["jni","jni_flutter"]},{"name":"path_provider_foundation","dependencies":[]},{"name":"path_provider_linux","dependencies":[]},{"name":"path_provider_windows","dependencies":[]},{"name":"sqlite3_flutter_libs","dependencies":[]}],"date_created":"2026-08-21 16:54:25.315606","version":"3.44.7","swift_package_manager_enabled":{"ios":false,"macos":false}}[m
+\ No newline at end of file[m
+[1mdiff --git a/lib/core/database/app_database.dart b/lib/core/database/app_database.dart[m
+[1mindex b4e476f..878dcb2 100644[m
+[1m--- a/lib/core/database/app_database.dart[m
+[1m+++ b/lib/core/database/app_database.dart[m
+[36m@@ -5,7 +5,6 @@[m [mimport 'package:drift/drift.dart';[m
+ import 'package:drift/native.dart';[m
+ import 'package:path/path.dart' as p;[m
+ import 'package:path_provider/path_provider.dart';[m
+[31m-[m
+ // Tablas existentes[m
+ import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';[m
+ import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';[m
+[36m@@ -20,11 +19,9 @@[m [mimport 'package:fiscogest_rd/features/inventario/data/database/tables/kardex_tab[m
+ import 'package:fiscogest_rd/features/ajustes_inventario/data/datasources/ajuste_inventario_database.dart';[m
+ import 'package:fiscogest_rd/features/inventario_fisico/data/database/tables/conteo_fisico_table.dart';[m
+ import 'package:fiscogest_rd/features/inventario_fisico/data/database/tables/diferencia_conteo_table.dart';[m
+[31m-[m
+ // NUEVAS: Tablas base Fase 4[m
+ import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dart';[m
+ import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_table.dart';[m
+[31m-[m
+ // NUEVAS: Tablas Fase 4 - Módulo Comercial[m
+ import 'package:fiscogest_rd/features/comercial/data/dao/ventas_table.dart';[m
+ import 'package:fiscogest_rd/features/comercial/data/dao/ventas_detalle_table.dart';[m
+[36m@@ -41,9 +38,7 @@[m [mimport 'package:fiscogest_rd/features/comercial/data/dao/descuentos_table.dart';[m
+ import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_table.dart';[m
+ import 'package:fiscogest_rd/features/comercial/data/dao/kardex_comercial_table.dart';[m
+ import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_table.dart';[m
+[31m-[m
+ part 'app_database.g.dart';[m
+[31m-[m
+ @DriftDatabase(tables: [[m
+   // Tablas existentes[m
+   ClientesTable,[m
+[36m@@ -88,7 +83,6 @@[m [mpart 'app_database.g.dart';[m
+ ])[m
+ class AppDatabase extends _$AppDatabase {[m
+   AppDatabase() : super(_openConnection());[m
+[31m-[m
+   @override[m
+   $CategoriasTable get categorias => super.categorias;[m
+   @override[m
+[36m@@ -101,9 +95,16 @@[m [mclass AppDatabase extends _$AppDatabase {[m
+   $DiferenciasConteoTable get diferenciasConteo => super.diferenciasConteo;[m
+   @override[m
+   $ExistenciasTableTable get existenciasTable => super.existenciasTable;[m
+[31m-[m
+   @override[m
+[31m-  int get schemaVersion => 10;[m
+[32m+[m[32m  int get schemaVersion => 12;[m
+[32m+[m
+[32m+[m[32m  Future<bool> _columnaExiste(Migrator m, String tabla, String columna) async {[m
+[32m+[m[32m    final resultado = await m.database.customSelect('''[m
+[32m+[m[32m      SELECT COUNT(*) AS conteo FROM pragma_table_info('$tabla') WHERE name='$columna'[m
+[32m+[m[32m    ''').getSingleOrNull();[m
+[32m+[m[32m    final conteo = resultado?.read<int>('conteo') ?? 0;[m
+[32m+[m[32m    return conteo > 0;[m
+[32m+[m[32m  }[m
+ [m
+   @override[m
+   MigrationStrategy get migration => MigrationStrategy([m
+[36m@@ -123,7 +124,7 @@[m [mclass AppDatabase extends _$AppDatabase {[m
+             await m.alterTable(TableMigration(ajusteInventarioTable));[m
+             await m.alterTable(TableMigration(diferenciasConteo));[m
+           }[m
+[31m-          // NUEVA VERSIÓN 10: Fase 4 - Módulo Comercial completo[m
+[32m+[m[32m          // Versión 10: Fase 4 - Módulo Comercial completo[m
+           if (from < 10) {[m
+             await m.createTable(proveedoresTable);[m
+             await m.createTable(usuariosTable);[m
+[36m@@ -143,10 +144,42 @@[m [mclass AppDatabase extends _$AppDatabase {[m
+             await m.createTable(kardexComercialTable);[m
+             await m.createTable(cajaMovimientosTable);[m
+           }[m
+[32m+[m[32m          // ✅ Versión 12: Reconstruir tabla con valores por defecto seguros[m
+[32m+[m[32m          if (from < 12) {[m
+[32m+[m[32m            final tieneCodigoBarras = await _columnaExiste(m, 'productos_table', 'codigo_barras');[m
+[32m+[m[32m            final tieneDescripcion = await _columnaExiste(m, 'productos_table', 'descripcion');[m
+[32m+[m
+[32m+[m[32m            await customStatement('ALTER TABLE productos_table RENAME TO productos_table_old;');[m
+[32m+[m[32m            await m.createTable(productosTable);[m
+[32m+[m
+[32m+[m[32m            final colCodigoBarras = tieneCodigoBarras ? 'codigo_barras,' : 'NULL AS codigo_barras,';[m
+[32m+[m[32m            final colDescripcion = tieneDescripcion ? 'descripcion,' : 'NULL AS descripcion,';[m
+[32m+[m
+[32m+[m[32m            await customStatement('''[m
+[32m+[m[32m              INSERT INTO productos_table ([m
+[32m+[m[32m                id, codigo, codigo_barras, nombre, descripcion,[m
+[32m+[m[32m                precio_compra, precio_venta,[m
+[32m+[m[32m                stock, stock_minimo, stock_maximo,[m
+[32m+[m[32m                categoria_id, marca_id, unidad_medida_id, activo[m
+[32m+[m[32m              )[m
+[32m+[m[32m              SELECT[m
+[32m+[m[32m                id, codigo, $colCodigoBarras nombre, $colDescripcion[m
+[32m+[m[32m                COALESCE(precio_compra, 0.0),[m
+[32m+[m[32m                COALESCE(precio_venta, 0.0),[m
+[32m+[m[32m                COALESCE(stock, 0.0),[m
+[32m+[m[32m                COALESCE(stock_minimo, 0.0),[m
+[32m+[m[32m                COALESCE(stock_maximo, 0.0),[m
+[32m+[m[32m                categoria_id, marca_id, unidad_medida_id, activo[m
+[32m+[m[32m              FROM productos_table_old;[m
+[32m+[m[32m            ''');[m
+[32m+[m[32m            await customStatement('DROP TABLE productos_table_old;');[m
+[32m+[m[32m          }[m
+[32m+[m[32m        },[m
+[32m+[m[32m        beforeOpen: (details) async {[m
+[32m+[m[32m          await customStatement('PRAGMA foreign_keys = ON');[m
+         },[m
+       );[m
+ }[m
+[31m-[m
+ LazyDatabase _openConnection() {[m
+   return LazyDatabase(() async {[m
+     final carpetaBase = await getApplicationDocumentsDirectory();[m
+[1mdiff --git a/lib/core/database/app_database.g.dart b/lib/core/database/app_database.g.dart[m
+[1mindex 1338323..3c614bc 100644[m
+[1m--- a/lib/core/database/app_database.g.dart[m
+[1m+++ b/lib/core/database/app_database.g.dart[m
+[36m@@ -1035,9 +1035,10 @@[m [mclass $ProductosTableTable extends ProductosTable[m
+   late final GeneratedColumn<double> precioCompra = GeneratedColumn<double>([m
+     'precio_compra',[m
+     aliasedName,[m
+[31m-    false,[m
+[32m+[m[32m    true,[m
+     type: DriftSqlType.double,[m
+[31m-    requiredDuringInsert: true,[m
+[32m+[m[32m    requiredDuringInsert: false,[m
+[32m+[m[32m    defaultValue: const Constant(0.0),[m
+   );[m
+   static const VerificationMeta _precioVentaMeta = const VerificationMeta([m
+     'precioVenta',[m
+[36m@@ -1046,9 +1047,10 @@[m [mclass $ProductosTableTable extends ProductosTable[m
+   late final GeneratedColumn<double> precioVenta = GeneratedColumn<double>([m
+     'precio_venta',[m
+     aliasedName,[m
+[31m-    false,[m
+[32m+[m[32m    true,[m
+     type: DriftSqlType.double,[m
+[31m-    requiredDuringInsert: true,[m
+[32m+[m[32m    requiredDuringInsert: false,[m
+[32m+[m[32m    defaultValue: const Constant(0.0),[m
+   );[m
+   static const VerificationMeta _stockMeta = const VerificationMeta('stock');[m
+   @override[m
+[36m@@ -1058,6 +1060,7 @@[m [mclass $ProductosTableTable extends ProductosTable[m
+     true,[m
+     type: DriftSqlType.double,[m
+     requiredDuringInsert: false,[m
+[32m+[m[32m    defaultValue: const Constant(0.0),[m
+   );[m
+   static const VerificationMeta _stockMinimoMeta = const VerificationMeta([m
+     'stockMinimo',[m
+[36m@@ -1069,6 +1072,7 @@[m [mclass $ProductosTableTable extends ProductosTable[m
+     true,[m
+     type: DriftSqlType.double,[m
+     requiredDuringInsert: false,[m
+[32m+[m[32m    defaultValue: const Constant(0.0),[m
+   );[m
+   static const VerificationMeta _stockMaximoMeta = const VerificationMeta([m
+     'stockMaximo',[m
+[36m@@ -1080,6 +1084,7 @@[m [mclass $ProductosTableTable extends ProductosTable[m
+     true,[m
+     type: DriftSqlType.double,[m
+     requiredDuringInsert: false,[m
+[32m+[m[32m    defaultValue: const Constant(0.0),[m
+   );[m
+   static const VerificationMeta _categoriaIdMeta = const VerificationMeta([m
+     'categoriaId',[m
+[36m@@ -1198,8 +1203,6 @@[m [mclass $ProductosTableTable extends ProductosTable[m
+           _precioCompraMeta,[m
+         ),[m
+       );[m
+[31m-    } else if (isInserting) {[m
+[31m-      context.missing(_precioCompraMeta);[m
+     }[m
+     if (data.containsKey('precio_venta')) {[m
+       context.handle([m
+[36m@@ -1209,8 +1212,6 @@[m [mclass $ProductosTableTable extends ProductosTable[m
+           _precioVentaMeta,[m
+         ),[m
+       );[m
+[31m-    } else if (isInserting) {[m
+[31m-      context.missing(_precioVentaMeta);[m
+     }[m
+     if (data.containsKey('stock')) {[m
+       context.handle([m
+[36m@@ -1304,11 +1305,11 @@[m [mclass $ProductosTableTable extends ProductosTable[m
+       precioCompra: attachedDatabase.typeMapping.read([m
+         DriftSqlType.double,[m
+         data['${effectivePrefix}precio_compra'],[m
+[31m-      )!,[m
+[32m+[m[32m      ),[m
+       precioVenta: attachedDatabase.typeMapping.read([m
+         DriftSqlType.double,[m
+         data['${effectivePrefix}precio_venta'],[m
+[31m-      )!,[m
+[32m+[m[32m      ),[m
+       stock: attachedDatabase.typeMapping.read([m
+         DriftSqlType.double,[m
+         data['${effectivePrefix}stock'],[m
+[36m@@ -1352,8 +1353,8 @@[m [mclass ProductoData extends DataClass implements Insertable<ProductoData> {[m
+   final String? codigoBarras;[m
+   final String nombre;[m
+   final String? descripcion;[m
+[31m-  final double precioCompra;[m
+[31m-  final double precioVenta;[m
+[32m+[m[32m  final double? precioCompra;[m
+[32m+[m[32m  final double? precioVenta;[m
+   final double? stock;[m
+   final double? stockMinimo;[m
+   final double? stockMaximo;[m
+[36m@@ -1367,8 +1368,8 @@[m [mclass ProductoData extends DataClass implements Insertable<ProductoData> {[m
+     this.codigoBarras,[m
+     required this.nombre,[m
+     this.descripcion,[m
+[31m-    required this.precioCompra,[m
+[31m-    required this.precioVenta,[m
+[32m+[m[32m    this.precioCompra,[m
+[32m+[m[32m    this.precioVenta,[m
+     this.stock,[m
+     this.stockMinimo,[m
+     this.stockMaximo,[m
+[36m@@ -1389,8 +1390,12 @@[m [mclass ProductoData extends DataClass implements Insertable<ProductoData> {[m
+     if (!nullToAbsent || descripcion != null) {[m
+       map['descripcion'] = Variable<String>(descripcion);[m
+     }[m
+[31m-    map['precio_compra'] = Variable<double>(precioCompra);[m
+[31m-    map['precio_venta'] = Variable<double>(precioVenta);[m
+[32m+[m[32m    if (!nullToAbsent || precioCompra != null) {[m
+[32m+[m[32m      map['precio_compra'] = Variable<double>(precioCompra);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    if (!nullToAbsent || precioVenta != null) {[m
+[32m+[m[32m      map['precio_venta'] = Variable<double>(precioVenta);[m
+[32m+[m[32m    }[m
+     if (!nullToAbsent || stock != null) {[m
+       map['stock'] = Variable<double>(stock);[m
+     }[m
+[36m@@ -1418,8 +1423,12 @@[m [mclass ProductoData extends DataClass implements Insertable<ProductoData> {[m
+       descripcion: descripcion == null && nullToAbsent[m
+           ? const Value.absent()[m
+           : Value(descripcion),[m
+[31m-      precioCompra: Value(precioCompra),[m
+[31m-      precioVenta: Value(precioVenta),[m
+[32m+[m[32m      precioCompra: precioCompra == null && nullToAbsent[m
+[32m+[m[32m          ? const Value.absent()[m
+[32m+[m[32m          : Value(precioCompra),[m
+[32m+[m[32m      precioVenta: precioVenta == null && nullToAbsent[m
+[32m+[m[32m          ? const Value.absent()[m
+[32m+[m[32m          : Value(precioVenta),[m
+       stock: stock == null && nullToAbsent[m
+           ? const Value.absent()[m
+           : Value(stock),[m
+[36m@@ -1447,8 +1456,8 @@[m [mclass ProductoData extends DataClass implements Insertable<ProductoData> {[m
+       codigoBarras: serializer.fromJson<String?>(json['codigoBarras']),[m
+       nombre: serializer.fromJson<String>(json['nombre']),[m
+       descripcion: serializer.fromJson<String?>(json['descripcion']),[m
+[31m-      precioCompra: serializer.fromJson<double>(json['precioCompra']),[m
+[31m-      precioVenta: serializer.fromJson<double>(json['precioVenta']),[m
+[32m+[m[32m      precioCompra: serializer.fromJson<double?>(json['precioCompra']),[m
+[32m+[m[32m      precioVenta: serializer.fromJson<double?>(json['precioVenta']),[m
+       stock: serializer.fromJson<double?>(json['stock']),[m
+       stockMinimo: serializer.fromJson<double?>(json['stockMinimo']),[m
+       stockMaximo: serializer.fromJson<double?>(json['stockMaximo']),[m
+[36m@@ -1467,8 +1476,8 @@[m [mclass ProductoData extends DataClass implements Insertable<ProductoData> {[m
+       'codigoBarras': serializer.toJson<String?>(codigoBarras),[m
+       'nombre': serializer.toJson<String>(nombre),[m
+       'descripcion': serializer.toJson<String?>(descripcion),[m
+[31m-      'precioCompra': serializer.toJson<double>(precioCompra),[m
+[31m-      'precioVenta': serializer.toJson<double>(precioVenta),[m
+[32m+[m[32m      'precioCompra': serializer.toJson<double?>(precioCompra),[m
+[32m+[m[32m      'precioVenta': serializer.toJson<double?>(precioVenta),[m
+       'stock': serializer.toJson<double?>(stock),[m
+       'stockMinimo': serializer.toJson<double?>(stockMinimo),[m
+       'stockMaximo': serializer.toJson<double?>(stockMaximo),[m
+[36m@@ -1485,8 +1494,8 @@[m [mclass ProductoData extends DataClass implements Insertable<ProductoData> {[m
+     Value<String?> codigoBarras = const Value.absent(),[m
+     String? nombre,[m
+     Value<String?> descripcion = const Value.absent(),[m
+[31m-    double? precioCompra,[m
+[31m-    double? precioVenta,[m
+[32m+[m[32m    Value<double?> precioCompra = const Value.absent(),[m
+[32m+[m[32m    Value<double?> precioVenta = const Value.absent(),[m
+     Value<double?> stock = const Value.absent(),[m
+     Value<double?> stockMinimo = const Value.absent(),[m
+     Value<double?> stockMaximo = const Value.absent(),[m
+[36m@@ -1500,8 +1509,8 @@[m [mclass ProductoData extends DataClass implements Insertable<ProductoData> {[m
+     codigoBarras: codigoBarras.present ? codigoBarras.value : this.codigoBarras,[m
+     nombre: nombre ?? this.nombre,[m
+     descripcion: descripcion.present ? descripcion.value : this.descripcion,[m
+[31m-    precioCompra: precioCompra ?? this.precioCompra,[m
+[31m-    precioVenta: precioVenta ?? this.precioVenta,[m
+[32m+[m[32m    precioCompra: precioCompra.present ? precioCompra.value : this.precioCompra,[m
+[32m+[m[32m    precioVenta: precioVenta.present ? precioVenta.value : this.precioVenta,[m
+     stock: stock.present ? stock.value : this.stock,[m
+     stockMinimo: stockMinimo.present ? stockMinimo.value : this.stockMinimo,[m
+     stockMaximo: stockMaximo.present ? stockMaximo.value : this.stockMaximo,[m
+[36m@@ -1609,8 +1618,8 @@[m [mclass ProductosTableCompanion extends UpdateCompanion<ProductoData> {[m
+   final Value<String?> codigoBarras;[m
+   final Value<String> nombre;[m
+   final Value<String?> descripcion;[m
+[31m-  final Value<double> precioCompra;[m
+[31m-  final Value<double> precioVenta;[m
+[32m+[m[32m  final Value<double?> precioCompra;[m
+[32m+[m[32m  final Value<double?> precioVenta;[m
+   final Value<double?> stock;[m
+   final Value<double?> stockMinimo;[m
+   final Value<double?> stockMaximo;[m
+[36m@@ -1640,8 +1649,8 @@[m [mclass ProductosTableCompanion extends UpdateCompanion<ProductoData> {[m
+     this.codigoBarras = const Value.absent(),[m
+     required String nombre,[m
+     this.descripcion = const Value.absent(),[m
+[31m-    required double precioCompra,[m
+[31m-    required double precioVenta,[m
+[32m+[m[32m    this.precioCompra = const Value.absent(),[m
+[32m+[m[32m    this.precioVenta = const Value.absent(),[m
+     this.stock = const Value.absent(),[m
+     this.stockMinimo = const Value.absent(),[m
+     this.stockMaximo = const Value.absent(),[m
+[36m@@ -1651,8 +1660,6 @@[m [mclass ProductosTableCompanion extends UpdateCompanion<ProductoData> {[m
+     this.activo = const Value.absent(),[m
+   }) : codigo = Value(codigo),[m
+        nombre = Value(nombre),[m
+[31m-       precioCompra = Value(precioCompra),[m
+[31m-       precioVenta = Value(precioVenta),[m
+        categoriaId = Value(categoriaId),[m
+        marcaId = Value(marcaId),[m
+        unidadMedidaId = Value(unidadMedidaId);[m
+[36m@@ -1696,8 +1703,8 @@[m [mclass ProductosTableCompanion extends UpdateCompanion<ProductoData> {[m
+     Value<String?>? codigoBarras,[m
+     Value<String>? nombre,[m
+     Value<String?>? descripcion,[m
+[31m-    Value<double>? precioCompra,[m
+[31m-    Value<double>? precioVenta,[m
+[32m+[m[32m    Value<double?>? precioCompra,[m
+[32m+[m[32m    Value<double?>? precioVenta,[m
+     Value<double?>? stock,[m
+     Value<double?>? stockMinimo,[m
+     Value<double?>? stockMaximo,[m
+[36m@@ -17567,8 +17574,8 @@[m [mtypedef $$ProductosTableTableCreateCompanionBuilder =[m
+       Value<String?> codigoBarras,[m
+       required String nombre,[m
+       Value<String?> descripcion,[m
+[31m-      required double precioCompra,[m
+[31m-      required double precioVenta,[m
+[32m+[m[32m      Value<double?> precioCompra,[m
+[32m+[m[32m      Value<double?> precioVenta,[m
+       Value<double?> stock,[m
+       Value<double?> stockMinimo,[m
+       Value<double?> stockMaximo,[m
+[36m@@ -17584,8 +17591,8 @@[m [mtypedef $$ProductosTableTableUpdateCompanionBuilder =[m
+       Value<String?> codigoBarras,[m
+       Value<String> nombre,[m
+       Value<String?> descripcion,[m
+[31m-      Value<double> precioCompra,[m
+[31m-      Value<double> precioVenta,[m
+[32m+[m[32m      Value<double?> precioCompra,[m
+[32m+[m[32m      Value<double?> precioVenta,[m
+       Value<double?> stock,[m
+       Value<double?> stockMinimo,[m
+       Value<double?> stockMaximo,[m
+[36m@@ -18343,8 +18350,8 @@[m [mclass $$ProductosTableTableTableManager[m
+                 Value<String?> codigoBarras = const Value.absent(),[m
+                 Value<String> nombre = const Value.absent(),[m
+                 Value<String?> descripcion = const Value.absent(),[m
+[31m-                Value<double> precioCompra = const Value.absent(),[m
+[31m-                Value<double> precioVenta = const Value.absent(),[m
+[32m+[m[32m                Value<double?> precioCompra = const Value.absent(),[m
+[32m+[m[32m                Value<double?> precioVenta = const Value.absent(),[m
+                 Value<double?> stock = const Value.absent(),[m
+                 Value<double?> stockMinimo = const Value.absent(),[m
+                 Value<double?> stockMaximo = const Value.absent(),[m
+[36m@@ -18375,8 +18382,8 @@[m [mclass $$ProductosTableTableTableManager[m
+                 Value<String?> codigoBarras = const Value.absent(),[m
+                 required String nombre,[m
+                 Value<String?> descripcion = const Value.absent(),[m
+[31m-                required double precioCompra,[m
+[31m-                required double precioVenta,[m
+[32m+[m[32m                Value<double?> precioCompra = const Value.absent(),[m
+[32m+[m[32m                Value<double?> precioVenta = const Value.absent(),[m
+                 Value<double?> stock = const Value.absent(),[m
+                 Value<double?> stockMinimo = const Value.absent(),[m
+                 Value<double?> stockMaximo = const Value.absent(),[m
+[1mdiff --git a/lib/features/inventario/data/dao/productos_table.dart b/lib/features/inventario/data/dao/productos_table.dart[m
+[1mindex 53ca123..9bd561e 100644[m
+[1m--- a/lib/features/inventario/data/dao/productos_table.dart[m
+[1m+++ b/lib/features/inventario/data/dao/productos_table.dart[m
+[36m@@ -1,5 +1,4 @@[m
+ import 'package:drift/drift.dart';[m
+[31m-[m
+ @DataClassName('ProductoData')[m
+ class ProductosTable extends Table {[m
+   IntColumn get id => integer().autoIncrement()();[m
+[36m@@ -7,15 +6,13 @@[m [mclass ProductosTable extends Table {[m
+   TextColumn get codigoBarras => text().named('codigo_barras').nullable()();[m
+   TextColumn get nombre => text()();[m
+   TextColumn get descripcion => text().nullable()();[m
+[31m-  RealColumn get precioCompra => real().named('precio_compra')();[m
+[31m-  RealColumn get precioVenta => real().named('precio_venta')();[m
+[31m-  RealColumn get stock => real().nullable()();[m
+[31m-  RealColumn get stockMinimo => real().named('stock_minimo').nullable()();[m
+[31m-  // ✅ AGREGADO FALTANTE[m
+[31m-  RealColumn get stockMaximo => real().named('stock_maximo').nullable()();[m
+[32m+[m[32m  RealColumn get precioCompra => real().named('precio_compra').nullable().withDefault(const Constant(0.0))();[m
+[32m+[m[32m  RealColumn get precioVenta => real().named('precio_venta').nullable().withDefault(const Constant(0.0))();[m
+[32m+[m[32m  RealColumn get stock => real().nullable().withDefault(const Constant(0.0))();[m
+[32m+[m[32m  RealColumn get stockMinimo => real().named('stock_minimo').nullable().withDefault(const Constant(0.0))();[m
+[32m+[m[32m  RealColumn get stockMaximo => real().named('stock_maximo').nullable().withDefault(const Constant(0.0))();[m
+   IntColumn get categoriaId => integer().named('categoria_id')();[m
+   IntColumn get marcaId => integer().named('marca_id')();[m
+   IntColumn get unidadMedidaId => integer().named('unidad_medida_id')();[m
+[31m-  // ✅ CORREGIDO: int, convertir bool en capa superior[m
+   IntColumn get activo => integer().withDefault(const Constant(1))();[m
+ }[m
+[1mdiff --git a/lib/features/inventario/data/datasources/inventario_database.dart b/lib/features/inventario/data/datasources/inventario_database.dart[m
+[1mindex a8fd0e4..eb912df 100644[m
+[1m--- a/lib/features/inventario/data/datasources/inventario_database.dart[m
+[1m+++ b/lib/features/inventario/data/datasources/inventario_database.dart[m
+[36m@@ -10,10 +10,10 @@[m [mclass InventarioTable extends Table {[m
+   IntColumn get id => integer().autoIncrement()();[m
+   TextColumn get codigo => text().unique()();[m
+   TextColumn get nombre => text()();[m
+[31m-  RealColumn get precioCompra => real()();[m
+[31m-  RealColumn get precioVenta => real()();[m
+[31m-  RealColumn get stockActual => real().withDefault(const Constant(0))();[m
+[31m-  RealColumn get stockMinimo => real().withDefault(const Constant(0))();[m
+[32m+[m[32m  RealColumn get precioCompra => real().nullable().withDefault(const Constant(0))();[m
+[32m+[m[32m  RealColumn get precioVenta => real().nullable().withDefault(const Constant(0))();[m
+[32m+[m[32m  RealColumn get stockActual => real().nullable().withDefault(const Constant(0))();[m
+[32m+[m[32m  RealColumn get stockMinimo => real().nullable().withDefault(const Constant(0))();[m
+   IntColumn get categoriaId => integer()();[m
+   IntColumn get marcaId => integer()();[m
+   IntColumn get unidadId => integer()();[m
+[1mdiff --git a/lib/features/inventario/data/datasources/inventario_database.g.dart b/lib/features/inventario/data/datasources/inventario_database.g.dart[m
+[1mindex c56ecae..29471b6 100644[m
+[1m--- a/lib/features/inventario/data/datasources/inventario_database.g.dart[m
+[1m+++ b/lib/features/inventario/data/datasources/inventario_database.g.dart[m
+[36m@@ -48,9 +48,10 @@[m [mclass $InventarioTableTable extends InventarioTable[m
+   late final GeneratedColumn<double> precioCompra = GeneratedColumn<double>([m
+     'precio_compra',[m
+     aliasedName,[m
+[31m-    false,[m
+[32m+[m[32m    true,[m
+     type: DriftSqlType.double,[m
+[31m-    requiredDuringInsert: true,[m
+[32m+[m[32m    requiredDuringInsert: false,[m
+[32m+[m[32m    defaultValue: const Constant(0),[m
+   );[m
+   static const VerificationMeta _precioVentaMeta = const VerificationMeta([m
+     'precioVenta',[m
+[36m@@ -59,9 +60,10 @@[m [mclass $InventarioTableTable extends InventarioTable[m
+   late final GeneratedColumn<double> precioVenta = GeneratedColumn<double>([m
+     'precio_venta',[m
+     aliasedName,[m
+[31m-    false,[m
+[32m+[m[32m    true,[m
+     type: DriftSqlType.double,[m
+[31m-    requiredDuringInsert: true,[m
+[32m+[m[32m    requiredDuringInsert: false,[m
+[32m+[m[32m    defaultValue: const Constant(0),[m
+   );[m
+   static const VerificationMeta _stockActualMeta = const VerificationMeta([m
+     'stockActual',[m
+[36m@@ -70,7 +72,7 @@[m [mclass $InventarioTableTable extends InventarioTable[m
+   late final GeneratedColumn<double> stockActual = GeneratedColumn<double>([m
+     'stock_actual',[m
+     aliasedName,[m
+[31m-    false,[m
+[32m+[m[32m    true,[m
+     type: DriftSqlType.double,[m
+     requiredDuringInsert: false,[m
+     defaultValue: const Constant(0),[m
+[36m@@ -82,7 +84,7 @@[m [mclass $InventarioTableTable extends InventarioTable[m
+   late final GeneratedColumn<double> stockMinimo = GeneratedColumn<double>([m
+     'stock_minimo',[m
+     aliasedName,[m
+[31m-    false,[m
+[32m+[m[32m    true,[m
+     type: DriftSqlType.double,[m
+     requiredDuringInsert: false,[m
+     defaultValue: const Constant(0),[m
+[36m@@ -212,8 +214,6 @@[m [mclass $InventarioTableTable extends InventarioTable[m
+           _precioCompraMeta,[m
+         ),[m
+       );[m
+[31m-    } else if (isInserting) {[m
+[31m-      context.missing(_precioCompraMeta);[m
+     }[m
+     if (data.containsKey('precio_venta')) {[m
+       context.handle([m
+[36m@@ -223,8 +223,6 @@[m [mclass $InventarioTableTable extends InventarioTable[m
+           _precioVentaMeta,[m
+         ),[m
+       );[m
+[31m-    } else if (isInserting) {[m
+[31m-      context.missing(_precioVentaMeta);[m
+     }[m
+     if (data.containsKey('stock_actual')) {[m
+       context.handle([m
+[36m@@ -319,19 +317,19 @@[m [mclass $InventarioTableTable extends InventarioTable[m
+       precioCompra: attachedDatabase.typeMapping.read([m
+         DriftSqlType.double,[m
+         data['${effectivePrefix}precio_compra'],[m
+[31m-      )!,[m
+[32m+[m[32m      ),[m
+       precioVenta: attachedDatabase.typeMapping.read([m
+         DriftSqlType.double,[m
+         data['${effectivePrefix}precio_venta'],[m
+[31m-      )!,[m
+[32m+[m[32m      ),[m
+       stockActual: attachedDatabase.typeMapping.read([m
+         DriftSqlType.double,[m
+         data['${effectivePrefix}stock_actual'],[m
+[31m-      )!,[m
+[32m+[m[32m      ),[m
+       stockMinimo: attachedDatabase.typeMapping.read([m
+         DriftSqlType.double,[m
+         data['${effectivePrefix}stock_minimo'],[m
+[31m-      )!,[m
+[32m+[m[32m      ),[m
+       categoriaId: attachedDatabase.typeMapping.read([m
+         DriftSqlType.int,[m
+         data['${effectivePrefix}categoria_id'],[m
+[36m@@ -370,10 +368,10 @@[m [mclass InventarioTableData extends DataClass[m
+   final int id;[m
+   final String codigo;[m
+   final String nombre;[m
+[31m-  final double precioCompra;[m
+[31m-  final double precioVenta;[m
+[31m-  final double stockActual;[m
+[31m-  final double stockMinimo;[m
+[32m+[m[32m  final double? precioCompra;[m
+[32m+[m[32m  final double? precioVenta;[m
+[32m+[m[32m  final double? stockActual;[m
+[32m+[m[32m  final double? stockMinimo;[m
+   final int categoriaId;[m
+   final int marcaId;[m
+   final int unidadId;[m
+[36m@@ -384,10 +382,10 @@[m [mclass InventarioTableData extends DataClass[m
+     required this.id,[m
+     required this.codigo,[m
+     required this.nombre,[m
+[31m-    required this.precioCompra,[m
+[31m-    required this.precioVenta,[m
+[31m-    required this.stockActual,[m
+[31m-    required this.stockMinimo,[m
+[32m+[m[32m    this.precioCompra,[m
+[32m+[m[32m    this.precioVenta,[m
+[32m+[m[32m    this.stockActual,[m
+[32m+[m[32m    this.stockMinimo,[m
+     required this.categoriaId,[m
+     required this.marcaId,[m
+     required this.unidadId,[m
+[36m@@ -401,10 +399,18 @@[m [mclass InventarioTableData extends DataClass[m
+     map['id'] = Variable<int>(id);[m
+     map['codigo'] = Variable<String>(codigo);[m
+     map['nombre'] = Variable<String>(nombre);[m
+[31m-    map['precio_compra'] = Variable<double>(precioCompra);[m
+[31m-    map['precio_venta'] = Variable<double>(precioVenta);[m
+[31m-    map['stock_actual'] = Variable<double>(stockActual);[m
+[31m-    map['stock_minimo'] = Variable<double>(stockMinimo);[m
+[32m+[m[32m    if (!nullToAbsent || precioCompra != null) {[m
+[32m+[m[32m      map['precio_compra'] = Variable<double>(precioCompra);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    if (!nullToAbsent || precioVenta != null) {[m
+[32m+[m[32m      map['precio_venta'] = Variable<double>(precioVenta);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    if (!nullToAbsent || stockActual != null) {[m
+[32m+[m[32m      map['stock_actual'] = Variable<double>(stockActual);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    if (!nullToAbsent || stockMinimo != null) {[m
+[32m+[m[32m      map['stock_minimo'] = Variable<double>(stockMinimo);[m
+[32m+[m[32m    }[m
+     map['categoria_id'] = Variable<int>(categoriaId);[m
+     map['marca_id'] = Variable<int>(marcaId);[m
+     map['unidad_id'] = Variable<int>(unidadId);[m
+[36m@@ -421,10 +427,18 @@[m [mclass InventarioTableData extends DataClass[m
+       id: Value(id),[m
+       codigo: Value(codigo),[m
+       nombre: Value(nombre),[m
+[31m-      precioCompra: Value(precioCompra),[m
+[31m-      precioVenta: Value(precioVenta),[m
+[31m-      stockActual: Value(stockActual),[m
+[31m-      stockMinimo: Value(stockMinimo),[m
+[32m+[m[32m      precioCompra: precioCompra == null && nullToAbsent[m
+[32m+[m[32m          ? const Value.absent()[m
+[32m+[m[32m          : Value(precioCompra),[m
+[32m+[m[32m      precioVenta: precioVenta == null && nullToAbsent[m
+[32m+[m[32m          ? const Value.absent()[m
+[32m+[m[32m          : Value(precioVenta),[m
+[32m+[m[32m      stockActual: stockActual == null && nullToAbsent[m
+[32m+[m[32m          ? const Value.absent()[m
+[32m+[m[32m          : Value(stockActual),[m
+[32m+[m[32m      stockMinimo: stockMinimo == null && nullToAbsent[m
+[32m+[m[32m          ? const Value.absent()[m
+[32m+[m[32m          : Value(stockMinimo),[m
+       categoriaId: Value(categoriaId),[m
+       marcaId: Value(marcaId),[m
+       unidadId: Value(unidadId),[m
+[36m@@ -445,10 +459,10 @@[m [mclass InventarioTableData extends DataClass[m
+       id: serializer.fromJson<int>(json['id']),[m
+       codigo: serializer.fromJson<String>(json['codigo']),[m
+       nombre: serializer.fromJson<String>(json['nombre']),[m
+[31m-      precioCompra: serializer.fromJson<double>(json['precioCompra']),[m
+[31m-      precioVenta: serializer.fromJson<double>(json['precioVenta']),[m
+[31m-      stockActual: serializer.fromJson<double>(json['stockActual']),[m
+[31m-      stockMinimo: serializer.fromJson<double>(json['stockMinimo']),[m
+[32m+[m[32m      precioCompra: serializer.fromJson<double?>(json['precioCompra']),[m
+[32m+[m[32m      precioVenta: serializer.fromJson<double?>(json['precioVenta']),[m
+[32m+[m[32m      stockActual: serializer.fromJson<double?>(json['stockActual']),[m
+[32m+[m[32m      stockMinimo: serializer.fromJson<double?>(json['stockMinimo']),[m
+       categoriaId: serializer.fromJson<int>(json['categoriaId']),[m
+       marcaId: serializer.fromJson<int>(json['marcaId']),[m
+       unidadId: serializer.fromJson<int>(json['unidadId']),[m
+[36m@@ -466,10 +480,10 @@[m [mclass InventarioTableData extends DataClass[m
+       'id': serializer.toJson<int>(id),[m
+       'codigo': serializer.toJson<String>(codigo),[m
+       'nombre': serializer.toJson<String>(nombre),[m
+[31m-      'precioCompra': serializer.toJson<double>(precioCompra),[m
+[31m-      'precioVenta': serializer.toJson<double>(precioVenta),[m
+[31m-      'stockActual': serializer.toJson<double>(stockActual),[m
+[31m-      'stockMinimo': serializer.toJson<double>(stockMinimo),[m
+[32m+[m[32m      'precioCompra': serializer.toJson<double?>(precioCompra),[m
+[32m+[m[32m      'precioVenta': serializer.toJson<double?>(precioVenta),[m
+[32m+[m[32m      'stockActual': serializer.toJson<double?>(stockActual),[m
+[32m+[m[32m      'stockMinimo': serializer.toJson<double?>(stockMinimo),[m
+       'categoriaId': serializer.toJson<int>(categoriaId),[m
+       'marcaId': serializer.toJson<int>(marcaId),[m
+       'unidadId': serializer.toJson<int>(unidadId),[m
+[36m@@ -483,10 +497,10 @@[m [mclass InventarioTableData extends DataClass[m
+     int? id,[m
+     String? codigo,[m
+     String? nombre,[m
+[31m-    double? precioCompra,[m
+[31m-    double? precioVenta,[m
+[31m-    double? stockActual,[m
+[31m-    double? stockMinimo,[m
+[32m+[m[32m    Value<double?> precioCompra = const Value.absent(),[m
+[32m+[m[32m    Value<double?> precioVenta = const Value.absent(),[m
+[32m+[m[32m    Value<double?> stockActual = const Value.absent(),[m
+[32m+[m[32m    Value<double?> stockMinimo = const Value.absent(),[m
+     int? categoriaId,[m
+     int? marcaId,[m
+     int? unidadId,[m
+[36m@@ -497,10 +511,10 @@[m [mclass InventarioTableData extends DataClass[m
+     id: id ?? this.id,[m
+     codigo: codigo ?? this.codigo,[m
+     nombre: nombre ?? this.nombre,[m
+[31m-    precioCompra: precioCompra ?? this.precioCompra,[m
+[31m-    precioVenta: precioVenta ?? this.precioVenta,[m
+[31m-    stockActual: stockActual ?? this.stockActual,[m
+[31m-    stockMinimo: stockMinimo ?? this.stockMinimo,[m
+[32m+[m[32m    precioCompra: precioCompra.present ? precioCompra.value : this.precioCompra,[m
+[32m+[m[32m    precioVenta: precioVenta.present ? precioVenta.value : this.precioVenta,[m
+[32m+[m[32m    stockActual: stockActual.present ? stockActual.value : this.stockActual,[m
+[32m+[m[32m    stockMinimo: stockMinimo.present ? stockMinimo.value : this.stockMinimo,[m
+     categoriaId: categoriaId ?? this.categoriaId,[m
+     marcaId: marcaId ?? this.marcaId,[m
+     unidadId: unidadId ?? this.unidadId,[m
+[36m@@ -601,10 +615,10 @@[m [mclass InventarioTableCompanion extends UpdateCompanion<InventarioTableData> {[m
+   final Value<int> id;[m
+   final Value<String> codigo;[m
+   final Value<String> nombre;[m
+[31m-  final Value<double> precioCompra;[m
+[31m-  final Value<double> precioVenta;[m
+[31m-  final Value<double> stockActual;[m
+[31m-  final Value<double> stockMinimo;[m
+[32m+[m[32m  final Value<double?> precioCompra;[m
+[32m+[m[32m  final Value<double?> precioVenta;[m
+[32m+[m[32m  final Value<double?> stockActual;[m
+[32m+[m[32m  final Value<double?> stockMinimo;[m
+   final Value<int> categoriaId;[m
+   final Value<int> marcaId;[m
+   final Value<int> unidadId;[m
+[36m@@ -630,8 +644,8 @@[m [mclass InventarioTableCompanion extends UpdateCompanion<InventarioTableData> {[m
+     this.id = const Value.absent(),[m
+     required String codigo,[m
+     required String nombre,[m
+[31m-    required double precioCompra,[m
+[31m-    required double precioVenta,[m
+[32m+[m[32m    this.precioCompra = const Value.absent(),[m
+[32m+[m[32m    this.precioVenta = const Value.absent(),[m
+     this.stockActual = const Value.absent(),[m
+     this.stockMinimo = const Value.absent(),[m
+     required int categoriaId,[m
+[36m@@ -642,8 +656,6 @@[m [mclass InventarioTableCompanion extends UpdateCompanion<InventarioTableData> {[m
+     this.fechaActualizacion = const Value.absent(),[m
+   }) : codigo = Value(codigo),[m
+        nombre = Value(nombre),[m
+[31m-       precioCompra = Value(precioCompra),[m
+[31m-       precioVenta = Value(precioVenta),[m
+        categoriaId = Value(categoriaId),[m
+        marcaId = Value(marcaId),[m
+        unidadId = Value(unidadId);[m
+[36m@@ -683,10 +695,10 @@[m [mclass InventarioTableCompanion extends UpdateCompanion<InventarioTableData> {[m
+     Value<int>? id,[m
+     Value<String>? codigo,[m
+     Value<String>? nombre,[m
+[31m-    Value<double>? precioCompra,[m
+[31m-    Value<double>? precioVenta,[m
+[31m-    Value<double>? stockActual,[m
+[31m-    Value<double>? stockMinimo,[m
+[32m+[m[32m    Value<double?>? precioCompra,[m
+[32m+[m[32m    Value<double?>? precioVenta,[m
+[32m+[m[32m    Value<double?>? stockActual,[m
+[32m+[m[32m    Value<double?>? stockMinimo,[m
+     Value<int>? categoriaId,[m
+     Value<int>? marcaId,[m
+     Value<int>? unidadId,[m
+[36m@@ -795,10 +807,10 @@[m [mtypedef $$InventarioTableTableCreateCompanionBuilder =[m
+       Value<int> id,[m
+       required String codigo,[m
+       required String nombre,[m
+[31m-      required double precioCompra,[m
+[31m-      required double precioVenta,[m
+[31m-      Value<double> stockActual,[m
+[31m-      Value<double> stockMinimo,[m
+[32m+[m[32m      Value<double?> precioCompra,[m
+[32m+[m[32m      Value<double?> precioVenta,[m
+[32m+[m[32m      Value<double?> stockActual,[m
+[32m+[m[32m      Value<double?> stockMinimo,[m
+       required int categoriaId,[m
+       required int marcaId,[m
+       required int unidadId,[m
+[36m@@ -811,10 +823,10 @@[m [mtypedef $$InventarioTableTableUpdateCompanionBuilder =[m
+       Value<int> id,[m
+       Value<String> codigo,[m
+       Value<String> nombre,[m
+[31m-      Value<double> precioCompra,[m
+[31m-      Value<double> precioVenta,[m
+[31m-      Value<double> stockActual,[m
+[31m-      Value<double> stockMinimo,[m
+[32m+[m[32m      Value<double?> precioCompra,[m
+[32m+[m[32m      Value<double?> precioVenta,[m
+[32m+[m[32m      Value<double?> stockActual,[m
+[32m+[m[32m      Value<double?> stockMinimo,[m
+       Value<int> categoriaId,[m
+       Value<int> marcaId,[m
+       Value<int> unidadId,[m
+[36m@@ -1076,10 +1088,10 @@[m [mclass $$InventarioTableTableTableManager[m
+                 Value<int> id = const Value.absent(),[m
+                 Value<String> codigo = const Value.absent(),[m
+                 Value<String> nombre = const Value.absent(),[m
+[31m-                Value<double> precioCompra = const Value.absent(),[m
+[31m-                Value<double> precioVenta = const Value.absent(),[m
+[31m-                Value<double> stockActual = const Value.absent(),[m
+[31m-                Value<double> stockMinimo = const Value.absent(),[m
+[32m+[m[32m                Value<double?> precioCompra = const Value.absent(),[m
+[32m+[m[32m                Value<double?> precioVenta = const Value.absent(),[m
+[32m+[m[32m                Value<double?> stockActual = const Value.absent(),[m
+[32m+[m[32m                Value<double?> stockMinimo = const Value.absent(),[m
+                 Value<int> categoriaId = const Value.absent(),[m
+                 Value<int> marcaId = const Value.absent(),[m
+                 Value<int> unidadId = const Value.absent(),[m
+[36m@@ -1106,10 +1118,10 @@[m [mclass $$InventarioTableTableTableManager[m
+                 Value<int> id = const Value.absent(),[m
+                 required String codigo,[m
+                 required String nombre,[m
+[31m-                required double precioCompra,[m
+[31m-                required double precioVenta,[m
+[31m-                Value<double> stockActual = const Value.absent(),[m
+[31m-                Value<double> stockMinimo = const Value.absent(),[m
+[32m+[m[32m                Value<double?> precioCompra = const Value.absent(),[m
+[32m+[m[32m                Value<double?> precioVenta = const Value.absent(),[m
+[32m+[m[32m                Value<double?> stockActual = const Value.absent(),[m
+[32m+[m[32m                Value<double?> stockMinimo = const Value.absent(),[m
+                 required int categoriaId,[m
+                 required int marcaId,[m
+                 required int unidadId,[m
+[1mdiff --git a/lib/features/inventario/data/mappers/producto_mapper.dart b/lib/features/inventario/data/mappers/producto_mapper.dart[m
+[1mindex 9ad25b9..c182cd6 100644[m
+[1m--- a/lib/features/inventario/data/mappers/producto_mapper.dart[m
+[1m+++ b/lib/features/inventario/data/mappers/producto_mapper.dart[m
+[36m@@ -3,7 +3,6 @@[m [mimport 'package:fiscogest_rd/core/database/app_database.dart';[m
+ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';[m
+ [m
+ class ProductoDataMapper {[m
+[31m-  // ✅ Nombre CORRECTO: ProductoData (igual generado por Drift)[m
+   static Producto toDomain(ProductoData fila) {[m
+     return Producto([m
+       id: fila.id,[m
+[36m@@ -11,37 +10,37 @@[m [mclass ProductoDataMapper {[m
+       codigoBarras: fila.codigoBarras,[m
+       nombre: fila.nombre,[m
+       descripcion: fila.descripcion,[m
+[31m-      precioCompra: fila.precioCompra,[m
+[31m-      precioVenta: fila.precioVenta,[m
+[31m-      stock: fila.stock,[m
+[31m-      stockMinimo: fila.stockMinimo,[m
+[31m-      // ✅ Agregados campos que faltaban y generaban error[m
+[32m+[m[32m      precioCompra: fila.precioCompra ?? 0.0,[m
+[32m+[m[32m      precioVenta: fila.precioVenta ?? 0.0,[m
+[32m+[m[32m      stock: fila.stock ?? 0.0,[m
+[32m+[m[32m      stockMinimo: fila.stockMinimo ?? 0.0,[m
+       stockMaximo: fila.stockMaximo,[m
+       categoriaId: fila.categoriaId,[m
+       marcaId: fila.marcaId,[m
+       unidadMedidaId: fila.unidadMedidaId,[m
+[31m-      // ✅ Conversión segura entero ↔ booleano[m
+       activo: fila.activo == 1,[m
+     );[m
+   }[m
+ [m
+   static ProductosTableCompanion toCompanion(Producto entidad) {[m
+[32m+[m[32m    final identificador = entidad.id;[m
+     return ProductosTableCompanion([m
+[31m-      id: entidad.id != null ? drift.Value(entidad.id!) : const drift.Value.absent(),[m
+[31m-      codigo: drift.Value(entidad.codigo),[m
+[31m-      codigoBarras: drift.Value(entidad.codigoBarras),[m
+[31m-      nombre: drift.Value(entidad.nombre),[m
+[31m-      descripcion: drift.Value(entidad.descripcion),[m
+[31m-      precioCompra: drift.Value(entidad.precioCompra),[m
+[31m-      precioVenta: drift.Value(entidad.precioVenta),[m
+[31m-      stock: drift.Value(entidad.stock),[m
+[31m-      stockMinimo: drift.Value(entidad.stockMinimo),[m
+[31m-      // ✅ Completos y declarados[m
+[31m-      stockMaximo: drift.Value(entidad.stockMaximo),[m
+[31m-      categoriaId: drift.Value(entidad.categoriaId),[m
+[31m-      marcaId: drift.Value(entidad.marcaId),[m
+[31m-      unidadMedidaId: drift.Value(entidad.unidadMedidaId),[m
+[31m-      activo: drift.Value(entidad.activo ? 1 : 0),[m
+[32m+[m[32m      id: identificador != null[m
+[32m+[m[32m          ? drift.Value<int>(identificador)[m
+[32m+[m[32m          : const drift.Value<int>.absent(),[m
+[32m+[m[32m      codigo: drift.Value<String>(entidad.codigo),[m
+[32m+[m[32m      codigoBarras: drift.Value<String?>(entidad.codigoBarras),[m
+[32m+[m[32m      nombre: drift.Value<String>(entidad.nombre),[m
+[32m+[m[32m      descripcion: drift.Value<String?>(entidad.descripcion),[m
+[32m+[m[32m      precioCompra: drift.Value<double>(entidad.precioCompra),[m
+[32m+[m[32m      precioVenta: drift.Value<double>(entidad.precioVenta),[m
+[32m+[m[32m      stock: drift.Value<double?>(entidad.stock),[m
+[32m+[m[32m      stockMinimo: drift.Value<double?>(entidad.stockMinimo),[m
+[32m+[m[32m      stockMaximo: drift.Value<double?>(entidad.stockMaximo),[m
+[32m+[m[32m      categoriaId: drift.Value<int>(entidad.categoriaId),[m
+[32m+[m[32m      marcaId: drift.Value<int>(entidad.marcaId),[m
+[32m+[m[32m      unidadMedidaId: drift.Value<int>(entidad.unidadMedidaId),[m
+[32m+[m[32m      activo: drift.Value<int>(entidad.activo ? 1 : 0),[m
+     );[m
+   }[m
+ }[m
+[1mdiff --git a/lib/features/inventario/data/repositories/producto_repository_impl.dart b/lib/features/inventario/data/repositories/producto_repository_impl.dart[m
+[1mindex 712bae3..d9bdbfa 100644[m
+[1m--- a/lib/features/inventario/data/repositories/producto_repository_impl.dart[m
+[1m+++ b/lib/features/inventario/data/repositories/producto_repository_impl.dart[m
+[36m@@ -8,14 +8,13 @@[m [mimport 'package:fiscogest_rd/features/inventario/data/mappers/producto_mapper.da[m
+ [m
+ class ProductoRepositoryImpl implements IProductoRepository {[m
+   ProductoRepositoryImpl(this._db, this._kardexRepo);[m
+[31m-[m
+   final AppDatabase _db;[m
+   final IKardexRepository _kardexRepo;[m
+ [m
+   @override[m
+   Future<List<Producto>> obtenerProductos() async {[m
+     final results = await _db.select(_db.productosTable).get();[m
+[31m-    return results.map(ProductoDataMapper.toDomain).toList();[m
+[32m+[m[32m    return results.map<Producto>(ProductoDataMapper.toDomain).toList();[m
+   }[m
+ [m
+   @override[m
+[36m@@ -52,18 +51,21 @@[m [mclass ProductoRepositoryImpl implements IProductoRepository {[m
+ [m
+   @override[m
+   Future<bool> actualizarProducto(Producto producto) async {[m
+[31m-    if (producto.id == null) return false;[m
+[32m+[m[32m    final identificador = producto.id;[m
+[32m+[m[32m    if (identificador == null) {[m
+[32m+[m[32m      return false;[m
+[32m+[m[32m    }[m
+     final rowsAffected = await (_db.update(_db.productosTable)[m
+[31m-      ..where((t) => t.id.equals(producto.id!))).write([m
+[32m+[m[32m      ..where((t) => t.id.equals(identificador))).write([m
+         ProductoDataMapper.toCompanion(producto),[m
+       );[m
+     return rowsAffected > 0;[m
+   }[m
+ [m
+   @override[m
+[31m-  Future<bool> eliminarProducto(int id) async {[m
+[32m+[m[32m  Future<bool> eliminarProducto(int identificador) async {[m
+     final rowsAffected = await (_db.delete(_db.productosTable)[m
+[31m-      ..where((t) => t.id.equals(id))).go();[m
+[32m+[m[32m      ..where((t) => t.id.equals(identificador))).go();[m
+     return rowsAffected > 0;[m
+   }[m
+ }[m
+[1mdiff --git a/lib/features/inventario/presentation/pages/productos_page.dart b/lib/features/inventario/presentation/pages/productos_page.dart[m
+[1mindex 0cf44cd..ded4a95 100644[m
+[1m--- a/lib/features/inventario/presentation/pages/productos_page.dart[m
+[1m+++ b/lib/features/inventario/presentation/pages/productos_page.dart[m
+[36m@@ -3,12 +3,15 @@[m [mimport 'package:flutter_riverpod/flutter_riverpod.dart';[m
+ import 'package:go_router/go_router.dart';[m
+ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';[m
+ import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';[m
+[31m-import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';[m
+[31m-import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';[m
+ import 'package:fiscogest_rd/features/categorias/presentation/pages/categorias_page.dart';[m
+ import 'package:fiscogest_rd/features/marcas/presentation/pages/marcas_page.dart';[m
+ import 'package:fiscogest_rd/features/unidades/presentation/pages/unidades_page.dart';[m
+ import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';[m
+[32m+[m[32mimport 'package:fiscogest_rd/core/ui/app_scaffold.dart';[m
+[32m+[m[32mimport 'package:fiscogest_rd/core/ui/app_spacing.dart';[m
+[32m+[m[32mimport 'package:fiscogest_rd/core/ui/app_typography.dart';[m
+[32m+[m[32mimport 'package:fiscogest_rd/core/ui/app_textfield.dart';[m
+[32m+[m[32mimport 'package:fiscogest_rd/core/ui/app_dropdown.dart';[m
+ [m
+ class ProductosPage extends ConsumerStatefulWidget {[m
+   const ProductosPage({super.key});[m
+[36m@@ -18,12 +21,12 @@[m [mclass ProductosPage extends ConsumerStatefulWidget {[m
+   ConsumerState<ProductosPage> createState() => _ProductosPageState();[m
+ }[m
+ [m
+[31m-class _ProductosPageState extends ConsumerState<ProductosPage>[m
+[31m-    with SingleTickerProviderStateMixin {[m
+[31m-  late TabController _tabController;[m
+[32m+[m[32mclass _ProductosPageState extends ConsumerState<ProductosPage> with SingleTickerProviderStateMixin {[m
+[32m+[m[32m  bool _busquedaActiva = false;[m
+   String _filtroProductos = '';[m
+   String _filtroKardex = '';[m
+   TipoMovimiento? _filtroTipoKardex;[m
+[32m+[m[32m  late TabController _tabController;[m
+ [m
+   @override[m
+   void initState() {[m
+[36m@@ -39,33 +42,54 @@[m [mclass _ProductosPageState extends ConsumerState<ProductosPage>[m
+ [m
+   @override[m
+   Widget build(BuildContext context) {[m
+[31m-    return Scaffold([m
+[31m-      backgroundColor: const Color(0xFFF4F6F9),[m
+[32m+[m[32m    return AppScaffold([m
+[32m+[m[32m      title: null,[m
+       appBar: AppBar([m
+         title: const Text('Gestión Integral de Inventario'),[m
+[31m-        backgroundColor: const Color(0xFF1E293B),[m
+[31m-        elevation: 0,[m
+         actions: [[m
+[31m-          IconButton([m
+[31m-            icon: const Icon(Icons.edit_note_outlined, color: Colors.white, size: 22),[m
+[31m-            tooltip: 'Ajustes de Inventario',[m
+[31m-            onPressed: () => context.pushNamed('lista-ajustes'),[m
+[31m-          ),[m
+[31m-          const SizedBox(width: 8),[m
+[32m+[m[32m          const SizedBox(width: AppSpacing.s),[m
+[32m+[m[32m          _busquedaActiva[m
+[32m+[m[32m              ? SizedBox([m
+[32m+[m[32m                  width: 180,[m
+[32m+[m[32m                  child: Row([m
+[32m+[m[32m                    children: [[m
+[32m+[m[32m                      Expanded([m
+[32m+[m[32m                        child: AppTextField([m
+[32m+[m[32m                          hint: 'Buscar...',[m
+[32m+[m[32m                          onChanged: (v) => setState(() => _filtroProductos = v),[m
+[32m+[m[32m                        ),[m
+[32m+[m[32m                      ),[m
+[32m+[m[32m                      IconButton([m
+[32m+[m[32m                        icon: const Icon(Icons.close, color: Colors.white, size: 18),[m
+[32m+[m[32m                        onPressed: () => setState(() {[m
+[32m+[m[32m                          _busquedaActiva = false;[m
+[32m+[m[32m                          _filtroProductos = '';[m
+[32m+[m[32m                        }),[m
+[32m+[m[32m                      ),[m
+[32m+[m[32m                    ],[m
+[32m+[m[32m                  ),[m
+[32m+[m[32m                )[m
+[32m+[m[32m              : IconButton([m
+[32m+[m[32m                  icon: const Icon(Icons.search_outlined, color: Colors.white, size: 22),[m
+[32m+[m[32m                  tooltip: 'Buscar',[m
+[32m+[m[32m                  onPressed: () => setState(() => _busquedaActiva = true),[m
+[32m+[m[32m                ),[m
+         ],[m
+         bottom: TabBar([m
+           controller: _tabController,[m
+[31m-          indicatorColor: Colors.tealAccent,[m
+[31m-          indicatorWeight: 3,[m
+[31m-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),[m
+[32m+[m[32m          labelStyle: AppTypography.labelMedium.copyWith([m
+[32m+[m[32m            fontWeight: FontWeight.bold,[m
+[32m+[m[32m            fontSize: 13,[m
+[32m+[m[32m          ),[m
+           unselectedLabelColor: Colors.white70,[m
+           labelColor: Colors.white,[m
+[32m+[m[32m          isScrollable: true,[m
+           tabs: const [[m
+[31m-            Tab(icon: Icon(Icons.inventory_2_outlined), text: 'Productos'),[m
+[31m-            Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Kardex'),[m
+[31m-            Tab(icon: Icon(Icons.category_outlined), text: 'Categorías'),[m
+[31m-            Tab(icon: Icon(Icons.branding_watermark_outlined), text: 'Marcas'),[m
+[31m-            Tab(icon: Icon(Icons.straighten_outlined), text: 'Unidades'),[m
+[32m+[m[32m            Tab(icon: Icon(Icons.inventory_2_outlined, size: 20), text: 'Productos'),[m
+[32m+[m[32m            Tab(icon: Icon(Icons.receipt_long_outlined, size: 20), text: 'Kardex'),[m
+[32m+[m[32m            Tab(icon: Icon(Icons.category_outlined, size: 20), text: 'Categorías'),[m
+[32m+[m[32m            Tab(icon: Icon(Icons.branding_watermark_outlined, size: 20), text: 'Marcas'),[m
+[32m+[m[32m            Tab(icon: Icon(Icons.straighten_outlined, size: 20), text: 'Unidades'),[m
+           ],[m
+         ),[m
+       ),[m
+[36m@@ -83,105 +107,207 @@[m [mclass _ProductosPageState extends ConsumerState<ProductosPage>[m
+   }[m
+ [m
+   Widget _buildSeccionProductos(BuildContext context) {[m
+[31m-    final AsyncValue<List<Producto>> productosAsync = ref.watch(productoControllerProvider);[m
+[31m-[m
+[32m+[m[32m    final productosAsync = ref.watch(productoControllerProvider);[m
+     return Padding([m
+[31m-      padding: const EdgeInsets.all(24.0),[m
+[31m-      child: Column([m
+[31m-        crossAxisAlignment: CrossAxisAlignment.start,[m
+[32m+[m[32m      padding: EdgeInsets.zero,[m
+[32m+[m[32m      child: Stack([m
+         children: [[m
+[31m-          Row([m
+[31m-            mainAxisAlignment: MainAxisAlignment.spaceBetween,[m
+[32m+[m[32m          Column([m
+[32m+[m[32m            crossAxisAlignment: CrossAxisAlignment.start,[m
+             children: [[m
+[31m-              const Expanded([m
+[31m-                child: Text([m
+[31m-                  'Listado General de Productos',[m
+[31m-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF1E293B)),[m
+[31m-                  overflow: TextOverflow.ellipsis,[m
+[31m-                ),[m
+[31m-              ),[m
+[31m-              const SizedBox(width: 12),[m
+[31m-              ElevatedButton.icon([m
+[31m-                style: ElevatedButton.styleFrom([m
+[31m-                  backgroundColor: const Color(0xFF1E293B),[m
+[31m-                  foregroundColor: Colors.white,[m
+[31m-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),[m
+[31m-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),[m
+[31m-                ),[m
+[31m-                onPressed: () => context.push('/productos/nuevo'),[m
+[31m-                icon: const Icon(Icons.add, size: 20),[m
+[31m-                label: const Text('Nuevo Producto', style: TextStyle(fontWeight: FontWeight.w600)),[m
+[31m-              ),[m
+[31m-            ],[m
+[31m-          ),[m
+[31m-          const SizedBox(height: 24),[m
+[31m-          TextField([m
+[31m-            onChanged: (String v) => setState(() => _filtroProductos = v),[m
+[31m-            decoration: InputDecoration([m
+[31m-              hintText: 'Buscar por código, nombre...',[m
+[31m-              hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),[m
+[31m-              prefixIcon: const Icon(Icons.search, color: Color(0xFF64748B), size: 20),[m
+[31m-              filled: true,[m
+[31m-              fillColor: Colors.white,[m
+[31m-              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),[m
+[31m-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),[m
+[31m-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),[m
+[31m-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B), width: 1.5)),[m
+[31m-            ),[m
+[31m-          ),[m
+[31m-          const SizedBox(height: 16),[m
+[31m-          Expanded([m
+[31m-            child: productosAsync.when([m
+[31m-              loading: () => const Center(child: CircularProgressIndicator()),[m
+[31m-              error: (Object e, StackTrace? _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),[m
+[31m-              data: (List<Producto> productos) {[m
+[31m-                final List<Producto> filtrados = productos[m
+[31m-                    .where((Producto p) => p.codigo.toLowerCase().contains(_filtroProductos) || p.nombre.toLowerCase().contains(_filtroProductos))[m
+[31m-                    .toList();[m
+[32m+[m[32m              Expanded([m
+[32m+[m[32m                child: productosAsync.when([m
+[32m+[m[32m                  loading: () => const Center(child: CircularProgressIndicator()),[m
+[32m+[m[32m                  error: (e, _) => Center([m
+[32m+[m[32m                    child: Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: Colors.red)),[m
+[32m+[m[32m                  ),[m
+[32m+[m[32m                  data: (productos) {[m
+[32m+[m[32m                    final filtrados = productos[m
+[32m+[m[32m                        .where((p) => p.codigo.toLowerCase().contains(_filtroProductos) || p.nombre.toLowerCase().contains(_filtroProductos))[m
+[32m+[m[32m                        .toList();[m
+ [m
+[31m-                if (filtrados.isEmpty) {[m
+[31m-                  return const Center(child: Text('El inventario está listo para registrar elementos.', style: TextStyle(color: Color(0xFF64748B), fontSize: 15)));[m
+[31m-                }[m
+[32m+[m[32m                    if (filtrados.isEmpty) {[m
+[32m+[m[32m                      return Center([m
+[32m+[m[32m                        child: Padding([m
+[32m+[m[32m                          padding: AppSpacing.allL,[m
+[32m+[m[32m                          child: Text([m
+[32m+[m[32m                            'El inventario está listo para registrar elementos.',[m
+[32m+[m[32m                            textAlign: TextAlign.center,[m
+[32m+[m[32m                            style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF64748B)),[m
+[32m+[m[32m                          ),[m
+[32m+[m[32m                        ),[m
+[32m+[m[32m                      );[m
+[32m+[m[32m                    }[m
+ [m
+[31m-                return ListView.separated([m
+[31m-                  padding: const EdgeInsets.symmetric(vertical: 8),[m
+[31m-                  itemCount: filtrados.length,[m
+[31m-                  separatorBuilder: (_, __) => const SizedBox(height: 12),[m
+[31m-                  itemBuilder: (_, i) {[m
+[31m-                    final Producto prod = filtrados[i];[m
+[31m-                    return Card([m
+[31m-                      elevation: 2,[m
+[31m-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),[m
+[31m-                      child: Padding([m
+[31m-                        padding: const EdgeInsets.all(16),[m
+[31m-                        child: Row([m
+[31m-                          children: [[m
+[31m-                            Container([m
+[31m-                              width: 50, height: 50, margin: const EdgeInsets.only(right: 16),[m
+[31m-                              decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),[m
+[31m-                              child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF1E293B), size: 24),[m
+[31m-                            ),[m
+[31m-                            Expanded([m
+[31m-                              child: Column([m
+[31m-                                crossAxisAlignment: CrossAxisAlignment.start,[m
+[31m-                                children: [[m
+[31m-                                  Text('${prod.codigo} • ${prod.nombre}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF1E293B)), overflow: TextOverflow.ellipsis),[m
+[31m-                                  const SizedBox(height: 4),[m
+[31m-                                  Wrap(spacing: 8, runSpacing: 4, children: [[m
+[31m-                                    RichText(text: TextSpan(style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)), children: [const TextSpan(text: 'Stock: '), TextSpan(text: '${prod.stock}', style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF1E293B)))])),[m
+[31m-                                    RichText(text: TextSpan(style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)), children: [const TextSpan(text: 'Compra: '), TextSpan(text: '${prod.precioCompra}', style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF10B981)))])),[m
+[31m-                                    RichText(text: TextSpan(style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)), children: [const TextSpan(text: 'Venta: '), TextSpan(text: '${prod.precioVenta}', style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFFEF4444)))])),[m
+[31m-                                  ]),[m
+[31m-                                ],[m
+[31m-                              ),[m
+[32m+[m[32m                    return ListView.separated([m
+[32m+[m[32m                      padding: EdgeInsets.zero,[m
+[32m+[m[32m                      itemCount: filtrados.length,[m
+[32m+[m[32m                      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s),[m
+[32m+[m[32m                      itemBuilder: (_, i) {[m
+[32m+[m[32m                        final prod = filtrados[i];[m
+[32m+[m[32m                        final stock = prod.stock ?? 0.0;[m
+[32m+[m[32m                        final stockMinimo = prod.stockMinimo ?? 0.0;[m
+[32m+[m[32m                        Color colorStock = const Color(0xFF1E293B);[m
+[32m+[m[32m                        if (stock <= 0) colorStock = const Color(0xFFDC2626);[m
+[32m+[m[32m                        else if (stock <= 5) colorStock = const Color(0xFFCA8A04);[m
+[32m+[m
+[32m+[m[32m                        final precioCompra = prod.precioCompra.toDouble();[m
+[32m+[m[32m                        final precioVenta = prod.precioVenta.toDouble();[m
+[32m+[m[32m                        final nombre = prod.nombre;[m
+[32m+[m[32m                        final codigo = prod.codigo;[m
+[32m+[m[32m                        final activo = prod.activo;[m
+[32m+[m[32m                        final productoId = prod.id ?? 0;[m
+[32m+[m
+[32m+[m[32m                        return Card([m
+[32m+[m[32m                          elevation: 2,[m
+[32m+[m[32m                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),[m
+[32m+[m[32m                          child: Padding([m
+[32m+[m[32m                            padding: AppSpacing.allM,[m
+[32m+[m[32m                            child: Row([m
+[32m+[m[32m                              children: [[m
+[32m+[m[32m                                Container([m
+[32m+[m[32m                                  width: 50, height: 50,[m
+[32m+[m[32m                                  margin: const EdgeInsets.only(right: 16),[m
+[32m+[m[32m                                  decoration: BoxDecoration([m
+[32m+[m[32m                                    color: const Color(0xFFF1F5F9),[m
+[32m+[m[32m                                    borderRadius: BorderRadius.circular(12),[m
+[32m+[m[32m                                  ),[m
+[32m+[m[32m                                  child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF1E293B), size: 24),[m
+[32m+[m[32m                                ),[m
+[32m+[m[32m                                Expanded([m
+[32m+[m[32m                                  child: Column([m
+[32m+[m[32m                                    crossAxisAlignment: CrossAxisAlignment.start,[m
+[32m+[m[32m                                    children: [[m
+[32m+[m[32m                                      Row([m
+[32m+[m[32m                                        children: [[m
+[32m+[m[32m                                          Expanded([m
+[32m+[m[32m                                            child: Text([m
+[32m+[m[32m                                              nombre,[m
+[32m+[m[32m                                              style: AppTypography.labelMedium.copyWith([m
+[32m+[m[32m                                                fontWeight: FontWeight.w700,[m
+[32m+[m[32m                                                color: const Color(0xFF1E293B),[m
+[32m+[m[32m                                                fontSize: 13,[m
+[32m+[m[32m                                                height: 1.1,[m
+[32m+[m[32m                                              ),[m
+[32m+[m[32m                                              overflow: TextOverflow.ellipsis,[m
+[32m+[m[32m                                              maxLines: 1,[m
+[32m+[m[32m                                            ),[m
+[32m+[m[32m                                          ),[m
+[32m+[m[32m                                          const SizedBox(width: 8),[m
+[32m+[m[32m                                          Container([m
+[32m+[m[32m                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),[m
+[32m+[m[32m                                            decoration: BoxDecoration([m
+[32m+[m[32m                                              color: activo ? const Color(0xFFD1FAE5) : const Color(0xFFF3F4F6),[m
+[32m+[m[32m                                              borderRadius: BorderRadius.circular(4),[m
+[32m+[m[32m                                            ),[m
+[32m+[m[32m                                            child: Text([m
+[32m+[m[32m                                              activo ? 'ACTIVO' : 'INACTIVO',[m
+[32m+[m[32m                                              style: AppTypography.labelSmall.copyWith([m
+[32m+[m[32m                                                fontWeight: FontWeight.bold,[m
+[32m+[m[32m                                                color: activo ? const Color(0xFF047857) : const Color(0xFF6B7280),[m
+[32m+[m[32m                                                fontSize: 10,[m
+[32m+[m[32m                                              ),[m
+[32m+[m[32m                                            ),[m
+[32m+[m[32m                                          ),[m
+[32m+[m[32m                                        ],[m
+[32m+[m[32m                                      ),[m
+[32m+[m[32m                                      const SizedBox(height: 2),[m
+[32m+[m[32m                                      if (stock <= stockMinimo)[m
+[32m+[m[32m                                        Padding([m
+[32m+[m[32m                                          padding: const EdgeInsets.only(bottom: 2),[m
+[32m+[m[32m                                          child: Row([m
+[32m+[m[32m                                            children: [[m
+[32m+[m[32m                                              const Icon(Icons.warning_amber_rounded, color: Color(0xFFCA8A04), size: 16),[m
+[32m+[m[32m                                              const SizedBox(width: 4),[m
+[32m+[m[32m                                              Text([m
+[32m+[m[32m                                                'Stock bajo! Mín: $stockMinimo',[m
+[32m+[m[32m                                                style: AppTypography.bodySmall.copyWith(color: const Color(0xFFCA8A04), fontWeight: FontWeight.w600),[m
+[32m+[m[32m                                              ),[m
+[32m+[m[32m                                            ],[m
+[32m+[m[32m                                          ),[m
+[32m+[m[32m                                        ),[m
+[32m+[m[32m                                      Wrap([m
+[32m+[m[32m                                        spacing: 16, runSpacing: 4,[m
+[32m+[m[32m                                        children: [[m
+[32m+[m[32m                                          RichText([m
+[32m+[m[32m                                            text: TextSpan([m
+[32m+[m[32m                                              style: AppTypography.bodySmall.copyWith(color: const Color(0xFF64748B)),[m
+[32m+[m[32m                                              children: [[m
+[32m+[m[32m                                                const TextSpan(text: 'Stock: '),[m
+[32m+[m[32m                                                TextSpan(text: '$stock', style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, color: colorStock)),[m
+[32m+[m[32m                                              ],[m
+[32m+[m[32m                                            ),[m
+[32m+[m[32m                                          ),[m
+[32m+[m[32m                                          RichText([m
+[32m+[m[32m                                            text: TextSpan([m
+[32m+[m[32m                                              style: AppTypography.bodySmall.copyWith(color: const Color(0xFF64748B)),[m
+[32m+[m[32m                                              children: [[m
+[32m+[m[32m                                                const TextSpan(text: 'Compra: '),[m
+[32m+[m[32m                                                TextSpan(text: 'RD\$ $precioCompra', style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF10B981))),[m
+[32m+[m[32m                                              ],[m
+[32m+[m[32m                                            ),[m
+[32m+[m[32m                                          ),[m
+[32m+[m[32m                                        ],[m
+[32m+[m[32m                                      ),[m
+[32m+[m[32m                                      const SizedBox(height: 2),[m
+[32m+[m[32m                                      Wrap([m
+[32m+[m[32m                                        spacing: 12, runSpacing: 4,[m
+[32m+[m[32m                                        children: [[m
+[32m+[m[32m                                          RichText([m
+[32m+[m[32m                                            text: TextSpan([m
+[32m+[m[32m                                              style: AppTypography.bodySmall.copyWith(color: const Color(0xFF64748B)),[m
+[32m+[m[32m                                              children: [[m
+[32m+[m[32m                                                const TextSpan(text: 'SKU: '),[m
+[32m+[m[32m                                                TextSpan(text: codigo, style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF1E293B))),[m
+[32m+[m[32m                                              ],[m
+[32m+[m[32m                                            ),[m
+[32m+[m[32m                                          ),[m
+[32m+[m[32m                                          RichText([m
+[32m+[m[32m                                            text: TextSpan([m
+[32m+[m[32m                                              style: AppTypography.bodySmall.copyWith(color: const Color(0xFF64748B)),[m
+[32m+[m[32m                                              children: [[m
+[32m+[m[32m                                                const TextSpan(text: 'Venta: '),[m
+[32m+[m[32m                                                TextSpan(text: 'RD\$ $precioVenta', style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFFEF4444))),[m
+[32m+[m[32m                                              ],[m
+[32m+[m[32m                                            ),[m
+[32m+[m[32m                                          ),[m
+[32m+[m[32m                                        ],[m
+[32m+[m[32m                                      ),[m
+[32m+[m[32m                                    ],[m
+[32m+[m[32m                                  ),[m
+[32m+[m[32m                                ),[m
+[32m+[m[32m                                Column([m
+[32m+[m[32m                                  children: [[m
+[32m+[m[32m                                    IconButton([m
+[32m+[m[32m                                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF1E293B), size: 20),[m
+[32m+[m[32m                                      tooltip: 'Editar Producto',[m
+[32m+[m[32m                                      onPressed: () => context.push('/productos/$productoId/editar'),[m
+[32m+[m[32m                                    ),[m
+[32m+[m[32m                                    IconButton([m
+[32m+[m[32m                                      icon: const Icon(Icons.delete_outline, color: Color(0xFFDC2626), size: 20),[m
+[32m+[m[32m                                      tooltip: 'Eliminar Producto',[m
+[32m+[m[32m                                      onPressed: () => ref.read(productoControllerProvider.notifier).eliminar(productoId),[m
+[32m+[m[32m                                    ),[m
+[32m+[m[32m                                  ],[m
+[32m+[m[32m                                ),[m
+[32m+[m[32m                              ],[m
+                             ),[m
+[31m-                          ],[m
+[31m-                        ),[m
+[31m-                      ),[m
+[32m+[m[32m                          ),[m
+[32m+[m[32m                        );[m
+[32m+[m[32m                      },[m
+                     );[m
+                   },[m
+[31m-                );[m
+[31m-              },[m
+[32m+[m[32m                ),[m
+[32m+[m[32m              ),[m
+[32m+[m[32m            ],[m
+[32m+[m[32m          ),[m
+[32m+[m[32m          Positioned([m
+[32m+[m[32m            bottom: 8,[m
+[32m+[m[32m            right: 8,[m
+[32m+[m[32m            child: FloatingActionButton([m
+[32m+[m[32m              backgroundColor: const Color(0xFF1E293B),[m
+[32m+[m[32m              child: const Icon(Icons.add, color: Colors.white, size: 24),[m
+[32m+[m[32m              onPressed: () => context.push('/productos/nuevo'),[m
+             ),[m
+           ),[m
+         ],[m
+[36m@@ -190,105 +316,141 @@[m [mclass _ProductosPageState extends ConsumerState<ProductosPage>[m
+   }[m
+ [m
+   Widget _buildSeccionKardex(BuildContext context) {[m
+[31m-    final AsyncValue<List<Kardex>> movimientosAsync = ref.watch(kardexPorProductoProvider(''));[m
+[31m-[m
+[32m+[m[32m    final movimientosAsync = ref.watch(kardexPorProductoProvider(''));[m
+     return Padding([m
+[31m-      padding: const EdgeInsets.all(24.0),[m
+[32m+[m[32m      padding: EdgeInsets.zero,[m
+       child: Column([m
+         crossAxisAlignment: CrossAxisAlignment.start,[m
+         children: [[m
+[31m-          const Text('Historial de Movimientos (Kardex)', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF1E293B))),[m
+[31m-          const SizedBox(height: 24),[m
+[31m-          Row(children: [[m
+[31m-            Expanded([m
+[31m-              child: TextField([m
+[31m-                onChanged: (String v) => setState(() => _filtroKardex = v),[m
+[31m-                decoration: InputDecoration([m
+[31m-                  hintText: 'Buscar por producto, documento...',[m
+[31m-                  hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),[m
+[31m-                  prefixIcon: const Icon(Icons.search, color: Color(0xFF64748B), size: 20),[m
+[31m-                  filled: true, fillColor: Colors.white,[m
+[31m-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),[m
+[31m-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),[m
+[31m-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),[m
+[32m+[m[32m          Text([m
+[32m+[m[32m            'Historial de Movimientos (Kardex)',[m
+[32m+[m[32m            style: AppTypography.h4.copyWith(color: const Color(0xFF1E293B)),[m
+[32m+[m[32m          ),[m
+[32m+[m[32m          const SizedBox(height: AppSpacing.m),[m
+[32m+[m[32m          Row([m
+[32m+[m[32m            children: [[m
+[32m+[m[32m              Expanded([m
+[32m+[m[32m                child: AppTextField([m
+[32m+[m[32m                  hint: 'Buscar por producto, documento...',[m
+[32m+[m[32m                  onChanged: (v) => setState(() => _filtroKardex = v),[m
+                 ),[m
+               ),[m
+[31m-            ),[m
+[31m-            const SizedBox(width: 16),[m
+[31m-            Expanded([m
+[31m-              child: DropdownButtonFormField<TipoMovimiento>([m
+[31m-                initialValue: _filtroTipoKardex,[m
+[31m-                decoration: InputDecoration([m
+[31m-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),[m
+[31m-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),[m
+[31m-                  filled: true, fillColor: Colors.white,[m
+[31m-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1)),[m
+[32m+[m[32m              const SizedBox(width: AppSpacing.m),[m
+[32m+[m[32m              Expanded([m
+[32m+[m[32m                child: AppDropdown<TipoMovimiento>([m
+[32m+[m[32m                  initialValue: _filtroTipoKardex,[m
+[32m+[m[32m                  hint: 'Tipo Movimiento',[m
+[32m+[m[32m                  items: TipoMovimiento.values[m
+[32m+[m[32m                      .map((t) => DropdownMenuItem(value: t, child: Text(t.name.toUpperCase())))[m
+[32m+[m[32m                      .toList(),[m
+[32m+[m[32m                  onChanged: (v) => setState(() => _filtroTipoKardex = v),[m
+                 ),[m
+[31m-                hint: const Text('Tipo Movimiento', style: TextStyle(fontSize: 14, color: Color(0xFF94A3B8))),[m
+[31m-                items: TipoMovimiento.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name.toUpperCase(), style: const TextStyle(fontSize: 14)))).toList(),[m
+[31m-                onChanged: (v) => setState(() => _filtroTipoKardex = v),[m
+               ),[m
+[31m-            ),[m
+[31m-          ]),[m
+[31m-          const SizedBox(height: 16),[m
+[32m+[m[32m            ],[m
+[32m+[m[32m          ),[m
+[32m+[m[32m          const SizedBox(height: AppSpacing.m),[m
+           Expanded([m
+             child: movimientosAsync.when([m
+               loading: () => const Center(child: CircularProgressIndicator()),[m
+[31m-              error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),[m
+[32m+[m[32m              error: (e, _) => Center([m
+[32m+[m[32m                child: Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: Colors.red)),[m
+[32m+[m[32m              ),[m
+               data: (movimientos) {[m
+                 final filtrados = movimientos.where((m) {[m
+[31m-                  final coincideTexto = m.productoId.toString().contains(_filtroKardex) || (m.documentoReferencia?.contains(_filtroKardex) ?? false);[m
+[32m+[m[32m                  final docRef = m.documentoReferencia ?? '';[m
+[32m+[m[32m                  final coincideTexto = m.productoId.toString().contains(_filtroKardex) || docRef.contains(_filtroKardex);[m
+                   final coincideTipo = _filtroTipoKardex == null || m.tipoMovimiento == _filtroTipoKardex;[m
+                   return coincideTexto && coincideTipo;[m
+                 }).toList();[m
+ [m
+[31m-                if (filtrados.isEmpty) return const Center(child: Text('Aquí aparecerá el historial completo de entradas, salidas y ajustes de inventario.', style: TextStyle(color: Color(0xFF64748B), fontSize: 15), textAlign: TextAlign.center));[m
+[32m+[m[32m                if (filtrados.isEmpty) {[m
+[32m+[m[32m                  return Center([m
+[32m+[m[32m                    child: Padding([m
+[32m+[m[32m                      padding: AppSpacing.allL,[m
+[32m+[m[32m                      child: Text([m
+[32m+[m[32m                        'Aquí aparecerá el historial completo de entradas, salidas y ajustes de inventario.',[m
+[32m+[m[32m                        textAlign: TextAlign.center,[m
+[32m+[m[32m                        style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF64748B)),[m
+[32m+[m[32m                      ),[m
+[32m+[m[32m                    ),[m
+[32m+[m[32m                  );[m
+[32m+[m[32m                }[m
+ [m
+                 return ListView.separated([m
+[31m-                  padding: const EdgeInsets.symmetric(vertical: 8),[m
+[32m+[m[32m                  padding: EdgeInsets.zero,[m
+                   itemCount: filtrados.length,[m
+[31m-                  separatorBuilder: (_, __) => const SizedBox(height: 12),[m
+[32m+[m[32m                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s),[m
+                   itemBuilder: (_, i) {[m
+[31m-                    final mov = filtrados[i];[m
+[31m-                    final colorTipo = switch (mov.tipoMovimiento) {[m
+[32m+[m[32m                    final m = filtrados[i];[m
+[32m+[m[32m                    final colorTipo = switch (m.tipoMovimiento) {[m
+                       TipoMovimiento.entrada => const Color(0xFF10B981),[m
+                       TipoMovimiento.salida => const Color(0xFFEF4444),[m
+[31m-                      TipoMovimiento.ajuste => const Color(0xFFF59E0B),[m
+[31m-                      _ => const Color(0xFF6366F1),[m
+[32m+[m[32m                      TipoMovimiento.ajuste => const Color(0xFF3B82F6),[m
+[32m+[m[32m                      _ => const Color(0xFF94A3B8),[m
+                     };[m
+[31m-                    [m
+[31m-                    final fechaValida = mov.fechaMovimiento ?? DateTime.now();[m
+[32m+[m[32m                    final fecha = m.fechaMovimiento ?? DateTime.now();[m
+[32m+[m[32m                    final dia = fecha.day;[m
+[32m+[m[32m                    final mes = fecha.month;[m
+[32m+[m[32m                    final anio = fecha.year;[m
+[32m+[m[32m                    final docRef = m.documentoReferencia ?? 'Sin doc';[m
+ [m
+                     return Card([m
+[31m-                      elevation: 2,[m
+[31m-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),[m
+[32m+[m[32m                      elevation: 1,[m
+[32m+[m[32m                      margin: EdgeInsets.zero,[m
+                       child: Padding([m
+[31m-                        padding: const EdgeInsets.all(16),[m
+[31m-                        child: Row(children: [[m
+[31m-                          Container(width: 8, height: 60, decoration: BoxDecoration(color: colorTipo, borderRadius: BorderRadius.circular(4))),[m
+[31m-                          const SizedBox(width: 16),[m
+[31m-                          Expanded([m
+[31m-                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [[m
+[31m-                              Text(mov.tipoMovimiento.name.toUpperCase(), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: colorTipo)),[m
+[31m-                              const SizedBox(height: 6),[m
+[31m-                              Text('Producto: ${mov.productoId}\nDocumento: ${mov.documentoReferencia ?? 'Sin doc'}', style: const TextStyle(fontSize: 13, color: Color(0xFF64748B), height: 1.3)),[m
+[31m-                              const SizedBox(height: 6),[m
+[31m-                              Text('Cantidad: ${mov.cantidad}  |  Saldo: ${mov.saldoAnterior} → ${mov.saldoNuevo}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1E293B))),[m
+[31m-                            ]),[m
+[31m-                          ),[m
+[31m-                          const SizedBox(width: 12),[m
+[31m-                          Flexible([m
+[31m-                            child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [[m
+[31m-                              Text('${fechaValida.day}/${fechaValida.month}/${fechaValida.year}', style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600)),[m
+[31m-                              const SizedBox(height: 4),[m
+[31m-                              Container([m
+[31m-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),[m
+[31m-                                decoration: BoxDecoration(color: colorTipo.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),[m
+[31m-                                child: Text(mov.tipoMovimiento == TipoMovimiento.entrada ? 'Entrante' : 'Saliente', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colorTipo)),[m
+[32m+[m[32m                        padding: AppSpacing.allM,[m
+[32m+[m[32m                        child: Row([m
+[32m+[m[32m                          children: [[m
+[32m+[m[32m                            Container([m
+[32m+[m[32m                              width: 8, height: 60,[m
+[32m+[m[32m                              decoration: BoxDecoration(color: colorTipo, borderRadius: BorderRadius.circular(4)),[m
+[32m+[m[32m                            ),[m
+[32m+[m[32m                            const SizedBox(width: AppSpacing.m),[m
+[32m+[m[32m                            Expanded([m
+[32m+[m[32m                              child: Column([m
+[32m+[m[32m                                crossAxisAlignment: CrossAxisAlignment.start,[m
+[32m+[m[32m                                children: [[m
+[32m+[m[32m                                  Text([m
+[32m+[m[32m                                    m.tipoMovimiento.name.toUpperCase(),[m
+[32m+[m[32m                                    style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w800, color: colorTipo),[m
+[32m+[m[32m                                  ),[m
+[32m+[m[32m                                  const SizedBox(height: AppSpacing.xs),[m
+[32m+[m[32m                                  Text([m
+[32m+[m[32m                                    'Producto: ${m.productoId}\nDocumento: $docRef',[m
+[32m+[m[32m                                    style: AppTypography.bodySmall.copyWith(color: const Color(0xFF64748B)),[m
+[32m+[m[32m                                  ),[m
+[32m+[m[32m                                  const SizedBox(height: AppSpacing.xs),[m
+[32m+[m[32m                                  Text([m
+[32m+[m[32m                                    'Cantidad: ${m.cantidad}  |  Saldo: ${m.saldoAnterior} → ${m.saldoNuevo}',[m
+[32m+[m[32m                                    style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF1E293B)),[m
+[32m+[m[32m                                  ),[m
+[32m+[m[32m                                ],[m
+                               ),[m
+[31m-                            ]),[m
+[31m-                          ),[m
+[31m-                        ]),[m
+[32m+[m[32m                            ),[m
+[32m+[m[32m                            const SizedBox(width: AppSpacing.s),[m
+[32m+[m[32m                            Column([m
+[32m+[m[32m                              crossAxisAlignment: CrossAxisAlignment.end,[m
+[32m+[m[32m                              children: [[m
+[32m+[m[32m                                Text([m
+[32m+[m[32m                                  '$dia/$mes/$anio',[m
+[32m+[m[32m                                  style: AppTypography.bodySmall.copyWith(color: const Color(0xFF94A3B8)),[m
+[32m+[m[32m                                ),[m
+[32m+[m[32m                                const SizedBox(height: AppSpacing.xs),[m
+[32m+[m[32m                                Container([m
+[32m+[m[32m                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),[m
+[32m+[m[32m                                  decoration: BoxDecoration([m
+[32m+[m[32m                                    color: colorTipo.withValues(alpha: 0.1),[m
+[32m+[m[32m                                    borderRadius: BorderRadius.circular(6),[m
+[32m+[m[32m                                  ),[m
+[32m+[m[32m                                  child: Text([m
+[32m+[m[32m                                    m.tipoMovimiento == TipoMovimiento.entrada ? 'Entrante' : 'Saliente',[m
+[32m+[m[32m                                    style: AppTypography.labelSmall.copyWith(color: colorTipo, fontWeight: FontWeight.bold),[m
+[32m+[m[32m                                  ),[m
+[32m+[m[32m                                ),[m
+[32m+[m[32m                              ],[m
+[32m+[m[32m                            ),[m
+[32m+[m[32m                          ],[m
+[32m+[m[32m                        ),[m
+                       ),[m
+                     );[m
+                   },[m
+[1mdiff --git a/lib/features/inventario/presentation/providers/producto_providers.dart b/lib/features/inventario/presentation/providers/producto_providers.dart[m
+[1mindex b0f0e4a..d2ff46f 100644[m
+[1m--- a/lib/features/inventario/presentation/providers/producto_providers.dart[m
+[1m+++ b/lib/features/inventario/presentation/providers/producto_providers.dart[m
+[36m@@ -59,10 +59,10 @@[m [mclass ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {[m
+ [m
+   Future<List<Producto>> buscarPorNombre(String nombre) async {[m
+     final termino = nombre.toLowerCase().trim();[m
+[31m-    return state.whenData((lista) => lista[m
+[32m+[m[32m    final listaActual = state.valueOrNull ?? [];[m
+[32m+[m[32m    return listaActual[m
+         .where((producto) => producto.nombre.toLowerCase().contains(termino))[m
+[31m-        .toList(),[m
+[31m-    ).value ?? [];[m
+[32m+[m[32m        .toList();[m
+   }[m
+ }[m
+ [m
+[1mdiff --git a/lib/main.dart b/lib/main.dart[m
+[1mindex 4c9b624..eaaee33 100644[m
+[1m--- a/lib/main.dart[m
+[1m+++ b/lib/main.dart[m
+[36m@@ -75,8 +75,8 @@[m [mclass _InventarioRepositoryAdapter implements InventarioRepositoryInterface {[m
+       id: row.id,[m
+       codigo: row.codigo,[m
+       nombre: row.nombre,[m
+[31m-      precioCompra: row.precioCompra,[m
+[31m-      precioVenta: row.precioVenta,[m
+[32m+[m[32m      precioCompra: row.precioCompra ?? 0.0,[m
+[32m+[m[32m      precioVenta: row.precioVenta ?? 0.0,[m
+       stock: row.stock,[m
+       stockMinimo: row.stockMinimo,[m
+       categoriaId: row.categoriaId,[m
+[36m@@ -96,8 +96,8 @@[m [mclass _InventarioRepositoryAdapter implements InventarioRepositoryInterface {[m
+       id: row.id,[m
+       codigo: row.codigo,[m
+       nombre: row.nombre,[m
+[31m-      precioCompra: row.precioCompra,[m
+[31m-      precioVenta: row.precioVenta,[m
+[32m+[m[32m      precioCompra: row.precioCompra ?? 0.0,[m
+[32m+[m[32m      precioVenta: row.precioVenta ?? 0.0,[m
+       stock: row.stock,[m
+       stockMinimo: row.stockMinimo,[m
+       categoriaId: row.categoriaId,[m
+[36m@@ -114,8 +114,8 @@[m [mclass _InventarioRepositoryAdapter implements InventarioRepositoryInterface {[m
+       id: row.id,[m
+       codigo: row.codigo,[m
+       nombre: row.nombre,[m
+[31m-      precioCompra: row.precioCompra,[m
+[31m-      precioVenta: row.precioVenta,[m
+[32m+[m[32m      precioCompra: row.precioCompra ?? 0.0,[m
+[32m+[m[32m      precioVenta: row.precioVenta ?? 0.0,[m
+       stock: row.stock,[m
+       stockMinimo: row.stockMinimo,[m
+       categoriaId: row.categoriaId,[m

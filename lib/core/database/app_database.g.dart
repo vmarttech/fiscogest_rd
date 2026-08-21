@@ -1035,9 +1035,10 @@ class $ProductosTableTable extends ProductosTable
   late final GeneratedColumn<double> precioCompra = GeneratedColumn<double>(
     'precio_compra',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _precioVentaMeta = const VerificationMeta(
     'precioVenta',
@@ -1046,9 +1047,10 @@ class $ProductosTableTable extends ProductosTable
   late final GeneratedColumn<double> precioVenta = GeneratedColumn<double>(
     'precio_venta',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _stockMeta = const VerificationMeta('stock');
   @override
@@ -1058,6 +1060,7 @@ class $ProductosTableTable extends ProductosTable
     true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _stockMinimoMeta = const VerificationMeta(
     'stockMinimo',
@@ -1069,6 +1072,7 @@ class $ProductosTableTable extends ProductosTable
     true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _stockMaximoMeta = const VerificationMeta(
     'stockMaximo',
@@ -1080,6 +1084,7 @@ class $ProductosTableTable extends ProductosTable
     true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _categoriaIdMeta = const VerificationMeta(
     'categoriaId',
@@ -1198,8 +1203,6 @@ class $ProductosTableTable extends ProductosTable
           _precioCompraMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_precioCompraMeta);
     }
     if (data.containsKey('precio_venta')) {
       context.handle(
@@ -1209,8 +1212,6 @@ class $ProductosTableTable extends ProductosTable
           _precioVentaMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_precioVentaMeta);
     }
     if (data.containsKey('stock')) {
       context.handle(
@@ -1304,11 +1305,11 @@ class $ProductosTableTable extends ProductosTable
       precioCompra: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}precio_compra'],
-      )!,
+      ),
       precioVenta: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}precio_venta'],
-      )!,
+      ),
       stock: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}stock'],
@@ -1352,8 +1353,8 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
   final String? codigoBarras;
   final String nombre;
   final String? descripcion;
-  final double precioCompra;
-  final double precioVenta;
+  final double? precioCompra;
+  final double? precioVenta;
   final double? stock;
   final double? stockMinimo;
   final double? stockMaximo;
@@ -1367,8 +1368,8 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     this.codigoBarras,
     required this.nombre,
     this.descripcion,
-    required this.precioCompra,
-    required this.precioVenta,
+    this.precioCompra,
+    this.precioVenta,
     this.stock,
     this.stockMinimo,
     this.stockMaximo,
@@ -1389,8 +1390,12 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     if (!nullToAbsent || descripcion != null) {
       map['descripcion'] = Variable<String>(descripcion);
     }
-    map['precio_compra'] = Variable<double>(precioCompra);
-    map['precio_venta'] = Variable<double>(precioVenta);
+    if (!nullToAbsent || precioCompra != null) {
+      map['precio_compra'] = Variable<double>(precioCompra);
+    }
+    if (!nullToAbsent || precioVenta != null) {
+      map['precio_venta'] = Variable<double>(precioVenta);
+    }
     if (!nullToAbsent || stock != null) {
       map['stock'] = Variable<double>(stock);
     }
@@ -1418,8 +1423,12 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       descripcion: descripcion == null && nullToAbsent
           ? const Value.absent()
           : Value(descripcion),
-      precioCompra: Value(precioCompra),
-      precioVenta: Value(precioVenta),
+      precioCompra: precioCompra == null && nullToAbsent
+          ? const Value.absent()
+          : Value(precioCompra),
+      precioVenta: precioVenta == null && nullToAbsent
+          ? const Value.absent()
+          : Value(precioVenta),
       stock: stock == null && nullToAbsent
           ? const Value.absent()
           : Value(stock),
@@ -1447,8 +1456,8 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       codigoBarras: serializer.fromJson<String?>(json['codigoBarras']),
       nombre: serializer.fromJson<String>(json['nombre']),
       descripcion: serializer.fromJson<String?>(json['descripcion']),
-      precioCompra: serializer.fromJson<double>(json['precioCompra']),
-      precioVenta: serializer.fromJson<double>(json['precioVenta']),
+      precioCompra: serializer.fromJson<double?>(json['precioCompra']),
+      precioVenta: serializer.fromJson<double?>(json['precioVenta']),
       stock: serializer.fromJson<double?>(json['stock']),
       stockMinimo: serializer.fromJson<double?>(json['stockMinimo']),
       stockMaximo: serializer.fromJson<double?>(json['stockMaximo']),
@@ -1467,8 +1476,8 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       'codigoBarras': serializer.toJson<String?>(codigoBarras),
       'nombre': serializer.toJson<String>(nombre),
       'descripcion': serializer.toJson<String?>(descripcion),
-      'precioCompra': serializer.toJson<double>(precioCompra),
-      'precioVenta': serializer.toJson<double>(precioVenta),
+      'precioCompra': serializer.toJson<double?>(precioCompra),
+      'precioVenta': serializer.toJson<double?>(precioVenta),
       'stock': serializer.toJson<double?>(stock),
       'stockMinimo': serializer.toJson<double?>(stockMinimo),
       'stockMaximo': serializer.toJson<double?>(stockMaximo),
@@ -1485,8 +1494,8 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     Value<String?> codigoBarras = const Value.absent(),
     String? nombre,
     Value<String?> descripcion = const Value.absent(),
-    double? precioCompra,
-    double? precioVenta,
+    Value<double?> precioCompra = const Value.absent(),
+    Value<double?> precioVenta = const Value.absent(),
     Value<double?> stock = const Value.absent(),
     Value<double?> stockMinimo = const Value.absent(),
     Value<double?> stockMaximo = const Value.absent(),
@@ -1500,8 +1509,8 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     codigoBarras: codigoBarras.present ? codigoBarras.value : this.codigoBarras,
     nombre: nombre ?? this.nombre,
     descripcion: descripcion.present ? descripcion.value : this.descripcion,
-    precioCompra: precioCompra ?? this.precioCompra,
-    precioVenta: precioVenta ?? this.precioVenta,
+    precioCompra: precioCompra.present ? precioCompra.value : this.precioCompra,
+    precioVenta: precioVenta.present ? precioVenta.value : this.precioVenta,
     stock: stock.present ? stock.value : this.stock,
     stockMinimo: stockMinimo.present ? stockMinimo.value : this.stockMinimo,
     stockMaximo: stockMaximo.present ? stockMaximo.value : this.stockMaximo,
@@ -1609,8 +1618,8 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
   final Value<String?> codigoBarras;
   final Value<String> nombre;
   final Value<String?> descripcion;
-  final Value<double> precioCompra;
-  final Value<double> precioVenta;
+  final Value<double?> precioCompra;
+  final Value<double?> precioVenta;
   final Value<double?> stock;
   final Value<double?> stockMinimo;
   final Value<double?> stockMaximo;
@@ -1640,8 +1649,8 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     this.codigoBarras = const Value.absent(),
     required String nombre,
     this.descripcion = const Value.absent(),
-    required double precioCompra,
-    required double precioVenta,
+    this.precioCompra = const Value.absent(),
+    this.precioVenta = const Value.absent(),
     this.stock = const Value.absent(),
     this.stockMinimo = const Value.absent(),
     this.stockMaximo = const Value.absent(),
@@ -1651,8 +1660,6 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     this.activo = const Value.absent(),
   }) : codigo = Value(codigo),
        nombre = Value(nombre),
-       precioCompra = Value(precioCompra),
-       precioVenta = Value(precioVenta),
        categoriaId = Value(categoriaId),
        marcaId = Value(marcaId),
        unidadMedidaId = Value(unidadMedidaId);
@@ -1696,8 +1703,8 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Value<String?>? codigoBarras,
     Value<String>? nombre,
     Value<String?>? descripcion,
-    Value<double>? precioCompra,
-    Value<double>? precioVenta,
+    Value<double?>? precioCompra,
+    Value<double?>? precioVenta,
     Value<double?>? stock,
     Value<double?>? stockMinimo,
     Value<double?>? stockMaximo,
@@ -17567,8 +17574,8 @@ typedef $$ProductosTableTableCreateCompanionBuilder =
       Value<String?> codigoBarras,
       required String nombre,
       Value<String?> descripcion,
-      required double precioCompra,
-      required double precioVenta,
+      Value<double?> precioCompra,
+      Value<double?> precioVenta,
       Value<double?> stock,
       Value<double?> stockMinimo,
       Value<double?> stockMaximo,
@@ -17584,8 +17591,8 @@ typedef $$ProductosTableTableUpdateCompanionBuilder =
       Value<String?> codigoBarras,
       Value<String> nombre,
       Value<String?> descripcion,
-      Value<double> precioCompra,
-      Value<double> precioVenta,
+      Value<double?> precioCompra,
+      Value<double?> precioVenta,
       Value<double?> stock,
       Value<double?> stockMinimo,
       Value<double?> stockMaximo,
@@ -18343,8 +18350,8 @@ class $$ProductosTableTableTableManager
                 Value<String?> codigoBarras = const Value.absent(),
                 Value<String> nombre = const Value.absent(),
                 Value<String?> descripcion = const Value.absent(),
-                Value<double> precioCompra = const Value.absent(),
-                Value<double> precioVenta = const Value.absent(),
+                Value<double?> precioCompra = const Value.absent(),
+                Value<double?> precioVenta = const Value.absent(),
                 Value<double?> stock = const Value.absent(),
                 Value<double?> stockMinimo = const Value.absent(),
                 Value<double?> stockMaximo = const Value.absent(),
@@ -18375,8 +18382,8 @@ class $$ProductosTableTableTableManager
                 Value<String?> codigoBarras = const Value.absent(),
                 required String nombre,
                 Value<String?> descripcion = const Value.absent(),
-                required double precioCompra,
-                required double precioVenta,
+                Value<double?> precioCompra = const Value.absent(),
+                Value<double?> precioVenta = const Value.absent(),
                 Value<double?> stock = const Value.absent(),
                 Value<double?> stockMinimo = const Value.absent(),
                 Value<double?> stockMaximo = const Value.absent(),
