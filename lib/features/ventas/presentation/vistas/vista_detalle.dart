@@ -6,18 +6,20 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/cotizacion.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_apartado.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 
-/// Vista de detalle — COTIZACIONES Y APARTADOS INTEGRADOS
-/// ✅ Campo Fecha Vencimiento → SOLO en Cotización
-/// ✅ Campo Monto Adelanto → SOLO en Apartado
-/// ✅ Botón y acción cambian dinámicamente según ModoOperacion
-/// ✅ Interfaz AppTextField corregida
+/// Vista de detalle — GUARDADO REAL CONECTADO
+/// ✅ Venta → caso de uso RegistrarVenta
+/// ✅ Cotización → IVentasRepository.registrarCotizacion
+/// ✅ Apartado → instancia directa con repositorio
 class VistaDetalle extends ConsumerStatefulWidget {
   const VistaDetalle({super.key});
 
@@ -163,12 +165,12 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
             usuarioId: estado.usuarioId,
             createdAt: fecha,
           );
-          final casoUso = ref.read(registrarVentaUseCaseProvider);
-          final resultado = await casoUso(venta);
+          final casoUsoVenta = ref.read(registrarVentaUseCaseProvider);
+          final resultadoVenta = await casoUsoVenta(venta);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Venta guardada — N° ${resultado.numero}'),
+                content: Text('✅ Venta guardada — N° ${resultadoVenta.numero}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),
@@ -177,10 +179,23 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           break;
 
         case ModoOperacion.cotizacion:
+          final cotizacion = Cotizacion(
+            numero: numero,
+            clienteId: estado.clienteId!,
+            fechaEmision: fecha,
+            fechaVencimiento: _fechaVencimiento!,
+            detalles: estado.detalles,
+            subtotal: estado.subtotal,
+            itbis: estado.itbis,
+            total: estado.total,
+            createdAt: fecha,
+          );
+          final repositorio = ref.read(ventasRepositoryProvider);
+          final resultadoCotizacion = await repositorio.registrarCotizacion(cotizacion);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Cotización guardada — N° $numero\nVence: ${_fechaVencimiento!.day}/${_fechaVencimiento!.month}/${_fechaVencimiento!.year}'),
+                content: Text('✅ Cotización guardada — N° ${resultadoCotizacion.numero}\nVence: ${_fechaVencimiento!.day}/${_fechaVencimiento!.month}/${_fechaVencimiento!.year}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),
@@ -189,11 +204,26 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           break;
 
         case ModoOperacion.apartado:
-          final adelanto = double.tryParse(_adelantoController.text) ?? 0.0;
+          final montoAbonado = double.tryParse(_adelantoController.text) ?? 0.0;
+          final montoTotal = estado.total;
+          final repositorio = ref.read(ventasRepositoryProvider);
+          final casoUsoApartado = RegistrarApartado(repositorio);
+          final apartado = Apartado(
+            numero: numero,
+            clienteId: estado.clienteId!,
+            productos: estado.detalles,
+            montoTotal: montoTotal,
+            montoAbonado: montoAbonado,
+            saldoPendiente: montoTotal - montoAbonado,
+            fechaApartado: fecha,
+            estado: 'pendiente',
+            createdAt: fecha,
+          );
+          final resultadoApartado = await casoUsoApartado(apartado);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Apartado guardado — N° $numero\nAdelanto: RD\$ ${adelanto.toStringAsFixed(2)}'),
+                content: Text('✅ Apartado guardado — N° ${resultadoApartado.numero}\nAdelanto: RD\$ ${montoAbonado.toStringAsFixed(2)} · Saldo: RD\$ ${resultadoApartado.saldoPendiente.toStringAsFixed(2)}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),
@@ -306,7 +336,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
+              foregroundColor: Colors.white,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
