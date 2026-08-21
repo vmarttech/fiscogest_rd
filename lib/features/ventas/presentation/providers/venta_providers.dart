@@ -50,6 +50,8 @@ class CotizacionState {
     this.detalles = const [],
     this.subtotal = 0.0,
     this.descuento = 0.0,
+    this.descuentoId,
+    this.descuentoNombre,
     this.itbis = 0.0,
     this.montoTotal = 0.0,
     this.estado = 'PENDIENTE',
@@ -64,6 +66,8 @@ class CotizacionState {
   final List<DetalleVenta> detalles;
   final double subtotal;
   final double descuento;
+  final int? descuentoId;
+  final String? descuentoNombre;
   final double itbis;
   final double montoTotal;
   final String estado;
@@ -78,6 +82,8 @@ class CotizacionState {
     List<DetalleVenta>? detalles,
     double? subtotal,
     double? descuento,
+    int? descuentoId,
+    String? descuentoNombre,
     double? itbis,
     double? montoTotal,
     String? estado,
@@ -92,6 +98,8 @@ class CotizacionState {
       detalles: detalles ?? this.detalles,
       subtotal: subtotal ?? this.subtotal,
       descuento: descuento ?? this.descuento,
+      descuentoId: descuentoId ?? this.descuentoId,
+      descuentoNombre: descuentoNombre ?? this.descuentoNombre,
       itbis: itbis ?? this.itbis,
       montoTotal: montoTotal ?? this.montoTotal,
       estado: estado ?? this.estado,
@@ -103,12 +111,44 @@ class CotizacionState {
 class CotizacionNotifier extends StateNotifier<CotizacionState> {
   CotizacionNotifier() : super(const CotizacionState());
 
-  void seleccionarCliente(int idCliente, String nombre) {
+  void seleccionarCliente(int? idCliente, String nombre) {
     state = state.copiarCon(clienteId: idCliente, clienteNombre: nombre);
   }
 
   void establecerVencimiento(DateTime fechaVencimiento) {
     state = state.copiarCon(fechaVencimiento: fechaVencimiento);
+  }
+
+  void establecerDescuentoManual(double monto) {
+    final totalSinDescuento = state.subtotal + state.itbis;
+    final nuevoTotal = totalSinDescuento - monto;
+    state = state.copiarCon(
+      descuento: monto,
+      descuentoNombre: monto > 0 ? 'Manual' : null,
+      descuentoId: monto > 0 ? 0 : null,
+      montoTotal: nuevoTotal > 0 ? nuevoTotal : 0.0,
+    );
+  }
+
+  void quitarDescuento() {
+    final totalSinDescuento = state.subtotal + state.itbis;
+    state = state.copiarCon(
+      descuento: 0.0,
+      descuentoId: null,
+      descuentoNombre: null,
+      montoTotal: totalSinDescuento,
+    );
+  }
+
+  void aplicarDescuento(Descuento descuento) {
+    final totalSinDescuento = state.subtotal + state.itbis;
+    final nuevoTotal = totalSinDescuento - descuento.valor;
+    state = state.copiarCon(
+      descuento: descuento.valor,
+      descuentoId: descuento.id,
+      descuentoNombre: descuento.nombre,
+      montoTotal: nuevoTotal > 0 ? nuevoTotal : 0.0,
+    );
   }
 
   void calcularTotales(List<DetalleVenta> lista) {
@@ -119,12 +159,13 @@ class CotizacionNotifier extends StateNotifier<CotizacionState> {
       final tasaDecimal = linea.tasaImpuesto / 100;
       itbis += linea.subtotalLinea * tasaDecimal;
     }
-    final total = subtotal + itbis;
+    final totalSinDescuento = subtotal + itbis;
+    final nuevoTotal = totalSinDescuento - state.descuento;
     state = state.copiarCon(
       detalles: lista,
       subtotal: subtotal,
       itbis: itbis,
-      montoTotal: total,
+      montoTotal: nuevoTotal > 0 ? nuevoTotal : 0.0,
     );
   }
 

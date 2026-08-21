@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 class AppTextField extends StatelessWidget {
   const AppTextField({
@@ -19,6 +19,7 @@ class AppTextField extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.height,
+    this.inputFormatters,
   });
 
   final String? label;
@@ -34,10 +35,10 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final double? height;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
-    // ✅ SIN Expanded AQUÍ: solo el SizedBox con altura opcional
     return SizedBox(
       height: height,
       child: TextFormField(
@@ -47,6 +48,7 @@ class AppTextField extends StatelessWidget {
         enabled: enabled,
         onChanged: onChanged,
         onFieldSubmitted: onSubmitted,
+        inputFormatters: inputFormatters,
         style: AppTypography.bodyMedium,
         decoration: InputDecoration(
           labelText: label,
@@ -57,18 +59,19 @@ class AppTextField extends StatelessWidget {
               ? IconButton(
                   icon: Icon(suffixIcon, size: 20, color: AppColors.grey600),
                   onPressed: onSuffixTap,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 )
               : null,
-          contentPadding: AppSpacing.allM,
-          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-          enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)), borderSide: BorderSide(color: AppColors.grey300)),
-          focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)), borderSide: BorderSide(color: AppColors.primary)),
-          errorBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)), borderSide: BorderSide(color: AppColors.error)),
-          focusedErrorBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8)), borderSide: BorderSide(color: AppColors.error)),
-          filled: true,
-          fillColor: AppColors.white,
+          border: const OutlineInputBorder(),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: AppColors.grey300),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+          ),
+          errorBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: AppColors.error),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         ),
       ),
     );

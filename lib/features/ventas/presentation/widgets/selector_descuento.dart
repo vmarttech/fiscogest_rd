@@ -4,7 +4,9 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 class SelectorDescuento extends ConsumerWidget {
-  const SelectorDescuento({super.key});
+  const SelectorDescuento({super.key, this.esParaCotizacion = false});
+
+  final bool esParaCotizacion;
 
   String _formatearValor(Descuento descuento) {
     if (descuento.tipo == 'porcentaje') {
@@ -33,7 +35,6 @@ class SelectorDescuento extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final descuentosAsync = ref.watch(descuentosActivosProvider);
-    final estadoVenta = ref.watch(registrarVentaProvider);
 
     return descuentosAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -48,11 +49,24 @@ class SelectorDescuento extends ConsumerWidget {
         ),
       ),
       data: (descuentos) {
+        final estadoVenta = ref.watch(registrarVentaProvider);
+        final estadoCot = ref.watch(cotizacionProvider);
+
+        final descuentoId = esParaCotizacion
+            ? estadoCot.descuentoId
+            : estadoVenta.descuentoId;
+        final descuentoNombre = esParaCotizacion
+            ? estadoCot.descuentoNombre
+            : estadoVenta.descuentoNombre;
+        final montoDescuento = esParaCotizacion
+            ? estadoCot.descuento
+            : estadoVenta.montoDescuento;
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (estadoVenta.descuentoId != null)
+            if (descuentoId != null)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -69,21 +83,25 @@ class SelectorDescuento extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Descuento aplicado: ${estadoVenta.descuentoNombre}',
+                          'Descuento aplicado: $descuentoNombre',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),
                         ),
                         Text(
-                          'Monto: RD\$ ${estadoVenta.montoDescuento.toStringAsFixed(2)}',
+                          'Monto: RD\$ ${montoDescuento.toStringAsFixed(2)}',
                           style: const TextStyle(color: Colors.green),
                         ),
                       ],
                     ),
                     TextButton(
                       onPressed: () {
-                        ref.read(registrarVentaProvider.notifier).quitarDescuento();
+                        if (esParaCotizacion) {
+                          ref.read(cotizacionProvider.notifier).quitarDescuento();
+                        } else {
+                          ref.read(registrarVentaProvider.notifier).quitarDescuento();
+                        }
                       },
                       child: const Text('Quitar'),
                     ),
@@ -99,7 +117,7 @@ class SelectorDescuento extends ConsumerWidget {
               )
             else
               ...descuentos.map((descuento) {
-                final seleccionado = estadoVenta.descuentoId == descuento.id;
+                final seleccionado = descuentoId == descuento.id;
                 return Card(
                   elevation: seleccionado ? 4 : 1,
                   color: seleccionado ? Colors.blue.shade50 : null,
@@ -137,7 +155,11 @@ class SelectorDescuento extends ConsumerWidget {
                       ],
                     ),
                     onTap: () {
-                      ref.read(registrarVentaProvider.notifier).aplicarDescuento(descuento);
+                      if (esParaCotizacion) {
+                        ref.read(cotizacionProvider.notifier).aplicarDescuento(descuento);
+                      } else {
+                        ref.read(registrarVentaProvider.notifier).aplicarDescuento(descuento);
+                      }
                     },
                   ),
                 );
