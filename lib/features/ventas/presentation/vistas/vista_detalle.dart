@@ -5,16 +5,17 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 
-/// Vista de detalle — Selectores de Cliente y Forma de Pago INTEGRADOS
-/// ✅ REUTILIZA: SeleccionarClienteDialog existente
-/// ✅ REUTILIZA: enum FormaPago de comercio_enums.dart
-/// ✅ CONECTA: registrarVentaProvider.seleccionarCliente / cambiarFormaPago
+/// Vista de detalle — LÓGICA DE GUARDADO REAL CONECTADA
+/// ✅ Construye entidad Venta desde RegistrarVentaState
+/// ✅ Llama caso de uso RegistrarVenta real
+/// ✅ Maneja éxito y error de forma explícita
 class VistaDetalle extends ConsumerStatefulWidget {
   const VistaDetalle({super.key});
 
@@ -23,6 +24,8 @@ class VistaDetalle extends ConsumerStatefulWidget {
 }
 
 class _VistaDetalleState extends ConsumerState<VistaDetalle> {
+  bool _guardando = false;
+
   Future<void> _alSeleccionarCliente() async {
     final cliente = await SeleccionarClienteDialog.mostrar(context);
     if (cliente != null && cliente.id != null) {
@@ -69,6 +72,10 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
     });
   }
 
+  String _generarNumeroVenta(DateTime fecha) {
+    return '${fecha.year}${fecha.month.toString().padLeft(2,'0')}${fecha.day.toString().padLeft(2,'0')}-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
+  }
+
   Future<void> _confirmarVenta() async {
     final valido = ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
     if (!valido) {
@@ -81,15 +88,54 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Guardando operación...'),
-        backgroundColor: AppColors.success,
-      ),
-    );
+    setState(() => _guardando = true);
 
-    ref.read(registrarVentaProvider.notifier).vaciarVenta();
-    ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
+    try {
+      final estado = ref.read(registrarVentaProvider);
+      final fecha = DateTime.now();
+
+      final venta = Venta(
+        numero: _generarNumeroVenta(fecha),
+        clienteId: estado.clienteId,
+        fecha: fecha,
+        detalles: estado.detalles,
+        subtotal: estado.subtotal,
+        itbis: estado.itbis,
+        total: estado.total,
+        tipoPago: estado.tipoPago,
+        esCredito: estado.esCredito,
+        usuarioId: estado.usuarioId,
+        createdAt: fecha,
+      );
+
+      final casoUso = ref.read(registrarVentaUseCaseProvider);
+      final resultado = await casoUso(venta);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Venta guardada — N° ${resultado.numero}'),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+
+      ref.read(registrarVentaProvider.notifier).vaciarVenta();
+      ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error al guardar: $error'),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _guardando = false);
+    }
   }
 
   @override
@@ -105,7 +151,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
-                onPressed: () => ref
+                onPressed: _guardando ? null : () => ref
                     .read(ventasNavegacionProvider.notifier)
                     .cambiarVista(VistaActual.inventario),
               ),
@@ -128,9 +174,11 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           ),
           const SizedBox(height: AppSpacing.l),
           ElevatedButton.icon(
-            onPressed: estado.detalles.isNotEmpty ? _confirmarVenta : null,
-            icon: const Icon(Icons.check_circle_outline),
-            label: const Text('Confirmar Operación'),
+            onPressed: !_guardando && estado.detalles.isNotEmpty ? _confirmarVenta : null,
+            icon: _guardando
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Icon(Icons.check_circle_outline),
+            label: Text(_guardando ? 'Guardando...' : 'Confirmar Operación'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               backgroundColor: AppColors.primary,
