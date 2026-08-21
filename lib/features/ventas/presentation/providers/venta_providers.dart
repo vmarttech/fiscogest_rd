@@ -57,7 +57,6 @@ class CotizacionState {
     this.estado = 'PENDIENTE',
     this.numero = '',
   });
-
   final int? id;
   final int? clienteId;
   final String? clienteNombre;
@@ -192,6 +191,7 @@ class RegistrarVentaState {
   const RegistrarVentaState({
     this.numero = '',
     this.clienteId,
+    this.clienteNombre,
     this.tipoPago = '',
     this.esCredito = false,
     this.detalles = const [],
@@ -203,9 +203,9 @@ class RegistrarVentaState {
     this.total = 0.0,
     this.usuarioId,
   });
-
   final String numero;
   final int? clienteId;
+  final String? clienteNombre;
   final String tipoPago;
   final bool esCredito;
   final List<DetalleVenta> detalles;
@@ -220,6 +220,7 @@ class RegistrarVentaState {
   RegistrarVentaState copiarCon({
     String? numero,
     int? clienteId,
+    String? clienteNombre,
     String? tipoPago,
     bool? esCredito,
     List<DetalleVenta>? detalles,
@@ -234,6 +235,7 @@ class RegistrarVentaState {
     return RegistrarVentaState(
       numero: numero ?? this.numero,
       clienteId: clienteId ?? this.clienteId,
+      clienteNombre: clienteNombre ?? this.clienteNombre,
       tipoPago: tipoPago ?? this.tipoPago,
       esCredito: esCredito ?? this.esCredito,
       detalles: detalles ?? this.detalles,
@@ -251,8 +253,8 @@ class RegistrarVentaState {
 class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
   RegistrarVentaNotifier() : super(const RegistrarVentaState());
 
-  void seleccionarCliente(int idCliente) {
-    state = state.copiarCon(clienteId: idCliente);
+  void seleccionarCliente(int idCliente, String nombreCliente) {
+    state = state.copiarCon(clienteId: idCliente, clienteNombre: nombreCliente);
   }
 
   void cambiarFormaPago(String formaPago, bool credito) {

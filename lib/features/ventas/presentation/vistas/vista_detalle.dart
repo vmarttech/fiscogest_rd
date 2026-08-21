@@ -16,10 +16,6 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_naveg
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 
-/// Vista de detalle — GUARDADO REAL CONECTADO
-/// ✅ Venta → caso de uso RegistrarVenta
-/// ✅ Cotización → IVentasRepository.registrarCotizacion
-/// ✅ Apartado → instancia directa con repositorio
 class VistaDetalle extends ConsumerStatefulWidget {
   const VistaDetalle({super.key});
 
@@ -41,7 +37,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
   Future<void> _alSeleccionarCliente() async {
     final cliente = await SeleccionarClienteDialog.mostrar(context);
     if (cliente != null && cliente.id != null) {
-      ref.read(registrarVentaProvider.notifier).seleccionarCliente(cliente.id!);
+      ref.read(registrarVentaProvider.notifier).seleccionarCliente(cliente.id!, cliente.nombre);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Cliente seleccionado: ${cliente.nombre}')),
@@ -75,11 +71,15 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
       ),
     ).then((seleccion) {
       if (seleccion != null) {
-        final etiqueta = seleccion.name;
+        final etiqueta = switch (seleccion) {
+          FormaPago.efectivo => 'efectivo',
+          FormaPago.tarjeta => 'tarjeta',
+          FormaPago.transferencia => 'transferencia',
+          FormaPago.credito => 'crédito',
+          FormaPago.cheque => 'cheque',
+        };
         final esCredito = seleccion == FormaPago.credito;
-        ref
-            .read(registrarVentaProvider.notifier)
-            .cambiarFormaPago(etiqueta, esCredito);
+        ref.read(registrarVentaProvider.notifier).cambiarFormaPago(etiqueta, esCredito);
       }
     });
   }
@@ -115,11 +115,11 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
         const SnackBar(
           content: Text('Complete cliente, forma de pago y productos'),
           backgroundColor: AppColors.error,
+          duration: Duration(seconds: 4),
         ),
       );
       return;
     }
-
     if (modo == ModoOperacion.cotizacion && _fechaVencimiento == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -129,7 +129,6 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
       );
       return;
     }
-
     if (modo == ModoOperacion.apartado) {
       final adelanto = double.tryParse(_adelantoController.text);
       if (adelanto == null || adelanto < 0) {
@@ -142,14 +141,11 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
         return;
       }
     }
-
     setState(() => _guardando = true);
-
     try {
       final estado = ref.read(registrarVentaProvider);
       final fecha = DateTime.now();
       final numero = _generarNumero(fecha, modo);
-
       switch (modo) {
         case ModoOperacion.venta:
           final venta = Venta(
@@ -170,14 +166,13 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Venta guardada — N° ${resultadoVenta.numero}'),
+                content: Text('Venta guardada. Numero: ${resultadoVenta.numero}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),
             );
           }
           break;
-
         case ModoOperacion.cotizacion:
           final cotizacion = Cotizacion(
             numero: numero,
@@ -195,14 +190,13 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Cotización guardada — N° ${resultadoCotizacion.numero}\nVence: ${_fechaVencimiento!.day}/${_fechaVencimiento!.month}/${_fechaVencimiento!.year}'),
+                content: Text('Cotizacion guardada. Numero: ${resultadoCotizacion.numero}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),
             );
           }
           break;
-
         case ModoOperacion.apartado:
           final montoAbonado = double.tryParse(_adelantoController.text) ?? 0.0;
           final montoTotal = estado.total;
@@ -223,7 +217,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Apartado guardado — N° ${resultadoApartado.numero}\nAdelanto: RD\$ ${montoAbonado.toStringAsFixed(2)} · Saldo: RD\$ ${resultadoApartado.saldoPendiente.toStringAsFixed(2)}'),
+                content: Text('Apartado guardado. Numero: ${resultadoApartado.numero}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),
@@ -231,7 +225,6 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           }
           break;
       }
-
       ref.read(registrarVentaProvider.notifier).vaciarVenta();
       setState(() {
         _fechaVencimiento = null;
@@ -242,7 +235,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Error al guardar: $error'),
+            content: Text('Error al guardar: $error'),
             backgroundColor: AppColors.error,
             duration: const Duration(seconds: 5),
           ),
@@ -257,13 +250,11 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
   Widget build(BuildContext context) {
     final estado = ref.watch(registrarVentaProvider);
     final modo = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
-
     final textoBoton = switch (modo) {
       ModoOperacion.venta => 'Finalizar Venta',
       ModoOperacion.cotizacion => 'Guardar Cotización',
       ModoOperacion.apartado => 'Confirmar Apartado',
     };
-
     return SingleChildScrollView(
       padding: AppSpacing.allM,
       child: Column(

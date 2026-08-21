@@ -11,7 +11,9 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.
 
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
+
   static const String routeName = 'registrar-ventas';
+
   @override
   ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
@@ -46,43 +48,35 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     final resultados = await ref
         .read(productoControllerProvider.notifier)
         .buscarPorNombre(termino);
-
     if (resultados.isEmpty && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Producto no encontrado')),
       );
       return;
     }
-
     final ofertasActivas = await ref.watch(ofertasActivosProvider.future);
-
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
-
       if ((p.stock ?? 0) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('⚠️ "${p.nombre}" sin existencias disponibles'),
+            content: Text('"${p.nombre}" sin existencias disponibles'),
             backgroundColor: Colors.red,
           ),
         );
         return;
       }
-
       final oferta = _buscarOfertaAplicable(ofertasActivas, p.id ?? 0, 1);
-
       double precioUnitario = p.precioVenta.toDouble();
       double? precioOriginal;
       int? ofertaId;
       String? ofertaNombre;
-
       if (oferta != null) {
         precioOriginal = p.precioVenta.toDouble();
         precioUnitario = oferta.precioOferta;
         ofertaId = oferta.id;
         ofertaNombre = oferta.nombre;
       }
-
       final linea = DetalleVenta(
         productoId: p.id ?? 0,
         nombreProducto: p.nombre,
@@ -95,11 +89,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       );
       ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
       _buscadorController.clear();
-
       if (oferta != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('🎉 Oferta aplicada: ${oferta.nombre}'),
+            content: Text('Oferta aplicada: ${oferta.nombre}'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -170,14 +163,12 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         double? precioOriginal;
                         int? ofertaId;
                         String? ofertaNombre;
-
                         if (oferta != null) {
                           precioOriginal = p.precioVenta.toDouble();
                           precioUnitario = oferta.precioOferta;
                           ofertaId = oferta.id;
                           ofertaNombre = oferta.nombre;
                         }
-
                         final linea = DetalleVenta(
                           productoId: p.id ?? 0,
                           nombreProducto: p.nombre,
@@ -191,11 +182,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
                         _buscadorController.clear();
                         Navigator.pop(ctx);
-
                         if (oferta != null && mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('🎉 Oferta aplicada: ${oferta.nombre}'),
+                              content: Text('Oferta aplicada: ${oferta.nombre}'),
                               backgroundColor: Colors.orange,
                             ),
                           );
@@ -251,7 +241,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           ListTile(
             title: const Text('Consumidor Final'),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).seleccionarCliente(1);
+              ref.read(registrarVentaProvider.notifier).seleccionarCliente(1, 'Consumidor Final');
               Navigator.pop(context);
             },
           ),
@@ -316,7 +306,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
               title: Text(nombre),
               subtitle: Text(rnc),
               onTap: () {
-                ref.read(registrarVentaProvider.notifier).seleccionarCliente(id);
+                ref.read(registrarVentaProvider.notifier).seleccionarCliente(id, nombre);
                 Navigator.pop(ctx);
               },
             );
@@ -346,17 +336,15 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
 
   Future<void> _cobrarYRegistrarSalida() async {
     final estado = ref.read(registrarVentaProvider);
-
     if (!ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('⚠️ Complete los datos: Cliente, Forma de Pago y al menos un producto'),
+          content: Text('Complete los datos: Cliente, Forma de Pago y al menos un producto'),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
-
     setState(() => _cargando = true);
     try {
       final venta = Venta(
@@ -371,14 +359,12 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         esCredito: estado.esCredito,
         usuarioId: estado.usuarioId ?? 1,
       );
-
       final casoUso = ref.read(registrarVentaUseCaseProvider);
       final ventaGuardada = await casoUso(venta);
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ Venta registrada. Nº $_ventaNumero — ID: ${ventaGuardada.id}'),
+            content: Text('Venta registrada. Nº $_ventaNumero — ID: ${ventaGuardada.id}'),
             backgroundColor: Colors.green,
           ),
         );
@@ -389,7 +375,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Error al registrar: $e'),
+            content: Text('Error al registrar: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -463,7 +449,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                       child: ElevatedButton.icon(
                         onPressed: _cargando ? null : _cobrarYRegistrarSalida,
                         icon: _cargando
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),)
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
                             : const Icon(Icons.save),
                         label: Text(_cargando ? 'Guardando...' : 'Registrar Venta'),
                         style: ElevatedButton.styleFrom(
@@ -485,7 +471,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   }
 }
 
-/// Función auxiliar local para silenciar advertencia de Future sin await
 void unawaitedShowDialog(BuildContext context, Widget dialog) {
   showDialog<dynamic>(context: context, builder: (_) => dialog);
 }

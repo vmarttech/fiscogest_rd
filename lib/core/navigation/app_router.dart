@@ -11,7 +11,7 @@ import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/regis
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/diferencias_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/listar_conteos_page.dart';
 import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/ventas_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_cotizacion_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
@@ -44,15 +44,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/sales', name: SalesPage.routeName, builder: (_, __) => const AppShell(child: SalesPage())),
       GoRoute(
         path: '/ventas',
-        name: VentasPage.routeName,
-        builder: (_, __) => const AppShell(child: VentasPage()),
+        name: VentasContenedorPage.nombreRuta,
+        builder: (_, __) => const AppShell(child: VentasContenedorPage()),
         routes: [
           GoRoute(path: 'registrar', name: RegistrarVentaPage.routeName, builder: (_, __) => const AppShell(child: RegistrarVentaPage())),
           GoRoute(path: 'cotizaciones/nueva', name: NuevaCotizacionPage.routeName, builder: (_, __) => const AppShell(child: NuevaCotizacionPage())),
           GoRoute(path: 'apartados', name: ApartadosPage.routeName, builder: (_, __) => const AppShell(child: ApartadosPage())),
           GoRoute(path: 'devoluciones', name: DevolucionesPage.routeName, builder: (_, __) => const AppShell(child: DevolucionesPage())),
           GoRoute(path: 'cobrar', name: CobrarPage.routeName, builder: (_, __) => const AppShell(child: CobrarPage())),
-          GoRoute(path: 'pagar', name: PagarPage.routeName, builder: (_, __) => const AppShell(child: PagarPage())),
+          GoRoute(path: 'pagar', name: PagarPage.routeName, builder: (_, __) => const AppShell(child: AppShell(child: PagarPage()))),
           GoRoute(path: 'descuentos', name: DescuentosPage.routeName, builder: (_, __) => const AppShell(child: DescuentosPage())),
           GoRoute(path: 'ofertas', name: OfertasPage.routeName, builder: (_, __) => const AppShell(child: OfertasPage())),
         ],

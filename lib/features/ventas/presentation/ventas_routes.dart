@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/ventas_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_cotizacion_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
@@ -10,7 +10,6 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
 
 class VentasRoute {
-
   const VentasRoute({required this.path, required this.name, required this.builder});
   final String path;
   final String name;
@@ -18,7 +17,7 @@ class VentasRoute {
 }
 
 final List<VentasRoute> ventasRoutes = [
-  VentasRoute(path: '/ventas', name: VentasPage.routeName, builder: (_) => const VentasPage()),
+  VentasRoute(path: '/ventas', name: VentasContenedorPage.nombreRuta, builder: (_) => const VentasContenedorPage()),
   VentasRoute(path: '/ventas/registrar', name: RegistrarVentaPage.routeName, builder: (_) => const RegistrarVentaPage()),
   VentasRoute(path: '/ventas/cotizaciones/nueva', name: NuevaCotizacionPage.routeName, builder: (_) => const NuevaCotizacionPage()),
   VentasRoute(path: '/ventas/apartados', name: ApartadosPage.routeName, builder: (_) => const ApartadosPage()),

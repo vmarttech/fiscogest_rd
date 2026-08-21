@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 class FormularioVenta extends ConsumerWidget {
-
   const FormularioVenta({
     super.key,
     required this.alSeleccionarCliente,
     required this.alSeleccionarFormaPago,
   });
+
   final VoidCallback alSeleccionarCliente;
   final VoidCallback alSeleccionarFormaPago;
 
@@ -35,8 +35,13 @@ class FormularioVenta extends ConsumerWidget {
                     const SizedBox(width: 12),
                     const Expanded(child: Text('Cliente')),
                     Row(children: [
-                      Text(estado.clienteId != null ? 'Cliente ID ${estado.clienteId}' : 'Seleccionar',
-                          style: const TextStyle(fontWeight: FontWeight.w500)),
+                      Text(
+                        estado.clienteNombre ?? 'Seleccionar',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: estado.clienteNombre != null ? Colors.black87 : Colors.grey,
+                        ),
+                      ),
                       const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
                     ]),
@@ -60,7 +65,10 @@ class FormularioVenta extends ConsumerWidget {
                         estado.tipoPago.isNotEmpty
                             ? '${estado.tipoPago[0].toUpperCase()}${estado.tipoPago.substring(1)}${estado.esCredito ? ' (Crédito)' : ''}'
                             : 'Seleccionar',
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: estado.tipoPago.isNotEmpty ? Colors.black87 : Colors.grey,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),

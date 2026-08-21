@@ -1,44 +1,54 @@
+import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 
 class ClienteCompletoRepository {
-  final List<ClienteCompleto> _clientesLocales = [
-    ClienteCompleto(
-      id: 1,
-      nombre: 'Consumidor Final',
-      direccion: 'Santo Domingo',
-      telefono: '809-000-0000',
-      correo: 'ventas@fiscogest.rd',
-      rncCedula: '001-0000000-0',
-      observaciones: 'Cliente genérico por defecto.',
-      historial: 'Creado por defecto en el sistema.',
-    ),
-  ];
+  final ClienteDao _dao = ClienteDao(AppDatabase());
 
   Future<List<ClienteCompleto>> obtenerClientes() async {
-    return _clientesLocales;
+    final registros = await _dao.obtenerTodos();
+    return registros.map((registro) => ClienteCompleto(
+      id: registro.id,
+      nombre: registro.nombre,
+      direccion: registro.direccion,
+      telefono: registro.telefono,
+      correo: registro.correo,
+      rncCedula: registro.rncCedula,
+      activo: registro.activo,
+    )).toList();
   }
 
   Future<void> agregarCliente(ClienteCompleto cliente) async {
-    final existe = _clientesLocales.any((c) => c.rncCedula.trim() == cliente.rncCedula.trim());
-    if (existe) {
-      throw Exception('Ya existe un cliente registrado con ese RNC o Cédula.');
-    }
-    final nuevoId = _clientesLocales.isEmpty ? 1 : (_clientesLocales.map((e) => e.id ?? 0).reduce((a, b) => a > b ? a : b) + 1);
-    _clientesLocales.add(cliente.copyWith(id: nuevoId));
+    await _dao.insertarOActualizar(ClientesTableCompanion.insert(
+      codigo: '',
+      nombre: cliente.nombre,
+      direccion: cliente.direccion,
+      telefono: cliente.telefono,
+      correo: cliente.correo,
+      rncCedula: cliente.rncCedula,
+      activo: Value(cliente.activo),
+    ));
   }
 
   Future<void> actualizarCliente(ClienteCompleto cliente) async {
-    final duplicado = _clientesLocales.any((c) => c.id != cliente.id && c.rncCedula.trim() == cliente.rncCedula.trim());
-    if (duplicado) {
-      throw Exception('Ya existe otro cliente con ese RNC o Cédula.');
+    final identificador = cliente.id;
+    if (identificador == null) {
+      return;
     }
-    final index = _clientesLocales.indexWhere((c) => c.id == cliente.id);
-    if (index != -1) {
-      _clientesLocales[index] = cliente;
-    }
+    await _dao.insertarOActualizar(ClientesTableCompanion(
+      id: Value(identificador),
+      codigo: const Value(''),
+      nombre: Value(cliente.nombre),
+      direccion: Value(cliente.direccion),
+      telefono: Value(cliente.telefono),
+      correo: Value(cliente.correo),
+      rncCedula: Value(cliente.rncCedula),
+      activo: Value(cliente.activo),
+    ));
   }
 
-  Future<void> eliminarCliente(int id) async {
-    _clientesLocales.removeWhere((c) => c.id == id);
+  Future<void> eliminarCliente(int identificador) async {
+    await _dao.eliminar(identificador);
   }
 }

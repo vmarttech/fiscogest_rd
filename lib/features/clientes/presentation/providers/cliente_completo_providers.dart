@@ -1,60 +1,51 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/features/clientes/data/repositories/cliente_completo_repository.dart';
 
-class ClienteCompletoNotifier extends StateNotifier<AsyncValue<List<ClienteCompleto>>> {
-  ClienteCompletoNotifier() : super(AsyncValue.data([
-    ClienteCompleto(
-      id: 1,
-      nombre: 'Consumidor Final',
-      direccion: 'Santo Domingo',
-      telefono: '809-000-0000',
-      correo: 'ventas@fiscogest.rd',
-      rncCedula: '001-0000000-0',
-      observaciones: 'Cliente genérico por defecto.',
-      historial: 'Creado por defecto en el sistema.',
-    ),
-  ]));
+final clienteCompletoRepositoryProvider = Provider<ClienteCompletoRepository>((ref) {
+  return ClienteCompletoRepository();
+});
 
-  Future<void> guardar(ClienteCompleto cliente) async {
-    state.whenData((lista) {
-      final existe = lista.any((c) => c.rncCedula.trim() == cliente.rncCedula.trim());
-      if (existe) {
-        throw Exception('Ya existe un cliente registrado con ese RNC o Cédula.');
-      }
-      final nuevoId = lista.isEmpty ? 1 : (lista.map((e) => e.id ?? 0).reduce((a, b) => a > b ? a : b) + 1);
-      final nuevoCliente = cliente.copyWith(id: nuevoId);
-      state = AsyncValue.data([...lista, nuevoCliente]);
-    });
-  }
+final clienteCompletoControllerProvider = AsyncNotifierProvider<ClienteCompletoController, List<ClienteCompleto>>(() {
+  return ClienteCompletoController();
+});
 
-  Future<void> actualizar(ClienteCompleto cliente) async {
-    state.whenData((lista) {
-      final duplicado = lista.any((c) => c.id != cliente.id && c.rncCedula.trim() == cliente.rncCedula.trim());
-      if (duplicado) {
-        throw Exception('Ya existe otro cliente con ese RNC o Cédula.');
-      }
-      state = AsyncValue.data([
-        for (var c in lista)
-          if (c.id == cliente.id) cliente else c
-      ]);
-    });
-  }
-
-  Future<void> eliminar(int id) async {
-    state.whenData((lista) {
-      state = AsyncValue.data(lista.where((c) => c.id != id).toList());
-    });
+class ClienteCompletoController extends AsyncNotifier<List<ClienteCompleto>> {
+  @override
+  Future<List<ClienteCompleto>> build() async {
+    final repositorio = ref.read(clienteCompletoRepositoryProvider);
+    return await repositorio.obtenerClientes();
   }
 
   Future<List<ClienteCompleto>> buscarPorNombre(String nombre) async {
     final termino = nombre.toLowerCase().trim();
-    return state.whenData((lista) => lista
-        .where((cliente) => cliente.nombre.toLowerCase().contains(termino))
-        .toList(),
-    ).value ?? [];
+    final repositorio = ref.read(clienteCompletoRepositoryProvider);
+    final listadoCompleto = await repositorio.obtenerClientes();
+    if (termino.isEmpty) {
+      return listadoCompleto;
+    }
+    return listadoCompleto.where((cliente) =>
+      cliente.nombre.toLowerCase().contains(termino) ||
+      cliente.rncCedula.toLowerCase().contains(termino) ||
+      cliente.telefono.toLowerCase().contains(termino)
+    ).toList();
+  }
+
+  Future<void> guardar(ClienteCompleto cliente) async {
+    final repositorio = ref.read(clienteCompletoRepositoryProvider);
+    await repositorio.agregarCliente(cliente);
+    ref.invalidateSelf();
+  }
+
+  Future<void> actualizar(ClienteCompleto cliente) async {
+    final repositorio = ref.read(clienteCompletoRepositoryProvider);
+    await repositorio.actualizarCliente(cliente);
+    ref.invalidateSelf();
+  }
+
+  Future<void> eliminar(int identificador) async {
+    final repositorio = ref.read(clienteCompletoRepositoryProvider);
+    await repositorio.eliminarCliente(identificador);
+    ref.invalidateSelf();
   }
 }
-
-final clienteCompletoControllerProvider = StateNotifierProvider<ClienteCompletoNotifier, AsyncValue<List<ClienteCompleto>>>((ref) {
-  return ClienteCompletoNotifier();
-});
