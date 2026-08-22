@@ -57,6 +57,7 @@ class CotizacionState {
     this.estado = 'PENDIENTE',
     this.numero = '',
   });
+
   final int? id;
   final int? clienteId;
   final String? clienteNombre;
@@ -119,52 +120,68 @@ class CotizacionNotifier extends StateNotifier<CotizacionState> {
   }
 
   void establecerDescuentoManual(double monto) {
-    final totalSinDescuento = state.subtotal + state.itbis;
-    final nuevoTotal = totalSinDescuento - monto;
+    final baseGravable = state.subtotal - monto;
+    final itbisNuevo = baseGravable * 0.18;
+    final nuevoTotal = baseGravable + itbisNuevo;
     state = state.copiarCon(
       descuento: monto,
       descuentoNombre: monto > 0 ? 'Manual' : null,
       descuentoId: monto > 0 ? 0 : null,
+      itbis: itbisNuevo > 0 ? itbisNuevo : 0.0,
       montoTotal: nuevoTotal > 0 ? nuevoTotal : 0.0,
     );
   }
 
   void quitarDescuento() {
-    final totalSinDescuento = state.subtotal + state.itbis;
+    final itbisOriginal = state.subtotal * 0.18;
     state = state.copiarCon(
       descuento: 0.0,
       descuentoId: null,
       descuentoNombre: null,
-      montoTotal: totalSinDescuento,
+      itbis: itbisOriginal,
+      montoTotal: state.subtotal + itbisOriginal,
     );
   }
 
   void aplicarDescuento(Descuento descuento) {
-    final totalSinDescuento = state.subtotal + state.itbis;
-    final nuevoTotal = totalSinDescuento - descuento.valor;
+    double montoDescuento;
+    if (descuento.tipo == 'porcentaje') {
+      montoDescuento = state.subtotal * descuento.valor / 100;
+    } else {
+      montoDescuento = descuento.valor;
+    }
+    if (montoDescuento > state.subtotal) {
+      montoDescuento = state.subtotal;
+    }
+    final baseGravable = state.subtotal - montoDescuento;
+    final itbisNuevo = baseGravable * 0.18;
+    final nuevoTotal = baseGravable + itbisNuevo;
     state = state.copiarCon(
-      descuento: descuento.valor,
+      descuento: montoDescuento,
       descuentoId: descuento.id,
       descuentoNombre: descuento.nombre,
+      itbis: itbisNuevo > 0 ? itbisNuevo : 0.0,
       montoTotal: nuevoTotal > 0 ? nuevoTotal : 0.0,
     );
   }
 
   void calcularTotales(List<DetalleVenta> lista) {
     double subtotal = 0.0;
-    double itbis = 0.0;
+    double itbisOriginal = 0.0;
     for (final linea in lista) {
       subtotal += linea.subtotalLinea;
       final tasaDecimal = linea.tasaImpuesto / 100;
-      itbis += linea.subtotalLinea * tasaDecimal;
+      itbisOriginal += linea.subtotalLinea * tasaDecimal;
     }
-    final totalSinDescuento = subtotal + itbis;
-    final nuevoTotal = totalSinDescuento - state.descuento;
+    final baseGravable = subtotal - state.descuento;
+    final promedioTasa = subtotal > 0 ? itbisOriginal / subtotal : 0.18;
+    final itbisCalculado = baseGravable * promedioTasa;
+    final total = baseGravable + itbisCalculado;
     state = state.copiarCon(
       detalles: lista,
       subtotal: subtotal,
-      itbis: itbis,
-      montoTotal: nuevoTotal > 0 ? nuevoTotal : 0.0,
+      itbis: itbisCalculado > 0 ? itbisCalculado : 0.0,
+      montoTotal: total > 0 ? total : 0.0,
     );
   }
 
@@ -203,6 +220,7 @@ class RegistrarVentaState {
     this.total = 0.0,
     this.usuarioId,
   });
+
   final String numero;
   final int? clienteId;
   final String? clienteNombre;
@@ -274,11 +292,11 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
 
   void calcularTotales(List<DetalleVenta> lista, {Descuento? descuento}) {
     double subtotal = 0.0;
-    double itbis = 0.0;
+    double itbisOriginal = 0.0;
     for (final linea in lista) {
       subtotal += linea.subtotalLinea;
       final tasa = linea.tasaImpuesto / 100;
-      itbis += linea.subtotalLinea * tasa;
+      itbisOriginal += linea.subtotalLinea * tasa;
     }
     double montoDescuento = 0.0;
     String? descuentoNombre;
@@ -295,14 +313,17 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
         montoDescuento = subtotal;
       }
     }
-    final total = subtotal + itbis - montoDescuento;
+    final baseGravable = subtotal - montoDescuento;
+    final promedioTasa = subtotal > 0 ? itbisOriginal / subtotal : 0.18;
+    final itbisCalculado = baseGravable * promedioTasa;
+    final total = baseGravable + itbisCalculado;
     state = state.copiarCon(
       detalles: lista,
       subtotal: subtotal,
       montoDescuento: montoDescuento,
       descuentoId: descuentoId,
       descuentoNombre: descuentoNombre,
-      itbis: itbis,
+      itbis: itbisCalculado > 0 ? itbisCalculado : 0.0,
       total: total > 0 ? total : 0.0,
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/item_carrito.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_descuento.dart';
@@ -18,7 +19,7 @@ class PanelCarrito extends ConsumerWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 450),
             child: const SingleChildScrollView(
-              child: SelectorDescuento(),
+              child: const SelectorDescuento(),
             ),
           ),
         ),
@@ -36,6 +37,31 @@ class PanelCarrito extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final estado = ref.watch(registrarVentaProvider);
+    final controladorDescuento = TextEditingController(
+      text: estado.montoDescuento > 0 ? estado.montoDescuento.toStringAsFixed(2) : '',
+    );
+    bool esPorcentaje = false;
+
+    void aplicarValorDescuento(String valorTexto, bool enPorcentaje) {
+      final double valor = double.tryParse(valorTexto) ?? 0.0;
+      final double totalSinDescuento = estado.subtotal + estado.itbis;
+      final double montoFinal = enPorcentaje
+          ? (totalSinDescuento * valor / 100).clamp(0.0, totalSinDescuento)
+          : valor;
+      final DateTime hoy = DateTime.now();
+      final descuento = Descuento(
+        id: 0,
+        nombre: enPorcentaje ? 'Manual %' : 'Manual',
+        tipo: 'monto',
+        valor: montoFinal,
+        aplicaA: 'general',
+        vigenciaDesde: hoy,
+        vigenciaHasta: hoy.add(const Duration(days: 365)),
+        estado: 'activo',
+      );
+      ref.read(registrarVentaProvider.notifier).aplicarDescuento(descuento);
+    }
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 12),
@@ -46,7 +72,6 @@ class PanelCarrito extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // === TITULO DEL CARRITO ===
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -63,8 +88,6 @@ class PanelCarrito extends ConsumerWidget {
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 12),
-
-            // === LISTA DE PRODUCTOS ===
             if (estado.detalles.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 32),
@@ -94,80 +117,76 @@ class PanelCarrito extends ConsumerWidget {
                   },
                 ),
               ),
-
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 8),
-
-            // === BOTÓN APLICAR DESCUENTO ===
-            InkWell(
-              onTap: () => _abrirSelectorDescuento(context),
-              borderRadius: BorderRadius.circular(8),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.local_offer, color: Colors.blueGrey, size: 20),
-                        const SizedBox(width: 12),
-                        Text(
-                          estado.descuentoNombre != null
-                              ? 'Descuento: ${estado.descuentoNombre}'
-                              : 'Aplicar Descuento',
-                          style: TextStyle(
-                            fontWeight: estado.descuentoNombre != null
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                            color: estado.descuentoNombre != null
-                                ? Colors.green.shade700
-                                : Colors.black87,
-                          ),
-                        ),
-                      ],
+            Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 180,
+                    child: TextField(
+                      controller: controladorDescuento,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                        labelText: 'Descuento RD\$',
+                        hintText: '0.00',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      onSubmitted: (String valor) => aplicarValorDescuento(valor, false),
                     ),
-                    Row(
-                      children: [
-                        if (estado.montoDescuento > 0)
-                          Text(
-                            '- RD\$ ${estado.montoDescuento.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              color: Colors.green.shade700,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
-                      ],
+                  ),
+                  const SizedBox(width: 8),
+                  StatefulBuilder(
+                    builder: (ctx, setEstado) => ElevatedButton(
+                      onPressed: () {
+                        setEstado(() => esPorcentaje = !esPorcentaje);
+                        aplicarValorDescuento(controladorDescuento.text, esPorcentaje);
+                      },
+                      child: Text(esPorcentaje ? 'RD\$' : '%'),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => _abrirSelectorDescuento(context),
+                child: const Text('Seleccionar descuento de lista'),
+              ),
+            ),
+            if (estado.montoDescuento > 0) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Descuento aplicado: - RD\$ ${estado.montoDescuento.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: Colors.green.shade700,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 8),
-
-            // === DESGLOSE DE TOTALES ===
             _buildFilaTotal('Subtotal', estado.subtotal),
-
-            // === SOLO APARECE SI HAY DESCUENTO ===
             if (estado.montoDescuento > 0) ...[
               const SizedBox(height: 4),
               _buildFilaTotal('Descuento', estado.montoDescuento, esDescuento: true),
               _buildFilaTotal('Base Gravable', estado.subtotal - estado.montoDescuento),
             ],
-
             const SizedBox(height: 4),
             _buildFilaTotal('ITBIS', estado.itbis),
-
             const SizedBox(height: 12),
             const Divider(height: 1, thickness: 1.2),
             const SizedBox(height: 8),
-
-            // === TOTAL FINAL ===
             _buildFilaTotal('TOTAL A PAGAR', estado.total, esTotal: true),
             const SizedBox(height: 8),
           ],
