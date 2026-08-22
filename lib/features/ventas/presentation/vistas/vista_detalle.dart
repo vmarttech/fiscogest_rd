@@ -13,12 +13,12 @@ import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_apartado.
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/factura_imprimible.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 
 class VistaDetalle extends ConsumerStatefulWidget {
   const VistaDetalle({super.key});
-
   @override
   ConsumerState<VistaDetalle> createState() => _VistaDetalleState();
 }
@@ -75,7 +75,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           FormaPago.efectivo => 'efectivo',
           FormaPago.tarjeta => 'tarjeta',
           FormaPago.transferencia => 'transferencia',
-          FormaPago.credito => 'crédito',
+          FormaPago.credito => 'credito',
           FormaPago.cheque => 'cheque',
         };
         final esCredito = seleccion == FormaPago.credito;
@@ -144,6 +144,10 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
     setState(() => _guardando = true);
     try {
       final estado = ref.read(registrarVentaProvider);
+      final formaPagoValida = <String>['efectivo', 'tarjeta', 'transferencia', 'credito', 'cheque'];
+      if (!formaPagoValida.contains(estado.tipoPago)) {
+        throw Exception('Forma de pago no válida: seleccione una de la lista (Efectivo, Tarjeta, Transferencia, Crédito, Cheque)');
+      }
       final fecha = DateTime.now();
       final numero = _generarNumero(fecha, modo);
       switch (modo) {
@@ -164,9 +168,19 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           final casoUsoVenta = ref.read(registrarVentaUseCaseProvider);
           final resultadoVenta = await casoUsoVenta(venta);
           if (mounted) {
+            await showDialog<void>(
+              context: context,
+              barrierDismissible: false,
+              builder: (ctx) => FacturaImprimible(
+                venta: resultadoVenta,
+                onCerrar: () => Navigator.pop(ctx),
+              ),
+            );
+          }
+          if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Venta guardada. Numero: ${resultadoVenta.numero}'),
+                content: Text('Venta guardada. Número: ${resultadoVenta.numero}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),
@@ -190,7 +204,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Cotizacion guardada. Numero: ${resultadoCotizacion.numero}'),
+                content: Text('Cotización guardada. Número: ${resultadoCotizacion.numero}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),
@@ -217,7 +231,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Apartado guardado. Numero: ${resultadoApartado.numero}'),
+                content: Text('Apartado guardado. Número: ${resultadoApartado.numero}'),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 4),
               ),

@@ -8348,7 +8348,7 @@ class $VentasTableTable extends VentasTable
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('Borrador'),
+        defaultValue: const Constant('borrador'),
       ).withConverter<VentaEstado>($VentasTableTable.$converterestado);
   static const VerificationMeta _usuarioIdMeta = const VerificationMeta(
     'usuarioId',
@@ -8542,8 +8542,8 @@ class $VentasTableTable extends VentasTable
 
   static JsonTypeConverter2<FormaPago, String, String> $converterformaPago =
       const EnumNameConverter<FormaPago>(FormaPago.values);
-  static JsonTypeConverter2<VentaEstado, String, String> $converterestado =
-      const EnumNameConverter<VentaEstado>(VentaEstado.values);
+  static TypeConverter<VentaEstado, String> $converterestado =
+      const VentaEstadoConverter();
 }
 
 class VentaData extends DataClass implements Insertable<VentaData> {
@@ -8628,9 +8628,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       formaPago: $VentasTableTable.$converterformaPago.fromJson(
         serializer.fromJson<String>(json['formaPago']),
       ),
-      estado: $VentasTableTable.$converterestado.fromJson(
-        serializer.fromJson<String>(json['estado']),
-      ),
+      estado: serializer.fromJson<VentaEstado>(json['estado']),
       usuarioId: serializer.fromJson<int>(json['usuarioId']),
       fechaRegistro: serializer.fromJson<DateTime>(json['fechaRegistro']),
     );
@@ -8649,9 +8647,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       'formaPago': serializer.toJson<String>(
         $VentasTableTable.$converterformaPago.toJson(formaPago),
       ),
-      'estado': serializer.toJson<String>(
-        $VentasTableTable.$converterestado.toJson(estado),
-      ),
+      'estado': serializer.toJson<VentaEstado>(estado),
       'usuarioId': serializer.toJson<int>(usuarioId),
       'fechaRegistro': serializer.toJson<DateTime>(fechaRegistro),
     };

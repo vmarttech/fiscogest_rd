@@ -1,98 +1,203 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/factura_provider.dart';
 
-class FacturaImprimible extends ConsumerWidget {
+class FacturaImprimible extends StatelessWidget {
+
   const FacturaImprimible({
     super.key,
     required this.venta,
-    this.onCerrar,
+    required this.onCerrar,
   });
-
   final Venta venta;
-  final VoidCallback? onCerrar;
+  final VoidCallback onCerrar;
+
+  String _formatearMonto(double valor) {
+    return NumberFormat.currency(
+      locale: 'es_DO',
+      symbol: 'RD\$',
+      decimalDigits: 2,
+    ).format(valor);
+  }
+
+  String _formatearFecha(DateTime fecha) {
+    return DateFormat('dd/MM/yyyy HH:mm').format(fecha);
+  }
+
+  double get _descuentoTotal {
+    return venta.detalles.fold<double>(0.0, (suma, linea) => suma + (linea.montoDescuento ?? 0.0));
+  }
+
+  double get _baseGravable => venta.subtotal - _descuentoTotal;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final facturaService = ref.watch(facturaServiceProvider);
-    final textoFactura = facturaService.generarTextoFactura(venta);
+  Widget build(BuildContext context) {
+    final esCredito = venta.esCredito;
+    final descuentoTotal = _descuentoTotal;
+    final baseGravable = _baseGravable;
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        width: 420,
-        padding: const EdgeInsets.all(20),
+      insetPadding: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'FACTURA DE VENTA',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: onCerrar ?? () => Navigator.pop(context),
-                ),
-              ],
+            const Text(
+              '========================================',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-            Container(
-              height: 400,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  textoFactura,
-                  style: const TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 12,
-                    height: 1.4,
-                  ),
-                ),
-              ),
+            const SizedBox(height: 4),
+            const Text(
+              '           FISCOGEST RD',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 14, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const Text(
+              '         FACTURA DE VENTA',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '========================================',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
+            Text(
+              'Número: ${venta.numero}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            Text(
+              'Fecha:   ${_formatearFecha(venta.fecha)}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            Text(
+              'Cliente ID: ${venta.clienteId ?? "N/A"}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            Text(
+              'Forma de Pago: ${venta.tipoPago.toUpperCase()}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            Text(
+              'Crédito: ${esCredito ? "SÍ" : "NO"}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '----------------------------------------',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'DETALLE DE PRODUCTOS',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '----------------------------------------',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            ...venta.detalles.asMap().entries.map((entry) {
+              final linea = entry.value;
+              final tieneDescuento = (linea.montoDescuento ?? 0.0) != 0.0;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${entry.key + 1}. ${linea.nombreProducto}',
+                    style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+                  ),
+                  Text(
+                    '   Cant: ${linea.cantidad.toStringAsFixed(2)}  x  ${_formatearMonto(linea.precioUnitario)}',
+                    style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+                  ),
+                  Text(
+                    '   Subtotal: ${_formatearMonto(linea.subtotalLinea)}',
+                    style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+                  ),
+                  if (tieneDescuento)
+                    Text(
+                      '   Descuento: -${_formatearMonto(linea.montoDescuento!)}',
+                      style: const TextStyle(fontFamily: 'Courier', fontSize: 12, color: Colors.green),
+                    ),
+                  const SizedBox(height: 4),
+                ],
+              );
+            }),
+            const SizedBox(height: 8),
+            const Text(
+              '----------------------------------------',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Subtotal:          ${_formatearMonto(venta.subtotal)}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            if (descuentoTotal != 0.0) ...[
+              Text(
+                'Descuento:         -${_formatearMonto(descuentoTotal)}',
+                style: const TextStyle(fontFamily: 'Courier', fontSize: 12, color: Colors.green),
+              ),
+              Text(
+                'Base Gravable:     ${_formatearMonto(baseGravable)}',
+                style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+              ),
+            ],
+            Text(
+              'ITBIS (18%):       ${_formatearMonto(venta.itbis)}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '========================================',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            Text(
+              'TOTAL A PAGAR:     ${_formatearMonto(venta.total)}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 13, fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              '========================================',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            Text(
+              'Usuario ID: ${venta.usuarioId ?? "N/A"}',
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '       ¡GRACIAS POR SU COMPRA!',
+              style: TextStyle(fontFamily: 'Courier', fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.copy),
-                    label: const Text('Copiar'),
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: textoFactura));
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Factura copiada al portapapeles')),
-                        );
-                      }
-                    },
-                  ),
+                TextButton.icon(
+                  onPressed: () {
+                    final contenido = _generarTextoFactura(descuentoTotal, baseGravable);
+                    Clipboard.setData(ClipboardData(text: contenido));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Factura copiada al portapapeles')),
+                    );
+                  },
+                  icon: const Icon(Icons.copy, size: 16),
+                  label: const Text('Copiar'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.print),
-                    label: const Text('Imprimir'),
-                    onPressed: () async {
-                      await facturaService.imprimirFactura(venta);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Factura copiada. Use impresora térmica.')),
-                        );
-                      }
-                    },
-                  ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: onCerrar,
+                  icon: const Icon(Icons.check_circle_outline, size: 16),
+                  label: const Text('Cerrar'),
                 ),
               ],
             ),
@@ -100,5 +205,43 @@ class FacturaImprimible extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String _generarTextoFactura(double descuentoTotal, double baseGravable) {
+    final buffer = StringBuffer();
+    buffer.writeln('========================================');
+    buffer.writeln('           FISCOGEST RD');
+    buffer.writeln('         FACTURA DE VENTA');
+    buffer.writeln('========================================');
+    buffer.writeln('Número: ${venta.numero}');
+    buffer.writeln('Fecha:   ${_formatearFecha(venta.fecha)}');
+    buffer.writeln('Cliente ID: ${venta.clienteId ?? "N/A"}');
+    buffer.writeln('Forma de Pago: ${venta.tipoPago.toUpperCase()}');
+    buffer.writeln('Crédito: ${venta.esCredito ? "SÍ" : "NO"}');
+    buffer.writeln('----------------------------------------');
+    buffer.writeln('DETALLE DE PRODUCTOS');
+    buffer.writeln('----------------------------------------');
+    for (var i = 0; i < venta.detalles.length; i++) {
+      final linea = venta.detalles[i];
+      buffer.writeln('${i + 1}. ${linea.nombreProducto}');
+      buffer.writeln('   Cant: ${linea.cantidad.toStringAsFixed(2)}  x  ${_formatearMonto(linea.precioUnitario)}');
+      buffer.writeln('   Subtotal: ${_formatearMonto(linea.subtotalLinea)}');
+      if ((linea.montoDescuento ?? 0.0) != 0.0) {
+        buffer.writeln('   Descuento: -${_formatearMonto(linea.montoDescuento!)}');
+      }
+    }
+    buffer.writeln('----------------------------------------');
+    buffer.writeln('Subtotal:          ${_formatearMonto(venta.subtotal)}');
+    if (descuentoTotal != 0.0) {
+      buffer.writeln('Descuento:         -${_formatearMonto(descuentoTotal)}');
+      buffer.writeln('Base Gravable:     ${_formatearMonto(baseGravable)}');
+    }
+    buffer.writeln('ITBIS (18%):       ${_formatearMonto(venta.itbis)}');
+    buffer.writeln('========================================');
+    buffer.writeln('TOTAL A PAGAR:     ${_formatearMonto(venta.total)}');
+    buffer.writeln('========================================');
+    buffer.writeln('Usuario ID: ${venta.usuarioId ?? "N/A"}');
+    buffer.writeln('       ¡GRACIAS POR SU COMPRA!');
+    return buffer.toString();
   }
 }

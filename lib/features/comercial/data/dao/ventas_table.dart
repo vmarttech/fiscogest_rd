@@ -3,6 +3,22 @@ import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
+class VentaEstadoConverter extends TypeConverter<VentaEstado, String> {
+  const VentaEstadoConverter();
+
+  @override
+  VentaEstado fromSql(String valorDb) {
+    final buscado = valorDb.trim().toLowerCase();
+    return VentaEstado.values.firstWhere(
+      (e) => e.name == buscado,
+      orElse: () => VentaEstado.borrador,
+    );
+  }
+
+  @override
+  String toSql(VentaEstado valorDart) => valorDart.name;
+}
+
 @DataClassName('VentaData')
 class VentasTable extends Table {
   IntColumn get id => integer().autoIncrement().named('id')();
@@ -13,7 +29,10 @@ class VentasTable extends Table {
   RealColumn get itbis => real().named('itbis')();
   RealColumn get montoTotal => real().named('monto_total')();
   TextColumn get formaPago => textEnum<FormaPago>().named('forma_pago')();
-  TextColumn get estado => textEnum<VentaEstado>().named('estado').withDefault(const Constant('Borrador'))();
+  TextColumn get estado => text()
+      .named('estado')
+      .withDefault(const Constant('borrador'))
+      .map(const VentaEstadoConverter())();
   IntColumn get usuarioId => integer().named('usuario_id').references(UsuariosTable, #id)();
   DateTimeColumn get fechaRegistro => dateTime().named('fecha_registro').withDefault(currentDateAndTime)();
 }

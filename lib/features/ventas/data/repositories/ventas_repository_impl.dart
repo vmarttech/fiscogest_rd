@@ -72,10 +72,16 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta> registrarVenta(Venta venta) async {
-    final formaPagoEnum = FormaPago.values.firstWhere(
-      (e) => e.name == venta.tipoPago || e.name.toLowerCase() == venta.tipoPago.toLowerCase(),
-      orElse: () => FormaPago.efectivo,
-    );
+    FormaPago formaPagoEnum;
+    try {
+      final entrada = venta.tipoPago.trim().toLowerCase().replaceAll('ó', 'o');
+      formaPagoEnum = FormaPago.values.firstWhere(
+        (e) => e.name.toLowerCase() == entrada,
+        orElse: () => FormaPago.efectivo,
+      );
+    } catch (_) {
+      formaPagoEnum = FormaPago.efectivo;
+    }
 
     final companion = VentasTableCompanion(
       clienteId: Value(venta.clienteId ?? 0),
@@ -88,6 +94,27 @@ class VentasRepositoryImpl implements IVentasRepository {
     );
 
     final idGenerado = await ventasDao.insertarVenta(companion);
+    final detalle = await ventasDao.listarDetallePorVenta(idGenerado);
+    for (final linea in detalle) {
+      await productosDao.descontarStock(linea.productoId, linea.cantidad);
+      await existenciasDao.descontarExistencia(linea.productoId, linea.cantidad);
+      await salidasDao.registrarSalida(
+        productoId: linea.productoId,
+        cantidad: linea.cantidad,
+        motivo: 'Venta',
+      );
+    }
+
+    final esCredito = formaPagoEnum == FormaPago.credito;
+    if (esCredito && venta.clienteId != null && venta.clienteId! > 0) {
+      await cuentasCobrarDao.crearCuentaPorVenta(
+        clienteId: venta.clienteId!,
+        ventaId: idGenerado,
+        montoOriginal: venta.total,
+        fechaVencimiento: venta.fecha.add(const Duration(days: 30)),
+      );
+    }
+
     return Venta(
       id: idGenerado,
       numero: venta.numero,
@@ -98,8 +125,8 @@ class VentasRepositoryImpl implements IVentasRepository {
       subtotal: venta.subtotal,
       itbis: venta.itbis,
       total: venta.total,
-      tipoPago: venta.tipoPago,
-      esCredito: venta.esCredito,
+      tipoPago: formaPagoEnum.name,
+      esCredito: esCredito,
       cotizacionOrigenId: venta.cotizacionOrigenId,
       apartadoOrigenId: venta.apartadoOrigenId,
       createdAt: venta.createdAt ?? DateTime.now(),
@@ -112,7 +139,6 @@ class VentasRepositoryImpl implements IVentasRepository {
     final companion = CotizacionesTableCompanion(
       clienteId: Value(cotizacion.clienteId),
       fechaEmision: Value(cotizacion.fechaEmision),
-      fechaVigencia: Value(cotizacion.fechaVencimiento),
       montoSubtotal: Value(cotizacion.subtotal),
       itbis: Value(cotizacion.itbis),
       montoTotal: Value(cotizacion.total),
@@ -296,9 +322,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<void> actualizarEnCascada(int ventaId) async {
     final venta = await ventasDao.buscarPorId(ventaId);
     if (venta == null) throw Exception('Venta no encontrada');
-
     final detalle = await ventasDao.listarDetallePorVenta(ventaId);
-
     for (final linea in detalle) {
       await productosDao.descontarStock(linea.productoId, linea.cantidad);
       await existenciasDao.descontarExistencia(linea.productoId, linea.cantidad);
@@ -308,15 +332,13 @@ class VentasRepositoryImpl implements IVentasRepository {
         motivo: 'Venta',
       );
     }
-
     final esCredito = venta.formaPago == FormaPago.credito;
-    if (esCredito) {
-      final fechaVencimiento = venta.fecha.add(const Duration(days: 30));
+    if (esCredito && venta.clienteId > 0) {
       await cuentasCobrarDao.crearCuentaPorVenta(
         clienteId: venta.clienteId,
         ventaId: ventaId,
         montoOriginal: venta.montoTotal,
-        fechaVencimiento: fechaVencimiento,
+        fechaVencimiento: venta.fecha.add(const Duration(days: 30)),
       );
     }
   }
