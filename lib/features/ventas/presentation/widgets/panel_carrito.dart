@@ -6,15 +6,15 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/item_carrito.d
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_descuento.dart';
 
 class _DatosDescuento {
+  const _DatosDescuento({required this.valor, required this.esPorcentaje});
   final double valor;
   final bool esPorcentaje;
-  const _DatosDescuento({required this.valor, required this.esPorcentaje});
 }
 
 class _CampoDescuento extends StatefulWidget {
+  const _CampoDescuento({required this.montoActual, required this.onAplicar});
   final double montoActual;
   final void Function(_DatosDescuento) onAplicar;
-  const _CampoDescuento({required this.montoActual, required this.onAplicar});
 
   @override
   State<_CampoDescuento> createState() => _CampoDescuentoState();
@@ -37,7 +37,6 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
   @override
   void didUpdateWidget(_CampoDescuento viejo) {
     super.didUpdateWidget(viejo);
-    // ✅ SOLUCIÓN CLAVE: NO actualizar el texto si el usuario ESTÁ ESCRIBIENDO
     if (viejo.montoActual != widget.montoActual && !_focusNode.hasFocus) {
       final nuevoTexto = widget.montoActual > 0 ? widget.montoActual.toStringAsFixed(2) : '';
       if (_controlador.text != nuevoTexto) _controlador.text = nuevoTexto;
@@ -64,32 +63,50 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 180,
+          width: 170,
           child: TextField(
             controller: _controlador,
             focusNode: _focusNode,
             keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+            style: const TextStyle(fontSize: 13),
             decoration: InputDecoration(
+              isDense: true,
               labelText: _esPorcentaje ? 'Descuento %' : 'Descuento RD\$',
               hintText: '0.00',
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              filled: true,
+              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: theme.colorScheme.primary, width: 1),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
-            // ✅ REGEX FLEXIBLE: permite entrada progresiva sin bloquear
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
             ],
             onChanged: _alCambiarTexto,
           ),
         ),
-        const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: _cambiarTipo,
-          child: Text(_esPorcentaje ? '%' : 'RD\$'),
+        const SizedBox(width: 6),
+        SizedBox(
+          height: 42,
+          child: OutlinedButton(
+            onPressed: _cambiarTipo,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text(_esPorcentaje ? '%' : 'RD\$', style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ),
       ],
     );
@@ -109,7 +126,7 @@ class PanelCarrito extends ConsumerWidget {
           width: 500,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 450),
-            child: SingleChildScrollView(child: SelectorDescuento()),
+            child: const SingleChildScrollView(child: SelectorDescuento()),
           ),
         ),
       ),
@@ -147,90 +164,172 @@ class PanelCarrito extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final estado = ref.watch(registrarVentaProvider);
     final hayDescuento = estado.montoDescuento > 0;
+    final theme = Theme.of(context);
 
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0, // Look moderno sin sombra pesada
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5), width: 1),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Cabecera del Carrito
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Carrito', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('${estado.detalles.length} productos', style: Theme.of(context).textTheme.bodySmall),
+                Row(
+                  children: [
+                    Icon(Icons.shopping_bag_outlined, size: 20, color: theme.colorScheme.primary),
+                    const SizedBox(width: 8),
+                    const Text('Carrito de Venta', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${estado.detalles.length} ${estado.detalles.length == 1 ? 'artículo' : 'artículos'}',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+
+            // Lista de productos o estado vacío
             if (estado.detalles.isEmpty)
-              const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Center(child: Text('Busque y agregue productos arriba', style: TextStyle(color: Colors.grey))))
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                alignment: Alignment.center,
+                child: Column(
+                  children: [
+                    Icon(Icons.remove_shopping_cart_outlined, size: 40, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+                    const SizedBox(height: 8),
+                    Text('El carrito está vacío', style: TextStyle(color: theme.colorScheme.outline, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 2),
+                    const Text('Busca y agrega productos arriba', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  ],
+                ),
+              )
             else
-              SizedBox(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: estado.detalles.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (ctx, i) {
-                    final detalle = estado.detalles[i];
-                    return ItemCarrito(detalle: detalle, indice: i, alEliminar: () => ref.read(registrarVentaProvider.notifier).quitarProducto(i));
-                  },
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: estado.detalles.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (ctx, i) {
+                  final detalle = estado.detalles[i];
+                  return ItemCarrito(
+                    detalle: detalle,
+                    indice: i,
+                    alEliminar: () => ref.read(registrarVentaProvider.notifier).quitarProducto(i),
+                  );
+                },
+              ),
+
+            const SizedBox(height: 16),
+            const Divider(height: 1, thickness: 0.5),
+            const SizedBox(height: 16),
+
+            // Sección de Descuentos
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton.icon(
+                  onPressed: () => _abrirSelectorDescuento(context),
+                  icon: const Icon(Icons.local_offer_outlined, size: 16),
+                  label: const Text('Descuentos guardados', style: TextStyle(fontSize: 13)),
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                ),
+                _CampoDescuento(
+                  montoActual: estado.montoDescuento,
+                  onAplicar: (datos) => _aplicarDescuento(ref, datos),
+                ),
+              ],
+            ),
+
+            if (hayDescuento) ...[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Descuento aplicado: - RD\$ ${estado.montoDescuento.toStringAsFixed(2)}',
+                  style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.w600, fontSize: 12),
                 ),
               ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: _CampoDescuento(
-                montoActual: estado.montoDescuento,
-                onAplicar: (datos) => _aplicarDescuento(ref, datos),
+            ],
+
+            const SizedBox(height: 16),
+            
+            // Contenedor de Totales con estilo panel sutil
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                children: [
+                  _buildFilaTotal('Subtotal', estado.subtotal, context),
+                  if (hayDescuento) ...[
+                    const SizedBox(height: 6),
+                    _buildFilaTotal('Descuento', estado.montoDescuento, context, esDescuento: true),
+                    const SizedBox(height: 6),
+                    _buildFilaTotal('Base Gravable', (estado.subtotal - estado.montoDescuento).clamp(0.0, double.infinity), context),
+                  ],
+                  const SizedBox(height: 6),
+                  _buildFilaTotal('ITBIS', estado.itbis, context),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Divider(height: 1, thickness: 1),
+                  ),
+                  _buildFilaTotal('TOTAL A PAGAR', estado.total, context, esTotal: true),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Align(alignment: Alignment.centerRight, child: TextButton(onPressed: () => _abrirSelectorDescuento(context), child: const Text('Seleccionar descuento de lista'))),
-            if (hayDescuento) ...[
-              const SizedBox(height: 4),
-              Align(alignment: Alignment.centerRight, child: Text('Descuento aplicado: - RD\$ ${estado.montoDescuento.toStringAsFixed(2)}', style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold))),
-            ],
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            _buildFilaTotal('Subtotal', estado.subtotal),
-            if (hayDescuento) ...[
-              const SizedBox(height: 4),
-              _buildFilaTotal('Descuento', estado.montoDescuento, esDescuento: true),
-              _buildFilaTotal('Base Gravable', (estado.subtotal - estado.montoDescuento).clamp(0.0, double.infinity)),
-            ],
-            const SizedBox(height: 4),
-            _buildFilaTotal('ITBIS', estado.itbis),
-            const SizedBox(height: 12),
-            const Divider(height: 1, thickness: 1.2),
-            const SizedBox(height: 8),
-            _buildFilaTotal('TOTAL A PAGAR', estado.total, esTotal: true),
-            const SizedBox(height: 8),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilaTotal(String etiqueta, double monto, {bool esTotal = false, bool esDescuento = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(etiqueta, style: TextStyle(fontWeight: esTotal ? FontWeight.bold : FontWeight.normal, fontSize: esTotal ? 16 : 14, color: esTotal ? Colors.green.shade800 : const Color(0xFF424242))),
-          Text('${esDescuento ? '- ' : ''}RD\$ ${monto.toStringAsFixed(2)}', style: TextStyle(fontWeight: esTotal ? FontWeight.bold : FontWeight.normal, fontSize: esTotal ? 18 : 14, color: esTotal ? Colors.green.shade700 : esDescuento ? Colors.green.shade700 : const Color(0xFF212121))),
-        ],
-      ),
+  Widget _buildFilaTotal(String etiqueta, double monto, BuildContext context, {bool esTotal = false, bool esDescuento = false}) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          etiqueta,
+          style: TextStyle(
+            fontWeight: esTotal ? FontWeight.bold : FontWeight.w500,
+            fontSize: esTotal ? 15 : 13,
+            color: esTotal ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          '${esDescuento ? '- ' : ''}RD\$ ${monto.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontWeight: esTotal ? FontWeight.bold : FontWeight.w600,
+            fontSize: esTotal ? 18 : 13,
+            color: esTotal 
+                ? theme.colorScheme.primary 
+                : esDescuento 
+                    ? Colors.green.shade700 
+                    : theme.colorScheme.onSurface,
+          ),
+        ),
+      ],
     );
   }
 }
