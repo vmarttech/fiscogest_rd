@@ -27,6 +27,12 @@ class ProductosDao extends DatabaseAccessor<AppDatabase> with _$ProductosDaoMixi
     return producto?.stock;
   }
 
+  Future<ProductoData?> obtenerPorId(int productoId) async {
+    return await (select(productosTable)
+      ..where((t) => t.id.equals(productoId)))
+      .getSingleOrNull();
+  }
+
   Future<List<ProductoData>> buscarPorNombre(String nombre) =>
       (select(productosTable)
         ..where((t) => t.nombre.lower().like('%${nombre.toLowerCase()}%'))

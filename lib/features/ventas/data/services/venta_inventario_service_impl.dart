@@ -1,0 +1,56 @@
+import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
+import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
+import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
+import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
+import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
+
+class VentaInventarioServiceImpl implements IVentaInventarioService {
+  VentaInventarioServiceImpl({
+    required this.ventasRepository,
+    required this.kardexRepository,
+    required this.inventarioService,
+    required this.productosDao,
+  });
+
+  final IVentasRepository ventasRepository;
+  final IKardexRepository kardexRepository;
+  final IInventarioService inventarioService;
+  final ProductosDao productosDao;
+
+  @override
+  Future<Venta> registrarVentaConInventario(Venta venta) async {
+    final ventaRegistrada = await ventasRepository.registrarVenta(venta);
+
+    for (final detalle in venta.detalles) {
+      final saldoAnterior = await kardexRepository.obtenerSaldoActual(detalle.productoId.toString());
+      final producto = await productosDao.obtenerPorId(detalle.productoId);
+      final costoUnitario = producto?.precioCompra ?? 0.0;
+      final saldoNuevo = saldoAnterior - detalle.cantidad;
+
+      final movimientoKardex = Kardex(
+        productoId: detalle.productoId,
+        tipoMovimiento: TipoMovimiento.salida,
+        cantidad: detalle.cantidad,
+        saldoAnterior: saldoAnterior,
+        saldoNuevo: saldoNuevo,
+        costoUnitario: costoUnitario,
+        totalMovimiento: costoUnitario * detalle.cantidad,
+        fechaMovimiento: venta.fecha,
+        documentoReferencia: 'Venta #${ventaRegistrada.numero}',
+        observacion: 'Venta de ${detalle.nombreProducto}',
+        usuarioId: venta.usuarioId ?? 0,
+      );
+      await kardexRepository.registrarMovimiento(movimientoKardex);
+      await inventarioService.restarStock(detalle.productoId, detalle.cantidad);
+    }
+
+    if (ventaRegistrada.id != null) {
+      await ventasRepository.actualizarEnCascada(ventaRegistrada.id!);
+    }
+
+    return ventaRegistrada;
+  }
+}

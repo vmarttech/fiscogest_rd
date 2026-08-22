@@ -4,15 +4,20 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
+import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
 import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_venta.dart';
 
 final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
   return RepositoryInjection.instance.ventasRepository;
 });
 
+final ventaInventarioServiceProvider = Provider<IVentaInventarioService>((ref) {
+  return RepositoryInjection.instance.ventaInventarioService;
+});
+
 final registrarVentaUseCaseProvider = Provider<RegistrarVenta>((ref) {
-  final repo = ref.watch(ventasRepositoryProvider);
-  return RegistrarVenta(repo);
+  final servicio = ref.watch(ventaInventarioServiceProvider);
+  return RegistrarVenta(servicio);
 });
 
 final descuentosActivosProvider = FutureProvider<List<Descuento>>((ref) async {
@@ -457,7 +462,6 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
     calcularTotales(state.detalles);
   }
 
-  // ✅ MÉTODO CORREGIDO: CALCULA LA BASE Y LIMITA EL MONTO
   void aplicarDescuentoManual(double monto) {
     final baseCalculo = _subtotalConDescuentoLinea(state.detalles);
     final montoFinal = monto.clamp(0.0, baseCalculo);
