@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +16,6 @@ class _CampoDescuento extends StatefulWidget {
   const _CampoDescuento({required this.montoActual, required this.onAplicar});
   final double montoActual;
   final void Function(_DatosDescuento) onAplicar;
-
   @override
   State<_CampoDescuento> createState() => _CampoDescuentoState();
 }
@@ -137,26 +137,36 @@ class PanelCarrito extends ConsumerWidget {
     final valor = datos.valor;
     final esPorcentaje = datos.esPorcentaje;
     final estado = ref.read(registrarVentaProvider);
-
     double baseCalculo = 0.0;
-    for (final linea in estado.detalles) {
-      double base = linea.subtotalLinea;
-      if (linea.descuentoPorcentaje != null && linea.descuentoPorcentaje! > 0) {
-        base = base * (100 - linea.descuentoPorcentaje!) / 100;
-      } else if (linea.montoDescuento != null && linea.montoDescuento! > 0) {
-        base = base - linea.montoDescuento!;
+    for (final lineaRaw in estado.detalles) {
+      final dynamic linea = lineaRaw;
+      double base = 0.0;
+      double descuentoPct = 0.0;
+      double descMonto = 0.0;
+      if (linea is DetalleVenta) {
+        base = linea.subtotalLinea ?? linea.subtotal;
+        descuentoPct = linea.descuentoPorcentaje;
+        descMonto = linea.montoDescuento;
+      } else {
+        final mapa = linea as Map;
+        base = (mapa['subtotalLinea'] as double?) ?? 0.0;
+        descuentoPct = (mapa['descuentoPorcentaje'] as double?) ?? 0.0;
+        descMonto = (mapa['montoDescuento'] as double?) ?? 0.0;
+      }
+      if (descuentoPct > 0) {
+        base = base * (100 - descuentoPct) / 100;
+      } else if (descMonto > 0) {
+        base = base - descMonto;
       }
       if (base < 0) base = 0;
       baseCalculo += base;
     }
-
     double montoFinal;
     if (esPorcentaje) {
       montoFinal = (baseCalculo * valor / 100).clamp(0.0, baseCalculo);
     } else {
       montoFinal = valor.clamp(0.0, baseCalculo);
     }
-
     ref.read(registrarVentaProvider.notifier).aplicarDescuentoManual(montoFinal);
   }
 
@@ -165,9 +175,8 @@ class PanelCarrito extends ConsumerWidget {
     final estado = ref.watch(registrarVentaProvider);
     final hayDescuento = estado.montoDescuento > 0;
     final theme = Theme.of(context);
-
     return Card(
-      elevation: 0, // Look moderno sin sombra pesada
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5), width: 1),
@@ -179,7 +188,6 @@ class PanelCarrito extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Cabecera del Carrito
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -204,8 +212,6 @@ class PanelCarrito extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Lista de productos o estado vacío
             if (estado.detalles.isEmpty)
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 40),
@@ -227,7 +233,8 @@ class PanelCarrito extends ConsumerWidget {
                 itemCount: estado.detalles.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (ctx, i) {
-                  final detalle = estado.detalles[i];
+                  final detalleRaw = estado.detalles[i];
+                  final DetalleVenta detalle = detalleRaw as DetalleVenta;
                   return ItemCarrito(
                     detalle: detalle,
                     indice: i,
@@ -235,12 +242,9 @@ class PanelCarrito extends ConsumerWidget {
                   );
                 },
               ),
-
             const SizedBox(height: 16),
             const Divider(height: 1, thickness: 0.5),
             const SizedBox(height: 16),
-
-            // Sección de Descuentos
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -257,7 +261,6 @@ class PanelCarrito extends ConsumerWidget {
                 ),
               ],
             ),
-
             if (hayDescuento) ...[
               const SizedBox(height: 6),
               Align(
@@ -268,10 +271,7 @@ class PanelCarrito extends ConsumerWidget {
                 ),
               ),
             ],
-
             const SizedBox(height: 16),
-            
-            // Contenedor de Totales con estilo panel sutil
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -322,10 +322,10 @@ class PanelCarrito extends ConsumerWidget {
           style: TextStyle(
             fontWeight: esTotal ? FontWeight.bold : FontWeight.w600,
             fontSize: esTotal ? 18 : 13,
-            color: esTotal 
-                ? theme.colorScheme.primary 
-                : esDescuento 
-                    ? Colors.green.shade700 
+            color: esTotal
+                ? theme.colorScheme.primary
+                : esDescuento
+                    ? Colors.green.shade700
                     : theme.colorScheme.onSurface,
           ),
         ),

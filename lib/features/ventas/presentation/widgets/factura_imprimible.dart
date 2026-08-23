@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 
 class FacturaImprimible extends StatelessWidget {
-
   const FacturaImprimible({
     super.key,
     required this.venta,
     required this.onCerrar,
   });
+
   final Venta venta;
   final VoidCallback onCerrar;
 
@@ -26,7 +27,10 @@ class FacturaImprimible extends StatelessWidget {
   }
 
   double get _descuentoTotal {
-    return venta.detalles.fold<double>(0.0, (suma, linea) => suma + (linea.montoDescuento ?? 0.0));
+    return venta.detalles.fold<double>(0.0, (suma, elemento) {
+      final linea = elemento as DetalleVenta;
+      return suma + linea.montoDescuento;
+    });
   }
 
   double get _baseGravable => venta.subtotal - _descuentoTotal;
@@ -77,9 +81,14 @@ class FacturaImprimible extends StatelessWidget {
               style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
             ),
             Text(
-              'Cliente ID: ${venta.clienteId ?? "N/A"}',
+              'Cliente ID: ${venta.clienteId}',
               style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
             ),
+            if (venta.nombreCliente != null)
+              Text(
+                'Cliente: ${venta.nombreCliente}',
+                style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+              ),
             Text(
               'Forma de Pago: ${venta.tipoPago.toUpperCase()}',
               style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
@@ -105,26 +114,31 @@ class FacturaImprimible extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             ...venta.detalles.asMap().entries.map((entry) {
-              final linea = entry.value;
-              final tieneDescuento = (linea.montoDescuento ?? 0.0) != 0.0;
+              final indice = entry.key;
+              final linea = entry.value as DetalleVenta;
+              final nombre = linea.nombreProducto ?? 'Producto';
+              final tieneDescuento = linea.montoDescuento != 0.0;
+              final cantidad = linea.cantidad;
+              final subtotalLinea = linea.subtotalLinea ?? linea.subtotal;
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${entry.key + 1}. ${linea.nombreProducto}',
+                    '${indice + 1}. $nombre',
                     style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
                   ),
                   Text(
-                    '   Cant: ${linea.cantidad.toStringAsFixed(2)}  x  ${_formatearMonto(linea.precioUnitario)}',
+                    '   Cant: $cantidad  x  ${_formatearMonto(linea.precioUnitario)}',
                     style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
                   ),
                   Text(
-                    '   Subtotal: ${_formatearMonto(linea.subtotalLinea)}',
+                    '   Subtotal: ${_formatearMonto(subtotalLinea)}',
                     style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
                   ),
                   if (tieneDescuento)
                     Text(
-                      '   Descuento: -${_formatearMonto(linea.montoDescuento!)}',
+                      '   Descuento: -${_formatearMonto(linea.montoDescuento)}',
                       style: const TextStyle(fontFamily: 'Courier', fontSize: 12, color: Colors.green),
                     ),
                   const SizedBox(height: 4),
@@ -215,19 +229,24 @@ class FacturaImprimible extends StatelessWidget {
     buffer.writeln('========================================');
     buffer.writeln('Número: ${venta.numero}');
     buffer.writeln('Fecha:   ${_formatearFecha(venta.fecha)}');
-    buffer.writeln('Cliente ID: ${venta.clienteId ?? "N/A"}');
+    buffer.writeln('Cliente ID: ${venta.clienteId}');
+    if (venta.nombreCliente != null) {
+      buffer.writeln('Cliente: ${venta.nombreCliente}');
+    }
     buffer.writeln('Forma de Pago: ${venta.tipoPago.toUpperCase()}');
     buffer.writeln('Crédito: ${venta.esCredito ? "SÍ" : "NO"}');
     buffer.writeln('----------------------------------------');
     buffer.writeln('DETALLE DE PRODUCTOS');
     buffer.writeln('----------------------------------------');
     for (var i = 0; i < venta.detalles.length; i++) {
-      final linea = venta.detalles[i];
-      buffer.writeln('${i + 1}. ${linea.nombreProducto}');
-      buffer.writeln('   Cant: ${linea.cantidad.toStringAsFixed(2)}  x  ${_formatearMonto(linea.precioUnitario)}');
-      buffer.writeln('   Subtotal: ${_formatearMonto(linea.subtotalLinea)}');
-      if ((linea.montoDescuento ?? 0.0) != 0.0) {
-        buffer.writeln('   Descuento: -${_formatearMonto(linea.montoDescuento!)}');
+      final linea = venta.detalles[i] as DetalleVenta;
+      final nombre = linea.nombreProducto ?? 'Producto';
+      final subtotalLinea = linea.subtotalLinea ?? linea.subtotal;
+      buffer.writeln('${i + 1}. $nombre');
+      buffer.writeln('   Cant: ${linea.cantidad}  x  ${_formatearMonto(linea.precioUnitario)}');
+      buffer.writeln('   Subtotal: ${_formatearMonto(subtotalLinea)}');
+      if (linea.montoDescuento != 0.0) {
+        buffer.writeln('   Descuento: -${_formatearMonto(linea.montoDescuento)}');
       }
     }
     buffer.writeln('----------------------------------------');

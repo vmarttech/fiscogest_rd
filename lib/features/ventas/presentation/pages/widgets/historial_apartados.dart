@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 class HistorialApartados extends ConsumerWidget {
@@ -17,24 +18,9 @@ class HistorialApartados extends ConsumerWidget {
     return valor.toString();
   }
 
-  String _valorComoString(Map<String, dynamic> mapa, String clave, [String defecto = '']) {
-    final dynamic v = mapa[clave];
-    return v != null ? v.toString() : defecto;
-  }
-
-  double _valorComoDouble(Map<String, dynamic> mapa, String clave) {
-    final dynamic v = mapa[clave];
-    if (v == null) return 0.0;
-    if (v is double) return v;
-    if (v is int) return v.toDouble();
-    if (v is String) return double.tryParse(v) ?? 0.0;
-    return 0.0;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final apartadosAsync = ref.watch(listaApartadosProvider);
-
     return Padding(
       padding: AppSpacing.allM,
       child: Column(
@@ -42,7 +28,8 @@ class HistorialApartados extends ConsumerWidget {
         children: [
           const Text('Apartados', style: AppTypography.h4),
           const SizedBox(height: AppSpacing.xs),
-          Text('Reservas de productos con control de pagos', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+          Text('Reservas de productos con control de pagos',
+              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.m),
           Expanded(
             child: apartadosAsync.when(
@@ -53,11 +40,13 @@ class HistorialApartados extends ConsumerWidget {
                   children: [
                     const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                     const SizedBox(height: AppSpacing.m),
-                    Text('Error al cargar apartados: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error), textAlign: TextAlign.center),
+                    Text('Error al cargar apartados: $e',
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                        textAlign: TextAlign.center),
                   ],
                 ),
               ),
-              data: (List<Map<String, dynamic>> apartados) {
+              data: (List<Apartado> apartados) {
                 if (apartados.isEmpty) {
                   return Center(
                     child: Column(
@@ -65,9 +54,11 @@ class HistorialApartados extends ConsumerWidget {
                       children: [
                         const Icon(Icons.inventory_2_outlined, size: 64, color: Color(0x409E9E9E)),
                         const SizedBox(height: AppSpacing.m),
-                        Text('No hay apartados registrados', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
+                        Text('No hay apartados registrados',
+                            style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
                         const SizedBox(height: AppSpacing.xs),
-                        Text('Los apartados que registres aparecerán aquí', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                        Text('Los apartados que registres aparecerán aquí',
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
                       ],
                     ),
                   );
@@ -76,15 +67,14 @@ class HistorialApartados extends ConsumerWidget {
                   itemCount: apartados.length,
                   separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
                   itemBuilder: (_, int i) {
-                    final Map<String, dynamic> a = apartados[i];
-                    final String numero = _valorComoString(a, 'numero', 'S/N');
-                    final String fechaApartado = _formatearFecha(a['fechaApartado'] ?? a['fechaReserva'] ?? a['fecha_reserva']);
-                    final String fechaLimite = _formatearFecha(a['fechaLimitePago'] ?? a['fechaLimite'] ?? a['fecha_limite']);
-                    final double montoTotal = _valorComoDouble(a, 'montoTotal') + _valorComoDouble(a, 'monto_total');
-                    final double montoAbonado = _valorComoDouble(a, 'montoAbonado') + _valorComoDouble(a, 'monto_abonado');
-                    final double saldoPendiente = _valorComoDouble(a, 'saldoPendiente') + _valorComoDouble(a, 'saldo_pendiente');
-                    final String estado = _valorComoString(a, 'estado', 'Reservado');
-
+                    final Apartado a = apartados[i];
+                    final String numero = a.numero;
+                    final String fechaApartado = _formatearFecha(a.fechaApartado);
+                    final String fechaLimite = _formatearFecha(a.fechaLimitePago);
+                    final double montoTotal = a.montoTotal;
+                    final double montoAbonado = a.montoAbonado;
+                    final double saldoPendiente = a.saldoPendiente;
+                    final String estado = a.estado;
                     return _TarjetaApartado(
                       numero: numero,
                       fechaApartado: fechaApartado,
@@ -135,7 +125,6 @@ class _TarjetaApartado extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double porcentajePagado = montoTotal > 0 ? (montoAbonado / montoTotal).clamp(0.0, 1.0) : 0.0;
-
     return Padding(
       padding: AppSpacing.vS,
       child: Column(
@@ -143,7 +132,8 @@ class _TarjetaApartado extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('Apartado N° $numero', style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600)),
+              Text('Apartado N° $numero',
+                  style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(width: AppSpacing.s),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
@@ -165,17 +155,25 @@ class _TarjetaApartado extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Apartado: $fechaApartado', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-                    Text('Límite pago: $fechaLimite', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                    Text('Apartado: $fechaApartado',
+                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                    Text('Límite pago: $fechaLimite',
+                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
                         Expanded(
-                          child: Text('RD\$ ${montoAbonado.toStringAsFixed(2)} / RD\$ ${montoTotal.toStringAsFixed(2)}',
-                              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                          child: Text(
+                            'RD\$ ${montoAbonado.toStringAsFixed(2)} / RD\$ ${montoTotal.toStringAsFixed(2)}',
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                          ),
                         ),
-                        Text('Saldo: RD\$ ${saldoPendiente.toStringAsFixed(2)}',
-                            style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600, color: saldoPendiente > 0 ? AppColors.error : Colors.green)),
+                        Text(
+                          'Saldo: RD\$ ${saldoPendiente.toStringAsFixed(2)}',
+                          style: AppTypography.labelMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: saldoPendiente > 0 ? AppColors.error : Colors.green),
+                        ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xs),

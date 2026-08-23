@@ -10,13 +10,8 @@ import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cotizaciones_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/apartados_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_dao.dart';
-import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
-import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_dao.dart';
-import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_dao.dart';
-import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_dao.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
-import 'package:fiscogest_rd/features/inventario/data/dao/existencias_dao.dart';
-import 'package:fiscogest_rd/features/inventario/data/dao/salidas_dao.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_dao.dart';
 import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_repository_impl.dart';
 import 'package:fiscogest_rd/features/inventario/data/services/inventario_service_impl.dart';
@@ -61,29 +56,13 @@ class RepositoryInjection {
     final cotizacionesDao = CotizacionesDao(db);
     final apartadosDao = ApartadosDao(db);
     final devolucionesDao = DevolucionesDao(db);
-    final cuentasCobrarDao = CuentasCobrarDao(db);
-    final descuentosDao = DescuentosDao(db);
-    final ofertasDao = OfertasDao(db);
     final cajaMovimientosDao = CajaMovimientosDao(db);
     final productosDao = ProductosDao(db);
-    final existenciasDao = ExistenciasDao(db);
-    final salidasDao = SalidasDao(db);
     final kardexDatasource = DriftKardexDatasource(db);
     final kardexRepository = KardexRepositoryImpl(kardexDatasource);
     final inventarioService = InventarioServiceImpl(db);
 
-    final ventasRepository = VentasRepositoryImpl(
-      ventasDao: ventasDao,
-      cotizacionesDao: cotizacionesDao,
-      apartadosDao: apartadosDao,
-      devolucionesDao: devolucionesDao,
-      cuentasCobrarDao: cuentasCobrarDao,
-      descuentosDao: descuentosDao,
-      ofertasDao: ofertasDao,
-      productosDao: productosDao,
-      existenciasDao: existenciasDao,
-      salidasDao: salidasDao,
-    );
+    final ventasRepository = VentasRepositoryImpl(ventasDao: ventasDao);
 
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,
@@ -95,15 +74,12 @@ class RepositoryInjection {
     final apartadoRepository = ApartadoRepositoryImpl(
       apartadosDao: apartadosDao,
     );
-
     final cotizacionRepository = CotizacionRepositoryImpl(
       cotizacionesDao: cotizacionesDao,
     );
-
     final devolucionRepository = DevolucionRepositoryImpl(
       devolucionesDao: devolucionesDao,
     );
-
     final cajaRepository = CajaRepositoryImpl(
       cajaMovimientosDao: cajaMovimientosDao,
     );
@@ -120,7 +96,6 @@ class RepositoryInjection {
       productosDao: productosDao,
       ventaInventarioService: ventaInventarioService,
     );
-
     return _instance!;
   }
 }

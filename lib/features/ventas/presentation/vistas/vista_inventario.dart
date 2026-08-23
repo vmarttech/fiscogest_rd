@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -5,7 +6,6 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
@@ -33,7 +33,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
 
   List<Producto> _filtrar(List<Producto> lista, CategoriaProducto categoria) {
     var resultados = lista.where((p) => p.activo).toList();
-
     if (_terminoBusqueda != null && _terminoBusqueda!.isNotEmpty) {
       final termino = _terminoBusqueda!.toLowerCase().trim();
       resultados = resultados
@@ -42,7 +41,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
               p.codigo.toLowerCase().contains(termino))
           .toList();
     }
-
     switch (categoria) {
       case CategoriaProducto.productos:
         return resultados;
@@ -61,19 +59,18 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
   }
 
   void _seleccionarProducto(Producto producto) {
-    final cantidad = 1.0;
+    const cantidad = 1;
     final precioUnitario = producto.precioVenta;
     final subtotal = cantidad * precioUnitario;
-
     final linea = DetalleVenta(
       productoId: producto.id ?? 0,
       nombreProducto: producto.nombre,
       cantidad: cantidad,
       precioUnitario: precioUnitario,
+      subtotal: subtotal,
       subtotalLinea: subtotal,
       tasaImpuesto: _tasaItbis,
     );
-
     ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
     ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.detalle);
   }
@@ -84,7 +81,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
     final categoria = ref.watch(
       ventasNavegacionProvider.select((e) => e.categoriaSeleccionada),
     );
-
     return Column(
       children: [
         Padding(
@@ -120,7 +116,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
             ),
             data: (todos) {
               final lista = _filtrar(todos, categoria);
-
               if (lista.isEmpty) {
                 return Center(
                   child: Column(
@@ -140,7 +135,6 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                   ),
                 );
               }
-
               return ListView.builder(
                 padding: AppSpacing.allM,
                 itemCount: lista.length,
@@ -175,7 +169,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                                 ),
                                 if (producto.stock != null)
                                   Text(
-                                    'Stock: ${producto.stock!.toStringAsFixed(0)}',
+                                    'Stock: ${producto.stock!.toInt()}',
                                     style: AppTypography.bodySmall,
                                   ),
                               ],

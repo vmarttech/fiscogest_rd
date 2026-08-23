@@ -1,6 +1,6 @@
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 class ItemCarrito extends ConsumerWidget {
@@ -30,7 +30,7 @@ class ItemCarrito extends ConsumerWidget {
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
           TextButton(
             onPressed: () {
-              final nuevaCantidad = double.tryParse(controlador.text) ?? detalle.cantidad;
+              final nuevaCantidad = double.tryParse(controlador.text) ?? detalle.cantidad.toDouble();
               if (nuevaCantidad > 0) {
                 ref.read(registrarVentaProvider.notifier).cambiarCantidad(indice, nuevaCantidad);
               }
@@ -44,17 +44,16 @@ class ItemCarrito extends ConsumerWidget {
   }
 
   void _abrirDescuentoLinea(BuildContext context, WidgetRef ref) {
-    final tienePorcentaje = detalle.descuentoPorcentaje != null && detalle.descuentoPorcentaje! > 0;
-    final tieneMonto = detalle.montoDescuento != null && detalle.montoDescuento! > 0;
+    final tienePorcentaje = detalle.descuentoPorcentaje > 0;
+    final tieneMonto = detalle.montoDescuento > 0;
     final controlador = TextEditingController(
       text: tienePorcentaje
-          ? detalle.descuentoPorcentaje!.toStringAsFixed(2)
+          ? detalle.descuentoPorcentaje.toStringAsFixed(2)
           : tieneMonto
-              ? detalle.montoDescuento!.toStringAsFixed(2)
+              ? detalle.montoDescuento.toStringAsFixed(2)
               : '',
     );
     bool esPorcentaje = tienePorcentaje;
-
     showDialog<dynamic>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -120,14 +119,13 @@ class ItemCarrito extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tieneOferta = detalle.ofertaId != null;
-    final tieneDescuento = (detalle.descuentoPorcentaje ?? 0) > 0 || (detalle.montoDescuento ?? 0) > 0;
-
+    final tieneDescuento = detalle.descuentoPorcentaje > 0 || detalle.montoDescuento > 0;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         title: Row(
           children: [
-            Text(detalle.nombreProducto),
+            Text(detalle.nombreProducto ?? ''),
             if (tieneOferta)
               Container(
                 margin: const EdgeInsets.only(left: 8),
@@ -167,7 +165,7 @@ class ItemCarrito extends ConsumerWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Cant: ${detalle.cantidad} • RD\$ ${detalle.subtotalLinea.toStringAsFixed(2)}'),
+            Text('Cant: ${detalle.cantidad} • RD\$ ${(detalle.subtotalLinea ?? detalle.subtotal).toStringAsFixed(2)}'),
             if (tieneOferta && detalle.precioOriginal != null)
               Text(
                 'Precio original: RD\$ ${detalle.precioOriginal!.toStringAsFixed(2)} → Oferta: RD\$ ${detalle.precioUnitario.toStringAsFixed(2)}',

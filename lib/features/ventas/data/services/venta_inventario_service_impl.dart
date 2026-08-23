@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.da
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
 
@@ -23,34 +24,31 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
   @override
   Future<Venta> registrarVentaConInventario(Venta venta) async {
     final ventaRegistrada = await ventasRepository.registrarVenta(venta);
-
-    for (final detalle in venta.detalles) {
+    for (final elemento in venta.detalles) {
+      final detalle = elemento as DetalleVenta;
       final saldoAnterior = await kardexRepository.obtenerSaldoActual(detalle.productoId.toString());
       final producto = await productosDao.obtenerPorId(detalle.productoId);
       final costoUnitario = producto?.precioCompra ?? 0.0;
       final saldoNuevo = saldoAnterior - detalle.cantidad;
-
       final movimientoKardex = Kardex(
         productoId: detalle.productoId,
         tipoMovimiento: TipoMovimiento.salida,
-        cantidad: detalle.cantidad,
+        cantidad: detalle.cantidad.toDouble(),
         saldoAnterior: saldoAnterior,
         saldoNuevo: saldoNuevo,
         costoUnitario: costoUnitario,
         totalMovimiento: costoUnitario * detalle.cantidad,
         fechaMovimiento: venta.fecha,
         documentoReferencia: 'Venta #${ventaRegistrada.numero}',
-        observacion: 'Venta de ${detalle.nombreProducto}',
+        observacion: 'Venta de ${detalle.nombreProducto ?? "Producto"}',
         usuarioId: venta.usuarioId ?? 0,
       );
       await kardexRepository.registrarMovimiento(movimientoKardex);
-      await inventarioService.restarStock(detalle.productoId, detalle.cantidad);
+      await inventarioService.restarStock(detalle.productoId, detalle.cantidad.toDouble());
     }
-
     if (ventaRegistrada.id != null) {
       await ventasRepository.actualizarEnCascada(ventaRegistrada.id!);
     }
-
     return ventaRegistrada;
   }
 }

@@ -1,29 +1,134 @@
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_textfield.dart';
-import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
-import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/cotizacion.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_apartado.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/widgets/factura_imprimible.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
 
-class VistaDetalle extends ConsumerStatefulWidget {
+class VistaDetalle extends ConsumerWidget {
   const VistaDetalle({super.key});
+
   @override
-  ConsumerState<VistaDetalle> createState() => _VistaDetalleState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ventaCargada = ref.watch(ventaCargadaDesdeHistorialProvider);
+    if (ventaCargada != null) {
+      return _MostrarDetalleVenta(venta: ventaCargada);
+    }
+    return const ContenidoOperacionVenta();
+  }
 }
 
-class _VistaDetalleState extends ConsumerState<VistaDetalle> {
+class _MostrarDetalleVenta extends ConsumerWidget {
+  const _MostrarDetalleVenta({required this.venta});
+
+  final Venta venta;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SingleChildScrollView(
+      padding: AppSpacing.allM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
+                onPressed: () {
+                  ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = null;
+                  ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+                },
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      'Venta Nº ${venta.numero}',
+                      style: AppTypography.h4,
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      DateFormat.yMd().add_Hm().format(venta.fecha),
+                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 48),
+            ],
+          ),
+          const Divider(),
+          const SizedBox(height: AppSpacing.m),
+          _FilaDetalle('Cliente', '${venta.clienteId}'),
+          if (venta.nombreCliente != null)
+            _FilaDetalle('Nombre', venta.nombreCliente!),
+          _FilaDetalle('Fecha', DateFormat.yMd().add_Hm().format(venta.fecha)),
+          _FilaDetalle('Subtotal', NumberFormat.currency(symbol: 'RD\$ ').format(venta.subtotal)),
+          _FilaDetalle('ITBIS', NumberFormat.currency(symbol: 'RD\$ ').format(venta.itbis)),
+          _FilaDetalle('Total', NumberFormat.currency(symbol: 'RD\$ ').format(venta.total), esResaltado: true),
+          _FilaDetalle('Forma de Pago', venta.tipoPago),
+          _FilaDetalle('A crédito', venta.esCredito ? 'Sí' : 'No'),
+          const SizedBox(height: AppSpacing.l),
+          ElevatedButton.icon(
+            onPressed: () {
+              ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = null;
+              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+            },
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Volver al historial'),
+            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilaDetalle extends StatelessWidget {
+  const _FilaDetalle(this.etiqueta, this.valor, {this.esResaltado = false});
+
+  final String etiqueta, valor;
+  final bool esResaltado;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(etiqueta, style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
+          Text(
+            valor,
+            style: AppTypography.bodyMedium.copyWith(
+              fontWeight: esResaltado ? FontWeight.bold : FontWeight.normal,
+              color: esResaltado ? AppColors.primary : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ContenidoOperacionVenta extends ConsumerStatefulWidget {
+  const ContenidoOperacionVenta({super.key});
+
+  @override
+  ConsumerState<ContenidoOperacionVenta> createState() => _ContenidoOperacionVentaState();
+}
+
+class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVenta> {
   bool _guardando = false;
   DateTime? _fechaVencimiento;
   final TextEditingController _adelantoController = TextEditingController(text: '0.00');
@@ -47,39 +152,26 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
   }
 
   void _alSeleccionarFormaPago() {
-    showDialog<FormaPago>(
+    showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Forma de Pago'),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: FormaPago.values.map((forma) {
-            final etiqueta = switch (forma) {
-              FormaPago.efectivo => 'Efectivo',
-              FormaPago.tarjeta => 'Tarjeta',
-              FormaPago.transferencia => 'Transferencia',
-              FormaPago.credito => 'Crédito',
-              FormaPago.cheque => 'Cheque',
-            };
-            return ListTile(
-              title: Text(etiqueta),
-              onTap: () => Navigator.pop(ctx, forma),
-            );
-          }).toList(),
+          children: [
+            ListTile(title: const Text('Efectivo'), onTap: () => Navigator.pop(ctx, 'efectivo')),
+            ListTile(title: const Text('Tarjeta'), onTap: () => Navigator.pop(ctx, 'tarjeta')),
+            ListTile(title: const Text('Transferencia'), onTap: () => Navigator.pop(ctx, 'transferencia')),
+            ListTile(title: const Text('Crédito'), onTap: () => Navigator.pop(ctx, 'credito')),
+            ListTile(title: const Text('Cheque'), onTap: () => Navigator.pop(ctx, 'cheque')),
+          ],
         ),
       ),
     ).then((seleccion) {
       if (seleccion != null) {
-        final etiqueta = switch (seleccion) {
-          FormaPago.efectivo => 'efectivo',
-          FormaPago.tarjeta => 'tarjeta',
-          FormaPago.transferencia => 'transferencia',
-          FormaPago.credito => 'credito',
-          FormaPago.cheque => 'cheque',
-        };
-        final esCredito = seleccion == FormaPago.credito;
-        ref.read(registrarVentaProvider.notifier).cambiarFormaPago(etiqueta, esCredito);
+        final esCredito = seleccion == 'credito';
+        ref.read(registrarVentaProvider.notifier).cambiarFormaPago(seleccion, esCredito);
       }
     });
   }
@@ -107,6 +199,10 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
     return '$prefijo${fecha.year}${fecha.month.toString().padLeft(2,'0')}${fecha.day.toString().padLeft(2,'0')}-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
   }
 
+  List<DetalleVenta> _convertirDetalles(List<dynamic> crudos) {
+    return crudos.map((linea) => linea as DetalleVenta).toList();
+  }
+
   Future<void> _confirmarOperacion() async {
     final modo = ref.read(ventasNavegacionProvider).modoOperacion;
     final valido = ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
@@ -120,6 +216,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
       );
       return;
     }
+
     if (modo == ModoOperacion.cotizacion && _fechaVencimiento == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -129,6 +226,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
       );
       return;
     }
+
     if (modo == ModoOperacion.apartado) {
       final adelanto = double.tryParse(_adelantoController.text);
       if (adelanto == null || adelanto < 0) {
@@ -141,6 +239,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
         return;
       }
     }
+
     setState(() => _guardando = true);
     try {
       final estado = ref.read(registrarVentaProvider);
@@ -148,15 +247,18 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
       if (!formaPagoValida.contains(estado.tipoPago)) {
         throw Exception('Forma de pago no válida: seleccione una de la lista (Efectivo, Tarjeta, Transferencia, Crédito, Cheque)');
       }
+
       final fecha = DateTime.now();
       final numero = _generarNumero(fecha, modo);
+      final detallesTipados = _convertirDetalles(estado.detalles);
+
       switch (modo) {
         case ModoOperacion.venta:
           final venta = Venta(
             numero: numero,
-            clienteId: estado.clienteId,
+            clienteId: estado.clienteId!,
             fecha: fecha,
-            detalles: estado.detalles,
+            detalles: detallesTipados,
             subtotal: estado.subtotal,
             itbis: estado.itbis,
             total: estado.total,
@@ -166,14 +268,20 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
             createdAt: fecha,
           );
           final casoUsoVenta = ref.read(registrarVentaUseCaseProvider);
-          final resultadoVenta = await casoUsoVenta(venta);
+          final resultadoVenta = await (casoUsoVenta as dynamic).call(venta);
           if (mounted) {
             await showDialog<void>(
               context: context,
               barrierDismissible: false,
-              builder: (ctx) => FacturaImprimible(
-                venta: resultadoVenta,
-                onCerrar: () => Navigator.pop(ctx),
+              builder: (ctx) => AlertDialog(
+                title: Text('Venta Nº ${resultadoVenta.numero} guardada'),
+                content: const Text('La venta se registró correctamente.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Aceptar'),
+                  ),
+                ],
               ),
             );
           }
@@ -187,20 +295,23 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
             );
           }
           break;
+
         case ModoOperacion.cotizacion:
-          final cotizacion = Cotizacion(
+          final ventaComoCotizacion = Venta(
             numero: numero,
             clienteId: estado.clienteId!,
-            fechaEmision: fecha,
-            fechaVencimiento: _fechaVencimiento!,
-            detalles: estado.detalles,
+            fecha: fecha,
+            detalles: detallesTipados,
             subtotal: estado.subtotal,
             itbis: estado.itbis,
             total: estado.total,
+            tipoPago: estado.tipoPago,
+            esCredito: estado.esCredito,
+            usuarioId: estado.usuarioId,
             createdAt: fecha,
           );
           final repositorio = ref.read(ventasRepositoryProvider);
-          final resultadoCotizacion = await repositorio.registrarCotizacion(cotizacion);
+          final resultadoCotizacion = await repositorio.registrarCotizacion(ventaComoCotizacion);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -211,15 +322,15 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
             );
           }
           break;
+
         case ModoOperacion.apartado:
           final montoAbonado = double.tryParse(_adelantoController.text) ?? 0.0;
           final montoTotal = estado.total;
           final repositorio = ref.read(ventasRepositoryProvider);
-          final casoUsoApartado = RegistrarApartado(repositorio);
           final apartado = Apartado(
             numero: numero,
             clienteId: estado.clienteId!,
-            productos: estado.detalles,
+            productos: detallesTipados,
             montoTotal: montoTotal,
             montoAbonado: montoAbonado,
             saldoPendiente: montoTotal - montoAbonado,
@@ -227,7 +338,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
             estado: 'pendiente',
             createdAt: fecha,
           );
-          final resultadoApartado = await casoUsoApartado(apartado);
+          final resultadoApartado = await repositorio.registrarApartado(apartado);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -239,6 +350,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
           }
           break;
       }
+
       ref.read(registrarVentaProvider.notifier).vaciarVenta();
       setState(() {
         _fechaVencimiento = null;
@@ -269,6 +381,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
       ModoOperacion.cotizacion => 'Guardar Cotización',
       ModoOperacion.apartado => 'Confirmar Apartado',
     };
+
     return SingleChildScrollView(
       padding: AppSpacing.allM,
       child: Column(
@@ -280,7 +393,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
                 icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
                 onPressed: _guardando ? null : () => ref
                     .read(ventasNavegacionProvider.notifier)
-                    .cambiarVista(VistaActual.inventario),
+                    .cambiarVista(VistaActual.inicio),
               ),
               const Expanded(
                 child: Text(
@@ -323,11 +436,15 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
             const SizedBox(height: AppSpacing.m),
           ],
           if (modo == ModoOperacion.apartado) ...[
-            AppTextField(
+            TextField(
               controller: _adelantoController,
-              label: 'Monto de Adelanto',
-              hint: '0.00',
-              prefixIcon: Icons.monetization_on_outlined,
+              decoration: const InputDecoration(
+                labelText: 'Monto de Adelanto',
+                hintText: '0.00',
+                prefixIcon: Icon(Icons.monetization_on_outlined),
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             const SizedBox(height: AppSpacing.m),
           ],
@@ -344,7 +461,7 @@ class _VistaDetalleState extends ConsumerState<VistaDetalle> {
               foregroundColor: Colors.white,
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: 45),
         ],
       ),
     );

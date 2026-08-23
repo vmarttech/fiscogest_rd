@@ -1,6 +1,6 @@
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
@@ -11,9 +11,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.
 
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
-
   static const String routeName = 'registrar-ventas';
-
   @override
   ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
@@ -55,6 +53,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       return;
     }
     final ofertasActivas = await ref.watch(ofertasActivosProvider.future);
+    final List<Oferta> listaOfertas = ofertasActivas.cast<Oferta>();
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
       if ((p.stock ?? 0) <= 0) {
@@ -66,15 +65,17 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         );
         return;
       }
-      final oferta = _buscarOfertaAplicable(ofertasActivas, p.id ?? 0, 1);
+      final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
       double precioUnitario = p.precioVenta.toDouble();
+      double subtotal = precioUnitario;
       double? precioOriginal;
-      int? ofertaId;
+      String? ofertaId;
       String? ofertaNombre;
       if (oferta != null) {
         precioOriginal = p.precioVenta.toDouble();
         precioUnitario = oferta.precioOferta;
-        ofertaId = oferta.id;
+        subtotal = precioUnitario;
+        ofertaId = oferta.id.toString();
         ofertaNombre = oferta.nombre;
       }
       final linea = DetalleVenta(
@@ -82,6 +83,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         nombreProducto: p.nombre,
         cantidad: 1,
         precioUnitario: precioUnitario,
+        subtotal: subtotal,
         subtotalLinea: precioUnitario,
         ofertaId: ofertaId,
         ofertaNombre: ofertaNombre,
@@ -107,7 +109,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             itemCount: resultados.length,
             itemBuilder: (ctx, i) {
               final p = resultados[i];
-              final oferta = _buscarOfertaAplicable(ofertasActivas, p.id ?? 0, 1);
+              final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
               final hayStock = (p.stock ?? 0) > 0;
               return ListTile(
                 title: Row(
@@ -160,13 +162,15 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                 onTap: hayStock
                     ? () {
                         double precioUnitario = p.precioVenta.toDouble();
+                        double subtotal = precioUnitario;
                         double? precioOriginal;
-                        int? ofertaId;
+                        String? ofertaId;
                         String? ofertaNombre;
                         if (oferta != null) {
                           precioOriginal = p.precioVenta.toDouble();
                           precioUnitario = oferta.precioOferta;
-                          ofertaId = oferta.id;
+                          subtotal = precioUnitario;
+                          ofertaId = oferta.id.toString();
                           ofertaNombre = oferta.nombre;
                         }
                         final linea = DetalleVenta(
@@ -174,6 +178,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                           nombreProducto: p.nombre,
                           cantidad: 1,
                           precioUnitario: precioUnitario,
+                          subtotal: subtotal,
                           subtotalLinea: precioUnitario,
                           ofertaId: ofertaId,
                           ofertaNombre: ofertaNombre,
@@ -347,24 +352,12 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     }
     setState(() => _cargando = true);
     try {
-      final venta = Venta(
-        numero: _ventaNumero,
-        clienteId: estado.clienteId ?? 0,
-        fecha: DateTime.now(),
-        detalles: estado.detalles,
-        subtotal: estado.subtotal,
-        itbis: estado.itbis,
-        total: estado.total,
-        tipoPago: estado.tipoPago,
-        esCredito: estado.esCredito,
-        usuarioId: estado.usuarioId ?? 1,
-      );
       final casoUso = ref.read(registrarVentaUseCaseProvider);
-      final ventaGuardada = await casoUso(venta);
+      final ventaGuardada = await casoUso.ejecutar(estado);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Venta registrada. Nº $_ventaNumero — ID: ${ventaGuardada.id}'),
+            content: Text('Venta registrada. Nº $_ventaNumero — ID: $ventaGuardada'),
             backgroundColor: Colors.green,
           ),
         );

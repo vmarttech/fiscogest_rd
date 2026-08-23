@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
@@ -29,19 +30,22 @@ class CarritoVenta extends ConsumerWidget {
                 child: Center(child: Text('Busque y agregue productos arriba')),
               )
             else
-              ...estadoLocal.detalles.map((detalle) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: ListTile(
-                  title: Text(detalle.nombreProducto),
-                  subtitle: Text('Cant: ${detalle.cantidad} • RD\$ ${detalle.subtotalLinea.toStringAsFixed(2)}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    onPressed: () => ref
-                        .read(registrarVentaProvider.notifier)
-                        .quitarProducto(estadoLocal.detalles.indexOf(detalle)),
+              ...estadoLocal.detalles.map((detalleRaw) {
+                final DetalleVenta detalle = detalleRaw as DetalleVenta;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: ListTile(
+                    title: Text(detalle.nombreProducto ?? ''),
+                    subtitle: Text('Cant: ${detalle.cantidad} • RD\$ ${(detalle.subtotalLinea ?? detalle.subtotal).toStringAsFixed(2)}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: () => ref
+                          .read(registrarVentaProvider.notifier)
+                          .quitarProducto(estadoLocal.detalles.indexOf(detalleRaw)),
+                    ),
                   ),
-                ),
-              )),
+                );
+              }),
           ],
         ),
       ),

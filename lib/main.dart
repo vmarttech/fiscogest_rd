@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:fiscogest_rd/core/navigation/app_router.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -13,16 +14,20 @@ import 'package:fiscogest_rd/features/inventario_fisico/data/repositories/invent
 import 'package:fiscogest_rd/features/ajustes_inventario/data/repositories/ajuste_inventario_repository_impl.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart' as ajuste_prov;
+import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
+import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
+import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 
 class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   _InventarioRepositoryAdapter(this._db);
+
   final AppDatabase _db;
 
   @override
   Future<void> actualizarStock(int productoId, double nuevoStock) async {
     await (_db.update(_db.productosTable)
       ..where((fila) => fila.id.equals(productoId)))
-      .write(ProductosTableCompanion(stock: Value(nuevoStock)));
+        .write(ProductosTableCompanion(stock: Value(nuevoStock)));
   }
 
   @override
@@ -30,18 +35,18 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
     if (producto.id == null) return;
     await (_db.update(_db.productosTable)
       ..where((t) => t.id.equals(producto.id!)))
-      .write(ProductosTableCompanion(
-        codigo: Value(producto.codigo),
-        nombre: Value(producto.nombre),
-        precioCompra: Value(producto.precioCompra),
-        precioVenta: Value(producto.precioVenta),
-        stock: Value(producto.stock),
-        stockMinimo: Value(producto.stockMinimo),
-        categoriaId: Value(producto.categoriaId),
-        marcaId: Value(producto.marcaId),
-        unidadMedidaId: Value(producto.unidadMedidaId),
-        activo: Value(producto.activo ? 1 : 0),
-      ));
+        .write(ProductosTableCompanion(
+          codigo: Value(producto.codigo),
+          nombre: Value(producto.nombre),
+          precioCompra: Value(producto.precioCompra),
+          precioVenta: Value(producto.precioVenta),
+          stock: Value(producto.stock),
+          stockMinimo: Value(producto.stockMinimo),
+          categoriaId: Value(producto.categoriaId),
+          marcaId: Value(producto.marcaId),
+          unidadMedidaId: Value(producto.unidadMedidaId),
+          activo: Value(producto.activo ? 1 : 0),
+        ));
   }
 
   @override
@@ -128,24 +133,24 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es_DO', null);
   final db = AppDatabase();
-
-  // ✅ INICIALIZAR REPOSITORIOS — FALTABA ESTA LÍNEA
   await RepositoryInjection.initialize(db);
-
   final InventarioRepositoryInterface inventarioRepo = _InventarioRepositoryAdapter(db);
   final InventarioFisicoRepositoryInterface inventarioFisicoRepo = InventarioFisicoRepositoryImpl(db);
   final AjusteInventarioRepository ajusteInventarioRepo = AjusteInventarioRepositoryImpl(db);
-
+  // ✅ INYECCIÓN DE DEPENDENCIAS DE VENTAS — MISMO PATRÓN
+  final ventasDao = VentasDao(db);
+  final IVentasRepository ventasRepo = VentasRepositoryImpl(ventasDao: ventasDao);
   final container = ProviderContainer(
     overrides: [
       databaseProvider.overrideWithValue(db),
       inventarioRepositoryProvider.overrideWithValue(inventarioRepo),
       inventarioFisicoRepositoryProvider.overrideWithValue(inventarioFisicoRepo),
       ajuste_prov.ajusteInventarioRepositoryProvider.overrideWithValue(ajusteInventarioRepo),
+      ventasRepositoryProvider.overrideWithValue(ventasRepo),
     ],
   );
-
   runApp(
     UncontrolledProviderScope(
       container: container,

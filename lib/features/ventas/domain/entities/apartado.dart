@@ -1,4 +1,4 @@
-import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 
 class Apartado {
   const Apartado({
@@ -26,4 +26,21 @@ class Apartado {
   final DateTime? fechaLimitePago;
   final String estado;
   final DateTime? createdAt;
+
+  dynamic operator [](String clave) {
+    return switch (clave) {
+      'id' => id,
+      'numero' => numero,
+      'clienteId' => clienteId,
+      'productos' => productos,
+      'montoTotal' => montoTotal,
+      'montoAbonado' => montoAbonado,
+      'saldoPendiente' => saldoPendiente,
+      'fechaApartado' => fechaApartado,
+      'fechaLimitePago' => fechaLimitePago,
+      'estado' => estado,
+      'createdAt' => createdAt,
+      _ => null,
+    };
+  }
 }

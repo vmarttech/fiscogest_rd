@@ -1,9 +1,9 @@
 class Venta {
-
   const Venta({
     this.id,
     required this.numero,
     required this.clienteId,
+    this.nombreCliente,
     required this.fecha,
     required this.detalles,
     required this.subtotal,
@@ -15,13 +15,14 @@ class Venta {
     this.apartadoOrigenId,
     this.usuarioId,
     this.createdAt,
-    this.updatedAt,
   });
+
   final int? id;
   final String numero;
-  final int? clienteId;
+  final int clienteId;
+  final String? nombreCliente;
   final DateTime fecha;
-  final List<DetalleVenta> detalles;
+  final List<dynamic> detalles;
   final double subtotal;
   final double itbis;
   final double total;
@@ -31,33 +32,4 @@ class Venta {
   final int? apartadoOrigenId;
   final int? usuarioId;
   final DateTime? createdAt;
-  final DateTime? updatedAt;
-}
-
-class DetalleVenta {
-
-  const DetalleVenta({
-    required this.productoId,
-    required this.nombreProducto,
-    required this.cantidad,
-    required this.precioUnitario,
-    required this.subtotalLinea,
-    this.descuentoPorcentaje,
-    this.montoDescuento,
-    this.tasaImpuesto = 18.0,
-    this.ofertaId,
-    this.ofertaNombre,
-    this.precioOriginal,
-  });
-  final int productoId;
-  final String nombreProducto;
-  final double cantidad;
-  final double precioUnitario;
-  final double subtotalLinea;
-  final double? descuentoPorcentaje;
-  final double? montoDescuento;
-  final double tasaImpuesto;
-  final int? ofertaId;
-  final String? ofertaNombre;
-  final double? precioOriginal;
 }

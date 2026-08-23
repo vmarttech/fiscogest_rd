@@ -20,29 +20,6 @@ class HistorialCotizaciones extends ConsumerWidget {
     return valor.toString();
   }
 
-  String _valorComoString(Map<String, dynamic> mapa, String clave, [String defecto = '']) {
-    final dynamic v = mapa[clave];
-    return v != null ? v.toString() : defecto;
-  }
-
-  double _valorComoDouble(Map<String, dynamic> mapa, String clave) {
-    final dynamic v = mapa[clave];
-    if (v == null) return 0.0;
-    if (v is double) return v;
-    if (v is int) return v.toDouble();
-    if (v is String) return double.tryParse(v) ?? 0.0;
-    return 0.0;
-  }
-
-  bool _valorComoBooleano(Map<String, dynamic> mapa, String clave, [bool defecto = false]) {
-    final dynamic v = mapa[clave];
-    if (v == null) return defecto;
-    if (v is bool) return v;
-    if (v is int) return v == 1;
-    if (v is String) return v == '1' || v.toLowerCase() == 'true';
-    return defecto;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cotizacionesAsync = ref.watch(listaCotizacionesProvider);
@@ -69,7 +46,8 @@ class HistorialCotizaciones extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text('Lista de cotizaciones emitidas y su estado', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+          Text('Lista de cotizaciones emitidas y su estado',
+              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.m),
           Expanded(
             child: cotizacionesAsync.when(
@@ -80,11 +58,13 @@ class HistorialCotizaciones extends ConsumerWidget {
                   children: [
                     const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                     const SizedBox(height: AppSpacing.m),
-                    Text('Error al cargar cotizaciones: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error), textAlign: TextAlign.center),
+                    Text('Error al cargar cotizaciones: $e',
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                        textAlign: TextAlign.center),
                   ],
                 ),
               ),
-              data: (List<Map<String, dynamic>> cotizaciones) {
+              data: (List<CotizacionState> cotizaciones) {
                 if (cotizaciones.isEmpty) {
                   return Center(
                     child: Column(
@@ -92,9 +72,11 @@ class HistorialCotizaciones extends ConsumerWidget {
                       children: [
                         const Icon(Icons.description_outlined, size: 64, color: Color(0x409E9E9E)),
                         const SizedBox(height: AppSpacing.m),
-                        Text('No hay cotizaciones registradas', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
+                        Text('No hay cotizaciones registradas',
+                            style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
                         const SizedBox(height: AppSpacing.xs),
-                        Text('Las cotizaciones que registres aparecerán aquí', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                        Text('Las cotizaciones que registres aparecerán aquí',
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
                       ],
                     ),
                   );
@@ -103,13 +85,13 @@ class HistorialCotizaciones extends ConsumerWidget {
                   itemCount: cotizaciones.length,
                   separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
                   itemBuilder: (_, int i) {
-                    final Map<String, dynamic> c = cotizaciones[i];
-                    final String numero = _valorComoString(c, 'numero', 'S/N');
-                    final String fechaEmision = _formatearFecha(c['fechaEmision'] ?? c['fecha_emision']);
-                    final String fechaVencimiento = _formatearFecha(c['fechaVigencia'] ?? c['fecha_vigencia']);
-                    final double total = _valorComoDouble(c, 'montoTotal') + _valorComoDouble(c, 'monto_total');
-                    final bool convertida = _valorComoBooleano(c, 'convertida_a_venta', false) || _valorComoBooleano(c, 'convertidaAVenta', false);
-                    final int? cotizacionId = c['id'] as int?;
+                    final CotizacionState c = cotizaciones[i];
+                    final String numero = c.numero;
+                    final String fechaEmision = _formatearFecha(c.fecha);
+                    final String fechaVencimiento = _formatearFecha(c.vencimiento);
+                    final double total = c.montoTotal;
+                    final bool convertida = false;
+                    final int? cotizacionId = null;
                     return _TarjetaCotizacion(
                       numero: numero,
                       fechaEmision: fechaEmision,
@@ -154,8 +136,12 @@ class _TarjetaCotizacion extends ConsumerWidget {
         title: const Text('Convertir a Venta'),
         content: Text('¿Convertir la Cotización N° $numero en una Venta?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Convertir', style: TextStyle(fontWeight: FontWeight.bold))),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Convertir', style: TextStyle(fontWeight: FontWeight.bold))),
         ],
       ),
     );
@@ -191,12 +177,15 @@ class _TarjetaCotizacion extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Text('Cotización N° $numero', style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600)),
+                    Text('Cotización N° $numero',
+                        style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600)),
                     const SizedBox(width: AppSpacing.s),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
                       decoration: BoxDecoration(
-                        color: convertida ? Colors.green.withValues(alpha: 0.1) : AppColors.primary.withValues(alpha: 0.1),
+                        color: convertida
+                            ? Colors.green.withValues(alpha: 0.1)
+                            : AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -209,15 +198,18 @@ class _TarjetaCotizacion extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                Text('Emitida: $fechaEmision', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-                Text('Vence: $fechaVencimiento', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                Text('Emitida: $fechaEmision',
+                    style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                Text('Vence: $fechaVencimiento',
+                    style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('RD\$ ${total.toStringAsFixed(2)}', style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+              Text('RD\$ ${total.toStringAsFixed(2)}',
+                  style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
               const SizedBox(height: AppSpacing.xs),
               if (!convertida && cotizacionId != null)
                 AppButton(
@@ -228,7 +220,8 @@ class _TarjetaCotizacion extends ConsumerWidget {
                 TextButton.icon(
                   onPressed: null,
                   icon: const Icon(Icons.check_circle, size: 16, color: Colors.green),
-                  label: Text('Venta generada', style: AppTypography.labelSmall.copyWith(color: Colors.green.shade700)),
+                  label: Text('Venta generada',
+                      style: AppTypography.labelSmall.copyWith(color: Colors.green.shade700)),
                 ),
             ],
           ),

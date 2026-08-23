@@ -9,10 +9,8 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/barra_navegaci
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inventario.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_detalle.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_ventas.dart';
 
-/// CONTENEDOR ÚNICO DEL MÓDULO VENTAS — FASE 4 COMPLETA
-/// ✅ Flujo: Inicio → Inventario → Detalle
-/// ✅ Imports estrictamente necesarios
 class VentasContenedorPage extends ConsumerStatefulWidget {
   const VentasContenedorPage({
     super.key,
@@ -20,7 +18,6 @@ class VentasContenedorPage extends ConsumerStatefulWidget {
   });
 
   static const String nombreRuta = 'ventas-contenedor';
-
   final ModoOperacion modoInicial;
 
   @override
@@ -44,7 +41,6 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final vistaActual = ref.watch(
       ventasNavegacionProvider.select((estado) => estado.vistaActual),
     );
-
     final modoOperacion = ref.watch(
       ventasNavegacionProvider.select((estado) => estado.modoOperacion),
     );
@@ -60,12 +56,26 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
         title: Text(tituloAppBar),
         actions: [
           IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Historial',
+            color: vistaActual == VistaActual.historial
+                ? AppColors.primary
+                : AppColors.textSecondary,
+            onPressed: () {
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.historial);
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
             tooltip: 'Limpiar operación',
             color: AppColors.textSecondary,
             onPressed: () {
               ref.read(registrarVentaProvider.notifier).vaciarVenta();
-              ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .volverAlInicio();
             },
           ),
           IconButton(
@@ -89,6 +99,7 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
                 VistaInicioVacia(),
                 VistaInventario(),
                 VistaDetalle(),
+                HistorialVentas(),
               ],
             ),
           ),

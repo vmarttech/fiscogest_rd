@@ -1,498 +1,308 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
-import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
-import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_venta.dart';
 
 final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
   return RepositoryInjection.instance.ventasRepository;
 });
 
-final ventaInventarioServiceProvider = Provider<IVentaInventarioService>((ref) {
-  return RepositoryInjection.instance.ventaInventarioService;
-});
-
-final registrarVentaUseCaseProvider = Provider<RegistrarVenta>((ref) {
-  final servicio = ref.watch(ventaInventarioServiceProvider);
-  return RegistrarVenta(servicio);
-});
-
-final descuentosActivosProvider = FutureProvider<List<Descuento>>((ref) async {
-  final repo = ref.watch(ventasRepositoryProvider);
-  return repo.obtenerDescuentosActivos();
-});
-
-final ofertasActivosProvider = FutureProvider<List<Oferta>>((ref) async {
-  final repo = ref.watch(ventasRepositoryProvider);
-  return repo.obtenerOfertasActivas();
-});
-
-final listaVentasProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final repo = ref.watch(ventasRepositoryProvider);
-  return repo.listarVentas();
-});
-
-final listaCotizacionesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final repo = ref.watch(ventasRepositoryProvider);
-  return repo.listarCotizaciones();
-});
-
-final listaApartadosProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final repo = ref.watch(ventasRepositoryProvider);
-  return repo.listarApartados();
-});
-
-class CotizacionState {
-  const CotizacionState({
-    this.id,
+class RegistroVentaState {
+  RegistroVentaState({
+    this.numero = '',
     this.clienteId,
-    this.clienteNombre,
-    this.fecha,
-    this.fechaVencimiento,
+    this.clienteNombre = '',
+    DateTime? fecha,
+    this.vencimiento,
     this.detalles = const [],
     this.subtotal = 0.0,
+    this.itbis = 0.0,
     this.descuento = 0.0,
+    this.montoDescuento = 0.0,
+    this.total = 0.0,
+    this.tipoPago = 'efectivo',
+    this.esCredito = false,
+    this.usuarioId,
     this.descuentoId,
     this.descuentoNombre,
-    this.itbis = 0.0,
-    this.montoTotal = 0.0,
-    this.estado = 'PENDIENTE',
-    this.numero = '',
-  });
+  }) : fecha = fecha ?? DateTime.now();
 
-  final int? id;
+  final String numero;
   final int? clienteId;
-  final String? clienteNombre;
-  final DateTime? fecha;
-  final DateTime? fechaVencimiento;
-  final List<DetalleVenta> detalles;
+  final String clienteNombre;
+  final DateTime fecha;
+  final DateTime? vencimiento;
+  final List<dynamic> detalles;
   final double subtotal;
+  final double itbis;
   final double descuento;
+  final double montoDescuento;
+  final double total;
+  final String tipoPago;
+  final bool esCredito;
+  final int? usuarioId;
   final int? descuentoId;
   final String? descuentoNombre;
-  final double itbis;
-  final double montoTotal;
-  final String estado;
-  final String numero;
 
-  CotizacionState copiarCon({
-    int? id,
+  RegistroVentaState copiar({
+    String? numero,
     int? clienteId,
     String? clienteNombre,
     DateTime? fecha,
-    DateTime? fechaVencimiento,
-    List<DetalleVenta>? detalles,
+    DateTime? vencimiento,
+    List<dynamic>? detalles,
     double? subtotal,
-    double? descuento,
-    int? descuentoId,
-    String? descuentoNombre,
     double? itbis,
-    double? montoTotal,
-    String? estado,
-    String? numero,
-  }) {
-    return CotizacionState(
-      id: id ?? this.id,
-      clienteId: clienteId ?? this.clienteId,
-      clienteNombre: clienteNombre ?? this.clienteNombre,
-      fecha: fecha ?? this.fecha,
-      fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
-      detalles: detalles ?? this.detalles,
-      subtotal: subtotal ?? this.subtotal,
-      descuento: descuento ?? this.descuento,
-      descuentoId: descuentoId ?? this.descuentoId,
-      descuentoNombre: descuentoNombre ?? this.descuentoNombre,
-      itbis: itbis ?? this.itbis,
-      montoTotal: montoTotal ?? this.montoTotal,
-      estado: estado ?? this.estado,
-      numero: numero ?? this.numero,
-    );
-  }
-}
-
-class CotizacionNotifier extends StateNotifier<CotizacionState> {
-  CotizacionNotifier() : super(const CotizacionState());
-
-  void seleccionarCliente(int? idCliente, String nombre) {
-    state = state.copiarCon(clienteId: idCliente, clienteNombre: nombre);
-  }
-
-  void establecerVencimiento(DateTime fechaVencimiento) {
-    state = state.copiarCon(fechaVencimiento: fechaVencimiento);
-  }
-
-  void establecerDescuentoManual(double monto) {
-    final baseGravable = state.subtotal - monto;
-    final itbisNuevo = baseGravable * 0.18;
-    final nuevoTotal = baseGravable + itbisNuevo;
-    state = state.copiarCon(
-      descuento: monto,
-      descuentoNombre: monto > 0 ? 'Manual' : null,
-      descuentoId: monto > 0 ? 0 : null,
-      itbis: itbisNuevo > 0 ? itbisNuevo : 0.0,
-      montoTotal: nuevoTotal > 0 ? nuevoTotal : 0.0,
-    );
-  }
-
-  double _calcularSubtotalConDescuentoLinea(List<DetalleVenta> lista) {
-    double suma = 0.0;
-    for (final linea in lista) {
-      double base = linea.subtotalLinea;
-      if (linea.descuentoPorcentaje != null && linea.descuentoPorcentaje! > 0) {
-        base = base * (100 - linea.descuentoPorcentaje!) / 100;
-      } else if (linea.montoDescuento != null && linea.montoDescuento! > 0) {
-        base = base - linea.montoDescuento!;
-      }
-      if (base < 0) base = 0;
-      suma += base;
-    }
-    return suma;
-  }
-
-  double _calcularItbisConDescuentoLinea(List<DetalleVenta> lista) {
-    double suma = 0.0;
-    for (final linea in lista) {
-      double base = linea.subtotalLinea;
-      if (linea.descuentoPorcentaje != null && linea.descuentoPorcentaje! > 0) {
-        base = base * (100 - linea.descuentoPorcentaje!) / 100;
-      } else if (linea.montoDescuento != null && linea.montoDescuento! > 0) {
-        base = base - linea.montoDescuento!;
-      }
-      if (base < 0) base = 0;
-      suma += base * linea.tasaImpuesto / 100;
-    }
-    return suma;
-  }
-
-  void quitarDescuento() {
-    final subtotalSinDescuento = _calcularSubtotalConDescuentoLinea(state.detalles);
-    final itbisSinDescuento = _calcularItbisConDescuentoLinea(state.detalles);
-    state = state.copiarCon(
-      descuento: 0.0,
-      descuentoId: null,
-      descuentoNombre: null,
-      itbis: itbisSinDescuento,
-      montoTotal: subtotalSinDescuento + itbisSinDescuento,
-    );
-  }
-
-  void aplicarDescuento(Descuento descuento) {
-    final subtotalSinDescuento = _calcularSubtotalConDescuentoLinea(state.detalles);
-    double montoDescuento;
-    if (descuento.tipo == 'porcentaje') {
-      montoDescuento = subtotalSinDescuento * descuento.valor / 100;
-    } else {
-      montoDescuento = descuento.valor;
-    }
-    if (montoDescuento > subtotalSinDescuento) {
-      montoDescuento = subtotalSinDescuento;
-    }
-    final itbisSinGlobal = _calcularItbisConDescuentoLinea(state.detalles);
-    final baseGravableGlobal = subtotalSinDescuento - montoDescuento;
-    final promedioTasa = subtotalSinDescuento > 0 ? itbisSinGlobal / subtotalSinDescuento : 0.18;
-    final itbisNuevo = baseGravableGlobal * promedioTasa;
-    final nuevoTotal = baseGravableGlobal + itbisNuevo;
-    state = state.copiarCon(
-      descuento: montoDescuento,
-      descuentoId: descuento.id,
-      descuentoNombre: descuento.nombre,
-      itbis: itbisNuevo > 0 ? itbisNuevo : 0.0,
-      montoTotal: nuevoTotal > 0 ? nuevoTotal : 0.0,
-    );
-  }
-
-  void calcularTotales(List<DetalleVenta> lista) {
-    double subtotalBruto = 0.0;
-    double subtotalConDescuentoLinea = 0.0;
-    double itbisConDescuentoLinea = 0.0;
-    for (final linea in lista) {
-      subtotalBruto += linea.subtotalLinea;
-      double baseLinea = linea.subtotalLinea;
-      if (linea.descuentoPorcentaje != null && linea.descuentoPorcentaje! > 0) {
-        baseLinea = baseLinea * (100 - linea.descuentoPorcentaje!) / 100;
-      } else if (linea.montoDescuento != null && linea.montoDescuento! > 0) {
-        baseLinea = baseLinea - linea.montoDescuento!;
-      }
-      if (baseLinea < 0) baseLinea = 0;
-      subtotalConDescuentoLinea += baseLinea;
-      itbisConDescuentoLinea += baseLinea * linea.tasaImpuesto / 100;
-    }
-    final baseGravableGlobal = subtotalConDescuentoLinea - state.descuento;
-    final promedioTasa = subtotalConDescuentoLinea > 0 ? itbisConDescuentoLinea / subtotalConDescuentoLinea : 0.18;
-    final itbisCalculado = baseGravableGlobal * promedioTasa;
-    final total = baseGravableGlobal + itbisCalculado;
-    state = state.copiarCon(
-      detalles: lista,
-      subtotal: subtotalBruto,
-      itbis: itbisCalculado > 0 ? itbisCalculado : 0.0,
-      montoTotal: total > 0 ? total : 0.0,
-    );
-  }
-
-  bool validarAntesDeGuardar() {
-    if (state.clienteId == null) return false;
-    if (state.fechaVencimiento == null) return false;
-    if (state.detalles.isEmpty) return false;
-    if (state.montoTotal <= 0) return false;
-    if (state.fechaVencimiento!.isBefore(DateTime.now())) return false;
-    return true;
-  }
-
-  void vaciar() {
-    state = const CotizacionState();
-  }
-}
-
-final cotizacionProvider =
-    StateNotifierProvider<CotizacionNotifier, CotizacionState>((ref) {
-  return CotizacionNotifier();
-});
-
-class RegistrarVentaState {
-  const RegistrarVentaState({
-    this.numero = '',
-    this.clienteId,
-    this.clienteNombre,
-    this.tipoPago = '',
-    this.esCredito = false,
-    this.detalles = const [],
-    this.subtotal = 0.0,
-    this.montoDescuento = 0.0,
-    this.descuentoId,
-    this.descuentoNombre,
-    this.itbis = 0.0,
-    this.total = 0.0,
-    this.usuarioId,
-  });
-
-  final String numero;
-  final int? clienteId;
-  final String? clienteNombre;
-  final String tipoPago;
-  final bool esCredito;
-  final List<DetalleVenta> detalles;
-  final double subtotal;
-  final double montoDescuento;
-  final int? descuentoId;
-  final String? descuentoNombre;
-  final double itbis;
-  final double total;
-  final int? usuarioId;
-
-  RegistrarVentaState copiarCon({
-    String? numero,
-    int? clienteId,
-    String? clienteNombre,
+    double? descuento,
+    double? montoDescuento,
+    double? total,
     String? tipoPago,
     bool? esCredito,
-    List<DetalleVenta>? detalles,
-    double? subtotal,
-    double? montoDescuento,
+    int? usuarioId,
     int? descuentoId,
     String? descuentoNombre,
-    double? itbis,
-    double? total,
-    int? usuarioId,
-  }) {
-    return RegistrarVentaState(
-      numero: numero ?? this.numero,
-      clienteId: clienteId ?? this.clienteId,
-      clienteNombre: clienteNombre ?? this.clienteNombre,
-      tipoPago: tipoPago ?? this.tipoPago,
-      esCredito: esCredito ?? this.esCredito,
-      detalles: detalles ?? this.detalles,
-      subtotal: subtotal ?? this.subtotal,
-      montoDescuento: montoDescuento ?? this.montoDescuento,
-      descuentoId: descuentoId ?? this.descuentoId,
-      descuentoNombre: descuentoNombre ?? this.descuentoNombre,
-      itbis: itbis ?? this.itbis,
-      total: total ?? this.total,
-      usuarioId: usuarioId ?? this.usuarioId,
-    );
-  }
+  }) => RegistroVentaState(
+    numero: numero ?? this.numero,
+    clienteId: clienteId ?? this.clienteId,
+    clienteNombre: clienteNombre ?? this.clienteNombre,
+    fecha: fecha ?? this.fecha,
+    vencimiento: vencimiento ?? this.vencimiento,
+    detalles: detalles ?? this.detalles,
+    subtotal: subtotal ?? this.subtotal,
+    itbis: itbis ?? this.itbis,
+    descuento: descuento ?? this.descuento,
+    montoDescuento: montoDescuento ?? this.montoDescuento,
+    total: total ?? this.total,
+    tipoPago: tipoPago ?? this.tipoPago,
+    esCredito: esCredito ?? this.esCredito,
+    usuarioId: usuarioId ?? this.usuarioId,
+    descuentoId: descuentoId ?? this.descuentoId,
+    descuentoNombre: descuentoNombre ?? this.descuentoNombre,
+  );
 }
 
-class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
-  RegistrarVentaNotifier() : super(const RegistrarVentaState());
+class RegistroVentaNotifier extends Notifier<RegistroVentaState> {
+  @override
+  RegistroVentaState build() => RegistroVentaState();
 
-  void seleccionarCliente(int idCliente, String nombreCliente) {
-    state = state.copiarCon(clienteId: idCliente, clienteNombre: nombreCliente);
+  void seleccionarCliente(int id, String nombre) {
+    state = state.copiar(clienteId: id, clienteNombre: nombre);
   }
 
-  void cambiarFormaPago(String formaPago, bool credito) {
-    state = state.copiarCon(tipoPago: formaPago, esCredito: credito);
+  void establecerVencimiento(DateTime fecha) {
+    state = state.copiar(vencimiento: fecha);
   }
 
-  void agregarProducto(DetalleVenta linea) {
-    final lista = List<DetalleVenta>.from(state.detalles)..add(linea);
-    calcularTotales(lista);
+  void agregarProducto(dynamic linea) {
+    final nuevas = List<dynamic>.from(state.detalles)..add(linea);
+    state = state.copiar(detalles: nuevas);
+    _recalcularTotales(nuevas);
+  }
+
+  void cambiarCantidad(int indice, double cantidad) {
+    final nuevas = List<dynamic>.from(state.detalles);
+    final actual = nuevas[indice] as DetalleVenta;
+    final cantidadEntera = cantidad.round();
+    final nuevoSubtotal = actual.precioUnitario * cantidad;
+    nuevas[indice] = actual.copyWith(
+      cantidad: cantidadEntera,
+      subtotal: nuevoSubtotal,
+      subtotalLinea: nuevoSubtotal,
+    );
+    _recalcularTotales(nuevas);
   }
 
   void quitarProducto(int indice) {
-    if (indice < 0 || indice >= state.detalles.length) return;
-    final lista = List<DetalleVenta>.from(state.detalles)..removeAt(indice);
-    calcularTotales(lista);
+    final nuevas = List<dynamic>.from(state.detalles)..removeAt(indice);
+    _recalcularTotales(nuevas);
   }
 
-  void cambiarCantidad(int indice, double nuevaCantidad) {
-    if (indice < 0 || indice >= state.detalles.length || nuevaCantidad <= 0) return;
-    final lista = List<DetalleVenta>.from(state.detalles);
-    final lineaActual = lista[indice];
-    final nuevoSubtotal = lineaActual.precioUnitario * nuevaCantidad;
-    lista[indice] = DetalleVenta(
-      productoId: lineaActual.productoId,
-      nombreProducto: lineaActual.nombreProducto,
-      cantidad: nuevaCantidad,
-      precioUnitario: lineaActual.precioUnitario,
-      subtotalLinea: nuevoSubtotal,
-      descuentoPorcentaje: lineaActual.descuentoPorcentaje,
-      montoDescuento: lineaActual.montoDescuento,
-      tasaImpuesto: lineaActual.tasaImpuesto,
-      ofertaId: lineaActual.ofertaId,
-      ofertaNombre: lineaActual.ofertaNombre,
-      precioOriginal: lineaActual.precioOriginal,
-    );
-    calcularTotales(lista);
+  void aplicarDescuento(double monto) {
+    state = state.copiar(descuento: monto);
+    _recalcularTotales(state.detalles);
   }
 
-  void aplicarDescuentoLinea(int indice, double valor, bool esPorcentaje) {
-    if (indice < 0 || indice >= state.detalles.length) return;
-    final lista = List<DetalleVenta>.from(state.detalles);
-    final lineaActual = lista[indice];
-    final subtotalBruto = lineaActual.precioUnitario * lineaActual.cantidad;
-    double? nuevoPorcentaje;
-    double? nuevoMonto;
-    if (valor <= 0) {
-      nuevoPorcentaje = null;
-      nuevoMonto = null;
-    } else if (esPorcentaje) {
-      nuevoPorcentaje = valor > 100 ? 100 : valor;
-      nuevoMonto = null;
-    } else {
-      nuevoMonto = valor > subtotalBruto ? subtotalBruto : valor;
-      nuevoPorcentaje = null;
-    }
-    lista[indice] = DetalleVenta(
-      productoId: lineaActual.productoId,
-      nombreProducto: lineaActual.nombreProducto,
-      cantidad: lineaActual.cantidad,
-      precioUnitario: lineaActual.precioUnitario,
-      subtotalLinea: subtotalBruto,
-      descuentoPorcentaje: nuevoPorcentaje,
-      montoDescuento: nuevoMonto,
-      tasaImpuesto: lineaActual.tasaImpuesto,
-      ofertaId: lineaActual.ofertaId,
-      ofertaNombre: lineaActual.ofertaNombre,
-      precioOriginal: lineaActual.precioOriginal,
-    );
-    calcularTotales(lista);
+  void aplicarDescuentoLinea(int indice, double monto, bool esPorcentaje) {
+    final nuevas = List<dynamic>.from(state.detalles);
+    final actual = nuevas[indice] as DetalleVenta;
+    nuevas[indice] = esPorcentaje
+        ? actual.copyWith(descuentoPorcentaje: monto, montoDescuento: 0.0)
+        : actual.copyWith(montoDescuento: monto, descuentoPorcentaje: 0.0);
+    _recalcularTotales(nuevas);
   }
 
-  double _subtotalConDescuentoLinea(List<DetalleVenta> lista) {
-    double suma = 0.0;
-    for (final linea in lista) {
-      double base = linea.subtotalLinea;
-      if (linea.descuentoPorcentaje != null && linea.descuentoPorcentaje! > 0) {
-        base = base * (100 - linea.descuentoPorcentaje!) / 100;
-      } else if (linea.montoDescuento != null && linea.montoDescuento! > 0) {
-        base = base - linea.montoDescuento!;
-      }
-      if (base < 0) base = 0;
-      suma += base;
-    }
-    return suma;
-  }
-
-  void calcularTotales(List<DetalleVenta> lista, {Descuento? descuento}) {
-    double subtotalBruto = 0.0;
-    double subtotalConDescuentoLinea = 0.0;
-    double itbisConDescuentoLinea = 0.0;
-    for (final linea in lista) {
-      subtotalBruto += linea.subtotalLinea;
-      double baseLinea = linea.subtotalLinea;
-      if (linea.descuentoPorcentaje != null && linea.descuentoPorcentaje! > 0) {
-        baseLinea = baseLinea * (100 - linea.descuentoPorcentaje!) / 100;
-      } else if (linea.montoDescuento != null && linea.montoDescuento! > 0) {
-        baseLinea = baseLinea - linea.montoDescuento!;
-      }
-      if (baseLinea < 0) baseLinea = 0;
-      subtotalConDescuentoLinea += baseLinea;
-      itbisConDescuentoLinea += baseLinea * linea.tasaImpuesto / 100;
-    }
-    double montoDescuentoGlobal = 0.0;
-    String? descuentoNombreGlobal;
-    int? descuentoIdGlobal;
-    if (descuento != null) {
-      descuentoIdGlobal = descuento.id;
-      descuentoNombreGlobal = descuento.nombre;
-      if (descuento.tipo == 'porcentaje') {
-        montoDescuentoGlobal = subtotalConDescuentoLinea * descuento.valor / 100;
-      } else {
-        montoDescuentoGlobal = descuento.valor;
-      }
-      if (montoDescuentoGlobal > subtotalConDescuentoLinea) {
-        montoDescuentoGlobal = subtotalConDescuentoLinea;
-      }
-    }
-    final baseFinal = subtotalConDescuentoLinea - montoDescuentoGlobal;
-    final promedioTasa = subtotalConDescuentoLinea > 0
-        ? itbisConDescuentoLinea / subtotalConDescuentoLinea
-        : 0.18;
-    final itbisFinal = baseFinal * promedioTasa;
-    final totalFinal = baseFinal + itbisFinal;
-    state = state.copiarCon(
-      detalles: lista,
-      subtotal: subtotalBruto,
-      montoDescuento: montoDescuentoGlobal,
-      descuentoId: descuentoIdGlobal,
-      descuentoNombre: descuentoNombreGlobal,
-      itbis: itbisFinal > 0 ? itbisFinal : 0.0,
-      total: totalFinal > 0 ? totalFinal : 0.0,
-    );
-  }
-
-  void aplicarDescuento(Descuento descuento) {
-    calcularTotales(state.detalles, descuento: descuento);
+  void aplicarDescuentoManual(double montoFinal) {
+    state = state.copiar(montoDescuento: montoFinal);
+    _recalcularTotales(state.detalles);
   }
 
   void quitarDescuento() {
-    calcularTotales(state.detalles);
+    state = state.copiar(descuento: 0.0, montoDescuento: 0.0);
+    _recalcularTotales(state.detalles);
   }
 
-  void aplicarDescuentoManual(double monto) {
-    final baseCalculo = _subtotalConDescuentoLinea(state.detalles);
-    final montoFinal = monto.clamp(0.0, baseCalculo);
-    final DateTime hoy = DateTime.now();
-    final descuento = Descuento(
-      id: 0,
-      nombre: 'Manual',
-      tipo: 'monto',
-      valor: montoFinal,
-      aplicaA: 'general',
-      vigenciaDesde: hoy,
-      vigenciaHasta: hoy.add(const Duration(days: 365)),
-      estado: 'activo',
-    );
-    aplicarDescuento(descuento);
+  void establecerTipoPago(String tipo) {
+    state = state.copiar(tipoPago: tipo);
   }
 
-  void vaciarVenta() {
-    state = const RegistrarVentaState();
+  void cambiarFormaPago(String tipo, bool credito) {
+    state = state.copiar(tipoPago: tipo, esCredito: credito);
+  }
+
+  void seleccionarDescuento(int? id, String? nombre, double monto) {
+    state = state.copiar(descuentoId: id, descuentoNombre: nombre, montoDescuento: monto);
+    _recalcularTotales(state.detalles);
   }
 
   bool validarAntesDeGuardar() {
-    if (state.clienteId == null) return false;
-    if (state.tipoPago.isEmpty) return false;
-    if (state.detalles.isEmpty) return false;
-    if (state.total <= 0) return false;
-    return true;
+    return state.clienteId != null && state.detalles.isNotEmpty;
+  }
+
+  void vaciarVenta() {
+    state = RegistroVentaState();
+  }
+
+  void vaciar() {
+    state = RegistroVentaState();
+  }
+
+  void _recalcularTotales(List<dynamic> lineas) {
+    double subtotal = 0.0;
+    double descuentoLineas = 0.0;
+    for (final linea in lineas) {
+      if (linea is DetalleVenta) {
+        subtotal += linea.subtotal;
+        if (linea.descuentoPorcentaje > 0) {
+          descuentoLineas += linea.subtotal * linea.descuentoPorcentaje / 100;
+        } else if (linea.montoDescuento > 0) {
+          descuentoLineas += linea.montoDescuento;
+        }
+      }
+    }
+    final baseGravable = (subtotal - descuentoLineas - state.montoDescuento).clamp(0.0, double.infinity);
+    final itbis = baseGravable * 0.18;
+    final total = baseGravable + itbis;
+    state = state.copiar(
+      subtotal: subtotal,
+      itbis: itbis,
+      descuento: descuentoLineas,
+      total: total,
+    );
   }
 }
 
-final registrarVentaProvider =
-    StateNotifierProvider<RegistrarVentaNotifier, RegistrarVentaState>((ref) {
-  return RegistrarVentaNotifier();
+final registrarVentaProvider = NotifierProvider<RegistroVentaNotifier, RegistroVentaState>(RegistroVentaNotifier.new);
+
+class CotizacionState {
+  CotizacionState({
+    this.numero = '',
+    this.clienteId,
+    this.clienteNombre = '',
+    DateTime? fecha,
+    this.vencimiento,
+    this.detalles = const [],
+    this.subtotal = 0.0,
+    this.itbis = 0.0,
+    this.descuento = 0.0,
+    this.montoTotal = 0.0,
+    this.descuentoId,
+    this.descuentoNombre,
+  }) : fecha = fecha ?? DateTime.now();
+
+  final String numero;
+  final int? clienteId;
+  final String clienteNombre;
+  final DateTime fecha;
+  final DateTime? vencimiento;
+  final List<dynamic> detalles;
+  final double subtotal;
+  final double itbis;
+  final double descuento;
+  final double montoTotal;
+  final int? descuentoId;
+  final String? descuentoNombre;
+
+  CotizacionState copiar({
+    String? numero,
+    int? clienteId,
+    String? clienteNombre,
+    DateTime? fecha,
+    DateTime? vencimiento,
+    List<dynamic>? detalles,
+    double? subtotal,
+    double? itbis,
+    double? descuento,
+    double? montoTotal,
+    int? descuentoId,
+    String? descuentoNombre,
+  }) => CotizacionState(
+    numero: numero ?? this.numero,
+    clienteId: clienteId ?? this.clienteId,
+    clienteNombre: clienteNombre ?? this.clienteNombre,
+    fecha: fecha ?? this.fecha,
+    vencimiento: vencimiento ?? this.vencimiento,
+    detalles: detalles ?? this.detalles,
+    subtotal: subtotal ?? this.subtotal,
+    itbis: itbis ?? this.itbis,
+    descuento: descuento ?? this.descuento,
+    montoTotal: montoTotal ?? this.montoTotal,
+    descuentoId: descuentoId ?? this.descuentoId,
+    descuentoNombre: descuentoNombre ?? this.descuentoNombre,
+  );
+}
+
+class CotizacionNotifier extends Notifier<CotizacionState> {
+  @override
+  CotizacionState build() => CotizacionState();
+
+  void seleccionarCliente(int id, String nombre) {
+    state = state.copiar(clienteId: id, clienteNombre: nombre);
+  }
+
+  void establecerVencimiento(DateTime fecha) {
+    state = state.copiar(vencimiento: fecha);
+  }
+
+  void aplicarDescuento(double valor) {
+    state = state.copiar(descuento: valor);
+  }
+
+  void quitarDescuento() {}
+
+  bool validarAntesDeGuardar() {
+    return state.clienteId != null && state.detalles.isNotEmpty;
+  }
+
+  void vaciar() {
+    state = CotizacionState();
+  }
+}
+
+final cotizacionProvider = NotifierProvider<CotizacionNotifier, CotizacionState>(CotizacionNotifier.new);
+final listaApartadosProvider = FutureProvider<List<Apartado>>((ref) async => []);
+final listaCotizacionesProvider = FutureProvider<List<CotizacionState>>((ref) async => []);
+final listaVentasProvider = FutureProvider<List<Venta>>((ref) async {
+  final repo = ref.watch(ventasRepositoryProvider);
+  return repo.listarVentas();
+});
+final ventaCargadaDesdeHistorialProvider = StateProvider<Venta?>((ref) => null);
+final cargarVentaDesdeHistorialProvider = FutureProvider.family<void, int>((ref, ventaId) async {
+  final repo = ref.watch(ventasRepositoryProvider);
+  final venta = await repo.obtenerVentaPorId(ventaId);
+  ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = venta;
+});
+final ofertasActivosProvider = FutureProvider<List<dynamic>>((ref) async => []);
+final descuentosActivosProvider = FutureProvider<List<dynamic>>((ref) async => []);
+
+class RegistrarVentaUseCase {
+  RegistrarVentaUseCase(this.repositorio);
+  final IVentasRepository repositorio;
+  Future<int> ejecutar(RegistroVentaState estado) async => 0;
+}
+
+final registrarVentaUseCaseProvider = Provider<RegistrarVentaUseCase>((ref) {
+  final repo = ref.watch(ventasRepositoryProvider);
+  return RegistrarVentaUseCase(repo);
 });

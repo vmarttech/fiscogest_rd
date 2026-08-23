@@ -1,24 +1,20 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/cotizacion.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/devolucion.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/pago.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
+import 'package:fiscogest_rd/features/comercial/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 
 abstract class IVentasRepository {
-  Future<List<Map<String, dynamic>>> listarVentas({
+  Future<List<Venta>> listarVentas({
     DateTime? desde,
     DateTime? hasta,
     int? clienteId,
     int? usuarioId,
   });
-
-  Future<List<Map<String, dynamic>>> listarCotizaciones();
-  Future<List<Map<String, dynamic>>> listarApartados();
-
+  Future<Venta?> obtenerVentaPorId(int ventaId);
   Future<Venta> registrarVenta(Venta venta);
-  Future<Cotizacion> registrarCotizacion(Cotizacion cotizacion);
+  Future<Venta> registrarCotizacion(Venta cotizacion);
   Future<Venta> convertirCotizacionAVenta(int cotizacionId);
   Future<Apartado> registrarApartado(Apartado apartado);
   Future<Devolucion> registrarDevolucion(Devolucion devolucion);
