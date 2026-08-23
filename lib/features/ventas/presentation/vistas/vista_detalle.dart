@@ -32,6 +32,14 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
   final Venta venta;
 
+  String _formatearFecha(DateTime fecha) {
+    return DateFormat.yMd().add_Hm().format(fecha);
+  }
+
+  String _formatearMonto(double valor) {
+    return NumberFormat.currency(symbol: 'RD\$ ').format(valor);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
@@ -52,12 +60,12 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                 child: Column(
                   children: [
                     Text(
-                      'Venta Nº ${venta.numero}',
+                      'Transacción Nº ${venta.numero}',
                       style: AppTypography.h4,
                       textAlign: TextAlign.center,
                     ),
                     Text(
-                      DateFormat.yMd().add_Hm().format(venta.fecha),
+                      _formatearFecha(venta.fecha),
                       style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                       textAlign: TextAlign.center,
                     ),
@@ -69,16 +77,114 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           ),
           const Divider(),
           const SizedBox(height: AppSpacing.m),
-          _FilaDetalle('Cliente', '${venta.clienteId}'),
+
+          Text('Datos del Cliente y Pago', style: AppTypography.labelLarge),
+          const SizedBox(height: AppSpacing.s),
+          _FilaDetalle('Nº Transacción', venta.numero),
+          _FilaDetalle('Cliente ID', '${venta.clienteId}'),
           if (venta.nombreCliente != null)
             _FilaDetalle('Nombre', venta.nombreCliente!),
-          _FilaDetalle('Fecha', DateFormat.yMd().add_Hm().format(venta.fecha)),
-          _FilaDetalle('Subtotal', NumberFormat.currency(symbol: 'RD\$ ').format(venta.subtotal)),
-          _FilaDetalle('ITBIS', NumberFormat.currency(symbol: 'RD\$ ').format(venta.itbis)),
-          _FilaDetalle('Total', NumberFormat.currency(symbol: 'RD\$ ').format(venta.total), esResaltado: true),
+          _FilaDetalle('Fecha y Hora', _formatearFecha(venta.fecha)),
           _FilaDetalle('Forma de Pago', venta.tipoPago),
           _FilaDetalle('A crédito', venta.esCredito ? 'Sí' : 'No'),
+          if (venta.usuarioId != null)
+            _FilaDetalle('Atendido por', 'Usuario ${venta.usuarioId}'),
+
           const SizedBox(height: AppSpacing.l),
+
+          Text('Detalle de Artículos', style: AppTypography.labelLarge),
+          const SizedBox(height: AppSpacing.s),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.grey300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  color: AppColors.grey100,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: const Row(
+                    children: [
+                      Expanded(flex: 4, child: Text('Descripción', style: TextStyle(fontWeight: FontWeight.bold))),
+                      Expanded(flex: 1, child: Text('Cant', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
+                      Expanded(flex: 2, child: Text('Precio', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
+                      Expanded(flex: 2, child: Text('Impuesto', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
+                      Expanded(flex: 2, child: Text('Subtotal', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
+                    ],
+                  ),
+                ),
+                ...venta.detalles.map((linea) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Row(
+                    children: [
+                      Expanded(flex: 4, child: Text(linea.nombreProducto as String, style: AppTypography.bodySmall)),
+                      Expanded(flex: 1, child: Text('${linea.cantidad}', textAlign: TextAlign.right, style: AppTypography.bodySmall)),
+                      Expanded(flex: 2, child: Text(_formatearMonto(linea.precioUnitario as double), textAlign: TextAlign.right, style: AppTypography.bodySmall)),
+                      Expanded(flex: 2, child: Text('${linea.tasaImpuesto as double}%', textAlign: TextAlign.right, style: AppTypography.bodySmall)),
+                      Expanded(flex: 2, child: Text(_formatearMonto(linea.subtotalLinea as double), textAlign: TextAlign.right, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500))),
+                    ],
+                  ),
+                )),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.m),
+
+          Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              width: 260,
+              child: Column(
+                children: [
+                  _FilaDetalle('Subtotal', _formatearMonto(venta.subtotal)),
+                  _FilaDetalle('ITBIS', _formatearMonto(venta.itbis)),
+                  const Divider(),
+                  _FilaDetalle('TOTAL', _formatearMonto(venta.total), esResaltado: true),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.l),
+
+          Text('Acciones', style: AppTypography.labelLarge),
+          const SizedBox(height: AppSpacing.s),
+          Wrap(
+            spacing: AppSpacing.s,
+            runSpacing: AppSpacing.s,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Transacción ${venta.numero} copiada como referencia. Vaya a Facturación → Nota de Crédito / Devolución.'),
+                      backgroundColor: AppColors.success,
+                      duration: const Duration(seconds: 5),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.receipt_long, size: 18),
+                label: const Text('Usar para Devolución / NC'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Número ${venta.numero} copiado al portapapeles'),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.copy, size: 18),
+                label: const Text('Copiar Nº Transacción'),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.l),
+
           ElevatedButton.icon(
             onPressed: () {
               ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = null;
@@ -113,6 +219,7 @@ class _FilaDetalle extends StatelessWidget {
             style: AppTypography.bodyMedium.copyWith(
               fontWeight: esResaltado ? FontWeight.bold : FontWeight.normal,
               color: esResaltado ? AppColors.primary : null,
+              fontSize: esResaltado ? 16 : null,
             ),
           ),
         ],

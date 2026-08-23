@@ -6,6 +6,8 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 
 class HistorialVentas extends ConsumerWidget {
   const HistorialVentas({super.key});
@@ -28,6 +30,7 @@ class HistorialVentas extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final listaVentas = ref.watch(listaVentasProvider);
+
     return listaVentas.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
@@ -52,6 +55,7 @@ class HistorialVentas extends ConsumerWidget {
             ),
           );
         }
+
         return ListView.separated(
           padding: AppSpacing.allM,
           itemCount: ventas.length,
@@ -64,6 +68,7 @@ class HistorialVentas extends ConsumerWidget {
               child: InkWell(
                 onTap: () {
                   ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = venta;
+                  ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.detalle);
                 },
                 child: Padding(
                   padding: AppSpacing.allM,
