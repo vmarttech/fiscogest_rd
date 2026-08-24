@@ -6,7 +6,6 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 
 class HistorialVentas extends ConsumerWidget {

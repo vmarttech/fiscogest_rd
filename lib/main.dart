@@ -14,7 +14,6 @@ import 'package:fiscogest_rd/features/inventario_fisico/data/repositories/invent
 import 'package:fiscogest_rd/features/ajustes_inventario/data/repositories/ajuste_inventario_repository_impl.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart' as ajuste_prov;
-import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 
@@ -140,8 +139,7 @@ void main() async {
   final InventarioFisicoRepositoryInterface inventarioFisicoRepo = InventarioFisicoRepositoryImpl(db);
   final AjusteInventarioRepository ajusteInventarioRepo = AjusteInventarioRepositoryImpl(db);
   // ✅ INYECCIÓN DE DEPENDENCIAS DE VENTAS — MISMO PATRÓN
-  final ventasDao = VentasDao(db);
-  final IVentasRepository ventasRepo = VentasRepositoryImpl(ventasDao: ventasDao);
+  final IVentasRepository ventasRepo = VentasRepositoryImpl();
   final container = ProviderContainer(
     overrides: [
       databaseProvider.overrideWithValue(db),

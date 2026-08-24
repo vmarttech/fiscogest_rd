@@ -6,7 +6,6 @@ import 'package:fiscogest_rd/features/apartados/data/repositories/apartado_repos
 import 'package:fiscogest_rd/features/cotizaciones/data/repositories/cotizacion_repository_impl.dart';
 import 'package:fiscogest_rd/features/devoluciones/data/repositories/devolucion_repository_impl.dart';
 import 'package:fiscogest_rd/features/caja/data/repositories/caja_repository_impl.dart';
-import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cotizaciones_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/apartados_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_dao.dart';
@@ -52,7 +51,6 @@ class RepositoryInjection {
   final IVentaInventarioService ventaInventarioService;
 
   static Future<RepositoryInjection> initialize(AppDatabase db) async {
-    final ventasDao = VentasDao(db);
     final cotizacionesDao = CotizacionesDao(db);
     final apartadosDao = ApartadosDao(db);
     final devolucionesDao = DevolucionesDao(db);
@@ -62,7 +60,7 @@ class RepositoryInjection {
     final kardexRepository = KardexRepositoryImpl(kardexDatasource);
     final inventarioService = InventarioServiceImpl(db);
 
-    final ventasRepository = VentasRepositoryImpl(ventasDao: ventasDao);
+    final ventasRepository = VentasRepositoryImpl();
 
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,

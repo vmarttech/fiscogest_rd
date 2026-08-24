@@ -7,7 +7,6 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 /// Vista de listado y selección de productos

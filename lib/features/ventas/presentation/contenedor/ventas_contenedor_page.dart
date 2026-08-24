@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/barra_navegacion_inferior.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inventario.dart';

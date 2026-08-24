@@ -103,10 +103,9 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
     final nuevoDescuento = base - montoFinal;
     final baseImponible = montoFinal / 1.18;
     final nuevoItbis = baseImponible * 0.18;
-    final nuevoMontoDescuento = nuevoDescuento;
     state = state.copyWith(
       descuento: nuevoDescuento,
-      montoDescuento: nuevoMontoDescuento,
+      montoDescuento: nuevoDescuento,
       itbis: nuevoItbis,
       total: montoFinal,
     );
@@ -148,14 +147,14 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
       final precio = (linea.precioUnitario as num? ?? 0.0).toDouble();
       final cantidad = (linea.cantidad as num? ?? 1).toDouble();
       final subtotalSinDescuento = precio * cantidad;
-      double descuentoLinea;
+      double montoDesc;
       if (esPorcentaje) {
-        descuentoLinea = subtotalSinDescuento * (valor / 100.0);
+        montoDesc = subtotalSinDescuento * (valor / 100.0);
       } else {
-        descuentoLinea = valor;
+        montoDesc = valor;
       }
-      linea.descuento = descuentoLinea;
-      linea.subtotal = subtotalSinDescuento - descuentoLinea;
+      linea.montoDescuento = montoDesc;
+      linea.subtotal = subtotalSinDescuento - montoDesc;
       nuevaLista[indice] = linea;
     }
     _recalcularTotales(nuevaLista);
@@ -180,7 +179,7 @@ class RegistrarVentaNotifier extends StateNotifier<RegistrarVentaState> {
     double sumaDescuentos = 0.0;
     for (var d in detalles) {
       final valor = (d.subtotal as num? ?? 0.0).toDouble();
-      final desc = (d.descuento as num? ?? 0.0).toDouble();
+      final desc = (d.montoDescuento as num? ?? 0.0).toDouble();
       subtotal += valor + desc;
       sumaDescuentos += desc;
     }

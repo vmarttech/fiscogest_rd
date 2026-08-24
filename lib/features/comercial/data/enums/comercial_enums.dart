@@ -6,6 +6,7 @@ enum DevolucionTipo { parcial, total }
 enum DevolucionEstado { registrada, procesada, rechazada }
 enum CobrarEstado { pendiente, parcial, pagado, vencido }
 enum PagarEstado { pendiente, parcial, pagado, vencido }
+enum EstadoCompra { borrador, confirmada, anulada }
 enum TipoGasto { compra, servicio, impuesto, nomina, otro }
 enum DescuentoTipo { porcentaje, monto }
 enum AplicaA { todo, categoria, producto, cliente }

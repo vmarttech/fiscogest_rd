@@ -31,6 +31,9 @@ import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/list
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart';
 import 'package:fiscogest_rd/features/transferencias/presentation/pages/registrar_transferencia_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/recepcion/registrar_recepcion_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/lista_compras_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 import 'package:fiscogest_rd/features/presentaciones/presentation/pages/presentaciones_page.dart';
 import 'package:fiscogest_rd/features/categorias/presentation/pages/categorias_page.dart';
 import 'package:fiscogest_rd/features/marcas/presentation/pages/marcas_page.dart';
@@ -52,9 +55,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(path: 'apartados', name: ApartadosPage.routeName, builder: (_, __) => const AppShell(child: ApartadosPage())),
           GoRoute(path: 'devoluciones', name: DevolucionesPage.routeName, builder: (_, __) => const AppShell(child: DevolucionesPage())),
           GoRoute(path: 'cobrar', name: CobrarPage.routeName, builder: (_, __) => const AppShell(child: CobrarPage())),
-          GoRoute(path: 'pagar', name: PagarPage.routeName, builder: (_, __) => const AppShell(child: AppShell(child: PagarPage()))),
+          GoRoute(path: 'pagar', name: PagarPage.routeName, builder: (_, __) => const AppShell(child: PagarPage())),
           GoRoute(path: 'descuentos', name: DescuentosPage.routeName, builder: (_, __) => const AppShell(child: DescuentosPage())),
           GoRoute(path: 'ofertas', name: OfertasPage.routeName, builder: (_, __) => const AppShell(child: OfertasPage())),
+        ],
+      ),
+      GoRoute(
+        path: '/compras',
+        name: ListaComprasPage.routeName,
+        builder: (_, __) => const AppShell(child: ListaComprasPage()),
+        routes: [
+          GoRoute(path: 'registrar', name: RegistrarCompraPage.routeName, builder: (_, __) => const AppShell(child: RegistrarCompraPage())),
+          GoRoute(
+            path: 'detalle/:compraId',
+            name: DetalleCompraPage.routeName,
+            builder: (context, state) {
+              final compraId = state.pathParameters['compraId'] ?? '';
+              return AppShell(child: DetalleCompraPage(compraId: compraId));
+            },
+          ),
         ],
       ),
       GoRoute(path: '/inventory', name: ProductosPage.routeName, builder: (_, __) => const AppShell(child: ProductosPage())),

@@ -15,8 +15,10 @@ class Venta {
     this.apartadoOrigenId,
     this.usuarioId,
     this.createdAt,
+    this.descuentoId,
+    this.descuentoNombre,
+    this.montoDescuento = 0.0,
   });
-
   final int? id;
   final String numero;
   final int clienteId;
@@ -32,4 +34,7 @@ class Venta {
   final int? apartadoOrigenId;
   final int? usuarioId;
   final DateTime? createdAt;
+  final int? descuentoId;
+  final String? descuentoNombre;
+  final double montoDescuento;
 }

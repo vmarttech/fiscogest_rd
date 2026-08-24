@@ -39,6 +39,10 @@ import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/kardex_comercial_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_table.dart';
+// NUEVAS: Tablas Compras - Etapa 4.1
+import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
+
 part 'app_database.g.dart';
 
 @DriftDatabase(tables: [
@@ -82,6 +86,9 @@ part 'app_database.g.dart';
   // NUEVAS: Fase 4 - Integración en cascada
   KardexComercialTable,
   CajaMovimientosTable,
+  // NUEVAS: Etapa 4.1 - COMPRAS
+  ComprasTable,
+  DetalleCompraTable,
 ])
 class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => _instance;
@@ -103,7 +110,7 @@ class AppDatabase extends _$AppDatabase {
   $ExistenciasTableTable get existenciasTable => super.existenciasTable;
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -141,6 +148,10 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(ofertasTable);
             await m.createTable(kardexComercialTable);
             await m.createTable(cajaMovimientosTable);
+          }
+          if (from < 11) {
+            await m.createTable(comprasTable);
+            await m.createTable(detalleCompraTable);
           }
         },
       );

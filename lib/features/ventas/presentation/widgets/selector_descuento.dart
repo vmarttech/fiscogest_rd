@@ -1,42 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/descuento.dart';
+import 'package:fiscogest_rd/features/comercial/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
-
 class SelectorDescuento extends ConsumerWidget {
   const SelectorDescuento({super.key, this.esParaCotizacion = false});
   final bool esParaCotizacion;
-
   String _formatearValor(Descuento descuento) {
-    if (descuento.tipo == 'porcentaje') {
+    if (descuento.esPorcentaje) {
       return '${descuento.valor.toStringAsFixed(0)}%';
-    } else if (descuento.tipo == 'monto') {
-      return 'RD\$ ${descuento.valor.toStringAsFixed(2)}';
     }
-    return descuento.valor.toString();
+    return 'RD\$ ${descuento.valor.toStringAsFixed(2)}';
   }
-
-  String _formatearAplicaA(Descuento descuento) {
-    switch (descuento.aplicaA) {
-      case 'todo':
-        return 'Aplica a toda la venta';
-      case 'categoria':
-        return 'Por categoría';
-      case 'producto':
-        return 'Por producto específico';
-      case 'cliente':
-        return 'Por cliente';
-      default:
-        return descuento.aplicaA;
+  String _formatearTipo(TipoDescuento tipo) {
+    switch (tipo) {
+      case TipoDescuento.porProducto:
+        return 'Por producto';
+      case TipoDescuento.porFactura:
+        return 'Por total de venta';
     }
   }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final descuentosAsync = ref.watch(descuentosActivosProvider);
     return descuentosAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
+      error: (Object error, StackTrace stack) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -46,7 +34,7 @@ class SelectorDescuento extends ConsumerWidget {
           ],
         ),
       ),
-      data: (descuentos) {
+      data: (List<Descuento> descuentos) {
         final estadoVenta = ref.watch(registrarVentaProvider);
         final estadoCot = ref.watch(cotizacionProvider);
         final int? descuentoId = esParaCotizacion
@@ -58,6 +46,7 @@ class SelectorDescuento extends ConsumerWidget {
         final double montoDescuento = esParaCotizacion
             ? estadoCot.descuento
             : estadoVenta.montoDescuento;
+        final descuentosActivos = descuentos.where((d) => d.activo).toList();
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +93,7 @@ class SelectorDescuento extends ConsumerWidget {
                   ],
                 ),
               ),
-            if (descuentos.isEmpty)
+            if (descuentosActivos.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(24),
                 child: Center(
@@ -112,9 +101,9 @@ class SelectorDescuento extends ConsumerWidget {
                 ),
               )
             else
-              ...descuentos.map((descuentoRaw) {
-                final Descuento descuento = descuentoRaw as Descuento;
-                final bool seleccionado = descuentoId == descuento.id;
+              ...descuentosActivos.map((descuento) {
+                final int? descuentoIdInt = int.tryParse(descuento.id);
+                final bool seleccionado = descuentoId == descuentoIdInt;
                 return Card(
                   elevation: seleccionado ? 4 : 1,
                   color: seleccionado ? Colors.blue.shade50 : null,
@@ -127,12 +116,12 @@ class SelectorDescuento extends ConsumerWidget {
                   ),
                   child: ListTile(
                     title: Text(
-                      descuento.nombre,
+                      descuento.motivo,
                       style: TextStyle(
                         fontWeight: seleccionado ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
-                    subtitle: Text(_formatearAplicaA(descuento)),
+                    subtitle: Text(_formatearTipo(descuento.tipo)),
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -146,15 +135,15 @@ class SelectorDescuento extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          descuento.tipo,
+                          _formatearTipo(descuento.tipo),
                           style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
                     onTap: () {
                       final double valor = descuento.valor;
-                      final int? id = descuento.id;
-                      final String nombre = descuento.nombre;
+                      final int? id = int.tryParse(descuento.id);
+                      final String nombre = descuento.motivo;
                       if (esParaCotizacion) {
                         ref.read(cotizacionProvider.notifier).aplicarDescuento(valor);
                       } else {

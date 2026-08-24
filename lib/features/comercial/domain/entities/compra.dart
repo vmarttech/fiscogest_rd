@@ -1,12 +1,10 @@
-/// Estado posible de una [Compra].
-enum EstadoCompra { borrador, confirmada, anulada }
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
 /// Entidad de dominio: Compra de mercancías.
 ///
 /// Encabezado de operación de compra realizada a proveedor,
 /// con totales, impuestos y estado.
 class Compra {
-
   const Compra({
     required this.id,
     required this.proveedorId,
@@ -24,6 +22,7 @@ class Compra {
     required this.creadoEn,
     this.actualizadoEn,
   });
+
   final String id;
   final String proveedorId;
   final String nombreProveedor;
