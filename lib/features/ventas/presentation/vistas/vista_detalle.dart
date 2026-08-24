@@ -29,7 +29,6 @@ class VistaDetalle extends ConsumerWidget {
 
 class _MostrarDetalleVenta extends ConsumerWidget {
   const _MostrarDetalleVenta({required this.venta});
-
   final Venta venta;
 
   String _formatearFecha(DateTime fecha) {
@@ -77,7 +76,6 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           ),
           const Divider(),
           const SizedBox(height: AppSpacing.m),
-
           const Text('Datos del Cliente y Pago', style: AppTypography.labelLarge),
           const SizedBox(height: AppSpacing.s),
           _FilaDetalle('Nº Transacción', venta.numero),
@@ -89,9 +87,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           _FilaDetalle('A crédito', venta.esCredito ? 'Sí' : 'No'),
           if (venta.usuarioId != null)
             _FilaDetalle('Atendido por', 'Usuario ${venta.usuarioId}'),
-
           const SizedBox(height: AppSpacing.l),
-
           const Text('Detalle de Artículos', style: AppTypography.labelLarge),
           const SizedBox(height: AppSpacing.s),
           Container(
@@ -129,9 +125,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               ],
             ),
           ),
-
           const SizedBox(height: AppSpacing.m),
-
           Align(
             alignment: Alignment.centerRight,
             child: SizedBox(
@@ -146,15 +140,54 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               ),
             ),
           ),
-
           const SizedBox(height: AppSpacing.l),
-
           const Text('Acciones', style: AppTypography.labelLarge),
           const SizedBox(height: AppSpacing.s),
           Wrap(
             spacing: AppSpacing.s,
             runSpacing: AppSpacing.s,
             children: [
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Función Imprimir disponible'))
+                  );
+                },
+                icon: const Icon(Icons.print, size: 18),
+                label: const Text('Imprimir'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Generar PDF disponible'))
+                  );
+                },
+                icon: const Icon(Icons.picture_as_pdf, size: 18),
+                label: const Text('Exportar PDF'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Enviar por correo disponible'))
+                  );
+                },
+                icon: const Icon(Icons.email_outlined, size: 18),
+                label: const Text('Enviar al Cliente'),
+              ),
+              if (venta.numero.startsWith('C'))
+                OutlinedButton.icon(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Convirtiendo ${venta.numero} a venta...'))
+                    );
+                  },
+                  icon: const Icon(Icons.swap_horiz, size: 18),
+                  label: const Text('Convertir a Venta'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
               OutlinedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -182,9 +215,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               ),
             ],
           ),
-
           const SizedBox(height: AppSpacing.l),
-
           ElevatedButton.icon(
             onPressed: () {
               ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = null;
@@ -202,7 +233,6 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
 class _FilaDetalle extends StatelessWidget {
   const _FilaDetalle(this.etiqueta, this.valor, {this.esResaltado = false});
-
   final String etiqueta, valor;
   final bool esResaltado;
 
@@ -323,7 +353,6 @@ class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVent
       );
       return;
     }
-
     if (modo == ModoOperacion.cotizacion && _fechaVencimiento == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -333,7 +362,6 @@ class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVent
       );
       return;
     }
-
     if (modo == ModoOperacion.apartado) {
       final adelanto = double.tryParse(_adelantoController.text);
       if (adelanto == null || adelanto < 0) {
@@ -346,7 +374,6 @@ class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVent
         return;
       }
     }
-
     setState(() => _guardando = true);
     try {
       final estado = ref.read(registrarVentaProvider);
@@ -354,11 +381,9 @@ class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVent
       if (!formaPagoValida.contains(estado.tipoPago)) {
         throw Exception('Forma de pago no válida: seleccione una de la lista (Efectivo, Tarjeta, Transferencia, Crédito, Cheque)');
       }
-
       final fecha = DateTime.now();
       final numero = _generarNumero(fecha, modo);
       final detallesTipados = _convertirDetalles(estado.detalles);
-
       switch (modo) {
         case ModoOperacion.venta:
           final venta = Venta(
@@ -402,7 +427,6 @@ class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVent
             );
           }
           break;
-
         case ModoOperacion.cotizacion:
           final ventaComoCotizacion = Venta(
             numero: numero,
@@ -429,7 +453,6 @@ class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVent
             );
           }
           break;
-
         case ModoOperacion.apartado:
           final montoAbonado = double.tryParse(_adelantoController.text) ?? 0.0;
           final montoTotal = estado.total;
@@ -457,7 +480,6 @@ class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVent
           }
           break;
       }
-
       ref.read(registrarVentaProvider.notifier).vaciarVenta();
       setState(() {
         _fechaVencimiento = null;
@@ -488,7 +510,6 @@ class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVent
       ModoOperacion.cotizacion => 'Guardar Cotización',
       ModoOperacion.apartado => 'Confirmar Apartado',
     };
-
     return SingleChildScrollView(
       padding: AppSpacing.allM,
       child: Column(
