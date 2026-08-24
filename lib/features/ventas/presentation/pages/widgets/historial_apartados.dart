@@ -46,7 +46,7 @@ class HistorialApartados extends ConsumerWidget {
                   ],
                 ),
               ),
-              data: (List<Apartado> apartados) {
+              data: (List<dynamic> apartados) {
                 if (apartados.isEmpty) {
                   return Center(
                     child: Column(
@@ -67,7 +67,7 @@ class HistorialApartados extends ConsumerWidget {
                   itemCount: apartados.length,
                   separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
                   itemBuilder: (_, int i) {
-                    final Apartado a = apartados[i];
+                    final Apartado a = apartados[i] as Apartado;
                     final String numero = a.numero;
                     final String fechaApartado = _formatearFecha(a.fechaApartado);
                     final String fechaLimite = _formatearFecha(a.fechaLimitePago);

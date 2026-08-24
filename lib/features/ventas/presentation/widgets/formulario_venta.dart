@@ -36,7 +36,7 @@ class FormularioVenta extends ConsumerWidget {
                     const Expanded(child: Text('Cliente')),
                     Row(children: [
                       Text(
-                        estado.clienteNombre.isNotEmpty ? estado.clienteNombre : 'Seleccionar',
+                        (estado.clienteNombre?.isNotEmpty ?? false) ? estado.clienteNombre ?? 'Seleccionar' : 'Seleccionar',
                         style: const TextStyle(
                           fontWeight: FontWeight.w500,
                           color: Colors.black87,

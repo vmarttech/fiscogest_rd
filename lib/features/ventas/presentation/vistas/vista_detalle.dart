@@ -39,6 +39,90 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     return NumberFormat.currency(symbol: 'RD\$ ').format(valor);
   }
 
+  Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
+    try {
+      final servicio = ref.read(cotizacionServiceProvider);
+      final resultado = await servicio.generarImpresion(venta);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(resultado), backgroundColor: AppColors.success),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al imprimir: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _exportarPDF(BuildContext context, WidgetRef ref) async {
+    try {
+      final servicio = ref.read(cotizacionServiceProvider);
+      final ruta = await servicio.exportarPDF(venta);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Archivo generado: $ruta'), backgroundColor: AppColors.success),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al generar archivo: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _enviarPorCorreo(BuildContext context, WidgetRef ref) async {
+    final correo = venta.nombreCliente != null ? 'correo@ejemplo.com' : '';
+    try {
+      final servicio = ref.read(cotizacionServiceProvider);
+      await servicio.enviarPorCorreo(venta, correo);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al enviar: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _convertirCotizacion(BuildContext context, WidgetRef ref) async {
+    if (!venta.numero.startsWith('C')) return;
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Convertir Cotización'),
+        content: Text('¿Desea convertir la cotización ${venta.numero} en una venta?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirmar')),
+        ],
+      ),
+    );
+    if (confirmar != true || !context.mounted) return;
+
+    try {
+      final casoUso = ref.read(convertirCotizacionAVentaUseCaseProvider);
+      final resultado = await casoUso.call(venta.id?.toString() ?? '0');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cotización convertida: ${resultado.numero}'), backgroundColor: AppColors.success, duration: const Duration(seconds: 5)),
+        );
+        ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
+        ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al convertir: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
@@ -51,7 +135,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
                 onPressed: () {
-                  ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = null;
+                  ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
                   ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
                 },
               ),
@@ -148,39 +232,23 @@ class _MostrarDetalleVenta extends ConsumerWidget {
             runSpacing: AppSpacing.s,
             children: [
               OutlinedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Función Imprimir disponible'))
-                  );
-                },
+                onPressed: () => _imprimir(context, ref),
                 icon: const Icon(Icons.print, size: 18),
                 label: const Text('Imprimir'),
               ),
               OutlinedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Generar PDF disponible'))
-                  );
-                },
+                onPressed: () => _exportarPDF(context, ref),
                 icon: const Icon(Icons.picture_as_pdf, size: 18),
                 label: const Text('Exportar PDF'),
               ),
               OutlinedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Enviar por correo disponible'))
-                  );
-                },
+                onPressed: () => _enviarPorCorreo(context, ref),
                 icon: const Icon(Icons.email_outlined, size: 18),
                 label: const Text('Enviar al Cliente'),
               ),
               if (venta.numero.startsWith('C'))
                 OutlinedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Convirtiendo ${venta.numero} a venta...'))
-                    );
-                  },
+                  onPressed: () => _convertirCotizacion(context, ref),
                   icon: const Icon(Icons.swap_horiz, size: 18),
                   label: const Text('Convertir a Venta'),
                   style: OutlinedButton.styleFrom(
@@ -218,7 +286,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           const SizedBox(height: AppSpacing.l),
           ElevatedButton.icon(
             onPressed: () {
-              ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = null;
+              ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
               ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
             },
             icon: const Icon(Icons.arrow_back),

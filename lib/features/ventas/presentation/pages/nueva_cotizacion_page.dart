@@ -148,7 +148,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
               children: [
                 ListTile(
                   title: const Text('Cliente'),
-                  subtitle: Text(estado.clienteNombre),
+                  subtitle: Text(estado.clienteNombre ?? 'Sin nombre'),
                   trailing: const Icon(Icons.search),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                   onTap: _seleccionarCliente,

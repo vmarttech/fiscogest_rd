@@ -67,7 +67,7 @@ class HistorialVentas extends ConsumerWidget {
               margin: EdgeInsets.zero,
               child: InkWell(
                 onTap: () {
-                  ref.read(ventaCargadaDesdeHistorialProvider.notifier).state = venta;
+                  ref.read(ventaCargadaDesdeHistorialProvider.notifier).establecerVenta(venta);
                   ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.detalle);
                 },
                 child: Padding(
