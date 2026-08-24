@@ -4,4 +4,5 @@ class EventosSistema {
   static const String recepcionConfirmada = 'recepcionConfirmada';
   static const String apartadoConvertido = 'apartadoConvertido';
   static const String promocionAplicada = 'promocionAplicada';
+  static const String cotizacionRegistrada = 'cotizacionRegistrada';
 }

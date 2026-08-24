@@ -5,4 +5,10 @@ abstract class IInventarioRepository {
     required String productoId,
     required double cantidad,
   });
+
+  /// Reduce existencias tras venta o salida.
+  Future<void> descontarExistencias({
+    required String productoId,
+    required double cantidad,
+  });
 }

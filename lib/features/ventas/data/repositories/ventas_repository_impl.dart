@@ -10,7 +10,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 
 class VentasRepositoryImpl implements IVentasRepository {
   VentasRepositoryImpl({required this.ventasDao});
-  // ✅ Constructor PRIMERO — cumple sort_constructors_first
+
   final VentasDao ventasDao;
 
   Venta _mapearDesdeObjeto(VentaConCliente datos) => Venta(
@@ -68,6 +68,8 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override Future<Venta> registrarVenta(Venta venta) async => throw UnimplementedError();
   @override Future<Venta> registrarCotizacion(Venta cotizacion) async => throw UnimplementedError();
+  @override Future<Venta?> obtenerCotizacionPorId(int cotizacionId) async => throw UnimplementedError();
+  @override Future<Venta> actualizarCotizacion(Venta cotizacion) async => throw UnimplementedError();
   @override Future<Venta> convertirCotizacionAVenta(int cotizacionId) async => throw UnimplementedError();
   @override Future<Apartado> registrarApartado(Apartado apartado) async => throw UnimplementedError();
   @override Future<Devolucion> registrarDevolucion(Devolucion devolucion) async => throw UnimplementedError();
