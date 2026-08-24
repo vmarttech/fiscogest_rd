@@ -78,7 +78,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           const Divider(),
           const SizedBox(height: AppSpacing.m),
 
-          Text('Datos del Cliente y Pago', style: AppTypography.labelLarge),
+          const Text('Datos del Cliente y Pago', style: AppTypography.labelLarge),
           const SizedBox(height: AppSpacing.s),
           _FilaDetalle('Nº Transacción', venta.numero),
           _FilaDetalle('Cliente ID', '${venta.clienteId}'),
@@ -92,7 +92,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
           const SizedBox(height: AppSpacing.l),
 
-          Text('Detalle de Artículos', style: AppTypography.labelLarge),
+          const Text('Detalle de Artículos', style: AppTypography.labelLarge),
           const SizedBox(height: AppSpacing.s),
           Container(
             decoration: BoxDecoration(
@@ -149,7 +149,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
           const SizedBox(height: AppSpacing.l),
 
-          Text('Acciones', style: AppTypography.labelLarge),
+          const Text('Acciones', style: AppTypography.labelLarge),
           const SizedBox(height: AppSpacing.s),
           Wrap(
             spacing: AppSpacing.s,
