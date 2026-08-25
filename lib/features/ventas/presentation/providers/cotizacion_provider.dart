@@ -1,5 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_cotizacion.dart';
+import 'package:fiscogest_rd/features/ventas/domain/usecases/editar_cotizacion.dart';
+import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
+import 'package:fiscogest_rd/features/ventas/domain/services/i_cotizacion_service.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/cotizacion_service_provider.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+
 @immutable
 class CotizacionState {
   const CotizacionState({
@@ -11,11 +19,15 @@ class CotizacionState {
     required this.subtotal,
     required this.itbis,
     required this.descuento,
-    required this.montoDescuento,
-    required this.montoTotal,
     this.descuentoId,
     this.descuentoNombre,
+    required this.montoDescuento,
+    required this.montoTotal,
+    this.tipoPago = 'Contado',
+    this.esCredito = false,
+    this.detalles = const [],
   });
+
   final String numero;
   final DateTime fecha;
   final DateTime? vencimiento;
@@ -24,10 +36,14 @@ class CotizacionState {
   final double subtotal;
   final double itbis;
   final double descuento;
-  final double montoDescuento;
-  final double montoTotal;
   final int? descuentoId;
   final String? descuentoNombre;
+  final double montoDescuento;
+  final double montoTotal;
+  final String tipoPago;
+  final bool esCredito;
+  final List<dynamic> detalles;
+
   CotizacionState copyWith({
     String? numero,
     DateTime? fecha,
@@ -37,10 +53,13 @@ class CotizacionState {
     double? subtotal,
     double? itbis,
     double? descuento,
-    double? montoDescuento,
-    double? montoTotal,
     int? descuentoId,
     String? descuentoNombre,
+    double? montoDescuento,
+    double? montoTotal,
+    String? tipoPago,
+    bool? esCredito,
+    List<dynamic>? detalles,
   }) {
     return CotizacionState(
       numero: numero ?? this.numero,
@@ -51,15 +70,20 @@ class CotizacionState {
       subtotal: subtotal ?? this.subtotal,
       itbis: itbis ?? this.itbis,
       descuento: descuento ?? this.descuento,
-      montoDescuento: montoDescuento ?? this.montoDescuento,
-      montoTotal: montoTotal ?? this.montoTotal,
       descuentoId: descuentoId ?? this.descuentoId,
       descuentoNombre: descuentoNombre ?? this.descuentoNombre,
+      montoDescuento: montoDescuento ?? this.montoDescuento,
+      montoTotal: montoTotal ?? this.montoTotal,
+      tipoPago: tipoPago ?? this.tipoPago,
+      esCredito: esCredito ?? this.esCredito,
+      detalles: detalles ?? this.detalles,
     );
   }
 }
+
 class CotizacionNotifier extends StateNotifier<CotizacionState> {
-  CotizacionNotifier()
+
+  CotizacionNotifier(this._ref)
       : super(CotizacionState(
           numero: '',
           fecha: DateTime.now(),
@@ -69,27 +93,51 @@ class CotizacionNotifier extends StateNotifier<CotizacionState> {
           montoDescuento: 0.0,
           montoTotal: 0.0,
         ));
+  final Ref _ref;
+
   void seleccionarCliente(int id, String nombre) {
-    state = state.copyWith(
-      clienteId: id,
-      clienteNombre: nombre,
-    );
+    state = state.copyWith(clienteId: id, clienteNombre: nombre);
   }
+
   void establecerVencimiento(DateTime fecha) {
     state = state.copyWith(vencimiento: fecha);
   }
+
+  void aplicarDescuento(double valor) {
+    final baseImponible = state.subtotal - valor;
+    const tasaItbis = 0.18;
+    final nuevoItbis = baseImponible * tasaItbis;
+    final nuevoTotal = baseImponible + nuevoItbis;
+    state = state.copyWith(
+      descuento: valor,
+      montoDescuento: valor,
+      itbis: nuevoItbis,
+      montoTotal: nuevoTotal,
+    );
+  }
+
+  void quitarDescuento() {
+    final baseImponible = state.subtotal;
+    const tasaItbis = 0.18;
+    final nuevoItbis = baseImponible * tasaItbis;
+    final nuevoTotal = baseImponible + nuevoItbis;
+    state = state.copyWith(
+      descuento: 0.0,
+      descuentoId: null,
+      descuentoNombre: null,
+      montoDescuento: 0.0,
+      itbis: nuevoItbis,
+      montoTotal: nuevoTotal,
+    );
+  }
+
   bool validarAntesDeGuardar() {
-    if (state.clienteId == null || state.clienteNombre == null || state.clienteNombre!.trim().isEmpty) {
-      return false;
-    }
-    if (state.numero.trim().isEmpty) {
-      return false;
-    }
-    if (state.montoTotal <= 0) {
-      return false;
-    }
+    if (state.clienteId == null || (state.clienteNombre?.trim().isEmpty ?? true)) return false;
+    if (state.numero.trim().isEmpty) return false;
+    if (state.montoTotal <= 0) return false;
     return true;
   }
+
   void vaciar() {
     state = CotizacionState(
       numero: '',
@@ -101,36 +149,61 @@ class CotizacionNotifier extends StateNotifier<CotizacionState> {
       montoTotal: 0.0,
     );
   }
-  void aplicarDescuento(double valor) {
-    final nuevoSubtotal = state.subtotal;
-    final nuevoDescuento = valor;
-    final baseImponible = nuevoSubtotal - nuevoDescuento;
-    const tasaItbis = 0.18;
-    final nuevoItbis = baseImponible * tasaItbis;
-    final nuevoTotal = baseImponible + nuevoItbis;
-    state = state.copyWith(
-      descuento: nuevoDescuento,
-      montoDescuento: nuevoDescuento,
-      itbis: nuevoItbis,
-      montoTotal: nuevoTotal,
+
+  Venta _construirEntidad() {
+    return Venta(
+      numero: state.numero,
+      fecha: state.fecha,
+      clienteId: state.clienteId ?? 0,
+      nombreCliente: state.clienteNombre,
+      subtotal: state.subtotal,
+      itbis: state.itbis,
+      total: state.montoTotal,
+      detalles: state.detalles,
+      tipoPago: state.tipoPago,
+      esCredito: state.esCredito,
+      descuentoId: state.descuentoId,
+      descuentoNombre: state.descuentoNombre,
+      montoDescuento: state.montoDescuento,
     );
   }
-  void quitarDescuento() {
-    final baseImponible = state.subtotal;
-    const tasaItbis = 0.18;
-    final nuevoItbis = baseImponible * tasaItbis;
-    final nuevoTotal = baseImponible + nuevoItbis;
-    state = state.copyWith(
-      descuento: 0.0,
-      montoDescuento: 0.0,
-      itbis: nuevoItbis,
-      montoTotal: nuevoTotal,
-      descuentoId: null,
-      descuentoNombre: null,
-    );
+
+  Future<String> guardar() async {
+    if (!validarAntesDeGuardar()) throw Exception('Datos incompletos');
+    final repositorio = _ref.read<IVentasRepository>(ventasRepositoryProvider);
+    final entidad = _construirEntidad();
+    final casoUso = RegistrarCotizacion(repositorio);
+    final resultado = await casoUso(entidad);
+    _ref.invalidate(listaCotizacionesProvider);
+    return resultado.numero;
+  }
+
+  Future<String> editar(int cotizacionId) async {
+    if (!validarAntesDeGuardar()) throw Exception('Datos incompletos');
+    final repositorio = _ref.read<IVentasRepository>(ventasRepositoryProvider);
+    final entidad = _construirEntidad();
+    final casoUso = EditarCotizacion(repositorio);
+    final resultado = await casoUso(entidad);
+    _ref.invalidate(listaCotizacionesProvider);
+    return resultado.numero;
+  }
+
+  Future<String> imprimir(Venta cotizacion) async {
+    final servicio = _ref.read<ICotizacionService>(cotizacionServiceProvider);
+    return servicio.generarImpresion(cotizacion);
+  }
+
+  Future<String> exportarPDF(Venta cotizacion) async {
+    final servicio = _ref.read<ICotizacionService>(cotizacionServiceProvider);
+    return servicio.exportarPDF(cotizacion);
+  }
+
+  Future<void> enviarPorCorreo(Venta cotizacion, String correoDestinatario) async {
+    final servicio = _ref.read<ICotizacionService>(cotizacionServiceProvider);
+    return servicio.enviarPorCorreo(cotizacion, correoDestinatario);
   }
 }
-final cotizacionProvider =
-    StateNotifierProvider<CotizacionNotifier, CotizacionState>((ref) {
-  return CotizacionNotifier();
-});
+
+final cotizacionProvider = StateNotifierProvider<CotizacionNotifier, CotizacionState>(
+  (ref) => CotizacionNotifier(ref),
+);

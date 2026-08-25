@@ -1,4 +1,4 @@
-import 'package:fiscogest_rd/features/cotizaciones/domain/repositories/i_cotizacion_repository.dart';
+import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 
 class BuscarCotizaciones {
   BuscarCotizaciones(this._repositorio);

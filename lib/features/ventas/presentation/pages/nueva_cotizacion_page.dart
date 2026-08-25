@@ -20,6 +20,7 @@ class NuevaCotizacionPage extends ConsumerStatefulWidget {
 class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
   final TextEditingController _buscadorController = TextEditingController();
   DateTime? _fechaVencimientoSeleccionada;
+  bool _guardando = false;
 
   @override
   void dispose() {
@@ -51,29 +52,67 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     }
   }
 
-  Future<void> _alAgregar(String textoBusqueda) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Buscando producto: $textoBusqueda')),
-    );
-  }
-
   Future<void> _guardarCotizacion() async {
-    final validador = ref.read(cotizacionProvider.notifier);
-    if (!validador.validarAntesDeGuardar()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('⚠️ Seleccione cliente, fecha de vencimiento futura y al menos un producto'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+    final notificador = ref.read(cotizacionProvider.notifier);
+    if (!notificador.validarAntesDeGuardar()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('⚠️ Seleccione cliente y complete los datos'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('✅ Cotización guardada'), backgroundColor: AppColors.success),
-    );
-    ref.invalidate(listaCotizacionesProvider);
-    ref.read(cotizacionProvider.notifier).vaciar();
-    Navigator.pop(context);
+    setState(() => _guardando = true);
+    try {
+      final numero = await notificador.guardar();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Cotización guardada — N° $numero'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      notificador.vaciar();
+      setState(() => _fechaVencimientoSeleccionada = null);
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Error: $e'), backgroundColor: AppColors.error),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _guardando = false);
+      }
+    }
+    return;
+  }
+
+  void _imprimir() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ℹ️ Guarde la cotización antes de imprimir')),
+      );
+    }
+  }
+
+  void _exportarPDF() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ℹ️ Guarde la cotización antes de exportar')),
+      );
+    }
+  }
+
+  void _enviarPorCorreo() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ℹ️ Guarde la cotización antes de enviar')),
+      );
+    }
   }
 
   @override
@@ -87,8 +126,8 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final esPantallaAncha = constraints.maxWidth >= 720;
-                return _buildCuerpo(esPantallaAncha, estado);
+                final ancha = constraints.maxWidth >= 720;
+                return ancha ? _buildDosColumnas(estado) : _buildUnaColumna(estado);
               },
             ),
           ),
@@ -97,43 +136,48 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     );
   }
 
-  Widget _buildCuerpo(bool esPantallaAncha, CotizacionState estado) {
-    if (esPantallaAncha) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 5,
-            child: SingleChildScrollView(
-              padding: AppSpacing.allM,
-              child: _buildColumnaIzquierda(estado),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.m),
-          Expanded(
-            flex: 5,
-            child: SingleChildScrollView(
-              padding: AppSpacing.allM,
-              child: _buildColumnaDerecha(estado),
-            ),
-          ),
-        ],
-      );
-    }
+  Widget _buildUnaColumna(CotizacionState estado) {
     return SingleChildScrollView(
       padding: AppSpacing.allM,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildColumnaIzquierda(estado),
+          _buildDatosGenerales(estado),
           const SizedBox(height: AppSpacing.m),
-          _buildColumnaDerecha(estado),
+          _buildProductos(),
+          const SizedBox(height: AppSpacing.m),
+          _buildResumen(estado),
+          const SizedBox(height: AppSpacing.l),
+          _buildBotonera(),
         ],
       ),
     );
   }
 
-  Widget _buildColumnaIzquierda(CotizacionState estado) {
+  Widget _buildDosColumnas(CotizacionState estado) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 5,
+          child: SingleChildScrollView(
+            padding: AppSpacing.allM,
+            child: Column(children: [_buildDatosGenerales(estado), const SizedBox(height: AppSpacing.m), _buildProductos()]),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.m),
+        Expanded(
+          flex: 5,
+          child: SingleChildScrollView(
+            padding: AppSpacing.allM,
+            child: Column(children: [_buildResumen(estado), const SizedBox(height: AppSpacing.l), _buildBotonera()]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDatosGenerales(CotizacionState estado) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -144,7 +188,6 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
           child: Padding(
             padding: AppSpacing.allM,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ListTile(
                   title: const Text('Cliente'),
@@ -167,18 +210,22 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.l),
-        const Text('Productos', style: AppTypography.h4),
-        const SizedBox(height: AppSpacing.s),
-        PanelProductos(
-          controlador: _buscadorController,
-          alAgregar: _alAgregar,
-        ),
       ],
     );
   }
 
-  Widget _buildColumnaDerecha(CotizacionState estado) {
+  Widget _buildProductos() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('Productos', style: AppTypography.h4),
+        const SizedBox(height: AppSpacing.s),
+        PanelProductos(controlador: _buscadorController, alAgregar: (_) async {}),
+      ],
+    );
+  }
+
+  Widget _buildResumen(CotizacionState estado) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -189,56 +236,50 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
           child: Padding(
             padding: AppSpacing.allM,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Subtotal:', style: AppTypography.labelMedium),
-                    Text('RD\$ ${estado.subtotal.toStringAsFixed(2)}'),
-                  ],
-                ),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Subtotal:'), Text('RD\$ ${estado.subtotal.toStringAsFixed(2)}')]),
                 const SizedBox(height: AppSpacing.xs),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('ITBIS:', style: AppTypography.labelMedium),
-                    Text('RD\$ ${estado.itbis.toStringAsFixed(2)}'),
-                  ],
-                ),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('ITBIS:'), Text('RD\$ ${estado.itbis.toStringAsFixed(2)}')]),
                 const SizedBox(height: AppSpacing.xs),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Descuento:', style: AppTypography.labelMedium),
-                    Text('RD\$ ${estado.descuento.toStringAsFixed(2)}'),
-                  ],
-                ),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Descuento:'), Text('RD\$ ${estado.descuento.toStringAsFixed(2)}')]),
                 const Divider(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Total:', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)),
-                    Text(
-                      'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
-                      style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                  children: [Text('Total:', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)), Text('RD\$ ${estado.montoTotal.toStringAsFixed(2)}', style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold))],
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.xl),
+      ],
+    );
+  }
+
+  Widget _buildBotonera() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         ElevatedButton.icon(
-          icon: const Icon(Icons.save),
-          label: const Text('Guardar Cotización'),
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 48),
-            backgroundColor: AppColors.success,
-            foregroundColor: Colors.white,
-          ),
-          onPressed: _guardarCotizacion,
+          icon: _guardando ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.save),
+          label: Text(_guardando ? 'Guardando...' : 'Guardar Cotización'),
+          style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 48), backgroundColor: AppColors.success, foregroundColor: Colors.white),
+          onPressed: _guardando ? null : _guardarCotizacion,
+        ),
+        const SizedBox(height: AppSpacing.m),
+        Row(
+          children: [
+            Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.print, size: 18), label: const Text('Imprimir'), onPressed: _imprimir)),
+            const SizedBox(width: AppSpacing.s),
+            Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.picture_as_pdf, size: 18), label: const Text('PDF'), onPressed: _exportarPDF)),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.m),
+        Row(
+          children: [
+            Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.email, size: 18), label: const Text('Enviar'), onPressed: _enviarPorCorreo)),
+            const SizedBox(width: AppSpacing.s),
+            const Expanded(child: SizedBox()),
+          ],
         ),
       ],
     );
