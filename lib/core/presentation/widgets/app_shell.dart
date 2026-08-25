@@ -76,6 +76,7 @@ class AppShell extends StatelessWidget {
                 _buildNavItem(context, '/', 'Dashboard', Icons.dashboard_outlined, currentPath),
                 _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
                 _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
+                _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
                 _buildNavItem(context, '/inventory', 'Inventario', Icons.inventory_2_outlined, currentPath),
                 _buildNavItem(context, '/kardex', 'Kardex', Icons.receipt_long_outlined, currentPath),
                 _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.inventory_2, currentPath),
