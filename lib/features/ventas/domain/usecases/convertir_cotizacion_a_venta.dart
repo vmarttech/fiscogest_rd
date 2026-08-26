@@ -3,9 +3,10 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 
 class ConvertirCotizacionAVenta {
   ConvertirCotizacionAVenta(this._repository);
+
   final IVentasRepository _repository;
 
-  Future<Venta> call(String cotizacionId) async {
-    return await _repository.convertirCotizacionAVenta(int.parse(cotizacionId));
+  Future<Venta> call(int cotizacionId) async {
+    return await _repository.convertirCotizacionAVenta(cotizacionId);
   }
 }

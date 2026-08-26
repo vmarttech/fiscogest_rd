@@ -101,7 +101,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     if (confirmar != true || !context.mounted) return;
     try {
       final casoUso = ref.read(convertirCotizacionAVentaUseCaseProvider);
-      final resultado = await casoUso.call(venta.id?.toString() ?? '0');
+      final resultado = await casoUso.call(venta.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

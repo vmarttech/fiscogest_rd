@@ -7,8 +7,8 @@ import 'package:fiscogest_rd/features/devoluciones/data/repositories/devolucion_
 import 'package:fiscogest_rd/features/caja/data/repositories/caja_repository_impl.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/apartados_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_dao.dart';
-import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
 import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_repository_impl.dart';
 import 'package:fiscogest_rd/features/inventario/data/services/inventario_service_impl.dart';
@@ -29,11 +29,8 @@ class RepositoryInjection {
   });
 
   static RepositoryInjection? _instance;
-
   static RepositoryInjection get instance {
-    if (_instance == null) {
-      throw Exception('RepositoryInjection no inicializado');
-    }
+    if (_instance == null) throw Exception('RepositoryInjection no inicializado');
     return _instance!;
   }
 
@@ -55,22 +52,20 @@ class RepositoryInjection {
     final kardexDatasource = DriftKardexDatasource(db);
     final kardexRepository = KardexRepositoryImpl(kardexDatasource);
     final inventarioService = InventarioServiceImpl(db);
-    final ventasRepository = VentasRepositoryImpl();
+
+    // ✅ PASA LA BASE DE DATOS AL REPOSITORIO
+    final ventasRepository = VentasRepositoryImpl(db: db);
+
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,
       kardexRepository: kardexRepository,
       inventarioService: inventarioService,
       productosDao: productosDao,
     );
-    final apartadoRepository = ApartadoRepositoryImpl(
-      apartadosDao: apartadosDao,
-    );
-    final devolucionRepository = DevolucionRepositoryImpl(
-      devolucionesDao: devolucionesDao,
-    );
-    final cajaRepository = CajaRepositoryImpl(
-      cajaMovimientosDao: cajaMovimientosDao,
-    );
+
+    final apartadoRepository = ApartadoRepositoryImpl(apartadosDao: apartadosDao);
+    final devolucionRepository = DevolucionRepositoryImpl(devolucionesDao: devolucionesDao);
+    final cajaRepository = CajaRepositoryImpl(cajaMovimientosDao: cajaMovimientosDao);
 
     _instance = RepositoryInjection._(
       db: db,

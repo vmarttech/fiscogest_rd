@@ -2,12 +2,10 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 
 class AplicarDescuento {
   AplicarDescuento(this._repository);
+
   final IVentasRepository _repository;
 
-  Future<bool> call(String ventaId, String descuentoId) async {
-    return await _repository.aplicarDescuento(
-      int.parse(ventaId),
-      int.parse(descuentoId),
-    );
+  Future<bool> call(int ventaId, int descuentoId) async {
+    return await _repository.aplicarDescuento(ventaId, descuentoId);
   }
 }

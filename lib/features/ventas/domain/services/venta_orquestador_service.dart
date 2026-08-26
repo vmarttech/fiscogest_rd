@@ -14,7 +14,7 @@ class VentaOrquestadorService {
 
   Future<Venta> ejecutarVentaCompleta(Venta venta) async {
     final ventaRegistrada = await _registrarVenta(venta);
-    await _actualizarEnCascada(ventaRegistrada.id.toString());
+    await _actualizarEnCascada(ventaRegistrada.id!);
     return ventaRegistrada;
   }
 }

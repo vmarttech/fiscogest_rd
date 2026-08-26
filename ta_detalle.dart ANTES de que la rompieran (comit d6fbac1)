@@ -1,0 +1,604 @@
+[1mdiff --git a/lib/features/ventas/presentation/vistas/vista_detalle.dart b/lib/features/ventas/presentation/vistas/vista_detalle.dart[m
+[1mindex 11d8087..f4f42bb 100644[m
+[1m--- a/lib/features/ventas/presentation/vistas/vista_detalle.dart[m
+[1m+++ b/lib/features/ventas/presentation/vistas/vista_detalle.dart[m
+[36m@@ -1,269 +1,129 @@[m
+[31m-import 'package:flutter/material.dart';[m
+[31m-import 'package:flutter_riverpod/flutter_riverpod.dart';[m
+ import 'package:fiscogest_rd/core/ui/app_colors.dart';[m
+ import 'package:fiscogest_rd/core/ui/app_spacing.dart';[m
+ import 'package:fiscogest_rd/core/ui/app_typography.dart';[m
+[31m-import 'package:fiscogest_rd/core/ui/app_textfield.dart';[m
+[31m-import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';[m
+[31m-import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';[m
+[31m-import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';[m
+[31m-import 'package:fiscogest_rd/features/ventas/domain/entities/cotizacion.dart';[m
+ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';[m
+[31m-import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_apartado.dart';[m
+ import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';[m
+[32m+[m[32mimport 'package:fiscogest_rd/features/ventas/presentation/providers/cotizacion_service_provider.dart';[m
+ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';[m
+[31m-import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';[m
+[31m-import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';[m
+[31m-import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';[m
+[32m+[m[32mimport 'package:fiscogest_rd/features/ventas/presentation/widgets/contenido_operacion_venta.dart';[m
+[32m+[m[32mimport 'package:flutter/material.dart';[m
+[32m+[m[32mimport 'package:flutter_riverpod/flutter_riverpod.dart';[m
+[32m+[m[32mimport 'package:intl/intl.dart';[m
+ [m
+[31m-/// Vista de detalle — GUARDADO REAL CONECTADO[m
+[31m-/// ✅ Venta → caso de uso RegistrarVenta[m
+[31m-/// ✅ Cotización → IVentasRepository.registrarCotizacion[m
+[31m-/// ✅ Apartado → instancia directa con repositorio[m
+[31m-class VistaDetalle extends ConsumerStatefulWidget {[m
+[32m+[m[32mclass VistaDetalle extends ConsumerWidget {[m
+   const VistaDetalle({super.key});[m
+ [m
+   @override[m
+[31m-  ConsumerState<VistaDetalle> createState() => _VistaDetalleState();[m
+[32m+[m[32m  Widget build(BuildContext context, WidgetRef ref) {[m
+[32m+[m[32m    final ventaCargada = ref.watch(ventaCargadaDesdeHistorialProvider);[m
+[32m+[m[32m    if (ventaCargada != null) {[m
+[32m+[m[32m      return _MostrarDetalleVenta(venta: ventaCargada);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    return const ContenidoOperacionVenta();[m
+[32m+[m[32m  }[m
+ }[m
+ [m
+[31m-class _VistaDetalleState extends ConsumerState<VistaDetalle> {[m
+[31m-  bool _guardando = false;[m
+[31m-  DateTime? _fechaVencimiento;[m
+[31m-  final TextEditingController _adelantoController = TextEditingController(text: '0.00');[m
+[32m+[m[32mclass _MostrarDetalleVenta extends ConsumerWidget {[m
+[32m+[m[32m  const _MostrarDetalleVenta({required this.venta});[m
+[32m+[m[32m  final Venta venta;[m
+ [m
+[31m-  @override[m
+[31m-  void dispose() {[m
+[31m-    _adelantoController.dispose();[m
+[31m-    super.dispose();[m
+[32m+[m[32m  String _formatearFecha(DateTime fecha) {[m
+[32m+[m[32m    return DateFormat.yMd().add_Hm().format(fecha);[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  String _formatearMonto(double valor) {[m
+[32m+[m[32m    return NumberFormat.currency(symbol: 'RD\$ ').format(valor);[m
+   }[m
+ [m
+[31m-  Future<void> _alSeleccionarCliente() async {[m
+[31m-    final cliente = await SeleccionarClienteDialog.mostrar(context);[m
+[31m-    if (cliente != null && cliente.id != null) {[m
+[31m-      ref.read(registrarVentaProvider.notifier).seleccionarCliente(cliente.id!);[m
+[31m-      if (mounted) {[m
+[32m+[m[32m  Future<void> _imprimir(BuildContext context, WidgetRef ref) async {[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      final servicio = ref.read(cotizacionServiceProvider);[m
+[32m+[m[32m      final resultado = await servicio.generarImpresion(venta);[m
+[32m+[m[32m      if (context.mounted) {[m
+[32m+[m[32m        ScaffoldMessenger.of(context).showSnackBar([m
+[32m+[m[32m          SnackBar(content: Text(resultado), backgroundColor: AppColors.success),[m
+[32m+[m[32m        );[m
+[32m+[m[32m      }[m
+[32m+[m[32m    } catch (e) {[m
+[32m+[m[32m      if (context.mounted) {[m
+         ScaffoldMessenger.of(context).showSnackBar([m
+[31m-          SnackBar(content: Text('Cliente seleccionado: ${cliente.nombre}')),[m
+[32m+[m[32m          SnackBar(content: Text('Error al imprimir: $e'), backgroundColor: AppColors.error),[m
+         );[m
+       }[m
+     }[m
+   }[m
+ [m
+[31m-  void _alSeleccionarFormaPago() {[m
+[31m-    showDialog<FormaPago>([m
+[31m-      context: context,[m
+[31m-      builder: (ctx) => AlertDialog([m
+[31m-        title: const Text('Forma de Pago'),[m
+[31m-        contentPadding: const EdgeInsets.symmetric(vertical: 16),[m
+[31m-        content: Column([m
+[31m-          mainAxisSize: MainAxisSize.min,[m
+[31m-          children: FormaPago.values.map((forma) {[m
+[31m-            final etiqueta = switch (forma) {[m
+[31m-              FormaPago.efectivo => 'Efectivo',[m
+[31m-              FormaPago.tarjeta => 'Tarjeta',[m
+[31m-              FormaPago.transferencia => 'Transferencia',[m
+[31m-              FormaPago.credito => 'Crédito',[m
+[31m-              FormaPago.cheque => 'Cheque',[m
+[31m-            };[m
+[31m-            return ListTile([m
+[31m-              title: Text(etiqueta),[m
+[31m-              onTap: () => Navigator.pop(ctx, forma),[m
+[31m-            );[m
+[31m-          }).toList(),[m
+[31m-        ),[m
+[31m-      ),[m
+[31m-    ).then((seleccion) {[m
+[31m-      if (seleccion != null) {[m
+[31m-        final etiqueta = seleccion.name;[m
+[31m-        final esCredito = seleccion == FormaPago.credito;[m
+[31m-        ref[m
+[31m-            .read(registrarVentaProvider.notifier)[m
+[31m-            .cambiarFormaPago(etiqueta, esCredito);[m
+[32m+[m[32m  Future<void> _exportarPDF(BuildContext context, WidgetRef ref) async {[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      final servicio = ref.read(cotizacionServiceProvider);[m
+[32m+[m[32m      final ruta = await servicio.exportarPDF(venta);[m
+[32m+[m[32m      if (context.mounted) {[m
+[32m+[m[32m        ScaffoldMessenger.of(context).showSnackBar([m
+[32m+[m[32m          SnackBar(content: Text('Archivo generado: $ruta'), backgroundColor: AppColors.success),[m
+[32m+[m[32m        );[m
+[32m+[m[32m      }[m
+[32m+[m[32m    } catch (e) {[m
+[32m+[m[32m      if (context.mounted) {[m
+[32m+[m[32m        ScaffoldMessenger.of(context).showSnackBar([m
+[32m+[m[32m          SnackBar(content: Text('Error al generar archivo: $e'), backgroundColor: AppColors.error),[m
+[32m+[m[32m        );[m
+       }[m
+[31m-    });[m
+[31m-  }[m
+[31m-[m
+[31m-  Future<void> _seleccionarFechaVencimiento() async {[m
+[31m-    final hoy = DateTime.now();[m
+[31m-    final seleccion = await showDatePicker([m
+[31m-      context: context,[m
+[31m-      initialDate: hoy.add(const Duration(days: 30)),[m
+[31m-      firstDate: hoy.add(const Duration(days: 1)),[m
+[31m-      lastDate: hoy.add(const Duration(days: 365 * 3)),[m
+[31m-      locale: Localizations.localeOf(context),[m
+[31m-    );[m
+[31m-    if (seleccion != null) {[m
+[31m-      setState(() => _fechaVencimiento = seleccion);[m
+     }[m
+   }[m
+ [m
+[31m-  String _generarNumero(DateTime fecha, ModoOperacion modo) {[m
+[31m-    final prefijo = switch (modo) {[m
+[31m-      ModoOperacion.venta => 'V',[m
+[31m-      ModoOperacion.cotizacion => 'C',[m
+[31m-      ModoOperacion.apartado => 'A',[m
+[31m-    };[m
+[31m-    return '$prefijo${fecha.year}${fecha.month.toString().padLeft(2,'0')}${fecha.day.toString().padLeft(2,'0')}-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';[m
+[31m-  }[m
+[31m-[m
+[31m-  Future<void> _confirmarOperacion() async {[m
+[31m-    final modo = ref.read(ventasNavegacionProvider).modoOperacion;[m
+[31m-    final valido = ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();[m
+[31m-    if (!valido) {[m
+[31m-      ScaffoldMessenger.of(context).showSnackBar([m
+[31m-        const SnackBar([m
+[31m-          content: Text('Complete cliente, forma de pago y productos'),[m
+[31m-          backgroundColor: AppColors.error,[m
+[31m-        ),[m
+[31m-      );[m
+[31m-      return;[m
+[31m-    }[m
+[31m-[m
+[31m-    if (modo == ModoOperacion.cotizacion && _fechaVencimiento == null) {[m
+[31m-      ScaffoldMessenger.of(context).showSnackBar([m
+[31m-        const SnackBar([m
+[31m-          content: Text('Seleccione la fecha de vencimiento'),[m
+[31m-          backgroundColor: AppColors.error,[m
+[31m-        ),[m
+[31m-      );[m
+[31m-      return;[m
+[31m-    }[m
+[31m-[m
+[31m-    if (modo == ModoOperacion.apartado) {[m
+[31m-      final adelanto = double.tryParse(_adelantoController.text);[m
+[31m-      if (adelanto == null || adelanto < 0) {[m
+[32m+[m[32m  Future<void> _enviarPorCorreo(BuildContext context, WidgetRef ref) async {[m
+[32m+[m[32m    final correo = venta.nombreCliente != null ? 'correo@ejemplo.com' : '';[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      final servicio = ref.read(cotizacionServiceProvider);[m
+[32m+[m[32m      await servicio.enviarPorCorreo(venta, correo);[m
+[32m+[m[32m    } catch (e) {[m
+[32m+[m[32m      if (context.mounted) {[m
+         ScaffoldMessenger.of(context).showSnackBar([m
+[31m-          const SnackBar([m
+[31m-            content: Text('El monto de adelanto debe ser mayor o igual a 0'),[m
+[31m-            backgroundColor: AppColors.error,[m
+[31m-          ),[m
+[32m+[m[32m          SnackBar(content: Text('Error al enviar: $e'), backgroundColor: AppColors.error),[m
+         );[m
+[31m-        return;[m
+       }[m
+     }[m
+[32m+[m[32m  }[m
+ [m
+[31m-    setState(() => _guardando = true);[m
+[31m-[m
+[32m+[m[32m  Future<void> _convertirCotizacion(BuildContext context, WidgetRef ref) async {[m
+[32m+[m[32m    if (!venta.numero.startsWith('C')) return;[m
+[32m+[m[32m    final confirmar = await showDialog<bool>([m
+[32m+[m[32m      context: context,[m
+[32m+[m[32m      builder: (ctx) => AlertDialog([m
+[32m+[m[32m        title: const Text('Convertir Cotización'),[m
+[32m+[m[32m        content: Text('¿Desea convertir la cotización ${venta.numero} en una venta?'),[m
+[32m+[m[32m        actions: [[m
+[32m+[m[32m          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),[m
+[32m+[m[32m          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirmar')),[m
+[32m+[m[32m        ],[m
+[32m+[m[32m      ),[m
+[32m+[m[32m    );[m
+[32m+[m[32m    if (confirmar != true || !context.mounted) return;[m
+     try {[m
+[31m-      final estado = ref.read(registrarVentaProvider);[m
+[31m-      final fecha = DateTime.now();[m
+[31m-      final numero = _generarNumero(fecha, modo);[m
+[31m-[m
+[31m-      switch (modo) {[m
+[31m-        case ModoOperacion.venta:[m
+[31m-          final venta = Venta([m
+[31m-            numero: numero,[m
+[31m-            clienteId: estado.clienteId,[m
+[31m-            fecha: fecha,[m
+[31m-            detalles: estado.detalles,[m
+[31m-            subtotal: estado.subtotal,[m
+[31m-            itbis: estado.itbis,[m
+[31m-            total: estado.total,[m
+[31m-            tipoPago: estado.tipoPago,[m
+[31m-            esCredito: estado.esCredito,[m
+[31m-            usuarioId: estado.usuarioId,[m
+[31m-            createdAt: fecha,[m
+[31m-          );[m
+[31m-          final casoUsoVenta = ref.read(registrarVentaUseCaseProvider);[m
+[31m-          final resultadoVenta = await casoUsoVenta(venta);[m
+[31m-          if (mounted) {[m
+[31m-            ScaffoldMessenger.of(context).showSnackBar([m
+[31m-              SnackBar([m
+[31m-                content: Text('✅ Venta guardada — N° ${resultadoVenta.numero}'),[m
+[31m-                backgroundColor: AppColors.success,[m
+[31m-                duration: const Duration(seconds: 4),[m
+[31m-              ),[m
+[31m-            );[m
+[31m-          }[m
+[31m-          break;[m
+[31m-[m
+[31m-        case ModoOperacion.cotizacion:[m
+[31m-          final cotizacion = Cotizacion([m
+[31m-            numero: numero,[m
+[31m-            clienteId: estado.clienteId!,[m
+[31m-            fechaEmision: fecha,[m
+[31m-            fechaVencimiento: _fechaVencimiento!,[m
+[31m-            detalles: estado.detalles,[m
+[31m-            subtotal: estado.subtotal,[m
+[31m-            itbis: estado.itbis,[m
+[31m-            total: estado.total,[m
+[31m-            createdAt: fecha,[m
+[31m-          );[m
+[31m-          final repositorio = ref.read(ventasRepositoryProvider);[m
+[31m-          final resultadoCotizacion = await repositorio.registrarCotizacion(cotizacion);[m
+[31m-          if (mounted) {[m
+[31m-            ScaffoldMessenger.of(context).showSnackBar([m
+[31m-              SnackBar([m
+[31m-                content: Text('✅ Cotización guardada — N° ${resultadoCotizacion.numero}\nVence: ${_fechaVencimiento!.day}/${_fechaVencimiento!.month}/${_fechaVencimiento!.year}'),[m
+[31m-                backgroundColor: AppColors.success,[m
+[31m-                duration: const Duration(seconds: 4),[m
+[31m-              ),[m
+[31m-            );[m
+[31m-          }[m
+[31m-          break;[m
+[31m-[m
+[31m-        case ModoOperacion.apartado:[m
+[31m-          final montoAbonado = double.tryParse(_adelantoController.text) ?? 0.0;[m
+[31m-          final montoTotal = estado.total;[m
+[31m-          final repositorio = ref.read(ventasRepositoryProvider);[m
+[31m-          final casoUsoApartado = RegistrarApartado(repositorio);[m
+[31m-          final apartado = Apartado([m
+[31m-            numero: numero,[m
+[31m-            clienteId: estado.clienteId!,[m
+[31m-            productos: estado.detalles,[m
+[31m-            montoTotal: montoTotal,[m
+[31m-            montoAbonado: montoAbonado,[m
+[31m-            saldoPendiente: montoTotal - montoAbonado,[m
+[31m-            fechaApartado: fecha,[m
+[31m-            estado: 'pendiente',[m
+[31m-            createdAt: fecha,[m
+[31m-          );[m
+[31m-          final resultadoApartado = await casoUsoApartado(apartado);[m
+[31m-          if (mounted) {[m
+[31m-            ScaffoldMessenger.of(context).showSnackBar([m
+[31m-              SnackBar([m
+[31m-                content: Text('✅ Apartado guardado — N° ${resultadoApartado.numero}\nAdelanto: RD\$ ${montoAbonado.toStringAsFixed(2)} · Saldo: RD\$ ${resultadoApartado.saldoPendiente.toStringAsFixed(2)}'),[m
+[31m-                backgroundColor: AppColors.success,[m
+[31m-                duration: const Duration(seconds: 4),[m
+[31m-              ),[m
+[31m-            );[m
+[31m-          }[m
+[31m-          break;[m
+[31m-      }[m
+[31m-[m
+[31m-      ref.read(registrarVentaProvider.notifier).vaciarVenta();[m
+[31m-      setState(() {[m
+[31m-        _fechaVencimiento = null;[m
+[31m-        _adelantoController.text = '0.00';[m
+[31m-      });[m
+[31m-      ref.read(ventasNavegacionProvider.notifier).volverAlInicio();[m
+[31m-    } catch (error) {[m
+[31m-      if (mounted) {[m
+[32m+[m[32m      final casoUso = ref.read(convertirCotizacionAVentaUseCaseProvider);[m
+[32m+[m[32m      final resultado = await casoUso.call(venta.id?.toString() ?? '0');[m
+[32m+[m[32m      if (context.mounted) {[m
+         ScaffoldMessenger.of(context).showSnackBar([m
+           SnackBar([m
+[31m-            content: Text('❌ Error al guardar: $error'),[m
+[31m-            backgroundColor: AppColors.error,[m
+[32m+[m[32m            content: Text('Cotización convertida: ${resultado.numero}'),[m
+[32m+[m[32m            backgroundColor: AppColors.success,[m
+             duration: const Duration(seconds: 5),[m
+           ),[m
+         );[m
+[32m+[m[32m        ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();[m
+[32m+[m[32m        ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);[m
+[32m+[m[32m      }[m
+[32m+[m[32m    } catch (e) {[m
+[32m+[m[32m      if (context.mounted) {[m
+[32m+[m[32m        ScaffoldMessenger.of(context).showSnackBar([m
+[32m+[m[32m          SnackBar(content: Text('Error al convertir: $e'), backgroundColor: AppColors.error),[m
+[32m+[m[32m        );[m
+       }[m
+[31m-    } finally {[m
+[31m-      if (mounted) setState(() => _guardando = false);[m
+     }[m
+   }[m
+ [m
+   @override[m
+[31m-  Widget build(BuildContext context) {[m
+[31m-    final estado = ref.watch(registrarVentaProvider);[m
+[31m-    final modo = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));[m
+[31m-[m
+[31m-    final textoBoton = switch (modo) {[m
+[31m-      ModoOperacion.venta => 'Finalizar Venta',[m
+[31m-      ModoOperacion.cotizacion => 'Guardar Cotización',[m
+[31m-      ModoOperacion.apartado => 'Confirmar Apartado',[m
+[31m-    };[m
+[31m-[m
+[32m+[m[32m  Widget build(BuildContext context, WidgetRef ref) {[m
+     return SingleChildScrollView([m
+       padding: AppSpacing.allM,[m
+       child: Column([m
+[36m@@ -273,73 +133,192 @@[m [mclass _VistaDetalleState extends ConsumerState<VistaDetalle> {[m
+             children: [[m
+               IconButton([m
+                 icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),[m
+[31m-                onPressed: _guardando ? null : () => ref[m
+[31m-                    .read(ventasNavegacionProvider.notifier)[m
+[31m-                    .cambiarVista(VistaActual.inventario),[m
+[32m+[m[32m                onPressed: () {[m
+[32m+[m[32m                  ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();[m
+[32m+[m[32m                  ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);[m
+[32m+[m[32m                },[m
+               ),[m
+[31m-              const Expanded([m
+[31m-                child: Text([m
+[31m-                  'Detalle de Operación',[m
+[31m-                  style: AppTypography.h4,[m
+[31m-                  textAlign: TextAlign.center,[m
+[32m+[m[32m              Expanded([m
+[32m+[m[32m                child: Column([m
+[32m+[m[32m                  children: [[m
+[32m+[m[32m                    Text([m
+[32m+[m[32m                      'Transacción Nº ${venta.numero}',[m
+[32m+[m[32m                      style: AppTypography.h4,[m
+[32m+[m[32m                      textAlign: TextAlign.center,[m
+[32m+[m[32m                    ),[m
+[32m+[m[32m                    Text([m
+[32m+[m[32m                      _formatearFecha(venta.fecha),[m
+[32m+[m[32m                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),[m
+[32m+[m[32m                      textAlign: TextAlign.center,[m
+[32m+[m[32m                    ),[m
+[32m+[m[32m                  ],[m
+                 ),[m
+               ),[m
+               const SizedBox(width: 48),[m
+             ],[m
+           ),[m
+[32m+[m[32m          const Divider(),[m
+           const SizedBox(height: AppSpacing.m),[m
+[31m-          const PanelCarrito(),[m
+[31m-          const SizedBox(height: AppSpacing.m),[m
+[31m-          FormularioVenta([m
+[31m-            alSeleccionarCliente: _alSeleccionarCliente,[m
+[31m-            alSeleccionarFormaPago: _alSeleccionarFormaPago,[m
+[31m-          ),[m
+[31m-          const SizedBox(height: AppSpacing.m),[m
+[31m-          if (modo == ModoOperacion.cotizacion) ...[[m
+[31m-            InkWell([m
+[31m-              onTap: _guardando ? null : _seleccionarFechaVencimiento,[m
+[32m+[m[32m          const Text('Datos del Cliente y Pago', style: AppTypography.labelLarge),[m
+[32m+[m[32m          const SizedBox(height: AppSpacing.s),[m
+[32m+[m[32m          _FilaDetalle('Nº Transacción', venta.numero),[m
+[32m+[m[32m          _FilaDetalle('Cliente ID', '${venta.clienteId}'),[m
+[32m+[m[32m          if (venta.nombreCliente != null)[m
+[32m+[m[32m            _FilaDetalle('Nombre', venta.nombreCliente!),[m
+[32m+[m[32m          _FilaDetalle('Fecha y Hora', _formatearFecha(venta.fecha)),[m
+[32m+[m[32m          _FilaDetalle('Forma de Pago', venta.tipoPago),[m
+[32m+[m[32m          _FilaDetalle('A crédito', venta.esCredito ? 'Sí' : 'No'),[m
+[32m+[m[32m          if (venta.usuarioId != null)[m
+[32m+[m[32m            _FilaDetalle('Atendido por', 'Usuario ${venta.usuarioId}'),[m
+[32m+[m[32m          const SizedBox(height: AppSpacing.l),[m
+[32m+[m[32m          const Text('Detalle de Artículos', style: AppTypography.labelLarge),[m
+[32m+[m[32m          const SizedBox(height: AppSpacing.s),[m
+[32m+[m[32m          Container([m
+[32m+[m[32m            decoration: BoxDecoration([m
+[32m+[m[32m              border: Border.all(color: AppColors.grey300),[m
+               borderRadius: BorderRadius.circular(8),[m
+[31m-              child: InputDecorator([m
+[31m-                decoration: const InputDecoration([m
+[31m-                  labelText: 'Fecha de Vencimiento',[m
+[31m-                  prefixIcon: Icon(Icons.calendar_today_outlined),[m
+[31m-                  border: OutlineInputBorder(),[m
+[31m-                ),[m
+[31m-                child: Text([m
+[31m-                  _fechaVencimiento != null[m
+[31m-                      ? '${_fechaVencimiento!.day}/${_fechaVencimiento!.month}/${_fechaVencimiento!.year}'[m
+[31m-                      : 'Pulse para seleccionar',[m
+[31m-                  style: _fechaVencimiento != null[m
+[31m-                      ? null[m
+[31m-                      : const TextStyle(color: AppColors.textSecondary),[m
+[32m+[m[32m            ),[m
+[32m+[m[32m            child: Column([m
+[32m+[m[32m              children: [[m
+[32m+[m[32m                Container([m
+[32m+[m[32m                  color: AppColors.grey100,[m
+[32m+[m[32m                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),[m
+[32m+[m[32m                  child: const Row([m
+[32m+[m[32m                    children: [[m
+[32m+[m[32m                      Expanded(flex: 4, child: Text('Descripción', style: TextStyle(fontWeight: FontWeight.bold))),[m
+[32m+[m[32m                      Expanded(flex: 1, child: Text('Cant', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),[m
+[32m+[m[32m                      Expanded(flex: 2, child: Text('Precio', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),[m
+[32m+[m[32m                      Expanded(flex: 2, child: Text('Impuesto', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),[m
+[32m+[m[32m                      Expanded(flex: 2, child: Text('Subtotal', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),[m
+[32m+[m[32m                    ],[m
+[32m+[m[32m                  ),[m
+                 ),[m
+[31m-              ),[m
+[32m+[m[32m                ...venta.detalles.map((linea) => Padding([m
+[32m+[m[32m                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),[m
+[32m+[m[32m                  child: Row([m
+[32m+[m[32m                    children: [[m
+[32m+[m[32m                      Expanded(flex: 4, child: Text(linea.nombreProducto as String, style: AppTypography.bodySmall)),[m
+[32m+[m[32m                      Expanded(flex: 1, child: Text('${linea.cantidad}', textAlign: TextAlign.right, style: AppTypography.bodySmall)),[m
+[32m+[m[32m                      Expanded(flex: 2, child: Text(_formatearMonto(linea.precioUnitario as double), textAlign: TextAlign.right, style: AppTypography.bodySmall)),[m
+[32m+[m[32m                      Expanded(flex: 2, child: Text('${linea.tasaImpuesto as double}%', textAlign: TextAlign.right, style: AppTypography.bodySmall)),[m
+[32m+[m[32m                      Expanded(flex: 2, child: Text(_formatearMonto(linea.subtotalLinea as double), textAlign: TextAlign.right, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500))),[m
+[32m+[m[32m                    ],[m
+[32m+[m[32m                  ),[m
+[32m+[m[32m                )),[m
+[32m+[m[32m              ],[m
+             ),[m
+[31m-            const SizedBox(height: AppSpacing.m),[m
+[31m-          ],[m
+[31m-          if (modo == ModoOperacion.apartado) ...[[m
+[31m-            AppTextField([m
+[31m-              controller: _adelantoController,[m
+[31m-              label: 'Monto de Adelanto',[m
+[31m-              hint: '0.00',[m
+[31m-              prefixIcon: Icons.monetization_on_outlined,[m
+[32m+[m[32m          ),[m
+[32m+[m[32m          const SizedBox(height: AppSpacing.m),[m
+[32m+[m[32m          Align([m
+[32m+[m[32m            alignment: Alignment.centerRight,[m
+[32m+[m[32m            child: SizedBox([m
+[32m+[m[32m              width: 260,[m
+[32m+[m[32m              child: Column([m
+[32m+[m[32m                children: [[m
+[32m+[m[32m                  _FilaDetalle('Subtotal', _formatearMonto(venta.subtotal)),[m
+[32m+[m[32m                  _FilaDetalle('ITBIS', _formatearMonto(venta.itbis)),[m
+[32m+[m[32m                  const Divider(),[m
+[32m+[m[32m                  _FilaDetalle('TOTAL', _formatearMonto(venta.total), esResaltado: true),[m
+[32m+[m[32m                ],[m
+[32m+[m[32m              ),[m
+             ),[m
+[31m-            const SizedBox(height: AppSpacing.m),[m
+[31m-          ],[m
+[32m+[m[32m          ),[m
+[32m+[m[32m          const SizedBox(height: AppSpacing.l),[m
+[32m+[m[32m          const Text('Acciones', style: AppTypography.labelLarge),[m
+[32m+[m[32m          const SizedBox(height: AppSpacing.s),[m
+[32m+[m[32m          Wrap([m
+[32m+[m[32m            spacing: AppSpacing.s,[m
+[32m+[m[32m            runSpacing: AppSpacing.s,[m
+[32m+[m[32m            children: [[m
+[32m+[m[32m              OutlinedButton.icon([m
+[32m+[m[32m                onPressed: () => _imprimir(context, ref),[m
+[32m+[m[32m                icon: const Icon(Icons.print, size: 18),[m
+[32m+[m[32m                label: const Text('Imprimir'),[m
+[32m+[m[32m              ),[m
+[32m+[m[32m              OutlinedButton.icon([m
+[32m+[m[32m                onPressed: () => _exportarPDF(context, ref),[m
+[32m+[m[32m                icon: const Icon(Icons.picture_as_pdf, size: 18),[m
+[32m+[m[32m                label: const Text('Exportar PDF'),[m
+[32m+[m[32m              ),[m
+[32m+[m[32m              OutlinedButton.icon([m
+[32m+[m[32m                onPressed: () => _enviarPorCorreo(context, ref),[m
+[32m+[m[32m                icon: const Icon(Icons.email_outlined, size: 18),[m
+[32m+[m[32m                label: const Text('Enviar al Cliente'),[m
+[32m+[m[32m              ),[m
+[32m+[m[32m              if (venta.numero.startsWith('C'))[m
+[32m+[m[32m                OutlinedButton.icon([m
+[32m+[m[32m                  onPressed: () => _convertirCotizacion(context, ref),[m
+[32m+[m[32m                  icon: const Icon(Icons.swap_horiz, size: 18),[m
+[32m+[m[32m                  label: const Text('Convertir a Venta'),[m
+[32m+[m[32m                  style: OutlinedButton.styleFrom([m
+[32m+[m[32m                    foregroundColor: AppColors.primary,[m
+[32m+[m[32m                    side: const BorderSide(color: AppColors.primary),[m
+[32m+[m[32m                  ),[m
+[32m+[m[32m                ),[m
+[32m+[m[32m              OutlinedButton.icon([m
+[32m+[m[32m                onPressed: () {[m
+[32m+[m[32m                  ScaffoldMessenger.of(context).showSnackBar([m
+[32m+[m[32m                    SnackBar([m
+[32m+[m[32m                      content: Text('Transacción ${venta.numero} copiada como referencia. Vaya a Facturación → Nota de Crédito / Devolución.'),[m
+[32m+[m[32m                      backgroundColor: AppColors.success,[m
+[32m+[m[32m                      duration: const Duration(seconds: 5),[m
+[32m+[m[32m                    ),[m
+[32m+[m[32m                  );[m
+[32m+[m[32m                },[m
+[32m+[m[32m                icon: const Icon(Icons.receipt_long, size: 18),[m
+[32m+[m[32m                label: const Text('Usar para Devolución / NC'),[m
+[32m+[m[32m              ),[m
+[32m+[m[32m              OutlinedButton.icon([m
+[32m+[m[32m                onPressed: () {[m
+[32m+[m[32m                  ScaffoldMessenger.of(context).showSnackBar([m
+[32m+[m[32m                    SnackBar([m
+[32m+[m[32m                      content: Text('Número ${venta.numero} copiado al portapapeles'),[m
+[32m+[m[32m                      backgroundColor: AppColors.success,[m
+[32m+[m[32m                    ),[m
+[32m+[m[32m                  );[m
+[32m+[m[32m                },[m
+[32m+[m[32m                icon: const Icon(Icons.copy, size: 18),[m
+[32m+[m[32m                label: const Text('Copiar Nº Transacción'),[m
+[32m+[m[32m              ),[m
+[32m+[m[32m            ],[m
+[32m+[m[32m          ),[m
+           const SizedBox(height: AppSpacing.l),[m
+           ElevatedButton.icon([m
+[31m-            onPressed: !_guardando && estado.detalles.isNotEmpty ? _confirmarOperacion : null,[m
+[31m-            icon: _guardando[m
+[31m-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))[m
+[31m-                : const Icon(Icons.check_circle_outline),[m
+[31m-            label: Text(_guardando ? 'Guardando...' : textoBoton),[m
+[31m-            style: ElevatedButton.styleFrom([m
+[31m-              padding: const EdgeInsets.symmetric(vertical: 14),[m
+[31m-              backgroundColor: AppColors.primary,[m
+[31m-              foregroundColor: Colors.white,[m
+[32m+[m[32m            onPressed: () {[m
+[32m+[m[32m              ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();[m
+[32m+[m[32m              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);[m
+[32m+[m[32m            },[m
+[32m+[m[32m            icon: const Icon(Icons.arrow_back),[m
+[32m+[m[32m            label: const Text('Volver al historial'),[m
+[32m+[m[32m            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),[m
+[32m+[m[32m          ),[m
+[32m+[m[32m        ],[m
+[32m+[m[32m      ),[m
+[32m+[m[32m    );[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mclass _FilaDetalle extends StatelessWidget {[m
+[32m+[m[32m  const _FilaDetalle(this.etiqueta, this.valor, {this.esResaltado = false});[m
+[32m+[m[32m  final String etiqueta, valor;[m
+[32m+[m[32m  final bool esResaltado;[m
+[32m+[m
+[32m+[m[32m  @override[m
+[32m+[m[32m  Widget build(BuildContext context) {[m
+[32m+[m[32m    return Padding([m
+[32m+[m[32m      padding: const EdgeInsets.symmetric(vertical: 6),[m
+[32m+[m[32m      child: Row([m
+[32m+[m[32m        mainAxisAlignment: MainAxisAlignment.spaceBetween,[m
+[32m+[m[32m        children: [[m
+[32m+[m[32m          Text(etiqueta, style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),[m
+[32m+[m[32m          Text([m
+[32m+[m[32m            valor,[m
+[32m+[m[32m            style: AppTypography.bodyMedium.copyWith([m
+[32m+[m[32m              fontWeight: esResaltado ? FontWeight.bold : FontWeight.normal,[m
+[32m+[m[32m              color: esResaltado ? AppColors.primary : null,[m
+[32m+[m[32m              fontSize: esResaltado ? 16 : null,[m
+             ),[m
+           ),[m
+[31m-          const SizedBox(height: AppSpacing.xl),[m
+         ],[m
+       ),[m
+     );[m

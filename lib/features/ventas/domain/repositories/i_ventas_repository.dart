@@ -13,33 +13,26 @@ abstract class IVentasRepository {
     int? usuarioId,
   });
 
+  Future<List<Venta>> listarCotizaciones({
+    DateTime? desde,
+    DateTime? hasta,
+    int? clienteId,
+    int? usuarioId,
+  });
+
   Future<Venta?> obtenerVentaPorId(int ventaId);
-
   Future<Venta> registrarVenta(Venta venta);
-
   Future<Venta> registrarCotizacion(Venta cotizacion);
-
   Future<Venta?> obtenerCotizacionPorId(int cotizacionId);
-
   Future<Venta> actualizarCotizacion(Venta cotizacion);
-
   Future<Venta> convertirCotizacionAVenta(int cotizacionId);
-
   Future<Apartado> registrarApartado(Apartado apartado);
-
   Future<Devolucion> registrarDevolucion(Devolucion devolucion);
-
   Future<Pago> registrarPago(Pago pago);
-
   Future<double> consultarSaldoCliente(int clienteId);
-
   Future<List<Descuento>> obtenerDescuentosActivos();
-
   Future<List<Oferta>> obtenerOfertasActivas();
-
   Future<bool> aplicarDescuento(int ventaId, int descuentoId);
-
   Future<bool> validarOferta(int ofertaId, double montoCompra);
-
   Future<void> actualizarEnCascada(int ventaId);
 }

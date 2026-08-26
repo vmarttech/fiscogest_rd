@@ -2,9 +2,10 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 
 class ActualizarVentasEnCascada {
   ActualizarVentasEnCascada(this._repository);
+
   final IVentasRepository _repository;
 
-  Future<void> call(String ventaId) async {
-    return await _repository.actualizarEnCascada(int.parse(ventaId));
+  Future<void> call(int ventaId) async {
+    return await _repository.actualizarEnCascada(ventaId);
   }
 }

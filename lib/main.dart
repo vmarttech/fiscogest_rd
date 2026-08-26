@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
 import 'package:intl/date_symbol_data_local.dart';
+
 import 'package:fiscogest_rd/core/navigation/app_router.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -9,13 +10,12 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
+
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/data/repositories/inventario_fisico_repository_impl.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/data/repositories/ajuste_inventario_repository_impl.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart' as ajuste_prov;
-import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
-import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 
 class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   _InventarioRepositoryAdapter(this._db);
@@ -25,7 +25,7 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   @override
   Future<void> actualizarStock(int productoId, double nuevoStock) async {
     await (_db.update(_db.productosTable)
-      ..where((fila) => fila.id.equals(productoId)))
+          ..where((fila) => fila.id.equals(productoId)))
         .write(ProductosTableCompanion(stock: Value(nuevoStock)));
   }
 
@@ -33,7 +33,7 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   Future<void> actualizarProducto(Producto producto) async {
     if (producto.id == null) return;
     await (_db.update(_db.productosTable)
-      ..where((t) => t.id.equals(producto.id!)))
+          ..where((t) => t.id.equals(producto.id!)))
         .write(ProductosTableCompanion(
           codigo: Value(producto.codigo),
           nombre: Value(producto.nombre),
@@ -133,13 +133,20 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_DO', null);
+
   final db = AppDatabase();
+
+  // ✅ Inicialización ÚNICA de toda la gráfica de dependencias
   await RepositoryInjection.initialize(db);
+
   final InventarioRepositoryInterface inventarioRepo = _InventarioRepositoryAdapter(db);
   final InventarioFisicoRepositoryInterface inventarioFisicoRepo = InventarioFisicoRepositoryImpl(db);
   final AjusteInventarioRepository ajusteInventarioRepo = AjusteInventarioRepositoryImpl(db);
-  // ✅ INYECCIÓN DE DEPENDENCIAS DE VENTAS — MISMO PATRÓN
-  final IVentasRepository ventasRepo = VentasRepositoryImpl();
+
+  // ✅ INSTANCIA ÚNICA: Tomada de RepositoryInjection, NO creamos una nueva
+  // De esta forma, VentaInventarioService y Riverpod comparten la MISMA instancia
+  final ventasRepo = RepositoryInjection.instance.ventasRepository;
+
   final container = ProviderContainer(
     overrides: [
       databaseProvider.overrideWithValue(db),
@@ -149,6 +156,7 @@ void main() async {
       ventasRepositoryProvider.overrideWithValue(ventasRepo),
     ],
   );
+
   runApp(
     UncontrolledProviderScope(
       container: container,

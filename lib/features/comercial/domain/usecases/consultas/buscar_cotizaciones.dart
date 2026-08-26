@@ -1,10 +1,11 @@
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 
 class BuscarCotizaciones {
   BuscarCotizaciones(this._repositorio);
-  final ICotizacionRepository _repositorio;
+  final IVentasRepository _repositorio;
 
-  Future<List<Map<String, dynamic>>> call({
+  Future<List<Venta>> call({
     DateTime? desde,
     DateTime? hasta,
     String? clienteId,
