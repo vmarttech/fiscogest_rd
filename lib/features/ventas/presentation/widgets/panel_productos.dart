@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 
-class PanelProductos extends StatelessWidget {
-
+class PanelProductos extends ConsumerWidget {
   const PanelProductos({
     super.key,
     required this.controlador,
-    required this.alAgregar,
+    this.alBuscar,
+    this.alAgregar,
   });
+
   final TextEditingController controlador;
-  final Future<void> Function(String) alAgregar;
+  final Future<void> Function(String)? alBuscar;
+  final Future<void> Function(String)? alAgregar;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       elevation: 2,
       child: Padding(
@@ -28,16 +33,28 @@ class PanelProductos extends StatelessWidget {
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.add_circle, color: Colors.blue),
-                  onPressed: () {
+                  onPressed: () async {
                     final valor = controlador.text.trim();
-                    if (valor.isNotEmpty) alAgregar(valor);
+                    if (valor.isNotEmpty && alBuscar != null) {
+                      await alBuscar!(valor);
+                    } else {
+                      if (alAgregar != null) {
+                        await alAgregar!('');
+                      }
+                      if (context.mounted) {
+                        ref.read(ventasNavegacionProvider.notifier)
+                          ..cambiarCategoria(CategoriaProducto.productos)
+                          ..cambiarVista(VistaActual.inventario);
+                      }
+                    }
                   },
                 ),
                 border: const OutlineInputBorder(),
               ),
               textInputAction: TextInputAction.search,
-              onSubmitted: (valor) {
-                if (valor.trim().isNotEmpty) alAgregar(valor.trim());
+              onSubmitted: (valor) async {
+                final texto = valor.trim();
+                if (texto.isNotEmpty && alBuscar != null) await alBuscar!(texto);
               },
             ),
           ],

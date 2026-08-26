@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/barra_navegacion_inferior.dart';
@@ -14,6 +16,7 @@ class VentasContenedorPage extends ConsumerStatefulWidget {
   const VentasContenedorPage({super.key, this.modoInicial = ModoOperacion.venta});
   static const String nombreRuta = 'ventas-contenedor';
   final ModoOperacion modoInicial;
+
   @override
   ConsumerState<VentasContenedorPage> createState() => _VentasContenedorPageState();
 }
@@ -31,31 +34,65 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
   Widget build(BuildContext context) {
     final vistaActual = ref.watch(ventasNavegacionProvider.select((e) => e.vistaActual));
     final modoOperacion = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
+
     final String tituloAppBar = switch (modoOperacion) {
-      ModoOperacion.venta => 'Ventas',
-      ModoOperacion.cotizacion => 'Cotizaciones',
-      ModoOperacion.apartado => 'Apartados',
+      ModoOperacion.venta => 'Gestión de Ventas',
+      ModoOperacion.cotizacion => 'Gestión de Cotizaciones',
+      ModoOperacion.apartado => 'Gestión de Apartados',
       ModoOperacion.cobrar => 'Cuentas por Cobrar',
     };
+
     final Widget vistaActiva = switch (vistaActual) {
       VistaActual.inicio => const VistaInicioVacia(),
       VistaActual.inventario => const VistaInventario(),
       VistaActual.detalle => ref.watch(ventaCargadaDesdeHistorialProvider) != null ? const VistaDetalle() : const VistaDetalle(),
       VistaActual.historial => const HistorialVentas(),
     };
+
     return AppScaffold(
       appBar: AppBar(
-        title: Text(tituloAppBar),
+        title: Text(
+          tituloAppBar,
+          style: AppTypography.h3.copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.3),
+        ),
+        centerTitle: false,
+        elevation: 0.5,
+        shadowColor: AppColors.border,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
         actions: [
-          IconButton(icon: const Icon(Icons.history), tooltip: 'Historial', color: vistaActual == VistaActual.historial ? AppColors.primary : AppColors.textSecondary, onPressed: () => ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.historial)),
-          IconButton(icon: const Icon(Icons.delete_sweep_outlined), tooltip: 'Limpiar operación', color: AppColors.textSecondary, onPressed: () {
-            ref.read(registrarVentaProvider.notifier).vaciarVenta();
-            ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
-            ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
-          }),
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Historial de operaciones',
+            color: vistaActual == VistaActual.historial ? AppColors.primary : AppColors.textSecondary,
+            style: IconButton.styleFrom(
+              padding: const EdgeInsets.all(AppSpacing.s),
+            ),
+            onPressed: () => ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.historial),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          IconButton(
+            icon: const Icon(Icons.restore_from_trash_outlined),
+            tooltip: 'Limpiar operación actual',
+            color: AppColors.textSecondary,
+            style: IconButton.styleFrom(
+              padding: const EdgeInsets.all(AppSpacing.s),
+            ),
+            onPressed: () {
+              ref.read(registrarVentaProvider.notifier).vaciarVenta();
+              ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
+              ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
+            },
+          ),
+          const SizedBox(width: AppSpacing.m),
         ],
       ),
-      body: Column(children: [Expanded(child: vistaActiva), const BarraNavegacionInferior()]),
+      body: Column(
+        children: [
+          Expanded(child: vistaActiva),
+          const BarraNavegacionInferior(),
+        ],
+      ),
     );
   }
 }

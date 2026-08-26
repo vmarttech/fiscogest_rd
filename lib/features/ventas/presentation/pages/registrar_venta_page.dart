@@ -1,4 +1,6 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/pages/productos_page.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_gestion_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,7 +65,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              context.pushNamed('productos'); // ✅ Abre pantalla de inventario
+              context.pushNamed(ProductosPage.routeName); // ✅ Abre pantalla de inventario
             },
             child: const Text('Abrir Inventario'),
           ),
@@ -127,7 +129,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                   subtitle: const Text('Ver todos los productos'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    context.pushNamed('productos'); // ✅ Navega sin condiciones
+                    context.pushNamed(ProductosPage.routeName); // ✅ Navega sin condiciones
                   },
                 );
               }
@@ -286,7 +288,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             subtitle: const Text('Ver lista de clientes registrados'),
             onTap: () {
               Navigator.pop(context);
-              context.pushNamed('clientes'); // ✅ PANTALLA DE LISTADO, NO DE NUEVO
+              context.pushNamed(ClientesGestionPage.routeName); // ✅ PANTALLA DE LISTADO, NO DE NUEVO
             },
           ),
         ],

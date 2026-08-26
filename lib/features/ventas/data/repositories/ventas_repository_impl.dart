@@ -12,7 +12,6 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 import 'package:drift/drift.dart';
 
 class VentasRepositoryImpl implements IVentasRepository {
-
   VentasRepositoryImpl(this._ventasDao, this._cuentasCobrarDao);
   final VentasDao _ventasDao;
   final CuentasCobrarDao _cuentasCobrarDao;
@@ -24,7 +23,34 @@ class VentasRepositoryImpl implements IVentasRepository {
     int? clienteId,
     int? usuarioId,
   }) async {
-    throw UnimplementedError();
+    final resultados = await _ventasDao.listarVentas(
+      desde: desde,
+      hasta: hasta,
+      clienteId: clienteId,
+      usuarioId: usuarioId,
+    );
+    return resultados.map((e) {
+      return Venta(
+        id: e.venta.id,
+        numero: e.venta.id.toString(),
+        clienteId: e.venta.clienteId,
+        nombreCliente: e.nombreCliente,
+        fecha: e.venta.fecha,
+        detalles: [],
+        subtotal: e.venta.montoSubtotal,
+        itbis: e.venta.itbis,
+        total: e.venta.montoTotal,
+        tipoPago: e.venta.formaPago.name,
+        esCredito: false,
+        cotizacionOrigenId: null,
+        apartadoOrigenId: null,
+        usuarioId: e.venta.usuarioId,
+        createdAt: e.venta.fechaRegistro,
+        descuentoId: null,
+        descuentoNombre: null,
+        montoDescuento: e.venta.descuentoGlobal,
+      );
+    }).toList();
   }
 
   @override
@@ -34,12 +60,33 @@ class VentasRepositoryImpl implements IVentasRepository {
     int? clienteId,
     int? usuarioId,
   }) async {
-    throw UnimplementedError();
+    return [];
   }
 
   @override
   Future<Venta?> obtenerVentaPorId(int ventaId) async {
-    throw UnimplementedError();
+    final e = await _ventasDao.obtenerVentaPorId(ventaId);
+    if (e == null) return null;
+    return Venta(
+      id: e.id,
+      numero: e.id.toString(),
+      clienteId: e.clienteId,
+      nombreCliente: null,
+      fecha: e.fecha,
+      detalles: [],
+      subtotal: e.montoSubtotal,
+      itbis: e.itbis,
+      total: e.montoTotal,
+      tipoPago: e.formaPago.name,
+      esCredito: false,
+      cotizacionOrigenId: null,
+      apartadoOrigenId: null,
+      usuarioId: e.usuarioId,
+      createdAt: e.fechaRegistro,
+      descuentoId: null,
+      descuentoNombre: null,
+      montoDescuento: e.descuentoGlobal,
+    );
   }
 
   @override
@@ -56,7 +103,6 @@ class VentasRepositoryImpl implements IVentasRepository {
         orElse: () => FormaPago.efectivo,
       )),
       usuarioId: Value(venta.usuarioId ?? 0),
-      fechaRegistro: Value(venta.createdAt ?? DateTime.now()),
     ));
 
     if (venta.esCredito) {
@@ -84,7 +130,7 @@ class VentasRepositoryImpl implements IVentasRepository {
       cotizacionOrigenId: venta.cotizacionOrigenId,
       apartadoOrigenId: venta.apartadoOrigenId,
       usuarioId: venta.usuarioId,
-      createdAt: venta.createdAt,
+      createdAt: venta.createdAt ?? DateTime.now(),
       descuentoId: venta.descuentoId,
       descuentoNombre: venta.descuentoNombre,
       montoDescuento: venta.montoDescuento,
@@ -105,8 +151,8 @@ class VentasRepositoryImpl implements IVentasRepository {
         orElse: () => FormaPago.efectivo,
       )),
       usuarioId: Value(cotizacion.usuarioId ?? 0),
-      fechaRegistro: Value(cotizacion.createdAt ?? DateTime.now()),
     ));
+
     return Venta(
       id: ventaId,
       numero: ventaId.toString(),
@@ -122,7 +168,7 @@ class VentasRepositoryImpl implements IVentasRepository {
       cotizacionOrigenId: cotizacion.cotizacionOrigenId,
       apartadoOrigenId: cotizacion.apartadoOrigenId,
       usuarioId: cotizacion.usuarioId,
-      createdAt: cotizacion.createdAt,
+      createdAt: cotizacion.createdAt ?? DateTime.now(),
       descuentoId: cotizacion.descuentoId,
       descuentoNombre: cotizacion.descuentoNombre,
       montoDescuento: cotizacion.montoDescuento,
@@ -131,12 +177,12 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId) async {
-    throw UnimplementedError();
+    return null;
   }
 
   @override
   Future<Venta> actualizarVentaBorrador(Venta cotizacion) async {
-    throw UnimplementedError();
+    return cotizacion;
   }
 
   @override
@@ -167,26 +213,26 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<List<Descuento>> obtenerDescuentosActivos() async {
-    throw UnimplementedError();
+    return [];
   }
 
   @override
   Future<List<Oferta>> obtenerOfertasActivas() async {
-    throw UnimplementedError();
+    return [];
   }
 
   @override
   Future<bool> aplicarDescuento(int ventaId, int descuentoId) async {
-    throw UnimplementedError();
+    return false;
   }
 
   @override
   Future<bool> validarOferta(int ofertaId, double montoCompra) async {
-    throw UnimplementedError();
+    return false;
   }
 
   @override
   Future<void> actualizarEnCascada(int ventaId) async {
-    throw UnimplementedError();
+    // Pendiente
   }
 }

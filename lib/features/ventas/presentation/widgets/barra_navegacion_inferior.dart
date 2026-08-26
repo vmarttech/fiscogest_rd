@@ -8,10 +8,10 @@ import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_venta
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 
-/// Barra de navegación INFERIOR FIJA
 class BarraNavegacionInferior extends ConsumerWidget {
   const BarraNavegacionInferior({super.key});
-  static const double alturaBarra = 70.0;
+  static const double alturaBarra = 78.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categoriaActiva = ref.watch(
@@ -20,68 +20,74 @@ class BarraNavegacionInferior extends ConsumerWidget {
     final modoActivo = ref.watch(
       ventasNavegacionProvider.select((estado) => estado.modoOperacion),
     );
+
     return Container(
       height: alturaBarra,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: AppColors.border, width: 1),
-        ),
+        border: const Border(top: BorderSide(color: AppColors.border, width: 1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s),
-                child: Row(
-                  children: [
-                    _BotonCategoria(
-                      categoria: CategoriaProducto.productos,
-                      activa: categoriaActiva == CategoriaProducto.productos,
-                      icono: Icons.inventory_2_outlined,
-                      etiqueta: 'Productos',
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: AppSpacing.m),
-                    _BotonCategoria(
-                      categoria: CategoriaProducto.manufactura,
-                      activa: categoriaActiva == CategoriaProducto.manufactura,
-                      icono: Icons.handyman_outlined,
-                      etiqueta: 'Manufactura',
-                      color: AppColors.warning,
-                    ),
-                    const SizedBox(width: AppSpacing.m),
-                    _BotonCategoria(
-                      categoria: CategoriaProducto.servicios,
-                      activa: categoriaActiva == CategoriaProducto.servicios,
-                      icono: Icons.miscellaneous_services_outlined,
-                      etiqueta: 'Servicios',
-                      color: AppColors.info,
-                    ),
-                    const SizedBox(width: AppSpacing.m),
-                    _BotonCategoria(
-                      categoria: CategoriaProducto.scanner,
-                      activa: categoriaActiva == CategoriaProducto.scanner,
-                      icono: Icons.qr_code_scanner_outlined,
-                      etiqueta: 'Scanner',
-                      color: AppColors.success,
-                    ),
-                  ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: [
+                      _BotonCategoria(
+                        categoria: CategoriaProducto.productos,
+                        activa: categoriaActiva == CategoriaProducto.productos,
+                        icono: Icons.inventory_2_outlined,
+                        etiqueta: 'Productos',
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: AppSpacing.s),
+                      _BotonCategoria(
+                        categoria: CategoriaProducto.manufactura,
+                        activa: categoriaActiva == CategoriaProducto.manufactura,
+                        icono: Icons.handyman_outlined,
+                        etiqueta: 'Manufactura',
+                        color: AppColors.warning,
+                      ),
+                      const SizedBox(width: AppSpacing.s),
+                      _BotonCategoria(
+                        categoria: CategoriaProducto.servicios,
+                        activa: categoriaActiva == CategoriaProducto.servicios,
+                        icono: Icons.miscellaneous_services_outlined,
+                        etiqueta: 'Servicios',
+                        color: AppColors.info,
+                      ),
+                      const SizedBox(width: AppSpacing.s),
+                      _BotonCategoria(
+                        categoria: CategoriaProducto.scanner,
+                        activa: categoriaActiva == CategoriaProducto.scanner,
+                        icono: Icons.qr_code_scanner_outlined,
+                        etiqueta: 'Escanear',
+                        color: AppColors.success,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Container(
-              width: 1,
-              height: alturaBarra - 16,
-              color: AppColors.border,
-            ),
-            const SizedBox(width: AppSpacing.s),
-            _BotonOperaciones(modoActivo: modoActivo),
-            const SizedBox(width: AppSpacing.s),
-          ],
+              const SizedBox(width: AppSpacing.m),
+              Container(width: 1, height: 44, color: AppColors.border),
+              const SizedBox(width: AppSpacing.m),
+              _BotonOperaciones(modoActivo: modoActivo),
+            ],
+          ),
         ),
       ),
     );
@@ -101,6 +107,7 @@ class _BotonCategoria extends ConsumerWidget {
   final IconData icono;
   final String etiqueta;
   final Color color;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return InkWell(
@@ -108,15 +115,32 @@ class _BotonCategoria extends ConsumerWidget {
         ref.read(ventasNavegacionProvider.notifier).cambiarCategoria(categoria);
         ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario);
       },
-      borderRadius: BorderRadius.circular(AppSpacing.xs),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s, vertical: AppSpacing.xs),
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
+        decoration: activa
+            ? BoxDecoration(
+                color: color.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withValues(alpha: 0.35), width: 1),
+              )
+            : BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icono, color: activa ? color : AppColors.textSecondary, size: 24),
-            const SizedBox(height: AppSpacing.xs),
-            Text(etiqueta, style: AppTypography.labelSmall.copyWith(color: activa ? color : AppColors.textSecondary, fontWeight: activa ? FontWeight.w600 : FontWeight.normal)),
+            Icon(icono, color: activa ? color : AppColors.textSecondary, size: 22),
+            const SizedBox(height: 4),
+            Text(
+              etiqueta,
+              style: AppTypography.labelSmall.copyWith(
+                color: activa ? color : AppColors.textSecondary,
+                fontWeight: activa ? FontWeight.w600 : FontWeight.normal,
+                fontSize: 11.5,
+              ),
+            ),
           ],
         ),
       ),
@@ -133,7 +157,7 @@ class _BotonOperaciones extends ConsumerWidget {
       ModoOperacion.venta => 'Venta',
       ModoOperacion.cotizacion => 'Cotización',
       ModoOperacion.apartado => 'Apartado',
-      ModoOperacion.cobrar => 'Cuentas por Cobrar',
+      ModoOperacion.cobrar => 'Por Cobrar',
     };
   }
 
@@ -151,6 +175,7 @@ class _BotonOperaciones extends ConsumerWidget {
       context: context,
       position: const RelativeRect.fromLTRB(100, 0, 0, 100),
       elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       items: [
         PopupMenuItem(
           value: ModoOperacion.venta,
@@ -190,10 +215,12 @@ class _BotonOperaciones extends ConsumerWidget {
         ),
       ],
     );
+
     if (seleccion == ModoOperacion.cobrar) {
       if (context.mounted) context.pushNamed(CobrarPage.routeName);
       return;
     }
+
     if (seleccion != null && seleccion != modoActivo) {
       ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(seleccion);
       ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario);
@@ -205,19 +232,43 @@ class _BotonOperaciones extends ConsumerWidget {
     final color = _colorModo();
     return InkWell(
       onTap: () => _mostrarMenu(context, ref),
-      borderRadius: BorderRadius.circular(AppSpacing.s),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(AppSpacing.s)),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Row(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.arrow_drop_up, color: color, size: 20),
-            const SizedBox(width: AppSpacing.xs),
-            Text('Operaciones', style: AppTypography.labelSmall.copyWith(color: color, fontWeight: FontWeight.w600)),
-          ]),
-          const SizedBox(height: AppSpacing.xs),
-          Text(_etiquetaModo(), style: AppTypography.labelSmall.copyWith(color: color, fontWeight: FontWeight.bold)),
-        ]),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.35), width: 1),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.expand_circle_down_outlined, color: color, size: 18),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  'Operaciones',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11.5,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              _etiquetaModo(),
+              style: AppTypography.labelMedium.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 12.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
