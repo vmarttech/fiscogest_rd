@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 
-class NavegacionVentas extends StatelessWidget {
+class NavegacionVentas extends ConsumerWidget {
   const NavegacionVentas({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: 220,
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -17,7 +20,8 @@ class NavegacionVentas extends StatelessWidget {
             title: const Text('Registrar Venta'),
             onTap: () {
               Navigator.pop(context);
-              DefaultTabController.of(context).animateTo(0);
+              ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.venta);
+              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
             },
           ),
           ListTile(
@@ -25,7 +29,8 @@ class NavegacionVentas extends StatelessWidget {
             title: const Text('Cotizaciones'),
             onTap: () {
               Navigator.pop(context);
-              DefaultTabController.of(context).animateTo(1);
+              ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.cotizacion);
+              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
             },
           ),
           ListTile(
@@ -33,7 +38,8 @@ class NavegacionVentas extends StatelessWidget {
             title: const Text('Apartados'),
             onTap: () {
               Navigator.pop(context);
-              DefaultTabController.of(context).animateTo(2);
+              ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.apartado);
+              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
             },
           ),
           ListTile(
@@ -41,7 +47,7 @@ class NavegacionVentas extends StatelessWidget {
             title: const Text('Devoluciones'),
             onTap: () {
               Navigator.pop(context);
-              DefaultTabController.of(context).animateTo(3);
+              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario);
             },
           ),
           ListTile(
@@ -49,7 +55,7 @@ class NavegacionVentas extends StatelessWidget {
             title: const Text('Cobrar'),
             onTap: () {
               Navigator.pop(context);
-              DefaultTabController.of(context).animateTo(4);
+              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario);
             },
           ),
           ListTile(

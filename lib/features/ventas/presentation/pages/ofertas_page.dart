@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
-class OfertasPage extends StatelessWidget {
-
+class OfertasPage extends ConsumerStatefulWidget {
   const OfertasPage({super.key});
   static const routeName = 'ofertas';
 
   @override
+  ConsumerState<OfertasPage> createState() => _OfertasPageState();
+}
+
+class _OfertasPageState extends ConsumerState<OfertasPage> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Ofertas y Promociones')),
-      body: const Center(child: Text('Gestión de Ofertas y Promociones Comerciales')),
+    ref.watch(registrarVentaProvider);
+    return const AppScaffold(
+      title: 'Ofertas y Promociones',
+      body: Center(child: Text('Gestión de Ofertas y Promociones Comerciales')),
     );
   }
 }
