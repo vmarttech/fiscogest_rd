@@ -4,7 +4,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/widgets/contenido_operacion_venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +18,8 @@ class VistaDetalle extends ConsumerWidget {
     if (ventaCargada != null) {
       return _MostrarDetalleVenta(venta: ventaCargada);
     }
-    return const ContenidoOperacionVenta();
+    // ← CORRECCIÓN: NO llamar a ContenidoOperacionVenta (causa bucle) → ir a Inicio
+    return const VistaInicioVacia();
   }
 }
 

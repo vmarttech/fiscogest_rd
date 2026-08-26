@@ -9,21 +9,17 @@ import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_va
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inventario.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_detalle.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_ventas.dart';
-
 class VentasContenedorPage extends ConsumerStatefulWidget {
   const VentasContenedorPage({
     super.key,
     this.modoInicial = ModoOperacion.venta,
   });
-
   static const String nombreRuta = 'ventas-contenedor';
   final ModoOperacion modoInicial;
-
   @override
   ConsumerState<VentasContenedorPage> createState() =>
       _VentasContenedorPageState();
 }
-
 class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
   @override
   void initState() {
@@ -34,7 +30,6 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
           .establecerModoOperacion(widget.modoInicial);
     });
   }
-
   @override
   Widget build(BuildContext context) {
     final vistaActual = ref.watch(
@@ -43,13 +38,29 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final modoOperacion = ref.watch(
       ventasNavegacionProvider.select((estado) => estado.modoOperacion),
     );
-
     final String tituloAppBar = switch (modoOperacion) {
       ModoOperacion.venta => 'Ventas',
       ModoOperacion.cotizacion => 'Cotizaciones',
       ModoOperacion.apartado => 'Apartados',
     };
-
+    Widget vistaActiva;
+    switch (vistaActual) {
+      case VistaActual.inicio:
+        vistaActiva = const VistaInicioVacia();
+        break;
+      case VistaActual.inventario:
+        vistaActiva = const VistaInventario();
+        break;
+      case VistaActual.detalle:
+        final ventaCargada = ref.watch(ventaCargadaDesdeHistorialProvider);
+        vistaActiva = ventaCargada != null
+            ? const VistaDetalle()
+            : const VistaDetalle();
+        break;
+      case VistaActual.historial:
+        vistaActiva = const HistorialVentas();
+        break;
+    }
     return AppScaffold(
       appBar: AppBar(
         title: Text(tituloAppBar),
@@ -61,9 +72,7 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
                 ? AppColors.primary
                 : AppColors.textSecondary,
             onPressed: () {
-              ref
-                  .read(ventasNavegacionProvider.notifier)
-                  .cambiarVista(VistaActual.historial);
+              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.historial);
             },
           ),
           IconButton(
@@ -72,36 +81,15 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
             color: AppColors.textSecondary,
             onPressed: () {
               ref.read(registrarVentaProvider.notifier).vaciarVenta();
-              ref
-                  .read(ventasNavegacionProvider.notifier)
-                  .volverAlInicio();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.check_circle_outline),
-            tooltip: 'Confirmar',
-            color: AppColors.primary,
-            onPressed: () {
-              ref
-                  .read(ventasNavegacionProvider.notifier)
-                  .cambiarVista(VistaActual.detalle);
+              ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
+              ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
             },
           ),
         ],
       ),
       body: Column(
         children: [
-          Expanded(
-            child: IndexedStack(
-              index: vistaActual.index,
-              children: const [
-                VistaInicioVacia(),
-                VistaInventario(),
-                VistaDetalle(),
-                HistorialVentas(),
-              ],
-            ),
-          ),
+          Expanded(child: vistaActiva),
           const BarraNavegacionInferior(),
         ],
       ),

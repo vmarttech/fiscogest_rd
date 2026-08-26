@@ -213,21 +213,21 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           ListTile(
             title: const Text('Efectivo'),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('efectivo', false);
+              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('efectivo');
               Navigator.pop(context);
             },
           ),
           ListTile(
             title: const Text('Tarjeta'),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('tarjeta', false);
+              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('tarjeta');
               Navigator.pop(context);
             },
           ),
           ListTile(
             title: const Text('Crédito'),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito', true);
+              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito');
               Navigator.pop(context);
             },
           ),

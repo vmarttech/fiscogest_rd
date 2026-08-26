@@ -1,4 +1,6 @@
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
 import 'package:fiscogest_rd/features/ventas/data/services/venta_inventario_service_impl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
@@ -29,6 +31,7 @@ class RepositoryInjection {
   });
 
   static RepositoryInjection? _instance;
+
   static RepositoryInjection get instance {
     if (_instance == null) throw Exception('RepositoryInjection no inicializado');
     return _instance!;
@@ -52,21 +55,18 @@ class RepositoryInjection {
     final kardexDatasource = DriftKardexDatasource(db);
     final kardexRepository = KardexRepositoryImpl(kardexDatasource);
     final inventarioService = InventarioServiceImpl(db);
-
-    // ✅ PASA LA BASE DE DATOS AL REPOSITORIO
-    final ventasRepository = VentasRepositoryImpl(db: db);
-
+    final ventasDao = VentasDao(db);
+    final cuentasCobrarDao = CuentasCobrarDao(db);
+    final ventasRepository = VentasRepositoryImpl(ventasDao, cuentasCobrarDao);
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,
       kardexRepository: kardexRepository,
       inventarioService: inventarioService,
       productosDao: productosDao,
     );
-
     final apartadoRepository = ApartadoRepositoryImpl(apartadosDao: apartadosDao);
     final devolucionRepository = DevolucionRepositoryImpl(devolucionesDao: devolucionesDao);
     final cajaRepository = CajaRepositoryImpl(cajaMovimientosDao: cajaMovimientosDao);
-
     _instance = RepositoryInjection._(
       db: db,
       ventasRepository: ventasRepository,

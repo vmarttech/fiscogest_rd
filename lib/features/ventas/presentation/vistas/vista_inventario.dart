@@ -1,5 +1,7 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
@@ -71,7 +73,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
       tasaImpuesto: _tasaItbis,
     );
     ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
-    ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.detalle);
+    context.goNamed(RegistrarVentaPage.routeName);
   }
 
   @override

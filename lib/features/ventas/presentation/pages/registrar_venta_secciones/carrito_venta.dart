@@ -31,7 +31,7 @@ class CarritoVenta extends ConsumerWidget {
               )
             else
               ...estadoLocal.detalles.map((detalleRaw) {
-                final DetalleVenta detalle = detalleRaw as DetalleVenta;
+                final DetalleVenta detalle = detalleRaw;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: ListTile(

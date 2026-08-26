@@ -234,7 +234,7 @@ class PanelCarrito extends ConsumerWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (ctx, i) {
                   final detalleRaw = estado.detalles[i];
-                  final DetalleVenta detalle = detalleRaw as DetalleVenta;
+                  final DetalleVenta detalle = detalleRaw;
                   return ItemCarrito(
                     detalle: detalle,
                     indice: i,
