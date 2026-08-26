@@ -1,16 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_cotizacion.dart';
-import 'package:fiscogest_rd/features/ventas/domain/usecases/editar_cotizacion.dart';
+import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_venta_borrador.dart';
+import 'package:fiscogest_rd/features/ventas/domain/usecases/editar_venta_borrador.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_cotizacion_service.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/cotizacion_service_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 @immutable
-class CotizacionState {
-  const CotizacionState({
+class VentaBorradorState {
+  const VentaBorradorState({
     required this.numero,
     required this.fecha,
     this.vencimiento,
@@ -44,7 +43,7 @@ class CotizacionState {
   final bool esCredito;
   final List<dynamic> detalles;
 
-  CotizacionState copyWith({
+  VentaBorradorState copyWith({
     String? numero,
     DateTime? fecha,
     DateTime? vencimiento,
@@ -61,7 +60,7 @@ class CotizacionState {
     bool? esCredito,
     List<dynamic>? detalles,
   }) {
-    return CotizacionState(
+    return VentaBorradorState(
       numero: numero ?? this.numero,
       fecha: fecha ?? this.fecha,
       vencimiento: vencimiento ?? this.vencimiento,
@@ -81,10 +80,10 @@ class CotizacionState {
   }
 }
 
-class CotizacionNotifier extends StateNotifier<CotizacionState> {
+class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
 
-  CotizacionNotifier(this._ref)
-      : super(CotizacionState(
+  VentaBorradorNotifier(this._ref)
+      : super(VentaBorradorState(
           numero: '',
           fecha: DateTime.now(),
           subtotal: 0.0,
@@ -139,7 +138,7 @@ class CotizacionNotifier extends StateNotifier<CotizacionState> {
   }
 
   void vaciar() {
-    state = CotizacionState(
+    state = VentaBorradorState(
       numero: '',
       fecha: DateTime.now(),
       subtotal: 0.0,
@@ -172,38 +171,38 @@ class CotizacionNotifier extends StateNotifier<CotizacionState> {
     if (!validarAntesDeGuardar()) throw Exception('Datos incompletos');
     final repositorio = _ref.read<IVentasRepository>(ventasRepositoryProvider);
     final entidad = _construirEntidad();
-    final casoUso = RegistrarCotizacion(repositorio);
+    final casoUso = RegistrarVentaBorrador(repositorio);
     final resultado = await casoUso(entidad);
-    _ref.invalidate(listaCotizacionesProvider);
+    _ref.invalidate(listaVentasBorradorProvider);
     return resultado.numero;
   }
 
-  Future<String> editar(int cotizacionId) async {
+  Future<String> editar(int ventaBorradorId) async {
     if (!validarAntesDeGuardar()) throw Exception('Datos incompletos');
     final repositorio = _ref.read<IVentasRepository>(ventasRepositoryProvider);
     final entidad = _construirEntidad();
-    final casoUso = EditarCotizacion(repositorio);
+    final casoUso = EditarVentaBorrador(repositorio);
     final resultado = await casoUso(entidad);
-    _ref.invalidate(listaCotizacionesProvider);
+    _ref.invalidate(listaVentasBorradorProvider);
     return resultado.numero;
   }
 
   Future<String> imprimir(Venta cotizacion) async {
-    final servicio = _ref.read<ICotizacionService>(cotizacionServiceProvider);
+    final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
     return servicio.generarImpresion(cotizacion);
   }
 
   Future<String> exportarPDF(Venta cotizacion) async {
-    final servicio = _ref.read<ICotizacionService>(cotizacionServiceProvider);
+    final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
     return servicio.exportarPDF(cotizacion);
   }
 
   Future<void> enviarPorCorreo(Venta cotizacion, String correoDestinatario) async {
-    final servicio = _ref.read<ICotizacionService>(cotizacionServiceProvider);
+    final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
     return servicio.enviarPorCorreo(cotizacion, correoDestinatario);
   }
 }
 
-final cotizacionProvider = StateNotifierProvider<CotizacionNotifier, CotizacionState>(
-  (ref) => CotizacionNotifier(ref),
+final ventaBorradorProvider = StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>(
+  (ref) => VentaBorradorNotifier(ref),
 );

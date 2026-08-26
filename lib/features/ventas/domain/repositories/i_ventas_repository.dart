@@ -22,10 +22,10 @@ abstract class IVentasRepository {
 
   Future<Venta?> obtenerVentaPorId(int ventaId);
   Future<Venta> registrarVenta(Venta venta);
-  Future<Venta> registrarCotizacion(Venta cotizacion);
-  Future<Venta?> obtenerCotizacionPorId(int cotizacionId);
-  Future<Venta> actualizarCotizacion(Venta cotizacion);
-  Future<Venta> convertirCotizacionAVenta(int cotizacionId);
+  Future<Venta> registrarVentaBorrador(Venta cotizacion);
+  Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId);
+  Future<Venta> actualizarVentaBorrador(Venta cotizacion);
+  Future<Venta> confirmarVentaBorrador(int cotizacionId);
   Future<Apartado> registrarApartado(Apartado apartado);
   Future<Devolucion> registrarDevolucion(Devolucion devolucion);
   Future<Pago> registrarPago(Pago pago);

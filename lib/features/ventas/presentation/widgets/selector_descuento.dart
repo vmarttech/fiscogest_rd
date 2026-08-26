@@ -36,7 +36,7 @@ class SelectorDescuento extends ConsumerWidget {
       ),
       data: (List<Descuento> descuentos) {
         final estadoVenta = ref.watch(registrarVentaProvider);
-        final estadoCot = ref.watch(cotizacionProvider);
+        final estadoCot = ref.watch(ventaBorradorProvider);
         final int? descuentoId = esParaCotizacion
             ? estadoCot.descuentoId
             : estadoVenta.descuentoId;
@@ -83,7 +83,7 @@ class SelectorDescuento extends ConsumerWidget {
                     TextButton(
                       onPressed: () {
                         if (esParaCotizacion) {
-                          ref.read(cotizacionProvider.notifier).quitarDescuento();
+                          ref.read(ventaBorradorProvider.notifier).quitarDescuento();
                         } else {
                           ref.read(registrarVentaProvider.notifier).quitarDescuento();
                         }
@@ -145,7 +145,7 @@ class SelectorDescuento extends ConsumerWidget {
                       final int? id = int.tryParse(descuento.id);
                       final String nombre = descuento.motivo;
                       if (esParaCotizacion) {
-                        ref.read(cotizacionProvider.notifier).aplicarDescuento(valor);
+                        ref.read(ventaBorradorProvider.notifier).aplicarDescuento(valor);
                       } else {
                         ref.read(registrarVentaProvider.notifier).seleccionarDescuento(id, nombre, valor);
                       }

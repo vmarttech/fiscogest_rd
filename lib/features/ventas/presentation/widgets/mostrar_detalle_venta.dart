@@ -5,7 +5,6 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/cotizacion_service_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 
@@ -23,7 +22,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
-      final servicio = ref.read(cotizacionServiceProvider);
+      final servicio = ref.read(ventaBorradorServicioProvider);
       final resultado = await servicio.generarImpresion(venta);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -41,7 +40,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
 
   Future<void> _exportarPDF(BuildContext context, WidgetRef ref) async {
     try {
-      final servicio = ref.read(cotizacionServiceProvider);
+      final servicio = ref.read(ventaBorradorServicioProvider);
       final ruta = await servicio.exportarPDF(venta);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -60,7 +59,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
   Future<void> _enviarPorCorreo(BuildContext context, WidgetRef ref) async {
     final correo = venta.nombreCliente != null ? 'correo@ejemplo.com' : '';
     try {
-      final servicio = ref.read(cotizacionServiceProvider);
+      final servicio = ref.read(ventaBorradorServicioProvider);
       await servicio.enviarPorCorreo(venta, correo);
     } catch (e) {
       if (context.mounted) {
@@ -86,7 +85,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
     );
     if (confirmar != true || !context.mounted) return;
     try {
-      final casoUso = ref.read(convertirCotizacionAVentaUseCaseProvider);
+      final casoUso = ref.read(confirmarVentaBorradorUseCaseProvider);
       final resultado = await casoUso.call(venta.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

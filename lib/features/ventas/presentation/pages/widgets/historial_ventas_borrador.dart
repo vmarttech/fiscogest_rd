@@ -6,10 +6,10 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_cotizacion_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
 
-class HistorialCotizaciones extends ConsumerWidget {
-  const HistorialCotizaciones({super.key});
+class HistorialVentasBorrador extends ConsumerWidget {
+  const HistorialVentasBorrador({super.key});
 
   String _formatearFecha(dynamic valor) {
     if (valor == null) return 'Sin fecha';
@@ -22,7 +22,7 @@ class HistorialCotizaciones extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cotizacionesAsync = ref.watch(listaCotizacionesProvider);
+    final cotizacionesAsync = ref.watch(listaVentasBorradorProvider);
     return Padding(
       padding: AppSpacing.allM,
       child: Column(
@@ -40,7 +40,7 @@ class HistorialCotizaciones extends ConsumerWidget {
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
-                  context.goNamed(NuevaCotizacionPage.routeName);
+                  context.goNamed(NuevaVentaBorradorPage.routeName);
                 },
               ),
             ],
@@ -64,7 +64,7 @@ class HistorialCotizaciones extends ConsumerWidget {
                   ],
                 ),
               ),
-              data: (List<CotizacionState> cotizaciones) {
+              data: (List<VentaBorradorState> cotizaciones) {
                 if (cotizaciones.isEmpty) {
                   return Center(
                     child: Column(
@@ -85,20 +85,20 @@ class HistorialCotizaciones extends ConsumerWidget {
                   itemCount: cotizaciones.length,
                   separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
                   itemBuilder: (_, int i) {
-                    final CotizacionState c = cotizaciones[i];
+                    final VentaBorradorState c = cotizaciones[i];
                     final String numero = c.numero;
                     final String fechaEmision = _formatearFecha(c.fecha);
                     final String fechaVencimiento = _formatearFecha(c.vencimiento);
                     final double total = c.montoTotal;
                     final bool convertida = false;
-                    final int? cotizacionId = null;
+                    final int? ventaBorradorId = null;
                     return _TarjetaCotizacion(
                       numero: numero,
                       fechaEmision: fechaEmision,
                       fechaVencimiento: fechaVencimiento,
                       total: total,
                       convertida: convertida,
-                      cotizacionId: cotizacionId,
+                      ventaBorradorId: ventaBorradorId,
                     );
                   },
                 );
@@ -118,7 +118,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
     required this.fechaVencimiento,
     required this.total,
     required this.convertida,
-    required this.cotizacionId,
+    required this.ventaBorradorId,
   });
 
   final String numero;
@@ -126,10 +126,10 @@ class _TarjetaCotizacion extends ConsumerWidget {
   final String fechaVencimiento;
   final double total;
   final bool convertida;
-  final int? cotizacionId;
+  final int? ventaBorradorId;
 
   Future<void> _convertirAVenta(WidgetRef ref, BuildContext context) async {
-    if (cotizacionId == null) return;
+    if (ventaBorradorId == null) return;
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (BuildContext _) => AlertDialog(
@@ -148,12 +148,12 @@ class _TarjetaCotizacion extends ConsumerWidget {
     if (confirmar != true || !context.mounted) return;
     try {
       final repo = ref.read(ventasRepositoryProvider);
-      await repo.convertirCotizacionAVenta(cotizacionId!);
+      await repo.confirmarVentaBorrador(ventaBorradorId!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('✅ Cotización N° $numero convertida a Venta'), backgroundColor: Colors.green),
         );
-        ref.invalidate(listaCotizacionesProvider);
+        ref.invalidate(listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
@@ -211,7 +211,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
               Text('RD\$ ${total.toStringAsFixed(2)}',
                   style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
               const SizedBox(height: AppSpacing.xs),
-              if (!convertida && cotizacionId != null)
+              if (!convertida && ventaBorradorId != null)
                 AppButton(
                   text: 'Convertir a Venta',
                   onPressed: () => _convertirAVenta(ref, context),

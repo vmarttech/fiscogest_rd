@@ -148,7 +148,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   }
 
   @override
-  Future<Venta?> obtenerCotizacionPorId(int cotizacionId) async {
+  Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId) async {
     final fila = await _cotizacionesDao.buscarPorId(cotizacionId);
     if (fila == null) return null;
     return Venta(
@@ -168,7 +168,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   }
 
   @override
-  Future<Venta> registrarCotizacion(Venta cotizacion) async {
+  Future<Venta> registrarVentaBorrador(Venta cotizacion) async {
     final cotizacionId = await _cotizacionesDao.insertarCotizacion(CotizacionesTableCompanion(
       clienteId: Value(cotizacion.clienteId),
       fechaEmision: Value(cotizacion.fecha),
@@ -196,13 +196,13 @@ class VentasRepositoryImpl implements IVentasRepository {
   }
 
   @override
-  Future<Venta> actualizarCotizacion(Venta cotizacion) async {
+  Future<Venta> actualizarVentaBorrador(Venta cotizacion) async {
     throw UnimplementedError('Actualización de cotización requiere UPDATE en CotizacionesTable');
   }
 
   @override
-  Future<Venta> convertirCotizacionAVenta(int cotizacionId) async {
-    final cotizacion = await obtenerCotizacionPorId(cotizacionId);
+  Future<Venta> confirmarVentaBorrador(int cotizacionId) async {
+    final cotizacion = await obtenerVentaBorradorPorId(cotizacionId);
     if (cotizacion == null) {
       throw Exception('Cotización $cotizacionId no encontrada');
     }

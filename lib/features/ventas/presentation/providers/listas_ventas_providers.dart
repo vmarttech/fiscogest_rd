@@ -4,9 +4,9 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 extension VentaExtension on Venta {
-  CotizacionState toCotizacionState() {
+  VentaBorradorState toVentaBorradorState() {
     final double descuentoCalc = total - subtotal - itbis;
-    return CotizacionState(
+    return VentaBorradorState(
       numero: numero,
       fecha: fecha,
       vencimiento: null,
@@ -21,10 +21,10 @@ extension VentaExtension on Venta {
   }
 }
 
-final listaCotizacionesProvider = FutureProvider<List<CotizacionState>>((ref) async {
+final listaVentasBorradorProvider = FutureProvider<List<VentaBorradorState>>((ref) async {
   final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
   final List<Venta> entidades = await repositorio.listarVentas();
-  return entidades.map((Venta e) => e.toCotizacionState()).toList();
+  return entidades.map((Venta e) => e.toVentaBorradorState()).toList();
 });
 
 final listaApartadosProvider = FutureProvider<List<dynamic>>((ref) async {

@@ -9,15 +9,15 @@ import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 
-class NuevaCotizacionPage extends ConsumerStatefulWidget {
-  const NuevaCotizacionPage({super.key});
+class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
+  const NuevaVentaBorradorPage({super.key});
   static const String routeName = 'nueva-cotizacion';
 
   @override
-  ConsumerState<NuevaCotizacionPage> createState() => _NuevaCotizacionPageState();
+  ConsumerState<NuevaVentaBorradorPage> createState() => _NuevaCotizacionPageState();
 }
 
-class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
+class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
   final TextEditingController _buscadorController = TextEditingController();
   DateTime? _fechaVencimientoSeleccionada;
   bool _guardando = false;
@@ -31,7 +31,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
   Future<void> _seleccionarCliente() async {
     final ClienteEntity? cliente = await SeleccionarClienteDialog.mostrar(context);
     if (cliente != null && mounted) {
-      ref.read(cotizacionProvider.notifier).seleccionarCliente(
+      ref.read(ventaBorradorProvider.notifier).seleccionarCliente(
         cliente.id ?? 0,
         cliente.nombre,
       );
@@ -48,12 +48,12 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     );
     if (fecha != null) {
       setState(() => _fechaVencimientoSeleccionada = fecha);
-      ref.read(cotizacionProvider.notifier).establecerVencimiento(fecha);
+      ref.read(ventaBorradorProvider.notifier).establecerVencimiento(fecha);
     }
   }
 
   Future<void> _guardarCotizacion() async {
-    final notificador = ref.read(cotizacionProvider.notifier);
+    final notificador = ref.read(ventaBorradorProvider.notifier);
     if (!notificador.validarAntesDeGuardar()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -117,7 +117,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final estado = ref.watch(cotizacionProvider);
+    final estado = ref.watch(ventaBorradorProvider);
     return AppScaffold(
       title: 'Nueva Cotización',
       body: Column(
@@ -136,7 +136,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     );
   }
 
-  Widget _buildUnaColumna(CotizacionState estado) {
+  Widget _buildUnaColumna(VentaBorradorState estado) {
     return SingleChildScrollView(
       padding: AppSpacing.allM,
       child: Column(
@@ -154,7 +154,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     );
   }
 
-  Widget _buildDosColumnas(CotizacionState estado) {
+  Widget _buildDosColumnas(VentaBorradorState estado) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -177,7 +177,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     );
   }
 
-  Widget _buildDatosGenerales(CotizacionState estado) {
+  Widget _buildDatosGenerales(VentaBorradorState estado) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -225,7 +225,7 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaCotizacionPage> {
     );
   }
 
-  Widget _buildResumen(CotizacionState estado) {
+  Widget _buildResumen(VentaBorradorState estado) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
