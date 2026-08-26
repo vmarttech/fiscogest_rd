@@ -1,7 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_borrador_provider.dart';
+
+Venta _convertirVentaDeDao(VentaConCliente origen) {
+  return Venta(
+    id: origen.venta.id,
+    numero: origen.venta.id.toString(),
+    clienteId: origen.venta.clienteId,
+    nombreCliente: origen.nombreCliente,
+    fecha: origen.venta.fecha,
+    detalles: [],
+    subtotal: origen.venta.montoSubtotal,
+    itbis: origen.venta.itbis,
+    total: origen.venta.montoTotal,
+    tipoPago: origen.venta.formaPago.name,
+    esCredito: false,
+    cotizacionOrigenId: null,
+    apartadoOrigenId: null,
+    usuarioId: origen.venta.usuarioId,
+    createdAt: origen.venta.fechaRegistro,
+    descuentoId: null,
+    descuentoNombre: null,
+    montoDescuento: origen.venta.descuentoGlobal,
+  );
+}
 
 extension VentaExtension on Venta {
   VentaBorradorState toVentaBorradorState() {
@@ -21,19 +46,18 @@ extension VentaExtension on Venta {
   }
 }
 
+final listaVentasProvider = FutureProvider<List<Venta>>((ref) async {
+  final AppDatabase db = ref.watch(databaseProvider);
+  final dao = VentasDao(db);
+  final resultado = await dao.listarVentas();
+  return resultado.map((e) => _convertirVentaDeDao(e)).toList();
+});
+
 final listaVentasBorradorProvider = FutureProvider<List<VentaBorradorState>>((ref) async {
-  final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
-  final List<Venta> entidades = await repositorio.listarVentas();
-  return entidades.map((Venta e) => e.toVentaBorradorState()).toList();
+  final ventas = await ref.watch(listaVentasProvider.future);
+  return ventas.map((e) => e.toVentaBorradorState()).toList();
 });
 
 final listaApartadosProvider = FutureProvider<List<dynamic>>((ref) async {
-  final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
-  await Future.value(repositorio);
   return [];
-});
-
-final listaVentasProvider = FutureProvider<List<Venta>>((ref) async {
-  final IVentasRepository repositorio = ref.watch(ventasRepositoryProvider);
-  return await repositorio.listarVentas();
 });

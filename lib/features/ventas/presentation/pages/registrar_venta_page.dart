@@ -1,9 +1,9 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
-import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
@@ -12,7 +12,6 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
   static const String routeName = 'registrar-ventas';
-
   @override
   ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
@@ -48,19 +47,33 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         .read(productoControllerProvider.notifier)
         .buscarPorNombre(termino);
 
-    if (resultados.isEmpty && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Producto no encontrado')),
-      );
-      return;
-    }
-
     final ofertasActivas = await ref.watch(ofertasActivosProvider.future);
     final List<Oferta> listaOfertas = ofertasActivas.cast<Oferta>();
 
+    // ✅ Si no hay resultados → abrir diálogo con opción de ir a Inventario
+    if (resultados.isEmpty && mounted) {
+      unawaitedShowDialog(context, AlertDialog(
+        title: const Text('Producto no encontrado'),
+        content: const Text('No hay coincidencias. ¿Desea abrir el inventario completo?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.pushNamed('productos'); // ✅ Abre pantalla de inventario
+            },
+            child: const Text('Abrir Inventario'),
+          ),
+        ],
+      ));
+      return;
+    }
+
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
-
       if ((p.stock ?? 0) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -70,14 +83,12 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         );
         return;
       }
-
       final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
       final double precioUnitario = (oferta != null) ? oferta.precioOferta : p.precioVenta.toDouble();
       final double subtotal = precioUnitario * 1;
       final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
       final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
       final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
-
       final linea = DetalleVenta(
         productoId: p.id ?? 0,
         nombreProducto: p.nombre,
@@ -89,10 +100,8 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         ofertaNombre: ofertaNombre,
         precioOriginal: precioOriginal,
       );
-
       ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
       _buscadorController.clear();
-
       if (oferta != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -108,12 +117,23 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           width: double.maxFinite,
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: resultados.length,
+            itemCount: resultados.length + 1, // ✅ +1 para opción "Abrir Inventario"
             itemBuilder: (ctx, i) {
+              // ✅ ÚLTIMA OPCIÓN: Abrir Inventario completo
+              if (i == resultados.length) {
+                return ListTile(
+                  leading: const Icon(Icons.inventory_2, color: Colors.blue),
+                  title: const Text('Abrir Inventario completo'),
+                  subtitle: const Text('Ver todos los productos'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    context.pushNamed('productos'); // ✅ Navega sin condiciones
+                  },
+                );
+              }
               final p = resultados[i];
               final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
               final hayStock = (p.stock ?? 0) > 0;
-
               return ListTile(
                 title: Row(
                   children: [
@@ -169,7 +189,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
                         final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
                         final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
-
                         final linea = DetalleVenta(
                           productoId: p.id ?? 0,
                           nombreProducto: p.nombre,
@@ -181,11 +200,9 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                           ofertaNombre: ofertaNombre,
                           precioOriginal: precioOriginal,
                         );
-
                         ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
                         _buscadorController.clear();
                         Navigator.pop(ctx);
-
                         if (oferta != null && mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -225,9 +242,23 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             },
           ),
           ListTile(
+            title: const Text('Transferencia'),
+            onTap: () {
+              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('transferencia');
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
             title: const Text('Crédito'),
             onTap: () {
               ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito');
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Cheque'),
+            onTap: () {
+              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('cheque');
               Navigator.pop(context);
             },
           ),
@@ -249,73 +280,16 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
               Navigator.pop(context);
             },
           ),
+          // ✅ BUSCAR CLIENTE → ABRIR LISTA, NO FORMULARIO
           ListTile(
             title: const Text('Buscar Cliente...'),
-            onTap: () async {
+            subtitle: const Text('Ver lista de clientes registrados'),
+            onTap: () {
               Navigator.pop(context);
-              final termino = await _mostrarBusquedaDialog('Buscar Cliente');
-              if (termino != null && termino.trim().isNotEmpty && mounted) {
-                final resultados = await ref
-                    .read(clienteCompletoControllerProvider.notifier)
-                    .buscarPorNombre(termino);
-                if (resultados.isNotEmpty && mounted) {
-                  _mostrarResultadosClientes(resultados);
-                } else if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No se encontraron clientes')),
-                  );
-                }
-              }
+              context.pushNamed('clientes'); // ✅ PANTALLA DE LISTADO, NO DE NUEVO
             },
           ),
         ],
-      ),
-    ));
-  }
-
-  Future<String?> _mostrarBusquedaDialog(String titulo) async {
-    final control = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(titulo),
-        content: TextField(
-          controller: control,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Escriba para buscar...'),
-          onSubmitted: (valor) => Navigator.pop(ctx, valor),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(ctx, control.text), child: const Text('Buscar')),
-        ],
-      ),
-    );
-  }
-
-  void _mostrarResultadosClientes(List<dynamic> lista) {
-    unawaitedShowDialog(context, AlertDialog(
-      title: const Text('Clientes Encontrados'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: lista.length,
-          itemBuilder: (ctx, i) {
-            final cliente = lista[i];
-            final nombre = cliente.nombre as String? ?? '';
-            final rnc = cliente.rncCedula as String? ?? '';
-            final id = cliente.id as int? ?? 1;
-            return ListTile(
-              title: Text(nombre),
-              subtitle: Text(rnc),
-              onTap: () {
-                ref.read(registrarVentaProvider.notifier).seleccionarCliente(id, nombre);
-                Navigator.pop(ctx);
-              },
-            );
-          },
-        ),
       ),
     ));
   }
@@ -349,13 +323,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       );
       return;
     }
-
     setState(() => _cargando = true);
-
     try {
       final casoUso = ref.read(registrarVentaUseCaseProvider);
       final ventaGuardada = await casoUso.ejecutar(estado);
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
