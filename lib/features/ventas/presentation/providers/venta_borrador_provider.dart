@@ -187,19 +187,19 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     return resultado.numero;
   }
 
-  Future<String> imprimir(Venta cotizacion) async {
+  Future<String> imprimir(Venta ventaBorrador) async {
     final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
-    return servicio.generarImpresion(cotizacion);
+    return servicio.generarImpresion(ventaBorrador);
   }
 
-  Future<String> exportarPDF(Venta cotizacion) async {
+  Future<String> exportarPDF(Venta ventaBorrador) async {
     final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
-    return servicio.exportarPDF(cotizacion);
+    return servicio.exportarPDF(ventaBorrador);
   }
 
-  Future<void> enviarPorCorreo(Venta cotizacion, String correoDestinatario) async {
+  Future<void> enviarPorCorreo(Venta ventaBorrador, String correoDestinatario) async {
     final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
-    return servicio.enviarPorCorreo(cotizacion, correoDestinatario);
+    return servicio.enviarPorCorreo(ventaBorrador, correoDestinatario);
   }
 }
 

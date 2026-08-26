@@ -22,7 +22,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cotizacionesAsync = ref.watch(listaVentasBorradorProvider);
+    final ventasBorradorAsync = ref.watch(listaVentasBorradorProvider);
     return Padding(
       padding: AppSpacing.allM,
       child: Column(
@@ -46,11 +46,11 @@ class HistorialVentasBorrador extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text('Lista de cotizaciones emitidas y su estado',
+          Text('Lista de ventas borrador emitidas y su estado',
               style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.m),
           Expanded(
-            child: cotizacionesAsync.when(
+            child: ventasBorradorAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (Object e, StackTrace? _) => Center(
                 child: Column(
@@ -58,34 +58,34 @@ class HistorialVentasBorrador extends ConsumerWidget {
                   children: [
                     const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                     const SizedBox(height: AppSpacing.m),
-                    Text('Error al cargar cotizaciones: $e',
+                    Text('Error al cargar ventas borrador: $e',
                         style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
                         textAlign: TextAlign.center),
                   ],
                 ),
               ),
-              data: (List<VentaBorradorState> cotizaciones) {
-                if (cotizaciones.isEmpty) {
+              data: (List<VentaBorradorState> ventasBorrador) {
+                if (ventasBorrador.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.description_outlined, size: 64, color: Color(0x409E9E9E)),
                         const SizedBox(height: AppSpacing.m),
-                        Text('No hay cotizaciones registradas',
+                        Text('No hay ventas borrador registradas',
                             style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
                         const SizedBox(height: AppSpacing.xs),
-                        Text('Las cotizaciones que registres aparecerán aquí',
+                        Text('Las ventas borrador que registres aparecerán aquí',
                             style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
                       ],
                     ),
                   );
                 }
                 return ListView.separated(
-                  itemCount: cotizaciones.length,
+                  itemCount: ventasBorrador.length,
                   separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
                   itemBuilder: (_, int i) {
-                    final VentaBorradorState c = cotizaciones[i];
+                    final VentaBorradorState c = ventasBorrador[i];
                     final String numero = c.numero;
                     final String fechaEmision = _formatearFecha(c.fecha);
                     final String fechaVencimiento = _formatearFecha(c.vencimiento);

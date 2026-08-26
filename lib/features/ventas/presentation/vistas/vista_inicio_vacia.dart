@@ -19,7 +19,7 @@ class VistaInicioVacia extends ConsumerWidget {
 
     final String tituloModo = switch (modo) {
       ModoOperacion.venta => 'Nueva Venta',
-      ModoOperacion.cotizacion => 'Nueva Cotización',
+      ModoOperacion.cotizacion => 'Nueva Venta Borrador',
       ModoOperacion.apartado => 'Nuevo Apartado',
     };
 

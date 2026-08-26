@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
   static const String routeName = 'registrar-ventas';
+
   @override
   ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
@@ -46,16 +47,20 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     final resultados = await ref
         .read(productoControllerProvider.notifier)
         .buscarPorNombre(termino);
+
     if (resultados.isEmpty && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Producto no encontrado')),
       );
       return;
     }
+
     final ofertasActivas = await ref.watch(ofertasActivosProvider.future);
     final List<Oferta> listaOfertas = ofertasActivas.cast<Oferta>();
+
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
+
       if ((p.stock ?? 0) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -65,32 +70,29 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         );
         return;
       }
+
       final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
-      double precioUnitario = p.precioVenta.toDouble();
-      double subtotal = precioUnitario;
-      double? precioOriginal;
-      String? ofertaId;
-      String? ofertaNombre;
-      if (oferta != null) {
-        precioOriginal = p.precioVenta.toDouble();
-        precioUnitario = oferta.precioOferta;
-        subtotal = precioUnitario;
-        ofertaId = oferta.id.toString();
-        ofertaNombre = oferta.nombre;
-      }
+      final double precioUnitario = (oferta != null) ? oferta.precioOferta : p.precioVenta.toDouble();
+      final double subtotal = precioUnitario * 1;
+      final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
+      final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
+      final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
+
       final linea = DetalleVenta(
         productoId: p.id ?? 0,
         nombreProducto: p.nombre,
         cantidad: 1,
         precioUnitario: precioUnitario,
         subtotal: subtotal,
-        subtotalLinea: precioUnitario,
+        subtotalLinea: subtotal,
         ofertaId: ofertaId,
         ofertaNombre: ofertaNombre,
         precioOriginal: precioOriginal,
       );
+
       ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
       _buscadorController.clear();
+
       if (oferta != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -111,6 +113,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
               final p = resultados[i];
               final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
               final hayStock = (p.stock ?? 0) > 0;
+
               return ListTile(
                 title: Row(
                   children: [
@@ -161,32 +164,28 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                 enabled: hayStock,
                 onTap: hayStock
                     ? () {
-                        double precioUnitario = p.precioVenta.toDouble();
-                        double subtotal = precioUnitario;
-                        double? precioOriginal;
-                        String? ofertaId;
-                        String? ofertaNombre;
-                        if (oferta != null) {
-                          precioOriginal = p.precioVenta.toDouble();
-                          precioUnitario = oferta.precioOferta;
-                          subtotal = precioUnitario;
-                          ofertaId = oferta.id.toString();
-                          ofertaNombre = oferta.nombre;
-                        }
+                        final double precioUnitario = (oferta != null) ? oferta.precioOferta : p.precioVenta.toDouble();
+                        final double subtotal = precioUnitario * 1;
+                        final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
+                        final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
+                        final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
+
                         final linea = DetalleVenta(
                           productoId: p.id ?? 0,
                           nombreProducto: p.nombre,
                           cantidad: 1,
                           precioUnitario: precioUnitario,
                           subtotal: subtotal,
-                          subtotalLinea: precioUnitario,
+                          subtotalLinea: subtotal,
                           ofertaId: ofertaId,
                           ofertaNombre: ofertaNombre,
                           precioOriginal: precioOriginal,
                         );
+
                         ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
                         _buscadorController.clear();
                         Navigator.pop(ctx);
+
                         if (oferta != null && mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -350,10 +349,13 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       );
       return;
     }
+
     setState(() => _cargando = true);
+
     try {
       final casoUso = ref.read(registrarVentaUseCaseProvider);
       final ventaGuardada = await casoUso.ejecutar(estado);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

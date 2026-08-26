@@ -11,7 +11,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_producto
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
-  static const String routeName = 'nueva-cotizacion';
+  static const String routeName = 'nueva-venta-borrador';
 
   @override
   ConsumerState<NuevaVentaBorradorPage> createState() => _NuevaCotizacionPageState();
@@ -20,6 +20,7 @@ class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
 class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
   final TextEditingController _buscadorController = TextEditingController();
   DateTime? _fechaVencimientoSeleccionada;
+  String? _numeroCotizacionGuardada;
   bool _guardando = false;
 
   @override
@@ -65,16 +66,22 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
       }
       return;
     }
+
     setState(() => _guardando = true);
+
     try {
       final numero = await notificador.guardar();
       if (!mounted) return;
+
+      setState(() => _numeroCotizacionGuardada = numero);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('✅ Cotización guardada — N° $numero'),
           backgroundColor: AppColors.success,
         ),
       );
+
       notificador.vaciar();
       setState(() => _fechaVencimientoSeleccionada = null);
       Navigator.pop(context);
@@ -88,29 +95,55 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
         setState(() => _guardando = false);
       }
     }
-    return;
   }
 
-  void _imprimir() {
+  Future<void> _imprimir() async {
+    if (_numeroCotizacionGuardada == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ℹ️ Guarde la cotización antes de imprimir')),
+        );
+      }
+      return;
+    }
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ℹ️ Guarde la cotización antes de imprimir')),
+        SnackBar(content: Text('📄 Imprimiendo cotización N° $_numeroCotizacionGuardada...')),
       );
     }
   }
 
-  void _exportarPDF() {
+  Future<void> _exportarPDF() async {
+    if (_numeroCotizacionGuardada == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ℹ️ Guarde la cotización antes de exportar')),
+        );
+      }
+      return;
+    }
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ℹ️ Guarde la cotización antes de exportar')),
+        SnackBar(content: Text('📄 Generando PDF de cotización N° $_numeroCotizacionGuardada...')),
       );
     }
   }
 
-  void _enviarPorCorreo() {
+  Future<void> _enviarPorCorreo() async {
+    if (_numeroCotizacionGuardada == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ℹ️ Guarde la cotización antes de enviar')),
+        );
+      }
+      return;
+    }
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ℹ️ Guarde la cotización antes de enviar')),
+        SnackBar(content: Text('📧 Enviando cotización N° $_numeroCotizacionGuardada por correo...')),
       );
     }
   }
