@@ -90,7 +90,7 @@ class VistaInicioVacia extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.tips_and_updates_outlined, color: AppColors.textSecondary, size: 20),
+                  const Icon(Icons.tips_and_updates_outlined, color: AppColors.textSecondary, size: 20),
                   const SizedBox(width: AppSpacing.s),
                   Text(
                     'Seleccione una categoría para comenzar',

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -217,7 +218,7 @@ class _BotonOperaciones extends ConsumerWidget {
     );
 
     if (seleccion == ModoOperacion.cobrar) {
-      if (context.mounted) context.pushNamed(CobrarPage.routeName);
+      if (context.mounted) unawaited(context.pushNamed(CobrarPage.routeName));
       return;
     }
 
