@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_section.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 class ApartadosPage extends ConsumerStatefulWidget {
@@ -16,51 +19,89 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
   @override
   Widget build(BuildContext context) {
     final listaApartados = ref.watch(listaApartadosProvider);
-
     return AppScaffold(
       title: 'Productos Apartados',
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: listaApartados.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Text('❌ Error al cargar apartados: $error'),
-          ),
-          data: (apartados) {
-            if (apartados.isEmpty) {
-              return const Center(child: Text('No hay productos apartados'));
-            }
-            return AppSection(
-              title: 'Apartados (${apartados.length})',
-              children: [
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    columnSpacing: 20,
-                    columns: const [
-                      DataColumn(label: Text('ID')),
-                      DataColumn(label: Text('Producto')),
-                      DataColumn(label: Text('Cantidad')),
-                      DataColumn(label: Text('Cliente')),
-                      DataColumn(label: Text('Fecha')),
-                      DataColumn(label: Text('Estado')),
-                    ],
-                    rows: apartados.map((apt) {
-                      return DataRow(cells: [
-                        DataCell(Text('${apt['id']}')),
-                        DataCell(Text('${apt['productoNombre'] ?? '-'}')),
-                        DataCell(Text('${apt['cantidad']}')),
-                        DataCell(Text('${apt['clienteNombre'] ?? '-'}')),
-                        DataCell(Text('${apt['fechaApartado']}')),
-                        DataCell(Text('${apt['estado']}')),
-                      ]);
-                    }).toList(),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: AppSpacing.allM,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - AppSpacing.l,
+              ),
+              child: listaApartados.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Padding(
+                    padding: AppSpacing.allM,
+                    child: Text(
+                      'Error al cargar apartados: $error',
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ],
-            );
-          },
-        ),
+                data: (apartados) {
+                  if (apartados.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: AppSpacing.allM,
+                        child: Text(
+                          'No hay productos apartados',
+                          style: AppTypography.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                  return AppSection(
+                    title: 'Apartados (${apartados.length})',
+                    children: [
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: DataTable(
+                          columnSpacing: AppSpacing.l,
+                          columns: const [
+                            DataColumn(label: Text('ID', style: AppTypography.bodyMedium)),
+                            DataColumn(label: Text('Producto', style: AppTypography.bodyMedium)),
+                            DataColumn(label: Text('Cantidad', style: AppTypography.bodyMedium)),
+                            DataColumn(label: Text('Cliente', style: AppTypography.bodyMedium)),
+                            DataColumn(label: Text('Fecha', style: AppTypography.bodyMedium)),
+                            DataColumn(label: Text('Estado', style: AppTypography.bodyMedium)),
+                          ],
+                          rows: apartados.map((apt) {
+                            return DataRow(cells: [
+                              DataCell(Text('${apt['id']}', style: AppTypography.bodySmall)),
+                              DataCell(
+                                Text(
+                                  '${apt['productoNombre'] ?? '-'}',
+                                  style: AppTypography.bodySmall,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              DataCell(Text('${apt['cantidad']}', style: AppTypography.bodySmall)),
+                              DataCell(
+                                Text(
+                                  '${apt['clienteNombre'] ?? '-'}',
+                                  style: AppTypography.bodySmall,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              DataCell(Text('${apt['fechaApartado']}', style: AppTypography.bodySmall)),
+                              DataCell(Text('${apt['estado']}', style: AppTypography.bodySmall)),
+                            ]);
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }

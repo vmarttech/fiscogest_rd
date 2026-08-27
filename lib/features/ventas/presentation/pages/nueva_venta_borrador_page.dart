@@ -4,6 +4,8 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
@@ -59,36 +61,31 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('⚠️ Seleccione cliente y complete los datos'),
+            content: Text('Seleccione cliente y complete los datos'),
             backgroundColor: AppColors.error,
           ),
         );
       }
       return;
     }
-
     setState(() => _guardando = true);
-
     try {
       final numero = await notificador.guardar();
       if (!mounted) return;
-
       setState(() => _numeroCotizacionGuardada = numero);
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ Cotización guardada — N° $numero'),
+          content: Text('Cotización guardada — N° $numero'),
           backgroundColor: AppColors.success,
         ),
       );
-
       notificador.vaciar();
       setState(() => _fechaVencimientoSeleccionada = null);
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: $e'), backgroundColor: AppColors.error),
+        SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
       );
     } finally {
       if (mounted) {
@@ -101,15 +98,14 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
     if (_numeroCotizacionGuardada == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ℹ️ Guarde la cotización antes de imprimir')),
+          const SnackBar(content: Text('Guarde la cotización antes de imprimir')),
         );
       }
       return;
     }
-
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('📄 Imprimiendo cotización N° $_numeroCotizacionGuardada...')),
+        SnackBar(content: Text('Imprimiendo cotización N° $_numeroCotizacionGuardada...')),
       );
     }
   }
@@ -118,15 +114,14 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
     if (_numeroCotizacionGuardada == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ℹ️ Guarde la cotización antes de exportar')),
+          const SnackBar(content: Text('Guarde la cotización antes de exportar')),
         );
       }
       return;
     }
-
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('📄 Generando PDF de cotización N° $_numeroCotizacionGuardada...')),
+        SnackBar(content: Text('Generando PDF de cotización N° $_numeroCotizacionGuardada...')),
       );
     }
   }
@@ -135,15 +130,14 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
     if (_numeroCotizacionGuardada == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ℹ️ Guarde la cotización antes de enviar')),
+          const SnackBar(content: Text('Guarde la cotización antes de enviar')),
         );
       }
       return;
     }
-
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('📧 Enviando cotización N° $_numeroCotizacionGuardada por correo...')),
+        SnackBar(content: Text('Enviando cotización N° $_numeroCotizacionGuardada por correo...')),
       );
     }
   }
@@ -195,7 +189,11 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
           flex: 5,
           child: SingleChildScrollView(
             padding: AppSpacing.allM,
-            child: Column(children: [_buildDatosGenerales(estado), const SizedBox(height: AppSpacing.m), _buildProductos()]),
+            child: Column(children: [
+              _buildDatosGenerales(estado),
+              const SizedBox(height: AppSpacing.m),
+              _buildProductos(),
+            ]),
           ),
         ),
         const SizedBox(width: AppSpacing.m),
@@ -203,7 +201,11 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
           flex: 5,
           child: SingleChildScrollView(
             padding: AppSpacing.allM,
-            child: Column(children: [_buildResumen(estado), const SizedBox(height: AppSpacing.l), _buildBotonera()]),
+            child: Column(children: [
+              _buildResumen(estado),
+              const SizedBox(height: AppSpacing.l),
+              _buildBotonera(),
+            ]),
           ),
         ),
       ],
@@ -216,31 +218,31 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
       children: [
         const Text('Datos Generales', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
-        Card(
-          margin: EdgeInsets.zero,
-          child: Padding(
-            padding: AppSpacing.allM,
-            child: Column(
-              children: [
-                ListTile(
-                  title: const Text('Cliente'),
-                  subtitle: Text(estado.clienteNombre ?? 'Sin nombre'),
-                  trailing: const Icon(Icons.search),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  onTap: _seleccionarCliente,
-                ),
-                const SizedBox(height: AppSpacing.m),
-                ListTile(
-                  title: const Text('Vencimiento'),
-                  subtitle: Text(_fechaVencimientoSeleccionada != null
+        AppCard(
+          padding: AppSpacing.allM,
+          child: Column(
+            children: [
+              ListTile(
+                title: const Text('Cliente', style: AppTypography.bodyMedium),
+                subtitle: Text(estado.clienteNombre ?? 'Sin nombre', style: AppTypography.bodySmall),
+                trailing: const Icon(Icons.search, size: 20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                onTap: _seleccionarCliente,
+              ),
+              const SizedBox(height: AppSpacing.m),
+              ListTile(
+                title: const Text('Vencimiento', style: AppTypography.bodyMedium),
+                subtitle: Text(
+                  _fechaVencimientoSeleccionada != null
                       ? '${_fechaVencimientoSeleccionada!.day}/${_fechaVencimientoSeleccionada!.month}/${_fechaVencimientoSeleccionada!.year}'
-                      : 'Seleccione fecha'),
-                  trailing: const Icon(Icons.calendar_today),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  onTap: _seleccionarVencimiento,
+                      : 'Seleccione fecha',
+                  style: AppTypography.bodySmall,
                 ),
-              ],
-            ),
+                trailing: const Icon(Icons.calendar_today, size: 20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                onTap: _seleccionarVencimiento,
+              ),
+            ],
           ),
         ),
       ],
@@ -264,24 +266,45 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
       children: [
         const Text('Resumen', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
-        Card(
-          margin: EdgeInsets.zero,
-          child: Padding(
-            padding: AppSpacing.allM,
-            child: Column(
-              children: [
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Subtotal:'), Text('RD\$ ${estado.subtotal.toStringAsFixed(2)}')]),
-                const SizedBox(height: AppSpacing.xs),
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('ITBIS:'), Text('RD\$ ${estado.itbis.toStringAsFixed(2)}')]),
-                const SizedBox(height: AppSpacing.xs),
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Descuento:'), Text('RD\$ ${estado.descuento.toStringAsFixed(2)}')]),
-                const Divider(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('Total:', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)), Text('RD\$ ${estado.montoTotal.toStringAsFixed(2)}', style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold))],
-                ),
-              ],
-            ),
+        AppCard(
+          padding: AppSpacing.allM,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Subtotal:', style: AppTypography.bodyMedium),
+                  Text('RD\$ ${estado.subtotal.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('ITBIS:', style: AppTypography.bodyMedium),
+                  Text('RD\$ ${estado.itbis.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Descuento:', style: AppTypography.bodyMedium),
+                  Text('RD\$ ${estado.descuento.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                ],
+              ),
+              const Divider(height: AppSpacing.l),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Total:', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
+                    style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
@@ -292,24 +315,42 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ElevatedButton.icon(
-          icon: _guardando ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.save),
-          label: Text(_guardando ? 'Guardando...' : 'Guardar Cotización'),
-          style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 48), backgroundColor: AppColors.success, foregroundColor: Colors.white),
+        AppButton(
+          text: _guardando ? 'Guardando...' : 'Guardar Cotización',
           onPressed: _guardando ? null : _guardarCotizacion,
+          isLoading: _guardando,
+          icon: Icons.save,
         ),
         const SizedBox(height: AppSpacing.m),
         Row(
           children: [
-            Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.print, size: 18), label: const Text('Imprimir'), onPressed: _imprimir)),
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.print, size: 18),
+                label: const Text('Imprimir'),
+                onPressed: _imprimir,
+              ),
+            ),
             const SizedBox(width: AppSpacing.s),
-            Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.picture_as_pdf, size: 18), label: const Text('PDF'), onPressed: _exportarPDF)),
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.picture_as_pdf, size: 18),
+                label: const Text('PDF'),
+                onPressed: _exportarPDF,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.m),
         Row(
           children: [
-            Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.email, size: 18), label: const Text('Enviar'), onPressed: _enviarPorCorreo)),
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.email, size: 18),
+                label: const Text('Enviar'),
+                onPressed: _enviarPorCorreo,
+              ),
+            ),
             const SizedBox(width: AppSpacing.s),
             const Expanded(child: SizedBox()),
           ],
