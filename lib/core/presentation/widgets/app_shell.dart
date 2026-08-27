@@ -10,18 +10,38 @@ class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.child});
   final Widget child;
 
+  String _obtenerTituloPantalla(String rutaActual) {
+    return switch (rutaActual) {
+      '/' => 'Dashboard',
+      '/sales' => 'Facturación y NC',
+      '/ventas' => 'Ventas',
+      '/compras' => 'Compras',
+      '/inventory' => 'Inventario',
+      '/kardex' => 'Kárdex',
+      '/inventario-fisico' => 'Inventario Físico',
+      '/customers' => 'Clientes',
+      '/suppliers' => 'Proveedores',
+      '/reports' => 'Reportes 606/607',
+      '/taxes' => 'Impuestos',
+      '/import-export' => 'Importar / Exportar',
+      '/settings' => 'Configuración',
+      _ => 'FiscoGest RD',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final isMobile = AppBreakpoints.isMobile(context);
     const navWidth = 260.0;
     final currentPath = GoRouterState.of(context).uri.path;
+    final tituloPantalla = _obtenerTituloPantalla(currentPath);
 
     if (isMobile) {
       return Scaffold(
         backgroundColor: const Color(0xFFF4F6F9),
         appBar: AppBar(
           backgroundColor: const Color(0xFF0F172A),
-          title: const Text('FiscoGest RD', style: TextStyle(color: Colors.white)),
+          title: Text(tituloPantalla, style: const TextStyle(color: Colors.white)),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         drawer: _buildMenu(navWidth, currentPath, context),
@@ -78,12 +98,12 @@ class AppShell extends StatelessWidget {
                 _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
                 _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
                 _buildNavItem(context, '/inventory', 'Inventario', Icons.inventory_2_outlined, currentPath),
-                _buildNavItem(context, '/kardex', 'Kardex', Icons.receipt_long_outlined, currentPath),
+                _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
                 _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.inventory_2, currentPath),
-                _buildNavItem(context, '/customers', 'Clientes (DGII)', Icons.people_outline, currentPath),
+                _buildNavItem(context, '/customers', 'Clientes', Icons.people_outline, currentPath),
                 _buildNavItem(context, '/suppliers', 'Proveedores', Icons.business_outlined, currentPath),
                 _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
-                _buildNavItem(context, '/taxes', 'Impuestos (ITBIS/ISR)', Icons.calculate_outlined, currentPath),
+                _buildNavItem(context, '/taxes', 'Impuestos', Icons.calculate_outlined, currentPath),
                 _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
                 _buildNavItem(context, '/settings', 'Configuración', Icons.settings_outlined, currentPath),
               ],

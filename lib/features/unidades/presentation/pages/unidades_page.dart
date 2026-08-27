@@ -12,29 +12,35 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/unidad_medida.dart';
+
 class UnidadesPage extends ConsumerStatefulWidget {
   const UnidadesPage({super.key});
   static const String routeName = 'unidades';
   @override
   ConsumerState<UnidadesPage> createState() => _UnidadesPageState();
 }
+
 class _UnidadesPageState extends ConsumerState<UnidadesPage> {
   final TextEditingController _searchController = TextEditingController();
   String _filtroBusqueda = '';
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final unidadesAsync = ref.watch(unidadMedidaControllerProvider);
     final esPantallaPequena = MediaQuery.of(context).size.width < 600;
+
     return AppScaffold(
+      title: 'Unidades de Medida',
+      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1000),
-          padding: AppSpacing.allM,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -42,13 +48,8 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
-                          'Unidades de Medida',
-                          style: AppTypography.h2,
-                        ),
-                        AppLayout.vXs,
                         Text(
-                          'Gestion de unidades de venta y compra para el inventario.',
+                          'Gestión de unidades de venta y compra para el inventario.',
                           style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                         ),
                         AppLayout.vM,
@@ -62,19 +63,11 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Unidades de Medida',
-                              style: AppTypography.h2,
-                            ),
-                            AppLayout.vXs,
-                            Text(
-                              'Gestion de unidades de venta y compra para el inventario.',
-                              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                            ),
-                          ],
+                        Expanded(
+                          child: Text(
+                            'Gestión de unidades de venta y compra para el inventario.',
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                          ),
                         ),
                         AppButton(
                           text: 'Nueva Unidad',
@@ -150,7 +143,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                         unidad.abreviatura != null && unidad.abreviatura!.isNotEmpty
                                             ? 'Abreviatura: ${unidad.abreviatura}'
                                             : unidad.descripcion?.isNotEmpty ?? true
-                                                ? 'Sin descripcion'
+                                                ? 'Sin descripción'
                                                 : unidad.descripcion!,
                                         style: AppTypography.bodySmall,
                                       ),
@@ -171,8 +164,8 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                       onPressed: () {
                                         AppDialog.show<void>(
                                           context,
-                                          title: 'Confirmar Eliminacion',
-                                          message: 'Esta seguro de eliminar la unidad "${unidad.nombre}"?',
+                                          title: 'Confirmar Eliminación',
+                                          message: '¿Está seguro de eliminar la unidad "${unidad.nombre}"?',
                                           actions: [
                                             TextButton(
                                               onPressed: () => Navigator.pop(context),
@@ -210,12 +203,14 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
       ),
     );
   }
+
   void _mostrarModalRegistro(BuildContext context, {UnidadMedida? unidadToEdit}) {
     final formKey = GlobalKey<FormState>();
     final nombreController = TextEditingController(text: unidadToEdit?.nombre ?? '');
     final abreviaturaController = TextEditingController(text: unidadToEdit?.abreviatura ?? '');
     final descripcionController = TextEditingController(text: unidadToEdit?.descripcion ?? '');
     final isEditing = unidadToEdit != null;
+
     AppDialog.show<void>(
       context,
       title: isEditing ? 'Editar Unidad' : 'Nueva Unidad',
@@ -237,7 +232,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
               ),
               AppLayout.vM,
               AppTextField(
-                label: 'Descripcion',
+                label: 'Descripción',
                 controller: descripcionController,
               ),
             ],

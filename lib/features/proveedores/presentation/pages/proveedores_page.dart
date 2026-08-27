@@ -16,7 +16,6 @@ import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart
 class ProveedoresPage extends ConsumerStatefulWidget {
   const ProveedoresPage({super.key});
   static const String routeName = 'proveedores';
-
   @override
   ConsumerState<ProveedoresPage> createState() => _ProveedoresPageState();
 }
@@ -34,39 +33,49 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
   @override
   Widget build(BuildContext context) {
     final proveedoresAsync = ref.watch(proveedorControllerProvider);
+    final esPantallaPequena = MediaQuery.of(context).size.width < 800;
 
     return AppScaffold(
+      title: 'Directorio de Proveedores',
+      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1100),
-          padding: AppSpacing.allM,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Directorio de Proveedores',
-                        style: AppTypography.h2,
-                      ),
-                      AppLayout.vXs,
-                      Text(
-                        'Administración de datos generales, contactos, RNC y direcciones comerciales.',
-                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                  AppButton(
-                    text: 'Nuevo Proveedor',
-                    icon: Icons.business,
-                    onPressed: () => _mostrarModalRegistro(context),
-                  ),
-                ],
-              ),
+              esPantallaPequena
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Administración de datos generales, contactos, RNC y direcciones comerciales.',
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                        ),
+                        AppLayout.vM,
+                        AppButton(
+                          text: 'Nuevo Proveedor',
+                          icon: Icons.business,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Administración de datos generales, contactos, RNC y direcciones comerciales.',
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ),
+                        AppButton(
+                          text: 'Nuevo Proveedor',
+                          icon: Icons.business,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    ),
               AppLayout.vM,
               AppCard(
                 padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
@@ -89,7 +98,6 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         p.contacto.toLowerCase().contains(_filtroBusqueda) ||
                         p.correo.toLowerCase().contains(_filtroBusqueda)
                       ).toList();
-
                       if (filtrados.isEmpty) {
                         return const Center(
                           child: Text(
@@ -98,7 +106,6 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                           ),
                         );
                       }
-
                       return ListView.separated(
                         padding: AppSpacing.allS,
                         itemCount: filtrados.length,
@@ -283,7 +290,6 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                   correo: correoController.text.trim(),
                   rnc: rncController.text.trim(),
                 );
-
                 if (isEditing) {
                   ref.read(proveedorControllerProvider.notifier).actualizar(prov);
                 } else {

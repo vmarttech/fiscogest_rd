@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
@@ -34,12 +35,12 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
     final anchoPantalla = MediaQuery.of(context).size.width;
     final pantallaPequena = anchoPantalla < 600;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return AppScaffold(
+      title: 'Cartera de Clientes',
+      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1100),
-          padding: AppSpacing.allL,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -47,11 +48,6 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Cartera de Clientes',
-                          style: AppTypography.h1,
-                        ),
-                        AppLayout.vXs,
                         Text(
                           'Administración de datos personales, fiscales, direcciones e historial.',
                           style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
@@ -67,19 +63,11 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Cartera de Clientes',
-                              style: AppTypography.h1,
-                            ),
-                            AppLayout.vXs,
-                            Text(
-                              'Administración de datos personales, fiscales, direcciones e historial.',
-                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                            ),
-                          ],
+                        Expanded(
+                          child: Text(
+                            'Administración de datos personales, fiscales, direcciones e historial.',
+                            style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                          ),
                         ),
                         AppButton(
                           text: 'Nuevo Cliente',
@@ -88,7 +76,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                         ),
                       ],
                     ),
-              AppLayout.vL,
+              AppLayout.vM,
               AppCard(
                 padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
                 child: AppTextField(

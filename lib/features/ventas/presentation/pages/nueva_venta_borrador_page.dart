@@ -14,12 +14,11 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_producto
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
   static const String routeName = 'nueva-venta-borrador';
-
   @override
-  ConsumerState<NuevaVentaBorradorPage> createState() => _NuevaCotizacionPageState();
+  ConsumerState<NuevaVentaBorradorPage> createState() => _NuevaVentaBorradorPageState();
 }
 
-class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
+class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage> {
   final TextEditingController _buscadorController = TextEditingController();
   DateTime? _fechaVencimientoSeleccionada;
   String? _numeroCotizacionGuardada;
@@ -145,39 +144,31 @@ class _NuevaCotizacionPageState extends ConsumerState<NuevaVentaBorradorPage> {
   @override
   Widget build(BuildContext context) {
     final estado = ref.watch(ventaBorradorProvider);
+    final anchoPantalla = MediaQuery.of(context).size.width;
+    final pantallaPequena = anchoPantalla < 720;
+
     return AppScaffold(
-      title: 'Nueva Cotización',
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final ancha = constraints.maxWidth >= 720;
-                return ancha ? _buildDosColumnas(estado) : _buildUnaColumna(estado);
-              },
-            ),
-          ),
-        ],
+      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
+      body: SingleChildScrollView(
+        child: pantallaPequena
+            ? _buildUnaColumna(estado)
+            : _buildDosColumnas(estado),
       ),
     );
   }
 
   Widget _buildUnaColumna(VentaBorradorState estado) {
-    return SingleChildScrollView(
-      padding: AppSpacing.allM,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildDatosGenerales(estado),
-          const SizedBox(height: AppSpacing.m),
-          _buildProductos(),
-          const SizedBox(height: AppSpacing.m),
-          _buildResumen(estado),
-          const SizedBox(height: AppSpacing.l),
-          _buildBotonera(),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildDatosGenerales(estado),
+        const SizedBox(height: AppSpacing.m),
+        _buildProductos(),
+        const SizedBox(height: AppSpacing.m),
+        _buildResumen(estado),
+        const SizedBox(height: AppSpacing.l),
+        _buildBotonera(),
+      ],
     );
   }
 

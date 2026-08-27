@@ -8,6 +8,8 @@ import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+
 class KardexPage extends ConsumerStatefulWidget {
   const KardexPage({super.key, this.productoId});
   static const String routeName = 'kardex';
@@ -15,70 +17,82 @@ class KardexPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<KardexPage> createState() => _KardexPageState();
 }
+
 class _KardexPageState extends ConsumerState<KardexPage> {
   late final int? _productoIdFijo;
   String _filtroBusqueda = '';
   TipoMovimiento? _filtroTipo;
+
   @override
   void initState() {
     super.initState();
     _productoIdFijo = widget.productoId != null ? int.tryParse(widget.productoId!) : null;
   }
+
   @override
   Widget build(BuildContext context) {
     final movimientosAsync = ref.watch(
       kardexPorProductoProvider(_productoIdFijo?.toString() ?? ''),
     );
+    final anchoPantalla = MediaQuery.of(context).size.width;
+    final pantallaPequena = anchoPantalla < 600;
+
     return AppScaffold(
-      title: 'Historial de Movimientos (Kárdex)',
-      padding: AppSpacing.allL,
+      // title: 'Kárdex', — Eliminado por duplicidad (AppShell ya lo muestra)
+      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1000),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Historial de Movimientos (Kárdex)',
-                    style: AppTypography.h2,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    'Entradas, salidas, ajustes, transferencias y traslados del inventario.',
-                    style: AppTypography.labelMedium.copyWith(color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.l),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      hint: 'Buscar por producto, documento o fecha...',
-                      onChanged: (valor) => setState(
-                        () => _filtroBusqueda = valor.trim().toLowerCase(),
-                      ),
+              pantallaPequena
+                  ? Column(
+                      children: [
+                        AppTextField(
+                          hint: 'Buscar producto, doc. o fecha...',
+                          onChanged: (valor) => setState(
+                            () => _filtroBusqueda = valor.trim().toLowerCase(),
+                          ),
+                        ),
+                        AppLayout.vM,
+                        AppDropdown<TipoMovimiento>(
+                          initialValue: _filtroTipo,
+                          hint: 'Tipo de Movimiento',
+                          items: TipoMovimiento.values.map((tipo) => DropdownMenuItem<TipoMovimiento>(
+                            value: tipo,
+                            child: Text(tipo.name.toUpperCase(), style: AppTypography.bodySmall),
+                          )).toList(),
+                          onChanged: (valor) => setState(() => _filtroTipo = valor),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: AppTextField(
+                            hint: 'Buscar por producto, documento o fecha...',
+                            onChanged: (valor) => setState(
+                              () => _filtroBusqueda = valor.trim().toLowerCase(),
+                            ),
+                          ),
+                        ),
+                        AppLayout.hM,
+                        Expanded(
+                          child: AppDropdown<TipoMovimiento>(
+                            initialValue: _filtroTipo,
+                            hint: 'Tipo de Movimiento',
+                            items: TipoMovimiento.values.map((tipo) => DropdownMenuItem<TipoMovimiento>(
+                              value: tipo,
+                              child: Text(tipo.name.toUpperCase(), style: AppTypography.bodySmall),
+                            )).toList(),
+                            onChanged: (valor) => setState(() => _filtroTipo = valor),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.s),
-                  Expanded(
-                    child: AppDropdown<TipoMovimiento>(
-                      initialValue: _filtroTipo,
-                      hint: 'Tipo Movimiento',
-                      items: TipoMovimiento.values.map((tipo) => DropdownMenuItem<TipoMovimiento>(
-                        value: tipo,
-                        child: Text(tipo.name.toUpperCase(), style: AppTypography.bodySmall),
-                      )).toList(),
-                      onChanged: (valor) => setState(() => _filtroTipo = valor),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.m),
+              AppLayout.vM,
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -141,7 +155,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                   height: 48,
                                   decoration: BoxDecoration(color: colorTipo, borderRadius: BorderRadius.circular(4)),
                                 ),
-                                const SizedBox(width: AppSpacing.m),
+                                AppLayout.hM,
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,7 +164,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                         mov.tipoMovimiento.name.toUpperCase(),
                                         style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
                                       ),
-                                      const SizedBox(height: AppSpacing.xs),
+                                      AppLayout.vXs,
                                       Text(
                                         'Prod: ${mov.productoId} • Doc: ${mov.documentoReferencia ?? 'Sin documento'}',
                                         style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),

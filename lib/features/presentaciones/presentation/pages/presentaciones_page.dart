@@ -16,7 +16,6 @@ import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacio
 class PresentacionesPage extends ConsumerStatefulWidget {
   const PresentacionesPage({super.key});
   static const String routeName = 'presentaciones';
-
   @override
   ConsumerState<PresentacionesPage> createState() => _PresentacionesPageState();
 }
@@ -34,37 +33,49 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
   @override
   Widget build(BuildContext context) {
     final presentacionesAsync = ref.watch(presentacionControllerProvider);
+    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
 
     return AppScaffold(
       title: 'Presentaciones',
+      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1000),
-          padding: AppSpacing.allM,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Catálogo de Presentaciones', style: AppTypography.h2),
-                      AppLayout.vXs,
-                      Text(
-                        'Administración de unidades y presentaciones de productos.',
-                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                  AppButton(
-                    text: 'Nueva Presentación',
-                    icon: Icons.add,
-                    onPressed: () => _mostrarModalRegistro(context),
-                  ),
-                ],
-              ),
+              esPantallaPequena
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Administración de unidades y presentaciones de productos.',
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                        ),
+                        AppLayout.vM,
+                        AppButton(
+                          text: 'Nueva Presentación',
+                          icon: Icons.add,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Administración de unidades y presentaciones de productos.',
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ),
+                        AppButton(
+                          text: 'Nueva Presentación',
+                          icon: Icons.add,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    ),
               AppLayout.vM,
               AppCard(
                 padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
@@ -85,7 +96,6 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                         p.nombre.toLowerCase().contains(_filtroBusqueda) ||
                         p.abreviatura.toLowerCase().contains(_filtroBusqueda)
                       ).toList();
-
                       if (filtradas.isEmpty) {
                         return const Center(
                           child: Text(
@@ -94,7 +104,6 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                           ),
                         );
                       }
-
                       return ListView.separated(
                         padding: AppSpacing.allS,
                         itemCount: filtradas.length,
@@ -207,7 +216,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                 label: 'Nombre de la Presentación',
                 controller: nombreController,
               ),
-              const SizedBox(height: AppSpacing.m),
+              AppLayout.vM,
               AppTextField(
                 label: 'Abreviatura (ej. UND, CAJ)',
                 controller: abreviaturaController,

@@ -21,7 +21,6 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
   static const String routeName = 'registrar-ventas';
-
   @override
   ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
@@ -58,7 +57,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         .buscarPorNombre(termino);
     final ofertasActivas = await ref.watch(ofertasActivosProvider.future);
     final List<Oferta> listaOfertas = ofertasActivas.cast<Oferta>();
-
     if (resultados.isEmpty && mounted) {
       await AppDialog.show<void>(
         context,
@@ -82,7 +80,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       );
       return;
     }
-
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
       if ((p.stock ?? 0) <= 0) {
@@ -381,12 +378,11 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   Widget build(BuildContext context) {
     ref.watch(registrarVentaProvider);
     return AppScaffold(
-      title: 'Registrar Venta',
+      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: AppSpacing.allM,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Center(
@@ -419,7 +415,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                       const SizedBox(height: AppSpacing.m),
                       PanelProductos(
                         controlador: _buscadorController,
-                        alAgregar: _buscarYAgregarProducto,
+                        alBuscar: _buscarYAgregarProducto,
                       ),
                       const SizedBox(height: AppSpacing.m),
                       FormularioVenta(

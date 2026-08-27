@@ -66,8 +66,9 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
     final pantallaPequena = anchoPantalla < 600;
 
     return AppScaffold(
+      title: 'Clientes',
+      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: SingleChildScrollView(
-        padding: AppSpacing.hL.copyWith(top: AppSpacing.l, bottom: AppSpacing.l),
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 850),
@@ -79,11 +80,6 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Directorio de Clientes y Negocios',
-                              style: AppTypography.h1,
-                            ),
-                            AppLayout.vXs,
                             Text(
                               'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
                               style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
@@ -113,19 +109,11 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Directorio de Clientes y Negocios',
-                                  style: AppTypography.h1,
-                                ),
-                                AppLayout.vXs,
-                                Text(
-                                  'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
-                                  style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                                ),
-                              ],
+                            Expanded(
+                              child: Text(
+                                'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
+                                style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                              ),
                             ),
                             Container(
                               padding: AppSpacing.hS.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
@@ -147,7 +135,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                             ),
                           ],
                         ),
-                  AppLayout.vL,
+                  AppLayout.vM,
                   Form(
                     key: _formKey,
                     child: Column(
