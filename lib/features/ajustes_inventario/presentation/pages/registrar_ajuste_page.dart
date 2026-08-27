@@ -15,9 +15,7 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 
 class RegistrarAjustePage extends ConsumerStatefulWidget {
   const RegistrarAjustePage({super.key});
-
-  static const routeName = 'registrar-ajuste';
-
+  static const String routeName = 'registrar-ajuste';
   @override
   ConsumerState<RegistrarAjustePage> createState() => _RegistrarAjustePageState();
 }
@@ -62,11 +60,13 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
   @override
   Widget build(BuildContext context) {
     final productosAsync = ref.watch(productoControllerProvider);
-
     return AppScaffold(
       appBar: AppBar(
         title: const Text('Registrar Ajuste'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
       ),
       padding: AppSpacing.allM,
       body: productosAsync.when(
@@ -78,14 +78,17 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Producto', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Producto',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: AppSpacing.s),
                 Row(
                   children: [
                     Expanded(
                       child: AppTextField(
                         controller: _codigoCtrl,
-                        hint: 'Seleccione o escriba el código',
+                        hint: 'Seleccione o escriba el codigo',
                         onChanged: (val) {
                           setState(() => _productoSeleccionado = null);
                         },
@@ -107,18 +110,24 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                     ),
                   ),
                 const SizedBox(height: AppSpacing.m),
-                const Text('Tipo de Ajuste', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Tipo de Ajuste',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: AppSpacing.s),
                 AppDropdown<String>(
                   initialValue: _tipoSeleccionado,
                   items: const [
-                    DropdownMenuItem(value: 'entrada', child: Text('Entrada (Sumar stock)')),
-                    DropdownMenuItem(value: 'salida', child: Text('Salida (Restar stock)')),
+                    DropdownMenuItem(value: 'entrada', child: Text('Entrada (+)')),
+                    DropdownMenuItem(value: 'salida', child: Text('Salida (-)')),
                   ],
                   onChanged: (v) => setState(() => _tipoSeleccionado = v!),
                 ),
                 const SizedBox(height: AppSpacing.m),
-                const Text('Cantidad', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Cantidad',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: AppSpacing.s),
                 AppTextField(
                   controller: _cantidadCtrl,
@@ -126,14 +135,20 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                   hint: 'Ej: 5.5',
                 ),
                 const SizedBox(height: AppSpacing.m),
-                const Text('Motivo', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Motivo',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: AppSpacing.s),
                 AppTextField(
                   controller: _motivoCtrl,
-                  hint: 'Ej: Conteo físico / Pérdida',
+                  hint: 'Ej: Conteo fisico / Perdida',
                 ),
                 const SizedBox(height: AppSpacing.m),
-                const Text('Observaciones', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Observaciones',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: AppSpacing.s),
                 AppTextField(
                   controller: _observacionesCtrl,
@@ -185,7 +200,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                       final exito = await ref.read(ajusteInventarioProvider).registrar(ajuste);
                       if (!exito || !context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('✅ Ajuste guardado — stock actualizado en inventario')),
+                        const SnackBar(content: Text('✅ Ajuste guardado — stock actualizado')),
                       );
                       context.pop();
                     },
@@ -202,7 +217,6 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
 
 class _DialogoBusqueda extends StatefulWidget {
   const _DialogoBusqueda({required this.productos, required this.onSeleccionar});
-
   final List<Producto> productos;
   final void Function(Producto) onSeleccionar;
 
@@ -247,7 +261,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
           children: [
             AppTextField(
               controller: _buscarCtrl,
-              hint: 'Buscar por código o nombre...',
+              hint: 'Buscar por codigo o nombre...',
               prefixIcon: Icons.search,
               onChanged: _filtrar,
             ),

@@ -38,4 +38,15 @@ abstract class AppColors {
   static const Color textSecondary = grey600;
   static const Color textDisabled = grey400;
   static const Color border = grey300;
+  static const Color darkSurface = Color(0xFF1E293B);
+  static const Color pageBackground = Color(0xFFF4F6F9);
+  static const Color cardBackground = Color(0xFFF1F5F9);
+  static const Color tabIndicator = Color(0xFF14B8A6);
+  static const Color white70 = Colors.white70;
+  static const Color inputBorder = Color(0xFFE2E8F0);
+  static const Color focusedBlue = Color(0xFF0A2463);
+  static const Color formBackground = Color(0xFFF8FAFC);
 }
+
+
+

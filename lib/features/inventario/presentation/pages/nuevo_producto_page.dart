@@ -6,11 +6,13 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
   const NuevoProductoPage({super.key});
   static const String routeName = 'nuevo-producto';
-
   @override
   ConsumerState<NuevoProductoPage> createState() => _NuevoProductoPageState();
 }
@@ -44,17 +46,16 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final cats = ref.watch(categoriaControllerProvider);
     final marcas = ref.watch(marcaControllerProvider);
     final unids = ref.watch(unidadMedidaControllerProvider);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.formBackground,
       appBar: AppBar(
         title: const Text('Registrar Nuevo Producto'),
-        backgroundColor: const Color(0xFF1E293B),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.darkSurface,
+        foregroundColor: AppColors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: AppSpacing.allL,
         child: Form(
           key: _formKey,
           child: Column(
@@ -64,69 +65,69 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 controller: _nombreCtrl,
                 decoration: InputDecoration(
                   labelText: 'Nombre del Producto',
-                  prefixIcon: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF64748B)),
+                  prefixIcon: const Icon(Icons.shopping_bag_outlined, color: AppColors.textSecondary),
                   filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  fillColor: AppColors.white,
+                  contentPadding: AppSpacing.hM,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                    borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                    borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                   ),
                 ),
                 validator: (v) => v?.trim().isEmpty ?? true ? 'Campo obligatorio' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
               TextFormField(
                 controller: _skuCtrl,
                 decoration: InputDecoration(
                   labelText: 'SKU / Código de Barra',
-                  prefixIcon: const Icon(Icons.qr_code, color: Color(0xFF64748B)),
+                  prefixIcon: const Icon(Icons.qr_code, color: AppColors.textSecondary),
                   filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  fillColor: AppColors.white,
+                  contentPadding: AppSpacing.hM,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                    borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                    borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
               cats.when(
                 data: (lista) => DropdownButtonFormField<int>(
                   initialValue: _catSel,
                   decoration: InputDecoration(
                     labelText: 'Categoría',
-                    prefixIcon: const Icon(Icons.category_outlined, color: Color(0xFF64748B)),
+                    prefixIcon: const Icon(Icons.category_outlined, color: AppColors.textSecondary),
                     filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    fillColor: AppColors.white,
+                    contentPadding: AppSpacing.hM,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                      borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                      borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                     ),
                   ),
                   items: lista.map((c) => DropdownMenuItem(value: c.id, child: Text(c.nombre))).toList(),
@@ -134,58 +135,58 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                   validator: (v) => v == null ? 'Seleccione una categoría' : null,
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e,_) => Text('Error cargando categorías: $e', style: const TextStyle(color: Colors.red)),
+                error: (e, _) => Text('Error cargando categorías: $e', style: const TextStyle(color: AppColors.error)),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
               marcas.when(
                 data: (lista) => DropdownButtonFormField<int>(
                   initialValue: _marcaSel,
                   decoration: InputDecoration(
                     labelText: 'Marca',
-                    prefixIcon: const Icon(Icons.branding_watermark_outlined, color: Color(0xFF64748B)),
+                    prefixIcon: const Icon(Icons.branding_watermark_outlined, color: AppColors.textSecondary),
                     filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    fillColor: AppColors.white,
+                    contentPadding: AppSpacing.hM,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                      borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                      borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                     ),
                   ),
                   items: lista.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nombre))).toList(),
                   onChanged: (v) => setState(() => _marcaSel = v),
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e,_) => Text('Error cargando marcas: $e', style: const TextStyle(color: Colors.red)),
+                error: (e, _) => Text('Error cargando marcas: $e', style: const TextStyle(color: AppColors.error)),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
               unids.when(
                 data: (lista) => DropdownButtonFormField<int>(
                   initialValue: _unidadSel,
                   decoration: InputDecoration(
                     labelText: 'Unidad de Medida',
-                    prefixIcon: const Icon(Icons.straighten_outlined, color: Color(0xFF64748B)),
+                    prefixIcon: const Icon(Icons.straighten_outlined, color: AppColors.textSecondary),
                     filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    fillColor: AppColors.white,
+                    contentPadding: AppSpacing.hM,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                      borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                      borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                     ),
                   ),
                   items: lista.map((u) => DropdownMenuItem(value: u.id, child: Text(u.nombre))).toList(),
@@ -193,9 +194,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                   validator: (v) => v == null ? 'Seleccione unidad de medida' : null,
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e,_) => Text('Error cargando unidades: $e', style: const TextStyle(color: Colors.red)),
+                error: (e, _) => Text('Error cargando unidades: $e', style: const TextStyle(color: AppColors.error)),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
               Row(
                 children: [
                   Expanded(
@@ -204,54 +205,54 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Costo (RD\$)',
-                        prefixIcon: const Icon(Icons.payments_outlined, color: Color(0xFF64748B)),
+                        prefixIcon: const Icon(Icons.payments_outlined, color: AppColors.textSecondary),
                         filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        fillColor: AppColors.white,
+                        contentPadding: AppSpacing.hM,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                          borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.m),
                   Expanded(
                     child: TextFormField(
                       controller: _ventaCtrl,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Precio Venta (RD\$)',
-                        prefixIcon: const Icon(Icons.sell_outlined, color: Color(0xFF64748B)),
+                        prefixIcon: const Icon(Icons.sell_outlined, color: AppColors.textSecondary),
                         filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        fillColor: AppColors.white,
+                        contentPadding: AppSpacing.hM,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                          borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
               Row(
                 children: [
                   Expanded(
@@ -260,75 +261,75 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Existencia Actual',
-                        prefixIcon: const Icon(Icons.format_list_numbered, color: Color(0xFF64748B)),
+                        prefixIcon: const Icon(Icons.format_list_numbered, color: AppColors.textSecondary),
                         filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        fillColor: AppColors.white,
+                        contentPadding: AppSpacing.hM,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                          borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.m),
                   Expanded(
                     child: TextFormField(
                       controller: _stockMinCtrl,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Stock Mínimo (Alerta)',
-                        prefixIcon: const Icon(Icons.warning_amber_rounded, color: Color(0xFF64748B)),
+                        prefixIcon: const Icon(Icons.warning_amber_rounded, color: AppColors.textSecondary),
                         filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        fillColor: AppColors.white,
+                        contentPadding: AppSpacing.hM,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF0A2463), width: 1.5),
+                          borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.l),
               SwitchListTile(
-                title: const Text(
+                title: Text(
                   'Producto Activo para la Venta',
-                  style: TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.w500),
+                  style: AppTypography.labelLarge.copyWith(color: AppColors.darkSurface, fontWeight: FontWeight.w500),
                 ),
                 value: _activo,
-                activeThumbColor: const Color(0xFF0A2463),
+                activeThumbColor: AppColors.focusedBlue,
                 onChanged: (v) => setState(() => _activo = v),
                 contentPadding: EdgeInsets.zero,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xl),
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E293B),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.darkSurface,
+                    foregroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 0,
-                    textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                    textStyle: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600),
                   ),
                   onPressed: () {
                     if (!_formKey.currentState!.validate()) return;
@@ -336,7 +337,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     final stockMinVal = double.tryParse(_stockMinCtrl.text) ?? 0;
                     if (stockVal < 0 || stockMinVal < 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Las cantidades no pueden ser negativas'), backgroundColor: Colors.red),
+                        const SnackBar(content: Text('Las cantidades no pueden ser negativas'), backgroundColor: AppColors.error),
                       );
                       return;
                     }

@@ -32,16 +32,12 @@ class HistorialVentasBorrador extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Cotizaciones', style: AppTypography.h4),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Nueva Cotización'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
+              AppButton(
+                text: 'Nueva Cotización',
                 onPressed: () {
                   context.goNamed(NuevaVentaBorradorPage.routeName);
                 },
+                icon: Icons.add,
               ),
             ],
           ),
@@ -151,14 +147,14 @@ class _TarjetaCotizacion extends ConsumerWidget {
       await repo.confirmarVentaBorrador(ventaBorradorId!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Cotización N° $numero convertida a Venta'), backgroundColor: Colors.green),
+          SnackBar(content: Text('Cotización N° $numero convertida a Venta'), backgroundColor: AppColors.success),
         );
         ref.invalidate(listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
         );
       }
     }
@@ -184,14 +180,14 @@ class _TarjetaCotizacion extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
                       decoration: BoxDecoration(
                         color: convertida
-                            ? Colors.green.withValues(alpha: 0.1)
+                            ? AppColors.success.withValues(alpha: 0.1)
                             : AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         convertida ? 'Convertida' : 'Vigente',
                         style: AppTypography.labelSmall.copyWith(
-                          color: convertida ? Colors.green.shade700 : AppColors.primary,
+                          color: convertida ? AppColors.success : AppColors.primary,
                         ),
                       ),
                     ),
@@ -219,9 +215,9 @@ class _TarjetaCotizacion extends ConsumerWidget {
               if (convertida)
                 TextButton.icon(
                   onPressed: null,
-                  icon: const Icon(Icons.check_circle, size: 16, color: Colors.green),
+                  icon: const Icon(Icons.check_circle, size: 16, color: AppColors.success),
                   label: Text('Venta generada',
-                      style: AppTypography.labelSmall.copyWith(color: Colors.green.shade700)),
+                      style: AppTypography.labelSmall.copyWith(color: AppColors.success)),
                 ),
             ],
           ),

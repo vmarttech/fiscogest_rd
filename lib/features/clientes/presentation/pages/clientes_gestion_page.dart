@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_card.dart';
 
 class ClientesGestionPage extends ConsumerStatefulWidget {
   const ClientesGestionPage({super.key});
   static const String routeName = 'clientes-gestion';
-
   @override
   ConsumerState<ClientesGestionPage> createState() => _ClientesGestionPageState();
 }
@@ -24,86 +31,76 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
   @override
   Widget build(BuildContext context) {
     final clientesAsync = ref.watch(clienteCompletoControllerProvider);
+    final anchoPantalla = MediaQuery.of(context).size.width;
+    final pantallaPequena = anchoPantalla < 600;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+      backgroundColor: AppColors.background,
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1100),
-          padding: const EdgeInsets.all(24.0),
+          padding: AppSpacing.allL,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Cartera de Clientes',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
+              pantallaPequena
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Cartera de Clientes',
+                          style: AppTypography.h1,
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Administración de datos personales, fiscales, direcciones e historial.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF64748B),
+                        AppLayout.vXs,
+                        Text(
+                          'Administración de datos personales, fiscales, direcciones e historial.',
+                          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
                         ),
-                      ),
-                    ],
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => _mostrarModalRegistro(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F172A),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 2,
+                        AppLayout.vM,
+                        AppButton(
+                          text: 'Nuevo Cliente',
+                          icon: Icons.person_add,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Cartera de Clientes',
+                              style: AppTypography.h1,
+                            ),
+                            AppLayout.vXs,
+                            Text(
+                              'Administración de datos personales, fiscales, direcciones e historial.',
+                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                        AppButton(
+                          text: 'Nuevo Cliente',
+                          icon: Icons.person_add,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
                     ),
-                    icon: const Icon(Icons.person_add, size: 18),
-                    label: const Text(
-                      'Nuevo Cliente',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: TextField(
+              AppLayout.vL,
+              AppCard(
+                padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
+                child: AppTextField(
+                  hint: 'Buscar cliente por nombre, RNC/Cédula, teléfono o correo...',
                   controller: _searchController,
                   onChanged: (value) => setState(() => _filtroBusqueda = value.toLowerCase()),
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar cliente por nombre, RNC/Cédula, teléfono o correo...',
-                    hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                    prefixIcon: Icon(Icons.search, color: Color(0xFF64748B), size: 18),
-                    border: InputBorder.none,
-                  ),
+                  prefixIcon: Icons.search,
                 ),
               ),
-              const SizedBox(height: 16),
+              AppLayout.vM,
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
+                child: AppCard(
                   child: clientesAsync.when(
                     data: (clientes) {
                       final filtrados = clientes.where((c) =>
@@ -112,124 +109,183 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                         c.telefono.toLowerCase().contains(_filtroBusqueda) ||
                         c.correo.toLowerCase().contains(_filtroBusqueda)
                       ).toList();
-
                       if (filtrados.isEmpty) {
                         return const Center(
                           child: Text(
                             'No hay clientes registrados o coincidentes.',
-                            style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                            style: AppTypography.bodyMedium,
                           ),
                         );
                       }
-
                       return ListView.separated(
-                        padding: const EdgeInsets.all(12),
+                        padding: AppSpacing.allM,
                         itemCount: filtrados.length,
-                        separatorBuilder: (context, index) => const Divider(color: Color(0xFFE2E8F0), height: 1),
+                        separatorBuilder: (context, index) => const Divider(color: AppColors.border, height: 1),
                         itemBuilder: (context, index) {
                           final cliente = filtrados[index];
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(Icons.person_outline, color: Color(0xFF0F172A), size: 22),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  flex: 2,
-                                  child: Column(
+                            padding: AppSpacing.vS,
+                            child: pantallaPequena
+                                ? Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        cliente.nombre,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 14),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'RNC/Cédula: ${cliente.rncCedula} | Tel: ${cliente.telefono}',
-                                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        cliente.correo,
-                                        style: const TextStyle(color: Color(0xFF334155), fontSize: 13),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        cliente.direccion,
-                                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.history, color: Color(0xFF64748B), size: 20),
-                                      tooltip: 'Ver Historial e Info',
-                                      onPressed: () => _mostrarDetallesCliente(context, cliente),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF3B82F6), size: 20),
-                                      tooltip: 'Editar Cliente',
-                                      onPressed: () => _mostrarModalRegistro(context, clienteToEdit: cliente),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
-                                      tooltip: 'Eliminar Cliente',
-                                      onPressed: () {
-                                        showDialog<void>(
-                                          context: context,
-                                          builder: (ctx) => AlertDialog(
-                                            title: const Text('Confirmar Eliminación', style: TextStyle(fontWeight: FontWeight.bold)),
-                                            content: Text('¿Está seguro de eliminar al cliente "${cliente.nombre}"?'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(ctx),
-                                                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
-                                              ),
-                                              ElevatedButton(
-                                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626), foregroundColor: Colors.white),
-                                                onPressed: () {
-                                                  if (cliente.id != null) {
-                                                    ref.read(clienteCompletoControllerProvider.notifier).eliminar(cliente.id!);
-                                                  }
-                                                  Navigator.pop(ctx);
-                                                },
-                                                child: const Text('Eliminar'),
-                                              ),
-                                            ],
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.grey50,
+                                              borderRadius: AppRadius.allM,
+                                            ),
+                                            child: const Icon(Icons.person_outline, color: AppColors.textPrimary, size: 22),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                          AppLayout.hM,
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(cliente.nombre, style: AppTypography.h3),
+                                                Text('RNC/Cédula: ${cliente.rncCedula} | Tel: ${cliente.telefono}', style: AppTypography.bodySmall),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      AppLayout.vXs,
+                                      Text(cliente.correo, style: AppTypography.bodyMedium),
+                                      Text(cliente.direccion, style: AppTypography.bodySmall, overflow: TextOverflow.ellipsis),
+                                      AppLayout.vS,
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.history, color: AppColors.grey600, size: 20),
+                                            tooltip: 'Ver Historial e Info',
+                                            onPressed: () => _mostrarDetallesCliente(context, cliente),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                                            tooltip: 'Editar Cliente',
+                                            onPressed: () => _mostrarModalRegistro(context, clienteToEdit: cliente),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                                            tooltip: 'Eliminar Cliente',
+                                            onPressed: () {
+                                              showDialog<void>(
+                                                context: context,
+                                                builder: (ctx) => AlertDialog(
+                                                  title: const Text('Confirmar Eliminación', style: AppTypography.h3),
+                                                  content: Text('¿Está seguro de eliminar al cliente "${cliente.nombre}"?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () => Navigator.pop(ctx),
+                                                      child: const Text('Cancelar', style: AppTypography.bodyMedium),
+                                                    ),
+                                                    ElevatedButton(
+                                                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: AppColors.white),
+                                                      onPressed: () {
+                                                        if (cliente.id != null) {
+                                                          ref.read(clienteCompletoControllerProvider.notifier).eliminar(cliente.id!);
+                                                        }
+                                                        Navigator.pop(ctx);
+                                                      },
+                                                      child: const Text('Eliminar'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.grey50,
+                                          borderRadius: AppRadius.allM,
+                                        ),
+                                        child: const Icon(Icons.person_outline, color: AppColors.textPrimary, size: 22),
+                                      ),
+                                      AppLayout.hM,
+                                      Expanded(
+                                        flex: 2,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(cliente.nombre, style: AppTypography.h3),
+                                            Text('RNC/Cédula: ${cliente.rncCedula} | Tel: ${cliente.telefono}', style: AppTypography.bodySmall),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(cliente.correo, style: AppTypography.bodyMedium),
+                                            Text(cliente.direccion, style: AppTypography.bodySmall, overflow: TextOverflow.ellipsis),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.history, color: AppColors.grey600, size: 20),
+                                            tooltip: 'Ver Historial e Info',
+                                            onPressed: () => _mostrarDetallesCliente(context, cliente),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                                            tooltip: 'Editar Cliente',
+                                            onPressed: () => _mostrarModalRegistro(context, clienteToEdit: cliente),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                                            tooltip: 'Eliminar Cliente',
+                                            onPressed: () {
+                                              showDialog<void>(
+                                                context: context,
+                                                builder: (ctx) => AlertDialog(
+                                                  title: const Text('Confirmar Eliminación', style: AppTypography.h3),
+                                                  content: Text('¿Está seguro de eliminar al cliente "${cliente.nombre}"?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () => Navigator.pop(ctx),
+                                                      child: const Text('Cancelar', style: AppTypography.bodyMedium),
+                                                    ),
+                                                    ElevatedButton(
+                                                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: AppColors.white),
+                                                      onPressed: () {
+                                                        if (cliente.id != null) {
+                                                          ref.read(clienteCompletoControllerProvider.notifier).eliminar(cliente.id!);
+                                                        }
+                                                        Navigator.pop(ctx);
+                                                      },
+                                                      child: const Text('Eliminar'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                           );
                         },
                       );
                     },
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, st) => Center(child: Text('Error: $e')),
+                    error: (e, st) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium)),
                   ),
                 ),
               ),
@@ -244,34 +300,34 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Historial y Detalles: ${cliente.nombre}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Historial y Detalles: ${cliente.nombre}', style: AppTypography.h3),
         content: SizedBox(
           width: 420,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('RNC / Cédula: ${cliente.rncCedula}', style: const TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 6),
-              Text('Teléfono: ${cliente.telefono}'),
-              Text('Correo: ${cliente.correo}'),
-              Text('Dirección: ${cliente.direccion}'),
-              const SizedBox(height: 12),
-              const Text('Observaciones:', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(cliente.observaciones.isEmpty ? 'Ninguna' : cliente.observaciones, style: const TextStyle(color: Color(0xFF64748B))),
-              const SizedBox(height: 12),
-              const Text('Historial de Transacciones / Eventos:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('RNC / Cédula: ${cliente.rncCedula}', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+              AppLayout.vXs,
+              Text('Teléfono: ${cliente.telefono}', style: AppTypography.bodyMedium),
+              Text('Correo: ${cliente.correo}', style: AppTypography.bodyMedium),
+              Text('Dirección: ${cliente.direccion}', style: AppTypography.bodyMedium),
+              AppLayout.vM,
+              const Text('Observaciones:', style: AppTypography.h4),
+              Text(cliente.observaciones.isEmpty ? 'Ninguna' : cliente.observaciones, style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
+              AppLayout.vM,
+              const Text('Historial de Transacciones / Eventos:', style: AppTypography.h4),
               Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(6)),
-                child: Text(cliente.historial, style: const TextStyle(fontSize: 12, color: Color(0xFF334155))),
+                padding: AppSpacing.allM,
+                decoration: BoxDecoration(color: AppColors.grey50, borderRadius: AppRadius.allM),
+                child: Text(cliente.historial, style: AppTypography.bodySmall),
               ),
             ],
           ),
         ),
         actions: [
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.textPrimary, foregroundColor: AppColors.white),
             onPressed: () => Navigator.pop(context),
             child: const Text('Cerrar'),
           ),
@@ -293,7 +349,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(isEditing ? 'Editar Cliente' : 'Nuevo Cliente', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text(isEditing ? 'Editar Cliente' : 'Nuevo Cliente', style: AppTypography.h3),
         content: SizedBox(
           width: 450,
           child: SingleChildScrollView(
@@ -305,33 +361,33 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                   TextFormField(
                     controller: nombreController,
                     decoration: const InputDecoration(labelText: 'Nombre / Razón Social'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el nombre' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el nombre' : null,
                   ),
-                  const SizedBox(height: 10),
+                  AppLayout.vM,
                   TextFormField(
                     controller: rncCedulaController,
                     decoration: const InputDecoration(labelText: 'RNC o Cédula'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el RNC o Cédula' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el RNC o Cédula' : null,
                   ),
-                  const SizedBox(height: 10),
+                  AppLayout.vM,
                   TextFormField(
                     controller: telefonoController,
                     decoration: const InputDecoration(labelText: 'Teléfono'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el teléfono' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el teléfono' : null,
                   ),
-                  const SizedBox(height: 10),
+                  AppLayout.vM,
                   TextFormField(
                     controller: correoController,
                     decoration: const InputDecoration(labelText: 'Correo Electrónico'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese el correo' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el correo' : null,
                   ),
-                  const SizedBox(height: 10),
+                  AppLayout.vM,
                   TextFormField(
                     controller: direccionController,
                     decoration: const InputDecoration(labelText: 'Dirección'),
-                    validator: (v) => v!.isEmpty ? 'Ingrese la dirección' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Ingrese la dirección' : null,
                   ),
-                  const SizedBox(height: 10),
+                  AppLayout.vM,
                   TextFormField(
                     controller: observacionesController,
                     decoration: const InputDecoration(labelText: 'Observaciones'),
@@ -345,10 +401,10 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
+            child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.textPrimary, foregroundColor: AppColors.white),
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 try {
@@ -362,7 +418,6 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                     observaciones: observacionesController.text.trim(),
                     historial: clienteToEdit?.historial ?? 'Cliente registrado en el sistema.',
                   );
-
                   if (isEditing) {
                     ref.read(clienteCompletoControllerProvider.notifier).actualizar(cli);
                   } else {
@@ -371,7 +426,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                   Navigator.pop(context);
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+                    SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppColors.error),
                   );
                 }
               }

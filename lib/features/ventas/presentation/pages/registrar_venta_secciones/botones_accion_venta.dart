@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 class BotonesAccionVenta extends StatelessWidget {
-
   const BotonesAccionVenta({
     super.key,
     required this.cargando,
     required this.alLimpiar,
     required this.alGuardar,
   });
+
   final bool cargando;
   final VoidCallback alLimpiar;
   final VoidCallback alGuardar;
@@ -24,19 +26,13 @@ class BotonesAccionVenta extends StatelessWidget {
             style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.m),
         Expanded(
-          child: ElevatedButton.icon(
+          child: AppButton(
+            text: cargando ? 'Guardando...' : 'Registrar Venta',
             onPressed: cargando ? null : alGuardar,
-            icon: cargando
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                : const Icon(Icons.save),
-            label: Text(cargando ? 'Guardando...' : 'Registrar Venta'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
+            isLoading: cargando,
+            icon: Icons.save,
           ),
         ),
       ],

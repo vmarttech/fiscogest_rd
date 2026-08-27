@@ -12,29 +12,24 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/marca.dart';
-
 class MarcasPage extends ConsumerStatefulWidget {
   const MarcasPage({super.key});
   static const String routeName = 'marcas';
-
   @override
   ConsumerState<MarcasPage> createState() => _MarcasPageState();
 }
-
 class _MarcasPageState extends ConsumerState<MarcasPage> {
   final TextEditingController _searchController = TextEditingController();
   String _filtroBusqueda = '';
-
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final marcasAsync = ref.watch(marcaControllerProvider);
-
+    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
     return AppScaffold(
       body: Center(
         child: Container(
@@ -43,30 +38,51 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Catálogo de Marcas',
-                        style: AppTypography.h2,
-                      ),
-                      AppLayout.vXs,
-                      Text(
-                        'Administración de marcas comerciales del sistema.',
-                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                  AppButton(
-                    text: 'Nueva Marca',
-                    icon: Icons.add,
-                    onPressed: () => _mostrarModalRegistro(context),
-                  ),
-                ],
-              ),
+              esPantallaPequena
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Catalogo de Marcas',
+                          style: AppTypography.h2,
+                        ),
+                        AppLayout.vXs,
+                        Text(
+                          'Administracion de marcas comerciales del sistema.',
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                        ),
+                        AppLayout.vM,
+                        AppButton(
+                          text: 'Nueva Marca',
+                          icon: Icons.add,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Catalogo de Marcas',
+                              style: AppTypography.h2,
+                            ),
+                            AppLayout.vXs,
+                            Text(
+                              'Administracion de marcas comerciales del sistema.',
+                              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                        AppButton(
+                          text: 'Nueva Marca',
+                          icon: Icons.add,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    ),
               AppLayout.vM,
               AppCard(
                 padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
@@ -87,7 +103,6 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                         m.nombre.toLowerCase().contains(_filtroBusqueda) ||
                         (m.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false)
                       ).toList();
-
                       if (filtradas.isEmpty) {
                         return const Center(
                           child: Text(
@@ -96,7 +111,6 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                           ),
                         );
                       }
-
                       return ListView.separated(
                         padding: AppSpacing.allS,
                         itemCount: filtradas.length,
@@ -127,7 +141,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                       ),
                                       AppLayout.vXs,
                                       Text(
-                                        marca.descripcion?.isEmpty ?? true ? 'Sin descripción' : marca.descripcion!,
+                                        marca.descripcion?.isEmpty ?? true ? 'Sin descripcion' : marca.descripcion!,
                                         style: AppTypography.bodySmall,
                                       ),
                                     ],
@@ -147,8 +161,8 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                       onPressed: () {
                                         AppDialog.show<void>(
                                           context,
-                                          title: 'Confirmar Eliminación',
-                                          message: '¿Está seguro de eliminar la marca "${marca.nombre}"?',
+                                          title: 'Confirmar Eliminacion',
+                                          message: 'Esta seguro de eliminar la marca "${marca.nombre}"?',
                                           actions: [
                                             TextButton(
                                               onPressed: () => Navigator.pop(context),
@@ -186,13 +200,11 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
       ),
     );
   }
-
   void _mostrarModalRegistro(BuildContext context, {Marca? marcaToEdit}) {
     final formKey = GlobalKey<FormState>();
     final nombreController = TextEditingController(text: marcaToEdit?.nombre ?? '');
     final descripcionController = TextEditingController(text: marcaToEdit?.descripcion ?? '');
     final isEditing = marcaToEdit != null;
-
     AppDialog.show<void>(
       context,
       title: isEditing ? 'Editar Marca' : 'Nueva Marca',
@@ -209,7 +221,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
               ),
               AppLayout.vM,
               AppTextField(
-                label: 'Descripción',
+                label: 'Descripcion',
                 controller: descripcionController,
               ),
             ],
@@ -233,7 +245,6 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                   creadoEn: marcaToEdit?.creadoEn ?? DateTime.now(),
                   actualizadoEn: isEditing ? DateTime.now() : null,
                 );
-
                 if (isEditing) {
                   ref.read(marcaControllerProvider.notifier).actualizar(mar);
                 } else {

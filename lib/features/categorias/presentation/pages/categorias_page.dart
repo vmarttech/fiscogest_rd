@@ -12,29 +12,24 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
-
 class CategoriasPage extends ConsumerStatefulWidget {
   const CategoriasPage({super.key});
   static const String routeName = 'categorias';
-
   @override
   ConsumerState<CategoriasPage> createState() => _CategoriasPageState();
 }
-
 class _CategoriasPageState extends ConsumerState<CategoriasPage> {
   final TextEditingController _searchController = TextEditingController();
   String _filtroBusqueda = '';
-
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final categoriasAsync = ref.watch(categoriaControllerProvider);
-
+    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
     return AppScaffold(
       body: Center(
         child: Container(
@@ -43,36 +38,57 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Catálogo de Categorías',
-                        style: AppTypography.h2,
-                      ),
-                      AppLayout.vXs,
-                      Text(
-                        'Organización y clasificación de productos por categoría.',
-                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                  AppButton(
-                    text: 'Nueva Categoría',
-                    icon: Icons.add,
-                    onPressed: () => _mostrarModalRegistro(context),
-                  ),
-                ],
-              ),
+              esPantallaPequena
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Catalogo de Categorias',
+                          style: AppTypography.h2,
+                        ),
+                        AppLayout.vXs,
+                        Text(
+                          'Organizacion y clasificacion de productos por categoria.',
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                        ),
+                        AppLayout.vM,
+                        AppButton(
+                          text: 'Nueva Categoria',
+                          icon: Icons.add,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Catalogo de Categorias',
+                              style: AppTypography.h2,
+                            ),
+                            AppLayout.vXs,
+                            Text(
+                              'Organizacion y clasificacion de productos por categoria.',
+                              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                        AppButton(
+                          text: 'Nueva Categoria',
+                          icon: Icons.add,
+                          onPressed: () => _mostrarModalRegistro(context),
+                        ),
+                      ],
+                    ),
               AppLayout.vM,
               AppCard(
                 padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
                 child: AppTextField(
                   controller: _searchController,
-                  hint: 'Buscar categoría por nombre...',
+                  hint: 'Buscar categoria por nombre...',
                   prefixIcon: Icons.search,
                   onChanged: (value) => setState(() => _filtroBusqueda = value.toLowerCase()),
                 ),
@@ -87,16 +103,14 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                         c.nombre.toLowerCase().contains(_filtroBusqueda) ||
                         (c.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false)
                       ).toList();
-
                       if (filtradas.isEmpty) {
                         return const Center(
                           child: Text(
-                            'No hay categorías registradas o coincidentes.',
+                            'No hay categorias registradas o coincidentes.',
                             style: AppTypography.bodyMedium,
                           ),
                         );
                       }
-
                       return ListView.separated(
                         padding: AppSpacing.allS,
                         itemCount: filtradas.length,
@@ -127,7 +141,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                       ),
                                       AppLayout.vXs,
                                       Text(
-                                        categoria.descripcion?.isEmpty ?? true ? 'Sin descripción' : categoria.descripcion!,
+                                        categoria.descripcion?.isEmpty ?? true ? 'Sin descripcion' : categoria.descripcion!,
                                         style: AppTypography.bodySmall,
                                       ),
                                     ],
@@ -138,17 +152,17 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
-                                      tooltip: 'Editar Categoría',
+                                      tooltip: 'Editar Categoria',
                                       onPressed: () => _mostrarModalRegistro(context, categoriaToEdit: categoria),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
-                                      tooltip: 'Eliminar Categoría',
+                                      tooltip: 'Eliminar Categoria',
                                       onPressed: () {
                                         AppDialog.show<void>(
                                           context,
-                                          title: 'Confirmar Eliminación',
-                                          message: '¿Está seguro de eliminar la categoría "${categoria.nombre}"?',
+                                          title: 'Confirmar Eliminacion',
+                                          message: 'Esta seguro de eliminar la categoria "${categoria.nombre}"?',
                                           actions: [
                                             TextButton(
                                               onPressed: () => Navigator.pop(context),
@@ -186,16 +200,14 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
       ),
     );
   }
-
   void _mostrarModalRegistro(BuildContext context, {Categoria? categoriaToEdit}) {
     final formKey = GlobalKey<FormState>();
     final nombreController = TextEditingController(text: categoriaToEdit?.nombre ?? '');
     final descripcionController = TextEditingController(text: categoriaToEdit?.descripcion ?? '');
     final isEditing = categoriaToEdit != null;
-
     AppDialog.show<void>(
       context,
-      title: isEditing ? 'Editar Categoría' : 'Nueva Categoría',
+      title: isEditing ? 'Editar Categoria' : 'Nueva Categoria',
       content: SizedBox(
         width: 380,
         child: Form(
@@ -204,12 +216,12 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               AppTextField(
-                label: 'Nombre de la Categoría',
+                label: 'Nombre de la Categoria',
                 controller: nombreController,
               ),
               AppLayout.vM,
               AppTextField(
-                label: 'Descripción',
+                label: 'Descripcion',
                 controller: descripcionController,
               ),
             ],
@@ -233,7 +245,6 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                   creadoEn: categoriaToEdit?.creadoEn ?? DateTime.now(),
                   actualizadoEn: isEditing ? DateTime.now() : null,
                 );
-
                 if (isEditing) {
                   ref.read(categoriaControllerProvider.notifier).actualizar(cat);
                 } else {

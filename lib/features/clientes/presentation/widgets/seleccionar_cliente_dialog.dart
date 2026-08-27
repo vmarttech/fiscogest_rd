@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
@@ -55,7 +56,7 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                     actualizarEstado(() => terminoBusqueda = valor);
                   },
                 ),
-                const SizedBox(height: AppSpacing.m),
+                AppLayout.vM,
                 Flexible(
                   child: FutureBuilder<List<ClienteCompleto>>(
                     future: referenciador
@@ -101,7 +102,7 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                           return ListTile(
                             title: Text(cliente.nombre, style: AppTypography.labelMedium),
                             subtitle: Text(cliente.rncCedula, style: AppTypography.bodySmall),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                            trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.grey600),
                             onTap: () => Navigator.pop(context, cliente),
                           );
                         },
@@ -115,7 +116,7 @@ class SeleccionarClienteDialog extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondary)),
             ),
           ],
         );

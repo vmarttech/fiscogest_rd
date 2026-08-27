@@ -14,20 +14,17 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 class ClientesPage extends ConsumerStatefulWidget {
   const ClientesPage({super.key});
   static const String routeName = 'clientes';
-
   @override
   ConsumerState<ClientesPage> createState() => _ClientesPageState();
 }
 
 class _ClientesPageState extends ConsumerState<ClientesPage> {
   final _formKey = GlobalKey<FormState>();
-  
   final _nombreController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _direccionController = TextEditingController();
   final _establecimientoController = TextEditingController();
   final _rncController = TextEditingController();
-
   String _tipoComprobanteSeleccionado = 'B02 - Consumidor Final';
 
   @override
@@ -46,7 +43,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
         SnackBar(
           content: const Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white),
+              Icon(Icons.check_circle, color: AppColors.white),
               AppLayout.hM,
               Text('Cliente registrado correctamente en el sistema'),
             ],
@@ -65,6 +62,8 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
   @override
   Widget build(BuildContext context) {
     const bool esModoCompleto = true;
+    final anchoPantalla = MediaQuery.of(context).size.width;
+    final pantallaPequena = anchoPantalla < 600;
 
     return AppScaffold(
       body: SingleChildScrollView(
@@ -72,51 +71,84 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 850),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Directorio de Clientes y Negocios',
-                          style: AppTypography.h1,
+            child: AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  pantallaPequena
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Directorio de Clientes y Negocios',
+                              style: AppTypography.h1,
+                            ),
+                            AppLayout.vXs,
+                            Text(
+                              'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
+                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                            ),
+                            AppLayout.vM,
+                            Container(
+                              padding: AppSpacing.hS.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
+                              decoration: BoxDecoration(
+                                color: AppColors.grey50,
+                                borderRadius: AppRadius.allL,
+                                border: Border.all(color: AppColors.grey200),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.shield_outlined, size: 18, color: AppColors.primary),
+                                  AppLayout.hS,
+                                  Text(
+                                    'Modo Unificado Activo',
+                                    style: AppTypography.labelSmall.copyWith(color: AppColors.textPrimary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Directorio de Clientes y Negocios',
+                                  style: AppTypography.h1,
+                                ),
+                                AppLayout.vXs,
+                                Text(
+                                  'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
+                                  style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: AppSpacing.hS.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
+                              decoration: BoxDecoration(
+                                color: AppColors.grey50,
+                                borderRadius: AppRadius.allL,
+                                border: Border.all(color: AppColors.grey200),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.shield_outlined, size: 18, color: AppColors.primary),
+                                  AppLayout.hS,
+                                  Text(
+                                    'Modo Unificado Activo',
+                                    style: AppTypography.labelSmall.copyWith(color: AppColors.textPrimary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        AppLayout.vXs,
-                        Text(
-                          'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
-                          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: AppSpacing.hS.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
-                      decoration: BoxDecoration(
-                        color: AppColors.grey50,
-                        borderRadius: AppRadius.allL,
-                        border: Border.all(color: AppColors.grey200),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.shield_outlined, size: 18, color: AppColors.primary),
-                          AppLayout.hS,
-                          Text(
-                            'Modo Unificado Activo',
-                            style: AppTypography.labelSmall.copyWith(color: AppColors.textPrimary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                AppLayout.vL,
-
-                AppCard(
-                  padding: AppSpacing.allL,
-                  child: Form(
+                  AppLayout.vL,
+                  Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,32 +170,47 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                           controller: _nombreController,
                         ),
                         AppLayout.vM,
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextField(
-                                label: 'Teléfono / Celular',
-                                hint: '809-000-0000',
-                                controller: _telefonoController,
+                        pantallaPequena
+                            ? Column(
+                                children: [
+                                  AppTextField(
+                                    label: 'Teléfono / Celular',
+                                    hint: '809-000-0000',
+                                    controller: _telefonoController,
+                                  ),
+                                  AppLayout.vM,
+                                  AppTextField(
+                                    label: 'Tipo de Establecimiento',
+                                    hint: 'Colmado, Salón, Barbería...',
+                                    controller: _establecimientoController,
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                children: [
+                                  Expanded(
+                                    child: AppTextField(
+                                      label: 'Teléfono / Celular',
+                                      hint: '809-000-0000',
+                                      controller: _telefonoController,
+                                    ),
+                                  ),
+                                  AppLayout.hM,
+                                  Expanded(
+                                    child: AppTextField(
+                                      label: 'Tipo de Establecimiento',
+                                      hint: 'Colmado, Salón, Barbería...',
+                                      controller: _establecimientoController,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            AppLayout.hM,
-                            Expanded(
-                              child: AppTextField(
-                                label: 'Tipo de Establecimiento',
-                                hint: 'Colmado, Salón, Barbería...',
-                                controller: _establecimientoController,
-                              ),
-                            ),
-                          ],
-                        ),
                         AppLayout.vM,
                         AppTextField(
                           label: 'Dirección o Sector',
                           hint: 'Calle Principal #12, Sector...',
                           controller: _direccionController,
                         ),
-
                         if (esModoCompleto) ...[
                           AppLayout.vL,
                           const Divider(height: 1, color: AppColors.grey200),
@@ -179,38 +226,61 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                             ],
                           ),
                           AppLayout.vM,
-                          Row(
-                            children: [
-                              Expanded(
-                                child: AppTextField(
-                                  label: 'RNC o Cédula',
-                                  hint: 'Ej. 00112345678',
-                                  controller: _rncController,
-                                ),
-                              ),
-                              AppLayout.hM,
-                              Expanded(
-                                child: AppDropdown<String>(
-                                  label: 'Tipo de Comprobante',
-                                  initialValue: _tipoComprobanteSeleccionado,
-                                  items: const [
-                                    DropdownMenuItem(value: 'B01 - Crédito Fiscal', child: Text('B01 - Crédito Fiscal')),
-                                    DropdownMenuItem(value: 'B02 - Consumidor Final', child: Text('B02 - Consumidor Final')),
-                                    DropdownMenuItem(value: 'B14 - Regímenes Especiales', child: Text('B14 - Regímenes Especiales')),
+                          pantallaPequena
+                              ? Column(
+                                  children: [
+                                    AppTextField(
+                                      label: 'RNC o Cédula',
+                                      hint: 'Ej. 00112345678',
+                                      controller: _rncController,
+                                    ),
+                                    AppLayout.vM,
+                                    AppDropdown<String>(
+                                      hint: 'Tipo de Comprobante',
+                                      initialValue: _tipoComprobanteSeleccionado,
+                                      items: const [
+                                        DropdownMenuItem(value: 'B01 - Crédito Fiscal', child: Text('B01 - Crédito Fiscal')),
+                                        DropdownMenuItem(value: 'B02 - Consumidor Final', child: Text('B02 - Consumidor Final')),
+                                        DropdownMenuItem(value: 'B14 - Regímenes Especiales', child: Text('B14 - Regímenes Especiales')),
+                                      ],
+                                      onChanged: (String? val) {
+                                        if (val != null) {
+                                          setState(() => _tipoComprobanteSeleccionado = val);
+                                        }
+                                      },
+                                    ),
                                   ],
-                                  onChanged: (String? val) {
-                                    if (val != null) {
-                                      setState(() => _tipoComprobanteSeleccionado = val);
-                                    }
-                                  },
+                                )
+                              : Row(
+                                  children: [
+                                    Expanded(
+                                      child: AppTextField(
+                                        label: 'RNC o Cédula',
+                                        hint: 'Ej. 00112345678',
+                                        controller: _rncController,
+                                      ),
+                                    ),
+                                    AppLayout.hM,
+                                    Expanded(
+                                      child: AppDropdown<String>(
+                                        hint: 'Tipo de Comprobante',
+                                        initialValue: _tipoComprobanteSeleccionado,
+                                        items: const [
+                                          DropdownMenuItem(value: 'B01 - Crédito Fiscal', child: Text('B01 - Crédito Fiscal')),
+                                          DropdownMenuItem(value: 'B02 - Consumidor Final', child: Text('B02 - Consumidor Final')),
+                                          DropdownMenuItem(value: 'B14 - Regímenes Especiales', child: Text('B14 - Regímenes Especiales')),
+                                        ],
+                                        onChanged: (String? val) {
+                                          if (val != null) {
+                                            setState(() => _tipoComprobanteSeleccionado = val);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ],
-
                         AppLayout.vL,
-
                         SizedBox(
                           width: double.infinity,
                           child: AppButton(
@@ -222,8 +292,8 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
