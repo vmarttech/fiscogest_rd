@@ -2,6 +2,7 @@ class Venta {
   const Venta({
     this.id,
     required this.numero,
+    this.numeroFactura,
     required this.clienteId,
     this.nombreCliente,
     required this.fecha,
@@ -19,8 +20,10 @@ class Venta {
     this.descuentoNombre,
     this.montoDescuento = 0.0,
   });
+
   final int? id;
   final String numero;
+  final String? numeroFactura;
   final int clienteId;
   final String? nombreCliente;
   final DateTime fecha;
