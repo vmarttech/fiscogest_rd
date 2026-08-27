@@ -165,8 +165,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         ),
                         child: Text(
                           'SIN STOCK',
-                          style: TextStyle(
-                            fontSize: 10,
+                          style: AppTypography.bodySmall.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.red.shade700,
                           ),
@@ -182,8 +181,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         ),
                         child: Text(
                           'OFERTA',
-                          style: TextStyle(
-                            fontSize: 10,
+                          style: AppTypography.bodySmall.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.orange.shade700,
                           ),
