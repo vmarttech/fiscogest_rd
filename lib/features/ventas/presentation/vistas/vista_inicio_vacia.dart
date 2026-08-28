@@ -13,13 +13,6 @@ class VistaInicioVacia extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final modo = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
 
-    final titulo = switch (modo) {
-      ModoOperacion.venta => 'Nueva Venta',
-      ModoOperacion.cotizacion => 'Nueva Cotización',
-      ModoOperacion.apartado => 'Nuevo Apartado',
-      ModoOperacion.cobrar => 'Cuentas por Cobrar',
-    };
-
     final subtitulo = switch (modo) {
       ModoOperacion.venta => 'Seleccione productos o servicios para iniciar una operación de venta',
       ModoOperacion.cotizacion => 'Seleccione productos o servicios para elaborar una cotización',
@@ -42,8 +35,8 @@ class VistaInicioVacia extends ConsumerWidget {
     };
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -62,16 +55,6 @@ class VistaInicioVacia extends ConsumerWidget {
             ),
             const SizedBox(height: 32),
             Text(
-              titulo,
-              style: AppTypography.h2.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-                letterSpacing: -0.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
               subtitulo,
               style: AppTypography.bodyLarge.copyWith(
                 color: AppColors.textSecondary,
@@ -81,20 +64,23 @@ class VistaInicioVacia extends ConsumerWidget {
             ),
             const SizedBox(height: 48),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.tips_and_updates_outlined, color: AppColors.textSecondary, size: 20),
                   const SizedBox(width: AppSpacing.s),
-                  Text(
-                    'Seleccione una categoría para comenzar',
-                    style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  Expanded(
+                    child: Text(
+                      'Seleccione una categoría para comenzar',
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                    ),
                   ),
                 ],
               ),

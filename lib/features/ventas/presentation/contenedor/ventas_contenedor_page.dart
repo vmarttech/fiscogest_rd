@@ -35,7 +35,8 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final vistaActual = ref.watch(ventasNavegacionProvider.select((e) => e.vistaActual));
     final modoOperacion = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
 
-    final String tituloAppBar = switch (modoOperacion) {
+    // ✅ TÍTULO DINÁMICO — CAMBIA SEGÚN MODO
+    final String tituloDinamico = switch (modoOperacion) {
       ModoOperacion.venta => 'Gestión de Ventas',
       ModoOperacion.cotizacion => 'Gestión de Cotizaciones',
       ModoOperacion.apartado => 'Gestión de Apartados',
@@ -45,14 +46,15 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final Widget vistaActiva = switch (vistaActual) {
       VistaActual.inicio => const VistaInicioVacia(),
       VistaActual.inventario => const VistaInventario(),
-      VistaActual.detalle => ref.watch(ventaCargadaDesdeHistorialProvider) != null ? const VistaDetalle() : const VistaDetalle(),
+      VistaActual.detalle => const VistaDetalle(),
       VistaActual.historial => const HistorialVentas(),
     };
 
     return AppScaffold(
+      // ✅ SIN título en AppScaffold → EVITA DUPLICIDAD
       appBar: AppBar(
         title: Text(
-          tituloAppBar,
+          tituloDinamico,
           style: AppTypography.h3.copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.3),
         ),
         centerTitle: false,
@@ -60,6 +62,7 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
         shadowColor: AppColors.border,
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
+        titleSpacing: AppSpacing.m,
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
@@ -67,16 +70,17 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
             color: vistaActual == VistaActual.historial ? AppColors.primary : AppColors.textSecondary,
             style: IconButton.styleFrom(
               padding: const EdgeInsets.all(AppSpacing.s),
+              minimumSize: const Size(40, 40),
             ),
             onPressed: () => ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.historial),
           ),
-          const SizedBox(width: AppSpacing.xs),
           IconButton(
             icon: const Icon(Icons.restore_from_trash_outlined),
             tooltip: 'Limpiar operación actual',
             color: AppColors.textSecondary,
             style: IconButton.styleFrom(
               padding: const EdgeInsets.all(AppSpacing.s),
+              minimumSize: const Size(40, 40),
             ),
             onPressed: () {
               ref.read(registrarVentaProvider.notifier).vaciarVenta();
@@ -84,7 +88,7 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
               ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
             },
           ),
-          const SizedBox(width: AppSpacing.m),
+          const SizedBox(width: AppSpacing.s),
         ],
       ),
       body: Column(

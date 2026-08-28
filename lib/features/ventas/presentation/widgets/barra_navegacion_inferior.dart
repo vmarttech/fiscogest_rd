@@ -11,7 +11,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_naveg
 
 class BarraNavegacionInferior extends ConsumerWidget {
   const BarraNavegacionInferior({super.key});
-  static const double alturaBarra = 78.0;
+  static const double alturaBarra = 72.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,7 +38,7 @@ class BarraNavegacionInferior extends ConsumerWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: 4),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -84,7 +84,7 @@ class BarraNavegacionInferior extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.m),
-              Container(width: 1, height: 44, color: AppColors.border),
+              Container(width: 1, height: 40, color: AppColors.border),
               const SizedBox(width: AppSpacing.m),
               _BotonOperaciones(modoActivo: modoActivo),
             ],
@@ -103,6 +103,7 @@ class _BotonCategoria extends ConsumerWidget {
     required this.etiqueta,
     required this.color,
   });
+
   final CategoriaProducto categoria;
   final bool activa;
   final IconData icono;
@@ -119,7 +120,7 @@ class _BotonCategoria extends ConsumerWidget {
       borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s, vertical: 4),
         decoration: activa
             ? BoxDecoration(
                 color: color.withValues(alpha: 0.08),
@@ -132,14 +133,14 @@ class _BotonCategoria extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icono, color: activa ? color : AppColors.textSecondary, size: 22),
-            const SizedBox(height: 4),
+            Icon(icono, color: activa ? color : AppColors.textSecondary, size: 20),
+            const SizedBox(height: 2),
             Text(
               etiqueta,
               style: AppTypography.labelSmall.copyWith(
                 color: activa ? color : AppColors.textSecondary,
                 fontWeight: activa ? FontWeight.w600 : FontWeight.normal,
-                fontSize: 11.5,
+                fontSize: 11,
               ),
             ),
           ],
@@ -151,6 +152,7 @@ class _BotonCategoria extends ConsumerWidget {
 
 class _BotonOperaciones extends ConsumerWidget {
   const _BotonOperaciones({required this.modoActivo});
+
   final ModoOperacion modoActivo;
 
   String _etiquetaModo() {
@@ -235,7 +237,7 @@ class _BotonOperaciones extends ConsumerWidget {
       onTap: () => _mostrarMenu(context, ref),
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s, vertical: 4),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(12),
@@ -247,25 +249,25 @@ class _BotonOperaciones extends ConsumerWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.expand_circle_down_outlined, color: color, size: 18),
+                Icon(Icons.expand_circle_down_outlined, color: color, size: 16),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   'Operaciones',
                   style: AppTypography.labelSmall.copyWith(
                     color: color,
                     fontWeight: FontWeight.w600,
-                    fontSize: 11.5,
+                    fontSize: 11,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 1),
             Text(
               _etiquetaModo(),
               style: AppTypography.labelMedium.copyWith(
                 color: color,
                 fontWeight: FontWeight.bold,
-                fontSize: 12.5,
+                fontSize: 12,
               ),
             ),
           ],

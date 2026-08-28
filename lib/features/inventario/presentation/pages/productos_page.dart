@@ -1,136 +1,179 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
 import 'package:fiscogest_rd/features/categorias/presentation/pages/categorias_page.dart';
 import 'package:fiscogest_rd/features/marcas/presentation/pages/marcas_page.dart';
 import 'package:fiscogest_rd/features/unidades/presentation/pages/unidades_page.dart';
-import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
-import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 
 class ProductosPage extends ConsumerStatefulWidget {
   const ProductosPage({super.key});
   static const String routeName = 'inventario';
+
   @override
   ConsumerState<ProductosPage> createState() => _ProductosPageState();
 }
 
-class _ProductosPageState extends ConsumerState<ProductosPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _ProductosPageState extends ConsumerState<ProductosPage> {
+  int _vistaActual = 0;
   String _filtroProductos = '';
   String _filtroKardex = '';
-  TipoMovimiento? _filtroTipoKardex;
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+  void _abrirMenuOpciones(BuildContext context) async {
+    final seleccionado = await showMenu<int>(
+      context: context,
+      position: const RelativeRect.fromLTRB(200, 500, 16, 0),
+      color: const Color(0xFF1E293B),
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      items: [
+        PopupMenuItem(
+          value: 0,
+          child: Row(
+            children: [
+              const Icon(Icons.add_box_outlined, color: Color(0xFF3B82F6), size: 20),
+              const SizedBox(width: 12),
+              Text('Nuevo Producto', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 1,
+          child: Row(
+            children: [
+              const Icon(Icons.receipt_long_outlined, color: Color(0xFF10B981), size: 20),
+              const SizedBox(width: 12),
+              Text('Kárdex', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 2,
+          child: Row(
+            children: [
+              const Icon(Icons.category_outlined, color: Color(0xFFF59E0B), size: 20),
+              const SizedBox(width: 12),
+              Text('Categorías', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 3,
+          child: Row(
+            children: [
+              const Icon(Icons.branding_watermark_outlined, color: Color(0xFF8B5CF6), size: 20),
+              const SizedBox(width: 12),
+              Text('Marcas', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 4,
+          child: Row(
+            children: [
+              const Icon(Icons.straighten_outlined, color: Color(0xFFEC4899), size: 20),
+              const SizedBox(width: 12),
+              Text('Unidades', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 5,
+          child: Row(
+            children: [
+              const Icon(Icons.settings_outlined, color: Colors.grey, size: 20),
+              const SizedBox(width: 12),
+              Text('Ajustes de Inventario', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+        ),
+      ],
+    );
+    if (seleccionado == null) return;
+    if (!context.mounted) return;
+
+    switch (seleccionado) {
+      case 0: context.push('/productos/nuevo'); break;
+      case 1: setState(() => _vistaActual = 1); break;
+      case 2: context.pushNamed(CategoriasPage.routeName); break;
+      case 3: context.pushNamed(MarcasPage.routeName); break;
+      case 4: context.pushNamed(UnidadesPage.routeName); break;
+      case 5: context.pushNamed('lista-ajustes'); break;
+    }
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  Widget _construirVistaActual() {
+    return switch (_vistaActual) {
+      0 => _buildSeccionProductos(),
+      1 => _buildSeccionKardex(),
+      2 => const CategoriasPage(),
+      3 => const MarcasPage(),
+      4 => const UnidadesPage(),
+      _ => const SizedBox.shrink(),
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
-    return Scaffold(
-      backgroundColor: AppColors.pageBackground,
-      appBar: AppBar(
-        title: const Text('Gestion Integral de Inventario'),
-        backgroundColor: AppColors.darkSurface,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_note_outlined, color: AppColors.white, size: 22),
-            tooltip: 'Ajustes de Inventario',
-            onPressed: () => context.pushNamed('lista-ajustes'),
-          ),
-          const SizedBox(width: AppSpacing.s),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppColors.tabIndicator,
-          indicatorWeight: 3,
-          labelStyle: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
-          unselectedLabelColor: AppColors.white70,
-          labelColor: AppColors.white,
-          tabs: [
-            Tab(icon: const Icon(Icons.inventory_2_outlined), text: esPantallaPequena ? null : 'Productos'),
-            Tab(icon: const Icon(Icons.receipt_long_outlined), text: esPantallaPequena ? null : 'Kardex'),
-            Tab(icon: const Icon(Icons.category_outlined), text: esPantallaPequena ? null : 'Categorias'),
-            Tab(icon: const Icon(Icons.branding_watermark_outlined), text: esPantallaPequena ? null : 'Marcas'),
-            Tab(icon: const Icon(Icons.straighten_outlined), text: esPantallaPequena ? null : 'Unidades'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
+    return AppScaffold(
+      body: Stack(
         children: [
-          _buildSeccionProductos(context),
-          _buildSeccionKardex(context, esPantallaPequena),
-          const CategoriasPage(),
-          const MarcasPage(),
-          const UnidadesPage(),
+          _construirVistaActual(),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton.extended(
+              onPressed: () => _abrirMenuOpciones(context),
+              icon: const Icon(Icons.menu, size: 20),
+              label: const Text('Opciones', style: TextStyle(fontSize: 12)),
+              backgroundColor: const Color(0xFF3B82F6),
+              foregroundColor: Colors.white,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSeccionProductos(BuildContext context) {
-    final productosAsync = ref.watch(productoControllerProvider);
+  Widget _buildSeccionProductos() {
     return Padding(
-      padding: AppSpacing.allL,
+      padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkSurface,
-                  foregroundColor: AppColors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: AppSpacing.hL,
-                ),
-                onPressed: () => context.push('/productos/nuevo'),
-                icon: const Icon(Icons.add, size: 20),
-                label: const Text('Nuevo Producto', style: TextStyle(fontWeight: FontWeight.w600)),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.l),
           AppTextField(
-            hint: 'Buscar por codigo, nombre...',
-            onChanged: (v) => setState(() => _filtroProductos = v),
+            hint: 'Buscar por código, nombre...',
+            onChanged: (String v) => setState(() => _filtroProductos = v),
           ),
-          const SizedBox(height: AppSpacing.m),
+          const SizedBox(height: 16),
           Expanded(
-            child: productosAsync.when(
+            child: ref.watch(productoControllerProvider).when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
+              error: (Object e, StackTrace? _) => Center(
                 child: Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
               ),
-              data: (productos) {
-                final filtrados = productos
-                    .where((p) => p.codigo.toLowerCase().contains(_filtroProductos) || p.nombre.toLowerCase().contains(_filtroProductos))
+              data: (List<Producto> productos) {
+                final List<Producto> filtrados = productos
+                    .where((Producto p) =>
+                        p.codigo.toLowerCase().contains(_filtroProductos.toLowerCase()) ||
+                        p.nombre.toLowerCase().contains(_filtroProductos.toLowerCase()))
                     .toList();
                 if (filtrados.isEmpty) {
                   return Center(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 40),
+                      padding: const EdgeInsets.only(top: 60),
                       child: Text(
-                        'El inventario esta listo para registrar elementos.',
+                        'El inventario está listo para registrar elementos.',
                         style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
@@ -138,77 +181,63 @@ class _ProductosPageState extends ConsumerState<ProductosPage>
                   );
                 }
                 return ListView.separated(
-                  padding: AppSpacing.vS,
+                  padding: EdgeInsets.zero,
                   itemCount: filtrados.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
-                  itemBuilder: (_, i) {
-                    final prod = filtrados[i];
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, int i) {
+                    final Producto prod = filtrados[i];
+                    final double stockSeguro = prod.stock ?? 0;
                     return AppCard(
-                      padding: AppSpacing.allL,
+                      padding: const EdgeInsets.all(16),
                       elevation: 2,
                       child: Row(
                         children: [
                           Container(
-                            width: 50,
-                            height: 50,
-                            margin: const EdgeInsets.only(right: AppSpacing.m),
-                            decoration: BoxDecoration(color: AppColors.cardBackground, borderRadius: BorderRadius.circular(12)),
-                            child: const Icon(Icons.inventory_2_outlined, color: AppColors.darkSurface, size: 24),
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF3B82F6), size: 22),
                           ),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${prod.codigo} • ${prod.nombre}',
-                                  style: AppTypography.h4.copyWith(color: AppColors.darkSurface),
-                                  overflow: TextOverflow.ellipsis,
+                                  prod.nombre,
+                                  style: AppTypography.h4.copyWith(color: const Color(0xFF0F172A), fontSize: 15),
                                 ),
-                                const SizedBox(height: AppSpacing.xs),
-                                Wrap(
-                                  spacing: AppSpacing.s,
-                                  runSpacing: AppSpacing.xs,
-                                  children: [
-                                    RichText(
-                                      text: TextSpan(
-                                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                                        children: [
-                                          const TextSpan(text: 'Stock: '),
-                                          TextSpan(
-                                            text: '${prod.stock}',
-                                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.darkSurface),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    RichText(
-                                      text: TextSpan(
-                                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                                        children: [
-                                          const TextSpan(text: 'Compra: '),
-                                          TextSpan(
-                                            text: '${prod.precioCompra}',
-                                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.success),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    RichText(
-                                      text: TextSpan(
-                                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                                        children: [
-                                          const TextSpan(text: 'Venta: '),
-                                          TextSpan(
-                                            text: '${prod.precioVenta}',
-                                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.error),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Código: ${prod.codigo}',
+                                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 13),
                                 ),
                               ],
                             ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Stock: ${stockSeguro.toStringAsFixed(2)}',
+                                style: AppTypography.labelLarge.copyWith(
+                                  color: stockSeguro > 0 ? const Color(0xFF10B981) : AppColors.error,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                'Compra: \$${prod.precioCompra.toStringAsFixed(2)}',
+                                style: AppTypography.bodySmall.copyWith(color: const Color(0xFF10B981), fontSize: 12),
+                              ),
+                              Text(
+                                'Venta: \$${prod.precioVenta.toStringAsFixed(2)}',
+                                style: AppTypography.bodySmall.copyWith(color: const Color(0xFFEF4444), fontSize: 12),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -223,76 +252,30 @@ class _ProductosPageState extends ConsumerState<ProductosPage>
     );
   }
 
-  // ✅ TITULO ELIMINADO + MIGRACION COMPLETA DE LAYOUT
-  Widget _buildSeccionKardex(BuildContext context, bool esPantallaPequena) {
-    final movimientosAsync = ref.watch(kardexPorProductoProvider(''));
+  Widget _buildSeccionKardex() {
     return Padding(
-      padding: AppSpacing.allL,
+      padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🚫 TITULO "Historial de Movimientos" — ELIMINADO COMPLETAMENTE
-          const SizedBox(height: AppSpacing.s),
-          // ✅ MIGRACION: EN CELULAR UNO DEBAJO DEL OTRO → SIN DESBORDAMIENTO
-          if (esPantallaPequena) ...[
-            AppTextField(
-              hint: 'Buscar por producto, documento...',
-              onChanged: (v) => setState(() => _filtroKardex = v),
-            ),
-            const SizedBox(height: AppSpacing.m),
-            AppDropdown<TipoMovimiento>(
-              initialValue: _filtroTipoKardex,
-              hint: 'Tipo Movimiento',
-              items: TipoMovimiento.values.map((t) => DropdownMenuItem(
-                value: t,
-                child: Text(t.name.toUpperCase(), style: AppTypography.bodyMedium),
-              )).toList(),
-              onChanged: (v) => setState(() => _filtroTipoKardex = v),
-            ),
-          ] else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: AppTextField(
-                    hint: 'Buscar por producto, documento...',
-                    onChanged: (v) => setState(() => _filtroKardex = v),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.m),
-                Expanded(
-                  child: AppDropdown<TipoMovimiento>(
-                    initialValue: _filtroTipoKardex,
-                    hint: 'Tipo Movimiento',
-                    items: TipoMovimiento.values.map((t) => DropdownMenuItem(
-                      value: t,
-                      child: Text(t.name.toUpperCase(), style: AppTypography.bodyMedium),
-                    )).toList(),
-                    onChanged: (v) => setState(() => _filtroTipoKardex = v),
-                  ),
-                ),
-              ],
-            ),
-          ],
-          const SizedBox(height: AppSpacing.m),
+          AppTextField(
+            hint: 'Buscar por ID de producto...',
+            onChanged: (String v) => setState(() => _filtroKardex = v),
+          ),
+          const SizedBox(height: 16),
           Expanded(
-            child: movimientosAsync.when(
+            child: ref.watch(kardexPorProductoProvider(_filtroKardex)).when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
+              error: (Object e, StackTrace? _) => Center(
                 child: Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
               ),
-              data: (movimientos) {
-                final filtrados = movimientos.where((m) {
-                  final coincideTexto = m.productoId.toString().contains(_filtroKardex) ||
-                      (m.documentoReferencia?.contains(_filtroKardex) ?? false);
-                  final coincideTipo = _filtroTipoKardex == null || m.tipoMovimiento == _filtroTipoKardex;
-                  return coincideTexto && coincideTipo;
-                }).toList();
-                if (filtrados.isEmpty) {
+              data: (List<Kardex> movimientos) {
+                if (movimientos.isEmpty) {
                   return Center(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 40),
+                      padding: const EdgeInsets.only(top: 60),
                       child: Text(
-                        'Aparecera el historial completo de entradas, salidas y ajustes de inventario.',
+                        'No hay movimientos registrados.',
                         style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
@@ -300,71 +283,35 @@ class _ProductosPageState extends ConsumerState<ProductosPage>
                   );
                 }
                 return ListView.separated(
-                  padding: AppSpacing.vS,
-                  itemCount: filtrados.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
-                  itemBuilder: (_, i) {
-                    final mov = filtrados[i];
-                    final colorTipo = switch (mov.tipoMovimiento) {
-                      TipoMovimiento.entrada => AppColors.success,
-                      TipoMovimiento.salida => AppColors.error,
-                      TipoMovimiento.ajuste => AppColors.warning,
-                      _ => AppColors.info,
-                    };
-                    final fechaValida = mov.fechaMovimiento ?? DateTime.now();
+                  padding: EdgeInsets.zero,
+                  itemCount: movimientos.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, int i) {
+                    final Kardex mov = movimientos[i];
                     return AppCard(
-                      padding: AppSpacing.allL,
+                      padding: const EdgeInsets.all(16),
                       elevation: 2,
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 8,
-                            height: 60,
-                            decoration: BoxDecoration(color: colorTipo, borderRadius: BorderRadius.circular(4)),
+                          Text(
+                            'Producto ID: ${mov.productoId}',
+                            style: AppTypography.h4.copyWith(color: const Color(0xFF0F172A), fontSize: 15),
                           ),
-                          const SizedBox(width: AppSpacing.m),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  mov.tipoMovimiento.name.toUpperCase(),
-                                  style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: colorTipo),
-                                ),
-                                const SizedBox(height: AppSpacing.xs),
-                                Text(
-                                  'Producto: ${mov.productoId}\nDocumento: ${mov.documentoReferencia ?? 'Sin doc'}',
-                                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                                ),
-                                const SizedBox(height: AppSpacing.xs),
-                                Text(
-                                  'Cantidad: ${mov.cantidad}  |  Saldo: ${mov.saldoAnterior} -> ${mov.saldoNuevo}',
-                                  style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.darkSurface),
-                                ),
-                              ],
+                          const SizedBox(height: 4),
+                          Text(
+                            'Cantidad: ${mov.cantidad} • Saldo: ${mov.saldoNuevo}',
+                            style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary, fontSize: 14),
+                          ),
+                          Text(
+                            'Costo: \$${mov.costoUnitario.toStringAsFixed(2)} • Total: \$${mov.totalMovimiento.toStringAsFixed(2)}',
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 13),
+                          ),
+                          if (mov.fechaMovimiento != null)
+                            Text(
+                              'Fecha: ${mov.fechaMovimiento}',
+                              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 13),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.s),
-                          Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '${fechaValida.day}/${fechaValida.month}/${fechaValida.year}',
-                                  style: AppTypography.labelSmall.copyWith(color: AppColors.textDisabled, fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(height: AppSpacing.xs),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s, vertical: AppSpacing.xs),
-                                  decoration: BoxDecoration(color: colorTipo.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                                  child: Text(
-                                    mov.tipoMovimiento == TipoMovimiento.entrada ? 'Entrante' : 'Saliente',
-                                    style: AppTypography.labelSmall.copyWith(fontWeight: FontWeight.bold, color: colorTipo),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
                       ),
                     );

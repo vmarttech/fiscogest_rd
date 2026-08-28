@@ -15,6 +15,8 @@ class AppShell extends StatelessWidget {
       '/' => 'Dashboard',
       '/sales' => 'Facturación y NC',
       '/ventas' => 'Ventas',
+      '/ventas/cobrar' => 'Cuentas por Cobrar',
+      '/ventas/pagar' => 'Cuentas por Pagar',
       '/compras' => 'Compras',
       '/inventory' => 'Inventario',
       '/kardex' => 'Kárdex',
