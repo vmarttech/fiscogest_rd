@@ -7,19 +7,17 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/compra_usecase_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 
 class ListaComprasPage extends ConsumerWidget {
   const ListaComprasPage({super.key});
   static const String routeName = 'lista-compras';
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final listarCompras = ref.read(listarComprasUseCaseProvider);
     final confirmarCompra = ref.read(confirmarCompraUseCaseProvider);
-
     return AppScaffold(
-      title: 'Compras',
       body: FutureBuilder<List<Compra>>(
         future: listarCompras(),
         builder: (context, snapshot) {
@@ -121,6 +119,8 @@ class ListaComprasPage extends ConsumerWidget {
                                         ),
                                       );
                                     }
+                                    ref.invalidate(listarComprasUseCaseProvider);
+                                    ref.invalidate(productoControllerProvider);
                                   } catch (e) {
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
@@ -144,12 +144,13 @@ class ListaComprasPage extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.add),
-        label: const Text('Nueva Compra'),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'nueva_compra',
         onPressed: () {
           context.goNamed(RegistrarCompraPage.routeName);
         },
+        backgroundColor: const Color(0xFF3B82F6),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

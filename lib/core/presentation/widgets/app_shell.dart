@@ -27,6 +27,7 @@ class AppShell extends StatelessWidget {
       '/customers' => 'Clientes',
       '/suppliers' => 'Proveedores',
       '/reports' => 'Reportes 606/607',
+      '/compras/registrar' => 'Registrar Compra',
       '/taxes' => 'Impuestos',
       '/import-export' => 'Importar / Exportar',
       '/settings' => 'Configuración',

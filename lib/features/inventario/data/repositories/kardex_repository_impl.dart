@@ -20,7 +20,7 @@ class KardexRepositoryImpl implements IKardexRepository {
       saldoNuevo: Value(movimiento.saldoNuevo),
       costoUnitario: Value(movimiento.costoUnitario),
       totalMovimiento: Value(movimiento.totalMovimiento),
-      fechaMovimiento: Value(movimiento.fechaMovimiento?.millisecondsSinceEpoch ?? 0),
+      fechaMovimiento: Value(movimiento.fechaMovimiento?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch),
       documentoReferencia: Value(movimiento.documentoReferencia),
       observacion: Value(movimiento.observacion),
       usuarioId: Value(movimiento.usuarioId),

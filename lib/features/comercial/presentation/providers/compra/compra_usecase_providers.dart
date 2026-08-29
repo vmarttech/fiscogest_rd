@@ -4,20 +4,18 @@ import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/registrar
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/listar_compras_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/inventario_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart' as inventario_providers;
 
 final confirmarCompraUseCaseProvider = Provider<ConfirmarCompraUseCase>((ref) {
   final compraRepository = ref.watch(compraRepositoryProvider);
-  final inventarioRepository = ref.watch(inventarioRepositoryProvider);
-  final productoRepository = ref.watch(productoRepositoryProvider);
   final proveedorRepository = ref.watch(proveedorRepositoryProvider);
   final kardexRepository = ref.watch(kardexRepositoryProvider);
-
+  final productoRepoReal = ref.watch(inventario_providers.productoRepositoryProvider);
   return ConfirmarCompraUseCase(
     compraRepository,
-    inventarioRepository,
-    productoRepository,
     proveedorRepository,
     kardexRepository,
+    productoRepoReal,
   );
 });
 

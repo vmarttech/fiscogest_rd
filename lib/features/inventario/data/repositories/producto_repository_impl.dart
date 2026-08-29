@@ -27,6 +27,14 @@ class ProductoRepositoryImpl implements IProductoRepository {
   }
 
   @override
+  Future<Producto?> obtenerProductoPorCodigo(String codigo) async {
+    final query = _db.select(_db.productosTable)..where((t) => t.codigo.equals(codigo));
+    final row = await query.getSingleOrNull();
+    if (row == null) return null;
+    return ProductoDataMapper.toDomain(row);
+  }
+
+  @override
   Future<int> guardarProducto(Producto producto, int idUsuario) async {
     return await _db.transaction(() async {
       final idGenerado = await _db.into(_db.productosTable).insert(
@@ -62,8 +70,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
 
   @override
   Future<bool> eliminarProducto(int id) async {
-    final rowsAffected = await (_db.delete(_db.productosTable)
-      ..where((t) => t.id.equals(id))).go();
+    final rowsAffected = await (_db.delete(_db.productosTable)..where((t) => t.id.equals(id))).go();
     return rowsAffected > 0;
   }
 }
