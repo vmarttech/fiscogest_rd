@@ -5,7 +5,6 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/lista_precio
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 
 class EditarPreciosProductoPage extends ConsumerStatefulWidget {
-
   const EditarPreciosProductoPage({super.key, required this.producto});
   final Producto producto;
 
@@ -25,11 +24,19 @@ class _EditarPreciosProductoPageState extends ConsumerState<EditarPreciosProduct
   void initState() {
     super.initState();
     _costoCtrl = TextEditingController(text: widget.producto.precioCompra.toStringAsFixed(2));
-    _precioVentaCtrl = TextEditingController(text: widget.producto.precioVenta.toStringAsFixed(2));
-    _margenCtrl = TextEditingController(text: widget.producto.margenGanancia?.toStringAsFixed(2) ?? '0.00');
-    _precioMinimoCtrl = TextEditingController(text: widget.producto.precioMinimo?.toStringAsFixed(2) ?? '');
-    _precioMayoristaCtrl = TextEditingController(text: widget.producto.precioMayorista?.toStringAsFixed(2) ?? '');
-    _precioEspecialCtrl = TextEditingController(text: widget.producto.precioEspecial?.toStringAsFixed(2) ?? '');
+    _precioVentaCtrl = TextEditingController();
+    _margenCtrl = TextEditingController();
+    _precioMinimoCtrl = TextEditingController();
+    _precioMayoristaCtrl = TextEditingController();
+    _precioEspecialCtrl = TextEditingController();
+  }
+
+  void _sincronizarConDatos(ListaPrecios datos) {
+    _precioVentaCtrl.text = datos.precioVenta.toStringAsFixed(2);
+    _margenCtrl.text = datos.margenGanancia?.toStringAsFixed(2) ?? '0.00';
+    _precioMinimoCtrl.text = datos.precioMinimo?.toStringAsFixed(2) ?? '';
+    _precioMayoristaCtrl.text = datos.precioMayorista?.toStringAsFixed(2) ?? '';
+    _precioEspecialCtrl.text = datos.precioEspecial?.toStringAsFixed(2) ?? '';
   }
 
   void _calcularPrecioDesdeMargen() {
@@ -78,86 +85,111 @@ class _EditarPreciosProductoPageState extends ConsumerState<EditarPreciosProduct
 
   @override
   Widget build(BuildContext context) {
+    final productoId = widget.producto.id.toString();
+    final datosPrecios = ref.watch(listaPreciosPorProductoProvider(productoId));
+
+    ref.listen(listaPreciosPorProductoProvider(productoId), (anterior, actual) {
+      actual.whenData((datos) {
+        if (datos != null) {
+          _sincronizarConDatos(datos);
+        }
+      });
+    });
+
     return Scaffold(
       appBar: AppBar(title: const Text('Precios de Venta')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Producto: ${widget.producto.nombre}', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _costoCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Costo (solo lectura)',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              readOnly: true,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _margenCtrl,
-              decoration: InputDecoration(
-                labelText: 'Margen de ganancia %',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.calculate),
-                  onPressed: _calcularPrecioDesdeMargen,
+      body: datosPrecios.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('Error: $error')),
+        data: (datos) {
+          if (datos != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_precioVentaCtrl.text.isEmpty) {
+                _sincronizarConDatos(datos);
+              }
+            });
+          }
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Producto: ${widget.producto.nombre}',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _costoCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Costo (solo lectura)',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  readOnly: true,
                 ),
-              ),
-              keyboardType: TextInputType.number,
-              onChanged: (_) => _calcularPrecioDesdeMargen(),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _precioVentaCtrl,
-              decoration: InputDecoration(
-                labelText: 'Precio de Venta',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.sync),
-                  onPressed: _calcularMargenDesdePrecio,
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _margenCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Margen de ganancia %',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.calculate),
+                      onPressed: _calcularPrecioDesdeMargen,
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => _calcularPrecioDesdeMargen(),
                 ),
-              ),
-              keyboardType: TextInputType.number,
-              onChanged: (_) => _calcularMargenDesdePrecio(),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _precioVentaCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Precio de Venta',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.sync),
+                      onPressed: _calcularMargenDesdePrecio,
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => _calcularMargenDesdePrecio(),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _precioMinimoCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Precio Mínimo',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _precioMayoristaCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Precio Mayorista',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _precioEspecialCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Precio Especial',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _guardar,
+                  child: const Text('Guardar Precios'),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _precioMinimoCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Precio Mínimo',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _precioMayoristaCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Precio Mayorista',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _precioEspecialCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Precio Especial',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _guardar,
-              child: const Text('Guardar Precios'),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

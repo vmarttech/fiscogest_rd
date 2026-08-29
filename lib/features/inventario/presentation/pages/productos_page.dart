@@ -23,9 +23,7 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 
 class ProductosPage extends ConsumerStatefulWidget {
   const ProductosPage({super.key});
-
   static const String routeName = 'inventario';
-
   @override
   ConsumerState<ProductosPage> createState() => _ProductosPageState();
 }
@@ -42,7 +40,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
 
   bool _puedeEliminar() {
     final rol = ref.watch(rolUsuarioProvider);
-    return rol == RolUsuario.administracion;
+    return rol == RolUsuario.compras || rol == RolUsuario.administracion;
   }
 
   void _abrirMenuOpciones(BuildContext context) async {
@@ -197,7 +195,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   Widget _buildSeccionProductos() {
     final puedeVerCostos = _puedeVerCostos();
     final puedeEliminar = _puedeEliminar();
-
     return Padding(
       padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + AppSpacing.s),
       child: Column(
