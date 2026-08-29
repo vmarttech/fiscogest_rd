@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
-
 @immutable
 class RegistrarVentaState {
   const RegistrarVentaState({
@@ -30,7 +29,6 @@ class RegistrarVentaState {
   final int? descuentoId;
   final String? descuentoNombre;
   final double montoDescuento;
-
   RegistrarVentaState copyWith({
     int? clienteId,
     String? clienteNombre,
@@ -61,25 +59,20 @@ class RegistrarVentaState {
     );
   }
 }
-
 class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   @override
   RegistrarVentaState build() {
     return const RegistrarVentaState();
   }
-
   void seleccionarCliente(int id, String nombre) {
     state = state.copyWith(clienteId: id, clienteNombre: nombre);
   }
-
   void cambiarFormaPago(String tipo) {
     final tipoNormalizado = tipo.toLowerCase().trim();
     final credito = tipoNormalizado == 'credito';
     state = state.copyWith(tipoPago: tipoNormalizado, esCredito: credito);
   }
-
   double? _obtenerStock(DetalleVenta linea) => linea.subtotalLinea;
-
   String? validarStockAlAgregar(DetalleVenta producto, double cantidad) {
     final stockDisponible = _obtenerStock(producto);
     if (stockDisponible == null || stockDisponible <= 0) {
@@ -90,7 +83,6 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     }
     return null;
   }
-
   String? agregarProducto(DetalleVenta linea) {
     final errorStock = validarStockAlAgregar(linea, linea.cantidad.toDouble());
     if (errorStock != null) return errorStock;
@@ -98,26 +90,27 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     _recalcularTotales(nuevaLista);
     return null;
   }
-
   void quitarProducto(int indice) {
     final nuevaLista = List<DetalleVenta>.from(state.detalles)..removeAt(indice);
     _recalcularTotales(nuevaLista);
   }
-
   void eliminarProducto(int indice) {
     quitarProducto(indice);
   }
-
   void cambiarCantidad(int indice, double cantidad) {
+    if (cantidad < 1) cantidad = 1;
     final linea = state.detalles[indice];
     final errorStock = validarStockAlAgregar(linea, cantidad);
     if (errorStock != null) return;
     final listaActualizada = List<DetalleVenta>.from(state.detalles);
-    listaActualizada[indice] = linea.copyWith(cantidad: cantidad.toInt());
+    final nuevoSubtotal = linea.precioUnitario * cantidad;
+    listaActualizada[indice] = linea.copyWith(
+      cantidad: cantidad.toInt(),
+      subtotal: nuevoSubtotal,
+      subtotalLinea: nuevoSubtotal,
+    );
     _recalcularTotales(listaActualizada);
   }
-
-  // Firma actualizada para coincidir con UI: (indice, valor, esPorcentaje)
   void aplicarDescuentoLinea(int indice, double valor, [bool esPorcentaje = true]) {
     final lista = List<DetalleVenta>.from(state.detalles);
     final linea = lista[indice];
@@ -128,23 +121,18 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     lista[indice] = linea.copyWith(subtotal: nuevoSubtotal);
     _recalcularTotales(lista);
   }
-
   void aplicarDescuentoManual(double monto) {
     state = state.copyWith(montoDescuento: monto);
     _recalcularTotales(state.detalles);
   }
-
   void quitarDescuento() {
     state = state.copyWith(montoDescuento: 0.0, descuentoId: null, descuentoNombre: null);
     _recalcularTotales(state.detalles);
   }
-
-  // id: acepta int? y convierte con ?? 0
   void seleccionarDescuento(int? id, String nombre, double monto) {
     state = state.copyWith(descuentoId: id ?? 0, descuentoNombre: nombre, montoDescuento: monto);
     _recalcularTotales(state.detalles);
   }
-
   void _recalcularTotales(List<DetalleVenta> lineas) {
     const tasaItbis = 0.18;
     final subtotal = lineas.fold<double>(0.0, (sum, l) => sum + l.subtotal);
@@ -152,7 +140,6 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     final total = subtotal + itbis - state.montoDescuento;
     state = state.copyWith(detalles: lineas, subtotal: subtotal, itbis: itbis, total: total);
   }
-
   bool validarAntesDeGuardar() {
     if (state.clienteId == null || (state.clienteNombre?.trim().isEmpty ?? true)) {
       return false;
@@ -173,15 +160,12 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     }
     return true;
   }
-
   void aplicarDescuentoGlobal(double monto) {
     state = state.copyWith(montoDescuento: monto);
     _recalcularTotales(state.detalles);
   }
-
   void vaciarVenta() {
     state = const RegistrarVentaState();
   }
 }
-
 final registrarVentaProvider = NotifierProvider<RegistrarVentaNotifier, RegistrarVentaState>(RegistrarVentaNotifier.new);

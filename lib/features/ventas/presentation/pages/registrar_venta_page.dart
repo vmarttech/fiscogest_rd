@@ -17,10 +17,12 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/formulario_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
 
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
   static const String routeName = 'registrar-ventas';
+
   @override
   ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
@@ -99,6 +101,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
       final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
       final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
+
       final linea = DetalleVenta(
         productoId: p.id ?? 0,
         nombreProducto: p.nombre,
@@ -110,13 +113,15 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         ofertaNombre: ofertaNombre,
         precioOriginal: precioOriginal,
       );
+
       ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
       _buscadorController.clear();
+
       if (oferta != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Oferta aplicada: ${oferta.nombre}'),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
           ),
         );
       }
@@ -141,9 +146,11 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                   },
                 );
               }
+
               final p = resultados[i];
               final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
               final hayStock = (p.stock ?? 0) > 0;
+
               return ListTile(
                 title: Row(
                   children: [
@@ -159,14 +166,14 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         margin: const EdgeInsets.only(left: AppSpacing.s),
                         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade100,
-                          borderRadius: BorderRadius.circular(4),
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(AppRadius.s),
                         ),
                         child: Text(
                           'SIN STOCK',
                           style: AppTypography.bodySmall.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
+                            color: AppColors.error,
                           ),
                         ),
                       ),
@@ -175,14 +182,14 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         margin: const EdgeInsets.only(left: AppSpacing.s),
                         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
                         decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(4),
+                          color: AppColors.warning.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(AppRadius.s),
                         ),
                         child: Text(
                           'OFERTA',
                           style: AppTypography.bodySmall.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.orange.shade700,
+                            color: AppColors.warning,
                           ),
                         ),
                       ),
@@ -204,6 +211,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
                         final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
                         final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
+
                         final linea = DetalleVenta(
                           productoId: p.id ?? 0,
                           nombreProducto: p.nombre,
@@ -215,14 +223,16 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                           ofertaNombre: ofertaNombre,
                           precioOriginal: precioOriginal,
                         );
+
                         ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
                         _buscadorController.clear();
                         Navigator.pop(ctx);
+
                         if (oferta != null && mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Oferta aplicada: ${oferta.nombre}'),
-                              backgroundColor: Colors.orange,
+                              backgroundColor: AppColors.warning,
                             ),
                           );
                         }
@@ -232,7 +242,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             },
           ),
         ),
-        actions: [],
       );
     }
   }
@@ -354,6 +363,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       );
       return;
     }
+
     setState(() => _cargando = true);
     try {
       final casoUso = ref.read(registrarVentaUseCaseProvider);

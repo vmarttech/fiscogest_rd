@@ -1,7 +1,16 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+
+String _formatearMonto(double monto) {
+  return NumberFormat.currency(
+    locale: 'es_DO',
+    symbol: '',
+    decimalDigits: 2,
+  ).format(monto);
+}
 
 class ItemCarrito extends ConsumerWidget {
   const ItemCarrito({
@@ -10,11 +19,9 @@ class ItemCarrito extends ConsumerWidget {
     required this.indice,
     required this.alEliminar,
   });
-
   final DetalleVenta detalle;
   final int indice;
   final VoidCallback alEliminar;
-
   void _abrirEditarCantidad(BuildContext context, WidgetRef ref) {
     final controlador = TextEditingController(text: detalle.cantidad.toString());
     showDialog<dynamic>(
@@ -42,7 +49,6 @@ class ItemCarrito extends ConsumerWidget {
       ),
     );
   }
-
   void _abrirDescuentoLinea(BuildContext context, WidgetRef ref) {
     final tienePorcentaje = detalle.descuentoPorcentaje > 0;
     final tieneMonto = detalle.montoDescuento > 0;
@@ -115,12 +121,10 @@ class ItemCarrito extends ConsumerWidget {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tieneOferta = detalle.ofertaId != null;
     final tieneDescuento = detalle.descuentoPorcentaje > 0 || detalle.montoDescuento > 0;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
@@ -171,10 +175,10 @@ class ItemCarrito extends ConsumerWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Cant: ${detalle.cantidad} • RD\$ ${(detalle.subtotalLinea ?? detalle.subtotal).toStringAsFixed(2)}'),
+            Text('Cant: ${detalle.cantidad} • RD\$ ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}'),
             if (tieneOferta && detalle.precioOriginal != null)
               Text(
-                'Precio original: RD\$ ${detalle.precioOriginal!.toStringAsFixed(2)} → Oferta: RD\$ ${detalle.precioUnitario.toStringAsFixed(2)}',
+                'Precio original: RD\$ ${_formatearMonto(detalle.precioOriginal!)} → Oferta: RD\$ ${_formatearMonto(detalle.precioUnitario)}',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.orange.shade700,
