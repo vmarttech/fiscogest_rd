@@ -1,6 +1,6 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/productos_page.dart';
-import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_gestion_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -57,6 +57,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         .buscarPorNombre(termino);
     final ofertasActivas = await ref.watch(ofertasActivosProvider.future);
     final List<Oferta> listaOfertas = ofertasActivas.cast<Oferta>();
+
     if (resultados.isEmpty && mounted) {
       await AppDialog.show<void>(
         context,
@@ -80,6 +81,7 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       );
       return;
     }
+
     if (resultados.length == 1 && mounted) {
       final p = resultados.first;
       if ((p.stock ?? 0) <= 0) {
@@ -300,9 +302,15 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           ListTile(
             title: const Text('Buscar Cliente...', style: AppTypography.bodyMedium),
             subtitle: const Text('Ver lista de clientes registrados', style: AppTypography.bodySmall),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              context.pushNamed(ClientesGestionPage.routeName);
+              final cliente = await SeleccionarClienteDialog.mostrar(context);
+              if (cliente != null && context.mounted) {
+                ref.read(registrarVentaProvider.notifier).seleccionarCliente(
+                  cliente.id ?? 0,
+                  cliente.nombre,
+                );
+              }
             },
           ),
         ],

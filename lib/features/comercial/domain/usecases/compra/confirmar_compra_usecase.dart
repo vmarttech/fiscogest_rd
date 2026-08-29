@@ -37,7 +37,7 @@ class ConfirmarCompraUseCase {
         final saldoNuevoCalculado = saldoAnterior + linea.cantidad;
 
         await _productoRepoReal.actualizarProducto(
-          productoPorCodigo.copyWith(stock: saldoNuevoCalculado),
+          productoPorCodigo.copyWith(stock: saldoNuevoCalculado, precioCompra: linea.costoUnitario),
         );
 
         final movimiento = Kardex(
@@ -65,7 +65,7 @@ class ConfirmarCompraUseCase {
           final saldoNuevoCalculado = saldoAnterior + linea.cantidad;
 
           await _productoRepoReal.actualizarProducto(
-            producto.copyWith(stock: saldoNuevoCalculado),
+            producto.copyWith(stock: saldoNuevoCalculado, precioCompra: linea.costoUnitario),
           );
 
           final movimiento = Kardex(
