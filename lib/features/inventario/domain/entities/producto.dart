@@ -1,5 +1,4 @@
 class Producto {
-
   Producto({
     this.id,
     required this.codigo,
@@ -8,6 +7,11 @@ class Producto {
     this.descripcion,
     required this.precioCompra,
     required this.precioVenta,
+    this.margenGanancia,
+    this.precioMinimo,
+    this.precioMayorista,
+    this.precioEspecial,
+    this.gastosAsociados = 0,
     this.stock,
     this.stockMinimo,
     this.stockMaximo,
@@ -16,13 +20,19 @@ class Producto {
     required this.unidadMedidaId,
     required this.activo,
   });
+
   final int? id;
   final String codigo;
   final String? codigoBarras;
   final String nombre;
   final String? descripcion;
   final double precioCompra;
+  final double gastosAsociados;
   final double precioVenta;
+  final double? margenGanancia;
+  final double? precioMinimo;
+  final double? precioMayorista;
+  final double? precioEspecial;
   final double? stock;
   final double? stockMinimo;
   final double? stockMaximo;
@@ -31,7 +41,23 @@ class Producto {
   final int unidadMedidaId;
   final bool activo;
 
-  // ✅ Método que faltaba, causa error servicios entrada/salida
+  double get costoReal => precioCompra + gastosAsociados;
+
+  double calcularMargen() {
+    final cr = costoReal;
+    if (cr <= 0) return 0;
+    return ((precioVenta - cr) / cr) * 100;
+  }
+
+  static double calcularPrecioDesdeMargen(double costo, double margen) {
+    return costo * (1 + margen / 100);
+  }
+
+  bool precioVentaEsValido() {
+    if (precioMinimo == null) return true;
+    return precioVenta >= precioMinimo!;
+  }
+
   Producto copyWith({
     int? id,
     String? codigo,
@@ -39,7 +65,12 @@ class Producto {
     String? nombre,
     String? descripcion,
     double? precioCompra,
+    double? gastosAsociados,
     double? precioVenta,
+    double? margenGanancia,
+    double? precioMinimo,
+    double? precioMayorista,
+    double? precioEspecial,
     double? stock,
     double? stockMinimo,
     double? stockMaximo,
@@ -55,7 +86,12 @@ class Producto {
       nombre: nombre ?? this.nombre,
       descripcion: descripcion ?? this.descripcion,
       precioCompra: precioCompra ?? this.precioCompra,
+      gastosAsociados: gastosAsociados ?? this.gastosAsociados,
       precioVenta: precioVenta ?? this.precioVenta,
+      margenGanancia: margenGanancia ?? this.margenGanancia,
+      precioMinimo: precioMinimo ?? this.precioMinimo,
+      precioMayorista: precioMayorista ?? this.precioMayorista,
+      precioEspecial: precioEspecial ?? this.precioEspecial,
       stock: stock ?? this.stock,
       stockMinimo: stockMinimo ?? this.stockMinimo,
       stockMaximo: stockMaximo ?? this.stockMaximo,

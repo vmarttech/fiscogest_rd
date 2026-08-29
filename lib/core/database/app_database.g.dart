@@ -1052,6 +1052,54 @@ class $ProductosTableTable extends ProductosTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _margenGananciaMeta = const VerificationMeta(
+    'margenGanancia',
+  );
+  @override
+  late final GeneratedColumn<double> margenGanancia = GeneratedColumn<double>(
+    'margen_ganancia',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _precioMinimoMeta = const VerificationMeta(
+    'precioMinimo',
+  );
+  @override
+  late final GeneratedColumn<double> precioMinimo = GeneratedColumn<double>(
+    'precio_minimo',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _precioMayoristaMeta = const VerificationMeta(
+    'precioMayorista',
+  );
+  @override
+  late final GeneratedColumn<double> precioMayorista = GeneratedColumn<double>(
+    'precio_mayorista',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _precioEspecialMeta = const VerificationMeta(
+    'precioEspecial',
+  );
+  @override
+  late final GeneratedColumn<double> precioEspecial = GeneratedColumn<double>(
+    'precio_especial',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _stockMeta = const VerificationMeta('stock');
   @override
   late final GeneratedColumn<double> stock = GeneratedColumn<double>(
@@ -1138,6 +1186,10 @@ class $ProductosTableTable extends ProductosTable
     descripcion,
     precioCompra,
     precioVenta,
+    margenGanancia,
+    precioMinimo,
+    precioMayorista,
+    precioEspecial,
     stock,
     stockMinimo,
     stockMaximo,
@@ -1210,6 +1262,42 @@ class $ProductosTableTable extends ProductosTable
         precioVenta.isAcceptableOrUnknown(
           data['precio_venta']!,
           _precioVentaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('margen_ganancia')) {
+      context.handle(
+        _margenGananciaMeta,
+        margenGanancia.isAcceptableOrUnknown(
+          data['margen_ganancia']!,
+          _margenGananciaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('precio_minimo')) {
+      context.handle(
+        _precioMinimoMeta,
+        precioMinimo.isAcceptableOrUnknown(
+          data['precio_minimo']!,
+          _precioMinimoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('precio_mayorista')) {
+      context.handle(
+        _precioMayoristaMeta,
+        precioMayorista.isAcceptableOrUnknown(
+          data['precio_mayorista']!,
+          _precioMayoristaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('precio_especial')) {
+      context.handle(
+        _precioEspecialMeta,
+        precioEspecial.isAcceptableOrUnknown(
+          data['precio_especial']!,
+          _precioEspecialMeta,
         ),
       );
     }
@@ -1310,6 +1398,22 @@ class $ProductosTableTable extends ProductosTable
         DriftSqlType.double,
         data['${effectivePrefix}precio_venta'],
       ),
+      margenGanancia: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}margen_ganancia'],
+      ),
+      precioMinimo: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}precio_minimo'],
+      ),
+      precioMayorista: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}precio_mayorista'],
+      ),
+      precioEspecial: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}precio_especial'],
+      ),
       stock: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}stock'],
@@ -1355,6 +1459,10 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
   final String? descripcion;
   final double? precioCompra;
   final double? precioVenta;
+  final double? margenGanancia;
+  final double? precioMinimo;
+  final double? precioMayorista;
+  final double? precioEspecial;
   final double? stock;
   final double? stockMinimo;
   final double? stockMaximo;
@@ -1370,6 +1478,10 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     this.descripcion,
     this.precioCompra,
     this.precioVenta,
+    this.margenGanancia,
+    this.precioMinimo,
+    this.precioMayorista,
+    this.precioEspecial,
     this.stock,
     this.stockMinimo,
     this.stockMaximo,
@@ -1395,6 +1507,18 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     }
     if (!nullToAbsent || precioVenta != null) {
       map['precio_venta'] = Variable<double>(precioVenta);
+    }
+    if (!nullToAbsent || margenGanancia != null) {
+      map['margen_ganancia'] = Variable<double>(margenGanancia);
+    }
+    if (!nullToAbsent || precioMinimo != null) {
+      map['precio_minimo'] = Variable<double>(precioMinimo);
+    }
+    if (!nullToAbsent || precioMayorista != null) {
+      map['precio_mayorista'] = Variable<double>(precioMayorista);
+    }
+    if (!nullToAbsent || precioEspecial != null) {
+      map['precio_especial'] = Variable<double>(precioEspecial);
     }
     if (!nullToAbsent || stock != null) {
       map['stock'] = Variable<double>(stock);
@@ -1429,6 +1553,18 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       precioVenta: precioVenta == null && nullToAbsent
           ? const Value.absent()
           : Value(precioVenta),
+      margenGanancia: margenGanancia == null && nullToAbsent
+          ? const Value.absent()
+          : Value(margenGanancia),
+      precioMinimo: precioMinimo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(precioMinimo),
+      precioMayorista: precioMayorista == null && nullToAbsent
+          ? const Value.absent()
+          : Value(precioMayorista),
+      precioEspecial: precioEspecial == null && nullToAbsent
+          ? const Value.absent()
+          : Value(precioEspecial),
       stock: stock == null && nullToAbsent
           ? const Value.absent()
           : Value(stock),
@@ -1458,6 +1594,10 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       descripcion: serializer.fromJson<String?>(json['descripcion']),
       precioCompra: serializer.fromJson<double?>(json['precioCompra']),
       precioVenta: serializer.fromJson<double?>(json['precioVenta']),
+      margenGanancia: serializer.fromJson<double?>(json['margenGanancia']),
+      precioMinimo: serializer.fromJson<double?>(json['precioMinimo']),
+      precioMayorista: serializer.fromJson<double?>(json['precioMayorista']),
+      precioEspecial: serializer.fromJson<double?>(json['precioEspecial']),
       stock: serializer.fromJson<double?>(json['stock']),
       stockMinimo: serializer.fromJson<double?>(json['stockMinimo']),
       stockMaximo: serializer.fromJson<double?>(json['stockMaximo']),
@@ -1478,6 +1618,10 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       'descripcion': serializer.toJson<String?>(descripcion),
       'precioCompra': serializer.toJson<double?>(precioCompra),
       'precioVenta': serializer.toJson<double?>(precioVenta),
+      'margenGanancia': serializer.toJson<double?>(margenGanancia),
+      'precioMinimo': serializer.toJson<double?>(precioMinimo),
+      'precioMayorista': serializer.toJson<double?>(precioMayorista),
+      'precioEspecial': serializer.toJson<double?>(precioEspecial),
       'stock': serializer.toJson<double?>(stock),
       'stockMinimo': serializer.toJson<double?>(stockMinimo),
       'stockMaximo': serializer.toJson<double?>(stockMaximo),
@@ -1496,6 +1640,10 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     Value<String?> descripcion = const Value.absent(),
     Value<double?> precioCompra = const Value.absent(),
     Value<double?> precioVenta = const Value.absent(),
+    Value<double?> margenGanancia = const Value.absent(),
+    Value<double?> precioMinimo = const Value.absent(),
+    Value<double?> precioMayorista = const Value.absent(),
+    Value<double?> precioEspecial = const Value.absent(),
     Value<double?> stock = const Value.absent(),
     Value<double?> stockMinimo = const Value.absent(),
     Value<double?> stockMaximo = const Value.absent(),
@@ -1511,6 +1659,16 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     descripcion: descripcion.present ? descripcion.value : this.descripcion,
     precioCompra: precioCompra.present ? precioCompra.value : this.precioCompra,
     precioVenta: precioVenta.present ? precioVenta.value : this.precioVenta,
+    margenGanancia: margenGanancia.present
+        ? margenGanancia.value
+        : this.margenGanancia,
+    precioMinimo: precioMinimo.present ? precioMinimo.value : this.precioMinimo,
+    precioMayorista: precioMayorista.present
+        ? precioMayorista.value
+        : this.precioMayorista,
+    precioEspecial: precioEspecial.present
+        ? precioEspecial.value
+        : this.precioEspecial,
     stock: stock.present ? stock.value : this.stock,
     stockMinimo: stockMinimo.present ? stockMinimo.value : this.stockMinimo,
     stockMaximo: stockMaximo.present ? stockMaximo.value : this.stockMaximo,
@@ -1536,6 +1694,18 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       precioVenta: data.precioVenta.present
           ? data.precioVenta.value
           : this.precioVenta,
+      margenGanancia: data.margenGanancia.present
+          ? data.margenGanancia.value
+          : this.margenGanancia,
+      precioMinimo: data.precioMinimo.present
+          ? data.precioMinimo.value
+          : this.precioMinimo,
+      precioMayorista: data.precioMayorista.present
+          ? data.precioMayorista.value
+          : this.precioMayorista,
+      precioEspecial: data.precioEspecial.present
+          ? data.precioEspecial.value
+          : this.precioEspecial,
       stock: data.stock.present ? data.stock.value : this.stock,
       stockMinimo: data.stockMinimo.present
           ? data.stockMinimo.value
@@ -1564,6 +1734,10 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           ..write('descripcion: $descripcion, ')
           ..write('precioCompra: $precioCompra, ')
           ..write('precioVenta: $precioVenta, ')
+          ..write('margenGanancia: $margenGanancia, ')
+          ..write('precioMinimo: $precioMinimo, ')
+          ..write('precioMayorista: $precioMayorista, ')
+          ..write('precioEspecial: $precioEspecial, ')
           ..write('stock: $stock, ')
           ..write('stockMinimo: $stockMinimo, ')
           ..write('stockMaximo: $stockMaximo, ')
@@ -1584,6 +1758,10 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     descripcion,
     precioCompra,
     precioVenta,
+    margenGanancia,
+    precioMinimo,
+    precioMayorista,
+    precioEspecial,
     stock,
     stockMinimo,
     stockMaximo,
@@ -1603,6 +1781,10 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           other.descripcion == this.descripcion &&
           other.precioCompra == this.precioCompra &&
           other.precioVenta == this.precioVenta &&
+          other.margenGanancia == this.margenGanancia &&
+          other.precioMinimo == this.precioMinimo &&
+          other.precioMayorista == this.precioMayorista &&
+          other.precioEspecial == this.precioEspecial &&
           other.stock == this.stock &&
           other.stockMinimo == this.stockMinimo &&
           other.stockMaximo == this.stockMaximo &&
@@ -1620,6 +1802,10 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
   final Value<String?> descripcion;
   final Value<double?> precioCompra;
   final Value<double?> precioVenta;
+  final Value<double?> margenGanancia;
+  final Value<double?> precioMinimo;
+  final Value<double?> precioMayorista;
+  final Value<double?> precioEspecial;
   final Value<double?> stock;
   final Value<double?> stockMinimo;
   final Value<double?> stockMaximo;
@@ -1635,6 +1821,10 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     this.descripcion = const Value.absent(),
     this.precioCompra = const Value.absent(),
     this.precioVenta = const Value.absent(),
+    this.margenGanancia = const Value.absent(),
+    this.precioMinimo = const Value.absent(),
+    this.precioMayorista = const Value.absent(),
+    this.precioEspecial = const Value.absent(),
     this.stock = const Value.absent(),
     this.stockMinimo = const Value.absent(),
     this.stockMaximo = const Value.absent(),
@@ -1651,6 +1841,10 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     this.descripcion = const Value.absent(),
     this.precioCompra = const Value.absent(),
     this.precioVenta = const Value.absent(),
+    this.margenGanancia = const Value.absent(),
+    this.precioMinimo = const Value.absent(),
+    this.precioMayorista = const Value.absent(),
+    this.precioEspecial = const Value.absent(),
     this.stock = const Value.absent(),
     this.stockMinimo = const Value.absent(),
     this.stockMaximo = const Value.absent(),
@@ -1671,6 +1865,10 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Expression<String>? descripcion,
     Expression<double>? precioCompra,
     Expression<double>? precioVenta,
+    Expression<double>? margenGanancia,
+    Expression<double>? precioMinimo,
+    Expression<double>? precioMayorista,
+    Expression<double>? precioEspecial,
     Expression<double>? stock,
     Expression<double>? stockMinimo,
     Expression<double>? stockMaximo,
@@ -1687,6 +1885,10 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
       if (descripcion != null) 'descripcion': descripcion,
       if (precioCompra != null) 'precio_compra': precioCompra,
       if (precioVenta != null) 'precio_venta': precioVenta,
+      if (margenGanancia != null) 'margen_ganancia': margenGanancia,
+      if (precioMinimo != null) 'precio_minimo': precioMinimo,
+      if (precioMayorista != null) 'precio_mayorista': precioMayorista,
+      if (precioEspecial != null) 'precio_especial': precioEspecial,
       if (stock != null) 'stock': stock,
       if (stockMinimo != null) 'stock_minimo': stockMinimo,
       if (stockMaximo != null) 'stock_maximo': stockMaximo,
@@ -1705,6 +1907,10 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Value<String?>? descripcion,
     Value<double?>? precioCompra,
     Value<double?>? precioVenta,
+    Value<double?>? margenGanancia,
+    Value<double?>? precioMinimo,
+    Value<double?>? precioMayorista,
+    Value<double?>? precioEspecial,
     Value<double?>? stock,
     Value<double?>? stockMinimo,
     Value<double?>? stockMaximo,
@@ -1721,6 +1927,10 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
       descripcion: descripcion ?? this.descripcion,
       precioCompra: precioCompra ?? this.precioCompra,
       precioVenta: precioVenta ?? this.precioVenta,
+      margenGanancia: margenGanancia ?? this.margenGanancia,
+      precioMinimo: precioMinimo ?? this.precioMinimo,
+      precioMayorista: precioMayorista ?? this.precioMayorista,
+      precioEspecial: precioEspecial ?? this.precioEspecial,
       stock: stock ?? this.stock,
       stockMinimo: stockMinimo ?? this.stockMinimo,
       stockMaximo: stockMaximo ?? this.stockMaximo,
@@ -1754,6 +1964,18 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     }
     if (precioVenta.present) {
       map['precio_venta'] = Variable<double>(precioVenta.value);
+    }
+    if (margenGanancia.present) {
+      map['margen_ganancia'] = Variable<double>(margenGanancia.value);
+    }
+    if (precioMinimo.present) {
+      map['precio_minimo'] = Variable<double>(precioMinimo.value);
+    }
+    if (precioMayorista.present) {
+      map['precio_mayorista'] = Variable<double>(precioMayorista.value);
+    }
+    if (precioEspecial.present) {
+      map['precio_especial'] = Variable<double>(precioEspecial.value);
     }
     if (stock.present) {
       map['stock'] = Variable<double>(stock.value);
@@ -1789,6 +2011,10 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
           ..write('descripcion: $descripcion, ')
           ..write('precioCompra: $precioCompra, ')
           ..write('precioVenta: $precioVenta, ')
+          ..write('margenGanancia: $margenGanancia, ')
+          ..write('precioMinimo: $precioMinimo, ')
+          ..write('precioMayorista: $precioMayorista, ')
+          ..write('precioEspecial: $precioEspecial, ')
           ..write('stock: $stock, ')
           ..write('stockMinimo: $stockMinimo, ')
           ..write('stockMaximo: $stockMaximo, ')
@@ -19119,6 +19345,10 @@ typedef $$ProductosTableTableCreateCompanionBuilder =
       Value<String?> descripcion,
       Value<double?> precioCompra,
       Value<double?> precioVenta,
+      Value<double?> margenGanancia,
+      Value<double?> precioMinimo,
+      Value<double?> precioMayorista,
+      Value<double?> precioEspecial,
       Value<double?> stock,
       Value<double?> stockMinimo,
       Value<double?> stockMaximo,
@@ -19136,6 +19366,10 @@ typedef $$ProductosTableTableUpdateCompanionBuilder =
       Value<String?> descripcion,
       Value<double?> precioCompra,
       Value<double?> precioVenta,
+      Value<double?> margenGanancia,
+      Value<double?> precioMinimo,
+      Value<double?> precioMayorista,
+      Value<double?> precioEspecial,
       Value<double?> stock,
       Value<double?> stockMinimo,
       Value<double?> stockMaximo,
@@ -19352,6 +19586,26 @@ class $$ProductosTableTableFilterComposer
 
   ColumnFilters<double> get precioVenta => $composableBuilder(
     column: $table.precioVenta,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get margenGanancia => $composableBuilder(
+    column: $table.margenGanancia,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get precioMinimo => $composableBuilder(
+    column: $table.precioMinimo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get precioMayorista => $composableBuilder(
+    column: $table.precioMayorista,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get precioEspecial => $composableBuilder(
+    column: $table.precioEspecial,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -19590,6 +19844,26 @@ class $$ProductosTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get margenGanancia => $composableBuilder(
+    column: $table.margenGanancia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get precioMinimo => $composableBuilder(
+    column: $table.precioMinimo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get precioMayorista => $composableBuilder(
+    column: $table.precioMayorista,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get precioEspecial => $composableBuilder(
+    column: $table.precioEspecial,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get stock => $composableBuilder(
     column: $table.stock,
     builder: (column) => ColumnOrderings(column),
@@ -19661,6 +19935,26 @@ class $$ProductosTableTableAnnotationComposer
 
   GeneratedColumn<double> get precioVenta => $composableBuilder(
     column: $table.precioVenta,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get margenGanancia => $composableBuilder(
+    column: $table.margenGanancia,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get precioMinimo => $composableBuilder(
+    column: $table.precioMinimo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get precioMayorista => $composableBuilder(
+    column: $table.precioMayorista,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get precioEspecial => $composableBuilder(
+    column: $table.precioEspecial,
     builder: (column) => column,
   );
 
@@ -19895,6 +20189,10 @@ class $$ProductosTableTableTableManager
                 Value<String?> descripcion = const Value.absent(),
                 Value<double?> precioCompra = const Value.absent(),
                 Value<double?> precioVenta = const Value.absent(),
+                Value<double?> margenGanancia = const Value.absent(),
+                Value<double?> precioMinimo = const Value.absent(),
+                Value<double?> precioMayorista = const Value.absent(),
+                Value<double?> precioEspecial = const Value.absent(),
                 Value<double?> stock = const Value.absent(),
                 Value<double?> stockMinimo = const Value.absent(),
                 Value<double?> stockMaximo = const Value.absent(),
@@ -19910,6 +20208,10 @@ class $$ProductosTableTableTableManager
                 descripcion: descripcion,
                 precioCompra: precioCompra,
                 precioVenta: precioVenta,
+                margenGanancia: margenGanancia,
+                precioMinimo: precioMinimo,
+                precioMayorista: precioMayorista,
+                precioEspecial: precioEspecial,
                 stock: stock,
                 stockMinimo: stockMinimo,
                 stockMaximo: stockMaximo,
@@ -19927,6 +20229,10 @@ class $$ProductosTableTableTableManager
                 Value<String?> descripcion = const Value.absent(),
                 Value<double?> precioCompra = const Value.absent(),
                 Value<double?> precioVenta = const Value.absent(),
+                Value<double?> margenGanancia = const Value.absent(),
+                Value<double?> precioMinimo = const Value.absent(),
+                Value<double?> precioMayorista = const Value.absent(),
+                Value<double?> precioEspecial = const Value.absent(),
                 Value<double?> stock = const Value.absent(),
                 Value<double?> stockMinimo = const Value.absent(),
                 Value<double?> stockMaximo = const Value.absent(),
@@ -19942,6 +20248,10 @@ class $$ProductosTableTableTableManager
                 descripcion: descripcion,
                 precioCompra: precioCompra,
                 precioVenta: precioVenta,
+                margenGanancia: margenGanancia,
+                precioMinimo: precioMinimo,
+                precioMayorista: precioMayorista,
+                precioEspecial: precioEspecial,
                 stock: stock,
                 stockMinimo: stockMinimo,
                 stockMaximo: stockMaximo,

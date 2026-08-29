@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,18 +6,24 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_producto_page.dart';
 import 'package:fiscogest_rd/features/categorias/presentation/pages/categorias_page.dart';
 import 'package:fiscogest_rd/features/marcas/presentation/pages/marcas_page.dart';
 import 'package:fiscogest_rd/features/unidades/presentation/pages/unidades_page.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_sizes.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_dialog.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 
 class ProductosPage extends ConsumerStatefulWidget {
   const ProductosPage({super.key});
+
   static const String routeName = 'inventario';
 
   @override
@@ -27,6 +34,16 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   int _vistaActual = 0;
   String _filtroProductos = '';
   String _filtroKardex = '';
+
+  bool _puedeVerCostos() {
+    final rol = ref.watch(rolUsuarioProvider);
+    return rol == RolUsuario.compras || rol == RolUsuario.administracion;
+  }
+
+  bool _puedeEliminar() {
+    final rol = ref.watch(rolUsuarioProvider);
+    return rol == RolUsuario.administracion;
+  }
 
   void _abrirMenuOpciones(BuildContext context) async {
     final seleccionado = await showMenu<int>(
@@ -41,7 +58,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           child: Row(
             children: [
               const Icon(Icons.add_box_outlined, color: Color(0xFF3B82F6), size: 20),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.s),
               Text('Nuevo Producto', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
             ],
           ),
@@ -51,7 +68,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           child: Row(
             children: [
               const Icon(Icons.receipt_long_outlined, color: Color(0xFF10B981), size: 20),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.s),
               Text('Kárdex', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
             ],
           ),
@@ -61,7 +78,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           child: Row(
             children: [
               const Icon(Icons.category_outlined, color: Color(0xFFF59E0B), size: 20),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.s),
               Text('Categorías', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
             ],
           ),
@@ -71,7 +88,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           child: Row(
             children: [
               const Icon(Icons.branding_watermark_outlined, color: Color(0xFF8B5CF6), size: 20),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.s),
               Text('Marcas', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
             ],
           ),
@@ -81,7 +98,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           child: Row(
             children: [
               const Icon(Icons.straighten_outlined, color: Color(0xFFEC4899), size: 20),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.s),
               Text('Unidades', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
             ],
           ),
@@ -92,24 +109,56 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           child: Row(
             children: [
               const Icon(Icons.settings_outlined, color: Colors.grey, size: 20),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.s),
               Text('Ajustes de Inventario', style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontSize: 12)),
             ],
           ),
         ),
       ],
     );
-    if (seleccionado == null) return;
-    if (!context.mounted) return;
-
+    if (seleccionado == null || !context.mounted) return;
     switch (seleccionado) {
-      case 0: context.push('/productos/nuevo'); break;
+      case 0: unawaited(context.pushNamed(NuevoProductoPage.routeName)); break;
       case 1: setState(() => _vistaActual = 1); break;
-      case 2: context.pushNamed(CategoriasPage.routeName); break;
-      case 3: context.pushNamed(MarcasPage.routeName); break;
-      case 4: context.pushNamed(UnidadesPage.routeName); break;
-      case 5: context.pushNamed('lista-ajustes'); break;
+      case 2: unawaited(context.pushNamed(CategoriasPage.routeName)); break;
+      case 3: unawaited(context.pushNamed(MarcasPage.routeName)); break;
+      case 4: unawaited(context.pushNamed(UnidadesPage.routeName)); break;
+      case 5: unawaited(context.pushNamed('lista-ajustes')); break;
     }
+  }
+
+  Future<void> _confirmarEliminar(Producto producto) async {
+    final confirmado = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AppDialog(
+        title: 'Eliminar Producto',
+        message: '¿Eliminar \"${producto.nombre}\"? Esta acción no se puede deshacer.',
+        actions: [
+          TextButton(onPressed: () => ctx.pop(false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => ctx.pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmado == true && producto.id != null) {
+      await ref.read(productoControllerProvider.notifier).eliminar(producto.id!);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Producto eliminado correctamente')),
+        );
+      }
+    }
+  }
+
+  void _editarProducto(Producto producto) {
+    unawaited(context.pushNamed(
+      NuevoProductoPage.routeName,
+      extra: producto,
+    ));
   }
 
   Widget _construirVistaActual() {
@@ -130,11 +179,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         children: [
           _construirVistaActual(),
           Positioned(
-            bottom: 16,
-            right: 16,
+            bottom: AppSpacing.m,
+            right: AppSpacing.m,
             child: FloatingActionButton.extended(
               onPressed: () => _abrirMenuOpciones(context),
-              icon: const Icon(Icons.menu, size: 20),
+              icon: const Icon(Icons.menu, size: AppSizes.iconMd),
               label: const Text('Opciones', style: TextStyle(fontSize: 12)),
               backgroundColor: const Color(0xFF3B82F6),
               foregroundColor: Colors.white,
@@ -146,8 +195,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   }
 
   Widget _buildSeccionProductos() {
+    final puedeVerCostos = _puedeVerCostos();
+    final puedeEliminar = _puedeEliminar();
+
     return Padding(
-      padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + 8),
+      padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + AppSpacing.s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -155,7 +207,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
             hint: 'Buscar por código, nombre...',
             onChanged: (String v) => setState(() => _filtroProductos = v),
           ),
-          const SizedBox(height: 16),
+          AppLayout.vM,
           Expanded(
             child: ref.watch(productoControllerProvider).when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -183,60 +235,85 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 return ListView.separated(
                   padding: EdgeInsets.zero,
                   itemCount: filtrados.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, __) => AppLayout.vS,
                   itemBuilder: (_, int i) {
                     final Producto prod = filtrados[i];
                     final double stockSeguro = prod.stock ?? 0;
                     return AppCard(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppSpacing.allM,
                       elevation: 2,
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF3B82F6), size: 22),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  prod.nombre,
-                                  style: AppTypography.h4.copyWith(color: const Color(0xFF0F172A), fontSize: 15),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Código: ${prod.codigo}',
-                                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                          Row(
                             children: [
-                              Text(
-                                'Stock: ${stockSeguro.toStringAsFixed(2)}',
-                                style: AppTypography.labelLarge.copyWith(
-                                  color: stockSeguro > 0 ? const Color(0xFF10B981) : AppColors.error,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF3B82F6), size: 22),
+                              ),
+                              AppLayout.hM,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      prod.nombre,
+                                      style: AppTypography.h4.copyWith(color: const Color(0xFF0F172A), fontSize: 15),
+                                    ),
+                                    Text(
+                                      'Código: ${prod.codigo}',
+                                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 13),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Text(
-                                'Compra: \$${prod.precioCompra.toStringAsFixed(2)}',
-                                style: AppTypography.bodySmall.copyWith(color: const Color(0xFF10B981), fontSize: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Stock: ${stockSeguro.toStringAsFixed(2)}',
+                                    style: AppTypography.labelLarge.copyWith(
+                                      color: stockSeguro > 0 ? const Color(0xFF10B981) : AppColors.error,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  if (puedeVerCostos)
+                                    Text(
+                                      'Compra: \$${prod.precioCompra.toStringAsFixed(2)}',
+                                      style: AppTypography.bodySmall.copyWith(color: const Color(0xFF10B981), fontSize: 12),
+                                    ),
+                                  Text(
+                                    'Venta: \$${prod.precioVenta.toStringAsFixed(2)}',
+                                    style: AppTypography.bodySmall.copyWith(color: const Color(0xFFEF4444), fontSize: 12),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Venta: \$${prod.precioVenta.toStringAsFixed(2)}',
-                                style: AppTypography.bodySmall.copyWith(color: const Color(0xFFEF4444), fontSize: 12),
+                            ],
+                          ),
+                          AppLayout.vS,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              AppButton(
+                                text: 'Editar',
+                                icon: Icons.edit_outlined,
+                                height: 36,
+                                onPressed: () => _editarProducto(prod),
                               ),
+                              AppLayout.hS,
+                              if (puedeEliminar)
+                                AppButton(
+                                  text: 'Eliminar',
+                                  icon: Icons.delete_outline,
+                                  height: 36,
+                                  onPressed: () => _confirmarEliminar(prod),
+                                ),
                             ],
                           ),
                         ],
@@ -254,7 +331,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
 
   Widget _buildSeccionKardex() {
     return Padding(
-      padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + 8),
+      padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + AppSpacing.s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -262,7 +339,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
             hint: 'Buscar por ID de producto...',
             onChanged: (String v) => setState(() => _filtroKardex = v),
           ),
-          const SizedBox(height: 16),
+          AppLayout.vM,
           Expanded(
             child: ref.watch(kardexPorProductoProvider(_filtroKardex)).when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -285,11 +362,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 return ListView.separated(
                   padding: EdgeInsets.zero,
                   itemCount: movimientos.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, __) => AppLayout.vS,
                   itemBuilder: (_, int i) {
                     final Kardex mov = movimientos[i];
                     return AppCard(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppSpacing.allM,
                       elevation: 2,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +375,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                             'Producto ID: ${mov.productoId}',
                             style: AppTypography.h4.copyWith(color: const Color(0xFF0F172A), fontSize: 15),
                           ),
-                          const SizedBox(height: 4),
+                          AppLayout.vXs,
                           Text(
                             'Cantidad: ${mov.cantidad} • Saldo: ${mov.saldoNuevo}',
                             style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary, fontSize: 14),

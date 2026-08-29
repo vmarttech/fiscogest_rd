@@ -16,6 +16,7 @@ class _CampoDescuento extends StatefulWidget {
   const _CampoDescuento({required this.montoActual, required this.onAplicar});
   final double montoActual;
   final void Function(_DatosDescuento) onAplicar;
+
   @override
   State<_CampoDescuento> createState() => _CampoDescuentoState();
 }
@@ -67,33 +68,35 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: 170,
-          child: TextField(
-            controller: _controlador,
-            focusNode: _focusNode,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-            style: const TextStyle(fontSize: 13),
-            decoration: InputDecoration(
-              isDense: true,
-              labelText: _esPorcentaje ? 'Descuento %' : 'Descuento RD\$',
-              hintText: '0.00',
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+        Expanded(
+          child: SizedBox(
+            width: 140,
+            child: TextField(
+              controller: _controlador,
+              focusNode: _focusNode,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+              style: const TextStyle(fontSize: 13),
+              decoration: InputDecoration(
+                isDense: true,
+                labelText: _esPorcentaje ? 'Descuento %' : 'Descuento RD\$',
+                hintText: '0.00',
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: theme.colorScheme.primary, width: 1),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.colorScheme.primary, width: 1),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              ],
+              onChanged: _alCambiarTexto,
             ),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-            ],
-            onChanged: _alCambiarTexto,
           ),
         ),
         const SizedBox(width: 6),
@@ -249,15 +252,20 @@ class PanelCarrito extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                TextButton.icon(
-                  onPressed: () => _abrirSelectorDescuento(context),
-                  icon: const Icon(Icons.local_offer_outlined, size: 16),
-                  label: const Text('Descuentos guardados', style: TextStyle(fontSize: 13)),
-                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                Flexible(
+                  child: TextButton.icon(
+                    onPressed: () => _abrirSelectorDescuento(context),
+                    icon: const Icon(Icons.local_offer_outlined, size: 16),
+                    label: const Text('Descuentos guardados', style: TextStyle(fontSize: 13)),
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  ),
                 ),
-                _CampoDescuento(
-                  montoActual: estado.montoDescuento,
-                  onAplicar: (datos) => _aplicarDescuento(ref, datos),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: _CampoDescuento(
+                    montoActual: estado.montoDescuento,
+                    onAplicar: (datos) => _aplicarDescuento(ref, datos),
+                  ),
                 ),
               ],
             ),
@@ -309,24 +317,34 @@ class PanelCarrito extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          etiqueta,
-          style: TextStyle(
-            fontWeight: esTotal ? FontWeight.bold : FontWeight.w500,
-            fontSize: esTotal ? 15 : 13,
-            color: esTotal ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+        Expanded(
+          flex: 3,
+          child: Text(
+            etiqueta,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontWeight: esTotal ? FontWeight.bold : FontWeight.w500,
+              fontSize: esTotal ? 15 : 13,
+              color: esTotal ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
-        Text(
-          '${esDescuento ? '- ' : ''}RD\$ ${monto.toStringAsFixed(2)}',
-          style: TextStyle(
-            fontWeight: esTotal ? FontWeight.bold : FontWeight.w600,
-            fontSize: esTotal ? 18 : 13,
-            color: esTotal
-                ? theme.colorScheme.primary
-                : esDescuento
-                    ? Colors.green.shade700
-                    : theme.colorScheme.onSurface,
+        const SizedBox(width: 6),
+        Expanded(
+          flex: 2,
+          child: Text(
+            '${esDescuento ? '- ' : ''}RD\$ ${monto.toStringAsFixed(2)}',
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontWeight: esTotal ? FontWeight.bold : FontWeight.w600,
+              fontSize: esTotal ? 18 : 13,
+              color: esTotal
+                  ? theme.colorScheme.primary
+                  : esDescuento
+                      ? Colors.green.shade700
+                      : theme.colorScheme.onSurface,
+            ),
           ),
         ),
       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
@@ -7,12 +8,25 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/categori
 import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_sizes.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_section.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+
+enum RolUsuario { compras, ventas, almacen, administracion }
+
+final rolUsuarioProvider = StateProvider<RolUsuario>((ref) => RolUsuario.administracion);
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
   const NuevoProductoPage({super.key});
+
   static const String routeName = 'nuevo-producto';
+
   @override
   ConsumerState<NuevoProductoPage> createState() => _NuevoProductoPageState();
 }
@@ -22,330 +36,383 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   final _nombreCtrl = TextEditingController();
   final _skuCtrl = TextEditingController();
   final _costoCtrl = TextEditingController();
+  final _gastosCtrl = TextEditingController(text: '0');
   final _ventaCtrl = TextEditingController();
+  final _margenCtrl = TextEditingController();
+  final _minimoCtrl = TextEditingController();
+  final _mayoristaCtrl = TextEditingController();
+  final _especialCtrl = TextEditingController();
   final _stockCtrl = TextEditingController(text: '0');
   final _stockMinCtrl = TextEditingController(text: '0');
   int? _catSel;
   int? _marcaSel;
   int? _unidadSel;
   bool _activo = true;
+  bool _modificandoMargen = false;
+  bool _modificandoPrecioVenta = false;
+  bool _modificandoCosto = false;
 
   @override
   void dispose() {
     _nombreCtrl.dispose();
     _skuCtrl.dispose();
     _costoCtrl.dispose();
+    _gastosCtrl.dispose();
     _ventaCtrl.dispose();
+    _margenCtrl.dispose();
+    _minimoCtrl.dispose();
+    _mayoristaCtrl.dispose();
+    _especialCtrl.dispose();
     _stockCtrl.dispose();
     _stockMinCtrl.dispose();
     super.dispose();
   }
 
+  void _recalcularDesdeCosto() {
+    if (_modificandoMargen || _modificandoPrecioVenta) return;
+    final costo = double.tryParse(_costoCtrl.text) ?? 0;
+    final gastos = double.tryParse(_gastosCtrl.text) ?? 0;
+    final cr = costo + gastos;
+    final margen = double.tryParse(_margenCtrl.text) ?? 0;
+    if (cr > 0 && margen > 0) {
+      _modificandoCosto = true;
+      _ventaCtrl.text = Producto.calcularPrecioDesdeMargen(cr, margen).toStringAsFixed(2);
+      _modificandoCosto = false;
+    }
+  }
+
+  void _recalcularDesdeMargen() {
+    _modificandoMargen = true;
+    final costo = double.tryParse(_costoCtrl.text) ?? 0;
+    final gastos = double.tryParse(_gastosCtrl.text) ?? 0;
+    final cr = costo + gastos;
+    final margen = double.tryParse(_margenCtrl.text) ?? 0;
+    if (cr > 0) {
+      _ventaCtrl.text = Producto.calcularPrecioDesdeMargen(cr, margen).toStringAsFixed(2);
+    }
+    _modificandoMargen = false;
+  }
+
+  void _recalcularDesdePrecioVenta() {
+    if (_modificandoCosto) return;
+    _modificandoPrecioVenta = true;
+    final costo = double.tryParse(_costoCtrl.text) ?? 0;
+    final gastos = double.tryParse(_gastosCtrl.text) ?? 0;
+    final venta = double.tryParse(_ventaCtrl.text) ?? 0;
+    final cr = costo + gastos;
+    if (cr > 0 && venta >= cr) {
+      final margen = ((venta - cr) / cr) * 100;
+      _margenCtrl.text = margen.toStringAsFixed(2);
+    }
+    _modificandoPrecioVenta = false;
+  }
+
+  bool _puedeEditarCostos(RolUsuario rol) {
+    return rol == RolUsuario.compras || rol == RolUsuario.administracion;
+  }
+
+  bool _puedeEditarPrecios(RolUsuario rol) {
+    return rol == RolUsuario.ventas || rol == RolUsuario.administracion;
+  }
+
+  bool _puedeEditarInventario(RolUsuario rol) {
+    return rol == RolUsuario.almacen || rol == RolUsuario.administracion;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final rol = ref.watch(rolUsuarioProvider);
     final cats = ref.watch(categoriaControllerProvider);
     final marcas = ref.watch(marcaControllerProvider);
     final unids = ref.watch(unidadMedidaControllerProvider);
-    return Scaffold(
-      backgroundColor: AppColors.formBackground,
-      appBar: AppBar(
-        title: const Text('Registrar Nuevo Producto'),
-        backgroundColor: AppColors.darkSurface,
-        foregroundColor: AppColors.white,
-        elevation: 0,
-      ),
+    final puedeCostos = _puedeEditarCostos(rol);
+    final puedePrecios = _puedeEditarPrecios(rol);
+    final puedeInventario = _puedeEditarInventario(rol);
+
+    return AppScaffold(
+      title: 'Registrar Nuevo Producto',
       body: SingleChildScrollView(
         padding: AppSpacing.allL,
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                controller: _nombreCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Nombre del Producto',
-                  prefixIcon: const Icon(Icons.shopping_bag_outlined, color: AppColors.textSecondary),
-                  filled: true,
-                  fillColor: AppColors.white,
-                  contentPadding: AppSpacing.hM,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
-                  ),
-                ),
-                validator: (v) => v?.trim().isEmpty ?? true ? 'Campo obligatorio' : null,
-              ),
-              const SizedBox(height: AppSpacing.m),
-              TextFormField(
-                controller: _skuCtrl,
-                decoration: InputDecoration(
-                  labelText: 'SKU / Código de Barra',
-                  prefixIcon: const Icon(Icons.qr_code, color: AppColors.textSecondary),
-                  filled: true,
-                  fillColor: AppColors.white,
-                  contentPadding: AppSpacing.hM,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.m),
-              cats.when(
-                data: (lista) => DropdownButtonFormField<int>(
-                  initialValue: _catSel,
-                  decoration: InputDecoration(
-                    labelText: 'Categoría',
-                    prefixIcon: const Icon(Icons.category_outlined, color: AppColors.textSecondary),
-                    filled: true,
-                    fillColor: AppColors.white,
-                    contentPadding: AppSpacing.hM,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
-                    ),
-                  ),
-                  items: lista.map((c) => DropdownMenuItem(value: c.id, child: Text(c.nombre))).toList(),
-                  onChanged: (v) => setState(() => _catSel = v),
-                  validator: (v) => v == null ? 'Seleccione una categoría' : null,
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error cargando categorías: $e', style: const TextStyle(color: AppColors.error)),
-              ),
-              const SizedBox(height: AppSpacing.m),
-              marcas.when(
-                data: (lista) => DropdownButtonFormField<int>(
-                  initialValue: _marcaSel,
-                  decoration: InputDecoration(
-                    labelText: 'Marca',
-                    prefixIcon: const Icon(Icons.branding_watermark_outlined, color: AppColors.textSecondary),
-                    filled: true,
-                    fillColor: AppColors.white,
-                    contentPadding: AppSpacing.hM,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
-                    ),
-                  ),
-                  items: lista.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nombre))).toList(),
-                  onChanged: (v) => setState(() => _marcaSel = v),
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error cargando marcas: $e', style: const TextStyle(color: AppColors.error)),
-              ),
-              const SizedBox(height: AppSpacing.m),
-              unids.when(
-                data: (lista) => DropdownButtonFormField<int>(
-                  initialValue: _unidadSel,
-                  decoration: InputDecoration(
-                    labelText: 'Unidad de Medida',
-                    prefixIcon: const Icon(Icons.straighten_outlined, color: AppColors.textSecondary),
-                    filled: true,
-                    fillColor: AppColors.white,
-                    contentPadding: AppSpacing.hM,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
-                    ),
-                  ),
-                  items: lista.map((u) => DropdownMenuItem(value: u.id, child: Text(u.nombre))).toList(),
-                  onChanged: (v) => setState(() => _unidadSel = v),
-                  validator: (v) => v == null ? 'Seleccione unidad de medida' : null,
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error cargando unidades: $e', style: const TextStyle(color: AppColors.error)),
-              ),
-              const SizedBox(height: AppSpacing.m),
-              Row(
+              AppSection(
+                title: 'Información General',
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _costoCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Costo (RD\$)',
-                        prefixIcon: const Icon(Icons.payments_outlined, color: AppColors.textSecondary),
-                        filled: true,
-                        fillColor: AppColors.white,
-                        contentPadding: AppSpacing.hM,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
-                        ),
-                      ),
-                    ),
+                  AppTextField(
+                    label: 'Nombre del Producto',
+                    hint: 'Nombre comercial del producto',
+                    controller: _nombreCtrl,
+                    prefixIcon: Icons.shopping_bag_outlined,
                   ),
-                  const SizedBox(width: AppSpacing.m),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _ventaCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Precio Venta (RD\$)',
-                        prefixIcon: const Icon(Icons.sell_outlined, color: AppColors.textSecondary),
-                        filled: true,
-                        fillColor: AppColors.white,
-                        contentPadding: AppSpacing.hM,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
-                        ),
-                      ),
+                  AppLayout.vM,
+                  AppTextField(
+                    label: 'SKU / Código de Barra',
+                    hint: 'Código único del producto',
+                    controller: _skuCtrl,
+                    prefixIcon: Icons.qr_code,
+                  ),
+                  AppLayout.vM,
+                  cats.when(
+                    data: (lista) => AppDropdown<int>(
+                      hint: 'Seleccione categoría',
+                      initialValue: _catSel,
+                      items: lista.map((c) => DropdownMenuItem(value: c.id, child: Text(c.nombre, style: AppTypography.bodyMedium))).toList(),
+                      onChanged: (v) => setState(() => _catSel = v),
                     ),
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+                  ),
+                  AppLayout.vM,
+                  marcas.when(
+                    data: (lista) => AppDropdown<int>(
+                      hint: 'Seleccione marca',
+                      initialValue: _marcaSel,
+                      items: lista.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nombre, style: AppTypography.bodyMedium))).toList(),
+                      onChanged: (v) => setState(() => _marcaSel = v),
+                    ),
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+                  ),
+                  AppLayout.vM,
+                  unids.when(
+                    data: (lista) => AppDropdown<int>(
+                      hint: 'Seleccione unidad de medida',
+                      initialValue: _unidadSel,
+                      items: lista.map((u) => DropdownMenuItem(value: u.id, child: Text(u.nombre, style: AppTypography.bodyMedium))).toList(),
+                      onChanged: (v) => setState(() => _unidadSel = v),
+                    ),
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.m),
-              Row(
+              AppSection(
+                title: 'Costos',
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _stockCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Existencia Actual',
-                        prefixIcon: const Icon(Icons.format_list_numbered, color: AppColors.textSecondary),
-                        filled: true,
-                        fillColor: AppColors.white,
-                        contentPadding: AppSpacing.hM,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
+                  if (!puedeCostos)
+                    Padding(
+                      padding: AppSpacing.bS,
+                      child: Text('No tiene permiso para modificar estos valores', style: AppTypography.bodySmall.copyWith(color: AppColors.error)),
+                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Costo Compra (RD\$)',
+                          controller: _costoCtrl,
+                          prefixIcon: Icons.payments_outlined,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                          enabled: puedeCostos,
+                          onChanged: (_) => _recalcularDesdeCosto(),
                         ),
                       ),
-                    ),
+                      AppLayout.hM,
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Gastos Asociados (RD\$)',
+                          controller: _gastosCtrl,
+                          prefixIcon: Icons.receipt_long_outlined,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                          enabled: puedeCostos,
+                          onChanged: (_) => _recalcularDesdeCosto(),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: AppSpacing.m),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _stockMinCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Stock Mínimo (Alerta)',
-                        prefixIcon: const Icon(Icons.warning_amber_rounded, color: AppColors.textSecondary),
-                        filled: true,
-                        fillColor: AppColors.white,
-                        contentPadding: AppSpacing.hM,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.focusedBlue, width: 1.5),
-                        ),
-                      ),
-                    ),
+                  AppLayout.vS,
+                  Consumer(
+                    builder: (ctx, ref, _) {
+                      final costo = double.tryParse(_costoCtrl.text) ?? 0;
+                      final gastos = double.tryParse(_gastosCtrl.text) ?? 0;
+                      final real = costo + gastos;
+                      return Text('Costo Real: RD\$ ${real.toStringAsFixed(2)}', style: AppTypography.labelMedium.copyWith(color: AppColors.textSecondary));
+                    },
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.l),
+              AppSection(
+                title: 'Precios de Venta',
+                children: [
+                  if (!puedePrecios)
+                    Padding(
+                      padding: AppSpacing.bS,
+                      child: Text('No tiene permiso para modificar estos valores', style: AppTypography.bodySmall.copyWith(color: AppColors.error)),
+                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Precio Venta (RD\$)',
+                          controller: _ventaCtrl,
+                          prefixIcon: Icons.sell_outlined,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                          enabled: puedePrecios,
+                          onChanged: (_) => _recalcularDesdePrecioVenta(),
+                        ),
+                      ),
+                      AppLayout.hM,
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Margen de Ganancia (%)',
+                          controller: _margenCtrl,
+                          prefixIcon: Icons.percent,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                          enabled: puedePrecios,
+                          onChanged: (_) => _recalcularDesdeMargen(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppLayout.vM,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Precio Mínimo (RD\$)',
+                          hint: 'Límite inferior de venta',
+                          controller: _minimoCtrl,
+                          prefixIcon: Icons.warning_amber_rounded,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                          enabled: puedePrecios,
+                        ),
+                      ),
+                      AppLayout.hM,
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Precio Mayorista (RD\$)',
+                          hint: 'Volumen',
+                          controller: _mayoristaCtrl,
+                          prefixIcon: Icons.storefront_outlined,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                          enabled: puedePrecios,
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppLayout.vM,
+                  AppTextField(
+                    label: 'Precio Especial / Promoción (RD\$)',
+                    hint: 'Clientes preferenciales',
+                    controller: _especialCtrl,
+                    prefixIcon: Icons.star_border,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                    enabled: puedePrecios,
+                  ),
+                  AppLayout.vS,
+                  Consumer(
+                    builder: (ctx, ref, _) {
+                      final venta = double.tryParse(_ventaCtrl.text) ?? 0;
+                      final minimo = double.tryParse(_minimoCtrl.text) ?? 0;
+                      if (minimo > 0 && venta < minimo) {
+                        return Text('⚠️ El precio está por debajo del mínimo permitido', style: AppTypography.bodySmall.copyWith(color: AppColors.error, fontWeight: FontWeight.w600));
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ),
+              AppSection(
+                title: 'Inventario',
+                children: [
+                  if (!puedeInventario)
+                    Padding(
+                      padding: AppSpacing.bS,
+                      child: Text('No tiene permiso para modificar estos valores', style: AppTypography.bodySmall.copyWith(color: AppColors.error)),
+                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Existencia Actual',
+                          controller: _stockCtrl,
+                          prefixIcon: Icons.format_list_numbered,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                          enabled: puedeInventario,
+                        ),
+                      ),
+                      AppLayout.hM,
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Stock Mínimo (Alerta)',
+                          controller: _stockMinCtrl,
+                          prefixIcon: Icons.warning_amber_outlined,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                          enabled: puedeInventario,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              AppLayout.vM,
               SwitchListTile(
-                title: Text(
-                  'Producto Activo para la Venta',
-                  style: AppTypography.labelLarge.copyWith(color: AppColors.darkSurface, fontWeight: FontWeight.w500),
-                ),
+                title: Text('Producto Activo para la Venta', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w500)),
                 value: _activo,
-                activeThumbColor: AppColors.focusedBlue,
+                activeThumbColor: AppColors.primary,
                 onChanged: (v) => setState(() => _activo = v),
                 contentPadding: EdgeInsets.zero,
               ),
-              const SizedBox(height: AppSpacing.xl),
+              AppLayout.vXl,
               SizedBox(
                 width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkSurface,
-                    foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                    textStyle: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600),
-                  ),
+                child: AppButton(
+                  text: 'Guardar Producto',
+                  height: AppSizes.buttonHeightLg,
                   onPressed: () {
                     if (!_formKey.currentState!.validate()) return;
+                    if (_catSel == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seleccione una categoría'), backgroundColor: AppColors.error));
+                      return;
+                    }
+                    if (_unidadSel == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seleccione unidad de medida'), backgroundColor: AppColors.error));
+                      return;
+                    }
+                    final costo = double.tryParse(_costoCtrl.text) ?? 0;
+                    final gastos = double.tryParse(_gastosCtrl.text) ?? 0;
+                    final venta = double.tryParse(_ventaCtrl.text) ?? 0;
+                    final minimo = double.tryParse(_minimoCtrl.text);
                     final stockVal = double.tryParse(_stockCtrl.text) ?? 0;
                     final stockMinVal = double.tryParse(_stockMinCtrl.text) ?? 0;
                     if (stockVal < 0 || stockMinVal < 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Las cantidades no pueden ser negativas'), backgroundColor: AppColors.error),
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Las cantidades no pueden ser negativas'), backgroundColor: AppColors.error));
                       return;
                     }
+                    if (minimo != null && minimo > 0 && venta < minimo) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('El precio de venta no puede ser menor al precio mínimo'), backgroundColor: AppColors.error));
+                      return;
+                    }
+                    final margen = double.tryParse(_margenCtrl.text);
+                    final mayorista = double.tryParse(_mayoristaCtrl.text);
+                    final especial = double.tryParse(_especialCtrl.text);
+                    final sku = _skuCtrl.text.trim().isEmpty ? 'SKU-${DateTime.now().millisecondsSinceEpoch}' : _skuCtrl.text.trim();
                     final nuevoProd = Producto(
-                      codigo: _skuCtrl.text.trim().isEmpty ? 'SKU-${DateTime.now().millisecondsSinceEpoch}' : _skuCtrl.text.trim(),
+                      codigo: sku,
                       nombre: _nombreCtrl.text.trim(),
-                      precioCompra: double.tryParse(_costoCtrl.text) ?? 0,
-                      precioVenta: double.tryParse(_ventaCtrl.text) ?? 0,
+                      descripcion: null,
+                      precioCompra: costo,
+                      gastosAsociados: gastos,
+                      precioVenta: venta,
+                      margenGanancia: margen,
+                      precioMinimo: minimo,
+                      precioMayorista: mayorista,
+                      precioEspecial: especial,
                       stock: stockVal,
                       stockMinimo: stockMinVal,
                       categoriaId: _catSel!,
@@ -355,11 +422,8 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     );
                     ref.read(productoControllerProvider.notifier).guardar(nuevoProd);
                     context.pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('¡Producto registrado y movimiento en Kardex creado!')),
-                    );
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Producto registrado y movimiento en Kardex creado!')));
                   },
-                  child: const Text('Guardar Producto'),
                 ),
               ),
             ],

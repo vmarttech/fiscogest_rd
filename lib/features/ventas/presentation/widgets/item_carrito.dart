@@ -120,12 +120,18 @@ class ItemCarrito extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tieneOferta = detalle.ofertaId != null;
     final tieneDescuento = detalle.descuentoPorcentaje > 0 || detalle.montoDescuento > 0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         title: Row(
           children: [
-            Text(detalle.nombreProducto ?? ''),
+            Expanded(
+              child: Text(
+                detalle.nombreProducto ?? '',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             if (tieneOferta)
               Container(
                 margin: const EdgeInsets.only(left: 8),
