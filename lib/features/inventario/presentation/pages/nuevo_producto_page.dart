@@ -19,12 +19,10 @@ import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 
 enum RolUsuario { compras, ventas, almacen, administracion }
-
 final rolUsuarioProvider = StateProvider<RolUsuario>((ref) => RolUsuario.administracion);
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
   const NuevoProductoPage({super.key});
-
   static const String routeName = 'nuevo-producto';
 
   @override
@@ -51,6 +49,39 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   bool _modificandoMargen = false;
   bool _modificandoPrecioVenta = false;
   bool _modificandoCosto = false;
+  Producto? _productoEditar;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = GoRouterState.of(context).extra;
+      if (args is Producto) {
+        setState(() {
+          _productoEditar = args;
+          _cargarDatosProducto(args);
+        });
+      }
+    });
+  }
+
+  void _cargarDatosProducto(Producto p) {
+    _nombreCtrl.text = p.nombre;
+    _skuCtrl.text = p.codigo;
+    _costoCtrl.text = p.precioCompra.toStringAsFixed(2);
+    _gastosCtrl.text = p.gastosAsociados.toStringAsFixed(2);
+    _ventaCtrl.text = p.precioVenta.toStringAsFixed(2);
+    _margenCtrl.text = (p.margenGanancia ?? 0).toStringAsFixed(2);
+    _minimoCtrl.text = (p.precioMinimo ?? 0).toStringAsFixed(2);
+    _mayoristaCtrl.text = (p.precioMayorista ?? 0).toStringAsFixed(2);
+    _especialCtrl.text = (p.precioEspecial ?? 0).toStringAsFixed(2);
+    _stockCtrl.text = (p.stock ?? 0).toStringAsFixed(2);
+    _stockMinCtrl.text = (p.stockMinimo ?? 0).toStringAsFixed(2);
+    _catSel = p.categoriaId;
+    _marcaSel = p.marcaId;
+    _unidadSel = p.unidadMedidaId;
+    _activo = p.activo;
+  }
 
   @override
   void dispose() {
@@ -128,9 +159,10 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final puedeCostos = _puedeEditarCostos(rol);
     final puedePrecios = _puedeEditarPrecios(rol);
     final puedeInventario = _puedeEditarInventario(rol);
+    final esEdicion = _productoEditar != null;
 
     return AppScaffold(
-      title: 'Registrar Nuevo Producto',
+      title: esEdicion ? 'Editar Producto' : 'Registrar Nuevo Producto',
       body: SingleChildScrollView(
         padding: AppSpacing.allL,
         child: Form(
@@ -372,7 +404,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
               SizedBox(
                 width: double.infinity,
                 child: AppButton(
-                  text: 'Guardar Producto',
+                  text: esEdicion ? 'Actualizar Producto' : 'Guardar Producto',
                   height: AppSizes.buttonHeightLg,
                   onPressed: () {
                     if (!_formKey.currentState!.validate()) return;
@@ -402,27 +434,50 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     final mayorista = double.tryParse(_mayoristaCtrl.text);
                     final especial = double.tryParse(_especialCtrl.text);
                     final sku = _skuCtrl.text.trim().isEmpty ? 'SKU-${DateTime.now().millisecondsSinceEpoch}' : _skuCtrl.text.trim();
-                    final nuevoProd = Producto(
-                      codigo: sku,
-                      nombre: _nombreCtrl.text.trim(),
-                      descripcion: null,
-                      precioCompra: costo,
-                      gastosAsociados: gastos,
-                      precioVenta: venta,
-                      margenGanancia: margen,
-                      precioMinimo: minimo,
-                      precioMayorista: mayorista,
-                      precioEspecial: especial,
-                      stock: stockVal,
-                      stockMinimo: stockMinVal,
-                      categoriaId: _catSel!,
-                      marcaId: _marcaSel ?? 1,
-                      unidadMedidaId: _unidadSel!,
-                      activo: _activo,
-                    );
-                    ref.read(productoControllerProvider.notifier).guardar(nuevoProd);
+
+                    if (esEdicion && _productoEditar?.id != null) {
+                      final actualizado = _productoEditar!.copyWith(
+                        codigo: sku,
+                        nombre: _nombreCtrl.text.trim(),
+                        precioCompra: costo,
+                        gastosAsociados: gastos,
+                        precioVenta: venta,
+                        margenGanancia: margen,
+                        precioMinimo: minimo,
+                        precioMayorista: mayorista,
+                        precioEspecial: especial,
+                        stock: stockVal,
+                        stockMinimo: stockMinVal,
+                        categoriaId: _catSel!,
+                        marcaId: _marcaSel ?? 1,
+                        unidadMedidaId: _unidadSel!,
+                        activo: _activo,
+                      );
+                      ref.read(productoControllerProvider.notifier).guardar(actualizado);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Producto actualizado correctamente!')));
+                    } else {
+                      final nuevoProd = Producto(
+                        codigo: sku,
+                        nombre: _nombreCtrl.text.trim(),
+                        descripcion: null,
+                        precioCompra: costo,
+                        gastosAsociados: gastos,
+                        precioVenta: venta,
+                        margenGanancia: margen,
+                        precioMinimo: minimo,
+                        precioMayorista: mayorista,
+                        precioEspecial: especial,
+                        stock: stockVal,
+                        stockMinimo: stockMinVal,
+                        categoriaId: _catSel!,
+                        marcaId: _marcaSel ?? 1,
+                        unidadMedidaId: _unidadSel!,
+                        activo: _activo,
+                      );
+                      ref.read(productoControllerProvider.notifier).guardar(nuevoProd);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Producto registrado y movimiento en Kardex creado!')));
+                    }
                     context.pop();
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Producto registrado y movimiento en Kardex creado!')));
                   },
                 ),
               ),
