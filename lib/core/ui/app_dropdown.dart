@@ -1,56 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 class AppDropdown<T> extends StatelessWidget {
   const AppDropdown({
     super.key,
     this.initialValue,
+    this.label,
     this.hint,
     required this.items,
     this.onChanged,
     this.isExpanded = true,
+    this.enabled = true,
   });
 
   final T? initialValue;
+  final String? label;
   final String? hint;
   final List<DropdownMenuItem<T>> items;
   final ValueChanged<T?>? onChanged;
   final bool isExpanded;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: AppColors.inputBorder),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: DropdownButtonFormField<T>(
-        initialValue: initialValue,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: AppTypography.bodySmall.copyWith(
-            color: AppColors.grey400,
-            fontSize: 14,
-          ),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.zero,
+    return DropdownButtonFormField<T>(
+      initialValue: initialValue,
+      decoration: InputDecoration(
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        labelText: label,
+        labelStyle: AppTypography.labelMedium,
+        hintText: hint,
+        hintStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.grey400,
         ),
-        isExpanded: isExpanded,
-        icon: const Icon(Icons.arrow_drop_down, color: AppColors.grey600, size: 20),
-        style: AppTypography.bodyMedium.copyWith(
-          color: AppColors.textPrimary,
-          fontSize: 14,
+        border: const OutlineInputBorder(),
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.grey300),
         ),
-        items: items,
-        onChanged: onChanged,
-        dropdownColor: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        elevation: 4,
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+        disabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.grey300),
+        ),
       ),
+      isExpanded: isExpanded,
+      icon: const Icon(Icons.arrow_drop_down, color: AppColors.grey600, size: 20),
+      style: AppTypography.bodyMedium.copyWith(
+        color: AppColors.textPrimary,
+      ),
+      items: items,
+      onChanged: enabled ? onChanged : null,
+      dropdownColor: AppColors.white,
+      borderRadius: BorderRadius.circular(8),
     );
   }
 }

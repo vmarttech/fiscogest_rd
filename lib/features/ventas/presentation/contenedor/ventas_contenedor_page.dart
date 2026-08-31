@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/barra_navegacion_inferior.dart';
@@ -35,7 +36,6 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final vistaActual = ref.watch(ventasNavegacionProvider.select((e) => e.vistaActual));
     final modoOperacion = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
 
-    // ✅ TÍTULO DINÁMICO — CAMBIA SEGÚN MODO
     final String tituloDinamico = switch (modoOperacion) {
       ModoOperacion.venta => 'Gestión de Ventas',
       ModoOperacion.cotizacion => 'Gestión de Cotizaciones',
@@ -51,7 +51,6 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     };
 
     return AppScaffold(
-      // ✅ SIN título en AppScaffold → EVITA DUPLICIDAD
       appBar: AppBar(
         title: Text(
           tituloDinamico,
@@ -91,11 +90,17 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
           const SizedBox(width: AppSpacing.s),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(child: vistaActiva),
-          const BarraNavegacionInferior(),
-        ],
+      body: SafeArea(
+        bottom: true,
+        child: Padding(
+          padding: AppLayout.pantallaPadding,
+          child: Column(
+            children: [
+              Expanded(child: vistaActiva),
+              const BarraNavegacionInferior(),
+            ],
+          ),
+        ),
       ),
     );
   }

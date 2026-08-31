@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 abstract class AppLayout {
+
   // Filas estándar
   static Row row({
     Key? key,
@@ -56,6 +58,56 @@ abstract class AppLayout {
         constraints: BoxConstraints(maxWidth: maxWidth.toDouble()),
         child: child,
       ),
+    );
+  }
+
+  // Padding universal que evita contenido oculto bajo la barra del sistema
+  static const EdgeInsetsGeometry pantallaPadding = EdgeInsets.only(
+    left: AppSpacing.m,
+    right: AppSpacing.m,
+    top: AppSpacing.m,
+    bottom: kToolbarHeight + AppSpacing.xl * 2,
+  );
+}
+
+// Diseño adaptativo Fila / Columna — Row ↔ Column responsivo
+class ResponsiveRow extends StatelessWidget {
+
+  const ResponsiveRow({
+    super.key,
+    required this.child1,
+    required this.child2,
+    this.breakpoint = 600,
+    this.spacing,
+  });
+  final Widget child1;
+  final Widget child2;
+  final double breakpoint;
+  final double? spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final anchoPantalla = MediaQuery.of(context).size.width;
+    final espacio = spacing ?? AppSpacing.m;
+
+    if (anchoPantalla >= breakpoint) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: child1),
+          SizedBox(width: espacio),
+          Expanded(child: child2),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        child1,
+        SizedBox(height: espacio),
+        child2,
+      ],
     );
   }
 }

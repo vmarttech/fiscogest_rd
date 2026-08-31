@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
@@ -79,7 +80,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     } else if (_error != null) {
       cuerpo = Center(
         child: Padding(
-          padding: AppSpacing.allM,
+          padding: AppLayout.pantallaPadding,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -95,7 +96,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     } else {
       final compra = _compra!;
       cuerpo = SingleChildScrollView(
-        padding: AppSpacing.allM,
+        padding: AppLayout.pantallaPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -139,7 +140,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
 
     return AppScaffold(
       title: 'Detalle de Compra',
-      body: cuerpo,
+      body: SafeArea(
+        bottom: true,
+        child: cuerpo,
+      ),
     );
   }
 

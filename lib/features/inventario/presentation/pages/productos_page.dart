@@ -54,6 +54,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         PopupMenuItem(
           value: 0,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.add_box_outlined, color: Color(0xFF3B82F6), size: 20),
               const SizedBox(width: AppSpacing.s),
@@ -64,6 +65,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         PopupMenuItem(
           value: 1,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.receipt_long_outlined, color: Color(0xFF10B981), size: 20),
               const SizedBox(width: AppSpacing.s),
@@ -74,6 +76,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         PopupMenuItem(
           value: 2,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.category_outlined, color: Color(0xFFF59E0B), size: 20),
               const SizedBox(width: AppSpacing.s),
@@ -84,6 +87,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         PopupMenuItem(
           value: 3,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.branding_watermark_outlined, color: Color(0xFF8B5CF6), size: 20),
               const SizedBox(width: AppSpacing.s),
@@ -94,6 +98,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         PopupMenuItem(
           value: 4,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.straighten_outlined, color: Color(0xFFEC4899), size: 20),
               const SizedBox(width: AppSpacing.s),
@@ -105,6 +110,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         PopupMenuItem(
           value: 5,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.settings_outlined, color: Colors.grey, size: 20),
               const SizedBox(width: AppSpacing.s),
@@ -173,21 +179,24 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      body: Stack(
-        children: [
-          _construirVistaActual(),
-          Positioned(
-            bottom: AppSpacing.m,
-            right: AppSpacing.m,
-            child: FloatingActionButton.extended(
-              onPressed: () => _abrirMenuOpciones(context),
-              icon: const Icon(Icons.menu, size: AppSizes.iconMd),
-              label: const Text('Opciones', style: TextStyle(fontSize: 12)),
-              backgroundColor: const Color(0xFF3B82F6),
-              foregroundColor: Colors.white,
+      body: SafeArea(
+        bottom: true,
+        child: Stack(
+          children: [
+            _construirVistaActual(),
+            Positioned(
+              bottom: AppSpacing.m + MediaQuery.of(context).padding.bottom,
+              right: AppSpacing.m,
+              child: FloatingActionButton.extended(
+                onPressed: () => _abrirMenuOpciones(context),
+                icon: const Icon(Icons.menu, size: AppSizes.iconMd),
+                label: const Text('Opciones', style: TextStyle(fontSize: 12)),
+                backgroundColor: const Color(0xFF3B82F6),
+                foregroundColor: Colors.white,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -195,8 +204,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   Widget _buildSeccionProductos() {
     final puedeVerCostos = _puedeVerCostos();
     final puedeEliminar = _puedeEliminar();
+    final basePadding = AppLayout.pantallaPadding as EdgeInsets;
+    final padding = basePadding.copyWith(top: MediaQuery.of(context).padding.top + AppSpacing.s);
+
     return Padding(
-      padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + AppSpacing.s),
+      padding: padding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -232,7 +244,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 return ListView.separated(
                   padding: EdgeInsets.zero,
                   itemCount: filtrados.length,
-                  separatorBuilder: (_, __) => AppLayout.vS,
+                  separatorBuilder: (_, __) => AppLayout.vM,
                   itemBuilder: (_, int i) {
                     final Producto prod = filtrados[i];
                     final double stockSeguro = prod.stock ?? 0;
@@ -243,6 +255,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
                                 width: 44,
@@ -253,7 +266,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                                 ),
                                 child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF3B82F6), size: 22),
                               ),
-                              AppLayout.hM,
+                              const SizedBox(width: AppSpacing.m),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,25 +306,27 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                               ),
                             ],
                           ),
-                          AppLayout.vS,
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              AppButton(
-                                text: 'Editar',
-                                icon: Icons.edit_outlined,
-                                height: 36,
-                                onPressed: () => _editarProducto(prod),
-                              ),
-                              AppLayout.hS,
-                              if (puedeEliminar)
+                          AppLayout.vM,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Row(
+                              children: [
                                 AppButton(
-                                  text: 'Eliminar',
-                                  icon: Icons.delete_outline,
+                                  text: 'Editar',
+                                  icon: Icons.edit_outlined,
                                   height: 36,
-                                  onPressed: () => _confirmarEliminar(prod),
+                                  onPressed: () => _editarProducto(prod),
                                 ),
-                            ],
+                                const SizedBox(width: AppSpacing.s),
+                                if (puedeEliminar)
+                                  AppButton(
+                                    text: 'Eliminar',
+                                    icon: Icons.delete_outline,
+                                    height: 36,
+                                    onPressed: () => _confirmarEliminar(prod),
+                                  ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -327,8 +342,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   }
 
   Widget _buildSeccionKardex() {
+    final basePadding = AppLayout.pantallaPadding as EdgeInsets;
+    final padding = basePadding.copyWith(top: MediaQuery.of(context).padding.top + AppSpacing.s);
+
     return Padding(
-      padding: AppSpacing.allL.copyWith(top: MediaQuery.of(context).padding.top + AppSpacing.s),
+      padding: padding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -359,7 +377,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 return ListView.separated(
                   padding: EdgeInsets.zero,
                   itemCount: movimientos.length,
-                  separatorBuilder: (_, __) => AppLayout.vS,
+                  separatorBuilder: (_, __) => AppLayout.vM,
                   itemBuilder: (_, int i) {
                     final Kardex mov = movimientos[i];
                     return AppCard(

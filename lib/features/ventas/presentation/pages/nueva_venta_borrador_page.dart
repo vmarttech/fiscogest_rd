@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
@@ -148,11 +149,16 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
     final pantallaPequena = anchoPantalla < 720;
 
     return AppScaffold(
-      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
-      body: SingleChildScrollView(
-        child: pantallaPequena
-            ? _buildUnaColumna(estado)
-            : _buildDosColumnas(estado),
+      body: SafeArea(
+        bottom: true,
+        child: Padding(
+          padding: AppLayout.pantallaPadding,
+          child: SingleChildScrollView(
+            child: pantallaPequena
+                ? _buildUnaColumna(estado)
+                : _buildDosColumnas(estado),
+          ),
+        ),
       ),
     );
   }

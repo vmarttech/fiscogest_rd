@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
@@ -38,7 +39,6 @@ class _ControladoresLinea {
   final cantidad = TextEditingController();
   final costoUnitario = TextEditingController();
   final descuento = TextEditingController();
-
   void dispose() {
     productoId.dispose();
     nombreProducto.dispose();
@@ -221,7 +221,6 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       _lineas[i].costoUnitario = double.tryParse(ctrl.costoUnitario.text) ?? 0;
       _lineas[i].descuentoPorcentaje = double.tryParse(ctrl.descuento.text) ?? 0;
     }
-
     if (!_formKey.currentState!.validate()) return;
     if (_lineas.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -308,222 +307,225 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Registrar Compra',
-      body: SingleChildScrollView(
-        padding: AppSpacing.allM,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Datos de la Compra', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              const SizedBox(height: AppSpacing.m),
-              AppTextField(
-                controller: _fechaController,
-                label: 'Fecha Emisión',
-                enabled: false,
-              ),
-              const SizedBox(height: AppSpacing.m),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _proveedorIdController,
-                      label: 'ID Prov.',
+      body: SafeArea(
+        bottom: true,
+        child: SingleChildScrollView(
+          padding: AppLayout.pantallaPadding,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Datos de la Compra', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppSpacing.m),
+                AppTextField(
+                  controller: _fechaController,
+                  label: 'Fecha Emisión',
+                  enabled: false,
+                ),
+                const SizedBox(height: AppSpacing.m),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        controller: _proveedorIdController,
+                        label: 'ID Prov.',
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.m),
-                  Expanded(
-                    flex: 2,
-                    child: GestureDetector(
-                      onTap: _seleccionarProveedor,
-                      child: AbsorbPointer(
-                        child: AppTextField(
-                          controller: _proveedorNombreController,
-                          label: 'Proveedor',
-                          enabled: false,
-                          prefixIcon: Icons.search,
+                    const SizedBox(width: AppSpacing.m),
+                    Expanded(
+                      flex: 2,
+                      child: GestureDetector(
+                        onTap: _seleccionarProveedor,
+                        child: AbsorbPointer(
+                          child: AppTextField(
+                            controller: _proveedorNombreController,
+                            label: 'Proveedor',
+                            enabled: false,
+                            prefixIcon: Icons.search,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.m),
-              AppTextField(
-                controller: _comprobanteController,
-                label: 'Comprobante',
-              ),
-              const SizedBox(height: AppSpacing.m),
-              AppTextField(
-                controller: _observacionesController,
-                label: 'Observaciones',
-              ),
-              const SizedBox(height: AppSpacing.l),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Productos / Líneas', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  ElevatedButton.icon(
-                    onPressed: _agregarLinea,
-                    icon: const Icon(Icons.add, size: 14),
-                    label: const Text('Agregar', style: TextStyle(fontSize: 12)),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      minimumSize: const Size(80, 36),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.m),
+                AppTextField(
+                  controller: _comprobanteController,
+                  label: 'Comprobante',
+                ),
+                const SizedBox(height: AppSpacing.m),
+                AppTextField(
+                  controller: _observacionesController,
+                  label: 'Observaciones',
+                ),
+                const SizedBox(height: AppSpacing.l),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Productos / Líneas', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ElevatedButton.icon(
+                      onPressed: _agregarLinea,
+                      icon: const Icon(Icons.add, size: 14),
+                      label: const Text('Agregar', style: TextStyle(fontSize: 12)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        minimumSize: const Size(80, 36),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.m),
-              if (_lineas.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('No hay productos. Presione "Agregar".',
-                      style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey, fontSize: 12)),
-                )
-              else
-                ..._lineas.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final linea = entry.value;
-                  final ctrl = _controladores[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: AppSpacing.m),
-                    child: Padding(
-                      padding: AppSpacing.allM,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Línea ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
-                                onPressed: () => _eliminarLinea(index),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.s),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: AppTextField(
-                                  controller: ctrl.productoId,
-                                  label: 'Cód/ID',
-                                  onChanged: (v) => setState(() => linea.productoId = v),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.m),
+                if (_lineas.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text('No hay productos. Presione "Agregar".',
+                        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey, fontSize: 12)),
+                  )
+                else
+                  ..._lineas.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final linea = entry.value;
+                    final ctrl = _controladores[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: AppSpacing.m),
+                      child: Padding(
+                        padding: AppSpacing.allM,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Línea ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                                  onPressed: () => _eliminarLinea(index),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                 ),
-                              ),
-                              const SizedBox(width: AppSpacing.m),
-                              Expanded(
-                                flex: 3,
-                                child: GestureDetector(
-                                  onTap: () => _seleccionarProducto(index),
-                                  child: AbsorbPointer(
-                                    child: AppTextField(
-                                      controller: ctrl.nombreProducto,
-                                      label: 'Producto',
-                                      enabled: false,
-                                      prefixIcon: Icons.search,
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.s),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: AppTextField(
+                                    controller: ctrl.productoId,
+                                    label: 'Cód/ID',
+                                    onChanged: (v) => setState(() => linea.productoId = v),
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.m),
+                                Expanded(
+                                  flex: 3,
+                                  child: GestureDetector(
+                                    onTap: () => _seleccionarProducto(index),
+                                    child: AbsorbPointer(
+                                      child: AppTextField(
+                                        controller: ctrl.nombreProducto,
+                                        label: 'Producto',
+                                        enabled: false,
+                                        prefixIcon: Icons.search,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.s),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: AppTextField(
-                                  controller: ctrl.cantidad,
-                                  label: 'Cant.',
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                  onChanged: (v) {
-                                    setState(() {
-                                      linea.cantidad = double.tryParse(v) ?? 0;
-                                      ctrl.cantidad.selection = TextSelection.collapsed(offset: ctrl.cantidad.text.length);
-                                    });
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.m),
-                              Expanded(
-                                child: AppTextField(
-                                  controller: ctrl.costoUnitario,
-                                  label: 'Costo',
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                  onChanged: (v) {
-                                    setState(() {
-                                      linea.costoUnitario = double.tryParse(v) ?? 0;
-                                      ctrl.costoUnitario.selection = TextSelection.collapsed(offset: ctrl.costoUnitario.text.length);
-                                    });
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.m),
-                              Expanded(
-                                child: AppTextField(
-                                  controller: ctrl.descuento,
-                                  label: '%Desc',
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                  onChanged: (v) {
-                                    setState(() {
-                                      linea.descuentoPorcentaje = double.tryParse(v) ?? 0;
-                                      ctrl.descuento.selection = TextSelection.collapsed(offset: ctrl.descuento.text.length);
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.s),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(6)),
-                            child: Text(
-                              'Subtotal: \$${linea.subtotalLinea.toStringAsFixed(2)}',
-                              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: AppSpacing.s),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: AppTextField(
+                                    controller: ctrl.cantidad,
+                                    label: 'Cant.',
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    onChanged: (v) {
+                                      setState(() {
+                                        linea.cantidad = double.tryParse(v) ?? 0;
+                                        ctrl.cantidad.selection = TextSelection.collapsed(offset: ctrl.cantidad.text.length);
+                                      });
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.m),
+                                Expanded(
+                                  child: AppTextField(
+                                    controller: ctrl.costoUnitario,
+                                    label: 'Costo',
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    onChanged: (v) {
+                                      setState(() {
+                                        linea.costoUnitario = double.tryParse(v) ?? 0;
+                                        ctrl.costoUnitario.selection = TextSelection.collapsed(offset: ctrl.costoUnitario.text.length);
+                                      });
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.m),
+                                Expanded(
+                                  child: AppTextField(
+                                    controller: ctrl.descuento,
+                                    label: '%Desc',
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    onChanged: (v) {
+                                      setState(() {
+                                        linea.descuentoPorcentaje = double.tryParse(v) ?? 0;
+                                        ctrl.descuento.selection = TextSelection.collapsed(offset: ctrl.descuento.text.length);
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.s),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(6)),
+                              child: Text(
+                                'Subtotal: \$${linea.subtotalLinea.toStringAsFixed(2)}',
+                                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    );
+                  }),
+                const SizedBox(height: AppSpacing.l),
+                const Divider(height: 1),
+                const SizedBox(height: AppSpacing.m),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('Subtotal: \$${_subtotalSinImpuestos.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
+                        Text('Descuentos: \$${_descuentoGlobal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
+                        Text('ITBIS (18%): \$${_montoImpuesto.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
+                        const Divider(),
+                        Text('TOTAL: \$${_totalCompra.toStringAsFixed(2)}',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ],
                     ),
-                  );
-                }),
-              const SizedBox(height: AppSpacing.l),
-              const Divider(height: 1),
-              const SizedBox(height: AppSpacing.m),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('Subtotal: \$${_subtotalSinImpuestos.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
-                      Text('Descuentos: \$${_descuentoGlobal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
-                      Text('ITBIS (18%): \$${_montoImpuesto.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
-                      const Divider(),
-                      Text('TOTAL: \$${_totalCompra.toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.l),
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  text: 'Guardar Compra',
-                  onPressed: _guardarCompra,
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.l),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    text: 'Guardar Compra',
+                    onPressed: _guardarCompra,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

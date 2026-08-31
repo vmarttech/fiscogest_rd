@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 class ClientesGestionPage extends ConsumerStatefulWidget {
   const ClientesGestionPage({super.key});
   static const String routeName = 'clientes-gestion';
+
   @override
   ConsumerState<ClientesGestionPage> createState() => _ClientesGestionPageState();
 }
@@ -97,6 +98,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                         c.telefono.toLowerCase().contains(_filtroBusqueda) ||
                         c.correo.toLowerCase().contains(_filtroBusqueda)
                       ).toList();
+
                       if (filtrados.isEmpty) {
                         return const Center(
                           child: Text(
@@ -105,6 +107,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                           ),
                         );
                       }
+
                       return ListView.separated(
                         padding: AppSpacing.allM,
                         itemCount: filtrados.length,
@@ -333,49 +336,113 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
     final rncCedulaController = TextEditingController(text: clienteToEdit?.rncCedula ?? '');
     final observacionesController = TextEditingController(text: clienteToEdit?.observaciones ?? '');
     final isEditing = clienteToEdit != null;
+    final anchoPantalla = MediaQuery.of(context).size.width;
+    final pantallaGrande = anchoPantalla >= 600;
 
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isEditing ? 'Editar Cliente' : 'Nuevo Cliente', style: AppTypography.h3),
         content: SizedBox(
-          width: 450,
+          width: pantallaGrande ? 650 : null,
           child: SingleChildScrollView(
             child: Form(
               key: formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextFormField(
-                    controller: nombreController,
-                    decoration: const InputDecoration(labelText: 'Nombre / Razón Social'),
-                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el nombre' : null,
-                  ),
+                  // 📌 DATOS PRINCIPALES
+                  const Text('Datos Principales', style: AppTypography.h4),
+                  AppLayout.vS,
+                  pantallaGrande
+                      ? Column(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: nombreController,
+                                    decoration: const InputDecoration(labelText: 'Nombre / Razón Social'),
+                                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el nombre' : null,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.m),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: rncCedulaController,
+                                    decoration: const InputDecoration(labelText: 'RNC o Cédula'),
+                                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el RNC o Cédula' : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            AppLayout.vM,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: telefonoController,
+                                    decoration: const InputDecoration(labelText: 'Teléfono'),
+                                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el teléfono' : null,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.m),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: correoController,
+                                    decoration: const InputDecoration(labelText: 'Correo Electrónico'),
+                                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el correo' : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            TextFormField(
+                              controller: nombreController,
+                              decoration: const InputDecoration(labelText: 'Nombre / Razón Social'),
+                              validator: (v) => v == null || v.isEmpty ? 'Ingrese el nombre' : null,
+                            ),
+                            AppLayout.vM,
+                            TextFormField(
+                              controller: rncCedulaController,
+                              decoration: const InputDecoration(labelText: 'RNC o Cédula'),
+                              validator: (v) => v == null || v.isEmpty ? 'Ingrese el RNC o Cédula' : null,
+                            ),
+                            AppLayout.vM,
+                            TextFormField(
+                              controller: telefonoController,
+                              decoration: const InputDecoration(labelText: 'Teléfono'),
+                              validator: (v) => v == null || v.isEmpty ? 'Ingrese el teléfono' : null,
+                            ),
+                            AppLayout.vM,
+                            TextFormField(
+                              controller: correoController,
+                              decoration: const InputDecoration(labelText: 'Correo Electrónico'),
+                              validator: (v) => v == null || v.isEmpty ? 'Ingrese el correo' : null,
+                            ),
+                          ],
+                        ),
                   AppLayout.vM,
-                  TextFormField(
-                    controller: rncCedulaController,
-                    decoration: const InputDecoration(labelText: 'RNC o Cédula'),
-                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el RNC o Cédula' : null,
-                  ),
-                  AppLayout.vM,
-                  TextFormField(
-                    controller: telefonoController,
-                    decoration: const InputDecoration(labelText: 'Teléfono'),
-                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el teléfono' : null,
-                  ),
-                  AppLayout.vM,
-                  TextFormField(
-                    controller: correoController,
-                    decoration: const InputDecoration(labelText: 'Correo Electrónico'),
-                    validator: (v) => v == null || v.isEmpty ? 'Ingrese el correo' : null,
-                  ),
-                  AppLayout.vM,
+
+                  // 📌 UBICACIÓN
+                  const Text('Ubicación', style: AppTypography.h4),
+                  AppLayout.vS,
                   TextFormField(
                     controller: direccionController,
                     decoration: const InputDecoration(labelText: 'Dirección'),
                     validator: (v) => v == null || v.isEmpty ? 'Ingrese la dirección' : null,
                   ),
                   AppLayout.vM,
+
+                  // 📌 OBSERVACIONES
+                  const Text('Observaciones', style: AppTypography.h4),
+                  AppLayout.vS,
                   TextFormField(
                     controller: observacionesController,
                     decoration: const InputDecoration(labelText: 'Observaciones'),

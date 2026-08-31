@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
@@ -22,7 +23,6 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
   static const String routeName = 'registrar-ventas';
-
   @override
   ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
@@ -101,7 +101,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
       final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
       final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
-
       final linea = DetalleVenta(
         productoId: p.id ?? 0,
         nombreProducto: p.nombre,
@@ -113,10 +112,8 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         ofertaNombre: ofertaNombre,
         precioOriginal: precioOriginal,
       );
-
       ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
       _buscadorController.clear();
-
       if (oferta != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -146,11 +143,9 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                   },
                 );
               }
-
               final p = resultados[i];
               final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
               final hayStock = (p.stock ?? 0) > 0;
-
               return ListTile(
                 title: Row(
                   children: [
@@ -211,7 +206,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
                         final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
                         final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
-
                         final linea = DetalleVenta(
                           productoId: p.id ?? 0,
                           nombreProducto: p.nombre,
@@ -223,11 +217,9 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                           ofertaNombre: ofertaNombre,
                           precioOriginal: precioOriginal,
                         );
-
                         ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
                         _buscadorController.clear();
                         Navigator.pop(ctx);
-
                         if (oferta != null && mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -363,7 +355,6 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
       );
       return;
     }
-
     setState(() => _cargando = true);
     try {
       final casoUso = ref.read(registrarVentaUseCaseProvider);
@@ -396,103 +387,108 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   Widget build(BuildContext context) {
     ref.watch(registrarVentaProvider);
     return AppScaffold(
-      padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Center(
+      body: SafeArea(
+        bottom: true,
+        child: Padding(
+          padding: AppLayout.pantallaPadding,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 850),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      AppCard(
-                        elevation: 1,
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Expanded(
-                              child: Text(
-                                'Nueva Venta',
-                                style: AppTypography.h4,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.s),
-                            Text(
-                              'Nº $_ventaNumero',
-                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.m),
-                      PanelProductos(
-                        controlador: _buscadorController,
-                        alBuscar: _buscarYAgregarProducto,
-                      ),
-                      const SizedBox(height: AppSpacing.m),
-                      FormularioVenta(
-                        alSeleccionarCliente: _abrirSelectorCliente,
-                        alSeleccionarFormaPago: _abrirSelectorFormaPago,
-                      ),
-                      const SizedBox(height: AppSpacing.m),
-                      const PanelCarrito(),
-                      const SizedBox(height: AppSpacing.l),
-                      LayoutBuilder(
-                        builder: (context, rowConstraints) {
-                          if (rowConstraints.maxWidth < 500) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 850),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AppCard(
+                            elevation: 1,
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                AppButton(
-                                  text: 'Limpiar Venta',
-                                  onPressed: _limpiarVenta,
-                                  icon: Icons.refresh,
+                                const Expanded(
+                                  child: Text(
+                                    'Nueva Venta',
+                                    style: AppTypography.h4,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(height: AppSpacing.s),
-                                AppButton(
-                                  text: _cargando ? 'Guardando...' : 'Registrar Venta',
-                                  onPressed: _cargando ? null : _cobrarYRegistrarSalida,
-                                  isLoading: _cargando,
-                                  icon: Icons.save,
+                                const SizedBox(width: AppSpacing.s),
+                                Text(
+                                  'Nº $_ventaNumero',
+                                  style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
                                 ),
                               ],
-                            );
-                          }
-                          return Row(
-                            children: [
-                              Expanded(
-                                child: AppButton(
-                                  text: 'Limpiar Venta',
-                                  onPressed: _limpiarVenta,
-                                  icon: Icons.refresh,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.m),
-                              Expanded(
-                                child: AppButton(
-                                  text: _cargando ? 'Guardando...' : 'Registrar Venta',
-                                  onPressed: _cargando ? null : _cobrarYRegistrarSalida,
-                                  isLoading: _cargando,
-                                  icon: Icons.save,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.m),
+                          PanelProductos(
+                            controlador: _buscadorController,
+                            alBuscar: _buscarYAgregarProducto,
+                          ),
+                          const SizedBox(height: AppSpacing.m),
+                          FormularioVenta(
+                            alSeleccionarCliente: _abrirSelectorCliente,
+                            alSeleccionarFormaPago: _abrirSelectorFormaPago,
+                          ),
+                          const SizedBox(height: AppSpacing.m),
+                          const PanelCarrito(),
+                          const SizedBox(height: AppSpacing.l),
+                          LayoutBuilder(
+                            builder: (context, rowConstraints) {
+                              if (rowConstraints.maxWidth < 500) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    AppButton(
+                                      text: 'Limpiar Venta',
+                                      onPressed: _limpiarVenta,
+                                      icon: Icons.refresh,
+                                    ),
+                                    const SizedBox(height: AppSpacing.s),
+                                    AppButton(
+                                      text: _cargando ? 'Guardando...' : 'Registrar Venta',
+                                      onPressed: _cargando ? null : _cobrarYRegistrarSalida,
+                                      isLoading: _cargando,
+                                      icon: Icons.save,
+                                    ),
+                                  ],
+                                );
+                              }
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: AppButton(
+                                      text: 'Limpiar Venta',
+                                      onPressed: _limpiarVenta,
+                                      icon: Icons.refresh,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.m),
+                                  Expanded(
+                                    child: AppButton(
+                                      text: _cargando ? 'Guardando...' : 'Registrar Venta',
+                                      onPressed: _cargando ? null : _cobrarYRegistrarSalida,
+                                      isLoading: _cargando,
+                                      icon: Icons.save,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
