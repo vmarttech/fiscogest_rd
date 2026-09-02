@@ -7,7 +7,6 @@ final impuestoRepositoryProvider = Provider<ImpuestoRepositoryImpl>((ref) {
 });
 
 class ImpuestoNotifier extends StateNotifier<AsyncValue<List<ImpuestoEntity>>> {
-
   ImpuestoNotifier(this._repository) : super(const AsyncValue.loading()) {
     cargarImpuestos();
   }
@@ -50,7 +49,10 @@ class ImpuestoNotifier extends StateNotifier<AsyncValue<List<ImpuestoEntity>>> {
   }
 }
 
-final impuestoControllerProvider = StateNotifierProvider<ImpuestoNotifier, AsyncValue<List<ImpuestoEntity>>>((ref) {
-  final repo = ref.watch(impuestoRepositoryProvider);
-  return ImpuestoNotifier(repo);
-});
+final impuestoControllerProvider =
+    StateNotifierProvider<ImpuestoNotifier, AsyncValue<List<ImpuestoEntity>>>((
+      ref,
+    ) {
+      final repo = ref.watch(impuestoRepositoryProvider);
+      return ImpuestoNotifier(repo);
+    });

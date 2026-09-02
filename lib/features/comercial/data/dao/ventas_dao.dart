@@ -7,7 +7,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/ventas_detalle_table.da
 part 'ventas_dao.g.dart';
 
 class VentaConCliente {
-
   VentaConCliente({required this.venta, this.nombreCliente});
   final VentaData venta;
   final String? nombreCliente;
@@ -15,7 +14,7 @@ class VentaConCliente {
 
 @DriftAccessor(tables: [VentasTable, ClientesTable, VentasDetalleTable])
 class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
-  VentasDao(AppDatabase db) : super(db);
+  VentasDao(super.db);
 
   Future<List<VentaConCliente>> listarVentas({
     DateTime? desde,
@@ -25,9 +24,9 @@ class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
   }) async {
     final v = ventasTable;
     final c = clientesTable;
-    final query = select(v).join([
-      leftOuterJoin(c, v.clienteId.equalsExp(c.id)),
-    ]);
+    final query = select(
+      v,
+    ).join([leftOuterJoin(c, v.clienteId.equalsExp(c.id))]);
     if (desde != null) {
       query.where(v.fecha.isBiggerOrEqualValue(desde));
     }
@@ -45,22 +44,20 @@ class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
     return resultados.map((fila) {
       final venta = fila.readTable(v);
       final cliente = fila.readTableOrNull(c);
-      return VentaConCliente(
-        venta: venta,
-        nombreCliente: cliente?.nombre,
-      );
+      return VentaConCliente(venta: venta, nombreCliente: cliente?.nombre);
     }).toList();
   }
 
   Future<VentaData?> obtenerVentaPorId(int ventaId) async {
-    return await (select(ventasTable)..where((VentasTable t) => t.id.equals(ventaId)))
-        .getSingleOrNull();
+    return await (select(
+      ventasTable,
+    )..where((VentasTable t) => t.id.equals(ventaId))).getSingleOrNull();
   }
 
   Future<List<VentaDetalleData>> listarDetallePorVenta(int ventaId) async {
-    return await (select(ventasDetalleTable)
-          ..where((VentasDetalleTable t) => t.ventaId.equals(ventaId)))
-        .get();
+    return await (select(
+      ventasDetalleTable,
+    )..where((VentasDetalleTable t) => t.ventaId.equals(ventaId))).get();
   }
 
   Future<int> insertarVenta(VentasTableCompanion venta) async {
@@ -68,9 +65,9 @@ class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
   }
 
   Future<bool> actualizarVenta(int ventaId, VentasTableCompanion venta) async {
-    final filasAfectadas = await (update(ventasTable)
-          ..where((VentasTable t) => t.id.equals(ventaId)))
-        .write(venta);
+    final filasAfectadas = await (update(
+      ventasTable,
+    )..where((VentasTable t) => t.id.equals(ventaId))).write(venta);
     return filasAfectadas > 0;
   }
 }

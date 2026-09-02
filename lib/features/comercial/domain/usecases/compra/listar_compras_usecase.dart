@@ -3,7 +3,6 @@ import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_rep
 
 /// Caso de Uso: Obtener listado completo de compras.
 class ListarComprasUseCase {
-
   ListarComprasUseCase(this._compraRepository);
   final ICompraRepository _compraRepository;
 

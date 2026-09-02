@@ -2,7 +2,6 @@ import 'package:fiscogest_rd/features/devoluciones/domain/repositories/i_devoluc
 import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_dao.dart';
 
 class DevolucionRepositoryImpl implements IDevolucionRepository {
-
   DevolucionRepositoryImpl({required this.devolucionesDao});
   final DevolucionesDao devolucionesDao;
 
@@ -19,7 +18,9 @@ class DevolucionRepositoryImpl implements IDevolucionRepository {
     required String motivo,
     required bool esTotal,
   }) async {
-    throw UnimplementedError('registrarDevolucion: Insertar cabecera + líneas → devolver inventario → reintegrar a caja');
+    throw UnimplementedError(
+      'registrarDevolucion: Insertar cabecera + líneas → devolver inventario → reintegrar a caja',
+    );
   }
 
   @override
@@ -31,11 +32,15 @@ class DevolucionRepositoryImpl implements IDevolucionRepository {
     int? usuarioId,
     String? tipoOrigen,
   }) async {
-    throw UnimplementedError('listarDevoluciones: Filtrar por fechas, cliente, proveedor, usuario y tipo');
+    throw UnimplementedError(
+      'listarDevoluciones: Filtrar por fechas, cliente, proveedor, usuario y tipo',
+    );
   }
 
   @override
   Future<Map<String, dynamic>?> obtenerPorId(int devolucionId) async {
-    throw UnimplementedError('obtenerPorId: Consultar devolución y sus líneas por ID');
+    throw UnimplementedError(
+      'obtenerPorId: Consultar devolución y sus líneas por ID',
+    );
   }
 }

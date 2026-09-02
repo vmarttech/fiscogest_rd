@@ -13,5 +13,6 @@ class Categoria with _$Categoria {
     DateTime? actualizadoEn,
   }) = _Categoria;
 
-  factory Categoria.fromJson(Map<String, dynamic> json) => _$CategoriaFromJson(json);
+  factory Categoria.fromJson(Map<String, dynamic> json) =>
+      _$CategoriaFromJson(json);
 }

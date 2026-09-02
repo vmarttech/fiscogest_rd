@@ -17,7 +17,8 @@ class RegistrarAjustePage extends ConsumerStatefulWidget {
   const RegistrarAjustePage({super.key});
   static const String routeName = 'registrar-ajuste';
   @override
-  ConsumerState<RegistrarAjustePage> createState() => _RegistrarAjustePageState();
+  ConsumerState<RegistrarAjustePage> createState() =>
+      _RegistrarAjustePageState();
 }
 
 class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
@@ -103,10 +104,16 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                 ),
                 if (_productoSeleccionado != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 6, bottom: AppSpacing.m),
+                    padding: const EdgeInsets.only(
+                      top: 6,
+                      bottom: AppSpacing.m,
+                    ),
                     child: Text(
                       '✅ ${_productoSeleccionado!.nombre} | Stock actual: ${_productoSeleccionado!.stock ?? 0.0}',
-                      style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 const SizedBox(height: AppSpacing.m),
@@ -118,8 +125,14 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                 AppDropdown<String>(
                   initialValue: _tipoSeleccionado,
                   items: const [
-                    DropdownMenuItem(value: 'entrada', child: Text('Entrada (+)')),
-                    DropdownMenuItem(value: 'salida', child: Text('Salida (-)')),
+                    DropdownMenuItem(
+                      value: 'entrada',
+                      child: Text('Entrada (+)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'salida',
+                      child: Text('Salida (-)'),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _tipoSeleccionado = v!),
                 ),
@@ -131,7 +144,9 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                 const SizedBox(height: AppSpacing.s),
                 AppTextField(
                   controller: _cantidadCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   hint: 'Ej: 5.5',
                 ),
                 const SizedBox(height: AppSpacing.m),
@@ -162,28 +177,39 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                     onPressed: () async {
                       if (!_formKey.currentState!.validate()) return;
                       final codigo = _codigoCtrl.text.trim();
-                      final producto = _productoSeleccionado ?? todos.firstWhere(
-                        (p) => p.codigo == codigo,
-                        orElse: () => throw Exception('Producto no encontrado'),
-                      );
+                      final producto =
+                          _productoSeleccionado ??
+                          todos.firstWhere(
+                            (p) => p.codigo == codigo,
+                            orElse: () =>
+                                throw Exception('Producto no encontrado'),
+                          );
                       final cant = double.tryParse(_cantidadCtrl.text) ?? 0.0;
                       if (cant <= 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('La cantidad debe ser mayor a cero')),
+                          const SnackBar(
+                            content: Text('La cantidad debe ser mayor a cero'),
+                          ),
                         );
                         return;
                       }
                       final stockActual = producto.stock ?? 0.0;
                       if (_tipoSeleccionado == 'salida' && cant > stockActual) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Stock insuficiente. Disponible: $stockActual')),
+                          SnackBar(
+                            content: Text(
+                              'Stock insuficiente. Disponible: $stockActual',
+                            ),
+                          ),
                         );
                         return;
                       }
                       final usuarioId = ref.read(usuarioAutenticadoProvider);
                       if (usuarioId == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Usuario no autenticado')),
+                          const SnackBar(
+                            content: Text('Usuario no autenticado'),
+                          ),
                         );
                         return;
                       }
@@ -197,10 +223,16 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                         usuarioId: usuarioId,
                         fechaCreacion: DateTime.now(),
                       );
-                      final exito = await ref.read(ajusteInventarioProvider).registrar(ajuste);
+                      final exito = await ref
+                          .read(ajusteInventarioProvider)
+                          .registrar(ajuste);
                       if (!exito || !context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('✅ Ajuste guardado — stock actualizado')),
+                        const SnackBar(
+                          content: Text(
+                            '✅ Ajuste guardado — stock actualizado',
+                          ),
+                        ),
                       );
                       context.pop();
                     },
@@ -216,7 +248,10 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
 }
 
 class _DialogoBusqueda extends StatefulWidget {
-  const _DialogoBusqueda({required this.productos, required this.onSeleccionar});
+  const _DialogoBusqueda({
+    required this.productos,
+    required this.onSeleccionar,
+  });
   final List<Producto> productos;
   final void Function(Producto) onSeleccionar;
 
@@ -245,7 +280,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
       final t = texto.toLowerCase();
       _resultados = widget.productos.where((p) {
         return p.codigo.toLowerCase().contains(t) ||
-               p.nombre.toLowerCase().contains(t);
+            p.nombre.toLowerCase().contains(t);
       }).toList();
     });
   }
@@ -268,7 +303,12 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
             const SizedBox(height: AppSpacing.s),
             Flexible(
               child: _resultados.isEmpty
-                  ? const Center(child: Padding(padding: AppSpacing.allM, child: Text('Sin resultados')))
+                  ? const Center(
+                      child: Padding(
+                        padding: AppSpacing.allM,
+                        child: Text('Sin resultados'),
+                      ),
+                    )
                   : ListView.builder(
                       shrinkWrap: true,
                       itemCount: _resultados.length,
@@ -276,7 +316,9 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                         final p = _resultados[i];
                         return ListTile(
                           title: Text('${p.codigo} • ${p.nombre}'),
-                          subtitle: Text('Stock: ${p.stock ?? 0.0} | Compra: ${p.precioCompra} | Venta: ${p.precioVenta}'),
+                          subtitle: Text(
+                            'Stock: ${p.stock ?? 0.0} | Compra: ${p.precioCompra} | Venta: ${p.precioVenta}',
+                          ),
                           onTap: () => widget.onSeleccionar(p),
                         );
                       },

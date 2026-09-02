@@ -2,7 +2,6 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/promocion.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/promocion/validar_promocion.dart';
 
 class ResultadoDescuento {
-
   const ResultadoDescuento({
     required this.montoDescuento,
     required this.tipoPromocionAplicada,
@@ -39,7 +38,10 @@ class AplicarPromocion {
         .where((l) => promocion.aplicaAProducto(l.productoId))
         .toList();
 
-    final subtotal = lineasAplicables.fold<double>(0.0, (sum, l) => sum + l.subtotal);
+    final subtotal = lineasAplicables.fold<double>(
+      0.0,
+      (sum, l) => sum + l.subtotal,
+    );
     double descuento = 0.0;
 
     switch (promocion.tipo) {
@@ -52,7 +54,10 @@ class AplicarPromocion {
         break;
 
       case 'lleve2Pague1':
-        final cantidadTotal = lineasAplicables.fold<double>(0.0, (sum, l) => sum + l.cantidad);
+        final cantidadTotal = lineasAplicables.fold<double>(
+          0.0,
+          (sum, l) => sum + l.cantidad,
+        );
         final unidadesGratis = (cantidadTotal / 2).floorToDouble();
         descuento = unidadesGratis * lineasAplicables.first.precioUnitario;
         break;

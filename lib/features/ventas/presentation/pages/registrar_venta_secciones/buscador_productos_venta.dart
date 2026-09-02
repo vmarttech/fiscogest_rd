@@ -27,7 +27,10 @@ class BuscadorProductosVenta extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Agregar Producto', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            'Agregar Producto',
+            style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: AppSpacing.s),
           TextField(
             controller: controlador,

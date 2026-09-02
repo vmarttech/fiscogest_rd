@@ -26,7 +26,9 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     final ventaRegistrada = await ventasRepository.registrarVenta(venta);
     for (final elemento in venta.detalles) {
       final detalle = elemento as DetalleVenta;
-      final saldoAnterior = await kardexRepository.obtenerSaldoActual(detalle.productoId.toString());
+      final saldoAnterior = await kardexRepository.obtenerSaldoActual(
+        detalle.productoId,
+      );
       final producto = await productosDao.obtenerPorId(detalle.productoId);
       final costoUnitario = producto?.precioCompra ?? 0.0;
       final saldoNuevo = saldoAnterior - detalle.cantidad;
@@ -44,7 +46,10 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         usuarioId: venta.usuarioId ?? 0,
       );
       await kardexRepository.registrarMovimiento(movimientoKardex);
-      await inventarioService.restarStock(detalle.productoId, detalle.cantidad.toDouble());
+      await inventarioService.restarStock(
+        detalle.productoId,
+        detalle.cantidad.toDouble(),
+      );
     }
     if (ventaRegistrada.id != null) {
       await ventasRepository.actualizarEnCascada(ventaRegistrada.id!);

@@ -18,7 +18,7 @@ class AppShell extends StatelessWidget {
       '/ventas/cobrar' => 'Cuentas por Cobrar',
       '/ventas/pagar' => 'Cuentas por Pagar',
       '/compras' => 'Compras',
-      '/inventory' => 'Inventario',
+      '/inventario' => 'Inventario',
       '/kardex' => 'Kárdex',
       '/unidades' => 'Unidades de Medida',
       '/marcas' => 'Marcas',
@@ -47,7 +47,10 @@ class AppShell extends StatelessWidget {
         backgroundColor: const Color(0xFFF4F6F9),
         appBar: AppBar(
           backgroundColor: const Color(0xFF0F172A),
-          title: Text(tituloPantalla, style: const TextStyle(color: Colors.white)),
+          title: Text(
+            tituloPantalla,
+            style: const TextStyle(color: Colors.white),
+          ),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         drawer: _buildMenu(navWidth, currentPath, context),
@@ -80,14 +83,26 @@ class AppShell extends StatelessWidget {
             padding: AppSpacing.allL,
             child: Row(
               children: [
-                const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 28),
+                const Icon(
+                  Icons.receipt_long,
+                  color: Colors.blueAccent,
+                  size: 28,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('FiscoGest RD', style: AppTypography.h3.copyWith(color: Colors.white)),
-                      Text('Versión 3.0 Pro', style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary)),
+                      Text(
+                        'FiscoGest RD',
+                        style: AppTypography.h3.copyWith(color: Colors.white),
+                      ),
+                      Text(
+                        'Versión 3.0 Pro',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -97,21 +112,102 @@ class AppShell extends StatelessWidget {
           const Divider(color: Color(0xFF1E293B), height: 1),
           Expanded(
             child: ListView(
-              padding: AppSpacing.vM.copyWith(left: AppSpacing.xs, right: AppSpacing.xs),
+              padding: AppSpacing.vM.copyWith(
+                left: AppSpacing.xs,
+                right: AppSpacing.xs,
+              ),
               children: [
-                _buildNavItem(context, '/', 'Dashboard', Icons.dashboard_outlined, currentPath),
-                _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
-                _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
-                _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
-                _buildNavItem(context, '/inventory', 'Inventario', Icons.inventory_2_outlined, currentPath),
-                _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
-                _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.inventory_2, currentPath),
-                _buildNavItem(context, '/customers', 'Clientes', Icons.people_outline, currentPath),
-                _buildNavItem(context, '/suppliers', 'Proveedores', Icons.business_outlined, currentPath),
-                _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
-                _buildNavItem(context, '/taxes', 'Impuestos', Icons.calculate_outlined, currentPath),
-                _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
-                _buildNavItem(context, '/settings', 'Configuración', Icons.settings_outlined, currentPath),
+                _buildNavItem(
+                  context,
+                  '/',
+                  'Dashboard',
+                  Icons.dashboard_outlined,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/sales',
+                  'Facturación y NC',
+                  Icons.point_of_sale_outlined,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/ventas',
+                  'Ventas',
+                  Icons.point_of_sale,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/compras',
+                  'Compras',
+                  Icons.shopping_cart_outlined,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/inventario',
+                  'Inventario',
+                  Icons.inventory_2_outlined,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/kardex',
+                  'Kárdex',
+                  Icons.receipt_long_outlined,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/inventario-fisico',
+                  'Inventario Físico',
+                  Icons.inventory_2,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/customers',
+                  'Clientes',
+                  Icons.people_outline,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/suppliers',
+                  'Proveedores',
+                  Icons.business_outlined,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/reports',
+                  'Reportes 606/607',
+                  Icons.assessment_outlined,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/taxes',
+                  'Impuestos',
+                  Icons.calculate_outlined,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/import-export',
+                  'Importar / Exportar',
+                  Icons.import_export,
+                  currentPath,
+                ),
+                _buildNavItem(
+                  context,
+                  '/settings',
+                  'Configuración',
+                  Icons.settings_outlined,
+                  currentPath,
+                ),
               ],
             ),
           ),
@@ -120,7 +216,13 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, String routePath, String title, IconData icon, String currentPath) {
+  Widget _buildNavItem(
+    BuildContext context,
+    String routePath,
+    String title,
+    IconData icon,
+    String currentPath,
+  ) {
     final isSelected = currentPath == routePath;
     return Padding(
       padding: AppSpacing.vXs,
@@ -134,7 +236,11 @@ class AppShell extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
-                Icon(icon, color: isSelected ? Colors.white : AppColors.textSecondary, size: 20),
+                Icon(
+                  icon,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -142,8 +248,12 @@ class AppShell extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: AppTypography.labelMedium.copyWith(
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? Colors.white
+                          : AppColors.textSecondary,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),

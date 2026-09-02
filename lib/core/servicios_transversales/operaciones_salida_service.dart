@@ -33,19 +33,23 @@ class OperacionesSalidaService {
     required String usuario,
   }) async {
     await db.transaction(() async {
-      final producto = await productoRepository.obtenerProductoPorId(productoId);
+      final producto = await productoRepository.obtenerProductoPorId(
+        productoId,
+      );
       if (producto == null) throw Exception('Producto no encontrado');
       if (!puedeDescontar(producto, cantidad)) {
         throw Exception('Stock insuficiente para realizar la salida');
       }
 
-      await salidaRepository.registrarSalida(Salida(
-        productoId: productoId,
-        cantidad: cantidad,
-        motivo: motivo,
-        usuario: usuario,
-        fecha: DateTime.now(),
-      ));
+      await salidaRepository.registrarSalida(
+        Salida(
+          productoId: productoId,
+          cantidad: cantidad,
+          motivo: motivo,
+          usuario: usuario,
+          fecha: DateTime.now(),
+        ),
+      );
 
       final actualizado = descontarStock(producto, cantidad);
       await productoRepository.actualizarProducto(actualizado);

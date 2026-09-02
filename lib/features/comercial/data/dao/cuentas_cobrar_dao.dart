@@ -8,13 +8,14 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 part 'cuentas_cobrar_dao.g.dart';
 
 @DriftAccessor(tables: [CuentasCobrarTable, CobrosTable, ClientesTable])
-class CuentasCobrarDao extends DatabaseAccessor<AppDatabase> with _$CuentasCobrarDaoMixin {
-  CuentasCobrarDao(AppDatabase db) : super(db);
+class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
+    with _$CuentasCobrarDaoMixin {
+  CuentasCobrarDao(super.db);
 
   Future<double?> obtenerSaldoPorCliente(int clienteId) async {
-    final filas = await (select(cuentasCobrarTable)
-      ..where((t) => t.clienteId.equals(clienteId)))
-      .get();
+    final filas = await (select(
+      cuentasCobrarTable,
+    )..where((t) => t.clienteId.equals(clienteId))).get();
     if (filas.isEmpty) return null;
     final saldoTotal = filas.fold<double>(
       0.0,
@@ -48,17 +49,27 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase> with _$CuentasCobra
     DateTime? vencidasAntes,
   }) async {
     final q = select(cuentasCobrarTable).join([
-      innerJoin(clientesTable, clientesTable.id.equalsExp(cuentasCobrarTable.clienteId)),
+      innerJoin(
+        clientesTable,
+        clientesTable.id.equalsExp(cuentasCobrarTable.clienteId),
+      ),
     ]);
 
     if (estado != null) {
       q.where(cuentasCobrarTable.estado.equals(estado.name));
     }
     if (vencidasAntes != null) {
-      q.where(cuentasCobrarTable.fechaVencimiento.isSmallerThanValue(vencidasAntes));
+      q.where(
+        cuentasCobrarTable.fechaVencimiento.isSmallerThanValue(vencidasAntes),
+      );
     }
 
-    q.orderBy([OrderingTerm(expression: cuentasCobrarTable.fechaVencimiento, mode: OrderingMode.desc)]);
+    q.orderBy([
+      OrderingTerm(
+        expression: cuentasCobrarTable.fechaVencimiento,
+        mode: OrderingMode.desc,
+      ),
+    ]);
 
     final filas = await q.get();
     return filas.map((f) {
@@ -73,7 +84,6 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase> with _$CuentasCobra
 }
 
 class CuentaCobrarConCliente {
-
   const CuentaCobrarConCliente({
     required this.cuenta,
     required this.nombreCliente,

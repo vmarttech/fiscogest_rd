@@ -1,5 +1,66 @@
-class RecepcionElemento {
+class DetalleRecepcion {
+  const DetalleRecepcion({
+    this.id,
+    this.productoId,
+    this.productoNombre,
+    this.cantidadPedida,
+    this.cantidadRecibida,
+    this.costoUnitario,
+    this.subtotal,
+    this.diferencia,
+    this.motivoDiferencia,
+  });
 
+  final int? id;
+  final int? productoId;
+  final String? productoNombre;
+  final double? cantidadPedida;
+  final double? cantidadRecibida;
+  final double? costoUnitario;
+  final double? subtotal;
+  final double? diferencia;
+  final String? motivoDiferencia;
+
+  DetalleRecepcion copyWith({
+    int? id,
+    int? productoId,
+    String? productoNombre,
+    double? cantidadPedida,
+    double? cantidadRecibida,
+    double? costoUnitario,
+    double? subtotal,
+    double? diferencia,
+    String? motivoDiferencia,
+  }) {
+    return DetalleRecepcion(
+      id: id ?? this.id,
+      productoId: productoId ?? this.productoId,
+      productoNombre: productoNombre ?? this.productoNombre,
+      cantidadPedida: cantidadPedida ?? this.cantidadPedida,
+      cantidadRecibida: cantidadRecibida ?? this.cantidadRecibida,
+      costoUnitario: costoUnitario ?? this.costoUnitario,
+      subtotal: subtotal ?? this.subtotal,
+      diferencia: diferencia ?? this.diferencia,
+      motivoDiferencia: motivoDiferencia ?? this.motivoDiferencia,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'DetalleRecepcion(producto: $productoNombre, pedida: $cantidadPedida, recibida: $cantidadRecibida)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is DetalleRecepcion && other.id == id;
+  }
+
+  @override
+  int get hashCode => (id ?? 0).hashCode;
+}
+
+class RecepcionElemento {
   const RecepcionElemento({
     this.id,
     this.recepcionId,
@@ -14,9 +75,10 @@ class RecepcionElemento {
     this.fechaVencimiento,
     this.observaciones,
   });
-  final String? id;
-  final String? recepcionId;
-  final String? productoId;
+
+  final int? id;
+  final int? recepcionId;
+  final int? productoId;
   final String? productoNombre;
   final double? cantidad;
   final double? precioUnitario;
@@ -28,9 +90,9 @@ class RecepcionElemento {
   final String? observaciones;
 
   RecepcionElemento copyWith({
-    String? id,
-    String? recepcionId,
-    String? productoId,
+    int? id,
+    int? recepcionId,
+    int? productoId,
     String? productoNombre,
     double? cantidad,
     double? precioUnitario,

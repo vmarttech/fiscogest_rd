@@ -1,5 +1,4 @@
 class Proveedor {
-
   Proveedor({
     this.id,
     required this.nombre,

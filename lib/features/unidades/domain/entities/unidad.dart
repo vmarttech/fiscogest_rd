@@ -1,5 +1,4 @@
 class Unidad {
-
   Unidad({
     this.id,
     required this.nombre,

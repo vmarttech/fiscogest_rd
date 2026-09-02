@@ -31,7 +31,9 @@ class DiferenciasConteoPage extends ConsumerWidget {
               final dif = lista[i];
               return ListTile(
                 title: Text(dif.nombreProducto),
-                subtitle: Text('Sist: ${dif.stockSistema} | Físico: ${dif.stockFisico}'),
+                subtitle: Text(
+                  'Sist: ${dif.stockSistema} | Físico: ${dif.stockFisico}',
+                ),
                 trailing: Text('Dif: ${dif.diferencia.toStringAsFixed(2)}'),
               );
             },

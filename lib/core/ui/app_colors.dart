@@ -47,6 +47,3 @@ abstract class AppColors {
   static const Color focusedBlue = Color(0xFF0A2463);
   static const Color formBackground = Color(0xFFF8FAFC);
 }
-
-
-

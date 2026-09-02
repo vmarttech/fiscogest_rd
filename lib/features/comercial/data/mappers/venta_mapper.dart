@@ -10,9 +10,8 @@ class VentaMapper {
       FormaPago.values.firstWhere((v) => v.name == s);
 
   // Línea ~34: String → Enum
-  static VentaEstado estadoFromString(String s) =>
-      VentaEstado.values.firstWhere((v) => v.name == s,
-          orElse: () => VentaEstado.borrador);
+  static VentaEstado estadoFromString(String s) => VentaEstado.values
+      .firstWhere((v) => v.name == s, orElse: () => VentaEstado.borrador);
 
   // ... resto del código igual ...
 }

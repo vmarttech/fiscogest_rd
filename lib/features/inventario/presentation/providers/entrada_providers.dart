@@ -11,7 +11,9 @@ final entradaRepositoryProvider = Provider<IEntradaRepository>((ref) {
   return EntradaRepositoryImpl(db);
 });
 
-final operacionesEntradaServiceProvider = Provider<OperacionesEntradaService>((ref) {
+final operacionesEntradaServiceProvider = Provider<OperacionesEntradaService>((
+  ref,
+) {
   return OperacionesEntradaService(
     entradaRepository: ref.watch(entradaRepositoryProvider),
     productoRepository: ref.watch(productoRepositoryProvider),
@@ -25,7 +27,8 @@ final historialEntradasProvider = FutureProvider<List<Entrada>>((ref) async {
 });
 
 class EntradaController extends StateNotifier<AsyncValue<void>> {
-  EntradaController(this._operacionesEntrada, this._ref) : super(const AsyncValue.data(null));
+  EntradaController(this._operacionesEntrada, this._ref)
+    : super(const AsyncValue.data(null));
 
   final OperacionesEntradaService _operacionesEntrada;
   final Ref _ref;
@@ -53,7 +56,8 @@ class EntradaController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final entradaControllerProvider = StateNotifierProvider<EntradaController, AsyncValue<void>>((ref) {
-  final servicio = ref.watch(operacionesEntradaServiceProvider);
-  return EntradaController(servicio, ref);
-});
+final entradaControllerProvider =
+    StateNotifierProvider<EntradaController, AsyncValue<void>>((ref) {
+      final servicio = ref.watch(operacionesEntradaServiceProvider);
+      return EntradaController(servicio, ref);
+    });

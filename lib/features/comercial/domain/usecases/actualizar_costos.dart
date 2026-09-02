@@ -13,8 +13,8 @@ class ActualizarCostos {
 
     final double nuevoCostoPromedio =
         ((cantidadAnterior * costoUnitarioAnterior) +
-                (cantidadNueva * costoUnitarioNuevo)) /
-            totalCantidad;
+            (cantidadNueva * costoUnitarioNuevo)) /
+        totalCantidad;
 
     return nuevoCostoPromedio;
   }

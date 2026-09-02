@@ -6,7 +6,6 @@ import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_rep
 ///
 /// Valida datos y delega el almacenamiento al repositorio.
 class RegistrarCompraUseCase {
-
   RegistrarCompraUseCase(this._compraRepository);
   final ICompraRepository _compraRepository;
 

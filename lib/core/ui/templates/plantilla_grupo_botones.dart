@@ -9,7 +9,6 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 /// ✅ Alineación configurable → center / start / end
 
 class PlantillaGrupoBotones extends StatelessWidget {
-
   const PlantillaGrupoBotones({
     super.key,
     required this.botones,
@@ -24,7 +23,10 @@ class PlantillaGrupoBotones extends StatelessWidget {
     List<IconData>? iconos,
     WrapAlignment alineacion = WrapAlignment.center,
   }) {
-    assert(textos.length == onPressed.length, 'Textos y callbacks deben coincidir');
+    assert(
+      textos.length == onPressed.length,
+      'Textos y callbacks deben coincidir',
+    );
     return PlantillaGrupoBotones(
       key: key,
       alineacion: alineacion,
@@ -45,7 +47,7 @@ class PlantillaGrupoBotones extends StatelessWidget {
     // === PASO 4: Wrap → anti-desborde garantizado ===
     return Wrap(
       alignment: alineacion,
-      spacing: AppSpacing.s,    // Espacio HORIZONTAL entre botones
+      spacing: AppSpacing.s, // Espacio HORIZONTAL entre botones
       runSpacing: AppSpacing.s, // Espacio VERTICAL si bajan de línea
       children: botones,
     );

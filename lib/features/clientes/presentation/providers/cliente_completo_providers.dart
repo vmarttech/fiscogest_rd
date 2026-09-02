@@ -4,14 +4,17 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/data/repositories/cliente_completo_repository.dart';
 
 // ✅ PROVEEDOR: OBTIENE LA BASE ÚNICA Y LA PASA AL REPOSITORIO
-final clienteCompletoRepositoryProvider = Provider<ClienteCompletoRepository>((ref) {
+final clienteCompletoRepositoryProvider = Provider<ClienteCompletoRepository>((
+  ref,
+) {
   final db = ref.watch(appDatabaseProvider);
   return ClienteCompletoRepository(db);
 });
 
-final clienteCompletoControllerProvider = AsyncNotifierProvider<ClienteCompletoController, List<ClienteCompleto>>(() {
-  return ClienteCompletoController();
-});
+final clienteCompletoControllerProvider =
+    AsyncNotifierProvider<ClienteCompletoController, List<ClienteCompleto>>(() {
+      return ClienteCompletoController();
+    });
 
 class ClienteCompletoController extends AsyncNotifier<List<ClienteCompleto>> {
   @override
@@ -27,11 +30,14 @@ class ClienteCompletoController extends AsyncNotifier<List<ClienteCompleto>> {
     if (termino.isEmpty) {
       return listadoCompleto;
     }
-    return listadoCompleto.where((cliente) =>
-      cliente.nombre.toLowerCase().contains(termino) ||
-      cliente.rncCedula.toLowerCase().contains(termino) ||
-      cliente.telefono.toLowerCase().contains(termino)
-    ).toList();
+    return listadoCompleto
+        .where(
+          (cliente) =>
+              cliente.nombre.toLowerCase().contains(termino) ||
+              cliente.rncCedula.toLowerCase().contains(termino) ||
+              cliente.telefono.toLowerCase().contains(termino),
+        )
+        .toList();
   }
 
   Future<void> guardar(ClienteCompleto cliente) async {

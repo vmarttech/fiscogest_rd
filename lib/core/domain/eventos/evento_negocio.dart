@@ -1,5 +1,4 @@
 class EventoNegocio {
-
   const EventoNegocio({
     required this.fecha,
     required this.tipo,

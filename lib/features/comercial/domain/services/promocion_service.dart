@@ -5,21 +5,19 @@ import 'package:fiscogest_rd/features/comercial/domain/usecases/promocion/aplica
 import 'package:fiscogest_rd/features/comercial/domain/usecases/promocion/listar_promociones_activas.dart';
 
 class PromocionService {
-
   PromocionService(this._repositorio)
-      : _validador = ValidarPromocion(),
-        _aplicador = const AplicarPromocion(),
-        _listarActivas = ListarPromocionesActivas(_repositorio);
+    : _validador = ValidarPromocion(),
+      _aplicador = const AplicarPromocion(),
+      _listarActivas = ListarPromocionesActivas(_repositorio);
   final IPromocionRepository _repositorio;
   final ValidarPromocion _validador;
   final AplicarPromocion _aplicador;
   final ListarPromocionesActivas _listarActivas;
-
   Future<List<Promocion>> listarActivas({DateTime? fecha}) {
     return _listarActivas.ejecutar(fechaReferencia: fecha);
   }
 
-  Future<Promocion?> obtenerPorId(String id) {
+  Future<Promocion?> obtenerPorId(int id) {
     return _repositorio.obtenerPorId(id);
   }
 
@@ -31,7 +29,7 @@ class PromocionService {
     return _repositorio.actualizar(promocion);
   }
 
-  Future<void> eliminar(String id) {
+  Future<void> eliminar(int id) {
     return _repositorio.eliminar(id);
   }
 
@@ -59,7 +57,6 @@ class PromocionService {
       montoDescuento: 0.0,
       tipoPromocionAplicada: 'ninguna',
     );
-
     for (final promo in activas) {
       final resultado = _aplicador.ejecutar(
         promocion: promo,
@@ -70,7 +67,6 @@ class PromocionService {
         mejor = resultado;
       }
     }
-
     return mejor;
   }
 }

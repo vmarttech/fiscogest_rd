@@ -7,8 +7,8 @@ class VentaOrquestadorService {
   VentaOrquestadorService({
     required RegistrarVentaConInventarioUseCase registrarVenta,
     required ActualizarVentasEnCascada actualizarEnCascada,
-  })  : _registrarVenta = registrarVenta,
-        _actualizarEnCascada = actualizarEnCascada;
+  }) : _registrarVenta = registrarVenta,
+       _actualizarEnCascada = actualizarEnCascada;
 
   final RegistrarVentaConInventarioUseCase _registrarVenta;
   final ActualizarVentasEnCascada _actualizarEnCascada;

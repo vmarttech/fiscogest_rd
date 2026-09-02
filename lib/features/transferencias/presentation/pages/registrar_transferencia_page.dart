@@ -31,14 +31,9 @@ class RegistrarTransferenciaPage extends ConsumerWidget {
             onChanged: null,
           ),
           SizedBox(height: AppSpacing.vM.vertical),
-          const AppTextField(
-            controller: null,
-          ),
+          const AppTextField(controller: null),
           SizedBox(height: AppSpacing.vL.vertical),
-          const AppButton(
-            text: 'Procesar Transferencia',
-            onPressed: null,
-          ),
+          const AppButton(text: 'Procesar Transferencia', onPressed: null),
         ],
       ),
     );

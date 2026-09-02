@@ -7,36 +7,45 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/recepcion/recepcion_provider.dart';
+import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion_elemento.dart';
 
-class RegistrarRecepcionPage extends ConsumerWidget {
+class RegistrarRecepcionPage extends ConsumerStatefulWidget {
   const RegistrarRecepcionPage({
     super.key,
-    this.compraId = '',
-    this.proveedorId = '',
+    this.compraId = 0,
+    this.proveedorId = 0,
     this.proveedorNombre,
     this.usuarioResponsable = 'usuario_actual',
     this.detallesCompra = const [],
   });
 
   static const String routeName = 'registrar-recepcion';
-  final String compraId;
-  final String proveedorId;
+  final int compraId;
+  final int proveedorId;
   final String? proveedorNombre;
   final String usuarioResponsable;
   final List<DetalleRecepcion> detallesCompra;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RegistrarRecepcionPage> createState() =>
+      _RegistrarRecepcionPageState();
+}
+
+class _RegistrarRecepcionPageState
+    extends ConsumerState<RegistrarRecepcionPage> {
+  String _estadoRecepcion = 'parcial';
+
+  @override
+  Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
     final fechaController = TextEditingController(
       text: DateTime.now().toLocal().toString().split(' ')[0],
     );
     final proveedorController = TextEditingController(
-      text: proveedorNombre ?? proveedorId,
+      text: widget.proveedorNombre ?? widget.proveedorId.toString(),
     );
     final observacionesController = TextEditingController();
-    final List<DetalleRecepcion> detalles = detallesCompra;
-    String estadoRecepcion = 'parcial';
+    final List<DetalleRecepcion> detalles = widget.detallesCompra;
 
     return AppScaffold(
       title: 'Registrar Recepción',
@@ -62,40 +71,51 @@ class RegistrarRecepcionPage extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.m),
               const Text('Estado de Recepción', style: TextStyle(fontSize: 16)),
-              Row(
-                children: [
-                  Radio<String>(
-                    value: 'parcial',
-                    groupValue: estadoRecepcion,
-                    onChanged: (String? v) { estadoRecepcion = v ?? 'parcial'; },
-                  ),
-                  const Text('Parcial'),
-                  const SizedBox(width: 16),
-                  Radio<String>(
-                    value: 'completa',
-                    groupValue: estadoRecepcion,
-                    onChanged: (String? v) { estadoRecepcion = v ?? 'completa'; },
-                  ),
-                  const Text('Completa'),
-                ],
+              RadioGroup<String>(
+                groupValue: _estadoRecepcion,
+                onChanged: (String? value) {
+                  if (value != null) {
+                    setState(() => _estadoRecepcion = value);
+                  }
+                },
+                child: const Row(
+                  children: [
+                    Radio<String>(value: 'parcial'),
+                    Text('Parcial'),
+                    SizedBox(width: 16),
+                    Radio<String>(value: 'completa'),
+                    Text('Completa'),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.m),
-              const Text('Detalle de Productos', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              const Text(
+                'Detalle de Productos',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: AppSpacing.s),
-              ...detalles.map((DetalleRecepcion det) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(det.productoNombre ?? 'Producto',
-                            style: const TextStyle(fontWeight: FontWeight.w500)),
-                        Text('Pedida: ${det.cantidadPedida ?? 0} — Recibida: ${det.cantidadRecibida ?? 0}'),
-                        if ((det.diferencia ?? 0) != 0)
-                          Text('Diferencia: ${det.diferencia}',
-                              style: const TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  )),
+              ...detalles.map(
+                (DetalleRecepcion det) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        det.productoNombre ?? 'Producto',
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      Text(
+                        'Pedida: ${det.cantidadPedida ?? 0} — Recibida: ${det.cantidadRecibida ?? 0}',
+                      ),
+                      if ((det.diferencia ?? 0) != 0)
+                        Text(
+                          'Diferencia: ${det.diferencia}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: AppSpacing.m),
               AppTextField(
                 controller: observacionesController,
@@ -109,20 +129,20 @@ class RegistrarRecepcionPage extends ConsumerWidget {
                   onPressed: () async {
                     if (formKey.currentState?.validate() ?? false) {
                       final recepcion = Recepcion(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        compraId: compraId,
-                        proveedorId: proveedorId,
-                        proveedorNombre: proveedorNombre,
+                        id: DateTime.now().millisecondsSinceEpoch,
+                        compraId: widget.compraId,
+                        proveedorId: widget.proveedorId,
+                        proveedorNombre: widget.proveedorNombre,
                         fechaRecepcion: DateTime.now(),
-                        estado: estadoRecepcion,
+                        estado: _estadoRecepcion,
                         observaciones: observacionesController.text,
                         detalles: detalles,
-                        usuarioResponsable: usuarioResponsable,
+                        usuarioResponsable: widget.usuarioResponsable,
                         fechaCreacion: DateTime.now(),
                       );
                       await ref
                           .read(recepcionNotifierProvider.notifier)
-                          .registrar(recepcion, usuarioResponsable);
+                          .registrar(recepcion, widget.usuarioResponsable);
                       if (context.mounted) {
                         Navigator.of(context).pop();
                       }

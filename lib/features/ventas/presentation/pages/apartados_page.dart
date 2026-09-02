@@ -30,16 +30,21 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
               padding: AppLayout.pantallaPadding,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - AppLayout.pantallaPadding.vertical,
+                  minHeight:
+                      constraints.maxHeight -
+                      AppLayout.pantallaPadding.vertical,
                 ),
                 child: listaApartados.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Padding(
                       padding: AppLayout.pantallaPadding,
                       child: Text(
                         'Error al cargar apartados: $error',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.error,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -66,34 +71,86 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
                           child: DataTable(
                             columnSpacing: AppSpacing.l,
                             columns: const [
-                              DataColumn(label: Text('ID', style: AppTypography.bodyMedium)),
-                              DataColumn(label: Text('Producto', style: AppTypography.bodyMedium)),
-                              DataColumn(label: Text('Cantidad', style: AppTypography.bodyMedium)),
-                              DataColumn(label: Text('Cliente', style: AppTypography.bodyMedium)),
-                              DataColumn(label: Text('Fecha', style: AppTypography.bodyMedium)),
-                              DataColumn(label: Text('Estado', style: AppTypography.bodyMedium)),
+                              DataColumn(
+                                label: Text(
+                                  'ID',
+                                  style: AppTypography.bodyMedium,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Producto',
+                                  style: AppTypography.bodyMedium,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Cantidad',
+                                  style: AppTypography.bodyMedium,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Cliente',
+                                  style: AppTypography.bodyMedium,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Fecha',
+                                  style: AppTypography.bodyMedium,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Estado',
+                                  style: AppTypography.bodyMedium,
+                                ),
+                              ),
                             ],
                             rows: apartados.map((apt) {
-                              return DataRow(cells: [
-                                DataCell(Text('${apt['id']}', style: AppTypography.bodySmall)),
-                                DataCell(
-                                  Text(
-                                    '${apt['productoNombre'] ?? '-'}',
-                                    style: AppTypography.bodySmall,
-                                    overflow: TextOverflow.ellipsis,
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    Text(
+                                      '${apt['id']}',
+                                      style: AppTypography.bodySmall,
+                                    ),
                                   ),
-                                ),
-                                DataCell(Text('${apt['cantidad']}', style: AppTypography.bodySmall)),
-                                DataCell(
-                                  Text(
-                                    '${apt['clienteNombre'] ?? '-'}',
-                                    style: AppTypography.bodySmall,
-                                    overflow: TextOverflow.ellipsis,
+                                  DataCell(
+                                    Text(
+                                      '${apt['productoNombre'] ?? '-'}',
+                                      style: AppTypography.bodySmall,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
-                                DataCell(Text('${apt['fechaApartado']}', style: AppTypography.bodySmall)),
-                                DataCell(Text('${apt['estado']}', style: AppTypography.bodySmall)),
-                              ]);
+                                  DataCell(
+                                    Text(
+                                      '${apt['cantidad']}',
+                                      style: AppTypography.bodySmall,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      '${apt['clienteNombre'] ?? '-'}',
+                                      style: AppTypography.bodySmall,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      '${apt['fechaApartado']}',
+                                      style: AppTypography.bodySmall,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      '${apt['estado']}',
+                                      style: AppTypography.bodySmall,
+                                    ),
+                                  ),
+                                ],
+                              );
                             }).toList(),
                           ),
                         ),

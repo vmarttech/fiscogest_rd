@@ -1,7 +1,6 @@
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/movimiento_kardex.dart';
 
 class MovimientoKardexModel {
-
   const MovimientoKardexModel({
     this.id,
     required this.productoId,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/item_carrito.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_descuento.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -13,12 +13,14 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 
 class _DatosDescuento {
   const _DatosDescuento({required this.valor, required this.esPorcentaje});
+
   final double valor;
   final bool esPorcentaje;
 }
 
 class _CampoDescuento extends StatefulWidget {
   const _CampoDescuento({required this.montoActual, required this.onAplicar});
+
   final double montoActual;
   final void Function(_DatosDescuento) onAplicar;
 
@@ -30,55 +32,105 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
   late final TextEditingController _controlador;
   late final FocusNode _focusNode;
   bool _esPorcentaje = false;
+  double? _valorUltimoEnviado;
 
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
-    _controlador = TextEditingController(
-      text: widget.montoActual > 0 ? widget.montoActual.toStringAsFixed(2) : '',
-    );
+    _controlador = TextEditingController(text: _formatear(widget.montoActual));
+    _valorUltimoEnviado = widget.montoActual;
+
+    _focusNode.addListener(_alPerderFoco);
   }
 
   @override
   void didUpdateWidget(_CampoDescuento viejo) {
     super.didUpdateWidget(viejo);
-    if (viejo.montoActual != widget.montoActual && !_focusNode.hasFocus) {
-      final nuevoTexto = widget.montoActual > 0 ? widget.montoActual.toStringAsFixed(2) : '';
-      if (_controlador.text != nuevoTexto) _controlador.text = nuevoTexto;
+    // ✅ REGLA DE ORO: MIENTRAS EL USUARIO TIENE EL FOCO, NUNCA SOBRESCRIBIR
+    if (_focusNode.hasFocus) return;
+
+    // Solo actualizar desde fuera si el usuario NO está escribiendo
+    if (widget.montoActual != _valorUltimoEnviado) {
+      final nuevoTexto = _formatear(widget.montoActual);
+      if (_controlador.text != nuevoTexto) {
+        _controlador.text = nuevoTexto;
+      }
     }
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_alPerderFoco);
     _controlador.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
+  String _formatear(double valor) {
+    return valor > 0 ? valor.toStringAsFixed(2) : '';
+  }
+
+  void _alPerderFoco() {
+    if (!_focusNode.hasFocus) {
+      final valor =
+          double.tryParse(_controlador.text.replaceAll(',', '.')) ?? 0.0;
+      _valorUltimoEnviado = valor;
+      _controlador.text = _formatear(valor);
+    }
+  }
+
   void _alCambiarTexto(String texto) {
-    final valor = double.tryParse(texto) ?? 0.0;
-    widget.onAplicar(_DatosDescuento(valor: valor, esPorcentaje: _esPorcentaje));
+    // ✅ SOLO limpiar caracteres inválidos, NUNCA formatear mientras escribe
+    final limpio = texto
+        .replaceAll(RegExp(r'[^0-9.,]'), '')
+        .replaceAll(',', '.');
+    final valor = double.tryParse(limpio) ?? 0.0;
+
+    // ✅ Solo notificar al provider si el valor cambió realmente
+    if (_valorUltimoEnviado != valor) {
+      _valorUltimoEnviado = valor;
+      widget.onAplicar(
+        _DatosDescuento(valor: valor, esPorcentaje: _esPorcentaje),
+      );
+    }
   }
 
   void _cambiarTipo() {
     setState(() => _esPorcentaje = !_esPorcentaje);
-    final valor = double.tryParse(_controlador.text) ?? 0.0;
-    widget.onAplicar(_DatosDescuento(valor: valor, esPorcentaje: _esPorcentaje));
+    final valor =
+        double.tryParse(_controlador.text.replaceAll(',', '.')) ?? 0.0;
+    _valorUltimoEnviado = valor;
+    widget.onAplicar(
+      _DatosDescuento(valor: valor, esPorcentaje: _esPorcentaje),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       children: [
         Expanded(
-          child: AppTextField(
-            controller: _controlador,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-            label: _esPorcentaje ? 'Descuento %' : 'Descuento RD\$',
-            hint: '0.00',
-            onChanged: _alCambiarTexto,
+          child: Listener(
+            onPointerUp: (_) {
+              if (!_focusNode.hasFocus) {
+                FocusScope.of(context).requestFocus(_focusNode);
+              }
+            },
+            child: Focus(
+              focusNode: _focusNode,
+              child: AppTextField(
+                controller: _controlador,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: false,
+                ),
+                label: _esPorcentaje ? 'Descuento %' : 'Descuento RD\$',
+                hint: '0.00',
+                onChanged: _alCambiarTexto,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
@@ -88,9 +140,14 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
             onPressed: _cambiarTipo,
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.s)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.s),
+              ),
             ),
-            child: Text(_esPorcentaje ? '%' : 'RD\$', style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              _esPorcentaje ? '%' : 'RD\$',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       ],
@@ -113,207 +170,420 @@ class PanelCarrito extends ConsumerWidget {
             child: const SingleChildScrollView(child: SelectorDescuento()),
           ),
         ),
-        actions: [],
+        actions: const [],
       ),
     );
   }
 
-  void _aplicarDescuento(_DatosDescuento datos, WidgetRef ref) {
-    final valor = datos.valor;
-    final esPorcentaje = datos.esPorcentaje;
-    final estado = ref.read(registrarVentaProvider);
-    double baseCalculo = 0.0;
+  (double baseConDescuentoLinea, double totalDescuentoLinea)
+  _calcularBaseYDatos(RegistrarVentaState estado) {
+    double baseConDescLinea = 0.0;
+    double totalDescLinea = 0.0;
 
-    for (final lineaRaw in estado.detalles) {
-      double base = 0.0;
-      double descuentoPct = 0.0;
-      double descMonto = 0.0;
+    for (final linea in estado.detalles) {
+      final precioConCantidad = linea.subtotalLinea ?? linea.subtotal;
 
-      base = lineaRaw.subtotalLinea ?? lineaRaw.subtotal;
-      descuentoPct = lineaRaw.descuentoPorcentaje;
-      descMonto = lineaRaw.montoDescuento;
-
-      if (descuentoPct > 0) {
-        base = base * (100 - descuentoPct) / 100;
-      } else if (descMonto > 0) {
-        base = base - descMonto;
+      double despuesDescLinea = precioConCantidad;
+      if (linea.descuentoPorcentaje > 0) {
+        despuesDescLinea =
+            precioConCantidad * (100 - linea.descuentoPorcentaje) / 100;
+      } else if (linea.montoDescuento > 0) {
+        despuesDescLinea = precioConCantidad - linea.montoDescuento;
       }
-      if (base < 0) base = 0;
-      baseCalculo += base;
+      if (despuesDescLinea < 0) despuesDescLinea = 0;
+
+      baseConDescLinea += despuesDescLinea;
+      totalDescLinea += (precioConCantidad - despuesDescLinea);
     }
 
-    double montoFinal;
-    if (esPorcentaje) {
-      montoFinal = (baseCalculo * valor / 100).clamp(0.0, baseCalculo);
-    } else {
-      montoFinal = valor.clamp(0.0, baseCalculo);
-    }
+    return (baseConDescLinea, totalDescLinea);
+  }
 
-    ref.read(registrarVentaProvider.notifier).aplicarDescuentoManual(montoFinal);
+  void _aplicarDescuento(_DatosDescuento datos, WidgetRef ref) {
+    final estado = ref.read(registrarVentaProvider);
+    final (baseCalculo, _) = _calcularBaseYDatos(estado);
+
+    final montoFinal = datos.esPorcentaje
+        ? (baseCalculo * datos.valor / 100).clamp(0.0, baseCalculo)
+        : datos.valor.clamp(0.0, baseCalculo);
+
+    ref
+        .read(registrarVentaProvider.notifier)
+        .aplicarDescuentoManual(montoFinal);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final estado = ref.watch(registrarVentaProvider);
-    final hayDescuento = estado.montoDescuento > 0;
+    final hayDescuentoGeneral = estado.montoDescuento > 0;
+    final (baseConDescuentoLinea, totalDescuentoLinea) = _calcularBaseYDatos(
+      estado,
+    );
+    final hayDescuentoLinea = totalDescuentoLinea.abs() > 0.001;
 
     return AppCard(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.s),
       child: Padding(
         padding: AppSpacing.allM,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.shopping_bag_outlined, size: 20, color: AppColors.primary),
-                    SizedBox(width: AppSpacing.xs),
-                    Text('Carrito de Venta', style: AppTypography.h4),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s, vertical: AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppRadius.l),
-                  ),
-                  child: Text(
-                    '${estado.detalles.length} ${estado.detalles.length == 1 ? 'artículo' : 'artículos'}',
-                    style: AppTypography.labelSmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.m),
-            if (estado.detalles.isEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                alignment: Alignment.center,
-                child: Column(
-                  children: [
-                    Icon(Icons.remove_shopping_cart_outlined, size: 40, color: Colors.grey.withValues(alpha: 0.5)),
-                    const SizedBox(height: AppSpacing.s),
-                    Text('El carrito está vacío', style: AppTypography.bodyMedium.copyWith(color: Colors.grey)),
-                    const SizedBox(height: AppSpacing.xs),
-                    const Text('Busca y agrega productos arriba', style: AppTypography.bodySmall),
-                  ],
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: estado.detalles.length,
-                separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s),
-                itemBuilder: (ctx, i) {
-                  final detalle = estado.detalles[i];
-                  return ItemCarrito(
-                    detalle: detalle,
-                    indice: i,
-                    alEliminar: () => ref.read(registrarVentaProvider.notifier).quitarProducto(i),
-                  );
-                },
-              ),
-            const SizedBox(height: AppSpacing.m),
-            const Divider(height: 1, thickness: 0.5),
-            const SizedBox(height: AppSpacing.m),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                TextButton.icon(
-                  onPressed: () => _abrirSelectorDescuento(context),
-                  icon: const Icon(Icons.local_offer_outlined, size: 16, color: Colors.grey),
-                  label: const Text('Descuentos guardados', style: AppTypography.bodySmall),
-                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                ),
-                const SizedBox(width: AppSpacing.s),
-                Expanded(
-                  child: _CampoDescuento(
-                    montoActual: estado.montoDescuento,
-                    onAplicar: (datos) => _aplicarDescuento(datos, ref),
-                  ),
-                ),
-              ],
-            ),
-            if (hayDescuento) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  'Descuento aplicado: - RD\$ ${estado.montoDescuento.toStringAsFixed(2)}',
-                  style: AppTypography.labelSmall.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.m),
-            Container(
-              padding: AppSpacing.allM,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(AppRadius.m),
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                children: [
-                  _buildFilaTotal('Subtotal', estado.subtotal),
-                  if (hayDescuento) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    _buildFilaTotal('Descuento', estado.montoDescuento, esDescuento: true),
-                    const SizedBox(height: AppSpacing.xs),
-                    _buildFilaTotal('Base Gravable', (estado.subtotal - estado.montoDescuento).clamp(0.0, double.infinity)),
-                  ],
-                  const SizedBox(height: AppSpacing.xs),
-                  _buildFilaTotal('ITBIS', estado.itbis),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.s),
-                    child: Divider(height: 1, thickness: 1),
-                  ),
-                  _buildFilaTotal('Total', estado.total, esTotal: true),
-                ],
-              ),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, restricciones) {
+            if (restricciones.maxWidth < 800) {
+              return _construirModoMovil(
+                estado,
+                hayDescuentoGeneral,
+                hayDescuentoLinea,
+                baseConDescuentoLinea,
+                totalDescuentoLinea,
+                context,
+                ref,
+              );
+            }
+            return _construirModoEscritorio(
+              estado,
+              hayDescuentoGeneral,
+              hayDescuentoLinea,
+              baseConDescuentoLinea,
+              totalDescuentoLinea,
+              context,
+              ref,
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildFilaTotal(String etiqueta, double monto, {bool esTotal = false, bool esDescuento = false}) {
+  Widget _construirModoMovil(
+    RegistrarVentaState estado,
+    bool hayDescuentoGeneral,
+    bool hayDescuentoLinea,
+    double baseConDescuentoLinea,
+    double totalDescuentoLinea,
+    BuildContext context,
+    WidgetRef ref,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _construirEncabezado(estado),
+        const SizedBox(height: AppSpacing.s),
+        if (estado.detalles.isEmpty)
+          _construirCarritoVacio()
+        else
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 260),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: _construirListaProductos(estado, ref),
+            ),
+          ),
+        const SizedBox(height: AppSpacing.s),
+        const Divider(height: 1, thickness: 0.5),
+        const SizedBox(height: AppSpacing.s),
+        _construirFilaDescuentos(estado, hayDescuentoGeneral, context, ref),
+        if (hayDescuentoGeneral) ...[
+          const SizedBox(height: AppSpacing.xs),
+          _construirDescuentoGeneral(estado),
+        ],
+        const SizedBox(height: AppSpacing.s),
+        _construirCajaTotales(
+          estado,
+          hayDescuentoGeneral,
+          hayDescuentoLinea,
+          baseConDescuentoLinea,
+          totalDescuentoLinea,
+        ),
+      ],
+    );
+  }
+
+  Widget _construirModoEscritorio(
+    RegistrarVentaState estado,
+    bool hayDescuentoGeneral,
+    bool hayDescuentoLinea,
+    double baseConDescuentoLinea,
+    double totalDescuentoLinea,
+    BuildContext context,
+    WidgetRef ref,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _construirEncabezado(estado),
+              const SizedBox(height: AppSpacing.s),
+              if (estado.detalles.isEmpty)
+                const SizedBox.shrink()
+              else
+                SizedBox(
+                  height: 280,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: _construirListaProductos(estado, ref),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: AppSpacing.m),
+        Expanded(
+          flex: 1,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _construirFilaDescuentos(
+                estado,
+                hayDescuentoGeneral,
+                context,
+                ref,
+              ),
+              if (hayDescuentoGeneral) ...[
+                const SizedBox(height: AppSpacing.xs),
+                _construirDescuentoGeneral(estado),
+              ],
+              const SizedBox(height: AppSpacing.s),
+              _construirCajaTotales(
+                estado,
+                hayDescuentoGeneral,
+                hayDescuentoLinea,
+                baseConDescuentoLinea,
+                totalDescuentoLinea,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _construirEncabezado(RegistrarVentaState estado) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          flex: 3,
-          child: Text(
-            etiqueta,
-            overflow: TextOverflow.ellipsis,
-            style: esTotal ? AppTypography.h4.copyWith(fontSize: 16) : AppTypography.bodyMedium,
-          ),
+        const Row(
+          children: [
+            Icon(
+              Icons.shopping_bag_outlined,
+              size: 20,
+              color: AppColors.primary,
+            ),
+            SizedBox(width: AppSpacing.xs),
+            Text('Carrito de Venta', style: AppTypography.h4),
+          ],
         ),
-        const SizedBox(width: AppSpacing.xs),
-        Expanded(
-          flex: 2,
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s,
+            vertical: 2,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(AppRadius.l),
+          ),
           child: Text(
-            '${esDescuento ? '- ' : ''}RD\$ ${monto.toStringAsFixed(2)}',
-            textAlign: TextAlign.right,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontWeight: esTotal ? FontWeight.bold : FontWeight.w600,
-              fontSize: esTotal ? 18 : 14,
-              color: esTotal
-                  ? AppColors.primary
-                  : esDescuento
-                      ? AppColors.success
-                      : const Color(0xFF333333),
+            '${estado.detalles.length} art.',
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _construirCarritoVacio() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.m),
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Icon(
+            Icons.remove_shopping_cart_outlined,
+            size: 36,
+            color: Colors.grey.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'El carrito está vacío',
+            style: AppTypography.bodyMedium.copyWith(color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _construirListaProductos(RegistrarVentaState estado, WidgetRef ref) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      itemCount: estado.detalles.length,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.xs),
+      itemBuilder: (ctx, i) {
+        final detalle = estado.detalles[i];
+        return ItemCarrito(
+          detalle: detalle,
+          indice: i,
+          alEliminar: () =>
+              ref.read(registrarVentaProvider.notifier).quitarProducto(i),
+        );
+      },
+    );
+  }
+
+  Widget _construirFilaDescuentos(
+    RegistrarVentaState estado,
+    bool hayDescuentoGeneral,
+    BuildContext context,
+    WidgetRef ref,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        TextButton.icon(
+          onPressed: () => _abrirSelectorDescuento(context),
+          icon: const Icon(
+            Icons.local_offer_outlined,
+            size: 16,
+            color: Colors.grey,
+          ),
+          label: const Text('Descuentos', style: AppTypography.bodySmall),
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size(40, 36),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.s),
+        Expanded(
+          child: _CampoDescuento(
+            montoActual: estado.montoDescuento,
+            onAplicar: (datos) => _aplicarDescuento(datos, ref),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _construirDescuentoGeneral(RegistrarVentaState estado) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Text(
+        '- RD\$ ${estado.montoDescuento.toStringAsFixed(2)} (general)',
+        style: AppTypography.labelSmall.copyWith(
+          color: AppColors.success,
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _construirCajaTotales(
+    RegistrarVentaState estado,
+    bool hayDescuentoGeneral,
+    bool hayDescuentoLinea,
+    double baseConDescuentoLinea,
+    double totalDescuentoLinea,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s,
+        vertical: AppSpacing.s,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(AppRadius.m),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildFilaTotal('Subtotal', estado.subtotal),
+          // ✅ LÍNEA VISIBLE DE DESCUENTO POR PRODUCTO
+          if (hayDescuentoLinea) ...[
+            const SizedBox(height: 2),
+            _buildFilaTotal(
+              'Descuento por Producto',
+              totalDescuentoLinea,
+              esDescuento: true,
+            ),
+          ],
+          const SizedBox(height: 2),
+          _buildFilaTotal(
+            'Base Gravable',
+            baseConDescuentoLinea.clamp(0.0, double.infinity),
+          ),
+          if (hayDescuentoGeneral) ...[
+            const SizedBox(height: 2),
+            _buildFilaTotal(
+              'Descuento General',
+              estado.montoDescuento,
+              esDescuento: true,
+            ),
+          ],
+          const SizedBox(height: 2),
+          _buildFilaTotal('ITBIS', estado.itbis),
+          const Divider(height: 8, thickness: 0.8),
+          _buildFilaTotal('TOTAL', estado.total, esTotal: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilaTotal(
+    String etiqueta,
+    double monto, {
+    bool esTotal = false,
+    bool esDescuento = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(
+              etiqueta,
+              overflow: TextOverflow.ellipsis,
+              style: esTotal
+                  ? AppTypography.h4.copyWith(fontSize: 14)
+                  : AppTypography.bodySmall,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            flex: 2,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${esDescuento ? '- ' : ''}RD\$ ${monto.toStringAsFixed(2)}',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontWeight: esTotal ? FontWeight.bold : FontWeight.w600,
+                  fontSize: esTotal ? 15 : 13,
+                  color: esTotal
+                      ? AppColors.primary
+                      : esDescuento
+                      ? AppColors.success
+                      : const Color(0xFF333333),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

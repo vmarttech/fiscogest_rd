@@ -2,7 +2,7 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/descuento.dart';
 
 abstract class IDescuentoRepository {
   Future<Descuento> guardarDescuento(Descuento descuento);
-  Future<Descuento?> obtenerPorId(String id);
+  Future<Descuento?> obtenerPorId(int id);
   Future<List<Descuento>> listarDescuentosActivos();
   Future<bool> validarDescuento(Descuento descuento);
   Future<double> aplicarDescuento({
@@ -10,7 +10,7 @@ abstract class IDescuentoRepository {
     required double montoOriginal,
   });
   Future<Descuento> autorizarDescuento({
-    required String descuentoId,
-    required String usuarioAutorizadorId,
+    required int descuentoId,
+    required int usuarioAutorizadorId,
   });
 }

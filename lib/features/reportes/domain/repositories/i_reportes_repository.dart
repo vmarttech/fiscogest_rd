@@ -11,5 +11,9 @@ abstract class IReportesRepository {
   });
 
   /// Obtiene los datos del reporte según tipo y rango de fechas.
-  Future<Map<String, dynamic>?> obtenerDatos(String tipoReporte, DateTime desde, DateTime hasta);
+  Future<Map<String, dynamic>?> obtenerDatos(
+    String tipoReporte,
+    DateTime desde,
+    DateTime hasta,
+  );
 }

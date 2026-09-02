@@ -2,10 +2,9 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_recepcion_repository.dart';
 
 class RecepcionRepositoryImpl implements IRecepcionRepository {
-  final _almacen = <String, Recepcion>{};
-
+  final _almacen = <int, Recepcion>{};
   @override
-  Future<String> crear(Recepcion recepcion) async {
+  Future<int> crear(Recepcion recepcion) async {
     final fechaCreacion = recepcion.fechaCreacion ?? DateTime.now();
     final recepcionConFechas = recepcion.copyWith(
       fechaCreacion: fechaCreacion,
@@ -26,17 +25,20 @@ class RecepcionRepositoryImpl implements IRecepcionRepository {
   }
 
   @override
-  Future<Recepcion?> obtenerPorId(String id) async {
+  Future<Recepcion?> obtenerPorId(int id) async {
     return _almacen[id];
   }
 
   @override
-  Future<List<Recepcion>> listarPorCompra(String compraId) async {
+  Future<List<Recepcion>> listarPorCompra(int compraId) async {
     return _almacen.values.where((r) => r.compraId == compraId).toList();
   }
 
   @override
-  Future<List<Recepcion>> listarTodos({DateTime? desde, DateTime? hasta}) async {
+  Future<List<Recepcion>> listarTodos({
+    DateTime? desde,
+    DateTime? hasta,
+  }) async {
     var lista = _almacen.values.toList();
     if (desde != null) {
       lista = lista.where((r) {

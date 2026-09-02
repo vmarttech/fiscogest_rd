@@ -7,15 +7,15 @@ class BuscarApartados {
   Future<List<Map<String, dynamic>>> call({
     DateTime? desde,
     DateTime? hasta,
-    String? clienteId,
-    String? usuarioId,
+    int? clienteId,
+    int? usuarioId,
     String? estado,
   }) async {
     return _repositorio.listarApartados(
       desde: desde,
       hasta: hasta,
-      clienteId: int.tryParse(clienteId ?? ''),
-      usuarioId: int.tryParse(usuarioId ?? ''),
+      clienteId: clienteId,
+      usuarioId: usuarioId,
       estado: estado,
     );
   }

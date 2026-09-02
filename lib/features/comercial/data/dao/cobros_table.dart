@@ -5,7 +5,9 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_table.da
 @DataClassName('CobroData')
 class CobrosTable extends Table {
   IntColumn get id => integer().autoIncrement().named('id')();
-  IntColumn get cuentaCobrarId => integer().named('cuenta_cobrar_id').references(CuentasCobrarTable, #id, onDelete: KeyAction.cascade)();
+  IntColumn get cuentaCobrarId => integer()
+      .named('cuenta_cobrar_id')
+      .references(CuentasCobrarTable, #id, onDelete: KeyAction.cascade)();
   DateTimeColumn get fecha => dateTime().named('fecha')();
   RealColumn get montoAbonado => real().named('monto_abonado')();
   TextColumn get formaPago => textEnum<FormaPago>().named('forma_pago')();

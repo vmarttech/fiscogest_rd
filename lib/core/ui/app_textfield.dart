@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
@@ -49,7 +50,10 @@ class AppTextField extends StatelessWidget {
         style: AppTypography.bodyMedium,
         decoration: InputDecoration(
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 14,
+          ),
           label: label != null
               ? Text(
                   label!,
@@ -65,13 +69,18 @@ class AppTextField extends StatelessWidget {
           ),
           errorText: errorText,
           errorStyle: AppTypography.bodySmall.copyWith(color: AppColors.error),
-          prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20, color: AppColors.grey600) : null,
+          prefixIcon: prefixIcon != null
+              ? Icon(prefixIcon, size: 20, color: AppColors.grey600)
+              : null,
           suffixIcon: suffixIcon != null
               ? IconButton(
                   icon: Icon(suffixIcon, size: 20, color: AppColors.grey600),
                   onPressed: onSuffixTap,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                 )
               : null,
           border: const OutlineInputBorder(),

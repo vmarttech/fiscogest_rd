@@ -1,6 +1,5 @@
 // Excepciones personalizadas para el núcleo de la aplicación
 abstract class AppException implements Exception {
-
   const AppException(this.message, {this.code});
   final String message;
   final String? code;
@@ -18,5 +17,8 @@ class ValidationException extends AppException {
 }
 
 class BusinessRuleException extends AppException {
-  const BusinessRuleException(super.message, {super.code = 'BUSINESS_RULE_ERROR'});
+  const BusinessRuleException(
+    super.message, {
+    super.code = 'BUSINESS_RULE_ERROR',
+  });
 }

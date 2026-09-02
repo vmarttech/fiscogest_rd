@@ -28,7 +28,6 @@ abstract class AppEvent {
 }
 
 class ModuleCommunicationEvent extends AppEvent {
-
   const ModuleCommunicationEvent({
     required this.sourceModule,
     required this.targetModule,

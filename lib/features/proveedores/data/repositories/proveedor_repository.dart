@@ -18,16 +18,25 @@ class ProveedorRepository {
   }
 
   Future<void> agregarProveedor(Proveedor proveedor) async {
-    final existe = _proveedoresLocales.any((p) => p.rnc.trim() == proveedor.rnc.trim());
+    final existe = _proveedoresLocales.any(
+      (p) => p.rnc.trim() == proveedor.rnc.trim(),
+    );
     if (existe) {
       throw Exception('Ya existe un proveedor registrado con ese RNC.');
     }
-    final nuevoId = _proveedoresLocales.isEmpty ? 1 : (_proveedoresLocales.map((e) => e.id ?? 0).reduce((a, b) => a > b ? a : b) + 1);
+    final nuevoId = _proveedoresLocales.isEmpty
+        ? 1
+        : (_proveedoresLocales
+                  .map((e) => e.id ?? 0)
+                  .reduce((a, b) => a > b ? a : b) +
+              1);
     _proveedoresLocales.add(proveedor.copyWith(id: nuevoId));
   }
 
   Future<void> actualizarProveedor(Proveedor proveedor) async {
-    final duplicado = _proveedoresLocales.any((p) => p.id != proveedor.id && p.rnc.trim() == proveedor.rnc.trim());
+    final duplicado = _proveedoresLocales.any(
+      (p) => p.id != proveedor.id && p.rnc.trim() == proveedor.rnc.trim(),
+    );
     if (duplicado) {
       throw Exception('Ya existe otro proveedor registrado con ese RNC.');
     }

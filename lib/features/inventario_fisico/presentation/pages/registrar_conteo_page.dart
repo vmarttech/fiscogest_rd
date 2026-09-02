@@ -14,7 +14,8 @@ class RegistrarConteoPage extends ConsumerStatefulWidget {
   static const routeName = 'registrar-conteo-fisico';
 
   @override
-  ConsumerState<RegistrarConteoPage> createState() => _RegistrarConteoPageState();
+  ConsumerState<RegistrarConteoPage> createState() =>
+      _RegistrarConteoPageState();
 }
 
 class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {

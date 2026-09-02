@@ -7,17 +7,17 @@ class BuscarDevoluciones {
   Future<List<Map<String, dynamic>>> call({
     DateTime? desde,
     DateTime? hasta,
-    String? clienteId,
-    String? proveedorId,
-    String? usuarioId,
+    int? clienteId,
+    int? proveedorId,
+    int? usuarioId,
     String? tipoOrigen,
   }) async {
     return _repositorio.listarDevoluciones(
       desde: desde,
       hasta: hasta,
-      clienteId: int.tryParse(clienteId ?? ''),
-      proveedorId: int.tryParse(proveedorId ?? ''),
-      usuarioId: int.tryParse(usuarioId ?? ''),
+      clienteId: clienteId,
+      proveedorId: proveedorId,
+      usuarioId: usuarioId,
       tipoOrigen: tipoOrigen,
     );
   }

@@ -96,6 +96,18 @@ class $ClientesTableTable extends ClientesTable
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _saldoPendienteMeta = const VerificationMeta(
+    'saldoPendiente',
+  );
+  @override
+  late final GeneratedColumn<double> saldoPendiente = GeneratedColumn<double>(
+    'saldo_pendiente',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -106,6 +118,7 @@ class $ClientesTableTable extends ClientesTable
     correo,
     direccion,
     activo,
+    saldoPendiente,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -176,6 +189,15 @@ class $ClientesTableTable extends ClientesTable
         activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
       );
     }
+    if (data.containsKey('saldo_pendiente')) {
+      context.handle(
+        _saldoPendienteMeta,
+        saldoPendiente.isAcceptableOrUnknown(
+          data['saldo_pendiente']!,
+          _saldoPendienteMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -217,6 +239,10 @@ class $ClientesTableTable extends ClientesTable
         DriftSqlType.bool,
         data['${effectivePrefix}activo'],
       )!,
+      saldoPendiente: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}saldo_pendiente'],
+      )!,
     );
   }
 
@@ -236,6 +262,7 @@ class ClientesTableData extends DataClass
   final String correo;
   final String direccion;
   final bool activo;
+  final double saldoPendiente;
   const ClientesTableData({
     required this.id,
     required this.codigo,
@@ -245,6 +272,7 @@ class ClientesTableData extends DataClass
     required this.correo,
     required this.direccion,
     required this.activo,
+    required this.saldoPendiente,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -257,6 +285,7 @@ class ClientesTableData extends DataClass
     map['correo'] = Variable<String>(correo);
     map['direccion'] = Variable<String>(direccion);
     map['activo'] = Variable<bool>(activo);
+    map['saldo_pendiente'] = Variable<double>(saldoPendiente);
     return map;
   }
 
@@ -270,6 +299,7 @@ class ClientesTableData extends DataClass
       correo: Value(correo),
       direccion: Value(direccion),
       activo: Value(activo),
+      saldoPendiente: Value(saldoPendiente),
     );
   }
 
@@ -287,6 +317,7 @@ class ClientesTableData extends DataClass
       correo: serializer.fromJson<String>(json['correo']),
       direccion: serializer.fromJson<String>(json['direccion']),
       activo: serializer.fromJson<bool>(json['activo']),
+      saldoPendiente: serializer.fromJson<double>(json['saldoPendiente']),
     );
   }
   @override
@@ -301,6 +332,7 @@ class ClientesTableData extends DataClass
       'correo': serializer.toJson<String>(correo),
       'direccion': serializer.toJson<String>(direccion),
       'activo': serializer.toJson<bool>(activo),
+      'saldoPendiente': serializer.toJson<double>(saldoPendiente),
     };
   }
 
@@ -313,6 +345,7 @@ class ClientesTableData extends DataClass
     String? correo,
     String? direccion,
     bool? activo,
+    double? saldoPendiente,
   }) => ClientesTableData(
     id: id ?? this.id,
     codigo: codigo ?? this.codigo,
@@ -322,6 +355,7 @@ class ClientesTableData extends DataClass
     correo: correo ?? this.correo,
     direccion: direccion ?? this.direccion,
     activo: activo ?? this.activo,
+    saldoPendiente: saldoPendiente ?? this.saldoPendiente,
   );
   ClientesTableData copyWithCompanion(ClientesTableCompanion data) {
     return ClientesTableData(
@@ -333,6 +367,9 @@ class ClientesTableData extends DataClass
       correo: data.correo.present ? data.correo.value : this.correo,
       direccion: data.direccion.present ? data.direccion.value : this.direccion,
       activo: data.activo.present ? data.activo.value : this.activo,
+      saldoPendiente: data.saldoPendiente.present
+          ? data.saldoPendiente.value
+          : this.saldoPendiente,
     );
   }
 
@@ -346,7 +383,8 @@ class ClientesTableData extends DataClass
           ..write('telefono: $telefono, ')
           ..write('correo: $correo, ')
           ..write('direccion: $direccion, ')
-          ..write('activo: $activo')
+          ..write('activo: $activo, ')
+          ..write('saldoPendiente: $saldoPendiente')
           ..write(')'))
         .toString();
   }
@@ -361,6 +399,7 @@ class ClientesTableData extends DataClass
     correo,
     direccion,
     activo,
+    saldoPendiente,
   );
   @override
   bool operator ==(Object other) =>
@@ -373,7 +412,8 @@ class ClientesTableData extends DataClass
           other.telefono == this.telefono &&
           other.correo == this.correo &&
           other.direccion == this.direccion &&
-          other.activo == this.activo);
+          other.activo == this.activo &&
+          other.saldoPendiente == this.saldoPendiente);
 }
 
 class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
@@ -385,6 +425,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
   final Value<String> correo;
   final Value<String> direccion;
   final Value<bool> activo;
+  final Value<double> saldoPendiente;
   const ClientesTableCompanion({
     this.id = const Value.absent(),
     this.codigo = const Value.absent(),
@@ -394,6 +435,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     this.correo = const Value.absent(),
     this.direccion = const Value.absent(),
     this.activo = const Value.absent(),
+    this.saldoPendiente = const Value.absent(),
   });
   ClientesTableCompanion.insert({
     this.id = const Value.absent(),
@@ -404,6 +446,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     required String correo,
     required String direccion,
     this.activo = const Value.absent(),
+    this.saldoPendiente = const Value.absent(),
   }) : codigo = Value(codigo),
        nombre = Value(nombre),
        rncCedula = Value(rncCedula),
@@ -419,6 +462,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     Expression<String>? correo,
     Expression<String>? direccion,
     Expression<bool>? activo,
+    Expression<double>? saldoPendiente,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -429,6 +473,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
       if (correo != null) 'correo': correo,
       if (direccion != null) 'direccion': direccion,
       if (activo != null) 'activo': activo,
+      if (saldoPendiente != null) 'saldo_pendiente': saldoPendiente,
     });
   }
 
@@ -441,6 +486,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     Value<String>? correo,
     Value<String>? direccion,
     Value<bool>? activo,
+    Value<double>? saldoPendiente,
   }) {
     return ClientesTableCompanion(
       id: id ?? this.id,
@@ -451,6 +497,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
       correo: correo ?? this.correo,
       direccion: direccion ?? this.direccion,
       activo: activo ?? this.activo,
+      saldoPendiente: saldoPendiente ?? this.saldoPendiente,
     );
   }
 
@@ -481,6 +528,9 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     if (activo.present) {
       map['activo'] = Variable<bool>(activo.value);
     }
+    if (saldoPendiente.present) {
+      map['saldo_pendiente'] = Variable<double>(saldoPendiente.value);
+    }
     return map;
   }
 
@@ -494,7 +544,8 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
           ..write('telefono: $telefono, ')
           ..write('correo: $correo, ')
           ..write('direccion: $direccion, ')
-          ..write('activo: $activo')
+          ..write('activo: $activo, ')
+          ..write('saldoPendiente: $saldoPendiente')
           ..write(')'))
         .toString();
   }
@@ -16747,22 +16798,22 @@ class $ComprasTableTable extends ComprasTable
   $ComprasTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
     'id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _proveedorIdMeta = const VerificationMeta(
     'proveedorId',
   );
   @override
-  late final GeneratedColumn<String> proveedorId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> proveedorId = GeneratedColumn<int>(
     'proveedor_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _nombreProveedorMeta = const VerificationMeta(
@@ -16941,8 +16992,6 @@ class $ComprasTableTable extends ComprasTable
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
     }
     if (data.containsKey('proveedor_id')) {
       context.handle(
@@ -17090,11 +17139,11 @@ class $ComprasTableTable extends ComprasTable
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ComprasTableData(
       id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
       proveedorId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}proveedor_id'],
       )!,
       nombreProveedor: attachedDatabase.typeMapping.read(
@@ -17165,8 +17214,8 @@ class $ComprasTableTable extends ComprasTable
 
 class ComprasTableData extends DataClass
     implements Insertable<ComprasTableData> {
-  final String id;
-  final String proveedorId;
+  final int id;
+  final int proveedorId;
   final String nombreProveedor;
   final DateTime fechaEmision;
   final DateTime? fechaConfirmacion;
@@ -17200,8 +17249,8 @@ class ComprasTableData extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['proveedor_id'] = Variable<String>(proveedorId);
+    map['id'] = Variable<int>(id);
+    map['proveedor_id'] = Variable<int>(proveedorId);
     map['nombre_proveedor'] = Variable<String>(nombreProveedor);
     map['fecha_emision'] = Variable<DateTime>(fechaEmision);
     if (!nullToAbsent || fechaConfirmacion != null) {
@@ -17256,8 +17305,8 @@ class ComprasTableData extends DataClass
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ComprasTableData(
-      id: serializer.fromJson<String>(json['id']),
-      proveedorId: serializer.fromJson<String>(json['proveedorId']),
+      id: serializer.fromJson<int>(json['id']),
+      proveedorId: serializer.fromJson<int>(json['proveedorId']),
       nombreProveedor: serializer.fromJson<String>(json['nombreProveedor']),
       fechaEmision: serializer.fromJson<DateTime>(json['fechaEmision']),
       fechaConfirmacion: serializer.fromJson<DateTime?>(
@@ -17285,8 +17334,8 @@ class ComprasTableData extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'proveedorId': serializer.toJson<String>(proveedorId),
+      'id': serializer.toJson<int>(id),
+      'proveedorId': serializer.toJson<int>(proveedorId),
       'nombreProveedor': serializer.toJson<String>(nombreProveedor),
       'fechaEmision': serializer.toJson<DateTime>(fechaEmision),
       'fechaConfirmacion': serializer.toJson<DateTime?>(fechaConfirmacion),
@@ -17306,8 +17355,8 @@ class ComprasTableData extends DataClass
   }
 
   ComprasTableData copyWith({
-    String? id,
-    String? proveedorId,
+    int? id,
+    int? proveedorId,
     String? nombreProveedor,
     DateTime? fechaEmision,
     Value<DateTime?> fechaConfirmacion = const Value.absent(),
@@ -17448,8 +17497,8 @@ class ComprasTableData extends DataClass
 }
 
 class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
-  final Value<String> id;
-  final Value<String> proveedorId;
+  final Value<int> id;
+  final Value<int> proveedorId;
   final Value<String> nombreProveedor;
   final Value<DateTime> fechaEmision;
   final Value<DateTime?> fechaConfirmacion;
@@ -17463,7 +17512,6 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
   final Value<EstadoCompra> estado;
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
-  final Value<int> rowid;
   const ComprasTableCompanion({
     this.id = const Value.absent(),
     this.proveedorId = const Value.absent(),
@@ -17480,11 +17528,10 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     this.estado = const Value.absent(),
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
-    this.rowid = const Value.absent(),
   });
   ComprasTableCompanion.insert({
-    required String id,
-    required String proveedorId,
+    this.id = const Value.absent(),
+    required int proveedorId,
     required String nombreProveedor,
     required DateTime fechaEmision,
     this.fechaConfirmacion = const Value.absent(),
@@ -17498,9 +17545,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     required EstadoCompra estado,
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       proveedorId = Value(proveedorId),
+  }) : proveedorId = Value(proveedorId),
        nombreProveedor = Value(nombreProveedor),
        fechaEmision = Value(fechaEmision),
        numeroComprobante = Value(numeroComprobante),
@@ -17513,8 +17558,8 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
        estado = Value(estado),
        creadoEn = Value(creadoEn);
   static Insertable<ComprasTableData> custom({
-    Expression<String>? id,
-    Expression<String>? proveedorId,
+    Expression<int>? id,
+    Expression<int>? proveedorId,
     Expression<String>? nombreProveedor,
     Expression<DateTime>? fechaEmision,
     Expression<DateTime>? fechaConfirmacion,
@@ -17528,7 +17573,6 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     Expression<int>? estado,
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
-    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -17548,13 +17592,12 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       if (estado != null) 'estado': estado,
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
-      if (rowid != null) 'rowid': rowid,
     });
   }
 
   ComprasTableCompanion copyWith({
-    Value<String>? id,
-    Value<String>? proveedorId,
+    Value<int>? id,
+    Value<int>? proveedorId,
     Value<String>? nombreProveedor,
     Value<DateTime>? fechaEmision,
     Value<DateTime?>? fechaConfirmacion,
@@ -17568,7 +17611,6 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     Value<EstadoCompra>? estado,
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
-    Value<int>? rowid,
   }) {
     return ComprasTableCompanion(
       id: id ?? this.id,
@@ -17586,7 +17628,6 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       estado: estado ?? this.estado,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
-      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -17594,10 +17635,10 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['id'] = Variable<int>(id.value);
     }
     if (proveedorId.present) {
-      map['proveedor_id'] = Variable<String>(proveedorId.value);
+      map['proveedor_id'] = Variable<int>(proveedorId.value);
     }
     if (nombreProveedor.present) {
       map['nombre_proveedor'] = Variable<String>(nombreProveedor.value);
@@ -17644,9 +17685,6 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     if (actualizadoEn.present) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
     return map;
   }
 
@@ -17667,8 +17705,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
           ..write('observaciones: $observaciones, ')
           ..write('estado: $estado, ')
           ..write('creadoEn: $creadoEn, ')
-          ..write('actualizadoEn: $actualizadoEn, ')
-          ..write('rowid: $rowid')
+          ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
         .toString();
   }
@@ -17682,22 +17719,22 @@ class $DetalleCompraTableTable extends DetalleCompraTable
   $DetalleCompraTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
     'id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _compraIdMeta = const VerificationMeta(
     'compraId',
   );
   @override
-  late final GeneratedColumn<String> compraId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> compraId = GeneratedColumn<int>(
     'compra_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES compras_table (id) ON DELETE CASCADE',
@@ -17707,11 +17744,11 @@ class $DetalleCompraTableTable extends DetalleCompraTable
     'productoId',
   );
   @override
-  late final GeneratedColumn<String> productoId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> productoId = GeneratedColumn<int>(
     'producto_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _nombreProductoMeta = const VerificationMeta(
@@ -17806,8 +17843,6 @@ class $DetalleCompraTableTable extends DetalleCompraTable
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
     }
     if (data.containsKey('compra_id')) {
       context.handle(
@@ -17898,15 +17933,15 @@ class $DetalleCompraTableTable extends DetalleCompraTable
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DetalleCompraTableData(
       id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
       compraId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}compra_id'],
       )!,
       productoId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}producto_id'],
       )!,
       nombreProducto: attachedDatabase.typeMapping.read(
@@ -17944,9 +17979,9 @@ class $DetalleCompraTableTable extends DetalleCompraTable
 
 class DetalleCompraTableData extends DataClass
     implements Insertable<DetalleCompraTableData> {
-  final String id;
-  final String compraId;
-  final String productoId;
+  final int id;
+  final int compraId;
+  final int productoId;
   final String nombreProducto;
   final double cantidad;
   final double costoUnitario;
@@ -17967,9 +18002,9 @@ class DetalleCompraTableData extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['compra_id'] = Variable<String>(compraId);
-    map['producto_id'] = Variable<String>(productoId);
+    map['id'] = Variable<int>(id);
+    map['compra_id'] = Variable<int>(compraId);
+    map['producto_id'] = Variable<int>(productoId);
     map['nombre_producto'] = Variable<String>(nombreProducto);
     map['cantidad'] = Variable<double>(cantidad);
     map['costo_unitario'] = Variable<double>(costoUnitario);
@@ -17999,9 +18034,9 @@ class DetalleCompraTableData extends DataClass
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DetalleCompraTableData(
-      id: serializer.fromJson<String>(json['id']),
-      compraId: serializer.fromJson<String>(json['compraId']),
-      productoId: serializer.fromJson<String>(json['productoId']),
+      id: serializer.fromJson<int>(json['id']),
+      compraId: serializer.fromJson<int>(json['compraId']),
+      productoId: serializer.fromJson<int>(json['productoId']),
       nombreProducto: serializer.fromJson<String>(json['nombreProducto']),
       cantidad: serializer.fromJson<double>(json['cantidad']),
       costoUnitario: serializer.fromJson<double>(json['costoUnitario']),
@@ -18018,9 +18053,9 @@ class DetalleCompraTableData extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'compraId': serializer.toJson<String>(compraId),
-      'productoId': serializer.toJson<String>(productoId),
+      'id': serializer.toJson<int>(id),
+      'compraId': serializer.toJson<int>(compraId),
+      'productoId': serializer.toJson<int>(productoId),
       'nombreProducto': serializer.toJson<String>(nombreProducto),
       'cantidad': serializer.toJson<double>(cantidad),
       'costoUnitario': serializer.toJson<double>(costoUnitario),
@@ -18031,9 +18066,9 @@ class DetalleCompraTableData extends DataClass
   }
 
   DetalleCompraTableData copyWith({
-    String? id,
-    String? compraId,
-    String? productoId,
+    int? id,
+    int? compraId,
+    int? productoId,
     String? nombreProducto,
     double? cantidad,
     double? costoUnitario,
@@ -18122,16 +18157,15 @@ class DetalleCompraTableData extends DataClass
 
 class DetalleCompraTableCompanion
     extends UpdateCompanion<DetalleCompraTableData> {
-  final Value<String> id;
-  final Value<String> compraId;
-  final Value<String> productoId;
+  final Value<int> id;
+  final Value<int> compraId;
+  final Value<int> productoId;
   final Value<String> nombreProducto;
   final Value<double> cantidad;
   final Value<double> costoUnitario;
   final Value<double> descuentoPorcentaje;
   final Value<double> montoDescuentoLinea;
   final Value<double> subtotalLinea;
-  final Value<int> rowid;
   const DetalleCompraTableCompanion({
     this.id = const Value.absent(),
     this.compraId = const Value.absent(),
@@ -18142,21 +18176,18 @@ class DetalleCompraTableCompanion
     this.descuentoPorcentaje = const Value.absent(),
     this.montoDescuentoLinea = const Value.absent(),
     this.subtotalLinea = const Value.absent(),
-    this.rowid = const Value.absent(),
   });
   DetalleCompraTableCompanion.insert({
-    required String id,
-    required String compraId,
-    required String productoId,
+    this.id = const Value.absent(),
+    required int compraId,
+    required int productoId,
     required String nombreProducto,
     required double cantidad,
     required double costoUnitario,
     required double descuentoPorcentaje,
     required double montoDescuentoLinea,
     required double subtotalLinea,
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       compraId = Value(compraId),
+  }) : compraId = Value(compraId),
        productoId = Value(productoId),
        nombreProducto = Value(nombreProducto),
        cantidad = Value(cantidad),
@@ -18165,16 +18196,15 @@ class DetalleCompraTableCompanion
        montoDescuentoLinea = Value(montoDescuentoLinea),
        subtotalLinea = Value(subtotalLinea);
   static Insertable<DetalleCompraTableData> custom({
-    Expression<String>? id,
-    Expression<String>? compraId,
-    Expression<String>? productoId,
+    Expression<int>? id,
+    Expression<int>? compraId,
+    Expression<int>? productoId,
     Expression<String>? nombreProducto,
     Expression<double>? cantidad,
     Expression<double>? costoUnitario,
     Expression<double>? descuentoPorcentaje,
     Expression<double>? montoDescuentoLinea,
     Expression<double>? subtotalLinea,
-    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -18188,21 +18218,19 @@ class DetalleCompraTableCompanion
       if (montoDescuentoLinea != null)
         'monto_descuento_linea': montoDescuentoLinea,
       if (subtotalLinea != null) 'subtotal_linea': subtotalLinea,
-      if (rowid != null) 'rowid': rowid,
     });
   }
 
   DetalleCompraTableCompanion copyWith({
-    Value<String>? id,
-    Value<String>? compraId,
-    Value<String>? productoId,
+    Value<int>? id,
+    Value<int>? compraId,
+    Value<int>? productoId,
     Value<String>? nombreProducto,
     Value<double>? cantidad,
     Value<double>? costoUnitario,
     Value<double>? descuentoPorcentaje,
     Value<double>? montoDescuentoLinea,
     Value<double>? subtotalLinea,
-    Value<int>? rowid,
   }) {
     return DetalleCompraTableCompanion(
       id: id ?? this.id,
@@ -18214,7 +18242,6 @@ class DetalleCompraTableCompanion
       descuentoPorcentaje: descuentoPorcentaje ?? this.descuentoPorcentaje,
       montoDescuentoLinea: montoDescuentoLinea ?? this.montoDescuentoLinea,
       subtotalLinea: subtotalLinea ?? this.subtotalLinea,
-      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -18222,13 +18249,13 @@ class DetalleCompraTableCompanion
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['id'] = Variable<int>(id.value);
     }
     if (compraId.present) {
-      map['compra_id'] = Variable<String>(compraId.value);
+      map['compra_id'] = Variable<int>(compraId.value);
     }
     if (productoId.present) {
-      map['producto_id'] = Variable<String>(productoId.value);
+      map['producto_id'] = Variable<int>(productoId.value);
     }
     if (nombreProducto.present) {
       map['nombre_producto'] = Variable<String>(nombreProducto.value);
@@ -18250,9 +18277,6 @@ class DetalleCompraTableCompanion
     if (subtotalLinea.present) {
       map['subtotal_linea'] = Variable<double>(subtotalLinea.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
     return map;
   }
 
@@ -18267,8 +18291,7 @@ class DetalleCompraTableCompanion
           ..write('costoUnitario: $costoUnitario, ')
           ..write('descuentoPorcentaje: $descuentoPorcentaje, ')
           ..write('montoDescuentoLinea: $montoDescuentoLinea, ')
-          ..write('subtotalLinea: $subtotalLinea, ')
-          ..write('rowid: $rowid')
+          ..write('subtotalLinea: $subtotalLinea')
           ..write(')'))
         .toString();
   }
@@ -18428,6 +18451,7 @@ typedef $$ClientesTableTableCreateCompanionBuilder =
       required String correo,
       required String direccion,
       Value<bool> activo,
+      Value<double> saldoPendiente,
     });
 typedef $$ClientesTableTableUpdateCompanionBuilder =
     ClientesTableCompanion Function({
@@ -18439,6 +18463,7 @@ typedef $$ClientesTableTableUpdateCompanionBuilder =
       Value<String> correo,
       Value<String> direccion,
       Value<bool> activo,
+      Value<double> saldoPendiente,
     });
 
 final class $$ClientesTableTableReferences
@@ -18587,6 +18612,11 @@ class $$ClientesTableTableFilterComposer
 
   ColumnFilters<bool> get activo => $composableBuilder(
     column: $table.activo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get saldoPendiente => $composableBuilder(
+    column: $table.saldoPendiente,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18739,6 +18769,11 @@ class $$ClientesTableTableOrderingComposer
     column: $table.activo,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get saldoPendiente => $composableBuilder(
+    column: $table.saldoPendiente,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ClientesTableTableAnnotationComposer
@@ -18773,6 +18808,11 @@ class $$ClientesTableTableAnnotationComposer
 
   GeneratedColumn<bool> get activo =>
       $composableBuilder(column: $table.activo, builder: (column) => column);
+
+  GeneratedColumn<double> get saldoPendiente => $composableBuilder(
+    column: $table.saldoPendiente,
+    builder: (column) => column,
+  );
 
   Expression<T> ventasTableRefs<T extends Object>(
     Expression<T> Function($$VentasTableTableAnnotationComposer a) f,
@@ -18918,6 +18958,7 @@ class $$ClientesTableTableTableManager
                 Value<String> correo = const Value.absent(),
                 Value<String> direccion = const Value.absent(),
                 Value<bool> activo = const Value.absent(),
+                Value<double> saldoPendiente = const Value.absent(),
               }) => ClientesTableCompanion(
                 id: id,
                 codigo: codigo,
@@ -18927,6 +18968,7 @@ class $$ClientesTableTableTableManager
                 correo: correo,
                 direccion: direccion,
                 activo: activo,
+                saldoPendiente: saldoPendiente,
               ),
           createCompanionCallback:
               ({
@@ -18938,6 +18980,7 @@ class $$ClientesTableTableTableManager
                 required String correo,
                 required String direccion,
                 Value<bool> activo = const Value.absent(),
+                Value<double> saldoPendiente = const Value.absent(),
               }) => ClientesTableCompanion.insert(
                 id: id,
                 codigo: codigo,
@@ -18947,6 +18990,7 @@ class $$ClientesTableTableTableManager
                 correo: correo,
                 direccion: direccion,
                 activo: activo,
+                saldoPendiente: saldoPendiente,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -31363,8 +31407,8 @@ typedef $$CajaMovimientosTableTableProcessedTableManager =
     >;
 typedef $$ComprasTableTableCreateCompanionBuilder =
     ComprasTableCompanion Function({
-      required String id,
-      required String proveedorId,
+      Value<int> id,
+      required int proveedorId,
       required String nombreProveedor,
       required DateTime fechaEmision,
       Value<DateTime?> fechaConfirmacion,
@@ -31378,12 +31422,11 @@ typedef $$ComprasTableTableCreateCompanionBuilder =
       required EstadoCompra estado,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
-      Value<int> rowid,
     });
 typedef $$ComprasTableTableUpdateCompanionBuilder =
     ComprasTableCompanion Function({
-      Value<String> id,
-      Value<String> proveedorId,
+      Value<int> id,
+      Value<int> proveedorId,
       Value<String> nombreProveedor,
       Value<DateTime> fechaEmision,
       Value<DateTime?> fechaConfirmacion,
@@ -31397,7 +31440,6 @@ typedef $$ComprasTableTableUpdateCompanionBuilder =
       Value<EstadoCompra> estado,
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
-      Value<int> rowid,
     });
 
 final class $$ComprasTableTableReferences
@@ -31422,7 +31464,7 @@ final class $$ComprasTableTableReferences
     final manager = $$DetalleCompraTableTableTableManager(
       $_db,
       $_db.detalleCompraTable,
-    ).filter((f) => f.compraId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.compraId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(
       _detalleCompraTableRefsTable($_db),
@@ -31442,12 +31484,12 @@ class $$ComprasTableTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
+  ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get proveedorId => $composableBuilder(
+  ColumnFilters<int> get proveedorId => $composableBuilder(
     column: $table.proveedorId,
     builder: (column) => ColumnFilters(column),
   );
@@ -31553,12 +31595,12 @@ class $$ComprasTableTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
+  ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get proveedorId => $composableBuilder(
+  ColumnOrderings<int> get proveedorId => $composableBuilder(
     column: $table.proveedorId,
     builder: (column) => ColumnOrderings(column),
   );
@@ -31638,10 +31680,10 @@ class $$ComprasTableTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
+  GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get proveedorId => $composableBuilder(
+  GeneratedColumn<int> get proveedorId => $composableBuilder(
     column: $table.proveedorId,
     builder: (column) => column,
   );
@@ -31762,8 +31804,8 @@ class $$ComprasTableTableTableManager
               $$ComprasTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<String> id = const Value.absent(),
-                Value<String> proveedorId = const Value.absent(),
+                Value<int> id = const Value.absent(),
+                Value<int> proveedorId = const Value.absent(),
                 Value<String> nombreProveedor = const Value.absent(),
                 Value<DateTime> fechaEmision = const Value.absent(),
                 Value<DateTime?> fechaConfirmacion = const Value.absent(),
@@ -31777,7 +31819,6 @@ class $$ComprasTableTableTableManager
                 Value<EstadoCompra> estado = const Value.absent(),
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
               }) => ComprasTableCompanion(
                 id: id,
                 proveedorId: proveedorId,
@@ -31794,12 +31835,11 @@ class $$ComprasTableTableTableManager
                 estado: estado,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
-                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                required String id,
-                required String proveedorId,
+                Value<int> id = const Value.absent(),
+                required int proveedorId,
                 required String nombreProveedor,
                 required DateTime fechaEmision,
                 Value<DateTime?> fechaConfirmacion = const Value.absent(),
@@ -31813,7 +31853,6 @@ class $$ComprasTableTableTableManager
                 required EstadoCompra estado,
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
               }) => ComprasTableCompanion.insert(
                 id: id,
                 proveedorId: proveedorId,
@@ -31830,7 +31869,6 @@ class $$ComprasTableTableTableManager
                 estado: estado,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
-                rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -31892,29 +31930,27 @@ typedef $$ComprasTableTableProcessedTableManager =
     >;
 typedef $$DetalleCompraTableTableCreateCompanionBuilder =
     DetalleCompraTableCompanion Function({
-      required String id,
-      required String compraId,
-      required String productoId,
+      Value<int> id,
+      required int compraId,
+      required int productoId,
       required String nombreProducto,
       required double cantidad,
       required double costoUnitario,
       required double descuentoPorcentaje,
       required double montoDescuentoLinea,
       required double subtotalLinea,
-      Value<int> rowid,
     });
 typedef $$DetalleCompraTableTableUpdateCompanionBuilder =
     DetalleCompraTableCompanion Function({
-      Value<String> id,
-      Value<String> compraId,
-      Value<String> productoId,
+      Value<int> id,
+      Value<int> compraId,
+      Value<int> productoId,
       Value<String> nombreProducto,
       Value<double> cantidad,
       Value<double> costoUnitario,
       Value<double> descuentoPorcentaje,
       Value<double> montoDescuentoLinea,
       Value<double> subtotalLinea,
-      Value<int> rowid,
     });
 
 final class $$DetalleCompraTableTableReferences
@@ -31939,7 +31975,7 @@ final class $$DetalleCompraTableTableReferences
       );
 
   $$ComprasTableTableProcessedTableManager get compraId {
-    final $_column = $_itemColumn<String>('compra_id')!;
+    final $_column = $_itemColumn<int>('compra_id')!;
 
     final manager = $$ComprasTableTableTableManager(
       $_db,
@@ -31962,12 +31998,12 @@ class $$DetalleCompraTableTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
+  ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get productoId => $composableBuilder(
+  ColumnFilters<int> get productoId => $composableBuilder(
     column: $table.productoId,
     builder: (column) => ColumnFilters(column),
   );
@@ -32035,12 +32071,12 @@ class $$DetalleCompraTableTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
+  ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get productoId => $composableBuilder(
+  ColumnOrderings<int> get productoId => $composableBuilder(
     column: $table.productoId,
     builder: (column) => ColumnOrderings(column),
   );
@@ -32108,10 +32144,10 @@ class $$DetalleCompraTableTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
+  GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get productoId => $composableBuilder(
+  GeneratedColumn<int> get productoId => $composableBuilder(
     column: $table.productoId,
     builder: (column) => column,
   );
@@ -32201,16 +32237,15 @@ class $$DetalleCompraTableTableTableManager
               ),
           updateCompanionCallback:
               ({
-                Value<String> id = const Value.absent(),
-                Value<String> compraId = const Value.absent(),
-                Value<String> productoId = const Value.absent(),
+                Value<int> id = const Value.absent(),
+                Value<int> compraId = const Value.absent(),
+                Value<int> productoId = const Value.absent(),
                 Value<String> nombreProducto = const Value.absent(),
                 Value<double> cantidad = const Value.absent(),
                 Value<double> costoUnitario = const Value.absent(),
                 Value<double> descuentoPorcentaje = const Value.absent(),
                 Value<double> montoDescuentoLinea = const Value.absent(),
                 Value<double> subtotalLinea = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
               }) => DetalleCompraTableCompanion(
                 id: id,
                 compraId: compraId,
@@ -32221,20 +32256,18 @@ class $$DetalleCompraTableTableTableManager
                 descuentoPorcentaje: descuentoPorcentaje,
                 montoDescuentoLinea: montoDescuentoLinea,
                 subtotalLinea: subtotalLinea,
-                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                required String id,
-                required String compraId,
-                required String productoId,
+                Value<int> id = const Value.absent(),
+                required int compraId,
+                required int productoId,
                 required String nombreProducto,
                 required double cantidad,
                 required double costoUnitario,
                 required double descuentoPorcentaje,
                 required double montoDescuentoLinea,
                 required double subtotalLinea,
-                Value<int> rowid = const Value.absent(),
               }) => DetalleCompraTableCompanion.insert(
                 id: id,
                 compraId: compraId,
@@ -32245,7 +32278,6 @@ class $$DetalleCompraTableTableTableManager
                 descuentoPorcentaje: descuentoPorcentaje,
                 montoDescuentoLinea: montoDescuentoLinea,
                 subtotalLinea: subtotalLinea,
-                rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map(

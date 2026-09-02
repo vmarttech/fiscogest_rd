@@ -8,9 +8,10 @@ final marcaRepositoryProvider = Provider<MarcaRepository>((ref) {
   return MarcaRepositoryImpl(ref.watch(databaseProvider));
 });
 
-final marcaControllerProvider = AsyncNotifierProvider<MarcaController, List<Marca>>(() {
-  return MarcaController();
-});
+final marcaControllerProvider =
+    AsyncNotifierProvider<MarcaController, List<Marca>>(() {
+      return MarcaController();
+    });
 
 class MarcaController extends AsyncNotifier<List<Marca>> {
   late final MarcaRepository _repo;

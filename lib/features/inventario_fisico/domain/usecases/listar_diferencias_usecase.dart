@@ -2,7 +2,6 @@ import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferenc
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
 
 class ListarDiferenciasUsecase {
-
   ListarDiferenciasUsecase(this._repo);
   final InventarioFisicoRepositoryInterface _repo;
 

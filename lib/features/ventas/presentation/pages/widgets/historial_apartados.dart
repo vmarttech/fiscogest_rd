@@ -28,8 +28,12 @@ class HistorialApartados extends ConsumerWidget {
         children: [
           const Text('Apartados', style: AppTypography.h4),
           const SizedBox(height: AppSpacing.xs),
-          Text('Reservas de productos con control de pagos',
-              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+          Text(
+            'Reservas de productos con control de pagos',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.m),
           Expanded(
             child: apartadosAsync.when(
@@ -38,11 +42,19 @@ class HistorialApartados extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(height: AppSpacing.m),
-                    Text('Error al cargar apartados: $e',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
-                        textAlign: TextAlign.center),
+                    Text(
+                      'Error al cargar apartados: $e',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.error,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
@@ -52,25 +64,42 @@ class HistorialApartados extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.inventory_2_outlined, size: 64, color: Color(0x409E9E9E)),
+                        const Icon(
+                          Icons.inventory_2_outlined,
+                          size: 64,
+                          color: Color(0x409E9E9E),
+                        ),
                         const SizedBox(height: AppSpacing.m),
-                        Text('No hay apartados registrados',
-                            style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
+                        Text(
+                          'No hay apartados registrados',
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: AppSpacing.xs),
-                        Text('Los apartados que registres aparecerán aquí',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                        Text(
+                          'Los apartados que registres aparecerán aquí',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   );
                 }
                 return ListView.separated(
                   itemCount: apartados.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, thickness: 1),
                   itemBuilder: (_, int i) {
                     final Apartado a = apartados[i] as Apartado;
                     final String numero = a.numero;
-                    final String fechaApartado = _formatearFecha(a.fechaApartado);
-                    final String fechaLimite = _formatearFecha(a.fechaLimitePago);
+                    final String fechaApartado = _formatearFecha(
+                      a.fechaApartado,
+                    );
+                    final String fechaLimite = _formatearFecha(
+                      a.fechaLimitePago,
+                    );
                     final double montoTotal = a.montoTotal;
                     final double montoAbonado = a.montoAbonado;
                     final double saldoPendiente = a.saldoPendiente;
@@ -124,7 +153,9 @@ class _TarjetaApartado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double porcentajePagado = montoTotal > 0 ? (montoAbonado / montoTotal).clamp(0.0, 1.0) : 0.0;
+    final double porcentajePagado = montoTotal > 0
+        ? (montoAbonado / montoTotal).clamp(0.0, 1.0)
+        : 0.0;
     return Padding(
       padding: AppSpacing.vS,
       child: Column(
@@ -132,18 +163,28 @@ class _TarjetaApartado extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('Apartado N° $numero',
-                  style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600)),
+              Text(
+                'Apartado N° $numero',
+                style: AppTypography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(width: AppSpacing.s),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: 2,
+                ),
                 decoration: BoxDecoration(
                   color: _colorEstado().withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   estado,
-                  style: AppTypography.labelSmall.copyWith(color: _colorEstado(), fontSize: 10),
+                  style: AppTypography.labelSmall.copyWith(
+                    color: _colorEstado(),
+                    fontSize: 10,
+                  ),
                 ),
               ),
             ],
@@ -155,24 +196,37 @@ class _TarjetaApartado extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Apartado: $fechaApartado',
-                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-                    Text('Límite pago: $fechaLimite',
-                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                    Text(
+                      'Apartado: $fechaApartado',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      'Límite pago: $fechaLimite',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
                         Expanded(
                           child: Text(
                             'RD\$ ${montoAbonado.toStringAsFixed(2)} / RD\$ ${montoTotal.toStringAsFixed(2)}',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                         Text(
                           'Saldo: RD\$ ${saldoPendiente.toStringAsFixed(2)}',
                           style: AppTypography.labelMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: saldoPendiente > 0 ? AppColors.error : Colors.green),
+                            fontWeight: FontWeight.w600,
+                            color: saldoPendiente > 0
+                                ? AppColors.error
+                                : Colors.green,
+                          ),
                         ),
                       ],
                     ),
@@ -182,7 +236,9 @@ class _TarjetaApartado extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: porcentajePagado,
                         backgroundColor: Colors.grey.shade200,
-                        valueColor: AlwaysStoppedAnimation<Color>(_colorEstado()),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          _colorEstado(),
+                        ),
                         minHeight: 6,
                       ),
                     ),

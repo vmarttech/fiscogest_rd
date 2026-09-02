@@ -33,8 +33,14 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
           hint: 'Nombre o abreviatura...',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          AppButton(text: 'Buscar', onPressed: () => Navigator.pop(ctx, control.text)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          AppButton(
+            text: 'Buscar',
+            onPressed: () => Navigator.pop(ctx, control.text),
+          ),
         ],
       ),
     );
@@ -47,7 +53,6 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
   Widget build(BuildContext context) {
     final unidadesAsync = ref.watch(unidadMedidaControllerProvider);
     return AppScaffold(
-      
       padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: Stack(
         children: [
@@ -58,11 +63,22 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                 data: (unidades) {
                   final filtradas = _filtroBusqueda.isEmpty
                       ? unidades
-                      : unidades.where((u) =>
-                          u.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                          (u.abreviatura?.toLowerCase().contains(_filtroBusqueda) ?? false) ||
-                          (u.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false)
-                        ).toList();
+                      : unidades
+                            .where(
+                              (u) =>
+                                  u.nombre.toLowerCase().contains(
+                                    _filtroBusqueda,
+                                  ) ||
+                                  (u.abreviatura?.toLowerCase().contains(
+                                        _filtroBusqueda,
+                                      ) ??
+                                      false) ||
+                                  (u.descripcion?.toLowerCase().contains(
+                                        _filtroBusqueda,
+                                      ) ??
+                                      false),
+                            )
+                            .toList();
                   if (filtradas.isEmpty) {
                     return const Center(
                       child: Text(
@@ -74,7 +90,8 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                   return ListView.separated(
                     padding: AppSpacing.allS,
                     itemCount: filtradas.length,
-                    separatorBuilder: (context, index) => const Divider(color: AppColors.grey200, height: 1),
+                    separatorBuilder: (context, index) =>
+                        const Divider(color: AppColors.grey200, height: 1),
                     itemBuilder: (context, index) {
                       final unidad = filtradas[index];
                       return Padding(
@@ -91,7 +108,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                               child: Center(
                                 child: Text(
                                   unidad.abreviatura ?? '---',
-                                  style: AppTypography.labelMedium.copyWith(color: AppColors.textPrimary),
+                                  style: AppTypography.labelMedium.copyWith(
+                                    color: AppColors.textPrimary,
+                                  ),
                                 ),
                               ),
                             ),
@@ -100,14 +119,18 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(unidad.nombre, style: AppTypography.labelLarge),
+                                  Text(
+                                    unidad.nombre,
+                                    style: AppTypography.labelLarge,
+                                  ),
                                   AppLayout.vXs,
                                   Text(
-                                    unidad.abreviatura != null && unidad.abreviatura!.isNotEmpty
+                                    unidad.abreviatura != null &&
+                                            unidad.abreviatura!.isNotEmpty
                                         ? 'Abreviatura: ${unidad.abreviatura}'
                                         : unidad.descripcion?.isNotEmpty ?? true
-                                            ? 'Sin descripción'
-                                            : unidad.descripcion!,
+                                        ? 'Sin descripción'
+                                        : unidad.descripcion!,
                                     style: AppTypography.bodySmall,
                                   ),
                                 ],
@@ -117,14 +140,26 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
                                   tooltip: 'Editar Unidad',
-                                  onPressed: () => _mostrarModalRegistro(context, unidadToEdit: unidad),
+                                  onPressed: () => _mostrarModalRegistro(
+                                    context,
+                                    unidadToEdit: unidad,
+                                  ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppColors.error,
+                                    size: 20,
+                                  ),
                                   tooltip: 'Eliminar Unidad',
-                                  onPressed: () => _confirmarEliminacion(context, unidad),
+                                  onPressed: () =>
+                                      _confirmarEliminacion(context, unidad),
                                 ),
                               ],
                             ),
@@ -135,7 +170,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, st) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium)),
+                error: (e, st) => Center(
+                  child: Text('Error: $e', style: AppTypography.bodyMedium),
+                ),
               ),
             ),
           ),
@@ -173,11 +210,18 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
       title: 'Confirmar Eliminación',
       message: '¿Está seguro de eliminar la unidad "${unidad.nombre}"?',
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
         AppButton(
           text: 'Eliminar',
           onPressed: () {
-            if (unidad.id != null) ref.read(unidadMedidaControllerProvider.notifier).eliminar(unidad.id!);
+            if (unidad.id != null) {
+              ref
+                  .read(unidadMedidaControllerProvider.notifier)
+                  .eliminar(unidad.id!);
+            }
             Navigator.pop(context);
           },
         ),
@@ -185,11 +229,20 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
     );
   }
 
-  void _mostrarModalRegistro(BuildContext context, {UnidadMedida? unidadToEdit}) {
+  void _mostrarModalRegistro(
+    BuildContext context, {
+    UnidadMedida? unidadToEdit,
+  }) {
     final formKey = GlobalKey<FormState>();
-    final nombreController = TextEditingController(text: unidadToEdit?.nombre ?? '');
-    final abreviaturaController = TextEditingController(text: unidadToEdit?.abreviatura ?? '');
-    final descripcionController = TextEditingController(text: unidadToEdit?.descripcion ?? '');
+    final nombreController = TextEditingController(
+      text: unidadToEdit?.nombre ?? '',
+    );
+    final abreviaturaController = TextEditingController(
+      text: unidadToEdit?.abreviatura ?? '',
+    );
+    final descripcionController = TextEditingController(
+      text: unidadToEdit?.descripcion ?? '',
+    );
     final isEditing = unidadToEdit != null;
     AppDialog.show<void>(
       context,
@@ -201,17 +254,29 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AppTextField(label: 'Nombre de la Unidad', controller: nombreController),
+              AppTextField(
+                label: 'Nombre de la Unidad',
+                controller: nombreController,
+              ),
               AppLayout.vM,
-              AppTextField(label: 'Abreviatura (ej. UND, KG)', controller: abreviaturaController),
+              AppTextField(
+                label: 'Abreviatura (ej. UND, KG)',
+                controller: abreviaturaController,
+              ),
               AppLayout.vM,
-              AppTextField(label: 'Descripción', controller: descripcionController),
+              AppTextField(
+                label: 'Descripción',
+                controller: descripcionController,
+              ),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
         AppButton(
           text: isEditing ? 'Actualizar' : 'Guardar',
           onPressed: () {
@@ -220,17 +285,29 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                 final und = UnidadMedida(
                   id: unidadToEdit?.id,
                   nombre: nombreController.text.trim(),
-                  abreviatura: abreviaturaController.text.trim().isEmpty ? null : abreviaturaController.text.trim().toUpperCase(),
-                  descripcion: descripcionController.text.trim().isEmpty ? null : descripcionController.text.trim(),
+                  abreviatura: abreviaturaController.text.trim().isEmpty
+                      ? null
+                      : abreviaturaController.text.trim().toUpperCase(),
+                  descripcion: descripcionController.text.trim().isEmpty
+                      ? null
+                      : descripcionController.text.trim(),
                   creadoEn: unidadToEdit?.creadoEn ?? DateTime.now(),
                   actualizadoEn: isEditing ? DateTime.now() : null,
                 );
                 isEditing
-                    ? ref.read(unidadMedidaControllerProvider.notifier).actualizar(und)
-                    : ref.read(unidadMedidaControllerProvider.notifier).guardar(und);
+                    ? ref
+                          .read(unidadMedidaControllerProvider.notifier)
+                          .actualizar(und)
+                    : ref
+                          .read(unidadMedidaControllerProvider.notifier)
+                          .guardar(und);
                 Navigator.pop(context);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString().replaceAll('Exception: ', '')),
+                  ),
+                );
               }
             }
           },

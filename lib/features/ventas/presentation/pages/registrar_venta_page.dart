@@ -22,7 +22,9 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 
 class RegistrarVentaPage extends ConsumerStatefulWidget {
   const RegistrarVentaPage({super.key});
+
   static const String routeName = 'registrar-ventas';
+
   @override
   ConsumerState<RegistrarVentaPage> createState() => _RegistrarVentaPageState();
 }
@@ -35,7 +37,9 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
   @override
   void initState() {
     super.initState();
-    _ventaNumero = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    _ventaNumero = DateTime.now().millisecondsSinceEpoch.toString().substring(
+      8,
+    );
   }
 
   @override
@@ -44,9 +48,14 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     super.dispose();
   }
 
-  Oferta? _buscarOfertaAplicable(List<Oferta> ofertas, int productoId, double cantidad) {
+  Oferta? _buscarOfertaAplicable(
+    List<Oferta> ofertas,
+    int productoId,
+    double cantidad,
+  ) {
     for (final oferta in ofertas) {
-      if (oferta.productoId == productoId && cantidad >= oferta.cantidadMinima) {
+      if (oferta.productoId == productoId &&
+          cantidad >= oferta.cantidadMinima) {
         return oferta;
       }
     }
@@ -95,12 +104,18 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         );
         return;
       }
+
       final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
-      final double precioUnitario = (oferta != null) ? oferta.precioOferta : p.precioVenta.toDouble();
+      final double precioUnitario = (oferta != null)
+          ? oferta.precioOferta
+          : p.precioVenta.toDouble();
       final double subtotal = precioUnitario * 1;
-      final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
-      final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
+      final double? precioOriginal = (oferta != null)
+          ? p.precioVenta.toDouble()
+          : null;
+      final int? ofertaId = oferta?.id;
       final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
+
       final linea = DetalleVenta(
         productoId: p.id ?? 0,
         nombreProducto: p.nombre,
@@ -112,8 +127,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         ofertaNombre: ofertaNombre,
         precioOriginal: precioOriginal,
       );
+
       ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
       _buscadorController.clear();
+
       if (oferta != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -134,18 +151,29 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
             itemBuilder: (ctx, i) {
               if (i == resultados.length) {
                 return ListTile(
-                  leading: const Icon(Icons.inventory_2, color: AppColors.primary),
-                  title: const Text('Abrir Inventario completo', style: AppTypography.bodyMedium),
-                  subtitle: const Text('Ver todos los productos', style: AppTypography.bodySmall),
+                  leading: const Icon(
+                    Icons.inventory_2,
+                    color: AppColors.primary,
+                  ),
+                  title: const Text(
+                    'Abrir Inventario completo',
+                    style: AppTypography.bodyMedium,
+                  ),
+                  subtitle: const Text(
+                    'Ver todos los productos',
+                    style: AppTypography.bodySmall,
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     context.pushNamed(ProductosPage.routeName);
                   },
                 );
               }
+
               final p = resultados[i];
               final oferta = _buscarOfertaAplicable(listaOfertas, p.id ?? 0, 1);
               final hayStock = (p.stock ?? 0) > 0;
+
               return ListTile(
                 title: Row(
                   children: [
@@ -159,7 +187,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                     if (!hayStock)
                       Container(
                         margin: const EdgeInsets.only(left: AppSpacing.s),
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xs,
+                          vertical: AppSpacing.xs,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.error.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.s),
@@ -175,7 +206,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                     if (oferta != null && hayStock)
                       Container(
                         margin: const EdgeInsets.only(left: AppSpacing.s),
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xs,
+                          vertical: AppSpacing.xs,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.warning.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.s),
@@ -193,19 +227,26 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                 subtitle: Text(
                   hayStock
                       ? (oferta != null
-                          ? 'Oferta: RD\$ ${oferta.precioOferta.toStringAsFixed(2)} (antes RD\$ ${p.precioVenta.toStringAsFixed(2)}) — Stock: ${p.stock ?? 0}'
-                          : 'RD\$ ${p.precioVenta.toStringAsFixed(2)} — Stock: ${p.stock ?? 0}')
+                            ? 'Oferta: RD\$ ${oferta.precioOferta.toStringAsFixed(2)} (antes RD\$ ${p.precioVenta.toStringAsFixed(2)}) — Stock: ${p.stock ?? 0}'
+                            : 'RD\$ ${p.precioVenta.toStringAsFixed(2)} — Stock: ${p.stock ?? 0}')
                       : 'Sin existencias',
                   style: AppTypography.bodySmall,
                 ),
                 enabled: hayStock,
                 onTap: hayStock
                     ? () {
-                        final double precioUnitario = (oferta != null) ? oferta.precioOferta : p.precioVenta.toDouble();
+                        final double precioUnitario = (oferta != null)
+                            ? oferta.precioOferta
+                            : p.precioVenta.toDouble();
                         final double subtotal = precioUnitario * 1;
-                        final double? precioOriginal = (oferta != null) ? p.precioVenta.toDouble() : null;
-                        final String? ofertaId = (oferta != null) ? oferta.id.toString() : null;
-                        final String? ofertaNombre = (oferta != null) ? oferta.nombre : null;
+                        final double? precioOriginal = (oferta != null)
+                            ? p.precioVenta.toDouble()
+                            : null;
+                        final int? ofertaId = oferta?.id;
+                        final String? ofertaNombre = (oferta != null)
+                            ? oferta.nombre
+                            : null;
+
                         final linea = DetalleVenta(
                           productoId: p.id ?? 0,
                           nombreProducto: p.nombre,
@@ -217,13 +258,19 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                           ofertaNombre: ofertaNombre,
                           precioOriginal: precioOriginal,
                         );
-                        ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
+
+                        ref
+                            .read(registrarVentaProvider.notifier)
+                            .agregarProducto(linea);
                         _buscadorController.clear();
                         Navigator.pop(ctx);
+
                         if (oferta != null && mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Oferta aplicada: ${oferta.nombre}'),
+                              content: Text(
+                                'Oferta aplicada: ${oferta.nombre}',
+                              ),
                               backgroundColor: AppColors.warning,
                             ),
                           );
@@ -248,35 +295,45 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
           ListTile(
             title: const Text('Efectivo', style: AppTypography.bodyMedium),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('efectivo');
+              ref
+                  .read(registrarVentaProvider.notifier)
+                  .cambiarFormaPago('efectivo');
               Navigator.pop(context);
             },
           ),
           ListTile(
             title: const Text('Tarjeta', style: AppTypography.bodyMedium),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('tarjeta');
+              ref
+                  .read(registrarVentaProvider.notifier)
+                  .cambiarFormaPago('tarjeta');
               Navigator.pop(context);
             },
           ),
           ListTile(
             title: const Text('Transferencia', style: AppTypography.bodyMedium),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('transferencia');
+              ref
+                  .read(registrarVentaProvider.notifier)
+                  .cambiarFormaPago('transferencia');
               Navigator.pop(context);
             },
           ),
           ListTile(
             title: const Text('Crédito', style: AppTypography.bodyMedium),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('credito');
+              ref
+                  .read(registrarVentaProvider.notifier)
+                  .cambiarFormaPago('credito');
               Navigator.pop(context);
             },
           ),
           ListTile(
             title: const Text('Cheque', style: AppTypography.bodyMedium),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).cambiarFormaPago('cheque');
+              ref
+                  .read(registrarVentaProvider.notifier)
+                  .cambiarFormaPago('cheque');
               Navigator.pop(context);
             },
           ),
@@ -294,23 +351,33 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            title: const Text('Consumidor Final', style: AppTypography.bodyMedium),
+            title: const Text(
+              'Consumidor Final',
+              style: AppTypography.bodyMedium,
+            ),
             onTap: () {
-              ref.read(registrarVentaProvider.notifier).seleccionarCliente(1, 'Consumidor Final');
+              ref
+                  .read(registrarVentaProvider.notifier)
+                  .seleccionarCliente(1, 'Consumidor Final');
               Navigator.pop(context);
             },
           ),
           ListTile(
-            title: const Text('Buscar Cliente...', style: AppTypography.bodyMedium),
-            subtitle: const Text('Ver lista de clientes registrados', style: AppTypography.bodySmall),
+            title: const Text(
+              'Buscar Cliente...',
+              style: AppTypography.bodyMedium,
+            ),
+            subtitle: const Text(
+              'Ver lista de clientes registrados',
+              style: AppTypography.bodySmall,
+            ),
             onTap: () async {
               Navigator.pop(context);
               final cliente = await SeleccionarClienteDialog.mostrar(context);
               if (cliente != null && context.mounted) {
-                ref.read(registrarVentaProvider.notifier).seleccionarCliente(
-                  cliente.id ?? 0,
-                  cliente.nombre,
-                );
+                ref
+                    .read(registrarVentaProvider.notifier)
+                    .seleccionarCliente(cliente.id ?? 0, cliente.nombre);
               }
             },
           ),
@@ -349,20 +416,26 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
     if (!ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Complete los datos: Cliente, Forma de Pago y al menos un producto'),
+          content: Text(
+            'Complete los datos: Cliente, Forma de Pago y al menos un producto',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
       return;
     }
+
     setState(() => _cargando = true);
     try {
       final casoUso = ref.read(registrarVentaUseCaseProvider);
       final ventaGuardada = await casoUso.ejecutar(estado);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Venta registrada. Nº $_ventaNumero — ID: $ventaGuardada'),
+            content: Text(
+              'Venta registrada. Nº $_ventaNumero — ID: $ventaGuardada',
+            ),
             backgroundColor: AppColors.success,
           ),
         );
@@ -405,7 +478,10 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                         children: [
                           AppCard(
                             elevation: 1,
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.l,
+                              vertical: AppSpacing.m,
+                            ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -419,7 +495,9 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                                 const SizedBox(width: AppSpacing.s),
                                 Text(
                                   'Nº $_ventaNumero',
-                                  style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -441,7 +519,8 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                             builder: (context, rowConstraints) {
                               if (rowConstraints.maxWidth < 500) {
                                 return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     AppButton(
                                       text: 'Limpiar Venta',
@@ -450,8 +529,12 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                                     ),
                                     const SizedBox(height: AppSpacing.s),
                                     AppButton(
-                                      text: _cargando ? 'Guardando...' : 'Registrar Venta',
-                                      onPressed: _cargando ? null : _cobrarYRegistrarSalida,
+                                      text: _cargando
+                                          ? 'Guardando...'
+                                          : 'Registrar Venta',
+                                      onPressed: _cargando
+                                          ? null
+                                          : _cobrarYRegistrarSalida,
                                       isLoading: _cargando,
                                       icon: Icons.save,
                                     ),
@@ -470,8 +553,12 @@ class _RegistrarVentaPageState extends ConsumerState<RegistrarVentaPage> {
                                   const SizedBox(width: AppSpacing.m),
                                   Expanded(
                                     child: AppButton(
-                                      text: _cargando ? 'Guardando...' : 'Registrar Venta',
-                                      onPressed: _cargando ? null : _cobrarYRegistrarSalida,
+                                      text: _cargando
+                                          ? 'Guardando...'
+                                          : 'Registrar Venta',
+                                      onPressed: _cargando
+                                          ? null
+                                          : _cobrarYRegistrarSalida,
                                       isLoading: _cargando,
                                       icon: Icons.save,
                                     ),

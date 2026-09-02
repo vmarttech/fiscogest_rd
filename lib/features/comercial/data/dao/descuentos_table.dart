@@ -11,5 +11,7 @@ class DescuentosTable extends Table {
   IntColumn get referenciaId => integer().named('referencia_id').nullable()();
   DateTimeColumn get vigenciaDesde => dateTime().named('vigencia_desde')();
   DateTimeColumn get vigenciaHasta => dateTime().named('vigencia_hasta')();
-  TextColumn get estado => textEnum<RegistroEstado>().named('estado').withDefault(const Constant('Vigente'))();
+  TextColumn get estado => textEnum<RegistroEstado>()
+      .named('estado')
+      .withDefault(const Constant('Vigente'))();
 }

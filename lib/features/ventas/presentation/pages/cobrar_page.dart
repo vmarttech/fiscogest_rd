@@ -25,7 +25,9 @@ class CuentaCobrarItem {
   final String estado;
 }
 
-final listadoCuentasCobrarProvider = FutureProvider<List<CuentaCobrarItem>>((ref) async {
+final listadoCuentasCobrarProvider = FutureProvider<List<CuentaCobrarItem>>((
+  ref,
+) async {
   final db = ref.watch(databaseProvider);
   final dao = CuentasCobrarDao(db);
   final registros = await dao.listarCuentasPorCobrar();
@@ -81,12 +83,16 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                   children: [
                     Text(
                       'Gestión de Créditos y Cobros',
-                      style: AppTypography.h3.copyWith(color: AppColors.primary),
+                      style: AppTypography.h3.copyWith(
+                        color: AppColors.primary,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Consulte saldos, registre pagos y administre cuentas pendientes',
-                      style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -94,16 +100,23 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
               const SizedBox(height: 16),
               Expanded(
                 child: listado.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, _) => Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: AppColors.warning),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: AppColors.warning,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'Error al cargar cuentas: $error',
-                          style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -115,16 +128,26 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.payments_outlined, size: 64, color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                            Icon(
+                              Icons.payments_outlined,
+                              size: 64,
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               'No hay cuentas por cobrar',
-                              style: AppTypography.h3.copyWith(color: AppColors.textSecondary),
+                              style: AppTypography.h3.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Las ventas a crédito aparecerán aquí',
-                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ],
                         ),
@@ -148,32 +171,51 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       cta.clienteNombre,
-                                      style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+                                      style: AppTypography.bodyLarge.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                     Chip(
-                                      label: Text(cta.estado, style: const TextStyle(fontSize: 12)),
+                                      label: Text(
+                                        cta.estado,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
                                       padding: EdgeInsets.zero,
-                                      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+                                      labelPadding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
                                       side: BorderSide(color: colorEstado),
-                                      backgroundColor: colorEstado.withValues(alpha: 0.08),
+                                      backgroundColor: colorEstado.withValues(
+                                        alpha: 0.08,
+                                      ),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
-                                Text('Vencimiento: ${cta.fechaVencimiento.day.toString().padLeft(2,'0')}/${cta.fechaVencimiento.month.toString().padLeft(2,'0')}/${cta.fechaVencimiento.year}'),
+                                Text(
+                                  'Vencimiento: ${cta.fechaVencimiento.day.toString().padLeft(2, '0')}/${cta.fechaVencimiento.month.toString().padLeft(2, '0')}/${cta.fechaVencimiento.year}',
+                                ),
                                 const SizedBox(height: 4),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Original: \$${cta.montoOriginal.toStringAsFixed(2)}'),
-                                    Text('Abonado: \$${cta.montoAbonado.toStringAsFixed(2)}'),
+                                    Text(
+                                      'Original: \$${cta.montoOriginal.toStringAsFixed(2)}',
+                                    ),
+                                    Text(
+                                      'Abonado: \$${cta.montoAbonado.toStringAsFixed(2)}',
+                                    ),
                                     Text(
                                       'Pendiente: \$${cta.saldoPendiente.toStringAsFixed(2)}',
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),

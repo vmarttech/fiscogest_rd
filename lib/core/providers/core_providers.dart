@@ -7,16 +7,25 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 final usuarioAutenticadoProvider = Provider<int?>((ref) => null);
 
 // ✅ OBLIGATORIO POR ARQUITECTURA: No nulo, exige inicialización explícita en main.dart
-final inventarioRepositoryProvider = Provider<InventarioRepositoryInterface>((ref) {
-  throw StateError('Inicializa inventarioRepositoryProvider en main.dart mediante overrideWithValue');
+final inventarioRepositoryProvider = Provider<InventarioRepositoryInterface>((
+  ref,
+) {
+  throw StateError(
+    'Inicializa inventarioRepositoryProvider en main.dart mediante overrideWithValue',
+  );
 });
 
 // ✅ MISMA REGLA: No nulo, inicialización controlada en el arranque
-final inventarioFisicoRepositoryProvider = Provider<InventarioFisicoRepositoryInterface>((ref) {
-  throw StateError('Inicializa inventarioFisicoRepositoryProvider en main.dart mediante overrideWithValue');
-});
+final inventarioFisicoRepositoryProvider =
+    Provider<InventarioFisicoRepositoryInterface>((ref) {
+      throw StateError(
+        'Inicializa inventarioFisicoRepositoryProvider en main.dart mediante overrideWithValue',
+      );
+    });
 
 // ✅ MISMA REGLA PARA VENTAS: Inicializar en main.dart mediante overrideWithValue
 final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
-  throw StateError('Inicializa ventasRepositoryProvider en main.dart mediante overrideWithValue');
+  throw StateError(
+    'Inicializa ventasRepositoryProvider en main.dart mediante overrideWithValue',
+  );
 });

@@ -10,20 +10,60 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
 
 class VentasRoute {
-  const VentasRoute({required this.path, required this.name, required this.builder});
+  const VentasRoute({
+    required this.path,
+    required this.name,
+    required this.builder,
+  });
   final String path;
   final String name;
   final WidgetBuilder builder;
 }
 
 final List<VentasRoute> ventasRoutes = [
-  VentasRoute(path: '/ventas', name: VentasContenedorPage.nombreRuta, builder: (_) => const VentasContenedorPage()),
-  VentasRoute(path: '/ventas/registrar', name: RegistrarVentaPage.routeName, builder: (_) => const RegistrarVentaPage()),
-  VentasRoute(path: '/ventas/cotizaciones/nueva', name: NuevaVentaBorradorPage.routeName, builder: (_) => const NuevaVentaBorradorPage()),
-  VentasRoute(path: '/ventas/apartados', name: ApartadosPage.routeName, builder: (_) => const ApartadosPage()),
-  VentasRoute(path: '/ventas/devoluciones', name: DevolucionesPage.routeName, builder: (_) => const DevolucionesPage()),
-  VentasRoute(path: '/ventas/cobrar', name: CobrarPage.routeName, builder: (_) => const CobrarPage()),
-  VentasRoute(path: '/ventas/pagar', name: PagarPage.routeName, builder: (_) => const PagarPage()),
-  VentasRoute(path: '/ventas/descuentos', name: DescuentosPage.routeName, builder: (_) => const DescuentosPage()),
-  VentasRoute(path: '/ventas/ofertas', name: OfertasPage.routeName, builder: (_) => const OfertasPage()),
+  VentasRoute(
+    path: '/ventas',
+    name: VentasContenedorPage.nombreRuta,
+    builder: (_) => const VentasContenedorPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/registrar',
+    name: RegistrarVentaPage.routeName,
+    builder: (_) => const RegistrarVentaPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/cotizaciones/nueva',
+    name: NuevaVentaBorradorPage.routeName,
+    builder: (_) => const NuevaVentaBorradorPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/apartados',
+    name: ApartadosPage.routeName,
+    builder: (_) => const ApartadosPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/devoluciones',
+    name: DevolucionesPage.routeName,
+    builder: (_) => const DevolucionesPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/cobrar',
+    name: CobrarPage.routeName,
+    builder: (_) => const CobrarPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/pagar',
+    name: PagarPage.routeName,
+    builder: (_) => const PagarPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/descuentos',
+    name: DescuentosPage.routeName,
+    builder: (_) => const DescuentosPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/ofertas',
+    name: OfertasPage.routeName,
+    builder: (_) => const OfertasPage(),
+  ),
 ];

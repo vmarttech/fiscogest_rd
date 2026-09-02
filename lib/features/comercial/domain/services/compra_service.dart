@@ -15,14 +15,12 @@ class CompraService {
     required RegistrarCompraUseCase registrarCompra,
     required ConfirmarCompraUseCase confirmarCompra,
     required ListarComprasUseCase listarCompras,
-  })  : _registrarCompra = registrarCompra,
-        _confirmarCompra = confirmarCompra,
-        _listarCompras = listarCompras;
-
+  }) : _registrarCompra = registrarCompra,
+       _confirmarCompra = confirmarCompra,
+       _listarCompras = listarCompras;
   final RegistrarCompraUseCase _registrarCompra;
   final ConfirmarCompraUseCase _confirmarCompra;
   final ListarComprasUseCase _listarCompras;
-
   Future<Compra> registrarCompra({
     required Compra compra,
     required List<DetalleCompra> detalles,
@@ -34,9 +32,9 @@ class CompraService {
     return compraRegistrada;
   }
 
-  Future<Compra> confirmarCompra(String compraId) async {
+  Future<Compra> confirmarCompra(int compraId) async {
     final compraConfirmada = await _confirmarCompra(compraId);
-    EventoBus.emitir(EventosSistema.compraConfirmada, { 'compraId': compraId });
+    EventoBus.emitir(EventosSistema.compraConfirmada, {'compraId': compraId});
     return compraConfirmada;
   }
 

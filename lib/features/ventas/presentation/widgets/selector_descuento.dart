@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+
 class SelectorDescuento extends ConsumerWidget {
   const SelectorDescuento({super.key, this.esParaCotizacion = false});
   final bool esParaCotizacion;
+
   String _formatearValor(Descuento descuento) {
     if (descuento.esPorcentaje) {
       return '${descuento.valor.toStringAsFixed(0)}%';
     }
     return 'RD\$ ${descuento.valor.toStringAsFixed(2)}';
   }
+
   String _formatearTipo(TipoDescuento tipo) {
     switch (tipo) {
       case TipoDescuento.porProducto:
@@ -19,6 +22,7 @@ class SelectorDescuento extends ConsumerWidget {
         return 'Por total de venta';
     }
   }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final descuentosAsync = ref.watch(descuentosActivosProvider);
@@ -37,6 +41,7 @@ class SelectorDescuento extends ConsumerWidget {
       data: (List<Descuento> descuentos) {
         final estadoVenta = ref.watch(registrarVentaProvider);
         final estadoCot = ref.watch(ventaBorradorProvider);
+        // descuentoId en estado es int?
         final int? descuentoId = esParaCotizacion
             ? estadoCot.descuentoId
             : estadoVenta.descuentoId;
@@ -83,9 +88,13 @@ class SelectorDescuento extends ConsumerWidget {
                     TextButton(
                       onPressed: () {
                         if (esParaCotizacion) {
-                          ref.read(ventaBorradorProvider.notifier).quitarDescuento();
+                          ref
+                              .read(ventaBorradorProvider.notifier)
+                              .quitarDescuento();
                         } else {
-                          ref.read(registrarVentaProvider.notifier).quitarDescuento();
+                          ref
+                              .read(registrarVentaProvider.notifier)
+                              .quitarDescuento();
                         }
                       },
                       child: const Text('Quitar'),
@@ -102,7 +111,8 @@ class SelectorDescuento extends ConsumerWidget {
               )
             else
               ...descuentosActivos.map((descuento) {
-                final int? descuentoIdInt = int.tryParse(descuento.id);
+                // ✅ descuento.id YA ES int — NO se convierte a String
+                final int descuentoIdInt = descuento.id;
                 final bool seleccionado = descuentoId == descuentoIdInt;
                 return Card(
                   elevation: seleccionado ? 4 : 1,
@@ -118,7 +128,9 @@ class SelectorDescuento extends ConsumerWidget {
                     title: Text(
                       descuento.motivo,
                       style: TextStyle(
-                        fontWeight: seleccionado ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: seleccionado
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                     subtitle: Text(_formatearTipo(descuento.tipo)),
@@ -130,24 +142,32 @@ class SelectorDescuento extends ConsumerWidget {
                           _formatearValor(descuento),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue,
                             fontSize: 16,
                           ),
                         ),
                         Text(
                           _formatearTipo(descuento.tipo),
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
                     onTap: () {
                       final double valor = descuento.valor;
-                      final int? id = int.tryParse(descuento.id);
+                      // ✅ id YA ES int — se pasa directo
+                      final int id = descuento.id;
                       final String nombre = descuento.motivo;
                       if (esParaCotizacion) {
-                        ref.read(ventaBorradorProvider.notifier).aplicarDescuento(valor);
+                        ref
+                            .read(ventaBorradorProvider.notifier)
+                            .aplicarDescuento(valor);
                       } else {
-                        ref.read(registrarVentaProvider.notifier).seleccionarDescuento(id, nombre, valor);
+                        // ✅ Enviamos int → coincide con lo que espera el provider
+                        ref
+                            .read(registrarVentaProvider.notifier)
+                            .seleccionarDescuento(id, nombre, valor);
                       }
                     },
                   ),

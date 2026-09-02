@@ -50,7 +50,9 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                       children: [
                         Text(
                           'Administración de unidades y presentaciones de productos.',
-                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         AppLayout.vM,
                         AppButton(
@@ -66,7 +68,9 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                         Expanded(
                           child: Text(
                             'Administración de unidades y presentaciones de productos.',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                         AppButton(
@@ -78,12 +82,16 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                     ),
               AppLayout.vM,
               AppCard(
-                padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
+                padding: AppSpacing.hM.copyWith(
+                  top: AppSpacing.s,
+                  bottom: AppSpacing.s,
+                ),
                 child: AppTextField(
                   controller: _searchController,
                   hint: 'Buscar presentación por nombre o abreviatura...',
                   prefixIcon: Icons.search,
-                  onChanged: (value) => setState(() => _filtroBusqueda = value.toLowerCase()),
+                  onChanged: (value) =>
+                      setState(() => _filtroBusqueda = value.toLowerCase()),
                 ),
               ),
               AppLayout.vM,
@@ -92,10 +100,17 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                   padding: EdgeInsets.zero,
                   child: presentacionesAsync.when(
                     data: (presentaciones) {
-                      final filtradas = presentaciones.where((p) =>
-                        p.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                        p.abreviatura.toLowerCase().contains(_filtroBusqueda)
-                      ).toList();
+                      final filtradas = presentaciones
+                          .where(
+                            (p) =>
+                                p.nombre.toLowerCase().contains(
+                                  _filtroBusqueda,
+                                ) ||
+                                p.abreviatura.toLowerCase().contains(
+                                  _filtroBusqueda,
+                                ),
+                          )
+                          .toList();
                       if (filtradas.isEmpty) {
                         return const Center(
                           child: Text(
@@ -107,7 +122,8 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                       return ListView.separated(
                         padding: AppSpacing.allS,
                         itemCount: filtradas.length,
-                        separatorBuilder: (context, index) => const Divider(color: AppColors.grey200, height: 1),
+                        separatorBuilder: (context, index) =>
+                            const Divider(color: AppColors.grey200, height: 1),
                         itemBuilder: (context, index) {
                           final presentacion = filtradas[index];
                           return Padding(
@@ -124,16 +140,22 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                   child: Center(
                                     child: Text(
                                       presentacion.abreviatura,
-                                      style: AppTypography.labelMedium.copyWith(color: AppColors.textPrimary),
+                                      style: AppTypography.labelMedium.copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
                                     ),
                                   ),
                                 ),
                                 AppLayout.hM,
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(presentacion.nombre, style: AppTypography.labelLarge),
+                                      Text(
+                                        presentacion.nombre,
+                                        style: AppTypography.labelLarge,
+                                      ),
                                       AppLayout.vXs,
                                       Text(
                                         'Abreviatura: ${presentacion.abreviatura}',
@@ -146,28 +168,48 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                                      icon: const Icon(
+                                        Icons.edit_outlined,
+                                        color: AppColors.primary,
+                                        size: 20,
+                                      ),
                                       tooltip: 'Editar Presentación',
-                                      onPressed: () => _mostrarModalRegistro(context, presentacionToEdit: presentacion),
+                                      onPressed: () => _mostrarModalRegistro(
+                                        context,
+                                        presentacionToEdit: presentacion,
+                                      ),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                                      icon: const Icon(
+                                        Icons.delete_outline,
+                                        color: AppColors.error,
+                                        size: 20,
+                                      ),
                                       tooltip: 'Eliminar Presentación',
                                       onPressed: () {
                                         AppDialog.show<void>(
                                           context,
                                           title: 'Confirmar Eliminación',
-                                          message: '¿Está seguro de eliminar la presentación "${presentacion.nombre}"?',
+                                          message:
+                                              '¿Está seguro de eliminar la presentación "${presentacion.nombre}"?',
                                           actions: [
                                             TextButton(
-                                              onPressed: () => Navigator.pop(context),
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
                                               child: const Text('Cancelar'),
                                             ),
                                             AppButton(
                                               text: 'Eliminar',
                                               onPressed: () {
                                                 if (presentacion.id != null) {
-                                                  ref.read(presentacionControllerProvider.notifier).eliminar(presentacion.id!);
+                                                  ref
+                                                      .read(
+                                                        presentacionControllerProvider
+                                                            .notifier,
+                                                      )
+                                                      .eliminar(
+                                                        presentacion.id!,
+                                                      );
                                                 }
                                                 Navigator.pop(context);
                                               },
@@ -184,8 +226,11 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                         },
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, st) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium)),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, st) => Center(
+                      child: Text('Error: $e', style: AppTypography.bodyMedium),
+                    ),
                   ),
                 ),
               ),
@@ -196,10 +241,17 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
     );
   }
 
-  void _mostrarModalRegistro(BuildContext context, {Presentacion? presentacionToEdit}) {
+  void _mostrarModalRegistro(
+    BuildContext context, {
+    Presentacion? presentacionToEdit,
+  }) {
     final formKey = GlobalKey<FormState>();
-    final nombreController = TextEditingController(text: presentacionToEdit?.nombre ?? '');
-    final abreviaturaController = TextEditingController(text: presentacionToEdit?.abreviatura ?? '');
+    final nombreController = TextEditingController(
+      text: presentacionToEdit?.nombre ?? '',
+    );
+    final abreviaturaController = TextEditingController(
+      text: presentacionToEdit?.abreviatura ?? '',
+    );
     final isEditing = presentacionToEdit != null;
 
     AppDialog.show<void>(
@@ -241,14 +293,20 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                   abreviatura: abreviaturaController.text.trim().toUpperCase(),
                 );
                 if (isEditing) {
-                  ref.read(presentacionControllerProvider.notifier).actualizar(pres);
+                  ref
+                      .read(presentacionControllerProvider.notifier)
+                      .actualizar(pres);
                 } else {
-                  ref.read(presentacionControllerProvider.notifier).guardar(pres);
+                  ref
+                      .read(presentacionControllerProvider.notifier)
+                      .guardar(pres);
                 }
                 Navigator.pop(context);
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                  SnackBar(
+                    content: Text(e.toString().replaceAll('Exception: ', '')),
+                  ),
                 );
               }
             }

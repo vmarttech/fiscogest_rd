@@ -29,11 +29,16 @@ class ListarConteosPage extends ConsumerWidget {
       ),
       body: conteosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),
+        error: (e, _) => Center(
+          child: Text('Error: $e', style: const TextStyle(color: Colors.red)),
+        ),
         data: (lista) {
           if (lista.isEmpty) {
             return const Center(
-              child: Text('No hay conteos registrados. Cree el primero.', style: TextStyle(color: Color(0xFF64748B))),
+              child: Text(
+                'No hay conteos registrados. Cree el primero.',
+                style: TextStyle(color: Color(0xFF64748B)),
+              ),
             );
           }
           return ListView.separated(
@@ -44,13 +49,32 @@ class ListarConteosPage extends ConsumerWidget {
               final c = lista[i];
               return Card(
                 elevation: 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  title: Text(c.nombreConteo, style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF1E293B))),
-                  subtitle: Text('Fecha: ${c.fechaConteo.day}/${c.fechaConteo.month}/${c.fechaConteo.year} • Estado: ${c.estado.name.toUpperCase()}', style: const TextStyle(fontSize: 13)),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF94A3B8)),
-                  onTap: () => context.pushNamed('diferencias-conteo', extra: c.id),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  title: Text(
+                    c.nombreConteo,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Fecha: ${c.fechaConteo.day}/${c.fechaConteo.month}/${c.fechaConteo.year} • Estado: ${c.estado.name.toUpperCase()}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Color(0xFF94A3B8),
+                  ),
+                  onTap: () =>
+                      context.pushNamed('diferencias-conteo', extra: c.id),
                 ),
               );
             },

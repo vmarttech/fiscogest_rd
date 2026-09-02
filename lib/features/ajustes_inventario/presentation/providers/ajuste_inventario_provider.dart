@@ -3,9 +3,13 @@ import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 
-final ajusteInventarioRepositoryProvider = Provider<AjusteInventarioRepository>((ref) {
-  throw UnimplementedError('ajusteInventarioRepositoryProvider debe inicializarse');
-});
+final ajusteInventarioRepositoryProvider = Provider<AjusteInventarioRepository>(
+  (ref) {
+    throw UnimplementedError(
+      'ajusteInventarioRepositoryProvider debe inicializarse',
+    );
+  },
+);
 
 class AjusteInventarioProvider {
   AjusteInventarioProvider(this._repoAjuste, this._repoInventario);
@@ -35,14 +39,17 @@ class AjusteInventarioProvider {
   }
 }
 
-final ajusteInventarioListaProvider = FutureProvider.autoDispose<List<AjusteInventario>>((ref) async {
-  final repo = ref.watch(ajusteInventarioRepositoryProvider);
-  final repoInv = ref.watch(inventarioRepositoryProvider);
-  return await AjusteInventarioProvider(repo, repoInv).obtenerTodos();
-});
+final ajusteInventarioListaProvider =
+    FutureProvider.autoDispose<List<AjusteInventario>>((ref) async {
+      final repo = ref.watch(ajusteInventarioRepositoryProvider);
+      final repoInv = ref.watch(inventarioRepositoryProvider);
+      return await AjusteInventarioProvider(repo, repoInv).obtenerTodos();
+    });
 
-final ajusteInventarioProvider = Provider.autoDispose<AjusteInventarioProvider>((ref) {
-  final repoAjuste = ref.watch(ajusteInventarioRepositoryProvider);
-  final repoInv = ref.watch(inventarioRepositoryProvider);
-  return AjusteInventarioProvider(repoAjuste, repoInv);
-});
+final ajusteInventarioProvider = Provider.autoDispose<AjusteInventarioProvider>(
+  (ref) {
+    final repoAjuste = ref.watch(ajusteInventarioRepositoryProvider);
+    final repoInv = ref.watch(inventarioRepositoryProvider);
+    return AjusteInventarioProvider(repoAjuste, repoInv);
+  },
+);

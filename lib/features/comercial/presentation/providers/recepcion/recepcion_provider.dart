@@ -11,15 +11,16 @@ final recepcionServiceProvider = Provider<RecepcionService>((ref) {
 class RecepcionNotifier extends StateNotifier<AsyncValue<List<Recepcion>>> {
   RecepcionNotifier(this._service) : super(const AsyncValue.data([]));
   final RecepcionService _service;
-  final Map<String, Recepcion> _repoCache = {};
+  final Map<int, Recepcion> _repoCache = {};
 
   Future<void> registrar(Recepcion recepcion, String usuarioResponsable) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await _service.registrar(recepcion, usuarioResponsable);
-      if (recepcion.id != null) {
-        _repoCache[recepcion.id!] = recepcion;
-      }
+      final recepcionId = await _service.registrar(
+        recepcion,
+        usuarioResponsable,
+      );
+      _repoCache[recepcionId] = recepcion;
       return _repoCache.values.toList();
     });
   }
@@ -39,7 +40,9 @@ class RecepcionNotifier extends StateNotifier<AsyncValue<List<Recepcion>>> {
 }
 
 final recepcionNotifierProvider =
-    StateNotifierProvider<RecepcionNotifier, AsyncValue<List<Recepcion>>>((ref) {
-  final service = ref.watch(recepcionServiceProvider);
-  return RecepcionNotifier(service);
-});
+    StateNotifierProvider<RecepcionNotifier, AsyncValue<List<Recepcion>>>((
+      ref,
+    ) {
+      final service = ref.watch(recepcionServiceProvider);
+      return RecepcionNotifier(service);
+    });

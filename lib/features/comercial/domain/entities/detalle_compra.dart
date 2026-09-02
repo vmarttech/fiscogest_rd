@@ -3,7 +3,6 @@
 /// Cada instancia representa un producto incluido en la compra,
 /// con cantidad, costo unitario, descuento por línea e importe.
 class DetalleCompra {
-
   const DetalleCompra({
     required this.id,
     required this.compraId,
@@ -15,9 +14,10 @@ class DetalleCompra {
     required this.montoDescuentoLinea,
     required this.subtotalLinea,
   });
-  final String id;
-  final String compraId;
-  final String productoId;
+
+  final int id;
+  final int compraId;
+  final int productoId;
   final String nombreProducto;
   final double cantidad;
   final double costoUnitario;
@@ -28,9 +28,9 @@ class DetalleCompra {
   double get importeBruto => cantidad * costoUnitario;
 
   DetalleCompra copyWith({
-    String? id,
-    String? compraId,
-    String? productoId,
+    int? id,
+    int? compraId,
+    int? productoId,
     String? nombreProducto,
     double? cantidad,
     double? costoUnitario,

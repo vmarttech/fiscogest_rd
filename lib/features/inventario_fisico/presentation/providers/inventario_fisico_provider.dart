@@ -15,9 +15,12 @@ final inventarioFisicoDbProvider = Provider<AppDatabase>((ref) {
 });
 
 // ✅ Repositorio: usa la INTERFAZ como tipo y AppDatabase
-final inventarioFisicoRepoProvider = Provider<InventarioFisicoRepositoryInterface>((ref) {
-  return InventarioFisicoRepositoryImpl(ref.watch(inventarioFisicoDbProvider));
-});
+final inventarioFisicoRepoProvider =
+    Provider<InventarioFisicoRepositoryInterface>((ref) {
+      return InventarioFisicoRepositoryImpl(
+        ref.watch(inventarioFisicoDbProvider),
+      );
+    });
 
 // ✅ Casos de uso: todos reciben la interfaz, funcionan sin errores
 final registrarConteoProvider = Provider<RegistrarConteoUsecase>((ref) {

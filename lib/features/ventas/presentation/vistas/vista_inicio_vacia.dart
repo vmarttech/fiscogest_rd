@@ -11,13 +11,19 @@ class VistaInicioVacia extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final modo = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
+    final modo = ref.watch(
+      ventasNavegacionProvider.select((e) => e.modoOperacion),
+    );
 
     final subtitulo = switch (modo) {
-      ModoOperacion.venta => 'Seleccione productos o servicios para iniciar una operación de venta',
-      ModoOperacion.cotizacion => 'Seleccione productos o servicios para elaborar una cotización',
-      ModoOperacion.apartado => 'Seleccione productos para registrar un apartado de cliente',
-      ModoOperacion.cobrar => 'Consulte, administre y registre pagos de cuentas por cobrar',
+      ModoOperacion.venta =>
+        'Seleccione productos o servicios para iniciar una operación de venta',
+      ModoOperacion.cotizacion =>
+        'Seleccione productos o servicios para elaborar una cotización',
+      ModoOperacion.apartado =>
+        'Seleccione productos para registrar un apartado de cliente',
+      ModoOperacion.cobrar =>
+        'Consulte, administre y registre pagos de cuentas por cobrar',
     };
 
     final icono = switch (modo) {
@@ -74,12 +80,18 @@ class VistaInicioVacia extends ConsumerWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.tips_and_updates_outlined, color: AppColors.textSecondary, size: 20),
+                  const Icon(
+                    Icons.tips_and_updates_outlined,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
                   const SizedBox(width: AppSpacing.s),
                   Expanded(
                     child: Text(
                       'Seleccione una categoría para comenzar',
-                      style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ],

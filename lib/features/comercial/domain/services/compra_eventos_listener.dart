@@ -3,10 +3,9 @@ import 'package:fiscogest_rd/core/eventos/eventos_sistema.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_inventario_repository.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_producto_repository.dart';
-import 'package:fiscogest_rd/features/comercial/domain/repositories/i_proveedor_repository.dart';
+import 'package:fiscogest_rd/features/proveedores/domain/repositories/i_proveedor_repository.dart';
 
 class CompraEventosListener {
-
   CompraEventosListener(
     this.compraRepository,
     this.inventarioRepository,
@@ -15,6 +14,7 @@ class CompraEventosListener {
   ) {
     _registrarEscuchas();
   }
+
   final ICompraRepository compraRepository;
   final IInventarioRepository inventarioRepository;
   final IProductoRepository productoRepository;
@@ -25,8 +25,24 @@ class CompraEventosListener {
   }
 
   Future<void> _alConfirmarCompra(Map<String, dynamic> datos) async {
-    final String compraId = datos['compraId'] as String;
-    if (compraId.isEmpty) return;
+    final dynamic compraIdRaw = datos['compraId'];
+    final int compraId;
+
+    if (compraIdRaw is int) {
+      compraId = compraIdRaw;
+    } else {
+      final texto = compraIdRaw.toString();
+      // ✅ LIMPIEZA COMPLETA: extraer SOLO dígitos, sin importar sufijos
+      final soloDigitos = texto.replaceAll(RegExp(r'[^0-9]'), '');
+      // ✅ CONVERSIÓN SEGURA: sin excepción si no hay dígitos
+      compraId = int.tryParse(soloDigitos) ?? 0;
+
+      if (compraId == 0) {
+        throw FormatException(
+          'No se pudo extraer identificador numérico desde: $texto',
+        );
+      }
+    }
 
     final compra = await compraRepository.obtenerCompraPorId(compraId);
     if (compra == null) return;
@@ -38,7 +54,6 @@ class CompraEventosListener {
         productoId: linea.productoId,
         cantidad: linea.cantidad,
       );
-
       await productoRepository.actualizarCostoProducto(
         productoId: linea.productoId,
         costoUnitario: linea.costoUnitario,
@@ -54,6 +69,9 @@ class CompraEventosListener {
   }
 
   void dispose() {
-    EventoBus.dejarDeEscuchar(EventosSistema.compraConfirmada, _alConfirmarCompra);
+    EventoBus.dejarDeEscuchar(
+      EventosSistema.compraConfirmada,
+      _alConfirmarCompra,
+    );
   }
 }

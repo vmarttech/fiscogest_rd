@@ -8,9 +8,18 @@ class Existencia {
     required this.productoId,
     required this.existenciaActual,
     required this.existenciaDisponible,
-  }) : assert(existenciaActual >= 0, 'La existencia actual NO puede ser negativa'),
-       assert(existenciaDisponible >= 0, 'La existencia disponible NO puede ser negativa'),
-       assert(existenciaDisponible <= existenciaActual, 'Existencia disponible NO puede superar la existencia total');
+  }) : assert(
+         existenciaActual >= 0,
+         'La existencia actual NO puede ser negativa',
+       ),
+       assert(
+         existenciaDisponible >= 0,
+         'La existencia disponible NO puede ser negativa',
+       ),
+       assert(
+         existenciaDisponible <= existenciaActual,
+         'Existencia disponible NO puede superar la existencia total',
+       );
 
   final int? id;
   final int productoId;

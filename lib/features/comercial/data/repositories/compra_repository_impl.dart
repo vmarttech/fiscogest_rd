@@ -5,14 +5,16 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
 
+int _extraerId(dynamic valor) {
+  final texto = valor.toString().replaceAll(RegExp(r'[^0-9]'), '');
+  return int.tryParse(texto) ?? 0;
+}
+
 class CompraRepositoryImpl implements ICompraRepository {
   CompraRepositoryImpl(this.db);
 
   final AppDatabase db;
 
-  // ──────────────────────────────────────────────────────────────────
-  // MAPEADORES: Entidad de Dominio ↔ Companion Drift
-  // ──────────────────────────────────────────────────────────────────
   ComprasTableCompanion _compraToCompanion(Compra compra) {
     return ComprasTableCompanion(
       id: Value(compra.id),
@@ -35,8 +37,8 @@ class CompraRepositoryImpl implements ICompraRepository {
 
   Compra _filaToCompra(dynamic fila) {
     return Compra(
-      id: fila.id as String,
-      proveedorId: fila.proveedorId as String,
+      id: _extraerId(fila.id),
+      proveedorId: _extraerId(fila.proveedorId),
       nombreProveedor: fila.nombreProveedor as String,
       fechaEmision: fila.fechaEmision as DateTime,
       fechaConfirmacion: fila.fechaConfirmacion as DateTime?,
@@ -69,9 +71,9 @@ class CompraRepositoryImpl implements ICompraRepository {
 
   DetalleCompra _filaToDetalle(dynamic fila) {
     return DetalleCompra(
-      id: fila.id as String,
-      compraId: fila.compraId as String,
-      productoId: fila.productoId as String,
+      id: _extraerId(fila.id),
+      compraId: _extraerId(fila.compraId),
+      productoId: _extraerId(fila.productoId),
       nombreProducto: fila.nombreProducto as String,
       cantidad: fila.cantidad as double,
       costoUnitario: fila.costoUnitario as double,
@@ -81,9 +83,46 @@ class CompraRepositoryImpl implements ICompraRepository {
     );
   }
 
-  // ──────────────────────────────────────────────────────────────────
-  // IMPLEMENTACIÓN DE LA INTERFAZ
-  // ──────────────────────────────────────────────────────────────────
+  @override
+  Future<Compra?> obtenerCompraPorId(int compraId) async {
+    final fila = await (db.select(
+      db.comprasTable,
+    )..where((t) => t.id.equals(compraId))).getSingleOrNull();
+    return fila == null ? null : _filaToCompra(fila);
+  }
+
+  @override
+  Future<List<Compra>> listarCompras() async {
+    final filas = await (db.select(
+      db.comprasTable,
+    )..orderBy([(t) => OrderingTerm.desc(t.fechaEmision)])).get();
+    return filas.map(_filaToCompra).toList();
+  }
+
+  @override
+  Future<List<DetalleCompra>> listarDetallesDeCompra(int compraId) async {
+    final filas = await (db.select(
+      db.detalleCompraTable,
+    )..where((t) => t.compraId.equals(compraId))).get();
+    return filas.map(_filaToDetalle).toList();
+  }
+
+  @override
+  Future<Compra> confirmarCompra(int compraId) async {
+    final compra = await obtenerCompraPorId(compraId);
+    if (compra == null) {
+      throw StateError('Compra no encontrada: $compraId');
+    }
+    final compraConfirmada = compra.copyWith(
+      estado: EstadoCompra.confirmada,
+      fechaConfirmacion: DateTime.now(),
+      actualizadoEn: DateTime.now(),
+    );
+    await (db.update(db.comprasTable)..where((t) => t.id.equals(compraId)))
+        .write(_compraToCompanion(compraConfirmada));
+    return compraConfirmada;
+  }
+
   @override
   Future<Compra> registrarCompra({
     required Compra compra,
@@ -98,46 +137,5 @@ class CompraRepositoryImpl implements ICompraRepository {
       });
     });
     return compra;
-  }
-
-  @override
-  Future<Compra?> obtenerCompraPorId(String compraId) async {
-    final fila = await (db.select(db.comprasTable)
-          ..where((t) => t.id.equals(compraId)))
-        .getSingleOrNull();
-    return fila == null ? null : _filaToCompra(fila);
-  }
-
-  @override
-  Future<List<Compra>> listarCompras() async {
-    final filas = await (db.select(db.comprasTable)
-          ..orderBy([(t) => OrderingTerm.desc(t.fechaEmision)]))
-        .get();
-    return filas.map(_filaToCompra).toList();
-  }
-
-  @override
-  Future<List<DetalleCompra>> listarDetallesDeCompra(String compraId) async {
-    final filas = await (db.select(db.detalleCompraTable)
-          ..where((t) => t.compraId.equals(compraId)))
-        .get();
-    return filas.map(_filaToDetalle).toList();
-  }
-
-  @override
-  Future<Compra> confirmarCompra(String compraId) async {
-    final compra = await obtenerCompraPorId(compraId);
-    if (compra == null) {
-      throw StateError('Compra no encontrada: $compraId');
-    }
-    final compraConfirmada = compra.copyWith(
-      estado: EstadoCompra.confirmada,
-      fechaConfirmacion: DateTime.now(),
-      actualizadoEn: DateTime.now(),
-    );
-    await (db.update(db.comprasTable)
-          ..where((t) => t.id.equals(compraId)))
-        .write(_compraToCompanion(compraConfirmada));
-    return compraConfirmada;
   }
 }

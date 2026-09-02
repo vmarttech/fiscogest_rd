@@ -2,7 +2,6 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.da
 import 'package:fiscogest_rd/features/clientes/domain/interfaces/i_cliente_repository.dart';
 
 class ObtenerClientesUseCase {
-
   ObtenerClientesUseCase(this._repository);
   final IClienteRepository _repository;
 

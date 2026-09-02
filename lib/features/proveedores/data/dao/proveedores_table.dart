@@ -12,8 +12,12 @@ class ProveedoresTable extends Table {
   TextColumn get direccion => text().named('direccion').nullable()();
   TextColumn get ciudad => text().named('ciudad').nullable()();
   TextColumn get provincia => text().named('provincia').nullable()();
-  IntColumn get diasCredito => integer().named('dias_credito').withDefault(const Constant(0))();
-  TextColumn get estado => text().named('estado').withDefault(const Constant('Activo'))();
-  DateTimeColumn get fechaCreacion => dateTime().named('fecha_creacion').withDefault(currentDateAndTime)();
-  DateTimeColumn get fechaActualizacion => dateTime().named('fecha_actualizacion').nullable()();
+  IntColumn get diasCredito =>
+      integer().named('dias_credito').withDefault(const Constant(0))();
+  TextColumn get estado =>
+      text().named('estado').withDefault(const Constant('Activo'))();
+  DateTimeColumn get fechaCreacion =>
+      dateTime().named('fecha_creacion').withDefault(currentDateAndTime)();
+  DateTimeColumn get fechaActualizacion =>
+      dateTime().named('fecha_actualizacion').nullable()();
 }

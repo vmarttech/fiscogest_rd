@@ -1,12 +1,11 @@
-/// Contrato abstracto para el repositorio de Proveedores.
+/// Contrato abstracto para actualización de saldos de proveedores.
 ///
 /// Define operaciones disponibles sobre la entidad Proveedor,
 /// sin exponer detalles de almacenamiento ni tecnología.
 abstract class IProveedorRepository {
-  /// Actualiza el saldo pendiente con un proveedor.
-  /// [esAdeudo] = suma al saldo; [esPago] = resta del saldo.
-  Future<void> actualizarSaldo(String proveedorId, double monto, bool esAdeudo);
-
-  /// Obtiene el saldo actual con el proveedor.
-  Future<double?> obtenerSaldo(String proveedorId);
+  /// Registra el monto de compra en el saldo y historial del proveedor.
+  Future<void> registrarCompraProveedor({
+    required int proveedorId,
+    required double monto,
+  });
 }

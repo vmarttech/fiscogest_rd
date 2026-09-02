@@ -9,21 +9,23 @@ class InventarioServiceImpl implements IInventarioService {
 
   @override
   Future<void> sumarStock(int productoId, double cantidad) async {
-    final producto = await (db.select(db.productosTable)
-      ..where((p) => p.id.equals(productoId))).getSingle();
+    final producto = await (db.select(
+      db.productosTable,
+    )..where((p) => p.id.equals(productoId))).getSingle();
     final stockActual = producto.stock ?? 0.0;
-    await db.update(db.productosTable).replace(
-      producto.copyWith(stock: Value(stockActual + cantidad)),
-    );
+    await db
+        .update(db.productosTable)
+        .replace(producto.copyWith(stock: Value(stockActual + cantidad)));
   }
 
   @override
   Future<void> restarStock(int productoId, double cantidad) async {
-    final producto = await (db.select(db.productosTable)
-      ..where((p) => p.id.equals(productoId))).getSingle();
+    final producto = await (db.select(
+      db.productosTable,
+    )..where((p) => p.id.equals(productoId))).getSingle();
     final stockActual = producto.stock ?? 0.0;
-    await db.update(db.productosTable).replace(
-      producto.copyWith(stock: Value(stockActual - cantidad)),
-    );
+    await db
+        .update(db.productosTable)
+        .replace(producto.copyWith(stock: Value(stockActual - cantidad)));
   }
 }

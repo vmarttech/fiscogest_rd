@@ -10,7 +10,11 @@ class FacturaServiceImpl implements IFacturaService {
   @override
   String generarTextoFactura(Venta venta) {
     final formatoFecha = DateFormat('dd/MM/yyyy HH:mm');
-    final formatoMoneda = NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$ ', decimalDigits: 2);
+    final formatoMoneda = NumberFormat.currency(
+      locale: 'es_DO',
+      symbol: 'RD\$ ',
+      decimalDigits: 2,
+    );
     final factura = StringBuffer();
     factura.writeln('========================================');
     factura.writeln('           FISCOGEST RD');
@@ -32,19 +36,27 @@ class FacturaServiceImpl implements IFacturaService {
     for (var i = 0; i < venta.detalles.length; i++) {
       final detalle = venta.detalles[i] as DetalleVenta;
       factura.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}');
-      factura.writeln('   Cant: ${detalle.cantidad}  x  ${formatoMoneda.format(detalle.precioUnitario)}');
+      factura.writeln(
+        '   Cant: ${detalle.cantidad}  x  ${formatoMoneda.format(detalle.precioUnitario)}',
+      );
       if (detalle.descuentoPorcentaje > 0) {
-        factura.writeln('   Desc: ${detalle.descuentoPorcentaje.toStringAsFixed(2)}%');
+        factura.writeln(
+          '   Desc: ${detalle.descuentoPorcentaje.toStringAsFixed(2)}%',
+        );
       }
       if (detalle.montoDescuento > 0) {
-        factura.writeln('   Desc: ${formatoMoneda.format(detalle.montoDescuento)}');
+        factura.writeln(
+          '   Desc: ${formatoMoneda.format(detalle.montoDescuento)}',
+        );
       }
       final subtotalLinea = detalle.subtotalLinea ?? detalle.subtotal;
       factura.writeln('   Subtotal: ${formatoMoneda.format(subtotalLinea)}');
       factura.writeln('');
     }
     factura.writeln('----------------------------------------');
-    factura.writeln('Subtotal:          ${formatoMoneda.format(venta.subtotal)}');
+    factura.writeln(
+      'Subtotal:          ${formatoMoneda.format(venta.subtotal)}',
+    );
     factura.writeln('ITBIS (18%):       ${formatoMoneda.format(venta.itbis)}');
     factura.writeln('========================================');
     factura.writeln('TOTAL A PAGAR:     ${formatoMoneda.format(venta.total)}');

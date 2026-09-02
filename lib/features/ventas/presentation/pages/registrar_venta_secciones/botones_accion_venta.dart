@@ -23,7 +23,9 @@ class BotonesAccionVenta extends StatelessWidget {
             onPressed: alLimpiar,
             icon: const Icon(Icons.refresh),
             label: const Text('Limpiar Venta'),
-            style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.m),

@@ -1,6 +1,4 @@
-
 class ImportExportLog {
-
   const ImportExportLog({
     required this.fila,
     required this.entidad,
@@ -14,7 +12,8 @@ class ImportExportLog {
 class ImportExportService {
   final List<ImportExportLog> _registroErrores = [];
 
-  List<ImportExportLog> get registroErrores => List.unmodifiable(_registroErrores);
+  List<ImportExportLog> get registroErrores =>
+      List.unmodifiable(_registroErrores);
 
   void limpiarErrores() {
     _registroErrores.clear();
@@ -25,7 +24,9 @@ class ImportExportService {
     final buffer = StringBuffer();
     buffer.writeln('ID,Codigo,Nombre,Precio,Stock,ITBIS');
     for (var p in productos) {
-      buffer.writeln('${p['id']},${p['codigo']},"${p['nombre']}",${p['precio']},${p['stock']},${p['itbis']}');
+      buffer.writeln(
+        '${p['id']},${p['codigo']},"${p['nombre']}",${p['precio']},${p['stock']},${p['itbis']}',
+      );
     }
     return buffer.toString();
   }
@@ -35,17 +36,23 @@ class ImportExportService {
     final buffer = StringBuffer();
     buffer.writeln('ID,Nombre,RNC_Cedula,Telefono,Correo,Direccion');
     for (var c in clientes) {
-      buffer.writeln('${c['id']},"${c['nombre']}","${c['rncCedula']}","${c['telefono']}","${c['correo']}","${c['direccion']}"');
+      buffer.writeln(
+        '${c['id']},"${c['nombre']}","${c['rncCedula']}","${c['telefono']}","${c['correo']}","${c['direccion']}"',
+      );
     }
     return buffer.toString();
   }
 
   // Simulación de exportación de proveedores
-  Future<String> exportarProveedores(List<Map<String, dynamic>> proveedores) async {
+  Future<String> exportarProveedores(
+    List<Map<String, dynamic>> proveedores,
+  ) async {
     final buffer = StringBuffer();
     buffer.writeln('ID,Nombre,RNC,Contacto,Telefono,Correo,Direccion');
     for (var p in proveedores) {
-      buffer.writeln('${p['id']},"${p['nombre']}","${p['rnc']}","${p['contacto']}","${p['telefono']}","${p['correo']}","${p['direccion']}"');
+      buffer.writeln(
+        '${p['id']},"${p['nombre']}","${p['rnc']}","${p['contacto']}","${p['telefono']}","${p['correo']}","${p['direccion']}"',
+      );
     }
     return buffer.toString();
   }
@@ -62,11 +69,14 @@ class ImportExportService {
 
       final columnas = linea.split(',');
       if (columnas.length < 5) {
-        _registroErrores.add(ImportExportLog(
-          fila: i + 1,
-          entidad: 'Producto',
-          mensajeError: 'Estructura de columnas incompleta o formato inválido.',
-        ));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError:
+                'Estructura de columnas incompleta o formato inválido.',
+          ),
+        );
         continue;
       }
 
@@ -77,19 +87,43 @@ class ImportExportService {
 
       // Validaciones estrictas de negocio
       if (codigo.isEmpty) {
-        _registroErrores.add(ImportExportLog(fila: i + 1, entidad: 'Producto', mensajeError: 'El código del producto es obligatorio.'));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'El código del producto es obligatorio.',
+          ),
+        );
         continue;
       }
       if (nombre.isEmpty) {
-        _registroErrores.add(ImportExportLog(fila: i + 1, entidad: 'Producto', mensajeError: 'El nombre del producto es obligatorio.'));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'El nombre del producto es obligatorio.',
+          ),
+        );
         continue;
       }
       if (precio == null || precio < 0) {
-        _registroErrores.add(ImportExportLog(fila: i + 1, entidad: 'Producto', mensajeError: 'Precio inválido o negativo.'));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'Precio inválido o negativo.',
+          ),
+        );
         continue;
       }
       if (stock == null || stock < 0) {
-        _registroErrores.add(ImportExportLog(fila: i + 1, entidad: 'Producto', mensajeError: 'Stock inválido o negativo.'));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'Stock inválido o negativo.',
+          ),
+        );
         continue;
       }
 

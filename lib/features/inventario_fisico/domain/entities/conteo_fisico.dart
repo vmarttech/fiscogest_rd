@@ -1,7 +1,6 @@
 enum EstadoConteo { pendiente, aprobado, rechazado }
 
 class ConteoFisico {
-
   ConteoFisico({
     this.id,
     required this.nombreConteo,

@@ -50,7 +50,9 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                       children: [
                         Text(
                           'Administración de datos generales, contactos, RNC y direcciones comerciales.',
-                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         AppLayout.vM,
                         AppButton(
@@ -66,7 +68,9 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         Expanded(
                           child: Text(
                             'Administración de datos generales, contactos, RNC y direcciones comerciales.',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                         AppButton(
@@ -78,12 +82,17 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                     ),
               AppLayout.vM,
               AppCard(
-                padding: AppSpacing.hM.copyWith(top: AppSpacing.s, bottom: AppSpacing.s),
+                padding: AppSpacing.hM.copyWith(
+                  top: AppSpacing.s,
+                  bottom: AppSpacing.s,
+                ),
                 child: AppTextField(
                   controller: _searchController,
-                  hint: 'Buscar proveedor por nombre, RNC, contacto o correo...',
+                  hint:
+                      'Buscar proveedor por nombre, RNC, contacto o correo...',
                   prefixIcon: Icons.search,
-                  onChanged: (value) => setState(() => _filtroBusqueda = value.toLowerCase()),
+                  onChanged: (value) =>
+                      setState(() => _filtroBusqueda = value.toLowerCase()),
                 ),
               ),
               AppLayout.vM,
@@ -92,12 +101,21 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                   padding: EdgeInsets.zero,
                   child: proveedoresAsync.when(
                     data: (proveedores) {
-                      final filtrados = proveedores.where((p) =>
-                        p.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                        p.rnc.toLowerCase().contains(_filtroBusqueda) ||
-                        p.contacto.toLowerCase().contains(_filtroBusqueda) ||
-                        p.correo.toLowerCase().contains(_filtroBusqueda)
-                      ).toList();
+                      final filtrados = proveedores
+                          .where(
+                            (p) =>
+                                p.nombre.toLowerCase().contains(
+                                  _filtroBusqueda,
+                                ) ||
+                                p.rnc.toLowerCase().contains(_filtroBusqueda) ||
+                                p.contacto.toLowerCase().contains(
+                                  _filtroBusqueda,
+                                ) ||
+                                p.correo.toLowerCase().contains(
+                                  _filtroBusqueda,
+                                ),
+                          )
+                          .toList();
                       if (filtrados.isEmpty) {
                         return const Center(
                           child: Text(
@@ -109,7 +127,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                       return ListView.separated(
                         padding: AppSpacing.allS,
                         itemCount: filtrados.length,
-                        separatorBuilder: (context, index) => const Divider(color: AppColors.grey200, height: 1),
+                        separatorBuilder: (context, index) =>
+                            const Divider(color: AppColors.grey200, height: 1),
                         itemBuilder: (context, index) {
                           final proveedor = filtrados[index];
                           return Padding(
@@ -123,13 +142,18 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                     color: AppColors.grey50,
                                     borderRadius: AppRadius.allM,
                                   ),
-                                  child: const Icon(Icons.store_mall_directory_outlined, color: AppColors.textPrimary, size: 22),
+                                  child: const Icon(
+                                    Icons.store_mall_directory_outlined,
+                                    color: AppColors.textPrimary,
+                                    size: 22,
+                                  ),
                                 ),
                                 AppLayout.hM,
                                 Expanded(
                                   flex: 2,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         proveedor.nombre,
@@ -146,7 +170,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                 Expanded(
                                   flex: 2,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Tel: ${proveedor.telefono} | ${proveedor.correo}',
@@ -166,28 +191,46 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                                      icon: const Icon(
+                                        Icons.edit_outlined,
+                                        color: AppColors.primary,
+                                        size: 20,
+                                      ),
                                       tooltip: 'Editar Proveedor',
-                                      onPressed: () => _mostrarModalRegistro(context, proveedorToEdit: proveedor),
+                                      onPressed: () => _mostrarModalRegistro(
+                                        context,
+                                        proveedorToEdit: proveedor,
+                                      ),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                                      icon: const Icon(
+                                        Icons.delete_outline,
+                                        color: AppColors.error,
+                                        size: 20,
+                                      ),
                                       tooltip: 'Eliminar Proveedor',
                                       onPressed: () {
                                         AppDialog.show<void>(
                                           context,
                                           title: 'Confirmar Eliminación',
-                                          message: '¿Está seguro de eliminar al proveedor "${proveedor.nombre}"?',
+                                          message:
+                                              '¿Está seguro de eliminar al proveedor "${proveedor.nombre}"?',
                                           actions: [
                                             TextButton(
-                                              onPressed: () => Navigator.pop(context),
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
                                               child: const Text('Cancelar'),
                                             ),
                                             AppButton(
                                               text: 'Eliminar',
                                               onPressed: () {
                                                 if (proveedor.id != null) {
-                                                  ref.read(proveedorControllerProvider.notifier).eliminar(proveedor.id!);
+                                                  ref
+                                                      .read(
+                                                        proveedorControllerProvider
+                                                            .notifier,
+                                                      )
+                                                      .eliminar(proveedor.id!);
                                                 }
                                                 Navigator.pop(context);
                                               },
@@ -204,8 +247,11 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         },
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, st) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium)),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, st) => Center(
+                      child: Text('Error: $e', style: AppTypography.bodyMedium),
+                    ),
                   ),
                 ),
               ),
@@ -216,14 +262,29 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
     );
   }
 
-  void _mostrarModalRegistro(BuildContext context, {Proveedor? proveedorToEdit}) {
+  void _mostrarModalRegistro(
+    BuildContext context, {
+    Proveedor? proveedorToEdit,
+  }) {
     final formKey = GlobalKey<FormState>();
-    final nombreController = TextEditingController(text: proveedorToEdit?.nombre ?? '');
-    final contactoController = TextEditingController(text: proveedorToEdit?.contacto ?? '');
-    final direccionController = TextEditingController(text: proveedorToEdit?.direccion ?? '');
-    final telefonoController = TextEditingController(text: proveedorToEdit?.telefono ?? '');
-    final correoController = TextEditingController(text: proveedorToEdit?.correo ?? '');
-    final rncController = TextEditingController(text: proveedorToEdit?.rnc ?? '');
+    final nombreController = TextEditingController(
+      text: proveedorToEdit?.nombre ?? '',
+    );
+    final contactoController = TextEditingController(
+      text: proveedorToEdit?.contacto ?? '',
+    );
+    final direccionController = TextEditingController(
+      text: proveedorToEdit?.direccion ?? '',
+    );
+    final telefonoController = TextEditingController(
+      text: proveedorToEdit?.telefono ?? '',
+    );
+    final correoController = TextEditingController(
+      text: proveedorToEdit?.correo ?? '',
+    );
+    final rncController = TextEditingController(
+      text: proveedorToEdit?.rnc ?? '',
+    );
     final isEditing = proveedorToEdit != null;
 
     AppDialog.show<void>(
@@ -252,10 +313,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                   controller: contactoController,
                 ),
                 AppLayout.vM,
-                AppTextField(
-                  label: 'Teléfono',
-                  controller: telefonoController,
-                ),
+                AppTextField(label: 'Teléfono', controller: telefonoController),
                 AppLayout.vM,
                 AppTextField(
                   label: 'Correo Electrónico',
@@ -291,14 +349,18 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                   rnc: rncController.text.trim(),
                 );
                 if (isEditing) {
-                  ref.read(proveedorControllerProvider.notifier).actualizar(prov);
+                  ref
+                      .read(proveedorControllerProvider.notifier)
+                      .actualizar(prov);
                 } else {
                   ref.read(proveedorControllerProvider.notifier).guardar(prov);
                 }
                 Navigator.pop(context);
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                  SnackBar(
+                    content: Text(e.toString().replaceAll('Exception: ', '')),
+                  ),
                 );
               }
             }

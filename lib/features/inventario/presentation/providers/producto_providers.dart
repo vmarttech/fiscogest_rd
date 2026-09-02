@@ -13,7 +13,8 @@ final productoRepositoryProvider = Provider<IProductoRepository>((ref) {
 });
 
 class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
-  ProductoController(this._repository, this._ref) : super(const AsyncValue.loading()) {
+  ProductoController(this._repository, this._ref)
+    : super(const AsyncValue.loading()) {
     cargarProductos();
   }
   final IProductoRepository _repository;
@@ -59,13 +60,23 @@ class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
 
   Future<List<Producto>> buscarPorNombre(String nombre) async {
     final termino = nombre.toLowerCase().trim();
-    return state.whenData((lista) => lista
-        .where((producto) => producto.nombre.toLowerCase().contains(termino))
-        .toList(),
-    ).value ?? [];
+    return state
+            .whenData(
+              (lista) => lista
+                  .where(
+                    (producto) =>
+                        producto.nombre.toLowerCase().contains(termino),
+                  )
+                  .toList(),
+            )
+            .value ??
+        [];
   }
 }
 
-final productoControllerProvider = StateNotifierProvider<ProductoController, AsyncValue<List<Producto>>>((ref) {
-  return ProductoController(ref.watch(productoRepositoryProvider), ref);
-});
+final productoControllerProvider =
+    StateNotifierProvider<ProductoController, AsyncValue<List<Producto>>>((
+      ref,
+    ) {
+      return ProductoController(ref.watch(productoRepositoryProvider), ref);
+    });

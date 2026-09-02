@@ -28,10 +28,19 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Buscar Categoría'),
-        content: AppTextField(controller: control, hint: 'Nombre de la categoría...'),
+        content: AppTextField(
+          controller: control,
+          hint: 'Nombre de la categoría...',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-          AppButton(text: 'Buscar', onPressed: () => Navigator.pop(ctx, control.text)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          AppButton(
+            text: 'Buscar',
+            onPressed: () => Navigator.pop(ctx, control.text),
+          ),
         ],
       ),
     );
@@ -44,7 +53,6 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
   Widget build(BuildContext context) {
     final categoriasAsync = ref.watch(categoriaControllerProvider);
     return AppScaffold(
-      
       padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: Stack(
         children: [
@@ -55,10 +63,18 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                 data: (categorias) {
                   final filtradas = _filtroBusqueda.isEmpty
                       ? categorias
-                      : categorias.where((c) =>
-                          c.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                          (c.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false)
-                        ).toList();
+                      : categorias
+                            .where(
+                              (c) =>
+                                  c.nombre.toLowerCase().contains(
+                                    _filtroBusqueda,
+                                  ) ||
+                                  (c.descripcion?.toLowerCase().contains(
+                                        _filtroBusqueda,
+                                      ) ??
+                                      false),
+                            )
+                            .toList();
                   if (filtradas.isEmpty) {
                     return const Center(
                       child: Text(
@@ -70,7 +86,8 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                   return ListView.separated(
                     padding: AppSpacing.allS,
                     itemCount: filtradas.length,
-                    separatorBuilder: (context, index) => const Divider(color: AppColors.grey200, height: 1),
+                    separatorBuilder: (context, index) =>
+                        const Divider(color: AppColors.grey200, height: 1),
                     itemBuilder: (context, index) {
                       final categoria = filtradas[index];
                       return Padding(
@@ -84,17 +101,26 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                 color: AppColors.grey50,
                                 borderRadius: AppRadius.allM,
                               ),
-                              child: const Icon(Icons.category_outlined, color: AppColors.textPrimary, size: 20),
+                              child: const Icon(
+                                Icons.category_outlined,
+                                color: AppColors.textPrimary,
+                                size: 20,
+                              ),
                             ),
                             AppLayout.hM,
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(categoria.nombre, style: AppTypography.labelLarge),
+                                  Text(
+                                    categoria.nombre,
+                                    style: AppTypography.labelLarge,
+                                  ),
                                   AppLayout.vXs,
                                   Text(
-                                    categoria.descripcion?.isEmpty ?? true ? 'Sin descripción' : categoria.descripcion!,
+                                    categoria.descripcion?.isEmpty ?? true
+                                        ? 'Sin descripción'
+                                        : categoria.descripcion!,
                                     style: AppTypography.bodySmall,
                                   ),
                                 ],
@@ -104,14 +130,26 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
                                   tooltip: 'Editar Categoría',
-                                  onPressed: () => _mostrarModalRegistro(context, categoriaToEdit: categoria),
+                                  onPressed: () => _mostrarModalRegistro(
+                                    context,
+                                    categoriaToEdit: categoria,
+                                  ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppColors.error,
+                                    size: 20,
+                                  ),
                                   tooltip: 'Eliminar Categoría',
-                                  onPressed: () => _confirmarEliminacion(context, categoria),
+                                  onPressed: () =>
+                                      _confirmarEliminacion(context, categoria),
                                 ),
                               ],
                             ),
@@ -122,7 +160,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, st) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium)),
+                error: (e, st) => Center(
+                  child: Text('Error: $e', style: AppTypography.bodyMedium),
+                ),
               ),
             ),
           ),
@@ -160,11 +200,18 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
       title: 'Confirmar Eliminación',
       message: '¿Está seguro de eliminar la categoría "${categoria.nombre}"?',
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
         AppButton(
           text: 'Eliminar',
           onPressed: () {
-            if (categoria.id != null) ref.read(categoriaControllerProvider.notifier).eliminar(categoria.id!);
+            if (categoria.id != null) {
+              ref
+                  .read(categoriaControllerProvider.notifier)
+                  .eliminar(categoria.id!);
+            }
             Navigator.pop(context);
           },
         ),
@@ -172,10 +219,17 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
     );
   }
 
-  void _mostrarModalRegistro(BuildContext context, {Categoria? categoriaToEdit}) {
+  void _mostrarModalRegistro(
+    BuildContext context, {
+    Categoria? categoriaToEdit,
+  }) {
     final formKey = GlobalKey<FormState>();
-    final nombreController = TextEditingController(text: categoriaToEdit?.nombre ?? '');
-    final descripcionController = TextEditingController(text: categoriaToEdit?.descripcion ?? '');
+    final nombreController = TextEditingController(
+      text: categoriaToEdit?.nombre ?? '',
+    );
+    final descripcionController = TextEditingController(
+      text: categoriaToEdit?.descripcion ?? '',
+    );
     final isEditing = categoriaToEdit != null;
     AppDialog.show<void>(
       context,
@@ -187,15 +241,24 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AppTextField(label: 'Nombre de la Categoría', controller: nombreController),
+              AppTextField(
+                label: 'Nombre de la Categoría',
+                controller: nombreController,
+              ),
               AppLayout.vM,
-              AppTextField(label: 'Descripción', controller: descripcionController),
+              AppTextField(
+                label: 'Descripción',
+                controller: descripcionController,
+              ),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
         AppButton(
           text: isEditing ? 'Actualizar' : 'Guardar',
           onPressed: () {
@@ -209,11 +272,19 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                   actualizadoEn: isEditing ? DateTime.now() : null,
                 );
                 isEditing
-                    ? ref.read(categoriaControllerProvider.notifier).actualizar(cat)
-                    : ref.read(categoriaControllerProvider.notifier).guardar(cat);
+                    ? ref
+                          .read(categoriaControllerProvider.notifier)
+                          .actualizar(cat)
+                    : ref
+                          .read(categoriaControllerProvider.notifier)
+                          .guardar(cat);
                 Navigator.pop(context);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString().replaceAll('Exception: ', '')),
+                  ),
+                );
               }
             }
           },

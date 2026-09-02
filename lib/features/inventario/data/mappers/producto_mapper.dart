@@ -27,7 +27,9 @@ class ProductoDataMapper {
 
   static ProductosTableCompanion toCompanion(Producto entidad) {
     return ProductosTableCompanion(
-      id: entidad.id != null ? drift.Value(entidad.id!) : const drift.Value.absent(),
+      id: entidad.id != null
+          ? drift.Value(entidad.id!)
+          : const drift.Value.absent(),
       codigo: drift.Value(entidad.codigo),
       codigoBarras: drift.Value(entidad.codigoBarras),
       nombre: drift.Value(entidad.nombre),

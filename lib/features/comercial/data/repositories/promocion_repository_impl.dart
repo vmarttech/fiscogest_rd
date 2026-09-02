@@ -3,10 +3,8 @@ import 'package:fiscogest_rd/features/comercial/domain/repositories/i_promocion_
 import 'package:fiscogest_rd/features/comercial/data/datasources/promocion_datasource.dart';
 
 class PromocionRepositoryImpl implements IPromocionRepository {
-
   PromocionRepositoryImpl(this._datasource);
   final PromocionDatasource _datasource;
-
   @override
   Future<Promocion> crear(Promocion promocion) async {
     await _datasource.registrar(promocion);
@@ -14,7 +12,7 @@ class PromocionRepositoryImpl implements IPromocionRepository {
   }
 
   @override
-  Future<Promocion?> obtenerPorId(String id) async {
+  Future<Promocion?> obtenerPorId(int id) async {
     final modelo = await _datasource.buscarPorId(id);
     if (modelo == null) return null;
     return _deserializar(modelo);
@@ -42,13 +40,13 @@ class PromocionRepositoryImpl implements IPromocionRepository {
   }
 
   @override
-  Future<void> eliminar(String id) async {
+  Future<void> eliminar(int id) async {
     await _datasource.eliminar(id);
   }
 
   static Promocion _deserializar(Map<String, dynamic> modelo) {
     return Promocion(
-      id: modelo['id'] as String,
+      id: modelo['id'] as int,
       nombre: modelo['nombre'] as String,
       descripcion: modelo['descripcion'] as String,
       tipo: modelo['tipo'] as String,

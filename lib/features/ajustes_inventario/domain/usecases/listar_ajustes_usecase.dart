@@ -2,7 +2,6 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 
 class ListarAjustesUsecase {
-
   ListarAjustesUsecase(this._repository);
   final AjusteInventarioRepository _repository;
 

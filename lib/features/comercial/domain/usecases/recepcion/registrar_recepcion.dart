@@ -4,29 +4,27 @@ import 'package:fiscogest_rd/core/domain/eventos/recepcion_eventos.dart';
 import 'package:fiscogest_rd/core/services/sincronizacion_service.dart';
 
 class RegistrarRecepcion {
-
   RegistrarRecepcion(this._repo);
   final IRecepcionRepository _repo;
 
-  Future<String> ejecutar(Recepcion recepcion, String usuarioResponsable) async {
+  Future<int> ejecutar(Recepcion recepcion, String usuarioResponsable) async {
     validar(recepcion);
     final recepcionConEstado = _determinarEstado(recepcion);
     final recepcionId = await _repo.crear(recepcionConEstado);
-
-    if (recepcionConEstado.estado == 'completa' || recepcionConEstado.estado == 'parcial') {
+    if (recepcionConEstado.estado == 'completa' ||
+        recepcionConEstado.estado == 'parcial') {
       final evento = RecepcionConfirmada(
         recepcionId: recepcionId,
-        compraId: recepcionConEstado.compraId ?? '',
+        compraId: recepcionConEstado.compraId,
         usuarioResponsable: usuarioResponsable,
       );
       SincronizacionService.instancia.disparar(evento);
     }
-
     return recepcionId;
   }
 
   void validar(Recepcion recepcion) {
-    if (recepcion.compraId == null || recepcion.compraId!.trim().isEmpty) {
+    if (recepcion.compraId == null) {
       throw ArgumentError('El ID de compra es obligatorio');
     }
     if (recepcion.detalles == null || recepcion.detalles!.isEmpty) {
@@ -43,20 +41,20 @@ class RegistrarRecepcion {
     if (recepcion.detalles == null || recepcion.detalles!.isEmpty) {
       return recepcion.copyWith(estado: 'pendiente');
     }
-
-    final todosCero = recepcion.detalles!
-        .every((d) => d.cantidadRecibida == null || d.cantidadRecibida! == 0);
-    final todosIgual = recepcion.detalles!.every((d) =>
-        d.cantidadPedida != null &&
-        d.cantidadRecibida != null &&
-        d.cantidadRecibida! >= d.cantidadPedida!);
-
+    final todosCero = recepcion.detalles!.every(
+      (d) => d.cantidadRecibida == null || d.cantidadRecibida! == 0,
+    );
+    final todosIgual = recepcion.detalles!.every(
+      (d) =>
+          d.cantidadPedida != null &&
+          d.cantidadRecibida != null &&
+          d.cantidadRecibida! >= d.cantidadPedida!,
+    );
     final estado = todosCero
         ? 'pendiente'
         : todosIgual
-            ? 'completa'
-            : 'parcial';
-
+        ? 'completa'
+        : 'parcial';
     return recepcion.copyWith(estado: estado);
   }
 }

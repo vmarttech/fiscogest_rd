@@ -2,7 +2,6 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/promocion.dart';
 
 class PromocionDatasource {
   final List<Map<String, dynamic>> _almacen = [];
-
   Future<List<Map<String, dynamic>>> listarTodos() async {
     return List.unmodifiable(_almacen);
   }
@@ -11,7 +10,7 @@ class PromocionDatasource {
     return _almacen.where((registro) => registro['activa'] == true).toList();
   }
 
-  Future<Map<String, dynamic>?> buscarPorId(String id) async {
+  Future<Map<String, dynamic>?> buscarPorId(int id) async {
     final coinciden = _almacen.where((r) => r['id'] == id);
     return coinciden.isNotEmpty ? coinciden.first : null;
   }
@@ -45,7 +44,7 @@ class PromocionDatasource {
     }
   }
 
-  Future<void> eliminar(String id) async {
+  Future<void> eliminar(int id) async {
     _almacen.removeWhere((r) => r['id'] == id);
   }
 }

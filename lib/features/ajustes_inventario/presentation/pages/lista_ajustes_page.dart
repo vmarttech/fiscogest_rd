@@ -7,12 +7,14 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
+
 class ListaAjustesPage extends ConsumerStatefulWidget {
   const ListaAjustesPage({super.key});
   static const String routeName = 'lista-ajustes';
   @override
   ConsumerState<ListaAjustesPage> createState() => _ListaAjustesPageState();
 }
+
 class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
   @override
   Widget build(BuildContext context) {
@@ -49,7 +51,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
               : ListView.separated(
                   padding: AppSpacing.allM,
                   itemCount: lista.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s),
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.s),
                   itemBuilder: (_, int i) {
                     final AjusteInventario a = lista[i];
                     return Card(
@@ -60,9 +63,13 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           children: [
                             Text(
                               'Producto ID: ${a.productoId}',
-                              style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                              style: AppTypography.labelLarge.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            Text('Tipo: ${a.tipoAjuste} • Cantidad: ${a.cantidad}'),
+                            Text(
+                              'Tipo: ${a.tipoAjuste} • Cantidad: ${a.cantidad}',
+                            ),
                             Text('Motivo: ${a.motivo}'),
                             Text(
                               'Fecha: ${a.fechaCreacion.day}/${a.fechaCreacion.month}/${a.fechaCreacion.year} '

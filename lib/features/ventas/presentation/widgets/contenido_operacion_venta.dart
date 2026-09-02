@@ -14,10 +14,12 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historia
 class ContenidoOperacionVenta extends ConsumerStatefulWidget {
   const ContenidoOperacionVenta({super.key});
   @override
-  ConsumerState<ContenidoOperacionVenta> createState() => _ContenidoOperacionVentaState();
+  ConsumerState<ContenidoOperacionVenta> createState() =>
+      _ContenidoOperacionVentaState();
 }
 
-class _ContenidoOperacionVentaState extends ConsumerState<ContenidoOperacionVenta> {
+class _ContenidoOperacionVentaState
+    extends ConsumerState<ContenidoOperacionVenta> {
   @override
   Widget build(BuildContext context) {
     final estadoNavegacion = ref.watch(ventasNavegacionProvider);

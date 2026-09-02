@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 class AppDialog extends StatelessWidget {
-
   const AppDialog({
     super.key,
     required this.title,
@@ -44,7 +43,11 @@ class AppDialog extends StatelessWidget {
       contentPadding: AppSpacing.hM.copyWith(bottom: AppSpacing.m),
       actionsPadding: AppSpacing.allM,
       title: Text(title, style: AppTypography.h3),
-      content: content ?? (message != null ? Text(message!, style: AppTypography.bodyMedium) : null),
+      content:
+          content ??
+          (message != null
+              ? Text(message!, style: AppTypography.bodyMedium)
+              : null),
       actions: actions,
     );
   }

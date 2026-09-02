@@ -22,7 +22,7 @@ class DetalleVenta {
   final double subtotal;
   final String? nombreProducto;
   final double? subtotalLinea;
-  final String? ofertaId;
+  final int? ofertaId;
   final String? ofertaNombre;
   final double? precioOriginal;
   final double descuentoPorcentaje;
@@ -37,7 +37,7 @@ class DetalleVenta {
     double? subtotal,
     String? nombreProducto,
     double? subtotalLinea,
-    String? ofertaId,
+    int? ofertaId,
     String? ofertaNombre,
     double? precioOriginal,
     double? descuentoPorcentaje,

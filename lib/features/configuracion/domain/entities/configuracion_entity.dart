@@ -1,5 +1,4 @@
 class ConfiguracionEntity {
-
   const ConfiguracionEntity({
     required this.id,
     required this.nombreComercial,

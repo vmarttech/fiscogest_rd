@@ -1,5 +1,4 @@
 class ImpuestoEntity {
-
   const ImpuestoEntity({
     this.id,
     required this.nombre,
@@ -12,7 +11,8 @@ class ImpuestoEntity {
   final int? id;
   final String nombre;
   final double porcentaje;
-  final String tipo; // e.g., 'ITBIS', 'Selectivo al Consumo', 'Propina Legal', 'Exento'
+  final String
+  tipo; // e.g., 'ITBIS', 'Selectivo al Consumo', 'Propina Legal', 'Exento'
   final bool esExento;
   final bool activo;
   final String descripcion;

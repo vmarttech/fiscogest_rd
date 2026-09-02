@@ -12,7 +12,6 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 /// ✅ Proporciones inteligentes → nunca se desborda
 
 class PlantillaFilaLista extends StatelessWidget {
-
   const PlantillaFilaLista({
     super.key,
     required this.titulo,

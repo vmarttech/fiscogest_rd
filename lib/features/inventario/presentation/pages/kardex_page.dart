@@ -28,13 +28,15 @@ class _KardexPageState extends ConsumerState<KardexPage> {
   @override
   void initState() {
     super.initState();
-    _productoIdFijo = widget.productoId != null ? int.tryParse(widget.productoId!) : null;
+    _productoIdFijo = widget.productoId != null
+        ? int.tryParse(widget.productoId!)
+        : null;
   }
 
   @override
   Widget build(BuildContext context) {
     final movimientosAsync = ref.watch(
-      kardexPorProductoProvider(_productoIdFijo?.toString() ?? ''),
+      kardexPorProductoProvider(_productoIdFijo ?? 0),
     );
 
     return AppScaffold(
@@ -58,10 +60,17 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     child2: AppDropdown<TipoMovimiento>(
                       initialValue: _filtroTipo,
                       hint: 'Tipo de Movimiento',
-                      items: TipoMovimiento.values.map((tipo) => DropdownMenuItem<TipoMovimiento>(
-                        value: tipo,
-                        child: Text(tipo.name.toUpperCase(), style: AppTypography.bodySmall),
-                      )).toList(),
+                      items: TipoMovimiento.values
+                          .map(
+                            (tipo) => DropdownMenuItem<TipoMovimiento>(
+                              value: tipo,
+                              child: Text(
+                                tipo.name.toUpperCase(),
+                                style: AppTypography.bodySmall,
+                              ),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (valor) => setState(() => _filtroTipo = valor),
                     ),
                   ),
@@ -75,23 +84,37 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                         border: Border.all(color: AppColors.border),
                       ),
                       child: movimientosAsync.when(
-                        loading: () => const Center(child: CircularProgressIndicator()),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
                         error: (error, pila) => Center(
                           child: Padding(
                             padding: AppSpacing.allM,
                             child: Text(
                               'Error al cargar movimientos: $error',
                               textAlign: TextAlign.center,
-                              style: AppTypography.labelMedium.copyWith(color: AppColors.error),
+                              style: AppTypography.labelMedium.copyWith(
+                                color: AppColors.error,
+                              ),
                             ),
                           ),
                         ),
                         data: (movimientos) {
                           final filtrados = movimientos.where((mov) {
-                            if (_productoIdFijo != null && mov.productoId != _productoIdFijo) return false;
-                            final coincideTexto = mov.productoId.toString().contains(_filtroBusqueda) ||
-                                (mov.documentoReferencia?.toLowerCase().contains(_filtroBusqueda) ?? false);
-                            final coincideTipo = _filtroTipo == null || mov.tipoMovimiento == _filtroTipo;
+                            if (_productoIdFijo != null &&
+                                mov.productoId != _productoIdFijo) {
+                              return false;
+                            }
+                            final coincideTexto =
+                                mov.productoId.toString().contains(
+                                  _filtroBusqueda,
+                                ) ||
+                                (mov.documentoReferencia
+                                        ?.toLowerCase()
+                                        .contains(_filtroBusqueda) ??
+                                    false);
+                            final coincideTipo =
+                                _filtroTipo == null ||
+                                mov.tipoMovimiento == _filtroTipo;
                             return coincideTexto && coincideTipo;
                           }).toList();
 
@@ -101,7 +124,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                 padding: AppSpacing.allL,
                                 child: Text(
                                   'No hay movimientos registrados o coincidentes.',
-                                  style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
                             );
@@ -110,10 +135,13 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                           return ListView.separated(
                             padding: AppSpacing.allS,
                             itemCount: filtrados.length,
-                            separatorBuilder: (_, __) => const Divider(color: AppColors.border, height: 1),
+                            separatorBuilder: (_, __) => const Divider(
+                              color: AppColors.border,
+                              height: 1,
+                            ),
                             itemBuilder: (_, indice) {
                               final mov = filtrados[indice];
-                              final colorTipo = switch(mov.tipoMovimiento) {
+                              final colorTipo = switch (mov.tipoMovimiento) {
                                 TipoMovimiento.entrada => AppColors.success,
                                 TipoMovimiento.salida => AppColors.error,
                                 TipoMovimiento.ajuste => AppColors.warning,
@@ -121,7 +149,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                 _ => AppColors.secondary,
                               };
 
-                              final fechaValida = mov.fechaMovimiento ?? DateTime.now();
+                              final fechaValida =
+                                  mov.fechaMovimiento ?? DateTime.now();
                               return Padding(
                                 padding: AppSpacing.vS,
                                 child: Row(
@@ -130,21 +159,33 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                     Container(
                                       width: 8,
                                       height: 48,
-                                      decoration: BoxDecoration(color: colorTipo, borderRadius: BorderRadius.circular(4)),
+                                      decoration: BoxDecoration(
+                                        color: colorTipo,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
                                     ),
                                     const SizedBox(width: AppSpacing.m),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            mov.tipoMovimiento.name.toUpperCase(),
-                                            style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                                            mov.tipoMovimiento.name
+                                                .toUpperCase(),
+                                            style: AppTypography.labelLarge
+                                                .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                           ),
                                           AppLayout.vXs,
                                           Text(
                                             'Prod: ${mov.productoId} • Doc: ${mov.documentoReferencia ?? 'Sin documento'}',
-                                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                                            style: AppTypography.bodySmall
+                                                .copyWith(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                ),
                                           ),
                                           Text(
                                             'Cant: ${mov.cantidad} • Saldo: ${mov.saldoAnterior} → ${mov.saldoNuevo}',
@@ -154,10 +195,12 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                       ),
                                     ),
                                     Text(
-                                      '${fechaValida.day.toString().padLeft(2,'0')}/'
-                                      '${fechaValida.month.toString().padLeft(2,'0')}/'
+                                      '${fechaValida.day.toString().padLeft(2, '0')}/'
+                                      '${fechaValida.month.toString().padLeft(2, '0')}/'
                                       '${fechaValida.year}',
-                                      style: AppTypography.bodySmall.copyWith(color: AppColors.textDisabled),
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: AppColors.textDisabled,
+                                      ),
                                     ),
                                   ],
                                 ),

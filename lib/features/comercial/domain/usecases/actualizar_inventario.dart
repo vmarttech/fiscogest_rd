@@ -1,24 +1,25 @@
-import 'package:fiscogest_rd/features/inventario/domain/repositories/inventario_repository.dart';
+import 'package:fiscogest_rd/features/comercial/domain/repositories/i_inventario_repository.dart';
 
 class ActualizarInventario {
   ActualizarInventario(this._repositorio);
-  final InventarioRepository _repositorio;
+  final IInventarioRepository _repositorio;
 
   Future<bool> call({
     required int idProducto,
     required double cantidad,
     required bool esEntrada,
   }) async {
-    final stockActual = await _repositorio.obtenerStockActual(idProducto);
-    if (stockActual == null) return false;
-
-    final double stockNuevo = esEntrada
-        ? stockActual + cantidad
-        : stockActual - cantidad;
-
-    if (stockNuevo < 0) return false;
-
-    await _repositorio.actualizarStock(idProducto, stockNuevo);
+    if (esEntrada) {
+      await _repositorio.aumentarExistencias(
+        productoId: idProducto,
+        cantidad: cantidad,
+      );
+    } else {
+      await _repositorio.descontarExistencias(
+        productoId: idProducto,
+        cantidad: cantidad,
+      );
+    }
     return true;
   }
 }

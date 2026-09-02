@@ -26,13 +26,19 @@ class MostrarDetalleVenta extends ConsumerWidget {
       final resultado = await servicio.generarImpresion(venta);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(resultado), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text(resultado),
+            backgroundColor: AppColors.success,
+          ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al imprimir: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error al imprimir: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -44,13 +50,19 @@ class MostrarDetalleVenta extends ConsumerWidget {
       final ruta = await servicio.exportarPDF(venta);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Archivo generado: $ruta'), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text('Archivo generado: $ruta'),
+            backgroundColor: AppColors.success,
+          ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al generar archivo: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error al generar archivo: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -64,7 +76,10 @@ class MostrarDetalleVenta extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al enviar: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error al enviar: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -76,10 +91,18 @@ class MostrarDetalleVenta extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Convertir Cotización'),
-        content: Text('¿Desea convertir la cotización ${venta.numero} en una venta?'),
+        content: Text(
+          '¿Desea convertir la cotización ${venta.numero} en una venta?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirmar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirmar'),
+          ),
         ],
       ),
     );
@@ -89,15 +112,24 @@ class MostrarDetalleVenta extends ConsumerWidget {
       final resultado = await casoUso.call(venta.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cotización convertida: ${resultado.numero}'), backgroundColor: AppColors.success, duration: const Duration(seconds: 5)),
+          SnackBar(
+            content: Text('Cotización convertida: ${resultado.numero}'),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 5),
+          ),
         );
         ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
-        ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+        ref
+            .read(ventasNavegacionProvider.notifier)
+            .cambiarVista(VistaActual.inicio);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al convertir: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error al convertir: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -113,10 +145,17 @@ class MostrarDetalleVenta extends ConsumerWidget {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.textSecondary,
+                ),
                 onPressed: () {
-                  ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
-                  ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+                  ref
+                      .read(ventaCargadaDesdeHistorialProvider.notifier)
+                      .limpiarVenta();
+                  ref
+                      .read(ventasNavegacionProvider.notifier)
+                      .cambiarVista(VistaActual.inicio);
                 },
               ),
               Expanded(
@@ -129,7 +168,9 @@ class MostrarDetalleVenta extends ConsumerWidget {
                     ),
                     Text(
                       _formatearFecha(venta.fecha),
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -140,7 +181,10 @@ class MostrarDetalleVenta extends ConsumerWidget {
           ),
           const Divider(),
           const SizedBox(height: AppSpacing.m),
-          const Text('Datos del Cliente y Pago', style: AppTypography.labelLarge),
+          const Text(
+            'Datos del Cliente y Pago',
+            style: AppTypography.labelLarge,
+          ),
           const SizedBox(height: AppSpacing.s),
           FilaDetalle('Nº Transacción', venta.numero),
           FilaDetalle('Cliente ID', '${venta.clienteId}'),
@@ -163,29 +207,107 @@ class MostrarDetalleVenta extends ConsumerWidget {
               children: [
                 Container(
                   color: AppColors.grey100,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: const Row(
                     children: [
-                      Expanded(flex: 4, child: Text('Descripción', style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(flex: 1, child: Text('Cant', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(flex: 2, child: Text('Precio', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(flex: 2, child: Text('Impuesto', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(flex: 2, child: Text('Subtotal', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold))),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          'Descripción',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          'Cant',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Precio',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Impuesto',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Subtotal',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                ...venta.detalles.map((linea) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  child: Row(
-                    children: [
-                      Expanded(flex: 4, child: Text(linea.nombreProducto as String, style: AppTypography.bodySmall)),
-                      Expanded(flex: 1, child: Text('${linea.cantidad}', textAlign: TextAlign.right, style: AppTypography.bodySmall)),
-                      Expanded(flex: 2, child: Text(_formatearMonto(linea.precioUnitario as double), textAlign: TextAlign.right, style: AppTypography.bodySmall)),
-                      Expanded(flex: 2, child: Text('${linea.tasaImpuesto as double}%', textAlign: TextAlign.right, style: AppTypography.bodySmall)),
-                      Expanded(flex: 2, child: Text(_formatearMonto(linea.subtotalLinea as double), textAlign: TextAlign.right, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500))),
-                    ],
+                ...venta.detalles.map(
+                  (linea) => Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            linea.nombreProducto as String,
+                            style: AppTypography.bodySmall,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            '${linea.cantidad}',
+                            textAlign: TextAlign.right,
+                            style: AppTypography.bodySmall,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            _formatearMonto(linea.precioUnitario as double),
+                            textAlign: TextAlign.right,
+                            style: AppTypography.bodySmall,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            '${linea.tasaImpuesto as double}%',
+                            textAlign: TextAlign.right,
+                            style: AppTypography.bodySmall,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            _formatearMonto(linea.subtotalLinea as double),
+                            textAlign: TextAlign.right,
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                )),
+                ),
               ],
             ),
           ),
@@ -199,7 +321,11 @@ class MostrarDetalleVenta extends ConsumerWidget {
                   FilaDetalle('Subtotal', _formatearMonto(venta.subtotal)),
                   FilaDetalle('ITBIS', _formatearMonto(venta.itbis)),
                   const Divider(),
-                  FilaDetalle('TOTAL', _formatearMonto(venta.total), esResaltado: true),
+                  FilaDetalle(
+                    'TOTAL',
+                    _formatearMonto(venta.total),
+                    esResaltado: true,
+                  ),
                 ],
               ),
             ),
@@ -240,7 +366,9 @@ class MostrarDetalleVenta extends ConsumerWidget {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Transacción ${venta.numero} copiada como referencia. Vaya a Facturación → Nota de Crédito / Devolución.'),
+                      content: Text(
+                        'Transacción ${venta.numero} copiada como referencia. Vaya a Facturación → Nota de Crédito / Devolución.',
+                      ),
                       backgroundColor: AppColors.success,
                       duration: const Duration(seconds: 5),
                     ),
@@ -253,7 +381,9 @@ class MostrarDetalleVenta extends ConsumerWidget {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Número ${venta.numero} copiado al portapapeles'),
+                      content: Text(
+                        'Número ${venta.numero} copiado al portapapeles',
+                      ),
                       backgroundColor: AppColors.success,
                     ),
                   );
@@ -266,12 +396,18 @@ class MostrarDetalleVenta extends ConsumerWidget {
           const SizedBox(height: AppSpacing.l),
           ElevatedButton.icon(
             onPressed: () {
-              ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
-              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+              ref
+                  .read(ventaCargadaDesdeHistorialProvider.notifier)
+                  .limpiarVenta();
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.inicio);
             },
             icon: const Icon(Icons.arrow_back),
             label: const Text('Volver al historial'),
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
           ),
         ],
       ),
@@ -280,7 +416,12 @@ class MostrarDetalleVenta extends ConsumerWidget {
 }
 
 class FilaDetalle extends StatelessWidget {
-  const FilaDetalle(this.etiqueta, this.valor, {super.key, this.esResaltado = false});
+  const FilaDetalle(
+    this.etiqueta,
+    this.valor, {
+    super.key,
+    this.esResaltado = false,
+  });
   final String etiqueta, valor;
   final bool esResaltado;
 
@@ -291,7 +432,12 @@ class FilaDetalle extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(etiqueta, style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
+          Text(
+            etiqueta,
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
           Text(
             valor,
             style: AppTypography.bodyMedium.copyWith(

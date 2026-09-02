@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
 
 String _formatearMonto(double monto) {
   return NumberFormat.currency(
@@ -19,11 +22,15 @@ class ItemCarrito extends ConsumerWidget {
     required this.indice,
     required this.alEliminar,
   });
+
   final DetalleVenta detalle;
   final int indice;
   final VoidCallback alEliminar;
+
   void _abrirEditarCantidad(BuildContext context, WidgetRef ref) {
-    final controlador = TextEditingController(text: detalle.cantidad.toString());
+    final controlador = TextEditingController(
+      text: detalle.cantidad.toString(),
+    );
     showDialog<dynamic>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -34,12 +41,19 @@ class ItemCarrito extends ConsumerWidget {
           decoration: const InputDecoration(hintText: 'Cantidad'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
           TextButton(
             onPressed: () {
-              final nuevaCantidad = double.tryParse(controlador.text) ?? detalle.cantidad.toDouble();
+              final nuevaCantidad =
+                  double.tryParse(controlador.text) ??
+                  detalle.cantidad.toDouble();
               if (nuevaCantidad > 0) {
-                ref.read(registrarVentaProvider.notifier).cambiarCantidad(indice, nuevaCantidad);
+                ref
+                    .read(registrarVentaProvider.notifier)
+                    .cambiarCantidad(indice, nuevaCantidad);
               }
               Navigator.pop(ctx);
             },
@@ -49,6 +63,7 @@ class ItemCarrito extends ConsumerWidget {
       ),
     );
   }
+
   void _abrirDescuentoLinea(BuildContext context, WidgetRef ref) {
     final tienePorcentaje = detalle.descuentoPorcentaje > 0;
     final tieneMonto = detalle.montoDescuento > 0;
@@ -56,8 +71,8 @@ class ItemCarrito extends ConsumerWidget {
       text: tienePorcentaje
           ? detalle.descuentoPorcentaje.toStringAsFixed(2)
           : tieneMonto
-              ? detalle.montoDescuento.toStringAsFixed(2)
-              : '',
+          ? detalle.montoDescuento.toStringAsFixed(2)
+          : '',
     );
     bool esPorcentaje = tienePorcentaje;
     showDialog<dynamic>(
@@ -74,7 +89,8 @@ class ItemCarrito extends ConsumerWidget {
                     child: ChoiceChip(
                       label: const Text('RD\$'),
                       selected: !esPorcentaje,
-                      onSelected: (_) => setDialogState(() => esPorcentaje = false),
+                      onSelected: (_) =>
+                          setDialogState(() => esPorcentaje = false),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -82,7 +98,8 @@ class ItemCarrito extends ConsumerWidget {
                     child: ChoiceChip(
                       label: const Text('%'),
                       selected: esPorcentaje,
-                      onSelected: (_) => setDialogState(() => esPorcentaje = true),
+                      onSelected: (_) =>
+                          setDialogState(() => esPorcentaje = true),
                     ),
                   ),
                 ],
@@ -90,7 +107,9 @@ class ItemCarrito extends ConsumerWidget {
               const SizedBox(height: 16),
               TextField(
                 controller: controlador,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(
                   hintText: '0.00',
                   suffixText: esPorcentaje ? '%' : '',
@@ -101,7 +120,8 @@ class ItemCarrito extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(registrarVentaProvider.notifier)
+                ref
+                    .read(registrarVentaProvider.notifier)
                     .aplicarDescuentoLinea(indice, 0.0, false);
                 Navigator.pop(ctx);
               },
@@ -110,7 +130,8 @@ class ItemCarrito extends ConsumerWidget {
             TextButton(
               onPressed: () {
                 final valor = double.tryParse(controlador.text) ?? 0.0;
-                ref.read(registrarVentaProvider.notifier)
+                ref
+                    .read(registrarVentaProvider.notifier)
                     .aplicarDescuentoLinea(indice, valor, esPorcentaje);
                 Navigator.pop(ctx);
               },
@@ -121,91 +142,273 @@ class ItemCarrito extends ConsumerWidget {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tieneOferta = detalle.ofertaId != null;
-    final tieneDescuento = detalle.descuentoPorcentaje > 0 || detalle.montoDescuento > 0;
+    final tieneDescuento =
+        detalle.descuentoPorcentaje > 0 || detalle.montoDescuento > 0;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        title: Row(
-          children: [
-            Expanded(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      child: LayoutBuilder(
+        builder: (context, restricciones) {
+          if (restricciones.maxWidth < 420) {
+            return _construirModoCompacto(
+              context,
+              ref,
+              tieneOferta,
+              tieneDescuento,
+            );
+          }
+          return _construirModoCompleto(
+            context,
+            ref,
+            tieneOferta,
+            tieneDescuento,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _construirModoCompleto(
+    BuildContext context,
+    WidgetRef ref,
+    bool tieneOferta,
+    bool tieneDescuento,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(AppRadius.s),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: 4,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        detalle.nombreProducto ?? '',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    if (tieneOferta)
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'OFERTA',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange.shade700,
+                          ),
+                        ),
+                      ),
+                    if (tieneDescuento)
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'DESC',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Cant: ${detalle.cantidad} • RD\$ ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                if (tieneOferta && detalle.precioOriginal != null)
+                  Text(
+                    'Precio original: RD\$ ${_formatearMonto(detalle.precioOriginal!)} → Oferta: RD\$ ${_formatearMonto(detalle.precioUnitario)}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange.shade700,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit, size: 18, color: Colors.blueGrey),
+                tooltip: 'Editar cantidad',
+                onPressed: () => _abrirEditarCantidad(context, ref),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+              IconButton(
+                icon: const Icon(Icons.percent, size: 18, color: Colors.green),
+                tooltip: 'Descuento de línea',
+                onPressed: () => _abrirDescuentoLinea(context, ref),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  size: 18,
+                  color: Colors.red,
+                ),
+                tooltip: 'Eliminar',
+                onPressed: alEliminar,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _construirModoCompacto(
+    BuildContext context,
+    WidgetRef ref,
+    bool tieneOferta,
+    bool tieneDescuento,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(AppRadius.s),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  detalle.nombreProducto ?? '',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+              if (tieneOferta)
+                Container(
+                  margin: const EdgeInsets.only(left: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'OFERTA',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange.shade700,
+                    ),
+                  ),
+                ),
+              if (tieneDescuento)
+                Container(
+                  margin: const EdgeInsets.only(left: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'DESC',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Cant: ${detalle.cantidad} • RD\$ ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          if (tieneOferta && detalle.precioOriginal != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
               child: Text(
-                detalle.nombreProducto ?? '',
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (tieneOferta)
-              Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'OFERTA',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade700,
-                  ),
-                ),
-              ),
-            if (tieneDescuento)
-              Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'DESC',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Cant: ${detalle.cantidad} • RD\$ ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}'),
-            if (tieneOferta && detalle.precioOriginal != null)
-              Text(
                 'Precio original: RD\$ ${_formatearMonto(detalle.precioOriginal!)} → Oferta: RD\$ ${_formatearMonto(detalle.precioUnitario)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.orange.shade700,
-                ),
+                style: TextStyle(fontSize: 11, color: Colors.orange.shade700),
               ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit, size: 18, color: Colors.blueGrey),
-              tooltip: 'Editar cantidad',
-              onPressed: () => _abrirEditarCantidad(context, ref),
             ),
-            IconButton(
-              icon: const Icon(Icons.percent, size: 18, color: Colors.green),
-              tooltip: 'Descuento de línea',
-              onPressed: () => _abrirDescuentoLinea(context, ref),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-              tooltip: 'Eliminar',
-              onPressed: alEliminar,
-            ),
-          ],
-        ),
+          const SizedBox(height: AppSpacing.xs),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit, size: 18, color: Colors.blueGrey),
+                tooltip: 'Editar cantidad',
+                onPressed: () => _abrirEditarCantidad(context, ref),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+              IconButton(
+                icon: const Icon(Icons.percent, size: 18, color: Colors.green),
+                tooltip: 'Descuento de línea',
+                onPressed: () => _abrirDescuentoLinea(context, ref),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  size: 18,
+                  color: Colors.red,
+                ),
+                tooltip: 'Eliminar',
+                onPressed: alEliminar,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -37,9 +37,11 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
     if (_terminoBusqueda != null && _terminoBusqueda!.isNotEmpty) {
       final termino = _terminoBusqueda!.toLowerCase().trim();
       resultados = resultados
-          .where((p) =>
-              p.nombre.toLowerCase().contains(termino) ||
-              p.codigo.toLowerCase().contains(termino))
+          .where(
+            (p) =>
+                p.nombre.toLowerCase().contains(termino) ||
+                p.codigo.toLowerCase().contains(termino),
+          )
           .toList();
     }
     switch (categoria) {
@@ -47,8 +49,10 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
         return resultados;
       case CategoriaProducto.manufactura:
         return resultados
-            .where((p) =>
-                p.descripcion?.toLowerCase().contains('manufactura') == true)
+            .where(
+              (p) =>
+                  p.descripcion?.toLowerCase().contains('manufactura') == true,
+            )
             .toList();
       case CategoriaProducto.servicios:
         return resultados.where((p) => p.unidadMedidaId == 99).toList();
@@ -108,10 +112,16 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, color: AppColors.error, size: 48),
+                  const Icon(
+                    Icons.error_outline,
+                    color: AppColors.error,
+                    size: 48,
+                  ),
                   const SizedBox(height: AppSpacing.m),
-                  Text('Error al cargar productos: $error',
-                      style: AppTypography.bodyMedium),
+                  Text(
+                    'Error al cargar productos: $error',
+                    style: AppTypography.bodyMedium,
+                  ),
                 ],
               ),
             ),
@@ -122,15 +132,19 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.inventory_2_outlined,
-                          size: 64, color: AppColors.grey400),
+                      const Icon(
+                        Icons.inventory_2_outlined,
+                        size: 64,
+                        color: AppColors.grey400,
+                      ),
                       const SizedBox(height: AppSpacing.m),
                       Text(
                         _terminoBusqueda?.isNotEmpty == true
                             ? 'No hay coincidencias'
                             : 'No hay productos en esta categoría',
                         style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.textSecondary),
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -154,9 +168,15 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(producto.nombre, style: AppTypography.labelLarge),
+                                  Text(
+                                    producto.nombre,
+                                    style: AppTypography.labelLarge,
+                                  ),
                                   const SizedBox(height: AppSpacing.xs),
-                                  Text(producto.codigo, style: AppTypography.bodySmall),
+                                  Text(
+                                    producto.codigo,
+                                    style: AppTypography.bodySmall,
+                                  ),
                                 ],
                               ),
                             ),
@@ -166,7 +186,8 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                                 Text(
                                   'RD\$ ${producto.precioVenta.toStringAsFixed(2)}',
                                   style: AppTypography.labelMedium.copyWith(
-                                      color: AppColors.primary),
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                                 if (producto.stock != null)
                                   Text(

@@ -63,7 +63,8 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                         .read(clienteCompletoControllerProvider.notifier)
                         .buscarPorNombre(terminoBusqueda),
                     builder: (context, instantanea) {
-                      if (instantanea.connectionState == ConnectionState.waiting) {
+                      if (instantanea.connectionState ==
+                          ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (instantanea.hasError) {
@@ -72,7 +73,9 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                             padding: AppSpacing.allM,
                             child: Text(
                               'Error al cargar clientes: ${instantanea.error}',
-                              style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.error,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -87,7 +90,9 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                               terminoBusqueda.isEmpty
                                   ? 'No hay clientes registrados'
                                   : 'No se encontraron coincidencias',
-                              style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                              style: AppTypography.bodyLarge.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -100,9 +105,19 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                         itemBuilder: (_, indice) {
                           final cliente = listado[indice];
                           return ListTile(
-                            title: Text(cliente.nombre, style: AppTypography.labelMedium),
-                            subtitle: Text(cliente.rncCedula, style: AppTypography.bodySmall),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.grey600),
+                            title: Text(
+                              cliente.nombre,
+                              style: AppTypography.labelMedium,
+                            ),
+                            subtitle: Text(
+                              cliente.rncCedula,
+                              style: AppTypography.bodySmall,
+                            ),
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: AppColors.grey600,
+                            ),
                             onTap: () => Navigator.pop(context, cliente),
                           );
                         },
@@ -116,7 +131,10 @@ class SeleccionarClienteDialog extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
           ],
         );

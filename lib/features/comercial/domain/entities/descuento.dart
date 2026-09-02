@@ -1,19 +1,11 @@
 /// Tipo de descuento aplicable
-enum TipoDescuento {
-  porProducto,
-  porFactura,
-}
+enum TipoDescuento { porProducto, porFactura }
 
 /// Estado de autorización del descuento
-enum EstadoAutorizacion {
-  autorizado,
-  requierePermiso,
-  denegado,
-}
+enum EstadoAutorizacion { autorizado, requierePermiso, denegado }
 
 /// Entidad que representa un descuento comercial
 class Descuento {
-
   const Descuento({
     required this.id,
     required this.tipo,
@@ -27,7 +19,8 @@ class Descuento {
     this.esPorcentaje = false,
     this.activo = true,
   });
-  final String id;
+
+  final int id;
   final TipoDescuento tipo;
   final double valor;
   final String motivo;
@@ -35,7 +28,7 @@ class Descuento {
   final String? autorizadoPor;
   final DateTime fechaRegistro;
   final DateTime? fechaAutorizacion;
-  final String? productoId;
+  final int? productoId;
   final bool esPorcentaje;
   final bool activo;
 }

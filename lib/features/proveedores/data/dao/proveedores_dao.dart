@@ -5,13 +5,15 @@ import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dar
 part 'proveedores_dao.g.dart';
 
 @DriftAccessor(tables: [ProveedoresTable])
-class ProveedoresDao extends DatabaseAccessor<AppDatabase> with _$ProveedoresDaoMixin {
+class ProveedoresDao extends DatabaseAccessor<AppDatabase>
+    with _$ProveedoresDaoMixin {
   ProveedoresDao(super.db);
 
   Future<List<ProveedorData>> obtenerTodos() => select(proveedoresTable).get();
 
-  Future<ProveedorData?> obtenerPorId(int id) =>
-      (select(proveedoresTable)..where((t) => t.id.equals(id))).getSingleOrNull();
+  Future<ProveedorData?> obtenerPorId(int id) => (select(
+    proveedoresTable,
+  )..where((t) => t.id.equals(id))).getSingleOrNull();
 
   Future<int> insertar(ProveedoresTableCompanion proveedor) =>
       into(proveedoresTable).insert(proveedor);
@@ -25,12 +27,15 @@ class ProveedoresDao extends DatabaseAccessor<AppDatabase> with _$ProveedoresDao
   }
 
   Future<bool> eliminar(int id) async {
-    final int filas = await (delete(proveedoresTable)..where((t) => t.id.equals(id))).go();
+    final int filas = await (delete(
+      proveedoresTable,
+    )..where((t) => t.id.equals(id))).go();
     return filas > 0;
   }
 
   Future<List<ProveedorData>> buscarPorNombre(String nombre) =>
-      (select(proveedoresTable)
-        ..where((t) => t.nombreEmpresa.lower().like('%${nombre.toLowerCase()}%'))
-      ).get();
+      (select(proveedoresTable)..where(
+            (t) => t.nombreEmpresa.lower().like('%${nombre.toLowerCase()}%'),
+          ))
+          .get();
 }

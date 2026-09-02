@@ -5,7 +5,6 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 
 class AppSection extends StatelessWidget {
-
   const AppSection({
     super.key,
     this.title,

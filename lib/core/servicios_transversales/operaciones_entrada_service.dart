@@ -28,15 +28,19 @@ class OperacionesEntradaService {
     required String usuario,
   }) async {
     await db.transaction(() async {
-      await entradaRepository.registrarEntrada(Entrada(
-        productoId: productoId,
-        cantidad: cantidad,
-        motivo: motivo,
-        usuario: usuario,
-        fecha: DateTime.now(),
-      ));
+      await entradaRepository.registrarEntrada(
+        Entrada(
+          productoId: productoId,
+          cantidad: cantidad,
+          motivo: motivo,
+          usuario: usuario,
+          fecha: DateTime.now(),
+        ),
+      );
 
-      final producto = await productoRepository.obtenerProductoPorId(productoId);
+      final producto = await productoRepository.obtenerProductoPorId(
+        productoId,
+      );
       if (producto != null) {
         final actualizado = aumentarStock(producto, cantidad);
         await productoRepository.actualizarProducto(actualizado);

@@ -15,27 +15,32 @@ final configuracionDaoProvider = Provider<ConfiguracionDao>((ref) {
 });
 
 /// Proveedor Repositorio Configuración
-final configuracionRepositoryProvider = Provider<IConfiguracionRepository>((ref) {
+final configuracionRepositoryProvider = Provider<IConfiguracionRepository>((
+  ref,
+) {
   final dao = ref.watch(configuracionDaoProvider);
   return ConfiguracionRepositoryImpl(dao);
 });
 
 /// Proveedor Caso de Uso: Obtener Configuración
-final obtenerConfiguracionUseCaseProvider = Provider<ObtenerConfiguracionUseCase>((ref) {
-  final repo = ref.watch(configuracionRepositoryProvider);
-  return ObtenerConfiguracionUseCase(repo);
-});
+final obtenerConfiguracionUseCaseProvider =
+    Provider<ObtenerConfiguracionUseCase>((ref) {
+      final repo = ref.watch(configuracionRepositoryProvider);
+      return ObtenerConfiguracionUseCase(repo);
+    });
 
 /// Proveedor Caso de Uso: Guardar Configuración
-final guardarConfiguracionUseCaseProvider = Provider<GuardarConfiguracionUseCase>((ref) {
-  final repo = ref.watch(configuracionRepositoryProvider);
-  return GuardarConfiguracionUseCase(repo);
-});
+final guardarConfiguracionUseCaseProvider =
+    Provider<GuardarConfiguracionUseCase>((ref) {
+      final repo = ref.watch(configuracionRepositoryProvider);
+      return GuardarConfiguracionUseCase(repo);
+    });
 
 /// Controlador Configuración: SOLO gestiona estado, NUNCA lógica de negocio
-final configuracionControllerProvider = AsyncNotifierProvider<ConfiguracionController, ConfiguracionEntity?>(() {
-  return ConfiguracionController();
-});
+final configuracionControllerProvider =
+    AsyncNotifierProvider<ConfiguracionController, ConfiguracionEntity?>(() {
+      return ConfiguracionController();
+    });
 
 class ConfiguracionController extends AsyncNotifier<ConfiguracionEntity?> {
   @override

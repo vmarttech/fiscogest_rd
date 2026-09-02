@@ -8,9 +8,10 @@ final categoriaRepositoryProvider = Provider<CategoriaRepository>((ref) {
   return CategoriaRepositoryImpl(ref.watch(databaseProvider));
 });
 
-final categoriaControllerProvider = AsyncNotifierProvider<CategoriaController, List<Categoria>>(() {
-  return CategoriaController();
-});
+final categoriaControllerProvider =
+    AsyncNotifierProvider<CategoriaController, List<Categoria>>(() {
+      return CategoriaController();
+    });
 
 class CategoriaController extends AsyncNotifier<List<Categoria>> {
   late final CategoriaRepository _repo;

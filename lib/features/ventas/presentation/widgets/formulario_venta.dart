@@ -22,7 +22,10 @@ class FormularioVenta extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Datos de la Venta', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Datos de la Venta',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             InkWell(
               onTap: alSeleccionarCliente,
@@ -34,17 +37,25 @@ class FormularioVenta extends ConsumerWidget {
                     const Icon(Icons.person, color: Colors.blueGrey),
                     const SizedBox(width: 12),
                     const Expanded(child: Text('Cliente')),
-                    Row(children: [
-                      Text(
-                        (estado.clienteNombre?.isNotEmpty ?? false) ? estado.clienteNombre ?? 'Seleccionar' : 'Seleccionar',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
+                    Row(
+                      children: [
+                        Text(
+                          (estado.clienteNombre?.isNotEmpty ?? false)
+                              ? estado.clienteNombre ?? 'Seleccionar'
+                              : 'Seleccionar',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
-                    ]),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -60,19 +71,27 @@ class FormularioVenta extends ConsumerWidget {
                     const Icon(Icons.payment, color: Colors.blueGrey),
                     const SizedBox(width: 12),
                     const Expanded(child: Text('Forma de Pago')),
-                    Row(children: [
-                      Text(
-                        estado.tipoPago.isNotEmpty
-                            ? '${estado.tipoPago[0].toUpperCase()}${estado.tipoPago.substring(1)}${estado.esCredito ? ' (Crédito)' : ''}'
-                            : 'Seleccionar',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: estado.tipoPago.isNotEmpty ? Colors.black87 : Colors.grey,
+                    Row(
+                      children: [
+                        Text(
+                          estado.tipoPago.isNotEmpty
+                              ? '${estado.tipoPago[0].toUpperCase()}${estado.tipoPago.substring(1)}${estado.esCredito ? ' (Crédito)' : ''}'
+                              : 'Seleccionar',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: estado.tipoPago.isNotEmpty
+                                ? Colors.black87
+                                : Colors.grey,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
-                    ]),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

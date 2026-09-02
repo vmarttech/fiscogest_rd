@@ -14,5 +14,6 @@ class UnidadMedida with _$UnidadMedida {
     DateTime? actualizadoEn,
   }) = _UnidadMedida;
 
-  factory UnidadMedida.fromJson(Map<String, dynamic> json) => _$UnidadMedidaFromJson(json);
+  factory UnidadMedida.fromJson(Map<String, dynamic> json) =>
+      _$UnidadMedidaFromJson(json);
 }

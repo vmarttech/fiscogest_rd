@@ -13,7 +13,8 @@ class ConteosFisicos extends Table {
   DateTimeColumn get fechaConteo => dateTime()();
   TextColumn get observaciones => text().nullable()();
   IntColumn get usuarioId => integer()();
-  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get fechaCreacion =>
+      dateTime().withDefault(currentDateAndTime)();
   TextColumn get estado => text().withDefault(const Constant('pendiente'))();
 }
 

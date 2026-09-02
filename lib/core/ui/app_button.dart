@@ -5,7 +5,6 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 class AppButton extends StatelessWidget {
-
   const AppButton({
     super.key,
     required this.text,
@@ -54,17 +53,24 @@ class AppButton extends StatelessWidget {
       return const SizedBox(
         width: 20,
         height: 20,
-        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: AppColors.white,
+        ),
       );
     }
 
-    final iconWidget = icon != null ? Icon(icon, size: AppSizes.iconMd) : const SizedBox.shrink();
+    final iconWidget = icon != null
+        ? Icon(icon, size: AppSizes.iconMd)
+        : const SizedBox.shrink();
     final textWidget = Text(text);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
-      children: iconRight ? [textWidget, const SizedBox(width: 8), iconWidget] : [iconWidget, const SizedBox(width: 8), textWidget],
+      children: iconRight
+          ? [textWidget, const SizedBox(width: 8), iconWidget]
+          : [iconWidget, const SizedBox(width: 8), textWidget],
     );
   }
 }

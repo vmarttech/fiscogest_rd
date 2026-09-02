@@ -24,7 +24,10 @@ class PanelProductos extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Agregar Producto', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Agregar Producto',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: controlador,
@@ -54,7 +57,9 @@ class PanelProductos extends ConsumerWidget {
               textInputAction: TextInputAction.search,
               onSubmitted: (valor) async {
                 final texto = valor.trim();
-                if (texto.isNotEmpty && alBuscar != null) await alBuscar!(texto);
+                if (texto.isNotEmpty && alBuscar != null) {
+                  await alBuscar!(texto);
+                }
               },
             ),
           ],

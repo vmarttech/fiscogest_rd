@@ -5,9 +5,7 @@ class BuscarDescuentos {
   BuscarDescuentos(this._repositorio);
   final IDescuentoRepository _repositorio;
 
-  Future<List<Descuento>> call({
-    bool soloActivos = false,
-  }) async {
+  Future<List<Descuento>> call({bool soloActivos = false}) async {
     if (soloActivos) {
       return _repositorio.listarDescuentosActivos();
     }

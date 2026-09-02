@@ -42,8 +42,12 @@ class HistorialVentasBorrador extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text('Lista de ventas borrador emitidas y su estado',
-              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+          Text(
+            'Lista de ventas borrador emitidas y su estado',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.m),
           Expanded(
             child: ventasBorradorAsync.when(
@@ -52,11 +56,19 @@ class HistorialVentasBorrador extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(height: AppSpacing.m),
-                    Text('Error al cargar ventas borrador: $e',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
-                        textAlign: TextAlign.center),
+                    Text(
+                      'Error al cargar ventas borrador: $e',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.error,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
@@ -66,28 +78,43 @@ class HistorialVentasBorrador extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.description_outlined, size: 64, color: Color(0x409E9E9E)),
+                        const Icon(
+                          Icons.description_outlined,
+                          size: 64,
+                          color: Color(0x409E9E9E),
+                        ),
                         const SizedBox(height: AppSpacing.m),
-                        Text('No hay ventas borrador registradas',
-                            style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
+                        Text(
+                          'No hay ventas borrador registradas',
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: AppSpacing.xs),
-                        Text('Las ventas borrador que registres aparecerán aquí',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                        Text(
+                          'Las ventas borrador que registres aparecerán aquí',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   );
                 }
                 return ListView.separated(
                   itemCount: ventasBorrador.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, thickness: 1),
                   itemBuilder: (_, int i) {
                     final VentaBorradorState c = ventasBorrador[i];
                     final String numero = c.numero;
                     final String fechaEmision = _formatearFecha(c.fecha);
-                    final String fechaVencimiento = _formatearFecha(c.vencimiento);
+                    final String fechaVencimiento = _formatearFecha(
+                      c.vencimiento,
+                    );
                     final double total = c.montoTotal;
-                    final bool convertida = false;
-                    final int? ventaBorradorId = null;
+                    const bool convertida = false;
+                    const int? ventaBorradorId = null;
                     return _TarjetaCotizacion(
                       numero: numero,
                       fechaEmision: fechaEmision,
@@ -133,11 +160,16 @@ class _TarjetaCotizacion extends ConsumerWidget {
         content: Text('¿Convertir la Cotización N° $numero en una Venta?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar')),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
           TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Convertir', style: TextStyle(fontWeight: FontWeight.bold))),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Convertir',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
     );
@@ -147,14 +179,20 @@ class _TarjetaCotizacion extends ConsumerWidget {
       await repo.confirmarVentaBorrador(ventaBorradorId!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cotización N° $numero convertida a Venta'), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text('Cotización N° $numero convertida a Venta'),
+            backgroundColor: AppColors.success,
+          ),
         );
         ref.invalidate(listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -173,11 +211,18 @@ class _TarjetaCotizacion extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Text('Cotización N° $numero',
-                        style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      'Cotización N° $numero',
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(width: AppSpacing.s),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xs,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: convertida
                             ? AppColors.success.withValues(alpha: 0.1)
@@ -187,25 +232,40 @@ class _TarjetaCotizacion extends ConsumerWidget {
                       child: Text(
                         convertida ? 'Convertida' : 'Vigente',
                         style: AppTypography.labelSmall.copyWith(
-                          color: convertida ? AppColors.success : AppColors.primary,
+                          color: convertida
+                              ? AppColors.success
+                              : AppColors.primary,
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                Text('Emitida: $fechaEmision',
-                    style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-                Text('Vence: $fechaVencimiento',
-                    style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                Text(
+                  'Emitida: $fechaEmision',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                Text(
+                  'Vence: $fechaVencimiento',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('RD\$ ${total.toStringAsFixed(2)}',
-                  style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+              Text(
+                'RD\$ ${total.toStringAsFixed(2)}',
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: AppSpacing.xs),
               if (!convertida && ventaBorradorId != null)
                 AppButton(
@@ -215,9 +275,17 @@ class _TarjetaCotizacion extends ConsumerWidget {
               if (convertida)
                 TextButton.icon(
                   onPressed: null,
-                  icon: const Icon(Icons.check_circle, size: 16, color: AppColors.success),
-                  label: Text('Venta generada',
-                      style: AppTypography.labelSmall.copyWith(color: AppColors.success)),
+                  icon: const Icon(
+                    Icons.check_circle,
+                    size: 16,
+                    color: AppColors.success,
+                  ),
+                  label: Text(
+                    'Venta generada',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.success,
+                    ),
+                  ),
                 ),
             ],
           ),

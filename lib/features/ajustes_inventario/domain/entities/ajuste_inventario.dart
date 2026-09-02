@@ -1,5 +1,4 @@
 class AjusteInventario {
-
   const AjusteInventario({
     this.id,
     required this.productoId,

@@ -16,7 +16,10 @@ Widget menuLateral({
     title: Text(texto, style: AppTypography.labelMedium),
     onTap: onTap,
     shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
-    contentPadding: AppSpacing.hM.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
+    contentPadding: AppSpacing.hM.copyWith(
+      top: AppSpacing.xs,
+      bottom: AppSpacing.xs,
+    ),
   );
 }
 
@@ -31,9 +34,7 @@ class AppDrawer extends StatelessWidget {
 
     return SizedBox(
       width: drawerWidth,
-      child: Drawer(
-        child: child,
-      ),
+      child: Drawer(child: child),
     );
   }
 }

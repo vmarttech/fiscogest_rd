@@ -16,6 +16,7 @@ _$ClienteEntityImpl _$$ClienteEntityImplFromJson(Map<String, dynamic> json) =>
       correo: json['correo'] as String,
       direccion: json['direccion'] as String,
       activo: json['activo'] as bool? ?? true,
+      saldoPendiente: (json['saldoPendiente'] as num?)?.toDouble() ?? 0.0,
     );
 
 Map<String, dynamic> _$$ClienteEntityImplToJson(_$ClienteEntityImpl instance) =>
@@ -28,4 +29,5 @@ Map<String, dynamic> _$$ClienteEntityImplToJson(_$ClienteEntityImpl instance) =>
       'correo': instance.correo,
       'direccion': instance.direccion,
       'activo': instance.activo,
+      'saldoPendiente': instance.saldoPendiente,
     };

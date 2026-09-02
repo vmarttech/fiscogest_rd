@@ -2,8 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
 class ComprasTable extends Table {
-  TextColumn get id => text()();
-  TextColumn get proveedorId => text()();
+  IntColumn get id => integer()();
+  IntColumn get proveedorId => integer()();
   TextColumn get nombreProveedor => text()();
   DateTimeColumn get fechaEmision => dateTime()();
   DateTimeColumn get fechaConfirmacion => dateTime().nullable()();

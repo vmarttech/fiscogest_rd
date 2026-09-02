@@ -1,3 +1,5 @@
+import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion_elemento.dart';
+
 class Recepcion {
   const Recepcion({
     this.id,
@@ -20,9 +22,9 @@ class Recepcion {
     this.fechaActualizacion,
   });
 
-  final String? id;
-  final String? compraId;
-  final String? proveedorId;
+  final int? id;
+  final int? compraId;
+  final int? proveedorId;
   final String? proveedorNombre;
   final DateTime? fechaRecepcion;
   final String? estado;
@@ -40,9 +42,9 @@ class Recepcion {
   final DateTime? fechaActualizacion;
 
   Recepcion copyWith({
-    String? id,
-    String? compraId,
-    String? proveedorId,
+    int? id,
+    int? compraId,
+    int? proveedorId,
     String? proveedorNombre,
     DateTime? fechaRecepcion,
     String? estado,
@@ -95,67 +97,5 @@ class Recepcion {
   }
 
   @override
-  int get hashCode => id.hashCode ^ numeroDocumento.hashCode;
-}
-
-class DetalleRecepcion {
-  const DetalleRecepcion({
-    this.id,
-    this.productoId,
-    this.productoNombre,
-    this.cantidadPedida,
-    this.cantidadRecibida,
-    this.costoUnitario,
-    this.subtotal,
-    this.diferencia,
-    this.motivoDiferencia,
-  });
-
-  final String? id;
-  final String? productoId;
-  final String? productoNombre;
-  final double? cantidadPedida;
-  final double? cantidadRecibida;
-  final double? costoUnitario;
-  final double? subtotal;
-  final double? diferencia;
-  final String? motivoDiferencia;
-
-  DetalleRecepcion copyWith({
-    String? id,
-    String? productoId,
-    String? productoNombre,
-    double? cantidadPedida,
-    double? cantidadRecibida,
-    double? costoUnitario,
-    double? subtotal,
-    double? diferencia,
-    String? motivoDiferencia,
-  }) {
-    return DetalleRecepcion(
-      id: id ?? this.id,
-      productoId: productoId ?? this.productoId,
-      productoNombre: productoNombre ?? this.productoNombre,
-      cantidadPedida: cantidadPedida ?? this.cantidadPedida,
-      cantidadRecibida: cantidadRecibida ?? this.cantidadRecibida,
-      costoUnitario: costoUnitario ?? this.costoUnitario,
-      subtotal: subtotal ?? this.subtotal,
-      diferencia: diferencia ?? this.diferencia,
-      motivoDiferencia: motivoDiferencia ?? this.motivoDiferencia,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'DetalleRecepcion(producto: $productoNombre, pedida: $cantidadPedida, recibida: $cantidadRecibida)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is DetalleRecepcion && other.id == id;
-  }
-
-  @override
-  int get hashCode => id.hashCode;
+  int get hashCode => (id ?? 0).hashCode ^ (numeroDocumento ?? '').hashCode;
 }

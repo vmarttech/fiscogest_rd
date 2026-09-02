@@ -82,11 +82,16 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                           children: [
                             Text(
                               'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
-                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                             AppLayout.vM,
                             Container(
-                              padding: AppSpacing.hS.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
+                              padding: AppSpacing.hS.copyWith(
+                                top: AppSpacing.xs,
+                                bottom: AppSpacing.xs,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.grey50,
                                 borderRadius: AppRadius.allL,
@@ -95,11 +100,17 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.shield_outlined, size: 18, color: AppColors.primary),
+                                  const Icon(
+                                    Icons.shield_outlined,
+                                    size: 18,
+                                    color: AppColors.primary,
+                                  ),
                                   AppLayout.hS,
                                   Text(
                                     'Modo Unificado Activo',
-                                    style: AppTypography.labelSmall.copyWith(color: AppColors.textPrimary),
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -112,11 +123,16 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                             Expanded(
                               child: Text(
                                 'Gestión unificada para comercios locales y contribuyentes con control fiscal.',
-                                style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
                             Container(
-                              padding: AppSpacing.hS.copyWith(top: AppSpacing.xs, bottom: AppSpacing.xs),
+                              padding: AppSpacing.hS.copyWith(
+                                top: AppSpacing.xs,
+                                bottom: AppSpacing.xs,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.grey50,
                                 borderRadius: AppRadius.allL,
@@ -124,11 +140,17 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.shield_outlined, size: 18, color: AppColors.primary),
+                                  const Icon(
+                                    Icons.shield_outlined,
+                                    size: 18,
+                                    color: AppColors.primary,
+                                  ),
                                   AppLayout.hS,
                                   Text(
                                     'Modo Unificado Activo',
-                                    style: AppTypography.labelSmall.copyWith(color: AppColors.textPrimary),
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -143,7 +165,11 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.person_outline, color: AppColors.primary, size: 22),
+                            Icon(
+                              Icons.person_outline,
+                              color: AppColors.primary,
+                              size: 22,
+                            ),
                             AppLayout.hS,
                             Text(
                               'Información General',
@@ -205,7 +231,11 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                           AppLayout.vM,
                           const Row(
                             children: [
-                              Icon(Icons.receipt_long_outlined, color: AppColors.primary, size: 22),
+                              Icon(
+                                Icons.receipt_long_outlined,
+                                color: AppColors.primary,
+                                size: 22,
+                              ),
                               AppLayout.hS,
                               Text(
                                 'Información Fiscal y Tributaria (DGII)',
@@ -225,15 +255,30 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                                     AppLayout.vM,
                                     AppDropdown<String>(
                                       hint: 'Tipo de Comprobante',
-                                      initialValue: _tipoComprobanteSeleccionado,
+                                      initialValue:
+                                          _tipoComprobanteSeleccionado,
                                       items: const [
-                                        DropdownMenuItem(value: 'B01 - Crédito Fiscal', child: Text('B01 - Crédito Fiscal')),
-                                        DropdownMenuItem(value: 'B02 - Consumidor Final', child: Text('B02 - Consumidor Final')),
-                                        DropdownMenuItem(value: 'B14 - Regímenes Especiales', child: Text('B14 - Regímenes Especiales')),
+                                        DropdownMenuItem(
+                                          value: 'B01 - Crédito Fiscal',
+                                          child: Text('B01 - Crédito Fiscal'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'B02 - Consumidor Final',
+                                          child: Text('B02 - Consumidor Final'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 'B14 - Regímenes Especiales',
+                                          child: Text(
+                                            'B14 - Regímenes Especiales',
+                                          ),
+                                        ),
                                       ],
                                       onChanged: (String? val) {
                                         if (val != null) {
-                                          setState(() => _tipoComprobanteSeleccionado = val);
+                                          setState(
+                                            () => _tipoComprobanteSeleccionado =
+                                                val,
+                                          );
                                         }
                                       },
                                     ),
@@ -252,15 +297,33 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                                     Expanded(
                                       child: AppDropdown<String>(
                                         hint: 'Tipo de Comprobante',
-                                        initialValue: _tipoComprobanteSeleccionado,
+                                        initialValue:
+                                            _tipoComprobanteSeleccionado,
                                         items: const [
-                                          DropdownMenuItem(value: 'B01 - Crédito Fiscal', child: Text('B01 - Crédito Fiscal')),
-                                          DropdownMenuItem(value: 'B02 - Consumidor Final', child: Text('B02 - Consumidor Final')),
-                                          DropdownMenuItem(value: 'B14 - Regímenes Especiales', child: Text('B14 - Regímenes Especiales')),
+                                          DropdownMenuItem(
+                                            value: 'B01 - Crédito Fiscal',
+                                            child: Text('B01 - Crédito Fiscal'),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: 'B02 - Consumidor Final',
+                                            child: Text(
+                                              'B02 - Consumidor Final',
+                                            ),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: 'B14 - Regímenes Especiales',
+                                            child: Text(
+                                              'B14 - Regímenes Especiales',
+                                            ),
+                                          ),
                                         ],
                                         onChanged: (String? val) {
                                           if (val != null) {
-                                            setState(() => _tipoComprobanteSeleccionado = val);
+                                            setState(
+                                              () =>
+                                                  _tipoComprobanteSeleccionado =
+                                                      val,
+                                            );
                                           }
                                         },
                                       ),

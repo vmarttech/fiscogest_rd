@@ -15,14 +15,14 @@ abstract class ICompraRepository {
 
   /// Consulta una compra por su identificador único.
   /// Devuelve null si no existe.
-  Future<Compra?> obtenerCompraPorId(String compraId);
+  Future<Compra?> obtenerCompraPorId(int compraId);
 
   /// Obtiene el listado completo de compras registradas.
   Future<List<Compra>> listarCompras();
 
   /// Obtiene las líneas de detalle correspondientes a una compra.
-  Future<List<DetalleCompra>> listarDetallesDeCompra(String compraId);
+  Future<List<DetalleCompra>> listarDetallesDeCompra(int compraId);
 
   /// Actualiza el estado de una compra y marca fecha de confirmación.
-  Future<Compra> confirmarCompra(String compraId);
+  Future<Compra> confirmarCompra(int compraId);
 }

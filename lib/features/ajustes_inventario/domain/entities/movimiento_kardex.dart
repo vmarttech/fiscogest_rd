@@ -1,5 +1,4 @@
 class MovimientoKardex {
-
   const MovimientoKardex({
     this.id,
     required this.productoId,

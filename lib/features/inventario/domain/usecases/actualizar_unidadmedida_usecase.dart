@@ -5,5 +5,6 @@ class ActualizarUnidadMedidaUseCase {
   ActualizarUnidadMedidaUseCase(this._repo);
   final IUnidadMedidaRepository _repo;
 
-  Future<void> ejecutar(UnidadMedida entidad) async => _repo.actualizar(entidad);
+  Future<void> ejecutar(UnidadMedida entidad) async =>
+      _repo.actualizar(entidad);
 }

@@ -3,7 +3,6 @@ import 'package:fiscogest_rd/features/configuracion/domain/interfaces/i_configur
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_dao.dart';
 
 class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
-
   ConfiguracionRepositoryImpl(this._configuracionDao);
   final ConfiguracionDao _configuracionDao;
 

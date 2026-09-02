@@ -10,41 +10,55 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
 
   @override
   Future<void> registrarAjuste(AjusteInventario ajuste) async {
-    await _db.into(_db.ajusteInventarioTable).insert(
-      AjusteInventarioTableCompanion(
-        productoId: Value(ajuste.productoId),
-        tipoAjuste: Value(ajuste.tipoAjuste),
-        cantidad: Value(ajuste.cantidad),
-        motivo: Value(ajuste.motivo),
-        observaciones: Value(ajuste.observaciones),
-        usuarioId: Value(ajuste.usuarioId),
-        fechaCreacion: Value(ajuste.fechaCreacion.millisecondsSinceEpoch),
-      ),
-    );
+    await _db
+        .into(_db.ajusteInventarioTable)
+        .insert(
+          AjusteInventarioTableCompanion(
+            productoId: Value(ajuste.productoId),
+            tipoAjuste: Value(ajuste.tipoAjuste),
+            cantidad: Value(ajuste.cantidad),
+            motivo: Value(ajuste.motivo),
+            observaciones: Value(ajuste.observaciones),
+            usuarioId: Value(ajuste.usuarioId),
+            fechaCreacion: Value(ajuste.fechaCreacion.millisecondsSinceEpoch),
+          ),
+        );
   }
 
   @override
   Future<List<AjusteInventario>> listarAjustes() async {
     final registros = await _db.select(_db.ajusteInventarioTable).get();
-    return registros.map((fila) => AjusteInventario(
-      id: fila.id,
-      productoId: fila.productoId,
-      tipoAjuste: fila.tipoAjuste,
-      cantidad: fila.cantidad,
-      motivo: fila.motivo,
-      observaciones: fila.observaciones ?? '',
-      usuarioId: fila.usuarioId,
-      fechaCreacion: DateTime.fromMillisecondsSinceEpoch(fila.fechaCreacion),
-    )).toList();
+    return registros
+        .map(
+          (fila) => AjusteInventario(
+            id: fila.id,
+            productoId: fila.productoId,
+            tipoAjuste: fila.tipoAjuste,
+            cantidad: fila.cantidad,
+            motivo: fila.motivo,
+            observaciones: fila.observaciones ?? '',
+            usuarioId: fila.usuarioId,
+            fechaCreacion: DateTime.fromMillisecondsSinceEpoch(
+              fila.fechaCreacion,
+            ),
+          ),
+        )
+        .toList();
   }
 
   @override
-  Future<void> actualizarExistencias(int productoId, double cantidad, String tipo) async {
-    final producto = await (_db.select(_db.productosTable)
-          ..where((p) => p.id.equals(productoId)))
-        .getSingle();
+  Future<void> actualizarExistencias(
+    int productoId,
+    double cantidad,
+    String tipo,
+  ) async {
+    final producto = await (_db.select(
+      _db.productosTable,
+    )..where((p) => p.id.equals(productoId))).getSingle();
     final stockActual = producto.stock ?? 0.0;
-    final nuevoStock = tipo == 'entrada' ? stockActual + cantidad : stockActual - cantidad;
+    final nuevoStock = tipo == 'entrada'
+        ? stockActual + cantidad
+        : stockActual - cantidad;
     await (_db.update(_db.productosTable)
           ..where((p) => p.id.equals(productoId)))
         .write(ProductosTableCompanion(stock: Value(nuevoStock)));

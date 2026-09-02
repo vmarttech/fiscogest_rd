@@ -7,12 +7,16 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 
 class EditarPreciosProductoPage extends ConsumerStatefulWidget {
   const EditarPreciosProductoPage({super.key, required this.producto});
+
   final Producto producto;
+
   @override
-  ConsumerState<EditarPreciosProductoPage> createState() => _EditarPreciosProductoPageState();
+  ConsumerState<EditarPreciosProductoPage> createState() =>
+      _EditarPreciosProductoPageState();
 }
 
-class _EditarPreciosProductoPageState extends ConsumerState<EditarPreciosProductoPage> {
+class _EditarPreciosProductoPageState
+    extends ConsumerState<EditarPreciosProductoPage> {
   late final TextEditingController _costoCtrl;
   late final TextEditingController _precioVentaCtrl;
   late final TextEditingController _margenCtrl;
@@ -20,10 +24,18 @@ class _EditarPreciosProductoPageState extends ConsumerState<EditarPreciosProduct
   late final TextEditingController _precioMayoristaCtrl;
   late final TextEditingController _precioEspecialCtrl;
 
+  int get _productoId {
+    final id = widget.producto.id;
+    assert(id != null, 'El ID del producto no puede ser nulo');
+    return id!;
+  }
+
   @override
   void initState() {
     super.initState();
-    _costoCtrl = TextEditingController(text: widget.producto.precioCompra.toStringAsFixed(2));
+    _costoCtrl = TextEditingController(
+      text: widget.producto.precioCompra.toStringAsFixed(2),
+    );
     _precioVentaCtrl = TextEditingController();
     _margenCtrl = TextEditingController();
     _precioMinimoCtrl = TextEditingController();
@@ -61,7 +73,7 @@ class _EditarPreciosProductoPageState extends ConsumerState<EditarPreciosProduct
 
   Future<void> _guardar() async {
     final lista = ListaPrecios(
-      productoId: widget.producto.id.toString(),
+      productoId: _productoId,
       precioVenta: double.tryParse(_precioVentaCtrl.text) ?? 0.0,
       margenGanancia: double.tryParse(_margenCtrl.text),
       precioMinimo: double.tryParse(_precioMinimoCtrl.text),
@@ -85,7 +97,7 @@ class _EditarPreciosProductoPageState extends ConsumerState<EditarPreciosProduct
 
   @override
   Widget build(BuildContext context) {
-    final productoId = widget.producto.id.toString();
+    final int productoId = _productoId;
     final datosPrecios = ref.watch(listaPreciosPorProductoProvider(productoId));
     ref.listen(listaPreciosPorProductoProvider(productoId), (anterior, actual) {
       actual.whenData((datos) {
@@ -115,8 +127,10 @@ class _EditarPreciosProductoPageState extends ConsumerState<EditarPreciosProduct
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Producto: ${widget.producto.nombre}',
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Producto: ${widget.producto.nombre}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _costoCtrl,

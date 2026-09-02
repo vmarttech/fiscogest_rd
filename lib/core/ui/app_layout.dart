@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 abstract class AppLayout {
-
   // Filas estándar
   static Row row({
     Key? key,
@@ -34,13 +32,11 @@ abstract class AppLayout {
 
   // Separadores automáticos
   static Spacer spacer([int flex = 1]) => Spacer(flex: flex);
-
   static const Widget hXs = SizedBox(width: AppSpacing.xs);
   static const Widget hS = SizedBox(width: AppSpacing.s);
   static const Widget hM = SizedBox(width: AppSpacing.m);
   static const Widget hL = SizedBox(width: AppSpacing.l);
   static const Widget hXl = SizedBox(width: AppSpacing.xl);
-
   static const Widget vXs = SizedBox(height: AppSpacing.xs);
   static const Widget vS = SizedBox(height: AppSpacing.s);
   static const Widget vM = SizedBox(height: AppSpacing.m);
@@ -61,18 +57,17 @@ abstract class AppLayout {
     );
   }
 
-  // Padding universal que evita contenido oculto bajo la barra del sistema
+  // Padding universal: valor uniforme en todos los lados. SafeArea maneja el área inferior.
   static const EdgeInsetsGeometry pantallaPadding = EdgeInsets.only(
     left: AppSpacing.m,
     right: AppSpacing.m,
     top: AppSpacing.m,
-    bottom: kToolbarHeight + AppSpacing.xl * 2,
+    bottom: AppSpacing.m,
   );
 }
 
 // Diseño adaptativo Fila / Columna — Row ↔ Column responsivo
 class ResponsiveRow extends StatelessWidget {
-
   const ResponsiveRow({
     super.key,
     required this.child1,
@@ -80,6 +75,7 @@ class ResponsiveRow extends StatelessWidget {
     this.breakpoint = 600,
     this.spacing,
   });
+
   final Widget child1;
   final Widget child2;
   final double breakpoint;

@@ -17,34 +17,38 @@ class RegistrarTransferencia {
   }) async {
     final docRef = 'TRF-${DateTime.now().millisecondsSinceEpoch}';
 
-    await _repo.registrarMovimiento(Kardex(
-      id: null,
-      productoId: productoId,
-      tipoMovimiento: TipoMovimiento.salida,
-      cantidad: cantidad,
-      saldoAnterior: saldoAnterior,
-      saldoNuevo: saldoNuevo,
-      costoUnitario: costoUnitario,
-      totalMovimiento: cantidad * costoUnitario,
-      fechaMovimiento: DateTime.now(),
-      documentoReferencia: docRef,
-      observacion: observacion,
-      usuarioId: usuarioId,
-    ));
+    await _repo.registrarMovimiento(
+      Kardex(
+        id: null,
+        productoId: productoId,
+        tipoMovimiento: TipoMovimiento.salida,
+        cantidad: cantidad,
+        saldoAnterior: saldoAnterior,
+        saldoNuevo: saldoNuevo,
+        costoUnitario: costoUnitario,
+        totalMovimiento: cantidad * costoUnitario,
+        fechaMovimiento: DateTime.now(),
+        documentoReferencia: docRef,
+        observacion: observacion,
+        usuarioId: usuarioId,
+      ),
+    );
 
-    await _repo.registrarMovimiento(Kardex(
-      id: null,
-      productoId: productoId,
-      tipoMovimiento: TipoMovimiento.entrada,
-      cantidad: cantidad,
-      saldoAnterior: saldoAnterior - cantidad,
-      saldoNuevo: saldoNuevo,
-      costoUnitario: costoUnitario,
-      totalMovimiento: cantidad * costoUnitario,
-      fechaMovimiento: DateTime.now(),
-      documentoReferencia: docRef,
-      observacion: observacion,
-      usuarioId: usuarioId,
-    ));
+    await _repo.registrarMovimiento(
+      Kardex(
+        id: null,
+        productoId: productoId,
+        tipoMovimiento: TipoMovimiento.entrada,
+        cantidad: cantidad,
+        saldoAnterior: saldoAnterior - cantidad,
+        saldoNuevo: saldoNuevo,
+        costoUnitario: costoUnitario,
+        totalMovimiento: cantidad * costoUnitario,
+        fechaMovimiento: DateTime.now(),
+        documentoReferencia: docRef,
+        observacion: observacion,
+        usuarioId: usuarioId,
+      ),
+    );
   }
 }

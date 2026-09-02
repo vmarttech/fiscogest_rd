@@ -53,7 +53,9 @@ final listaVentasProvider = FutureProvider<List<Venta>>((ref) async {
   return resultado.map((e) => _convertirVentaDeDao(e)).toList();
 });
 
-final listaVentasBorradorProvider = FutureProvider<List<VentaBorradorState>>((ref) async {
+final listaVentasBorradorProvider = FutureProvider<List<VentaBorradorState>>((
+  ref,
+) async {
   final ventas = await ref.watch(listaVentasProvider.future);
   return ventas.map((e) => e.toVentaBorradorState()).toList();
 });

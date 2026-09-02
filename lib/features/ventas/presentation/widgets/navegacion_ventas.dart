@@ -14,14 +14,20 @@ class NavegacionVentas extends ConsumerWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(child: Text('Menú Ventas', style: TextStyle(fontSize: 18))),
+          const DrawerHeader(
+            child: Text('Menú Ventas', style: TextStyle(fontSize: 18)),
+          ),
           ListTile(
             leading: const Icon(Icons.add_shopping_cart),
             title: const Text('Registrar Venta'),
             onTap: () {
               Navigator.pop(context);
-              ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.venta);
-              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .establecerModoOperacion(ModoOperacion.venta);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.inicio);
             },
           ),
           ListTile(
@@ -29,8 +35,12 @@ class NavegacionVentas extends ConsumerWidget {
             title: const Text('Cotizaciones'),
             onTap: () {
               Navigator.pop(context);
-              ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.cotizacion);
-              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .establecerModoOperacion(ModoOperacion.cotizacion);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.inicio);
             },
           ),
           ListTile(
@@ -38,8 +48,12 @@ class NavegacionVentas extends ConsumerWidget {
             title: const Text('Apartados'),
             onTap: () {
               Navigator.pop(context);
-              ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.apartado);
-              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .establecerModoOperacion(ModoOperacion.apartado);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.inicio);
             },
           ),
           ListTile(
@@ -47,7 +61,9 @@ class NavegacionVentas extends ConsumerWidget {
             title: const Text('Devoluciones'),
             onTap: () {
               Navigator.pop(context);
-              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.inventario);
             },
           ),
           ListTile(
@@ -55,7 +71,9 @@ class NavegacionVentas extends ConsumerWidget {
             title: const Text('Cobrar'),
             onTap: () {
               Navigator.pop(context);
-              ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.inventario);
             },
           ),
           ListTile(

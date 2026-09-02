@@ -22,10 +22,12 @@ class VentaEstadoConverter extends TypeConverter<VentaEstado, String> {
 @DataClassName('VentaData')
 class VentasTable extends Table {
   IntColumn get id => integer().autoIncrement().named('id')();
-  IntColumn get clienteId => integer().named('cliente_id').references(ClientesTable, #id)();
+  IntColumn get clienteId =>
+      integer().named('cliente_id').references(ClientesTable, #id)();
   DateTimeColumn get fecha => dateTime().named('fecha')();
   RealColumn get montoSubtotal => real().named('monto_subtotal')();
-  RealColumn get descuentoGlobal => real().named('descuento_global').withDefault(const Constant(0.0))();
+  RealColumn get descuentoGlobal =>
+      real().named('descuento_global').withDefault(const Constant(0.0))();
   RealColumn get itbis => real().named('itbis')();
   RealColumn get montoTotal => real().named('monto_total')();
   TextColumn get formaPago => textEnum<FormaPago>().named('forma_pago')();
@@ -33,6 +35,8 @@ class VentasTable extends Table {
       .named('estado')
       .withDefault(const Constant('borrador'))
       .map(const VentaEstadoConverter())();
-  IntColumn get usuarioId => integer().named('usuario_id').references(UsuariosTable, #id)();
-  DateTimeColumn get fechaRegistro => dateTime().named('fecha_registro').withDefault(currentDateAndTime)();
+  IntColumn get usuarioId =>
+      integer().named('usuario_id').references(UsuariosTable, #id)();
+  DateTimeColumn get fechaRegistro =>
+      dateTime().named('fecha_registro').withDefault(currentDateAndTime)();
 }

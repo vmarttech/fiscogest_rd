@@ -26,7 +26,9 @@ class BarraNavegacionInferior extends ConsumerWidget {
       height: alturaBarra,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: const Border(top: BorderSide(color: AppColors.border, width: 1)),
+        border: const Border(
+          top: BorderSide(color: AppColors.border, width: 1),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -38,7 +40,10 @@ class BarraNavegacionInferior extends ConsumerWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: 4),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.m,
+            vertical: 4,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -58,7 +63,8 @@ class BarraNavegacionInferior extends ConsumerWidget {
                       const SizedBox(width: AppSpacing.s),
                       _BotonCategoria(
                         categoria: CategoriaProducto.manufactura,
-                        activa: categoriaActiva == CategoriaProducto.manufactura,
+                        activa:
+                            categoriaActiva == CategoriaProducto.manufactura,
                         icono: Icons.handyman_outlined,
                         etiqueta: 'Manufactura',
                         color: AppColors.warning,
@@ -115,25 +121,35 @@ class _BotonCategoria extends ConsumerWidget {
     return InkWell(
       onTap: () {
         ref.read(ventasNavegacionProvider.notifier).cambiarCategoria(categoria);
-        ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario);
+        ref
+            .read(ventasNavegacionProvider.notifier)
+            .cambiarVista(VistaActual.inventario);
       },
       borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s, vertical: 4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s,
+          vertical: 4,
+        ),
         decoration: activa
             ? BoxDecoration(
                 color: color.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withValues(alpha: 0.35), width: 1),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.35),
+                  width: 1,
+                ),
               )
-            : BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
+            : BoxDecoration(borderRadius: BorderRadius.circular(12)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icono, color: activa ? color : AppColors.textSecondary, size: 20),
+            Icon(
+              icono,
+              color: activa ? color : AppColors.textSecondary,
+              size: 20,
+            ),
             const SizedBox(height: 2),
             Text(
               etiqueta,
@@ -182,39 +198,75 @@ class _BotonOperaciones extends ConsumerWidget {
       items: [
         PopupMenuItem(
           value: ModoOperacion.venta,
-          child: Row(children: [
-            const Icon(Icons.point_of_sale_outlined, color: AppColors.primary, size: 20),
-            const SizedBox(width: AppSpacing.s),
-            const Text('Venta'),
-            if (modoActivo == ModoOperacion.venta) ...[const Spacer(), const Icon(Icons.check, color: AppColors.primary, size: 18)],
-          ]),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.point_of_sale_outlined,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: AppSpacing.s),
+              const Text('Venta'),
+              if (modoActivo == ModoOperacion.venta) ...[
+                const Spacer(),
+                const Icon(Icons.check, color: AppColors.primary, size: 18),
+              ],
+            ],
+          ),
         ),
         PopupMenuItem(
           value: ModoOperacion.cotizacion,
-          child: Row(children: [
-            const Icon(Icons.description_outlined, color: AppColors.info, size: 20),
-            const SizedBox(width: AppSpacing.s),
-            const Text('Cotización'),
-            if (modoActivo == ModoOperacion.cotizacion) ...[const Spacer(), const Icon(Icons.check, color: AppColors.info, size: 18)],
-          ]),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.description_outlined,
+                color: AppColors.info,
+                size: 20,
+              ),
+              const SizedBox(width: AppSpacing.s),
+              const Text('Cotización'),
+              if (modoActivo == ModoOperacion.cotizacion) ...[
+                const Spacer(),
+                const Icon(Icons.check, color: AppColors.info, size: 18),
+              ],
+            ],
+          ),
         ),
         PopupMenuItem(
           value: ModoOperacion.apartado,
-          child: Row(children: [
-            const Icon(Icons.inventory_2_outlined, color: AppColors.success, size: 20),
-            const SizedBox(width: AppSpacing.s),
-            const Text('Apartado'),
-            if (modoActivo == ModoOperacion.apartado) ...[const Spacer(), const Icon(Icons.check, color: AppColors.success, size: 18)],
-          ]),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.inventory_2_outlined,
+                color: AppColors.success,
+                size: 20,
+              ),
+              const SizedBox(width: AppSpacing.s),
+              const Text('Apartado'),
+              if (modoActivo == ModoOperacion.apartado) ...[
+                const Spacer(),
+                const Icon(Icons.check, color: AppColors.success, size: 18),
+              ],
+            ],
+          ),
         ),
         PopupMenuItem(
           value: ModoOperacion.cobrar,
-          child: Row(children: [
-            const Icon(Icons.payments_outlined, color: AppColors.warning, size: 20),
-            const SizedBox(width: AppSpacing.s),
-            const Text('Cuentas por Cobrar'),
-            if (modoActivo == ModoOperacion.cobrar) ...[const Spacer(), const Icon(Icons.check, color: AppColors.warning, size: 18)],
-          ]),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.payments_outlined,
+                color: AppColors.warning,
+                size: 20,
+              ),
+              const SizedBox(width: AppSpacing.s),
+              const Text('Cuentas por Cobrar'),
+              if (modoActivo == ModoOperacion.cobrar) ...[
+                const Spacer(),
+                const Icon(Icons.check, color: AppColors.warning, size: 18),
+              ],
+            ],
+          ),
         ),
       ],
     );
@@ -225,8 +277,12 @@ class _BotonOperaciones extends ConsumerWidget {
     }
 
     if (seleccion != null && seleccion != modoActivo) {
-      ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(seleccion);
-      ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario);
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .establecerModoOperacion(seleccion);
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .cambiarVista(VistaActual.inventario);
     }
   }
 
@@ -237,7 +293,10 @@ class _BotonOperaciones extends ConsumerWidget {
       onTap: () => _mostrarMenu(context, ref),
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s, vertical: 4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s,
+          vertical: 4,
+        ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(12),

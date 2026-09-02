@@ -5,7 +5,7 @@ class ValidarPrecioVenta {
 
   bool call({required double precioVenta, double? precioMinimo}) {
     return ListaPrecios(
-      productoId: '',
+      productoId: 0,
       precioVenta: precioVenta,
       precioMinimo: precioMinimo,
     ).precioVentaEsValido();

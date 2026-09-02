@@ -1,6 +1,4 @@
-
 class Promocion {
-
   const Promocion({
     required this.id,
     required this.nombre,
@@ -13,7 +11,7 @@ class Promocion {
     this.minimoCantidad,
     this.minimoMonto,
   });
-  final String id;
+  final int id;
   final String nombre;
   final String descripcion;
   final String tipo;
@@ -23,14 +21,14 @@ class Promocion {
   final bool activa;
   final int? minimoCantidad;
   final double? minimoMonto;
-
   bool estaVigente(DateTime fechaReferencia) {
-    if (fechaInicio != null && fechaReferencia.isBefore(fechaInicio!)) return false;
+    if (fechaInicio != null && fechaReferencia.isBefore(fechaInicio!)) {
+      return false;
+    }
     if (fechaFin != null && fechaReferencia.isAfter(fechaFin!)) return false;
     return activa;
   }
 
-  bool aplicaAProducto(String? idProducto) => true;
-
+  bool aplicaAProducto(int? idProducto) => true;
   bool aplicaACategoriaCliente(String? idCategoria) => true;
 }

@@ -8,9 +8,10 @@ final unidadMedidaRepositoryProvider = Provider<UnidadMedidaRepository>((ref) {
   return UnidadMedidaRepositoryImpl(ref.watch(databaseProvider));
 });
 
-final unidadMedidaControllerProvider = AsyncNotifierProvider<UnidadMedidaController, List<UnidadMedida>>(() {
-  return UnidadMedidaController();
-});
+final unidadMedidaControllerProvider =
+    AsyncNotifierProvider<UnidadMedidaController, List<UnidadMedida>>(() {
+      return UnidadMedidaController();
+    });
 
 class UnidadMedidaController extends AsyncNotifier<List<UnidadMedida>> {
   late final UnidadMedidaRepository _repo;

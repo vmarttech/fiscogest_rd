@@ -31,7 +31,9 @@ final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
   return VentasRepositoryImpl(ventasDao, cuentasCobrarDao);
 });
 
-final confirmarVentaBorradorUseCaseProvider = Provider<ConfirmarVentaBorrador>((ref) {
+final confirmarVentaBorradorUseCaseProvider = Provider<ConfirmarVentaBorrador>((
+  ref,
+) {
   final repositorio = ref.watch(ventasRepositoryProvider);
   return ConfirmarVentaBorrador(repositorio);
 });

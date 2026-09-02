@@ -31,9 +31,10 @@ class RepositoryInjection {
   });
 
   static RepositoryInjection? _instance;
-
   static RepositoryInjection get instance {
-    if (_instance == null) throw Exception('RepositoryInjection no inicializado');
+    if (_instance == null) {
+      throw Exception('RepositoryInjection no inicializado');
+    }
     return _instance!;
   }
 
@@ -64,9 +65,15 @@ class RepositoryInjection {
       inventarioService: inventarioService,
       productosDao: productosDao,
     );
-    final apartadoRepository = ApartadoRepositoryImpl(apartadosDao: apartadosDao);
-    final devolucionRepository = DevolucionRepositoryImpl(devolucionesDao: devolucionesDao);
-    final cajaRepository = CajaRepositoryImpl(cajaMovimientosDao: cajaMovimientosDao);
+    final apartadoRepository = ApartadoRepositoryImpl(
+      apartadosDao: apartadosDao,
+    );
+    final devolucionRepository = DevolucionRepositoryImpl(
+      devolucionesDao: devolucionesDao,
+    );
+    final cajaRepository = CajaRepositoryImpl(
+      cajaMovimientosDao: cajaMovimientosDao,
+    );
     _instance = RepositoryInjection._(
       db: db,
       ventasRepository: ventasRepository,

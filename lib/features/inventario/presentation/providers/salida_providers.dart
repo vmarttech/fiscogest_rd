@@ -11,7 +11,9 @@ final salidaRepositoryProvider = Provider<ISalidaRepository>((ref) {
   return SalidaRepositoryImpl(db);
 });
 
-final operacionesSalidaServiceProvider = Provider<OperacionesSalidaService>((ref) {
+final operacionesSalidaServiceProvider = Provider<OperacionesSalidaService>((
+  ref,
+) {
   return OperacionesSalidaService(
     salidaRepository: ref.watch(salidaRepositoryProvider),
     productoRepository: ref.watch(productoRepositoryProvider),
@@ -24,7 +26,8 @@ final historialSalidasProvider = FutureProvider<List<Salida>>((ref) async {
 });
 
 class SalidaController extends StateNotifier<AsyncValue<void>> {
-  SalidaController(this._servicio, this._ref) : super(const AsyncValue.data(null));
+  SalidaController(this._servicio, this._ref)
+    : super(const AsyncValue.data(null));
 
   final OperacionesSalidaService _servicio;
   final Ref _ref;
@@ -52,6 +55,7 @@ class SalidaController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final salidaControllerProvider = StateNotifierProvider<SalidaController, AsyncValue<void>>((ref) {
-  return SalidaController(ref.watch(operacionesSalidaServiceProvider), ref);
-});
+final salidaControllerProvider =
+    StateNotifierProvider<SalidaController, AsyncValue<void>>((ref) {
+      return SalidaController(ref.watch(operacionesSalidaServiceProvider), ref);
+    });

@@ -1,5 +1,7 @@
 /// Interfaz abstracta Repositorio Existencias • Etapa 3.1
 /// Define operaciones obligatorias, desacopla dominio de capa datos
+library;
+
 import 'package:fiscogest_rd/features/inventario/domain/entities/existencia.dart';
 
 abstract class IExistenciaRepository {

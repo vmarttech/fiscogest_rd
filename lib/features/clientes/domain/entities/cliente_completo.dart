@@ -1,5 +1,4 @@
 class ClienteCompleto {
-
   ClienteCompleto({
     this.id,
     required this.nombre,

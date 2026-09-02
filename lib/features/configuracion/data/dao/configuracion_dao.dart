@@ -5,7 +5,8 @@ import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table
 part 'configuracion_dao.g.dart';
 
 @DriftAccessor(tables: [ConfiguracionTable])
-class ConfiguracionDao extends DatabaseAccessor<AppDatabase> with _$ConfiguracionDaoMixin {
+class ConfiguracionDao extends DatabaseAccessor<AppDatabase>
+    with _$ConfiguracionDaoMixin {
   ConfiguracionDao(super.db);
 
   Future<ConfiguracionTableData?> obtenerConfiguracion() =>

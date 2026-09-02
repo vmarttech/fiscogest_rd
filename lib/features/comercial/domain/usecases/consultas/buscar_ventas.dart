@@ -3,20 +3,19 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 
 class BuscarVentas {
   BuscarVentas(this._repositorio);
-
   final IVentasRepository _repositorio;
 
   Future<List<Venta>> call({
     DateTime? desde,
     DateTime? hasta,
-    String? clienteId,
-    String? usuarioId,
+    int? clienteId,
+    int? usuarioId,
   }) async {
     return _repositorio.listarVentas(
       desde: desde,
       hasta: hasta,
-      clienteId: int.tryParse(clienteId ?? ''),
-      usuarioId: int.tryParse(usuarioId ?? ''),
+      clienteId: clienteId,
+      usuarioId: usuarioId,
     );
   }
 }

@@ -24,12 +24,17 @@ class DatosVenta extends ConsumerWidget {
       elevation: 2,
       child: Column(
         children: [
-          Text('Datos de la Venta', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            'Datos de la Venta',
+            style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: AppSpacing.m),
           _buildFilaDato(
             Icons.person,
             'Cliente',
-            estadoLocal.clienteId != null ? 'Cliente ID ${estadoLocal.clienteId}' : 'Seleccionar',
+            estadoLocal.clienteId != null
+                ? 'Cliente ID ${estadoLocal.clienteId}'
+                : 'Seleccionar',
             alSeleccionarCliente,
           ),
           const SizedBox(height: AppSpacing.m),
@@ -51,7 +56,12 @@ class DatosVenta extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilaDato(IconData icono, String etiqueta, String valor, VoidCallback alPresionar) {
+  Widget _buildFilaDato(
+    IconData icono,
+    String etiqueta,
+    String valor,
+    VoidCallback alPresionar,
+  ) {
     return InkWell(
       onTap: alPresionar,
       borderRadius: BorderRadius.circular(8),
@@ -62,18 +72,33 @@ class DatosVenta extends ConsumerWidget {
             Icon(icono, color: AppColors.textSecondary),
             const SizedBox(width: AppSpacing.m),
             Expanded(child: Text(etiqueta, style: AppTypography.bodyMedium)),
-            Row(children: [
-              Text(valor, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
-              const SizedBox(width: AppSpacing.xs),
-              const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textSecondary),
-            ]),
+            Row(
+              children: [
+                Text(
+                  valor,
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilaTotal(String etiqueta, double monto, {bool esTotal = false}) {
+  Widget _buildFilaTotal(
+    String etiqueta,
+    double monto, {
+    bool esTotal = false,
+  }) {
     return Padding(
       padding: AppSpacing.vS,
       child: Row(
@@ -88,7 +113,10 @@ class DatosVenta extends ConsumerWidget {
           Text(
             'RD\$ ${monto.toStringAsFixed(2)}',
             style: esTotal
-                ? AppTypography.h3.copyWith(fontWeight: FontWeight.bold, color: AppColors.success)
+                ? AppTypography.h3.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.success,
+                  )
                 : AppTypography.bodyMedium,
           ),
         ],

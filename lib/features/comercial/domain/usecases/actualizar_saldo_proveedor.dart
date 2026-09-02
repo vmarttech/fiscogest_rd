@@ -5,10 +5,14 @@ class ActualizarSaldoProveedor {
   final IProveedorRepository _repositorio;
 
   Future<void> call({
-    required String proveedorId,
+    required int proveedorId,
     required double monto,
     required bool esAdeudo,
   }) async {
-    await _repositorio.actualizarSaldo(proveedorId, monto, esAdeudo);
+    final montoAplicar = esAdeudo ? monto : -monto;
+    await _repositorio.registrarCompraProveedor(
+      proveedorId: proveedorId,
+      monto: montoAplicar,
+    );
   }
 }

@@ -22,7 +22,9 @@ class HistorialVentas extends ConsumerWidget {
               padding: AppSpacing.allM,
               child: Text(
                 'Error al cargar ventas: $error',
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.error,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -48,17 +50,23 @@ class HistorialVentas extends ConsumerWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   padding: AppSpacing.allM,
                   itemCount: ventas.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.s),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: AppSpacing.s),
                   itemBuilder: (context, index) {
                     final venta = ventas[index];
                     return TarjetaVenta(
                       numero: venta.numero,
-                      clienteNombre: venta.nombreCliente ?? 'Cliente ${venta.clienteId}',
+                      clienteNombre:
+                          venta.nombreCliente ?? 'Cliente ${venta.clienteId}',
                       fecha: venta.fecha,
                       total: venta.total,
                       onTap: () {
-                        ref.read(ventaCargadaDesdeHistorialProvider.notifier).establecerVenta(venta);
-                        ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.detalle);
+                        ref
+                            .read(ventaCargadaDesdeHistorialProvider.notifier)
+                            .establecerVenta(venta);
+                        ref
+                            .read(ventasNavegacionProvider.notifier)
+                            .cambiarVista(VistaActual.detalle);
                       },
                     );
                   },

@@ -5,8 +5,9 @@ import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_detalle_ta
 part 'devoluciones_dao.g.dart';
 
 @DriftAccessor(tables: [DevolucionesTable, DevolucionesDetalleTable])
-class DevolucionesDao extends DatabaseAccessor<AppDatabase> with _$DevolucionesDaoMixin {
-  DevolucionesDao(AppDatabase db) : super(db);
+class DevolucionesDao extends DatabaseAccessor<AppDatabase>
+    with _$DevolucionesDaoMixin {
+  DevolucionesDao(super.db);
 
   Future<int> insertarDevolucion(DevolucionesTableCompanion devolucion) async {
     return into(devolucionesTable).insert(devolucion);

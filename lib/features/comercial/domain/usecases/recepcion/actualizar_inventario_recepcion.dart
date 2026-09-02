@@ -9,9 +9,8 @@ class ActualizarInventarioRecepcion {
     if (recepcion.detalles == null || recepcion.detalles!.isEmpty) {
       throw ArgumentError('No hay productos para actualizar inventario');
     }
-
     for (final detalle in recepcion.detalles!) {
-      if (detalle.productoId == null || detalle.productoId!.trim().isEmpty) {
+      if (detalle.productoId == null) {
         throw ArgumentError('Producto sin identificar');
       }
       final cantidadRecibida = detalle.cantidadRecibida ?? 0;

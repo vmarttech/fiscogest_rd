@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 class AppCard extends StatelessWidget {
-
   const AppCard({
     super.key,
     required this.child,
@@ -40,11 +39,7 @@ class AppCard extends StatelessWidget {
     );
 
     return onTap != null
-        ? InkWell(
-            onTap: onTap,
-            borderRadius: AppRadius.allM,
-            child: content,
-          )
+        ? InkWell(onTap: onTap, borderRadius: AppRadius.allM, child: content)
         : content;
   }
 }

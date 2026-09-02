@@ -23,8 +23,8 @@ class Compra {
     this.actualizadoEn,
   });
 
-  final String id;
-  final String proveedorId;
+  final int id;
+  final int proveedorId;
   final String nombreProveedor;
   final DateTime fechaEmision;
   final DateTime? fechaConfirmacion;
@@ -40,8 +40,8 @@ class Compra {
   final DateTime? actualizadoEn;
 
   Compra copyWith({
-    String? id,
-    String? proveedorId,
+    int? id,
+    int? proveedorId,
     String? nombreProveedor,
     DateTime? fechaEmision,
     DateTime? fechaConfirmacion,

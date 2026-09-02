@@ -14,7 +14,7 @@ class DetalleCompraPage extends ConsumerStatefulWidget {
   const DetalleCompraPage({super.key, required this.compraId});
 
   static const String routeName = 'detalle-compra';
-  final String compraId;
+  final int compraId;
 
   @override
   ConsumerState<DetalleCompraPage> createState() => _DetalleCompraPageState();
@@ -42,7 +42,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       _compra = await repo.obtenerCompraPorId(widget.compraId);
       _detalles = await repo.listarDetallesDeCompra(widget.compraId);
     } catch (e) {
-      _error = e.toString();
+      setState(() => _error = e.toString());
     } finally {
       setState(() => _cargando = false);
     }
@@ -65,9 +65,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         _cargando = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $_error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $_error')));
       }
     }
   }
@@ -100,30 +100,52 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Compra ${compra.numeroComprobante}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              'Compra ${compra.numeroComprobante}',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: AppSpacing.s),
             _etiquetaEstado(compra.estado),
             const SizedBox(height: AppSpacing.m),
             Text('Proveedor: ${compra.nombreProveedor}'),
-            Text('Fecha Emisión: ${compra.fechaEmision.toString().split(' ')[0]}'),
+            Text(
+              'Fecha Emisión: ${compra.fechaEmision.toString().split(' ')[0]}',
+            ),
             if (compra.fechaConfirmacion != null)
-              Text('Confirmada: ${compra.fechaConfirmacion.toString().split(' ')[0]}'),
+              Text(
+                'Confirmada: ${compra.fechaConfirmacion.toString().split(' ')[0]}',
+              ),
             const SizedBox(height: AppSpacing.m),
-            const Text('Totales', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Totales',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: AppSpacing.s),
-            Text('Subtotal: \$${compra.subtotalSinImpuestos.toStringAsFixed(2)}'),
+            Text(
+              'Subtotal: \$${compra.subtotalSinImpuestos.toStringAsFixed(2)}',
+            ),
             Text('Impuesto: \$${compra.montoImpuesto.toStringAsFixed(2)}'),
-            Text('Total: \$${compra.totalCompra.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Total: \$${compra.totalCompra.toStringAsFixed(2)}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: AppSpacing.l),
-            const Text('Detalle', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Detalle',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: AppSpacing.s),
             if (_detalles.isEmpty)
               const Text('Sin líneas de detalle')
             else
-              ..._detalles.map((d) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text('${d.cantidad} x ${d.nombreProducto} = \$${d.subtotalLinea.toStringAsFixed(2)}'),
-              )),
+              ..._detalles.map(
+                (d) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    '${d.cantidad} x ${d.nombreProducto} = \$${d.subtotalLinea.toStringAsFixed(2)}',
+                  ),
+                ),
+              ),
             const SizedBox(height: 40),
             if (compra.esBorrador)
               SizedBox(
@@ -137,19 +159,15 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         ),
       );
     }
-
     return AppScaffold(
       title: 'Detalle de Compra',
-      body: SafeArea(
-        bottom: true,
-        child: cuerpo,
-      ),
+      body: SafeArea(bottom: true, child: cuerpo),
     );
   }
 
   Widget _etiquetaEstado(EstadoCompra estado) {
-    Color color;
-    String texto;
+    late final Color color;
+    late final String texto;
     switch (estado) {
       case EstadoCompra.borrador:
         color = Colors.orange;
@@ -170,7 +188,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(texto, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+      child: Text(
+        texto,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }

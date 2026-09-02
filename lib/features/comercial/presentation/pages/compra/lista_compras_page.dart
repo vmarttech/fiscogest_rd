@@ -13,12 +13,18 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detall
 
 class ListaComprasPage extends ConsumerWidget {
   const ListaComprasPage({super.key});
+
   static const String routeName = 'lista-compras';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final listarCompras = ref.read(listarComprasUseCaseProvider);
     final confirmarCompra = ref.read(confirmarCompraUseCaseProvider);
+
+    String limpiarId(dynamic id) {
+      final texto = id.toString().replaceAll(RegExp(r'[^0-9]'), '');
+      return texto;
+    }
 
     return AppScaffold(
       body: SafeArea(
@@ -52,6 +58,7 @@ class ListaComprasPage extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
               itemBuilder: (context, index) {
                 final compra = compras[index];
+                final idLimpio = limpiarId(compra.id);
                 return Card(
                   child: Padding(
                     padding: AppSpacing.allS,
@@ -59,8 +66,10 @@ class ListaComprasPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ListTile(
-                          title: Text('Compra ${compra.numeroComprobante}',
-                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(
+                            'Compra ${compra.numeroComprobante}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Text(
                             'Proveedor: ${compra.nombreProveedor}\n'
                             'Fecha: ${compra.fechaEmision.toString().split(' ')[0]} • '
@@ -68,17 +77,25 @@ class ListaComprasPage extends ConsumerWidget {
                           ),
                           trailing: _buildEstadoTag(compra.estado),
                           onTap: () {
-                            context.goNamed(DetalleCompraPage.routeName,
-                                pathParameters: {'compraId': compra.id});
+                            context.goNamed(
+                              DetalleCompraPage.routeName,
+                              pathParameters: {'compraId': idLimpio},
+                            );
                           },
                         ),
                         if (compra.estado == EstadoCompra.borrador)
                           Align(
                             alignment: Alignment.centerRight,
                             child: Padding(
-                              padding: const EdgeInsets.only(right: 16, bottom: 8),
+                              padding: const EdgeInsets.only(
+                                right: 16,
+                                bottom: 8,
+                              ),
                               child: ElevatedButton.icon(
-                                icon: const Icon(Icons.check_circle_outline, size: 18),
+                                icon: const Icon(
+                                  Icons.check_circle_outline,
+                                  size: 18,
+                                ),
                                 label: const Text('Confirmar Compra'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green.shade700,
@@ -96,15 +113,18 @@ class ListaComprasPage extends ConsumerWidget {
                                       ),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.pop(ctx, false),
+                                          onPressed: () =>
+                                              Navigator.pop(ctx, false),
                                           child: const Text('Cancelar'),
                                         ),
                                         ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.green.shade700,
+                                            backgroundColor:
+                                                Colors.green.shade700,
                                             foregroundColor: Colors.white,
                                           ),
-                                          onPressed: () => Navigator.pop(ctx, true),
+                                          onPressed: () =>
+                                              Navigator.pop(ctx, true),
                                           child: const Text('Sí, Confirmar'),
                                         ),
                                       ],
@@ -112,25 +132,43 @@ class ListaComprasPage extends ConsumerWidget {
                                   );
                                   if (confirmar == true && context.mounted) {
                                     try {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Confirmando compra...')),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Confirmando compra...',
+                                          ),
+                                        ),
                                       );
                                       await confirmarCompra(compra.id);
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           const SnackBar(
-                                            content: Text('✅ Compra confirmada. Inventario y Kardex actualizados.'),
+                                            content: Text(
+                                              '✅ Compra confirmada. Inventario y Kardex actualizados.',
+                                            ),
                                             backgroundColor: Colors.green,
                                           ),
                                         );
                                       }
-                                      ref.invalidate(listarComprasUseCaseProvider);
-                                      ref.invalidate(productoControllerProvider);
+                                      ref.invalidate(
+                                        listarComprasUseCaseProvider,
+                                      );
+                                      ref.invalidate(
+                                        productoControllerProvider,
+                                      );
                                     } catch (e) {
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
-                                            content: Text('Error al confirmar: $e'),
+                                            content: Text(
+                                              'Error al confirmar: $e',
+                                            ),
                                             backgroundColor: Colors.red,
                                           ),
                                         );
@@ -162,8 +200,8 @@ class ListaComprasPage extends ConsumerWidget {
   }
 
   Widget _buildEstadoTag(EstadoCompra estado) {
-    Color color;
-    String texto;
+    late final Color color;
+    late final String texto;
     switch (estado) {
       case EstadoCompra.borrador:
         color = Colors.orange;

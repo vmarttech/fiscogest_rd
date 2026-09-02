@@ -17,11 +17,17 @@ abstract class AppRadius {
   static final BorderRadius allXxl = BorderRadius.circular(xxl);
   static final BorderRadius allCircular = BorderRadius.circular(circular);
 
-  static final BorderRadius tS = const BorderRadius.vertical(top: Radius.circular(s));
-  static final BorderRadius tM = const BorderRadius.vertical(top: Radius.circular(m));
-  static final BorderRadius tL = const BorderRadius.vertical(top: Radius.circular(l));
+  static const BorderRadius tS = BorderRadius.vertical(top: Radius.circular(s));
+  static const BorderRadius tM = BorderRadius.vertical(top: Radius.circular(m));
+  static const BorderRadius tL = BorderRadius.vertical(top: Radius.circular(l));
 
-  static final BorderRadius bS = const BorderRadius.vertical(bottom: Radius.circular(s));
-  static final BorderRadius bM = const BorderRadius.vertical(bottom: Radius.circular(m));
-  static final BorderRadius bL = const BorderRadius.vertical(bottom: Radius.circular(l));
+  static const BorderRadius bS = BorderRadius.vertical(
+    bottom: Radius.circular(s),
+  );
+  static const BorderRadius bM = BorderRadius.vertical(
+    bottom: Radius.circular(m),
+  );
+  static const BorderRadius bL = BorderRadius.vertical(
+    bottom: Radius.circular(l),
+  );
 }

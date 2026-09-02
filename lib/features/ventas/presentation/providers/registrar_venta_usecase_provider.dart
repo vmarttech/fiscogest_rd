@@ -62,16 +62,17 @@ final registrarVentaUseCaseProvider = Provider<RegistrarVentaUseCase>((ref) {
   return RegistrarVentaUseCase(servicio);
 });
 
-final registrarVentaConInventarioUseCaseProvider = Provider<RegistrarVentaConInventarioUseCase>((ref) {
-  final repositorio = ref.read(ventasRepositoryProvider);
-  final kardexRepo = ref.read(kardexRepositoryProvider);
-  final inventarioServ = ref.read(inventarioServiceProvider);
-  final productosDaoInst = ref.read(productosDaoProvider);
-  final servicio = VentaInventarioServiceImpl(
-    ventasRepository: repositorio,
-    kardexRepository: kardexRepo,
-    inventarioService: inventarioServ,
-    productosDao: productosDaoInst,
-  );
-  return RegistrarVentaConInventarioUseCase(servicio);
-});
+final registrarVentaConInventarioUseCaseProvider =
+    Provider<RegistrarVentaConInventarioUseCase>((ref) {
+      final repositorio = ref.read(ventasRepositoryProvider);
+      final kardexRepo = ref.read(kardexRepositoryProvider);
+      final inventarioServ = ref.read(inventarioServiceProvider);
+      final productosDaoInst = ref.read(productosDaoProvider);
+      final servicio = VentaInventarioServiceImpl(
+        ventasRepository: repositorio,
+        kardexRepository: kardexRepo,
+        inventarioService: inventarioServ,
+        productosDao: productosDaoInst,
+      );
+      return RegistrarVentaConInventarioUseCase(servicio);
+    });

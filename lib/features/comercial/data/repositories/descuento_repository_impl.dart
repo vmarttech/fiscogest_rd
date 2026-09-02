@@ -3,8 +3,8 @@ import 'package:fiscogest_rd/features/comercial/domain/repositories/i_descuento_
 import 'package:fiscogest_rd/features/comercial/data/datasources/descuento_datasource.dart';
 
 class DescuentoRepositoryImpl implements IDescuentoRepository {
-
   DescuentoRepositoryImpl(this._datasource);
+
   final DescuentoDatasource _datasource;
 
   @override
@@ -14,14 +14,16 @@ class DescuentoRepositoryImpl implements IDescuentoRepository {
   }
 
   @override
-  Future<Descuento?> obtenerPorId(String id) async => null;
+  Future<Descuento?> obtenerPorId(int id) async => null;
 
   @override
   Future<List<Descuento>> listarDescuentosActivos() async => [];
 
   @override
   Future<bool> validarDescuento(Descuento descuento) async {
-    if (descuento.estadoAutorizacion == EstadoAutorizacion.denegado) return false;
+    if (descuento.estadoAutorizacion == EstadoAutorizacion.denegado) {
+      return false;
+    }
     if (descuento.valor <= 0) return false;
     if (descuento.esPorcentaje && descuento.valor > 100) return false;
     return true;
@@ -34,7 +36,6 @@ class DescuentoRepositoryImpl implements IDescuentoRepository {
   }) async {
     final esValido = await validarDescuento(descuento);
     if (!esValido) return montoOriginal;
-
     if (descuento.esPorcentaje) {
       final porcentaje = descuento.valor / 100;
       return montoOriginal - (montoOriginal * porcentaje);
@@ -46,8 +47,8 @@ class DescuentoRepositoryImpl implements IDescuentoRepository {
 
   @override
   Future<Descuento> autorizarDescuento({
-    required String descuentoId,
-    required String usuarioAutorizadorId,
+    required int descuentoId,
+    required int usuarioAutorizadorId,
   }) async {
     return Descuento(
       id: descuentoId,
@@ -55,7 +56,7 @@ class DescuentoRepositoryImpl implements IDescuentoRepository {
       valor: 0,
       motivo: '',
       estadoAutorizacion: EstadoAutorizacion.autorizado,
-      autorizadoPor: usuarioAutorizadorId,
+      autorizadoPor: usuarioAutorizadorId.toString(),
       fechaRegistro: DateTime.now(),
       fechaAutorizacion: DateTime.now(),
     );

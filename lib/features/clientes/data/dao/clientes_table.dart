@@ -9,4 +9,5 @@ class ClientesTable extends Table {
   TextColumn get correo => text()();
   TextColumn get direccion => text()();
   BoolColumn get activo => boolean().withDefault(const Constant(true))();
+  RealColumn get saldoPendiente => real().withDefault(const Constant(0.0))();
 }

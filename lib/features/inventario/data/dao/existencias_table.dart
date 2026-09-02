@@ -6,8 +6,10 @@ class ExistenciasTable extends Table {
   // ✅ productoId → producto_id
   IntColumn get productoId => integer().named('id_producto')();
   RealColumn get existenciaActual => real().named('existencia_actual')();
-  RealColumn get existenciaDisponible => real().named('existencia_disponible')();
+  RealColumn get existenciaDisponible =>
+      real().named('existencia_disponible')();
   // ✅ CAMPOS NUEVOS
   TextColumn get ubicacion => text().nullable()();
-  IntColumn get fechaActualizacion => integer().named('fecha_actualizacion').nullable()();
+  IntColumn get fechaActualizacion =>
+      integer().named('fecha_actualizacion').nullable()();
 }

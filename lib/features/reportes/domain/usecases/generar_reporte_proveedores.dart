@@ -1,7 +1,6 @@
 import 'package:fiscogest_rd/features/reportes/domain/repositories/i_reportes_repository.dart';
 
 class GenerarReporteProveedores {
-
   GenerarReporteProveedores(this._repository);
   final IReportesRepository _repository;
 

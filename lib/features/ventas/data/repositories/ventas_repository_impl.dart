@@ -91,19 +91,23 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta> registrarVenta(Venta venta) async {
-    final ventaId = await _ventasDao.insertarVenta(VentasTableCompanion(
-      clienteId: Value(venta.clienteId),
-      fecha: Value(venta.fecha),
-      montoSubtotal: Value(venta.subtotal),
-      descuentoGlobal: Value(venta.montoDescuento),
-      itbis: Value(venta.itbis),
-      montoTotal: Value(venta.total),
-      formaPago: Value(FormaPago.values.firstWhere(
-        (e) => e.name == venta.tipoPago,
-        orElse: () => FormaPago.efectivo,
-      )),
-      usuarioId: Value(venta.usuarioId ?? 0),
-    ));
+    final ventaId = await _ventasDao.insertarVenta(
+      VentasTableCompanion(
+        clienteId: Value(venta.clienteId),
+        fecha: Value(venta.fecha),
+        montoSubtotal: Value(venta.subtotal),
+        descuentoGlobal: Value(venta.montoDescuento),
+        itbis: Value(venta.itbis),
+        montoTotal: Value(venta.total),
+        formaPago: Value(
+          FormaPago.values.firstWhere(
+            (e) => e.name == venta.tipoPago,
+            orElse: () => FormaPago.efectivo,
+          ),
+        ),
+        usuarioId: Value(venta.usuarioId ?? 0),
+      ),
+    );
 
     if (venta.esCredito) {
       final fechaVencimiento = venta.fecha.add(const Duration(days: 30));
@@ -139,19 +143,23 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta> registrarVentaBorrador(Venta cotizacion) async {
-    final ventaId = await _ventasDao.insertarVenta(VentasTableCompanion(
-      clienteId: Value(cotizacion.clienteId),
-      fecha: Value(cotizacion.fecha),
-      montoSubtotal: Value(cotizacion.subtotal),
-      descuentoGlobal: Value(cotizacion.montoDescuento),
-      itbis: Value(cotizacion.itbis),
-      montoTotal: Value(cotizacion.total),
-      formaPago: Value(FormaPago.values.firstWhere(
-        (e) => e.name == cotizacion.tipoPago,
-        orElse: () => FormaPago.efectivo,
-      )),
-      usuarioId: Value(cotizacion.usuarioId ?? 0),
-    ));
+    final ventaId = await _ventasDao.insertarVenta(
+      VentasTableCompanion(
+        clienteId: Value(cotizacion.clienteId),
+        fecha: Value(cotizacion.fecha),
+        montoSubtotal: Value(cotizacion.subtotal),
+        descuentoGlobal: Value(cotizacion.montoDescuento),
+        itbis: Value(cotizacion.itbis),
+        montoTotal: Value(cotizacion.total),
+        formaPago: Value(
+          FormaPago.values.firstWhere(
+            (e) => e.name == cotizacion.tipoPago,
+            orElse: () => FormaPago.efectivo,
+          ),
+        ),
+        usuarioId: Value(cotizacion.usuarioId ?? 0),
+      ),
+    );
 
     return Venta(
       id: ventaId,

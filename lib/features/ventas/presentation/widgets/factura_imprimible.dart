@@ -57,7 +57,11 @@ class FacturaImprimible extends StatelessWidget {
             const SizedBox(height: 4),
             const Text(
               '           FISCOGEST RD',
-              style: TextStyle(fontFamily: 'Courier', fontSize: 14, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontFamily: 'Courier',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
             const Text(
@@ -105,7 +109,11 @@ class FacturaImprimible extends StatelessWidget {
             const SizedBox(height: 8),
             const Text(
               'DETALLE DE PRODUCTOS',
-              style: TextStyle(fontFamily: 'Courier', fontSize: 12, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontFamily: 'Courier',
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -139,7 +147,11 @@ class FacturaImprimible extends StatelessWidget {
                   if (tieneDescuento)
                     Text(
                       '   Descuento: -${_formatearMonto(linea.montoDescuento)}',
-                      style: const TextStyle(fontFamily: 'Courier', fontSize: 12, color: Colors.green),
+                      style: const TextStyle(
+                        fontFamily: 'Courier',
+                        fontSize: 12,
+                        color: Colors.green,
+                      ),
                     ),
                   const SizedBox(height: 4),
                 ],
@@ -158,7 +170,11 @@ class FacturaImprimible extends StatelessWidget {
             if (descuentoTotal != 0.0) ...[
               Text(
                 'Descuento:         -${_formatearMonto(descuentoTotal)}',
-                style: const TextStyle(fontFamily: 'Courier', fontSize: 12, color: Colors.green),
+                style: const TextStyle(
+                  fontFamily: 'Courier',
+                  fontSize: 12,
+                  color: Colors.green,
+                ),
               ),
               Text(
                 'Base Gravable:     ${_formatearMonto(baseGravable)}',
@@ -176,7 +192,11 @@ class FacturaImprimible extends StatelessWidget {
             ),
             Text(
               'TOTAL A PAGAR:     ${_formatearMonto(venta.total)}',
-              style: const TextStyle(fontFamily: 'Courier', fontSize: 13, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontFamily: 'Courier',
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const Text(
               '========================================',
@@ -198,10 +218,15 @@ class FacturaImprimible extends StatelessWidget {
               children: [
                 TextButton.icon(
                   onPressed: () {
-                    final contenido = _generarTextoFactura(descuentoTotal, baseGravable);
+                    final contenido = _generarTextoFactura(
+                      descuentoTotal,
+                      baseGravable,
+                    );
                     Clipboard.setData(ClipboardData(text: contenido));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Factura copiada al portapapeles')),
+                      const SnackBar(
+                        content: Text('Factura copiada al portapapeles'),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.copy, size: 16),
@@ -243,10 +268,14 @@ class FacturaImprimible extends StatelessWidget {
       final nombre = linea.nombreProducto ?? 'Producto';
       final subtotalLinea = linea.subtotalLinea ?? linea.subtotal;
       buffer.writeln('${i + 1}. $nombre');
-      buffer.writeln('   Cant: ${linea.cantidad}  x  ${_formatearMonto(linea.precioUnitario)}');
+      buffer.writeln(
+        '   Cant: ${linea.cantidad}  x  ${_formatearMonto(linea.precioUnitario)}',
+      );
       buffer.writeln('   Subtotal: ${_formatearMonto(subtotalLinea)}');
       if (linea.montoDescuento != 0.0) {
-        buffer.writeln('   Descuento: -${_formatearMonto(linea.montoDescuento)}');
+        buffer.writeln(
+          '   Descuento: -${_formatearMonto(linea.montoDescuento)}',
+        );
       }
     }
     buffer.writeln('----------------------------------------');

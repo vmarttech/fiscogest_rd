@@ -29,6 +29,7 @@ mixin _$ClienteEntity {
   String get correo => throw _privateConstructorUsedError;
   String get direccion => throw _privateConstructorUsedError;
   bool get activo => throw _privateConstructorUsedError;
+  double get saldoPendiente => throw _privateConstructorUsedError;
 
   /// Serializes this ClienteEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -56,6 +57,7 @@ abstract class $ClienteEntityCopyWith<$Res> {
     String correo,
     String direccion,
     bool activo,
+    double saldoPendiente,
   });
 }
 
@@ -82,6 +84,7 @@ class _$ClienteEntityCopyWithImpl<$Res, $Val extends ClienteEntity>
     Object? correo = null,
     Object? direccion = null,
     Object? activo = null,
+    Object? saldoPendiente = null,
   }) {
     return _then(
       _value.copyWith(
@@ -117,6 +120,10 @@ class _$ClienteEntityCopyWithImpl<$Res, $Val extends ClienteEntity>
                 ? _value.activo
                 : activo // ignore: cast_nullable_to_non_nullable
                       as bool,
+            saldoPendiente: null == saldoPendiente
+                ? _value.saldoPendiente
+                : saldoPendiente // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
@@ -141,6 +148,7 @@ abstract class _$$ClienteEntityImplCopyWith<$Res>
     String correo,
     String direccion,
     bool activo,
+    double saldoPendiente,
   });
 }
 
@@ -166,6 +174,7 @@ class __$$ClienteEntityImplCopyWithImpl<$Res>
     Object? correo = null,
     Object? direccion = null,
     Object? activo = null,
+    Object? saldoPendiente = null,
   }) {
     return _then(
       _$ClienteEntityImpl(
@@ -201,6 +210,10 @@ class __$$ClienteEntityImplCopyWithImpl<$Res>
             ? _value.activo
             : activo // ignore: cast_nullable_to_non_nullable
                   as bool,
+        saldoPendiente: null == saldoPendiente
+            ? _value.saldoPendiente
+            : saldoPendiente // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -218,6 +231,7 @@ class _$ClienteEntityImpl implements _ClienteEntity {
     required this.correo,
     required this.direccion,
     this.activo = true,
+    this.saldoPendiente = 0.0,
   });
 
   factory _$ClienteEntityImpl.fromJson(Map<String, dynamic> json) =>
@@ -240,10 +254,13 @@ class _$ClienteEntityImpl implements _ClienteEntity {
   @override
   @JsonKey()
   final bool activo;
+  @override
+  @JsonKey()
+  final double saldoPendiente;
 
   @override
   String toString() {
-    return 'ClienteEntity(id: $id, codigo: $codigo, nombre: $nombre, rncCedula: $rncCedula, telefono: $telefono, correo: $correo, direccion: $direccion, activo: $activo)';
+    return 'ClienteEntity(id: $id, codigo: $codigo, nombre: $nombre, rncCedula: $rncCedula, telefono: $telefono, correo: $correo, direccion: $direccion, activo: $activo, saldoPendiente: $saldoPendiente)';
   }
 
   @override
@@ -261,7 +278,9 @@ class _$ClienteEntityImpl implements _ClienteEntity {
             (identical(other.correo, correo) || other.correo == correo) &&
             (identical(other.direccion, direccion) ||
                 other.direccion == direccion) &&
-            (identical(other.activo, activo) || other.activo == activo));
+            (identical(other.activo, activo) || other.activo == activo) &&
+            (identical(other.saldoPendiente, saldoPendiente) ||
+                other.saldoPendiente == saldoPendiente));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -276,6 +295,7 @@ class _$ClienteEntityImpl implements _ClienteEntity {
     correo,
     direccion,
     activo,
+    saldoPendiente,
   );
 
   /// Create a copy of ClienteEntity
@@ -302,6 +322,7 @@ abstract class _ClienteEntity implements ClienteEntity {
     required final String correo,
     required final String direccion,
     final bool activo,
+    final double saldoPendiente,
   }) = _$ClienteEntityImpl;
 
   factory _ClienteEntity.fromJson(Map<String, dynamic> json) =
@@ -323,6 +344,8 @@ abstract class _ClienteEntity implements ClienteEntity {
   String get direccion;
   @override
   bool get activo;
+  @override
+  double get saldoPendiente;
 
   /// Create a copy of ClienteEntity
   /// with the given fields replaced by the non-null parameter values.

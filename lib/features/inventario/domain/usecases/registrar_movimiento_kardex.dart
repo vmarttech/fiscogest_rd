@@ -3,7 +3,6 @@ import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.da
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 
 class RegistrarMovimientoKardex {
-
   RegistrarMovimientoKardex(this._repo);
   final IKardexRepository _repo;
 

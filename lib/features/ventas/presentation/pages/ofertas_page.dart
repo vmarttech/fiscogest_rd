@@ -21,7 +21,9 @@ class _OfertasPageState extends ConsumerState<OfertasPage> {
         bottom: true,
         child: Padding(
           padding: AppLayout.pantallaPadding,
-          child: Center(child: Text('Gestión de Ofertas y Promociones Comerciales')),
+          child: Center(
+            child: Text('Gestión de Ofertas y Promociones Comerciales'),
+          ),
         ),
       ),
     );

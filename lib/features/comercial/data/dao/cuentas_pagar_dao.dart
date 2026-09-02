@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_table.dar
 part 'cuentas_pagar_dao.g.dart';
 
 @DriftAccessor(tables: [CuentasPagarTable])
-class CuentasPagarDao extends DatabaseAccessor<AppDatabase> with _$CuentasPagarDaoMixin {
-  CuentasPagarDao(AppDatabase db) : super(db);
+class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
+    with _$CuentasPagarDaoMixin {
+  CuentasPagarDao(super.db);
 }

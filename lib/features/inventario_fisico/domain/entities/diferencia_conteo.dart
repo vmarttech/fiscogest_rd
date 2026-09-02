@@ -1,5 +1,4 @@
 class DiferenciaConteo {
-
   const DiferenciaConteo({
     required this.id,
     required this.conteoId,

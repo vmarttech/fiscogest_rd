@@ -34,9 +34,10 @@ final guardarClienteUseCaseProvider = Provider<GuardarClienteUseCase>((ref) {
 
 /// Controlador de Clientes: SOLO gestiona estado y llamadas a casos de uso
 /// NO contiene reglas de negocio (prohibido por arquitectura)
-final clientesControllerProvider = AsyncNotifierProvider<ClientesController, List<ClienteEntity>>(() {
-  return ClientesController();
-});
+final clientesControllerProvider =
+    AsyncNotifierProvider<ClientesController, List<ClienteEntity>>(() {
+      return ClientesController();
+    });
 
 class ClientesController extends AsyncNotifier<List<ClienteEntity>> {
   @override

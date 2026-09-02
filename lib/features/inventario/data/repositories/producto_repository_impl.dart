@@ -28,7 +28,8 @@ class ProductoRepositoryImpl implements IProductoRepository {
 
   @override
   Future<Producto?> obtenerProductoPorCodigo(String codigo) async {
-    final query = _db.select(_db.productosTable)..where((t) => t.codigo.equals(codigo));
+    final query = _db.select(_db.productosTable)
+      ..where((t) => t.codigo.equals(codigo));
     final row = await query.getSingleOrNull();
     if (row == null) return null;
     return ProductoDataMapper.toDomain(row);
@@ -37,23 +38,25 @@ class ProductoRepositoryImpl implements IProductoRepository {
   @override
   Future<int> guardarProducto(Producto producto, int idUsuario) async {
     return await _db.transaction(() async {
-      final idGenerado = await _db.into(_db.productosTable).insert(
-        ProductoDataMapper.toCompanion(producto),
+      final idGenerado = await _db
+          .into(_db.productosTable)
+          .insert(ProductoDataMapper.toCompanion(producto));
+      await _kardexRepo.registrarMovimiento(
+        Kardex(
+          id: null,
+          productoId: idGenerado,
+          tipoMovimiento: TipoMovimiento.entrada,
+          cantidad: producto.stock ?? 0.0,
+          saldoAnterior: 0,
+          saldoNuevo: producto.stock ?? 0.0,
+          costoUnitario: producto.precioCompra,
+          totalMovimiento: producto.precioCompra * (producto.stock ?? 0.0),
+          fechaMovimiento: DateTime.now(),
+          documentoReferencia: 'INGRESO INICIAL',
+          observacion: 'Registro al crear producto',
+          usuarioId: idUsuario,
+        ),
       );
-      await _kardexRepo.registrarMovimiento(Kardex(
-        id: null,
-        productoId: idGenerado,
-        tipoMovimiento: TipoMovimiento.entrada,
-        cantidad: producto.stock ?? 0.0,
-        saldoAnterior: 0,
-        saldoNuevo: producto.stock ?? 0.0,
-        costoUnitario: producto.precioCompra,
-        totalMovimiento: producto.precioCompra * (producto.stock ?? 0.0),
-        fechaMovimiento: DateTime.now(),
-        documentoReferencia: 'INGRESO INICIAL',
-        observacion: 'Registro al crear producto',
-        usuarioId: idUsuario,
-      ));
       return idGenerado;
     });
   }
@@ -61,16 +64,18 @@ class ProductoRepositoryImpl implements IProductoRepository {
   @override
   Future<bool> actualizarProducto(Producto producto) async {
     if (producto.id == null) return false;
-    final rowsAffected = await (_db.update(_db.productosTable)
-      ..where((t) => t.id.equals(producto.id!))).write(
-        ProductoDataMapper.toCompanion(producto),
-      );
+    final rowsAffected =
+        await (_db.update(_db.productosTable)
+              ..where((t) => t.id.equals(producto.id!)))
+            .write(ProductoDataMapper.toCompanion(producto));
     return rowsAffected > 0;
   }
 
   @override
   Future<bool> eliminarProducto(int id) async {
-    final rowsAffected = await (_db.delete(_db.productosTable)..where((t) => t.id.equals(id))).go();
+    final rowsAffected = await (_db.delete(
+      _db.productosTable,
+    )..where((t) => t.id.equals(id))).go();
     return rowsAffected > 0;
   }
 }

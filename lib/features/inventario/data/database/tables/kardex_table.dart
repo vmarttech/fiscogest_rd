@@ -12,9 +12,11 @@ class KardexTable extends Table {
   RealColumn get costoUnitario => real().named('costo_unitario')();
   RealColumn get totalMovimiento => real().named('total_movimiento')();
   IntColumn get referenciaId => integer().named('referencia_id').nullable()();
-  TextColumn get documentoReferencia => text().named('documento_referencia').nullable()();
+  TextColumn get documentoReferencia =>
+      text().named('documento_referencia').nullable()();
   TextColumn get motivo => text().nullable()();
   IntColumn get usuarioId => integer().named('usuario_id').nullable()();
-  IntColumn get fechaMovimiento => integer().named('fecha_movimiento')(); // timestamp
+  IntColumn get fechaMovimiento =>
+      integer().named('fecha_movimiento')(); // timestamp
   TextColumn get observacion => text().nullable()();
 }

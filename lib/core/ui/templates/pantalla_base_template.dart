@@ -103,7 +103,10 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
             border: Border.all(color: Colors.grey.shade400),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text('Ejemplo de contenido', style: AppTypography.bodyMedium),
+          child: const Text(
+            'Ejemplo de contenido',
+            style: AppTypography.bodyMedium,
+          ),
         ),
       ],
     );
@@ -123,7 +126,10 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
             border: Border.all(color: Colors.grey.shade400),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text('Ejemplo de contenido', style: AppTypography.bodyMedium),
+          child: const Text(
+            'Ejemplo de contenido',
+            style: AppTypography.bodyMedium,
+          ),
         ),
       ],
     );

@@ -1,5 +1,4 @@
 class ListaPrecios {
-
   const ListaPrecios({
     required this.productoId,
     required this.precioVenta,
@@ -8,7 +7,8 @@ class ListaPrecios {
     this.precioMayorista,
     this.precioEspecial,
   });
-  final String productoId;
+
+  final int productoId;
   final double precioVenta;
   final double? margenGanancia;
   final double? precioMinimo;
@@ -30,7 +30,7 @@ class ListaPrecios {
   }
 
   ListaPrecios copyWith({
-    String? productoId,
+    int? productoId,
     double? precioVenta,
     double? margenGanancia,
     double? precioMinimo,

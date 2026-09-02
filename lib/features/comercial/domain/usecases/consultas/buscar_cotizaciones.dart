@@ -8,14 +8,14 @@ class BuscarCotizaciones {
   Future<List<Venta>> call({
     DateTime? desde,
     DateTime? hasta,
-    String? clienteId,
-    String? usuarioId,
+    int? clienteId,
+    int? usuarioId,
   }) async {
     return _repositorio.listarCotizaciones(
       desde: desde,
       hasta: hasta,
-      clienteId: int.tryParse(clienteId ?? ''),
-      usuarioId: int.tryParse(usuarioId ?? ''),
+      clienteId: clienteId,
+      usuarioId: usuarioId,
     );
   }
 }

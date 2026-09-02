@@ -12,7 +12,11 @@ class CotizacionServiceImpl implements ICotizacionService {
 
   String _generarTextoCotizacion(Venta cotizacion) {
     final formatoFecha = DateFormat('dd/MM/yyyy HH:mm');
-    final formatoMoneda = NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$ ', decimalDigits: 2);
+    final formatoMoneda = NumberFormat.currency(
+      locale: 'es_DO',
+      symbol: 'RD\$ ',
+      decimalDigits: 2,
+    );
     final texto = StringBuffer();
     texto.writeln('========================================');
     texto.writeln('           FISCOGEST RD');
@@ -34,22 +38,34 @@ class CotizacionServiceImpl implements ICotizacionService {
     for (var i = 0; i < cotizacion.detalles.length; i++) {
       final detalle = cotizacion.detalles[i] as DetalleVenta;
       texto.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}');
-      texto.writeln('   Cant: ${detalle.cantidad}  x  ${formatoMoneda.format(detalle.precioUnitario)}');
+      texto.writeln(
+        '   Cant: ${detalle.cantidad}  x  ${formatoMoneda.format(detalle.precioUnitario)}',
+      );
       if (detalle.descuentoPorcentaje > 0) {
-        texto.writeln('   Desc: ${detalle.descuentoPorcentaje.toStringAsFixed(2)}%');
+        texto.writeln(
+          '   Desc: ${detalle.descuentoPorcentaje.toStringAsFixed(2)}%',
+        );
       }
       if (detalle.montoDescuento > 0) {
-        texto.writeln('   Desc: ${formatoMoneda.format(detalle.montoDescuento)}');
+        texto.writeln(
+          '   Desc: ${formatoMoneda.format(detalle.montoDescuento)}',
+        );
       }
       final subtotalLinea = detalle.subtotalLinea ?? detalle.subtotal;
       texto.writeln('   Subtotal: ${formatoMoneda.format(subtotalLinea)}');
       texto.writeln('');
     }
     texto.writeln('----------------------------------------');
-    texto.writeln('Subtotal:          ${formatoMoneda.format(cotizacion.subtotal)}');
-    texto.writeln('ITBIS (18%):       ${formatoMoneda.format(cotizacion.itbis)}');
+    texto.writeln(
+      'Subtotal:          ${formatoMoneda.format(cotizacion.subtotal)}',
+    );
+    texto.writeln(
+      'ITBIS (18%):       ${formatoMoneda.format(cotizacion.itbis)}',
+    );
     texto.writeln('========================================');
-    texto.writeln('TOTAL COTIZACIÓN:  ${formatoMoneda.format(cotizacion.total)}');
+    texto.writeln(
+      'TOTAL COTIZACIÓN:  ${formatoMoneda.format(cotizacion.total)}',
+    );
     texto.writeln('========================================');
     texto.writeln('');
     texto.writeln('Usuario ID: ${cotizacion.usuarioId ?? "N/A"}');
@@ -70,7 +86,8 @@ class CotizacionServiceImpl implements ICotizacionService {
   Future<String> exportarPDF(Venta cotizacion) async {
     final texto = _generarTextoCotizacion(cotizacion);
     final directorio = await getTemporaryDirectory();
-    final nombreArchivo = 'cotizacion_${cotizacion.numero.replaceAll('/', '_')}.txt';
+    final nombreArchivo =
+        'cotizacion_${cotizacion.numero.replaceAll('/', '_')}.txt';
     final rutaArchivo = '${directorio.path}/$nombreArchivo';
     final archivo = File(rutaArchivo);
     await archivo.writeAsString(texto);
@@ -78,7 +95,10 @@ class CotizacionServiceImpl implements ICotizacionService {
   }
 
   @override
-  Future<void> enviarPorCorreo(Venta cotizacion, String correoDestinatario) async {
+  Future<void> enviarPorCorreo(
+    Venta cotizacion,
+    String correoDestinatario,
+  ) async {
     final rutaArchivo = await exportarPDF(cotizacion);
     await Share.shareXFiles(
       [XFile(rutaArchivo)],

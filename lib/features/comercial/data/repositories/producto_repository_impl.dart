@@ -1,11 +1,10 @@
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_producto_repository.dart';
 
 class ProductoRepositoryImpl implements IProductoRepository {
-  final _costos = <String, Map<String, double>>{};
-
+  final _costos = <int, Map<String, double>>{};
   @override
   Future<void> actualizarCostoProducto({
-    required String productoId,
+    required int productoId,
     required double costoUnitario,
     required double cantidadAnterior,
     required double cantidadMovimiento,

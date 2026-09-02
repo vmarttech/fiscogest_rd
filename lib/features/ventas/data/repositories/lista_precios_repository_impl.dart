@@ -5,12 +5,13 @@ import 'package:drift/drift.dart';
 
 class ListaPreciosRepositoryImpl implements IListaPreciosRepository {
   const ListaPreciosRepositoryImpl(this._db);
+
   final AppDatabase _db;
 
   @override
-  Future<ListaPrecios?> obtenerPorProductoId(String productoId) async {
-    final int id = int.parse(productoId);
-    final query = _db.select(_db.productosTable)..where((t) => t.id.equals(id));
+  Future<ListaPrecios?> obtenerPorProductoId(int productoId) async {
+    final query = _db.select(_db.productosTable)
+      ..where((t) => t.id.equals(productoId));
     final row = await query.getSingleOrNull();
     if (row == null) return null;
     return ListaPrecios(
@@ -25,25 +26,23 @@ class ListaPreciosRepositoryImpl implements IListaPreciosRepository {
 
   @override
   Future<void> guardar(ListaPrecios listaPrecios) async {
-    final int id = int.parse(listaPrecios.productoId);
-    await (_db.update(_db.productosTable)
-      ..where((t) => t.id.equals(id))).write(
-        ProductosTableCompanion(
-          precioVenta: Value(listaPrecios.precioVenta),
-          margenGanancia: Value(listaPrecios.margenGanancia),
-          precioMinimo: Value(listaPrecios.precioMinimo),
-          precioMayorista: Value(listaPrecios.precioMayorista),
-          precioEspecial: Value(listaPrecios.precioEspecial),
-        ),
-      );
+    await (_db.update(
+      _db.productosTable,
+    )..where((t) => t.id.equals(listaPrecios.productoId))).write(
+      ProductosTableCompanion(
+        precioVenta: Value(listaPrecios.precioVenta),
+        margenGanancia: Value(listaPrecios.margenGanancia),
+        precioMinimo: Value(listaPrecios.precioMinimo),
+        precioMayorista: Value(listaPrecios.precioMayorista),
+        precioEspecial: Value(listaPrecios.precioEspecial),
+      ),
+    );
   }
 
   @override
-  Future<void> actualizarPrecioVenta(String productoId, double nuevoPrecio) async {
-    final int id = int.parse(productoId);
+  Future<void> actualizarPrecioVenta(int productoId, double nuevoPrecio) async {
     await (_db.update(_db.productosTable)
-      ..where((t) => t.id.equals(id))).write(
-        ProductosTableCompanion(precioVenta: Value(nuevoPrecio)),
-      );
+          ..where((t) => t.id.equals(productoId)))
+        .write(ProductosTableCompanion(precioVenta: Value(nuevoPrecio)));
   }
 }

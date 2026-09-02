@@ -15,11 +15,14 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_producto
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
   static const String routeName = 'nueva-venta-borrador';
+
   @override
-  ConsumerState<NuevaVentaBorradorPage> createState() => _NuevaVentaBorradorPageState();
+  ConsumerState<NuevaVentaBorradorPage> createState() =>
+      _NuevaVentaBorradorPageState();
 }
 
-class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage> {
+class _NuevaVentaBorradorPageState
+    extends ConsumerState<NuevaVentaBorradorPage> {
   final TextEditingController _buscadorController = TextEditingController();
   DateTime? _fechaVencimientoSeleccionada;
   String? _numeroCotizacionGuardada;
@@ -32,12 +35,13 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
   }
 
   Future<void> _seleccionarCliente() async {
-    final ClienteEntity? cliente = await SeleccionarClienteDialog.mostrar(context);
+    final ClienteEntity? cliente = await SeleccionarClienteDialog.mostrar(
+      context,
+    );
     if (cliente != null && mounted) {
-      ref.read(ventaBorradorProvider.notifier).seleccionarCliente(
-        cliente.id ?? 0,
-        cliente.nombre,
-      );
+      ref
+          .read(ventaBorradorProvider.notifier)
+          .seleccionarCliente(cliente.id ?? 0, cliente.nombre);
     }
   }
 
@@ -98,14 +102,20 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
     if (_numeroCotizacionGuardada == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Guarde la cotización antes de imprimir')),
+          const SnackBar(
+            content: Text('Guarde la cotización antes de imprimir'),
+          ),
         );
       }
       return;
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Imprimiendo cotización N° $_numeroCotizacionGuardada...')),
+        SnackBar(
+          content: Text(
+            'Imprimiendo cotización N° $_numeroCotizacionGuardada...',
+          ),
+        ),
       );
     }
   }
@@ -114,14 +124,20 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
     if (_numeroCotizacionGuardada == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Guarde la cotización antes de exportar')),
+          const SnackBar(
+            content: Text('Guarde la cotización antes de exportar'),
+          ),
         );
       }
       return;
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Generando PDF de cotización N° $_numeroCotizacionGuardada...')),
+        SnackBar(
+          content: Text(
+            'Generando PDF de cotización N° $_numeroCotizacionGuardada...',
+          ),
+        ),
       );
     }
   }
@@ -137,7 +153,11 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Enviando cotización N° $_numeroCotizacionGuardada por correo...')),
+        SnackBar(
+          content: Text(
+            'Enviando cotización N° $_numeroCotizacionGuardada por correo...',
+          ),
+        ),
       );
     }
   }
@@ -186,11 +206,13 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
           flex: 5,
           child: SingleChildScrollView(
             padding: AppSpacing.allM,
-            child: Column(children: [
-              _buildDatosGenerales(estado),
-              const SizedBox(height: AppSpacing.m),
-              _buildProductos(),
-            ]),
+            child: Column(
+              children: [
+                _buildDatosGenerales(estado),
+                const SizedBox(height: AppSpacing.m),
+                _buildProductos(),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.m),
@@ -198,11 +220,13 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
           flex: 5,
           child: SingleChildScrollView(
             padding: AppSpacing.allM,
-            child: Column(children: [
-              _buildResumen(estado),
-              const SizedBox(height: AppSpacing.l),
-              _buildBotonera(),
-            ]),
+            child: Column(
+              children: [
+                _buildResumen(estado),
+                const SizedBox(height: AppSpacing.l),
+                _buildBotonera(),
+              ],
+            ),
           ),
         ),
       ],
@@ -221,14 +245,22 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
             children: [
               ListTile(
                 title: const Text('Cliente', style: AppTypography.bodyMedium),
-                subtitle: Text(estado.clienteNombre ?? 'Sin nombre', style: AppTypography.bodySmall),
+                subtitle: Text(
+                  estado.clienteNombre ?? 'Sin nombre',
+                  style: AppTypography.bodySmall,
+                ),
                 trailing: const Icon(Icons.search, size: 20),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
                 onTap: _seleccionarCliente,
               ),
               const SizedBox(height: AppSpacing.m),
               ListTile(
-                title: const Text('Vencimiento', style: AppTypography.bodyMedium),
+                title: const Text(
+                  'Vencimiento',
+                  style: AppTypography.bodyMedium,
+                ),
                 subtitle: Text(
                   _fechaVencimientoSeleccionada != null
                       ? '${_fechaVencimientoSeleccionada!.day}/${_fechaVencimientoSeleccionada!.month}/${_fechaVencimientoSeleccionada!.year}'
@@ -236,7 +268,9 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
                   style: AppTypography.bodySmall,
                 ),
                 trailing: const Icon(Icons.calendar_today, size: 20),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
                 onTap: _seleccionarVencimiento,
               ),
             ],
@@ -252,7 +286,10 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
       children: [
         const Text('Productos', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
-        PanelProductos(controlador: _buscadorController, alAgregar: (_) async {}),
+        PanelProductos(
+          controlador: _buscadorController,
+          alAgregar: (_) async {},
+        ),
       ],
     );
   }
@@ -271,7 +308,10 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Subtotal:', style: AppTypography.bodyMedium),
-                  Text('RD\$ ${estado.subtotal.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                  Text(
+                    'RD\$ ${estado.subtotal.toStringAsFixed(2)}',
+                    style: AppTypography.bodyMedium,
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -279,7 +319,10 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('ITBIS:', style: AppTypography.bodyMedium),
-                  Text('RD\$ ${estado.itbis.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                  Text(
+                    'RD\$ ${estado.itbis.toStringAsFixed(2)}',
+                    style: AppTypography.bodyMedium,
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -287,17 +330,20 @@ class _NuevaVentaBorradorPageState extends ConsumerState<NuevaVentaBorradorPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Descuento:', style: AppTypography.bodyMedium),
-                  Text('RD\$ ${estado.descuento.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                  Text(
+                    'RD\$ ${estado.descuento.toStringAsFixed(2)}',
+                    style: AppTypography.bodyMedium,
+                  ),
                 ],
               ),
               const Divider(height: AppSpacing.l),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Total:', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)),
+                  const Text('Total:', style: AppTypography.h4Bold),
                   Text(
                     'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
-                    style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                    style: AppTypography.h4PrimaryBold,
                   ),
                 ],
               ),

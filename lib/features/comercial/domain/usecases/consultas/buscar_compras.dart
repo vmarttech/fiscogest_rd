@@ -8,14 +8,15 @@ class BuscarCompras {
   Future<List<Compra>> call({
     DateTime? desde,
     DateTime? hasta,
-    String? proveedorId,
+    int? proveedorId,
   }) async {
     final List<Compra> todas = await _repositorio.listarCompras();
-
     return todas.where((compra) {
       if (desde != null && compra.fechaEmision.isBefore(desde)) return false;
       if (hasta != null && compra.fechaEmision.isAfter(hasta)) return false;
-      if (proveedorId != null && compra.proveedorId != proveedorId) return false;
+      if (proveedorId != null && compra.proveedorId != proveedorId) {
+        return false;
+      }
       return true;
     }).toList();
   }

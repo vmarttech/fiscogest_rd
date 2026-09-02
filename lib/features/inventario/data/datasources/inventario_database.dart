@@ -18,7 +18,8 @@ class InventarioTable extends Table {
   IntColumn get marcaId => integer()();
   IntColumn get unidadId => integer()();
   BoolColumn get activo => boolean().withDefault(const Constant(true))();
-  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get fechaCreacion =>
+      dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get fechaActualizacion => dateTime().nullable()();
 }
 

@@ -29,18 +29,15 @@ class EjecutarActualizacionesComerciales {
     required int idProducto,
     required double cantidad,
     required double costoUnitario,
-    required String proveedorId,
+    required int proveedorId,
     required double montoTotal,
     required DateTime fecha,
   }) async {
-    // 1. Actualizar inventario (entrada)
     await actualizarInventario.call(
       idProducto: idProducto,
       cantidad: cantidad,
       esEntrada: true,
     );
-
-    // 2. Actualizar costos
     await actualizarCostos.call(
       idProducto: idProducto,
       cantidadAnterior: 0,
@@ -48,32 +45,22 @@ class EjecutarActualizacionesComerciales {
       cantidadNueva: cantidad.toInt(),
       costoUnitarioNuevo: costoUnitario,
     );
-
-    // 3. Actualizar saldo proveedor
-    if (proveedorId.isNotEmpty) {
-      await actualizarSaldoProveedor.call(
-        proveedorId: proveedorId,
-        monto: montoTotal,
-        esAdeudo: true,
-      );
-    }
-
-    // 4. Actualizar caja (egreso por compra)
+    await actualizarSaldoProveedor.call(
+      proveedorId: proveedorId,
+      monto: montoTotal,
+      esAdeudo: true,
+    );
     await actualizarCaja.call(
       referencia: 'COMPRA-$fecha',
       monto: montoTotal,
       tipo: 'EGRESO',
       descripcion: 'Compra de mercancía',
     );
-
-    // 5. Actualizar estadísticas
     await actualizarEstadisticas.call(
       tipoOperacion: 'COMPRA',
       monto: montoTotal,
       fecha: fecha,
     );
-
-    // 6. Actualizar reportes
     await actualizarReportes.call(
       tipoOperacion: 'COMPRA',
       fecha: fecha,
@@ -91,41 +78,30 @@ class EjecutarActualizacionesComerciales {
     required int idProducto,
     required double cantidad,
     required double montoTotal,
-    required String clienteId,
+    required int clienteId,
     required DateTime fecha,
   }) async {
-    // 1. Actualizar inventario (salida)
     await actualizarInventario.call(
       idProducto: idProducto,
       cantidad: cantidad,
       esEntrada: false,
     );
-
-    // 2. Actualizar saldo cliente
-    if (clienteId.isNotEmpty) {
-      await actualizarSaldoCliente.call(
-        clienteId: clienteId,
-        monto: montoTotal,
-        esCargo: true,
-      );
-    }
-
-    // 3. Actualizar caja (ingreso por venta)
+    await actualizarSaldoCliente.call(
+      clienteId: clienteId,
+      monto: montoTotal,
+      esCargo: true,
+    );
     await actualizarCaja.call(
       referencia: 'VENTA-$fecha',
       monto: montoTotal,
       tipo: 'INGRESO',
       descripcion: 'Venta de mercancía',
     );
-
-    // 4. Actualizar estadísticas
     await actualizarEstadisticas.call(
       tipoOperacion: 'VENTA',
       monto: montoTotal,
       fecha: fecha,
     );
-
-    // 5. Actualizar reportes
     await actualizarReportes.call(
       tipoOperacion: 'VENTA',
       fecha: fecha,

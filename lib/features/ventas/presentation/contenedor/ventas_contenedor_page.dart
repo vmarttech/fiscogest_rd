@@ -14,12 +14,16 @@ import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_detalle.d
 import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_ventas.dart';
 
 class VentasContenedorPage extends ConsumerStatefulWidget {
-  const VentasContenedorPage({super.key, this.modoInicial = ModoOperacion.venta});
+  const VentasContenedorPage({
+    super.key,
+    this.modoInicial = ModoOperacion.venta,
+  });
   static const String nombreRuta = 'ventas-contenedor';
   final ModoOperacion modoInicial;
 
   @override
-  ConsumerState<VentasContenedorPage> createState() => _VentasContenedorPageState();
+  ConsumerState<VentasContenedorPage> createState() =>
+      _VentasContenedorPageState();
 }
 
 class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
@@ -27,14 +31,20 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(widget.modoInicial);
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .establecerModoOperacion(widget.modoInicial);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final vistaActual = ref.watch(ventasNavegacionProvider.select((e) => e.vistaActual));
-    final modoOperacion = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
+    final vistaActual = ref.watch(
+      ventasNavegacionProvider.select((e) => e.vistaActual),
+    );
+    final modoOperacion = ref.watch(
+      ventasNavegacionProvider.select((e) => e.modoOperacion),
+    );
 
     final String tituloDinamico = switch (modoOperacion) {
       ModoOperacion.venta => 'Gestión de Ventas',
@@ -54,7 +64,10 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
       appBar: AppBar(
         title: Text(
           tituloDinamico,
-          style: AppTypography.h3.copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.3),
+          style: AppTypography.h3.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+          ),
         ),
         centerTitle: false,
         elevation: 0.5,
@@ -66,12 +79,16 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
           IconButton(
             icon: const Icon(Icons.history),
             tooltip: 'Historial de operaciones',
-            color: vistaActual == VistaActual.historial ? AppColors.primary : AppColors.textSecondary,
+            color: vistaActual == VistaActual.historial
+                ? AppColors.primary
+                : AppColors.textSecondary,
             style: IconButton.styleFrom(
               padding: const EdgeInsets.all(AppSpacing.s),
               minimumSize: const Size(40, 40),
             ),
-            onPressed: () => ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.historial),
+            onPressed: () => ref
+                .read(ventasNavegacionProvider.notifier)
+                .cambiarVista(VistaActual.historial),
           ),
           IconButton(
             icon: const Icon(Icons.restore_from_trash_outlined),
@@ -83,7 +100,9 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
             ),
             onPressed: () {
               ref.read(registrarVentaProvider.notifier).vaciarVenta();
-              ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
+              ref
+                  .read(ventaCargadaDesdeHistorialProvider.notifier)
+                  .limpiarVenta();
               ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
             },
           ),

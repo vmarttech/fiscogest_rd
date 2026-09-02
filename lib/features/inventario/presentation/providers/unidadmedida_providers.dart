@@ -18,22 +18,27 @@ final unidadMedidaRepositoryProvider = Provider<IUnidadMedidaRepository>((ref) {
   return UnidadMedidaRepositoryImpl(dao);
 });
 
-final obtenerTodosUnidadMedidaUseCaseProvider = Provider<ObtenerTodosUnidadMedidaUseCase>((ref) {
-  final repo = ref.watch(unidadMedidaRepositoryProvider);
-  return ObtenerTodosUnidadMedidaUseCase(repo);
-});
+final obtenerTodosUnidadMedidaUseCaseProvider =
+    Provider<ObtenerTodosUnidadMedidaUseCase>((ref) {
+      final repo = ref.watch(unidadMedidaRepositoryProvider);
+      return ObtenerTodosUnidadMedidaUseCase(repo);
+    });
 
-final guardarUnidadMedidaUseCaseProvider = Provider<GuardarUnidadMedidaUseCase>((ref) {
-  final repo = ref.watch(unidadMedidaRepositoryProvider);
-  return GuardarUnidadMedidaUseCase(repo);
-});
+final guardarUnidadMedidaUseCaseProvider = Provider<GuardarUnidadMedidaUseCase>(
+  (ref) {
+    final repo = ref.watch(unidadMedidaRepositoryProvider);
+    return GuardarUnidadMedidaUseCase(repo);
+  },
+);
 
-final actualizarUnidadMedidaUseCaseProvider = Provider<ActualizarUnidadMedidaUseCase>((ref) {
-  final repo = ref.watch(unidadMedidaRepositoryProvider);
-  return ActualizarUnidadMedidaUseCase(repo);
-});
+final actualizarUnidadMedidaUseCaseProvider =
+    Provider<ActualizarUnidadMedidaUseCase>((ref) {
+      final repo = ref.watch(unidadMedidaRepositoryProvider);
+      return ActualizarUnidadMedidaUseCase(repo);
+    });
 
-final eliminarUnidadMedidaUseCaseProvider = Provider<EliminarUnidadMedidaUseCase>((ref) {
-  final repo = ref.watch(unidadMedidaRepositoryProvider);
-  return EliminarUnidadMedidaUseCase(repo);
-});
+final eliminarUnidadMedidaUseCaseProvider =
+    Provider<EliminarUnidadMedidaUseCase>((ref) {
+      final repo = ref.watch(unidadMedidaRepositoryProvider);
+      return EliminarUnidadMedidaUseCase(repo);
+    });

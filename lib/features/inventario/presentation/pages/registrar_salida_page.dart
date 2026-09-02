@@ -23,7 +23,8 @@ class RegistrarSalidaPage extends ConsumerStatefulWidget {
   final String nombreProducto;
 
   @override
-  ConsumerState<RegistrarSalidaPage> createState() => _RegistrarSalidaPageState();
+  ConsumerState<RegistrarSalidaPage> createState() =>
+      _RegistrarSalidaPageState();
 }
 
 class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
@@ -53,22 +54,30 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
     if (cantidad == null || cantidad <= 0) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ingrese una cantidad válida mayor a cero')),
+          const SnackBar(
+            content: Text('Ingrese una cantidad válida mayor a cero'),
+          ),
         );
       }
       return;
     }
-    await ref.read(salidaControllerProvider.notifier).registrarSalida(
-      productoId: widget.productoId,
-      cantidad: cantidad,
-      motivo: _motivoController.text.trim().isEmpty ? 'Salida por consumo' : _motivoController.text.trim(),
-      usuario: 'UsuarioActual',
-    );
+    await ref
+        .read(salidaControllerProvider.notifier)
+        .registrarSalida(
+          productoId: widget.productoId,
+          cantidad: cantidad,
+          motivo: _motivoController.text.trim().isEmpty
+              ? 'Salida por consumo'
+              : _motivoController.text.trim(),
+          usuario: 'UsuarioActual',
+        );
     ref.invalidate(productoControllerProvider);
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Salida registrada y existencias actualizadas')),
+        const SnackBar(
+          content: Text('Salida registrada y existencias actualizadas'),
+        ),
       );
     }
   }
@@ -100,7 +109,11 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
                             color: AppColors.error.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.remove_shopping_cart, color: AppColors.error, size: 24),
+                          child: const Icon(
+                            Icons.remove_shopping_cart,
+                            color: AppColors.error,
+                            size: 24,
+                          ),
                         ),
                         const SizedBox(width: AppSpacing.m),
                         Expanded(
@@ -114,7 +127,9 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
                               AppLayout.vXs,
                               Text(
                                 widget.nombreProducto,
-                                style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -151,13 +166,22 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Icon(Icons.calendar_today, color: AppColors.textSecondary, size: 20),
+                            const Icon(
+                              Icons.calendar_today,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
                             const SizedBox(width: AppSpacing.s),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Fecha de salida', style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary)),
+                                  Text(
+                                    'Fecha de salida',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
                                   AppLayout.vXs,
                                   Text(
                                     '${_fechaSeleccionada.day.toString().padLeft(2, '0')}/${_fechaSeleccionada.month.toString().padLeft(2, '0')}/${_fechaSeleccionada.year}',
@@ -166,7 +190,11 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
                                 ],
                               ),
                             ),
-                            const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textDisabled),
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 14,
+                              color: AppColors.textDisabled,
+                            ),
                           ],
                         ),
                       ),

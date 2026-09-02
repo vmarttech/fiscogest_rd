@@ -18,9 +18,8 @@ final listaPreciosRepositoryProvider = Provider<IListaPreciosRepository>(
   (ref) => ListaPreciosRepositoryImpl(AppDatabase()),
 );
 
-final listaPreciosPorProductoProvider = FutureProvider.family<ListaPrecios?, String>(
-  (ref, productoId) async {
-    final repo = ref.watch(listaPreciosRepositoryProvider);
-    return repo.obtenerPorProductoId(productoId);
-  },
-);
+final listaPreciosPorProductoProvider =
+    FutureProvider.family<ListaPrecios?, int>((ref, productoId) async {
+      final repo = ref.watch(listaPreciosRepositoryProvider);
+      return repo.obtenerPorProductoId(productoId);
+    });

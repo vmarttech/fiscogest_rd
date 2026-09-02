@@ -31,17 +31,34 @@ class TarjetaVenta extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Venta Nº $numero', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    'Venta Nº $numero',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   if (numeroFactura != null && numeroFactura!.isNotEmpty)
-                    Text('Factura: $numeroFactura', style: const TextStyle(fontSize: 13)),
+                    Text(
+                      'Factura: $numeroFactura',
+                      style: const TextStyle(fontSize: 13),
+                    ),
                 ],
               ),
               const SizedBox(height: 2),
-              Text('Cliente: $clienteNombre', style: const TextStyle(fontSize: 13)),
-              Text('Fecha: ${fecha.day}/${fecha.month}/${fecha.year}', style: const TextStyle(fontSize: 13)),
+              Text(
+                'Cliente: $clienteNombre',
+                style: const TextStyle(fontSize: 13),
+              ),
+              Text(
+                'Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
+                style: const TextStyle(fontSize: 13),
+              ),
               const SizedBox(height: 4),
-              Text('Total: RD\$ ${total.toStringAsFixed(2)}',
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              Text(
+                'Total: RD\$ ${total.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
         ),

@@ -12,10 +12,12 @@ class RegistrarTransferenciaPage extends ConsumerStatefulWidget {
   const RegistrarTransferenciaPage({super.key});
 
   @override
-  ConsumerState<RegistrarTransferenciaPage> createState() => _RegistrarTransferenciaPageState();
+  ConsumerState<RegistrarTransferenciaPage> createState() =>
+      _RegistrarTransferenciaPageState();
 }
 
-class _RegistrarTransferenciaPageState extends ConsumerState<RegistrarTransferenciaPage> {
+class _RegistrarTransferenciaPageState
+    extends ConsumerState<RegistrarTransferenciaPage> {
   final _formKey = GlobalKey<FormState>();
   int? _productoId;
   final _cantidadCtrl = TextEditingController();
@@ -40,9 +42,11 @@ class _RegistrarTransferenciaPageState extends ConsumerState<RegistrarTransferen
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     }
   }
 
@@ -57,7 +61,10 @@ class _RegistrarTransferenciaPageState extends ConsumerState<RegistrarTransferen
           child: ListView(
             padding: AppLayout.pantallaPadding,
             children: [
-              const Text('Seleccionar Producto', style: AppTypography.labelMedium),
+              const Text(
+                'Seleccionar Producto',
+                style: AppTypography.labelMedium,
+              ),
               AppLayout.vM,
               AppTextField(
                 label: 'Cantidad',
@@ -71,15 +78,9 @@ class _RegistrarTransferenciaPageState extends ConsumerState<RegistrarTransferen
                 keyboardType: TextInputType.number,
               ),
               AppLayout.vM,
-              AppTextField(
-                label: 'Observación',
-                controller: _obsCtrl,
-              ),
+              AppTextField(label: 'Observación', controller: _obsCtrl),
               AppLayout.vL,
-              AppButton(
-                text: 'Registrar Transferencia',
-                onPressed: _guardar,
-              ),
+              AppButton(text: 'Registrar Transferencia', onPressed: _guardar),
             ],
           ),
         ),

@@ -1,6 +1,1 @@
-enum VistaVenta {
-  todas,
-  pendientes,
-  aprobadas,
-  anuladas,
-}
+enum VistaVenta { todas, pendientes, aprobadas, anuladas }

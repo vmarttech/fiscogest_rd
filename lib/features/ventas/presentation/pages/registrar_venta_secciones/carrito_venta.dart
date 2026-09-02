@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -14,7 +15,7 @@ class CarritoVenta extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final estadoLocal = ref.watch(registrarVentaProvider);
     return AppCard(
-      padding: AppSpacing.allM,
+      padding: AppLayout.pantallaPadding,
       elevation: 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,8 +23,14 @@ class CarritoVenta extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Carrito', style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold)),
-              Text('${estadoLocal.detalles.length} productos', style: AppTypography.bodyMedium),
+              Text(
+                'Carrito',
+                style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '${estadoLocal.detalles.length} productos',
+                style: AppTypography.bodyMedium,
+              ),
             ],
           ),
           const Divider(),
@@ -38,13 +45,24 @@ class CarritoVenta extends ConsumerWidget {
               return Padding(
                 padding: AppSpacing.vS,
                 child: ListTile(
-                  title: Text(detalle.nombreProducto ?? '', style: AppTypography.bodyMedium),
-                  subtitle: Text('Cant: ${detalle.cantidad} • RD\$ ${(detalle.subtotalLinea ?? detalle.subtotal).toStringAsFixed(2)}', style: AppTypography.bodySmall),
+                  title: Text(
+                    detalle.nombreProducto ?? '',
+                    style: AppTypography.bodyMedium,
+                  ),
+                  subtitle: Text(
+                    'Cant: ${detalle.cantidad} • RD\$ ${(detalle.subtotalLinea ?? detalle.subtotal).toStringAsFixed(2)}',
+                    style: AppTypography.bodySmall,
+                  ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.error,
+                    ),
                     onPressed: () => ref
                         .read(registrarVentaProvider.notifier)
-                        .quitarProducto(estadoLocal.detalles.indexOf(detalleRaw)),
+                        .quitarProducto(
+                          estadoLocal.detalles.indexOf(detalleRaw),
+                        ),
                   ),
                 ),
               );

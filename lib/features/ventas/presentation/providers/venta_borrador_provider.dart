@@ -81,9 +81,9 @@ class VentaBorradorState {
 }
 
 class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
-
   VentaBorradorNotifier(this._ref)
-      : super(VentaBorradorState(
+    : super(
+        VentaBorradorState(
           numero: '',
           fecha: DateTime.now(),
           subtotal: 0.0,
@@ -91,7 +91,8 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
           descuento: 0.0,
           montoDescuento: 0.0,
           montoTotal: 0.0,
-        ));
+        ),
+      );
   final Ref _ref;
 
   void seleccionarCliente(int id, String nombre) {
@@ -131,7 +132,10 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
   }
 
   bool validarAntesDeGuardar() {
-    if (state.clienteId == null || (state.clienteNombre?.trim().isEmpty ?? true)) return false;
+    if (state.clienteId == null ||
+        (state.clienteNombre?.trim().isEmpty ?? true)) {
+      return false;
+    }
     if (state.numero.trim().isEmpty) return false;
     if (state.montoTotal <= 0) return false;
     return true;
@@ -188,21 +192,31 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
   }
 
   Future<String> imprimir(Venta ventaBorrador) async {
-    final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
+    final servicio = _ref.read<ICotizacionService>(
+      ventaBorradorServicioProvider,
+    );
     return servicio.generarImpresion(ventaBorrador);
   }
 
   Future<String> exportarPDF(Venta ventaBorrador) async {
-    final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
+    final servicio = _ref.read<ICotizacionService>(
+      ventaBorradorServicioProvider,
+    );
     return servicio.exportarPDF(ventaBorrador);
   }
 
-  Future<void> enviarPorCorreo(Venta ventaBorrador, String correoDestinatario) async {
-    final servicio = _ref.read<ICotizacionService>(ventaBorradorServicioProvider);
+  Future<void> enviarPorCorreo(
+    Venta ventaBorrador,
+    String correoDestinatario,
+  ) async {
+    final servicio = _ref.read<ICotizacionService>(
+      ventaBorradorServicioProvider,
+    );
     return servicio.enviarPorCorreo(ventaBorrador, correoDestinatario);
   }
 }
 
-final ventaBorradorProvider = StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>(
-  (ref) => VentaBorradorNotifier(ref),
-);
+final ventaBorradorProvider =
+    StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>(
+      (ref) => VentaBorradorNotifier(ref),
+    );

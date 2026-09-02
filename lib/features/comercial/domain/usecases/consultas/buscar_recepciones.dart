@@ -8,13 +8,17 @@ class BuscarRecepciones {
   Future<List<Recepcion>> call({
     DateTime? desde,
     DateTime? hasta,
-    String? proveedorId,
-    String? compraId,
+    int? proveedorId,
+    int? compraId,
   }) async {
-    final List<Recepcion> todas = await _repositorio.listarTodos(desde: desde, hasta: hasta);
-
+    final List<Recepcion> todas = await _repositorio.listarTodos(
+      desde: desde,
+      hasta: hasta,
+    );
     return todas.where((recepcion) {
-      if (proveedorId != null && recepcion.proveedorId != proveedorId) return false;
+      if (proveedorId != null && recepcion.proveedorId != proveedorId) {
+        return false;
+      }
       if (compraId != null && recepcion.compraId != compraId) return false;
       return true;
     }).toList();

@@ -5,7 +5,7 @@ part 'salidas_dao.g.dart';
 
 @DriftAccessor(tables: [SalidasTable])
 class SalidasDao extends DatabaseAccessor<AppDatabase> with _$SalidasDaoMixin {
-  SalidasDao(AppDatabase db) : super(db);
+  SalidasDao(super.db);
 
   Future<int> registrarSalida({
     required int productoId,
@@ -22,7 +22,9 @@ class SalidasDao extends DatabaseAccessor<AppDatabase> with _$SalidasDaoMixin {
         motivo: Value(motivo),
         fecha: Value(fechaUnix),
         usuario: Value(usuario ?? 'sistema'),
-        observacion: observacion != null ? Value(observacion) : const Value.absent(),
+        observacion: observacion != null
+            ? Value(observacion)
+            : const Value.absent(),
       ),
     );
   }
