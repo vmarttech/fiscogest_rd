@@ -29,7 +29,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
   void initState() {
     super.initState();
     _productoIdFijo = widget.productoId != null
-        ? int.tryParse(widget.productoId!)
+        ? int.tryParse(widget.productoId!.replaceAll(RegExp(r'[^0-9]'), ''))
         : null;
   }
 
@@ -41,7 +41,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
 
     return AppScaffold(
       body: SafeArea(
-        bottom: true,
+        bottom: false,
         child: SingleChildScrollView(
           padding: AppLayout.pantallaPadding,
           child: Center(
@@ -148,9 +148,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                 TipoMovimiento.transferencia => AppColors.info,
                                 _ => AppColors.secondary,
                               };
-
                               final fechaValida =
                                   mov.fechaMovimiento ?? DateTime.now();
+
                               return Padding(
                                 padding: AppSpacing.vS,
                                 child: Row(

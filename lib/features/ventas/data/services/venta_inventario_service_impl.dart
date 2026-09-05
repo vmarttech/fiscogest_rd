@@ -24,14 +24,25 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
   @override
   Future<Venta> registrarVentaConInventario(Venta venta) async {
     final ventaRegistrada = await ventasRepository.registrarVenta(venta);
+
+    if (ventaRegistrada.id == null) {
+      throw Exception('No se pudo guardar la venta');
+    }
+
+    final usuarioIdSeguro = venta.usuarioId ?? 1;
+
     for (final elemento in venta.detalles) {
       final detalle = elemento as DetalleVenta;
-      final saldoAnterior = await kardexRepository.obtenerSaldoActual(
-        detalle.productoId,
-      );
+
+      final saldoAnterior = await kardexRepository.obtenerSaldoActual(detalle.productoId);
+      if (saldoAnterior < detalle.cantidad) {
+        throw Exception('Stock insuficiente: producto ${detalle.nombreProducto}, disponible=$saldoAnterior, vendiendo=${detalle.cantidad}');
+      }
+
       final producto = await productosDao.obtenerPorId(detalle.productoId);
       final costoUnitario = producto?.precioCompra ?? 0.0;
       final saldoNuevo = saldoAnterior - detalle.cantidad;
+
       final movimientoKardex = Kardex(
         productoId: detalle.productoId,
         tipoMovimiento: TipoMovimiento.salida,
@@ -43,17 +54,17 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         fechaMovimiento: venta.fecha,
         documentoReferencia: 'Venta #${ventaRegistrada.numero}',
         observacion: 'Venta de ${detalle.nombreProducto ?? "Producto"}',
-        usuarioId: venta.usuarioId ?? 0,
+        usuarioId: usuarioIdSeguro,
       );
+
       await kardexRepository.registrarMovimiento(movimientoKardex);
-      await inventarioService.restarStock(
-        detalle.productoId,
-        detalle.cantidad.toDouble(),
-      );
+      await inventarioService.restarStock(detalle.productoId, detalle.cantidad.toDouble());
     }
+
     if (ventaRegistrada.id != null) {
       await ventasRepository.actualizarEnCascada(ventaRegistrada.id!);
     }
+
     return ventaRegistrada;
   }
 }

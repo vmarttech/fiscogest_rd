@@ -1091,6 +1091,18 @@ class $ProductosTableTable extends ProductosTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _gastosAsociadosMeta = const VerificationMeta(
+    'gastosAsociados',
+  );
+  @override
+  late final GeneratedColumn<double> gastosAsociados = GeneratedColumn<double>(
+    'gastos_asociados',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _precioVentaMeta = const VerificationMeta(
     'precioVenta',
   );
@@ -1236,6 +1248,7 @@ class $ProductosTableTable extends ProductosTable
     nombre,
     descripcion,
     precioCompra,
+    gastosAsociados,
     precioVenta,
     margenGanancia,
     precioMinimo,
@@ -1304,6 +1317,15 @@ class $ProductosTableTable extends ProductosTable
         precioCompra.isAcceptableOrUnknown(
           data['precio_compra']!,
           _precioCompraMeta,
+        ),
+      );
+    }
+    if (data.containsKey('gastos_asociados')) {
+      context.handle(
+        _gastosAsociadosMeta,
+        gastosAsociados.isAcceptableOrUnknown(
+          data['gastos_asociados']!,
+          _gastosAsociadosMeta,
         ),
       );
     }
@@ -1445,6 +1467,10 @@ class $ProductosTableTable extends ProductosTable
         DriftSqlType.double,
         data['${effectivePrefix}precio_compra'],
       ),
+      gastosAsociados: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gastos_asociados'],
+      ),
       precioVenta: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}precio_venta'],
@@ -1509,6 +1535,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
   final String nombre;
   final String? descripcion;
   final double? precioCompra;
+  final double? gastosAsociados;
   final double? precioVenta;
   final double? margenGanancia;
   final double? precioMinimo;
@@ -1528,6 +1555,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     required this.nombre,
     this.descripcion,
     this.precioCompra,
+    this.gastosAsociados,
     this.precioVenta,
     this.margenGanancia,
     this.precioMinimo,
@@ -1555,6 +1583,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     }
     if (!nullToAbsent || precioCompra != null) {
       map['precio_compra'] = Variable<double>(precioCompra);
+    }
+    if (!nullToAbsent || gastosAsociados != null) {
+      map['gastos_asociados'] = Variable<double>(gastosAsociados);
     }
     if (!nullToAbsent || precioVenta != null) {
       map['precio_venta'] = Variable<double>(precioVenta);
@@ -1601,6 +1632,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       precioCompra: precioCompra == null && nullToAbsent
           ? const Value.absent()
           : Value(precioCompra),
+      gastosAsociados: gastosAsociados == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gastosAsociados),
       precioVenta: precioVenta == null && nullToAbsent
           ? const Value.absent()
           : Value(precioVenta),
@@ -1644,6 +1678,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       nombre: serializer.fromJson<String>(json['nombre']),
       descripcion: serializer.fromJson<String?>(json['descripcion']),
       precioCompra: serializer.fromJson<double?>(json['precioCompra']),
+      gastosAsociados: serializer.fromJson<double?>(json['gastosAsociados']),
       precioVenta: serializer.fromJson<double?>(json['precioVenta']),
       margenGanancia: serializer.fromJson<double?>(json['margenGanancia']),
       precioMinimo: serializer.fromJson<double?>(json['precioMinimo']),
@@ -1668,6 +1703,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       'nombre': serializer.toJson<String>(nombre),
       'descripcion': serializer.toJson<String?>(descripcion),
       'precioCompra': serializer.toJson<double?>(precioCompra),
+      'gastosAsociados': serializer.toJson<double?>(gastosAsociados),
       'precioVenta': serializer.toJson<double?>(precioVenta),
       'margenGanancia': serializer.toJson<double?>(margenGanancia),
       'precioMinimo': serializer.toJson<double?>(precioMinimo),
@@ -1690,6 +1726,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     String? nombre,
     Value<String?> descripcion = const Value.absent(),
     Value<double?> precioCompra = const Value.absent(),
+    Value<double?> gastosAsociados = const Value.absent(),
     Value<double?> precioVenta = const Value.absent(),
     Value<double?> margenGanancia = const Value.absent(),
     Value<double?> precioMinimo = const Value.absent(),
@@ -1709,6 +1746,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     nombre: nombre ?? this.nombre,
     descripcion: descripcion.present ? descripcion.value : this.descripcion,
     precioCompra: precioCompra.present ? precioCompra.value : this.precioCompra,
+    gastosAsociados: gastosAsociados.present
+        ? gastosAsociados.value
+        : this.gastosAsociados,
     precioVenta: precioVenta.present ? precioVenta.value : this.precioVenta,
     margenGanancia: margenGanancia.present
         ? margenGanancia.value
@@ -1742,6 +1782,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       precioCompra: data.precioCompra.present
           ? data.precioCompra.value
           : this.precioCompra,
+      gastosAsociados: data.gastosAsociados.present
+          ? data.gastosAsociados.value
+          : this.gastosAsociados,
       precioVenta: data.precioVenta.present
           ? data.precioVenta.value
           : this.precioVenta,
@@ -1784,6 +1827,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           ..write('nombre: $nombre, ')
           ..write('descripcion: $descripcion, ')
           ..write('precioCompra: $precioCompra, ')
+          ..write('gastosAsociados: $gastosAsociados, ')
           ..write('precioVenta: $precioVenta, ')
           ..write('margenGanancia: $margenGanancia, ')
           ..write('precioMinimo: $precioMinimo, ')
@@ -1808,6 +1852,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     nombre,
     descripcion,
     precioCompra,
+    gastosAsociados,
     precioVenta,
     margenGanancia,
     precioMinimo,
@@ -1831,6 +1876,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           other.nombre == this.nombre &&
           other.descripcion == this.descripcion &&
           other.precioCompra == this.precioCompra &&
+          other.gastosAsociados == this.gastosAsociados &&
           other.precioVenta == this.precioVenta &&
           other.margenGanancia == this.margenGanancia &&
           other.precioMinimo == this.precioMinimo &&
@@ -1852,6 +1898,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
   final Value<String> nombre;
   final Value<String?> descripcion;
   final Value<double?> precioCompra;
+  final Value<double?> gastosAsociados;
   final Value<double?> precioVenta;
   final Value<double?> margenGanancia;
   final Value<double?> precioMinimo;
@@ -1871,6 +1918,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     this.nombre = const Value.absent(),
     this.descripcion = const Value.absent(),
     this.precioCompra = const Value.absent(),
+    this.gastosAsociados = const Value.absent(),
     this.precioVenta = const Value.absent(),
     this.margenGanancia = const Value.absent(),
     this.precioMinimo = const Value.absent(),
@@ -1891,6 +1939,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     required String nombre,
     this.descripcion = const Value.absent(),
     this.precioCompra = const Value.absent(),
+    this.gastosAsociados = const Value.absent(),
     this.precioVenta = const Value.absent(),
     this.margenGanancia = const Value.absent(),
     this.precioMinimo = const Value.absent(),
@@ -1915,6 +1964,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Expression<String>? nombre,
     Expression<String>? descripcion,
     Expression<double>? precioCompra,
+    Expression<double>? gastosAsociados,
     Expression<double>? precioVenta,
     Expression<double>? margenGanancia,
     Expression<double>? precioMinimo,
@@ -1935,6 +1985,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
       if (nombre != null) 'nombre': nombre,
       if (descripcion != null) 'descripcion': descripcion,
       if (precioCompra != null) 'precio_compra': precioCompra,
+      if (gastosAsociados != null) 'gastos_asociados': gastosAsociados,
       if (precioVenta != null) 'precio_venta': precioVenta,
       if (margenGanancia != null) 'margen_ganancia': margenGanancia,
       if (precioMinimo != null) 'precio_minimo': precioMinimo,
@@ -1957,6 +2008,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Value<String>? nombre,
     Value<String?>? descripcion,
     Value<double?>? precioCompra,
+    Value<double?>? gastosAsociados,
     Value<double?>? precioVenta,
     Value<double?>? margenGanancia,
     Value<double?>? precioMinimo,
@@ -1977,6 +2029,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
       nombre: nombre ?? this.nombre,
       descripcion: descripcion ?? this.descripcion,
       precioCompra: precioCompra ?? this.precioCompra,
+      gastosAsociados: gastosAsociados ?? this.gastosAsociados,
       precioVenta: precioVenta ?? this.precioVenta,
       margenGanancia: margenGanancia ?? this.margenGanancia,
       precioMinimo: precioMinimo ?? this.precioMinimo,
@@ -2012,6 +2065,9 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     }
     if (precioCompra.present) {
       map['precio_compra'] = Variable<double>(precioCompra.value);
+    }
+    if (gastosAsociados.present) {
+      map['gastos_asociados'] = Variable<double>(gastosAsociados.value);
     }
     if (precioVenta.present) {
       map['precio_venta'] = Variable<double>(precioVenta.value);
@@ -2061,6 +2117,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
           ..write('nombre: $nombre, ')
           ..write('descripcion: $descripcion, ')
           ..write('precioCompra: $precioCompra, ')
+          ..write('gastosAsociados: $gastosAsociados, ')
           ..write('precioVenta: $precioVenta, ')
           ..write('margenGanancia: $margenGanancia, ')
           ..write('precioMinimo: $precioMinimo, ')
@@ -19388,6 +19445,7 @@ typedef $$ProductosTableTableCreateCompanionBuilder =
       required String nombre,
       Value<String?> descripcion,
       Value<double?> precioCompra,
+      Value<double?> gastosAsociados,
       Value<double?> precioVenta,
       Value<double?> margenGanancia,
       Value<double?> precioMinimo,
@@ -19409,6 +19467,7 @@ typedef $$ProductosTableTableUpdateCompanionBuilder =
       Value<String> nombre,
       Value<String?> descripcion,
       Value<double?> precioCompra,
+      Value<double?> gastosAsociados,
       Value<double?> precioVenta,
       Value<double?> margenGanancia,
       Value<double?> precioMinimo,
@@ -19625,6 +19684,11 @@ class $$ProductosTableTableFilterComposer
 
   ColumnFilters<double> get precioCompra => $composableBuilder(
     column: $table.precioCompra,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gastosAsociados => $composableBuilder(
+    column: $table.gastosAsociados,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -19883,6 +19947,11 @@ class $$ProductosTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get gastosAsociados => $composableBuilder(
+    column: $table.gastosAsociados,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get precioVenta => $composableBuilder(
     column: $table.precioVenta,
     builder: (column) => ColumnOrderings(column),
@@ -19974,6 +20043,11 @@ class $$ProductosTableTableAnnotationComposer
 
   GeneratedColumn<double> get precioCompra => $composableBuilder(
     column: $table.precioCompra,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get gastosAsociados => $composableBuilder(
+    column: $table.gastosAsociados,
     builder: (column) => column,
   );
 
@@ -20232,6 +20306,7 @@ class $$ProductosTableTableTableManager
                 Value<String> nombre = const Value.absent(),
                 Value<String?> descripcion = const Value.absent(),
                 Value<double?> precioCompra = const Value.absent(),
+                Value<double?> gastosAsociados = const Value.absent(),
                 Value<double?> precioVenta = const Value.absent(),
                 Value<double?> margenGanancia = const Value.absent(),
                 Value<double?> precioMinimo = const Value.absent(),
@@ -20251,6 +20326,7 @@ class $$ProductosTableTableTableManager
                 nombre: nombre,
                 descripcion: descripcion,
                 precioCompra: precioCompra,
+                gastosAsociados: gastosAsociados,
                 precioVenta: precioVenta,
                 margenGanancia: margenGanancia,
                 precioMinimo: precioMinimo,
@@ -20272,6 +20348,7 @@ class $$ProductosTableTableTableManager
                 required String nombre,
                 Value<String?> descripcion = const Value.absent(),
                 Value<double?> precioCompra = const Value.absent(),
+                Value<double?> gastosAsociados = const Value.absent(),
                 Value<double?> precioVenta = const Value.absent(),
                 Value<double?> margenGanancia = const Value.absent(),
                 Value<double?> precioMinimo = const Value.absent(),
@@ -20291,6 +20368,7 @@ class $$ProductosTableTableTableManager
                 nombre: nombre,
                 descripcion: descripcion,
                 precioCompra: precioCompra,
+                gastosAsociados: gastosAsociados,
                 precioVenta: precioVenta,
                 margenGanancia: margenGanancia,
                 precioMinimo: precioMinimo,

@@ -13,6 +13,7 @@ export 'ventas_navegacion_provider.dart';
 export 'venta_cargada_desde_historial_provider.dart';
 export 'listas_ventas_providers.dart';
 export 'descuentos_ofertas_providers.dart';
+export 'package:fiscogest_rd/features/comercial/presentation/providers/comercial_providers.dart';
 export 'registrar_venta_usecase_provider.dart';
 
 final _ventasDaoProvider = Provider<VentasDao>((ref) {

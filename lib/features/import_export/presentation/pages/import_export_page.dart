@@ -46,8 +46,7 @@ class ImportExportPage extends ConsumerWidget {
                   Expanded(
                     child: _CardAccion(
                       titulo: 'Exportar Información',
-                      descripcion:
-                          'Extraiga catálogos completos en formato CSV estándar.',
+                      descripcion: 'Extraiga catálogos completos en formato CSV estándar.',
                       icono: Icons.cloud_download_outlined,
                       botones: [
                         ElevatedButton.icon(
@@ -56,20 +55,11 @@ class ImportExportPage extends ConsumerWidget {
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () async {
-                            final csv = await controller.exportarDatosEntidad(
-                              'productos',
-                            );
+                            final csv = await controller.exportarDatosEntidad('productos');
                             if (!context.mounted) return;
-                            _mostrarResultadoExportacion(
-                              context,
-                              'Productos.csv',
-                              csv,
-                            );
+                            _mostrarResultadoExportacion(context, 'Productos.csv', csv);
                           },
-                          icon: const Icon(
-                            Icons.inventory_2_outlined,
-                            size: 16,
-                          ),
+                          icon: const Icon(Icons.inventory_2_outlined, size: 16),
                           label: const Text('Exportar Productos'),
                         ),
                         const SizedBox(height: 8),
@@ -79,15 +69,9 @@ class ImportExportPage extends ConsumerWidget {
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () async {
-                            final csv = await controller.exportarDatosEntidad(
-                              'clientes',
-                            );
+                            final csv = await controller.exportarDatosEntidad('clientes');
                             if (!context.mounted) return;
-                            _mostrarResultadoExportacion(
-                              context,
-                              'Clientes.csv',
-                              csv,
-                            );
+                            _mostrarResultadoExportacion(context, 'Clientes.csv', csv);
                           },
                           icon: const Icon(Icons.people_outline, size: 16),
                           label: const Text('Exportar Clientes'),
@@ -99,15 +83,9 @@ class ImportExportPage extends ConsumerWidget {
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () async {
-                            final csv = await controller.exportarDatosEntidad(
-                              'proveedores',
-                            );
+                            final csv = await controller.exportarDatosEntidad('proveedores');
                             if (!context.mounted) return;
-                            _mostrarResultadoExportacion(
-                              context,
-                              'Proveedores.csv',
-                              csv,
-                            );
+                            _mostrarResultadoExportacion(context, 'Proveedores.csv', csv);
                           },
                           icon: const Icon(Icons.business_outlined, size: 16),
                           label: const Text('Exportar Proveedores'),
@@ -119,8 +97,7 @@ class ImportExportPage extends ConsumerWidget {
                   Expanded(
                     child: _CardAccion(
                       titulo: 'Importar Productos (Excel / CSV)',
-                      descripcion:
-                          'Cargue lotes masivos con validación tributaria y de stock.',
+                      descripcion: 'Cargue lotes masivos con validación tributaria y de stock.',
                       icono: Icons.cloud_upload_outlined,
                       botones: [
                         ElevatedButton.icon(
@@ -134,9 +111,7 @@ class ImportExportPage extends ConsumerWidget {
                             controller.importarProductosSimulado(csvEjemplo);
                           },
                           icon: const Icon(Icons.upload_file, size: 16),
-                          label: const Text(
-                            'Cargar Archivo de Prueba (Simulación)',
-                          ),
+                          label: const Text('Cargar Archivo de Prueba (Simulación)'),
                         ),
                         const SizedBox(height: 12),
                         estadoAsync.when(
@@ -151,10 +126,7 @@ class ImportExportPage extends ConsumerWidget {
                           loading: () => const LinearProgressIndicator(),
                           error: (e, _) => Text(
                             'Error: $e',
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 13,
-                            ),
+                            style: const TextStyle(color: Colors.red, fontSize: 13),
                           ),
                         ),
                       ],
@@ -165,11 +137,7 @@ class ImportExportPage extends ConsumerWidget {
               const SizedBox(height: 24),
               const Text(
                 'Registro de Errores e Incidencias en Importación',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
               ),
               const SizedBox(height: 12),
               Expanded(
@@ -183,10 +151,7 @@ class ImportExportPage extends ConsumerWidget {
                       ? const Center(
                           child: Text(
                             'No hay errores registrados en el último proceso de importación.',
-                            style: TextStyle(
-                              color: subtitleColor,
-                              fontSize: 13,
-                            ),
+                            style: TextStyle(color: subtitleColor, fontSize: 13),
                           ),
                         )
                       : ListView.separated(
@@ -199,25 +164,15 @@ class ImportExportPage extends ConsumerWidget {
                             return ListTile(
                               leading: const CircleAvatar(
                                 backgroundColor: Color(0xFFFEE2E2),
-                                child: Icon(
-                                  Icons.error_outline,
-                                  color: Color(0xFFDC2626),
-                                  size: 18,
-                                ),
+                                child: Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 18),
                               ),
                               title: Text(
                                 'Fila ${err.fila} - Entidad: ${err.entidad}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                               ),
                               subtitle: Text(
                                 err.mensajeError,
-                                style: const TextStyle(
-                                  color: Color(0xFFDC2626),
-                                  fontSize: 12,
-                                ),
+                                style: const TextStyle(color: Color(0xFFDC2626), fontSize: 12),
                               ),
                             );
                           },
@@ -275,6 +230,7 @@ class _CardAccion extends StatelessWidget {
     required this.icono,
     required this.botones,
   });
+
   final String titulo;
   final String descripcion;
   final IconData icono;
@@ -298,19 +254,12 @@ class _CardAccion extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 titulo,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
-                ),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            descripcion,
-            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-          ),
+          Text(descripcion, style: const TextStyle(fontSize: 13, color: Color(0xFF64748B))),
           const SizedBox(height: 20),
           ...botones,
         ],

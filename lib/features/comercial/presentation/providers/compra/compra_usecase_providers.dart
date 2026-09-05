@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/registrar_compra_usecase.dart';
@@ -78,4 +79,10 @@ final registrarCompraUseCaseProvider = Provider<RegistrarCompraUseCase>((ref) {
 final listarComprasUseCaseProvider = Provider<ListarComprasUseCase>((ref) {
   final repo = ref.watch(compraRepositoryProvider);
   return ListarComprasUseCase(repo);
+});
+
+// ✅ Provider para obtener una compra por ID — bien estructurado, siguiendo patrón del proyecto
+final compraPorIdProvider = FutureProvider.family<Compra?, int>((ref, compraId) async {
+  final compraRepository = ref.watch(compraRepositoryProvider);
+  return compraRepository.obtenerCompraPorId(compraId);
 });

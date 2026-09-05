@@ -12,7 +12,6 @@ import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/difer
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/listar_conteos_page.dart';
 import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/registrar_venta_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
@@ -60,12 +59,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'registrar',
-            name: RegistrarVentaPage.routeName,
-            builder: (_, __) => const AppShell(child: RegistrarVentaPage()),
-          ),
-          GoRoute(
-            path: 'cotizaciones/nueva',
-            name: NuevaVentaBorradorPage.routeName,
             builder: (_, __) => const AppShell(child: NuevaVentaBorradorPage()),
           ),
           GoRoute(

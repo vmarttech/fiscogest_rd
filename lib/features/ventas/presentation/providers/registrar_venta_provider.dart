@@ -17,7 +17,9 @@ class RegistrarVentaState {
     this.descuentoId,
     this.descuentoNombre,
     this.montoDescuento = 0.0,
+    this.resultadosBusqueda = const [],
   });
+
   final int? clienteId;
   final String? clienteNombre;
   final String tipoPago;
@@ -30,6 +32,8 @@ class RegistrarVentaState {
   final int? descuentoId;
   final String? descuentoNombre;
   final double montoDescuento;
+  final List<DetalleVenta> resultadosBusqueda;
+
   RegistrarVentaState copyWith({
     int? clienteId,
     String? clienteNombre,
@@ -43,6 +47,7 @@ class RegistrarVentaState {
     int? descuentoId,
     String? descuentoNombre,
     double? montoDescuento,
+    List<DetalleVenta>? resultadosBusqueda,
   }) {
     return RegistrarVentaState(
       clienteId: clienteId ?? this.clienteId,
@@ -57,6 +62,7 @@ class RegistrarVentaState {
       descuentoId: descuentoId ?? this.descuentoId,
       descuentoNombre: descuentoNombre ?? this.descuentoNombre,
       montoDescuento: montoDescuento ?? this.montoDescuento,
+      resultadosBusqueda: resultadosBusqueda ?? this.resultadosBusqueda,
     );
   }
 }
@@ -78,6 +84,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 
   double? _obtenerStock(DetalleVenta linea) => linea.subtotalLinea;
+
   String? validarStockAlAgregar(DetalleVenta producto, double cantidad) {
     final stockDisponible = _obtenerStock(producto);
     if (stockDisponible == null || stockDisponible <= 0) {
@@ -171,11 +178,23 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     );
   }
 
+  void establecerConsumidorFinal() {
+    state = state.copyWith(
+      clienteId: 0,
+      clienteNombre: 'Consumidor Final',
+    );
+  }
+
   bool validarAntesDeGuardar() {
-    if (state.clienteId == null ||
-        (state.clienteNombre?.trim().isEmpty ?? true)) {
+    final esConsumidorFinal = state.clienteId == 0 ||
+        state.clienteNombre == 'Consumidor Final';
+
+    if (!esConsumidorFinal &&
+        (state.clienteId == null ||
+            (state.clienteNombre?.trim().isEmpty ?? true))) {
       return false;
     }
+
     final formasValidas = {
       'efectivo',
       'tarjeta',
@@ -183,19 +202,28 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       'transferencia',
       'cheque',
     };
+
     if (!formasValidas.contains(state.tipoPago.toLowerCase())) {
       return false;
     }
-    if (state.detalles.isEmpty) {
-      return false;
-    }
-    if (state.total <= 0) {
-      return false;
-    }
+
+    if (state.detalles.isEmpty) return false;
+    if (state.total <= 0) return false;
+
     for (var linea in state.detalles) {
       final stock = _obtenerStock(linea);
       if (stock == null || stock <= 0) return false;
     }
+
+    return true;
+  }
+
+  bool guardarVenta() {
+    if (state.clienteId == null ||
+        (state.clienteNombre?.trim().isEmpty ?? true)) {
+      establecerConsumidorFinal();
+    }
+    if (state.detalles.isEmpty || state.total <= 0) return false;
     return true;
   }
 
@@ -207,9 +235,17 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   void vaciarVenta() {
     state = const RegistrarVentaState();
   }
+
+  void buscarProducto(String texto) {
+    state = state.copyWith(resultadosBusqueda: const []);
+  }
+
+  String? agregarProductoSeleccionado(DetalleVenta producto) {
+    return agregarProducto(producto);
+  }
 }
 
 final registrarVentaProvider =
     NotifierProvider<RegistrarVentaNotifier, RegistrarVentaState>(
-      RegistrarVentaNotifier.new,
-    );
+  RegistrarVentaNotifier.new,
+);

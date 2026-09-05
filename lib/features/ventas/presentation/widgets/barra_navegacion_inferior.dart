@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
@@ -15,11 +13,11 @@ class BarraNavegacionInferior extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categoriaActiva = ref.watch(
-      ventasNavegacionProvider.select((estado) => estado.categoriaSeleccionada),
+    final VistaActual vistaActiva = ref.watch(
+      ventasNavegacionProvider.select((e) => e.vistaActual),
     );
-    final modoActivo = ref.watch(
-      ventasNavegacionProvider.select((estado) => estado.modoOperacion),
+    final ModoOperacion modoActivo = ref.watch(
+      ventasNavegacionProvider.select((e) => e.modoOperacion),
     );
 
     return Container(
@@ -40,293 +38,150 @@ class BarraNavegacionInferior extends ConsumerWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.m,
-            vertical: 4,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: [
-                      _BotonCategoria(
-                        categoria: CategoriaProducto.productos,
-                        activa: categoriaActiva == CategoriaProducto.productos,
-                        icono: Icons.inventory_2_outlined,
-                        etiqueta: 'Productos',
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: AppSpacing.s),
-                      _BotonCategoria(
-                        categoria: CategoriaProducto.manufactura,
-                        activa:
-                            categoriaActiva == CategoriaProducto.manufactura,
-                        icono: Icons.handyman_outlined,
-                        etiqueta: 'Manufactura',
-                        color: AppColors.warning,
-                      ),
-                      const SizedBox(width: AppSpacing.s),
-                      _BotonCategoria(
-                        categoria: CategoriaProducto.servicios,
-                        activa: categoriaActiva == CategoriaProducto.servicios,
-                        icono: Icons.miscellaneous_services_outlined,
-                        etiqueta: 'Servicios',
-                        color: AppColors.info,
-                      ),
-                      const SizedBox(width: AppSpacing.s),
-                      _BotonCategoria(
-                        categoria: CategoriaProducto.scanner,
-                        activa: categoriaActiva == CategoriaProducto.scanner,
-                        icono: Icons.qr_code_scanner_outlined,
-                        etiqueta: 'Escanear',
-                        color: AppColors.success,
-                      ),
-                    ],
-                  ),
-                ),
+              _BotonPrincipal(
+                icono: Icons.point_of_sale,
+                etiqueta: 'Venta',
+                activo: vistaActiva == VistaActual.inicio &&
+                    modoActivo == ModoOperacion.venta,
+                color: AppColors.primary,
+                onTap: () {
+                  ref
+                      .read(ventasNavegacionProvider.notifier)
+                      .establecerModoOperacion(ModoOperacion.venta);
+                  ref
+                      .read(ventasNavegacionProvider.notifier)
+                      .cambiarVista(VistaActual.inicio);
+                },
               ),
-              const SizedBox(width: AppSpacing.m),
-              Container(width: 1, height: 40, color: AppColors.border),
-              const SizedBox(width: AppSpacing.m),
-              _BotonOperaciones(modoActivo: modoActivo),
+              _BotonPrincipal(
+                icono: Icons.inventory_2_outlined,
+                etiqueta: 'Productos',
+                activo: vistaActiva == VistaActual.inventario,
+                color: AppColors.primary,
+                onTap: () {
+                  ref
+                      .read(ventasNavegacionProvider.notifier)
+                      .cambiarVista(VistaActual.inventario);
+                },
+              ),
+              _BotonPrincipal(
+                icono: Icons.description_outlined,
+                etiqueta: 'Cotizar',
+                activo: modoActivo == ModoOperacion.cotizacion,
+                color: AppColors.info,
+                onTap: () {
+                  ref
+                      .read(ventasNavegacionProvider.notifier)
+                      .establecerModoOperacion(ModoOperacion.cotizacion);
+                  ref
+                      .read(ventasNavegacionProvider.notifier)
+                      .cambiarVista(VistaActual.inicio);
+                },
+              ),
+              _BotonPrincipal(
+                icono: Icons.more_horiz,
+                etiqueta: 'Más',
+                activo: false,
+                color: AppColors.textSecondary,
+                onTap: () => _mostrarMenuSecundario(context, ref),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
+  Future<void> _mostrarMenuSecundario(
+      BuildContext context, WidgetRef ref) async {
+    await showMenu<String>(
+      context: context,
+      position: const RelativeRect.fromLTRB(100, 0, 0, 100),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      items: [
+        PopupMenuItem<String>(
+          child: ListTile(
+            leading: const Icon(Icons.lock_outlined, color: AppColors.success),
+            title: const Text('Apartado'),
+            onTap: () {
+              Navigator.pop(context);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .establecerModoOperacion(ModoOperacion.apartado);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.inicio);
+            },
+          ),
+        ),
+        PopupMenuItem<String>(
+          child: ListTile(
+            leading: const Icon(Icons.payments_outlined, color: AppColors.warning),
+            title: const Text('Cuentas por Cobrar'),
+            onTap: () {
+              Navigator.pop(context);
+              unawaited(context.pushNamed(CobrarPage.routeName));
+            },
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem<String>(
+          child: ListTile(
+            leading: const Icon(Icons.history),
+            title: const Text('Historial'),
+            onTap: () {
+              Navigator.pop(context);
+              ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.historial);
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _BotonCategoria extends ConsumerWidget {
-  const _BotonCategoria({
-    required this.categoria,
-    required this.activa,
+class _BotonPrincipal extends StatelessWidget {
+  const _BotonPrincipal({
     required this.icono,
     required this.etiqueta,
+    required this.activo,
     required this.color,
+    required this.onTap,
   });
-
-  final CategoriaProducto categoria;
-  final bool activa;
   final IconData icono;
   final String etiqueta;
+  final bool activo;
   final Color color;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        ref.read(ventasNavegacionProvider.notifier).cambiarCategoria(categoria);
-        ref
-            .read(ventasNavegacionProvider.notifier)
-            .cambiarVista(VistaActual.inventario);
-      },
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s,
-          vertical: 4,
-        ),
-        decoration: activa
-            ? BoxDecoration(
-                color: color.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.35),
-                  width: 1,
-                ),
-              )
-            : BoxDecoration(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icono,
-              color: activa ? color : AppColors.textSecondary,
-              size: 20,
+              color: activo ? color : AppColors.textSecondary,
+              size: 22,
             ),
             const SizedBox(height: 2),
             Text(
               etiqueta,
-              style: AppTypography.labelSmall.copyWith(
-                color: activa ? color : AppColors.textSecondary,
-                fontWeight: activa ? FontWeight.w600 : FontWeight.normal,
+              style: TextStyle(
+                color: activo ? color : AppColors.textSecondary,
+                fontWeight: activo ? FontWeight.w600 : FontWeight.normal,
                 fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BotonOperaciones extends ConsumerWidget {
-  const _BotonOperaciones({required this.modoActivo});
-
-  final ModoOperacion modoActivo;
-
-  String _etiquetaModo() {
-    return switch (modoActivo) {
-      ModoOperacion.venta => 'Venta',
-      ModoOperacion.cotizacion => 'Cotización',
-      ModoOperacion.apartado => 'Apartado',
-      ModoOperacion.cobrar => 'Por Cobrar',
-    };
-  }
-
-  Color _colorModo() {
-    return switch (modoActivo) {
-      ModoOperacion.venta => AppColors.primary,
-      ModoOperacion.cotizacion => AppColors.info,
-      ModoOperacion.apartado => AppColors.success,
-      ModoOperacion.cobrar => AppColors.warning,
-    };
-  }
-
-  Future<void> _mostrarMenu(BuildContext context, WidgetRef ref) async {
-    final seleccion = await showMenu<ModoOperacion>(
-      context: context,
-      position: const RelativeRect.fromLTRB(100, 0, 0, 100),
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      items: [
-        PopupMenuItem(
-          value: ModoOperacion.venta,
-          child: Row(
-            children: [
-              const Icon(
-                Icons.point_of_sale_outlined,
-                color: AppColors.primary,
-                size: 20,
-              ),
-              const SizedBox(width: AppSpacing.s),
-              const Text('Venta'),
-              if (modoActivo == ModoOperacion.venta) ...[
-                const Spacer(),
-                const Icon(Icons.check, color: AppColors.primary, size: 18),
-              ],
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: ModoOperacion.cotizacion,
-          child: Row(
-            children: [
-              const Icon(
-                Icons.description_outlined,
-                color: AppColors.info,
-                size: 20,
-              ),
-              const SizedBox(width: AppSpacing.s),
-              const Text('Cotización'),
-              if (modoActivo == ModoOperacion.cotizacion) ...[
-                const Spacer(),
-                const Icon(Icons.check, color: AppColors.info, size: 18),
-              ],
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: ModoOperacion.apartado,
-          child: Row(
-            children: [
-              const Icon(
-                Icons.inventory_2_outlined,
-                color: AppColors.success,
-                size: 20,
-              ),
-              const SizedBox(width: AppSpacing.s),
-              const Text('Apartado'),
-              if (modoActivo == ModoOperacion.apartado) ...[
-                const Spacer(),
-                const Icon(Icons.check, color: AppColors.success, size: 18),
-              ],
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: ModoOperacion.cobrar,
-          child: Row(
-            children: [
-              const Icon(
-                Icons.payments_outlined,
-                color: AppColors.warning,
-                size: 20,
-              ),
-              const SizedBox(width: AppSpacing.s),
-              const Text('Cuentas por Cobrar'),
-              if (modoActivo == ModoOperacion.cobrar) ...[
-                const Spacer(),
-                const Icon(Icons.check, color: AppColors.warning, size: 18),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-
-    if (seleccion == ModoOperacion.cobrar) {
-      if (context.mounted) unawaited(context.pushNamed(CobrarPage.routeName));
-      return;
-    }
-
-    if (seleccion != null && seleccion != modoActivo) {
-      ref
-          .read(ventasNavegacionProvider.notifier)
-          .establecerModoOperacion(seleccion);
-      ref
-          .read(ventasNavegacionProvider.notifier)
-          .cambiarVista(VistaActual.inventario);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final color = _colorModo();
-    return InkWell(
-      onTap: () => _mostrarMenu(context, ref),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s,
-          vertical: 4,
-        ),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.35), width: 1),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.expand_circle_down_outlined, color: color, size: 16),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  'Operaciones',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 1),
-            Text(
-              _etiquetaModo(),
-              style: AppTypography.labelMedium.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
               ),
             ),
           ],

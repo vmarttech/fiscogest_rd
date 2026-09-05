@@ -93,10 +93,15 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
           montoTotal: 0.0,
         ),
       );
+
   final Ref _ref;
 
   void seleccionarCliente(int id, String nombre) {
     state = state.copyWith(clienteId: id, clienteNombre: nombre);
+  }
+
+  void establecerConsumidorFinal() {
+    state = state.copyWith(clienteId: 0, clienteNombre: 'Consumidor Final');
   }
 
   void establecerVencimiento(DateTime fecha) {
@@ -132,8 +137,12 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
   }
 
   bool validarAntesDeGuardar() {
-    if (state.clienteId == null ||
-        (state.clienteNombre?.trim().isEmpty ?? true)) {
+    final bool tieneCliente = state.clienteId != null &&
+        state.clienteId! > 0 &&
+        (state.clienteNombre?.trim().isNotEmpty ?? false);
+    final bool esConsumidorFinal = state.clienteId == 0 &&
+        state.clienteNombre == 'Consumidor Final';
+    if (!tieneCliente && !esConsumidorFinal) {
       return false;
     }
     if (state.numero.trim().isEmpty) return false;

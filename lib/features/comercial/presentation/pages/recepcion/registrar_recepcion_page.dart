@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/recepcion/recepcion_provider.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion_elemento.dart';
@@ -18,7 +19,6 @@ class RegistrarRecepcionPage extends ConsumerStatefulWidget {
     this.usuarioResponsable = 'usuario_actual',
     this.detallesCompra = const [],
   });
-
   static const String routeName = 'registrar-recepcion';
   final int compraId;
   final int proveedorId;
@@ -57,71 +57,80 @@ class _RegistrarRecepcionPageState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Datos de Recepción', style: AppTypography.h4),
-              const SizedBox(height: AppSpacing.m),
+              AppLayout.vM,
               AppTextField(
                 controller: fechaController,
                 label: 'Fecha de Recepción',
                 enabled: false,
               ),
-              const SizedBox(height: AppSpacing.m),
+              AppLayout.vM,
               AppTextField(
                 controller: proveedorController,
                 label: 'Proveedor',
                 enabled: false,
               ),
-              const SizedBox(height: AppSpacing.m),
-              const Text('Estado de Recepción', style: TextStyle(fontSize: 16)),
-              RadioGroup<String>(
-                groupValue: _estadoRecepcion,
-                onChanged: (String? value) {
-                  if (value != null) {
-                    setState(() => _estadoRecepcion = value);
-                  }
-                },
-                child: const Row(
-                  children: [
-                    Radio<String>(value: 'parcial'),
-                    Text('Parcial'),
-                    SizedBox(width: 16),
-                    Radio<String>(value: 'completa'),
-                    Text('Completa'),
-                  ],
-                ),
+              AppLayout.vM,
+              const Text('Estado de Recepción', style: AppTypography.labelMedium),
+              AppLayout.vS,
+              Row(
+                children: [
+                  Radio<String>(
+                    value: 'parcial',
+                    groupValue: _estadoRecepcion,
+                    onChanged: (String? value) {
+                      if (value != null) {
+                        setState(() => _estadoRecepcion = value);
+                      }
+                    },
+                  ),
+                  const Text('Parcial', style: AppTypography.bodyMedium),
+                  AppLayout.hM,
+                  Radio<String>(
+                    value: 'completa',
+                    groupValue: _estadoRecepcion,
+                    onChanged: (String? value) {
+                      if (value != null) {
+                        setState(() => _estadoRecepcion = value);
+                      }
+                    },
+                  ),
+                  const Text('Completa', style: AppTypography.bodyMedium),
+                ],
               ),
-              const SizedBox(height: AppSpacing.m),
-              const Text(
-                'Detalle de Productos',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: AppSpacing.s),
+              AppLayout.vM,
+              const Text('Detalle de Productos', style: AppTypography.labelMedium),
+              AppLayout.vS,
               ...detalles.map(
                 (DetalleRecepcion det) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.s),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         det.productoNombre ?? 'Producto',
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: AppTypography.labelMedium,
                       ),
                       Text(
                         'Pedida: ${det.cantidadPedida ?? 0} — Recibida: ${det.cantidadRecibida ?? 0}',
+                        style: AppTypography.bodySmall,
                       ),
                       if ((det.diferencia ?? 0) != 0)
                         Text(
                           'Diferencia: ${det.diferencia}',
-                          style: const TextStyle(color: Colors.red),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Colors.red,
+                          ),
                         ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.m),
+              AppLayout.vM,
               AppTextField(
                 controller: observacionesController,
                 label: 'Observaciones',
               ),
-              const SizedBox(height: AppSpacing.l),
+              AppLayout.vL,
               SizedBox(
                 width: double.infinity,
                 child: AppButton(

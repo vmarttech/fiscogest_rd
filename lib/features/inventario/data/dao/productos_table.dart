@@ -11,6 +11,10 @@ class ProductosTable extends Table {
       .named('precio_compra')
       .nullable()
       .withDefault(const Constant(0.0))();
+  RealColumn get gastosAsociados => real()
+      .named('gastos_asociados')
+      .nullable()
+      .withDefault(const Constant(0.0))();
   RealColumn get precioVenta => real()
       .named('precio_venta')
       .nullable()

@@ -24,9 +24,7 @@ final rolUsuarioProvider = StateProvider<RolUsuario>(
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
   const NuevoProductoPage({super.key});
-
   static const String routeName = 'nuevo-producto';
-
   @override
   ConsumerState<NuevoProductoPage> createState() => _NuevoProductoPageState();
 }
@@ -44,7 +42,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   final _especialCtrl = TextEditingController();
   final _stockCtrl = TextEditingController(text: '0');
   final _stockMinCtrl = TextEditingController(text: '0');
-
   int? _catSel;
   int? _marcaSel;
   int? _unidadSel;
@@ -52,13 +49,16 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   bool _modificandoMargen = false;
   bool _modificandoPrecioVenta = false;
   bool _modificandoCosto = false;
-
   Producto? _productoEditar;
   bool _esEdicion = false;
 
   @override
   void initState() {
     super.initState();
+    _costoCtrl.addListener(_recalcularDesdeCosto);
+    _gastosCtrl.addListener(_recalcularDesdeCosto);
+    _margenCtrl.addListener(_recalcularDesdeMargen);
+    _ventaCtrl.addListener(_recalcularDesdePrecioVenta);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = GoRouterState.of(context).extra;
       if (args is Producto) {
@@ -91,6 +91,10 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
 
   @override
   void dispose() {
+    _costoCtrl.removeListener(_recalcularDesdeCosto);
+    _gastosCtrl.removeListener(_recalcularDesdeCosto);
+    _margenCtrl.removeListener(_recalcularDesdeMargen);
+    _ventaCtrl.removeListener(_recalcularDesdePrecioVenta);
     _nombreCtrl.dispose();
     _skuCtrl.dispose();
     _costoCtrl.dispose();
@@ -107,37 +111,42 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
 
   void _recalcularDesdeCosto() {
     if (_modificandoMargen || _modificandoPrecioVenta) return;
+    _modificandoCosto = true;
     final costo = double.tryParse(_costoCtrl.text) ?? 0.0;
     final gastos = double.tryParse(_gastosCtrl.text) ?? 0.0;
     final cr = costo + gastos;
     final margen = double.tryParse(_margenCtrl.text) ?? 0.0;
     if (cr > 0.0 && margen > 0.0) {
-      _modificandoCosto = true;
       _ventaCtrl.text = Producto.calcularPrecioDesdeMargen(
         cr,
         margen,
       ).toStringAsFixed(2);
-      _modificandoCosto = false;
+    } else {
+      _ventaCtrl.text = '';
     }
+    _modificandoCosto = false;
   }
 
   void _recalcularDesdeMargen() {
+    if (_modificandoCosto || _modificandoPrecioVenta) return;
     _modificandoMargen = true;
     final costo = double.tryParse(_costoCtrl.text) ?? 0.0;
     final gastos = double.tryParse(_gastosCtrl.text) ?? 0.0;
     final cr = costo + gastos;
     final margen = double.tryParse(_margenCtrl.text) ?? 0.0;
-    if (cr > 0.0) {
+    if (cr > 0.0 && margen > 0.0) {
       _ventaCtrl.text = Producto.calcularPrecioDesdeMargen(
         cr,
         margen,
       ).toStringAsFixed(2);
+    } else {
+      _ventaCtrl.text = '';
     }
     _modificandoMargen = false;
   }
 
   void _recalcularDesdePrecioVenta() {
-    if (_modificandoCosto) return;
+    if (_modificandoCosto || _modificandoMargen) return;
     _modificandoPrecioVenta = true;
     final costo = double.tryParse(_costoCtrl.text) ?? 0.0;
     final gastos = double.tryParse(_gastosCtrl.text) ?? 0.0;
@@ -146,6 +155,8 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     if (cr > 0.0 && venta >= cr) {
       final margen = ((venta - cr) / cr) * 100.0;
       _margenCtrl.text = margen.toStringAsFixed(2);
+    } else {
+      _margenCtrl.text = '';
     }
     _modificandoPrecioVenta = false;
   }
@@ -164,7 +175,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final rol = ref.read(rolUsuarioProvider);
     final puedeCostos = _puedeEditarCostos(rol);
     final puedePrecios = _puedeEditarPrecios(rol);
-
     if (_catSel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -174,7 +184,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       return;
     }
-
     if (_unidadSel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -184,7 +193,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       return;
     }
-
     final costo = puedeCostos ? double.tryParse(_costoCtrl.text) ?? 0.0 : 0.0;
     final gastos = puedeCostos ? double.tryParse(_gastosCtrl.text) ?? 0.0 : 0.0;
     final venta = puedePrecios ? double.tryParse(_ventaCtrl.text) ?? 0.0 : 0.0;
@@ -195,7 +203,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final stockMinVal = _puedeEditarInventario(rol)
         ? double.tryParse(_stockMinCtrl.text) ?? 0.0
         : 0.0;
-
     if (stockVal < 0.0 || stockMinVal < 0.0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -205,7 +212,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       return;
     }
-
     if (minimo != null && minimo > 0.0 && venta < minimo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -217,17 +223,14 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       return;
     }
-
     final margen = puedePrecios ? double.tryParse(_margenCtrl.text) : null;
     final mayorista = puedePrecios
         ? double.tryParse(_mayoristaCtrl.text)
         : null;
     final especial = puedePrecios ? double.tryParse(_especialCtrl.text) : null;
-
     final sku = _skuCtrl.text.trim().isEmpty
         ? 'SKU-${DateTime.now().millisecondsSinceEpoch}'
         : _skuCtrl.text.trim();
-
     if (_esEdicion && _productoEditar?.id != null) {
       final actualizado = _productoEditar!.copyWith(
         codigo: sku,
@@ -285,7 +288,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final puedeCostos = _puedeEditarCostos(rol);
     final puedePrecios = _puedeEditarPrecios(rol);
     final puedeInventario = _puedeEditarInventario(rol);
-
     return AppScaffold(
       title: _esEdicion ? 'Editar Producto' : 'Registrar Producto',
       body: SafeArea(
@@ -299,7 +301,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                 final cats = ref.watch(categoriaControllerProvider);
                 final marcas = ref.watch(marcaControllerProvider);
                 final unids = ref.watch(unidadMedidaControllerProvider);
-
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -431,7 +432,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           ),
                         ],
                         enabled: puedeCostos,
-                        onChanged: (_) => _recalcularDesdeCosto(),
                       ),
                       child2: AppTextField(
                         label: 'Gastos Asociados (RD\$)',
@@ -446,7 +446,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           ),
                         ],
                         enabled: puedeCostos,
-                        onChanged: (_) => _recalcularDesdeCosto(),
                       ),
                     ),
                     AppLayout.vM,
@@ -490,7 +489,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           ),
                         ],
                         enabled: puedePrecios,
-                        onChanged: (_) => _recalcularDesdePrecioVenta(),
                       ),
                       child2: AppTextField(
                         label: 'Margen de Ganancia (%)',
@@ -505,7 +503,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           ),
                         ],
                         enabled: puedePrecios,
-                        onChanged: (_) => _recalcularDesdeMargen(),
                       ),
                     ),
                     AppLayout.vM,

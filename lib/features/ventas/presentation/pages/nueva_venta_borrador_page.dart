@@ -29,6 +29,14 @@ class _NuevaVentaBorradorPageState
   bool _guardando = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(ventaBorradorProvider.notifier).establecerConsumidorFinal();
+    });
+  }
+
+  @override
   void dispose() {
     _buscadorController.dispose();
     super.dispose();
@@ -65,7 +73,7 @@ class _NuevaVentaBorradorPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Seleccione cliente y complete los datos'),
+            content: Text('Complete los datos de la cotización'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -187,7 +195,9 @@ class _NuevaVentaBorradorPageState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildDatosGenerales(estado),
+        _buildCabecera(),
+        const SizedBox(height: AppSpacing.m),
+        _buildCliente(estado),
         const SizedBox(height: AppSpacing.m),
         _buildProductos(),
         const SizedBox(height: AppSpacing.m),
@@ -208,7 +218,9 @@ class _NuevaVentaBorradorPageState
             padding: AppSpacing.allM,
             child: Column(
               children: [
-                _buildDatosGenerales(estado),
+                _buildCabecera(),
+                const SizedBox(height: AppSpacing.m),
+                _buildCliente(estado),
                 const SizedBox(height: AppSpacing.m),
                 _buildProductos(),
               ],
@@ -233,45 +245,64 @@ class _NuevaVentaBorradorPageState
     );
   }
 
-  Widget _buildDatosGenerales(VentaBorradorState estado) {
+  Widget _buildCabecera() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Datos Generales', style: AppTypography.h4),
+        const Text('NUEVA VENTA', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
         AppCard(
           padding: AppSpacing.allM,
           child: Column(
             children: [
               ListTile(
-                title: const Text('Cliente', style: AppTypography.bodyMedium),
-                subtitle: Text(
-                  estado.clienteNombre ?? 'Sin nombre',
-                  style: AppTypography.bodySmall,
-                ),
-                trailing: const Icon(Icons.search, size: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                onTap: _seleccionarCliente,
-              ),
-              const SizedBox(height: AppSpacing.m),
-              ListTile(
-                title: const Text(
-                  'Vencimiento',
-                  style: AppTypography.bodyMedium,
-                ),
+                title: const Text('Vencimiento', style: AppTypography.bodyMedium),
                 subtitle: Text(
                   _fechaVencimientoSeleccionada != null
                       ? '${_fechaVencimientoSeleccionada!.day}/${_fechaVencimientoSeleccionada!.month}/${_fechaVencimientoSeleccionada!.year}'
-                      : 'Seleccione fecha',
+                      : 'Seleccione fecha (opcional)',
                   style: AppTypography.bodySmall,
                 ),
                 trailing: const Icon(Icons.calendar_today, size: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
                 onTap: _seleccionarVencimiento,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCliente(VentaBorradorState estado) {
+    final nombreCliente = estado.clienteNombre?.isNotEmpty == true
+        ? estado.clienteNombre!
+        : 'Consumidor Final';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('Cliente', style: AppTypography.h4),
+        const SizedBox(height: AppSpacing.s),
+        AppCard(
+          padding: AppSpacing.allM,
+          // ✅ Reemplazado ListTile → Row. Ningún gestor nativo interfiere
+          child: Row(
+            children: [
+              const Icon(Icons.person_outline, size: 20, color: AppColors.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(nombreCliente, style: AppTypography.labelMedium),
+                    const Text('Predeterminado', style: AppTypography.bodySmall),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              AppButton(
+                text: 'Cambiar',
+                onPressed: _seleccionarCliente,
+                height: 36,
               ),
             ],
           ),
@@ -340,7 +371,7 @@ class _NuevaVentaBorradorPageState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Total:', style: AppTypography.h4Bold),
+                  const Text('TOTAL:', style: AppTypography.h4Bold),
                   Text(
                     'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
                     style: AppTypography.h4PrimaryBold,
@@ -394,8 +425,6 @@ class _NuevaVentaBorradorPageState
                 onPressed: _enviarPorCorreo,
               ),
             ),
-            const SizedBox(width: AppSpacing.s),
-            const Expanded(child: SizedBox()),
           ],
         ),
       ],
