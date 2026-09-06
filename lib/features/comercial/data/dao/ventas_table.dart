@@ -5,7 +5,6 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 
 class VentaEstadoConverter extends TypeConverter<VentaEstado, String> {
   const VentaEstadoConverter();
-
   @override
   VentaEstado fromSql(String valorDb) {
     final buscado = valorDb.trim().toLowerCase();
@@ -14,7 +13,6 @@ class VentaEstadoConverter extends TypeConverter<VentaEstado, String> {
       orElse: () => VentaEstado.borrador,
     );
   }
-
   @override
   String toSql(VentaEstado valorDart) => valorDart.name;
 }
@@ -29,6 +27,8 @@ class VentasTable extends Table {
   RealColumn get descuentoGlobal =>
       real().named('descuento_global').withDefault(const Constant(0.0))();
   RealColumn get itbis => real().named('itbis')();
+  RealColumn get costoEnvio =>
+      real().named('costo_envio').withDefault(const Constant(0.0))();
   RealColumn get montoTotal => real().named('monto_total')();
   TextColumn get formaPago => textEnum<FormaPago>().named('forma_pago')();
   TextColumn get estado => text()

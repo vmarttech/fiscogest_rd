@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/barra_navegacion_inferior.dart';
@@ -18,6 +17,7 @@ class VentasContenedorPage extends ConsumerStatefulWidget {
     super.key,
     this.modoInicial = ModoOperacion.venta,
   });
+
   static const String nombreRuta = 'ventas-contenedor';
   final ModoOperacion modoInicial;
 
@@ -42,6 +42,7 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final vistaActual = ref.watch(
       ventasNavegacionProvider.select((e) => e.vistaActual),
     );
+
     final modoOperacion = ref.watch(
       ventasNavegacionProvider.select((e) => e.modoOperacion),
     );
@@ -77,20 +78,6 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
         titleSpacing: AppSpacing.m,
         actions: [
           IconButton(
-            icon: const Icon(Icons.history),
-            tooltip: 'Historial de operaciones',
-            color: vistaActual == VistaActual.historial
-                ? AppColors.primary
-                : AppColors.textSecondary,
-            style: IconButton.styleFrom(
-              padding: const EdgeInsets.all(AppSpacing.s),
-              minimumSize: const Size(40, 40),
-            ),
-            onPressed: () => ref
-                .read(ventasNavegacionProvider.notifier)
-                .cambiarVista(VistaActual.historial),
-          ),
-          IconButton(
             icon: const Icon(Icons.restore_from_trash_outlined),
             tooltip: 'Limpiar operación actual',
             color: AppColors.textSecondary,
@@ -98,28 +85,15 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
               padding: const EdgeInsets.all(AppSpacing.s),
               minimumSize: const Size(40, 40),
             ),
-            onPressed: () {
-              ref.read(registrarVentaProvider.notifier).vaciarVenta();
-              ref
-                  .read(ventaCargadaDesdeHistorialProvider.notifier)
-                  .limpiarVenta();
-              ref.read(ventasNavegacionProvider.notifier).volverAlInicio();
-            },
+            onPressed: () {},
           ),
-          const SizedBox(width: AppSpacing.s),
         ],
       ),
-      body: SafeArea(
-        bottom: true,
-        child: Padding(
-          padding: AppLayout.pantallaPadding,
-          child: Column(
-            children: [
-              Expanded(child: vistaActiva),
-              const BarraNavegacionInferior(),
-            ],
-          ),
-        ),
+      body: Column(
+        children: [
+          Expanded(child: vistaActiva),
+          const BarraNavegacionInferior(),
+        ],
       ),
     );
   }

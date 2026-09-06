@@ -9,6 +9,7 @@ class Venta {
     required this.detalles,
     required this.subtotal,
     required this.itbis,
+    this.costoEnvio = 0.0,
     required this.total,
     required this.tipoPago,
     required this.esCredito,
@@ -20,7 +21,6 @@ class Venta {
     this.descuentoNombre,
     this.montoDescuento = 0.0,
   });
-
   final int? id;
   final String numero;
   final String? numeroFactura;
@@ -30,6 +30,7 @@ class Venta {
   final List<dynamic> detalles;
   final double subtotal;
   final double itbis;
+  final double costoEnvio;
   final double total;
   final String tipoPago;
   final bool esCredito;

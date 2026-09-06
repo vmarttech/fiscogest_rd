@@ -73,7 +73,7 @@ class _NuevaVentaBorradorPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Complete los datos de la cotización'),
+            content: Text('Agregue productos para cotizar'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -82,7 +82,7 @@ class _NuevaVentaBorradorPageState
     }
     setState(() => _guardando = true);
     try {
-      final numero = await notificador.guardar();
+      final numero = notificador.guardar();
       if (!mounted) return;
       setState(() => _numeroCotizacionGuardada = numero);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -362,7 +362,7 @@ class _NuevaVentaBorradorPageState
                 children: [
                   const Text('Descuento:', style: AppTypography.bodyMedium),
                   Text(
-                    'RD\$ ${estado.descuento.toStringAsFixed(2)}',
+                    'RD\$ ${(estado.descuento ?? 0.0).toStringAsFixed(2)}',
                     style: AppTypography.bodyMedium,
                   ),
                 ],

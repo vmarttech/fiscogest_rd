@@ -53,7 +53,7 @@ class ItemCarrito extends ConsumerWidget {
               if (nuevaCantidad > 0) {
                 ref
                     .read(registrarVentaProvider.notifier)
-                    .cambiarCantidad(indice, nuevaCantidad);
+                    .cambiarCantidad(indice, nuevaCantidad.toInt());
               }
               Navigator.pop(ctx);
             },
@@ -67,6 +67,22 @@ class ItemCarrito extends ConsumerWidget {
   void _abrirDescuentoLinea(BuildContext context, WidgetRef ref) {
     final tienePorcentaje = detalle.descuentoPorcentaje > 0;
     final tieneMonto = detalle.montoDescuento > 0;
+
+    // ✅ ANTES de abrir el diálogo — validar reglas
+    final notifier = ref.read(registrarVentaProvider.notifier);
+    final error = notifier.puedeAplicarDescuentoLinea(detalle);
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     final controlador = TextEditingController(
       text: tienePorcentaje
           ? detalle.descuentoPorcentaje.toStringAsFixed(2)
@@ -75,6 +91,7 @@ class ItemCarrito extends ConsumerWidget {
           : '',
     );
     bool esPorcentaje = tienePorcentaje;
+
     showDialog<dynamic>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -120,9 +137,16 @@ class ItemCarrito extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () {
-                ref
-                    .read(registrarVentaProvider.notifier)
-                    .aplicarDescuentoLinea(indice, 0.0, false);
+                final err = notifier.aplicarDescuentoLinea(indice, 0.0, false);
+                if (err != null && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(err),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
                 Navigator.pop(ctx);
               },
               child: const Text('Sin descuento'),
@@ -130,10 +154,18 @@ class ItemCarrito extends ConsumerWidget {
             TextButton(
               onPressed: () {
                 final valor = double.tryParse(controlador.text) ?? 0.0;
-                ref
-                    .read(registrarVentaProvider.notifier)
-                    .aplicarDescuentoLinea(indice, valor, esPorcentaje);
-                Navigator.pop(ctx);
+                final err = notifier.aplicarDescuentoLinea(indice, valor, esPorcentaje);
+                if (err != null && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(err),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } else {
+                  Navigator.pop(ctx);
+                }
               },
               child: const Text('Aceptar'),
             ),

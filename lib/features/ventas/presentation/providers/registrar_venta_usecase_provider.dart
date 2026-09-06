@@ -38,7 +38,7 @@ class RegistrarVentaUseCase {
       total: estado.total,
       tipoPago: estado.tipoPago,
       esCredito: estado.esCredito,
-      usuarioId: estado.usuarioId ?? 1,
+      usuarioId: estado.usuarioId,
       createdAt: DateTime.now(),
       descuentoId: estado.descuentoId,
       descuentoNombre: estado.descuentoNombre,

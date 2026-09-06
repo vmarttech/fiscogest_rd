@@ -1,11 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_venta_borrador.dart';
-import 'package:fiscogest_rd/features/ventas/domain/usecases/editar_venta_borrador.dart';
-import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
-import 'package:fiscogest_rd/features/ventas/domain/services/i_cotizacion_service.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
 @immutable
 class VentaBorradorState {
@@ -17,7 +11,8 @@ class VentaBorradorState {
     this.clienteNombre,
     required this.subtotal,
     required this.itbis,
-    required this.descuento,
+    this.costoEnvio = 0.0,
+    this.descuento,
     this.descuentoId,
     this.descuentoNombre,
     required this.montoDescuento,
@@ -34,7 +29,8 @@ class VentaBorradorState {
   final String? clienteNombre;
   final double subtotal;
   final double itbis;
-  final double descuento;
+  final double costoEnvio;
+  final double? descuento;
   final int? descuentoId;
   final String? descuentoNombre;
   final double montoDescuento;
@@ -51,6 +47,7 @@ class VentaBorradorState {
     String? clienteNombre,
     double? subtotal,
     double? itbis,
+    double? costoEnvio,
     double? descuento,
     int? descuentoId,
     String? descuentoNombre,
@@ -68,6 +65,7 @@ class VentaBorradorState {
       clienteNombre: clienteNombre ?? this.clienteNombre,
       subtotal: subtotal ?? this.subtotal,
       itbis: itbis ?? this.itbis,
+      costoEnvio: costoEnvio ?? this.costoEnvio,
       descuento: descuento ?? this.descuento,
       descuentoId: descuentoId ?? this.descuentoId,
       descuentoNombre: descuentoNombre ?? this.descuentoNombre,
@@ -81,20 +79,19 @@ class VentaBorradorState {
 }
 
 class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
-  VentaBorradorNotifier(this._ref)
+  VentaBorradorNotifier()
     : super(
         VentaBorradorState(
           numero: '',
           fecha: DateTime.now(),
           subtotal: 0.0,
           itbis: 0.0,
+          costoEnvio: 0.0,
           descuento: 0.0,
           montoDescuento: 0.0,
           montoTotal: 0.0,
         ),
       );
-
-  final Ref _ref;
 
   void seleccionarCliente(int id, String nombre) {
     state = state.copyWith(clienteId: id, clienteNombre: nombre);
@@ -108,11 +105,31 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     state = state.copyWith(vencimiento: fecha);
   }
 
+  void _recalcularTotal({double? nuevoSubtotal, double? nuevoItbis, double? nuevoEnvio, double? nuevoDescuento}) {
+    final subt = nuevoSubtotal ?? state.subtotal;
+    final itb = nuevoItbis ?? state.itbis;
+    final env = nuevoEnvio ?? state.costoEnvio;
+    final desc = nuevoDescuento ?? state.montoDescuento;
+    final total = subt + itb + env - desc;
+    state = state.copyWith(
+      subtotal: subt,
+      itbis: itb,
+      costoEnvio: env,
+      montoDescuento: desc,
+      montoTotal: total,
+    );
+  }
+
+  void asignarCostoEnvio(double valor) {
+    _recalcularTotal(nuevoEnvio: valor);
+  }
+
   void aplicarDescuento(double valor) {
     final baseImponible = state.subtotal - valor;
     const tasaItbis = 0.18;
     final nuevoItbis = baseImponible * tasaItbis;
-    final nuevoTotal = baseImponible + nuevoItbis;
+    final subtMasItbis = baseImponible + nuevoItbis;
+    final nuevoTotal = subtMasItbis + state.costoEnvio;
     state = state.copyWith(
       descuento: valor,
       montoDescuento: valor,
@@ -125,7 +142,8 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final baseImponible = state.subtotal;
     const tasaItbis = 0.18;
     final nuevoItbis = baseImponible * tasaItbis;
-    final nuevoTotal = baseImponible + nuevoItbis;
+    final subtMasItbis = baseImponible + nuevoItbis;
+    final nuevoTotal = subtMasItbis + state.costoEnvio;
     state = state.copyWith(
       descuento: 0.0,
       descuentoId: null,
@@ -136,96 +154,40 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     );
   }
 
-  bool validarAntesDeGuardar() {
-    final bool tieneCliente = state.clienteId != null &&
-        state.clienteId! > 0 &&
-        (state.clienteNombre?.trim().isNotEmpty ?? false);
-    final bool esConsumidorFinal = state.clienteId == 0 &&
-        state.clienteNombre == 'Consumidor Final';
-    if (!tieneCliente && !esConsumidorFinal) {
-      return false;
-    }
-    if (state.numero.trim().isEmpty) return false;
-    if (state.montoTotal <= 0) return false;
-    return true;
-  }
-
   void vaciar() {
     state = VentaBorradorState(
       numero: '',
       fecha: DateTime.now(),
       subtotal: 0.0,
       itbis: 0.0,
+      costoEnvio: 0.0,
       descuento: 0.0,
       montoDescuento: 0.0,
       montoTotal: 0.0,
+      tipoPago: 'Contado',
+      esCredito: false,
+      detalles: const [],
     );
   }
 
-  Venta _construirEntidad() {
-    return Venta(
-      numero: state.numero,
-      fecha: state.fecha,
-      clienteId: state.clienteId ?? 0,
-      nombreCliente: state.clienteNombre,
-      subtotal: state.subtotal,
-      itbis: state.itbis,
-      total: state.montoTotal,
-      detalles: state.detalles,
-      tipoPago: state.tipoPago,
-      esCredito: state.esCredito,
-      descuentoId: state.descuentoId,
-      descuentoNombre: state.descuentoNombre,
-      montoDescuento: state.montoDescuento,
-    );
+  bool validarAntesDeGuardar() {
+    final bool tieneCliente = state.clienteId != null &&
+        state.clienteId! > 0 &&
+        (state.clienteNombre?.trim().isNotEmpty ?? false);
+    final bool esConsumidorFinal = state.clienteId == 0 &&
+        state.clienteNombre == 'Consumidor Final';
+    if (!tieneCliente && !esConsumidorFinal) return false;
+    if (state.numero.trim().isEmpty) return false;
+    if (state.montoTotal <= 0) return false;
+    return true;
   }
 
-  Future<String> guardar() async {
-    if (!validarAntesDeGuardar()) throw Exception('Datos incompletos');
-    final repositorio = _ref.read<IVentasRepository>(ventasRepositoryProvider);
-    final entidad = _construirEntidad();
-    final casoUso = RegistrarVentaBorrador(repositorio);
-    final resultado = await casoUso(entidad);
-    _ref.invalidate(listaVentasBorradorProvider);
-    return resultado.numero;
-  }
-
-  Future<String> editar(int ventaBorradorId) async {
-    if (!validarAntesDeGuardar()) throw Exception('Datos incompletos');
-    final repositorio = _ref.read<IVentasRepository>(ventasRepositoryProvider);
-    final entidad = _construirEntidad();
-    final casoUso = EditarVentaBorrador(repositorio);
-    final resultado = await casoUso(entidad);
-    _ref.invalidate(listaVentasBorradorProvider);
-    return resultado.numero;
-  }
-
-  Future<String> imprimir(Venta ventaBorrador) async {
-    final servicio = _ref.read<ICotizacionService>(
-      ventaBorradorServicioProvider,
-    );
-    return servicio.generarImpresion(ventaBorrador);
-  }
-
-  Future<String> exportarPDF(Venta ventaBorrador) async {
-    final servicio = _ref.read<ICotizacionService>(
-      ventaBorradorServicioProvider,
-    );
-    return servicio.exportarPDF(ventaBorrador);
-  }
-
-  Future<void> enviarPorCorreo(
-    Venta ventaBorrador,
-    String correoDestinatario,
-  ) async {
-    final servicio = _ref.read<ICotizacionService>(
-      ventaBorradorServicioProvider,
-    );
-    return servicio.enviarPorCorreo(ventaBorrador, correoDestinatario);
+  String? guardar() {
+    if (!validarAntesDeGuardar()) return null;
+    return state.numero.trim().isNotEmpty ? state.numero : null;
   }
 }
 
-final ventaBorradorProvider =
-    StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>(
-      (ref) => VentaBorradorNotifier(ref),
-    );
+final ventaBorradorProvider = StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>((ref) {
+  return VentaBorradorNotifier();
+});
