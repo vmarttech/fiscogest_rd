@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 
 class SelectorDeliveryDialog extends ConsumerStatefulWidget {
-
   const SelectorDeliveryDialog({
     super.key,
     required this.costoActual,
@@ -23,7 +24,6 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
     symbol: 'RD\$ ',
     decimalDigits: 2,
   );
-
   static const List<Map<String, dynamic>> _opciones = [
     {'nombre': 'Santo Domingo', 'monto': 50.0},
     {'nombre': 'Nacional', 'monto': 150.0},
@@ -61,42 +61,76 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
 
   @override
   Widget build(BuildContext context) {
+    final anchoPantalla = MediaQuery.of(context).size.width;
+    final esPantallaPequena = anchoPantalla < 600;
+    final anchoMaximoDialog = esPantallaPequena ? anchoPantalla * 0.92 : 400.0;
+    final paddingDialogo = esPantallaPequena ? 12.0 : 16.0;
+    final tamanoIcono = esPantallaPequena ? 20.0 : 24.0;
+    final tamanoTitulo = esPantallaPequena ? 16.0 : 18.0;
+    final espaciadoIconoTitulo = esPantallaPequena ? 8.0 : 10.0;
+
     return AlertDialog(
-      title: const Row(
+      titlePadding: EdgeInsets.all(paddingDialogo),
+      contentPadding: EdgeInsets.symmetric(horizontal: paddingDialogo, vertical: 8),
+      actionsPadding: EdgeInsets.symmetric(horizontal: paddingDialogo, vertical: 12),
+      title: Row(
         children: [
-          Icon(Icons.delivery_dining, color: Colors.blueAccent),
-          SizedBox(width: 10),
-          Text('Costo de Envío / Delivery'),
+          Icon(Icons.delivery_dining, color: AppColors.primary, size: tamanoIcono),
+          SizedBox(width: espaciadoIconoTitulo),
+          Expanded(
+            child: Text(
+              'Costo de Envío / Delivery',
+              style: AppTypography.labelLarge.copyWith(fontSize: tamanoTitulo),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
       content: SizedBox(
-        width: double.maxFinite,
+        width: anchoMaximoDialog,
         child: ListView(
           shrinkWrap: true,
           children: [
-            const Text('Selecciona una opción o ingresa el monto manualmente:'),
-            const SizedBox(height: 16),
+            Text(
+              'Selecciona una opción o ingresa el monto manualmente:',
+              style: AppTypography.labelSmall,
+            ),
+            const SizedBox(height: 12),
             ..._opciones.map((Map<String, dynamic> opcion) {
               final String nombre = opcion['nombre'] as String;
               final double monto = opcion['monto'] as double;
               final bool seleccionada = _opcionSeleccionada == nombre ||
                   (_opcionSeleccionada == null && widget.costoActual == monto);
               return ListTile(
-                title: Text(nombre),
-                subtitle: Text(_formatoMonto.format(monto)),
+                dense: esPantallaPequena,
+                visualDensity: VisualDensity.compact,
+                title: Text(
+                  nombre,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: seleccionada ? AppColors.primary : null,
+                    fontWeight: seleccionada ? FontWeight.w600 : null,
+                  ),
+                ),
+                subtitle: Text(
+                  _formatoMonto.format(monto),
+                  style: AppTypography.labelSmall,
+                ),
                 selected: seleccionada,
+                selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
                 onTap: () => _seleccionarOpcion(nombre, monto),
               );
             }),
-            const Divider(height: 24),
+            const Divider(height: 16),
             TextField(
               controller: _montoController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Monto personalizado (RD\$)',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                labelStyle: AppTypography.labelMedium,
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
+              style: AppTypography.labelMedium,
               onChanged: (_) {
                 setState(() => _opcionSeleccionada = null);
               },
@@ -111,7 +145,6 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
         ),
         FilledButton(
           onPressed: _confirmar,
-          style: FilledButton.styleFrom(backgroundColor: Colors.blueAccent),
           child: const Text('Confirmar'),
         ),
       ],

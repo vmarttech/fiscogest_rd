@@ -28,6 +28,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     customPattern: '¤ #,##0.00',
   );
   bool _guardando = false;
+  final TextEditingController _buscarController = TextEditingController();
 
   @override
   void initState() {
@@ -35,6 +36,12 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(registrarVentaProvider.notifier).establecerConsumidorFinal();
     });
+  }
+
+  @override
+  void dispose() {
+    _buscarController.dispose();
+    super.dispose();
   }
 
   Future<void> _cambiarCliente() async {
@@ -55,6 +62,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       }
       return;
     }
+    final esPantallaPequenaDialog = MediaQuery.of(context).size.width < 600;
     const formasPago = ['Efectivo', 'Tarjeta', 'Crédito', 'Transferencia', 'Cheque'];
     final formaSeleccionada = await showDialog<String>(
       context: context,
@@ -64,8 +72,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Total: ${_formatoMonto.format(estado.total)}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            Text(
+              'Total: ${_formatoMonto.format(estado.total)}',
+              style: TextStyle(
+                fontSize: esPantallaPequenaDialog ? 14 : 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
             const SizedBox(height: 16),
             ...formasPago.map((forma) => ListTile(
               title: Text(forma),
@@ -126,16 +140,17 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   }
 
   void _seleccionarProducto(DetalleVenta producto) {
-    ref.read(registrarVentaProvider.notifier).agregarProductoSeleccionado(producto);
+    _buscarController.clear();
+    ref.read(registrarVentaProvider.notifier)
+      ..buscarProducto('')
+      ..agregarProductoSeleccionado(producto);
   }
 
   @override
   Widget build(BuildContext context) {
     final modo = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
     final estado = ref.watch(registrarVentaProvider);
-
     final esConsumidorFinal = estado.clienteId == 0 || estado.clienteNombre == 'Consumidor Final';
-
     final colorPrimario = switch (modo) {
       ModoOperacion.venta => AppColors.primary,
       ModoOperacion.cotizacion => AppColors.info,
@@ -147,18 +162,24 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         : 'Consumidor Final';
     final tieneProductos = estado.detalles.isNotEmpty;
     final tieneResultados = estado.resultadosBusqueda.isNotEmpty;
-
     final montoTotal = _formatoMonto.format(estado.total);
-
     final tieneDescuentoGeneral = estado.montoDescuento > 0;
     final descuentoPorLinea = _calcularDescuentoPorLinea(estado);
     final subtotalConDescuentoLinea = estado.subtotal - descuentoPorLinea;
     final baseGravable = (subtotalConDescuentoLinea - estado.montoDescuento).clamp(0.0, double.infinity);
+
     final anchoPantalla = MediaQuery.of(context).size.width;
     final esPantallaPequena = anchoPantalla < 600;
     final paddingLateral = esPantallaPequena ? 16.0 : 24.0;
     final anchoMaximoContenido = esPantallaPequena ? double.infinity : 900.0;
     final espaciadoBotones = esPantallaPequena ? 4.0 : 8.0;
+    final anchoColumnaValores = esPantallaPequena ? anchoPantalla * 0.35 : 160.0;
+    final espaciadoEtiquetaValor = esPantallaPequena ? 8.0 : 16.0;
+    final paddingVacioVertical = esPantallaPequena ? 24.0 : 48.0;
+    final tamanoIconoVacio = esPantallaPequena ? 40.0 : 56.0;
+    final fontSizeMontoBoton = esPantallaPequena ? 14.0 : 18.0;
+    final espaciadoCliente = esPantallaPequena ? 6.0 : 8.0;
+    final espaciadoBotonesCliente = esPantallaPequena ? 8.0 : 12.0;
 
     Widget botonModo(ModoOperacion m, String etiqueta) {
       final activo = modo == m;
@@ -193,9 +214,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   ? AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: colorTexto)
                   : AppTypography.labelMedium.copyWith(color: colorTexto),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: espaciadoEtiquetaValor),
             SizedBox(
-              width: 160,
+              width: anchoColumnaValores,
               child: Text(
                 valor,
                 textAlign: TextAlign.right,
@@ -227,8 +248,6 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 ],
               ),
               const SizedBox(height: AppSpacing.m),
-
-              // ✅ BARRA DE BÚSQUEDA REDUCIDA — ALINEADA A LA IZQUIERDA
               Align(
                 alignment: Alignment.topLeft,
                 child: SizedBox(
@@ -237,11 +256,11 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AppTextField(
+                        controller: _buscarController,
                         hint: 'Buscar producto, código o escanear...',
                         prefixIcon: Icons.search,
                         onChanged: (texto) => ref.read(registrarVentaProvider.notifier).buscarProducto(texto),
                       ),
-                      // ✅ LISTA DE RESULTADOS DE BÚSQUEDA
                       if (tieneResultados)
                         Container(
                           margin: const EdgeInsets.only(top: 4),
@@ -273,14 +292,19 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   ),
                 ),
               ),
-
               const SizedBox(height: AppSpacing.m),
               Row(
                 children: [
                   const Icon(Icons.person_outline, size: 18, color: AppColors.primary),
-                  const SizedBox(width: 8),
-                  Text(nombreCliente, style: AppTypography.labelMedium),
-                  const SizedBox(width: 12),
+                  SizedBox(width: espaciadoCliente),
+                  Expanded(
+                    child: Text(
+                      nombreCliente,
+                      style: AppTypography.labelMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  SizedBox(width: espaciadoBotonesCliente),
                   ElevatedButton(
                     onPressed: _guardando ? null : _cambiarCliente,
                     child: const Text('Cambiar'),
@@ -291,16 +315,30 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
               const Divider(height: 1),
               const SizedBox(height: AppSpacing.m),
               if (!tieneProductos)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 48),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: paddingVacioVertical),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.point_of_sale_outlined, size: 56, color: AppColors.grey400),
-                      SizedBox(height: AppSpacing.m),
-                      Text('La venta está vacía', style: AppTypography.labelLarge),
-                      SizedBox(height: AppSpacing.s),
-                      Text('Busca un producto para comenzar', style: AppTypography.bodyMedium),
+                      Icon(
+                        Icons.point_of_sale_outlined,
+                        size: tamanoIconoVacio,
+                        color: AppColors.grey400,
+                      ),
+                      const SizedBox(height: AppSpacing.m),
+                      Text(
+                        'La venta está vacía',
+                        style: esPantallaPequena
+                            ? AppTypography.labelMedium
+                            : AppTypography.labelLarge,
+                      ),
+                      const SizedBox(height: AppSpacing.s),
+                      Text(
+                        'Busca un producto para comenzar',
+                        style: esPantallaPequena
+                            ? AppTypography.labelSmall
+                            : AppTypography.bodyMedium,
+                      ),
                     ],
                   ),
                 )
@@ -314,6 +352,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
+                      if (estado.costoEnvio > 0)
+                        filaTotal('Envío / Delivery:', _formatoMonto.format(estado.costoEnvio)),
                       if (!esConsumidorFinal) ...[
                         filaTotal('Subtotal:', _formatoMonto.format(estado.subtotal)),
                         if (descuentoPorLinea > 0.001)
@@ -343,11 +383,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   width: esPantallaPequena ? double.infinity : 260,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: esPantallaPequena ? 16 : 24,
+                        vertical: esPantallaPequena ? 12 : 16,
+                      ),
                       backgroundColor: colorPrimario,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      minimumSize: const Size(0, 72),
+                      minimumSize: Size(0, esPantallaPequena ? 60 : 72),
                     ),
                     onPressed: tieneProductos && !_guardando ? _cobrar : null,
                     child: _guardando
@@ -355,9 +398,21 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                         : Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(tieneProductos ? 'COBRAR' : 'AGREGUE PRODUCTOS', style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Text(
+                                tieneProductos ? 'COBRAR' : 'AGREGUE PRODUCTOS',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: esPantallaPequena ? 12 : 14,
+                                ),
+                              ),
                               const SizedBox(height: 4),
-                              Text(montoTotal, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              Text(
+                                montoTotal,
+                                style: TextStyle(
+                                  fontSize: fontSizeMontoBoton,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                   ),

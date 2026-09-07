@@ -6,7 +6,9 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_delivery.dart';
 
 class BarraNavegacionInferior extends ConsumerWidget {
   const BarraNavegacionInferior({super.key});
@@ -17,6 +19,14 @@ class BarraNavegacionInferior extends ConsumerWidget {
 
     void navegarA(VistaActual destino) {
       ref.read(ventasNavegacionProvider.notifier).cambiarVista(destino);
+    }
+
+    Future<void> abrirSelectorDelivery() async {
+      final costoActual = ref.read(registrarVentaProvider).costoEnvio;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => SelectorDeliveryDialog(costoActual: costoActual),
+      );
     }
 
     Future<void> mostrarMenuMas() async {
@@ -39,11 +49,11 @@ class BarraNavegacionInferior extends ConsumerWidget {
       );
     }
 
-    Widget botonNavegacion(VistaActual vista, IconData icono, String etiqueta) {
+    Widget botonNavegacion(VistaActual vista, IconData icono, String etiqueta, {VoidCallback? onTapPersonalizado}) {
       final activo = vistaActual == vista;
       return Expanded(
         child: InkWell(
-          onTap: () => navegarA(vista),
+          onTap: onTapPersonalizado ?? () => navegarA(vista),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.s),
             decoration: BoxDecoration(
@@ -116,7 +126,7 @@ class BarraNavegacionInferior extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             botonNavegacion(VistaActual.inicio, Icons.point_of_sale, 'Inicio'),
-            botonNavegacion(VistaActual.inventario, Icons.inventory_2, 'Productos'),
+            botonNavegacion(VistaActual.inventario, Icons.delivery_dining, 'Delivery', onTapPersonalizado: abrirSelectorDelivery),
             botonNavegacion(VistaActual.historial, Icons.history, 'Historial'),
             botonMas(),
           ],
