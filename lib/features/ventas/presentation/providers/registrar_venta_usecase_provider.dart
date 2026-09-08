@@ -10,7 +10,6 @@ import 'package:fiscogest_rd/features/inventario/data/services/inventario_servic
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
 import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_venta.dart';
 
-// ─── Providers ──────────────────────────────────────────────────
 final inventarioServiceProvider = Provider<IInventarioService>((ref) {
   final db = ref.watch(databaseProvider);
   return InventarioServiceImpl(db);
@@ -21,13 +20,13 @@ final productosDaoProvider = Provider<ProductosDao>((ref) {
   return ProductosDao(db);
 });
 
-// ─── Caso de uso principal ─────────────────────────────────────
 class RegistrarVentaUseCase {
   RegistrarVentaUseCase(this._servicioInventario);
   final IVentaInventarioService _servicioInventario;
 
   Future<Venta> ejecutar(RegistrarVentaState estado) async {
     final venta = Venta(
+      id: null,
       numero: '',
       clienteId: estado.clienteId ?? 0,
       nombreCliente: estado.clienteNombre,
@@ -38,6 +37,8 @@ class RegistrarVentaUseCase {
       total: estado.total,
       tipoPago: estado.tipoPago,
       esCredito: estado.esCredito,
+      abonoInicial: estado.abonoInicial,
+      vencimiento: estado.vencimiento,
       usuarioId: estado.usuarioId,
       createdAt: DateTime.now(),
       descuentoId: estado.descuentoId,

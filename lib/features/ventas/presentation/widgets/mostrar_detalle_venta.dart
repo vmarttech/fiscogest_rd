@@ -281,7 +281,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            _formatearMonto(linea.precioUnitario as double),
+                            _formatearMonto(linea.precioUnitario),
                             textAlign: TextAlign.right,
                             style: AppTypography.bodySmall,
                           ),
@@ -289,7 +289,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            '${linea.tasaImpuesto as double}%',
+                            '${linea.tasaImpuesto}%',
                             textAlign: TextAlign.right,
                             style: AppTypography.bodySmall,
                           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_factura_service.dart';
 
 class FacturaServiceImpl implements IFacturaService {
@@ -34,7 +33,7 @@ class FacturaServiceImpl implements IFacturaService {
     factura.writeln('DETALLE DE PRODUCTOS');
     factura.writeln('----------------------------------------');
     for (var i = 0; i < venta.detalles.length; i++) {
-      final detalle = venta.detalles[i] as DetalleVenta;
+      final detalle = venta.detalles[i];
       factura.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}');
       factura.writeln(
         '   Cant: ${detalle.cantidad}  x  ${formatoMoneda.format(detalle.precioUnitario)}',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:drift/drift.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:fiscogest_rd/core/navigation/app_router.dart';
@@ -173,6 +174,16 @@ class FiscoGestApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       routerConfig: ref.watch(appRouterProvider),
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blueGrey),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'DO'),
+        Locale('en', 'US'),
+      ],
+      locale: const Locale('es', 'DO'),
     );
   }
 }

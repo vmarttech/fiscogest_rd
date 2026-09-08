@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.da
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
 
@@ -32,7 +31,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     final usuarioIdSeguro = venta.usuarioId ?? 1;
 
     for (final elemento in venta.detalles) {
-      final detalle = elemento as DetalleVenta;
+      final detalle = elemento;
 
       final saldoAnterior = await kardexRepository.obtenerSaldoActual(detalle.productoId);
       if (saldoAnterior < detalle.cantidad) {

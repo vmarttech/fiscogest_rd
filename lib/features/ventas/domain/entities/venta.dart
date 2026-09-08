@@ -1,39 +1,42 @@
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+
 class Venta {
   const Venta({
-    this.id,
+    required this.id,
     required this.numero,
-    this.numeroFactura,
     required this.clienteId,
-    this.nombreCliente,
+    required this.nombreCliente,
     required this.fecha,
     required this.detalles,
     required this.subtotal,
     required this.itbis,
-    this.costoEnvio = 0.0,
     required this.total,
     required this.tipoPago,
     required this.esCredito,
+    this.abonoInicial = 0.0,
+    this.vencimiento,
     this.cotizacionOrigenId,
     this.apartadoOrigenId,
-    this.usuarioId,
+    required this.usuarioId,
     this.createdAt,
     this.descuentoId,
     this.descuentoNombre,
-    this.montoDescuento = 0.0,
+    required this.montoDescuento,
   });
+
   final int? id;
   final String numero;
-  final String? numeroFactura;
   final int clienteId;
   final String? nombreCliente;
   final DateTime fecha;
-  final List<dynamic> detalles;
+  final List<DetalleVenta> detalles;
   final double subtotal;
   final double itbis;
-  final double costoEnvio;
   final double total;
   final String tipoPago;
   final bool esCredito;
+  final double abonoInicial;
+  final DateTime? vencimiento;
   final int? cotizacionOrigenId;
   final int? apartadoOrigenId;
   final int? usuarioId;

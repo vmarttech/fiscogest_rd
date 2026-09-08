@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 
 class FacturaImprimible extends StatelessWidget {
   const FacturaImprimible({
@@ -28,7 +27,7 @@ class FacturaImprimible extends StatelessWidget {
 
   double get _descuentoTotal {
     return venta.detalles.fold<double>(0.0, (suma, elemento) {
-      final linea = elemento as DetalleVenta;
+      final linea = elemento;
       return suma + linea.montoDescuento;
     });
   }
@@ -123,7 +122,7 @@ class FacturaImprimible extends StatelessWidget {
             const SizedBox(height: 8),
             ...venta.detalles.asMap().entries.map((entry) {
               final indice = entry.key;
-              final linea = entry.value as DetalleVenta;
+              final linea = entry.value;
               final nombre = linea.nombreProducto ?? 'Producto';
               final tieneDescuento = linea.montoDescuento != 0.0;
               final cantidad = linea.cantidad;
@@ -264,7 +263,7 @@ class FacturaImprimible extends StatelessWidget {
     buffer.writeln('DETALLE DE PRODUCTOS');
     buffer.writeln('----------------------------------------');
     for (var i = 0; i < venta.detalles.length; i++) {
-      final linea = venta.detalles[i] as DetalleVenta;
+      final linea = venta.detalles[i];
       final nombre = linea.nombreProducto ?? 'Producto';
       final subtotalLinea = linea.subtotalLinea ?? linea.subtotal;
       buffer.writeln('${i + 1}. $nombre');

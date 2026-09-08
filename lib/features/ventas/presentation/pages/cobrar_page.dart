@@ -1,16 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_layout.dart';
-import 'package:fiscogest_rd/core/ui/app_card.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
+final listadoCuentasCobrarProvider = FutureProvider<List<CuentaCobrarItem>>((
+  ref,
+) async {
+  final db = ref.watch<AppDatabase>(appDatabaseProvider);
+  final dao = CuentasCobrarDao(db);
+  final registros = await dao.listarCuentasPorCobrar();
+
+  final idsClientes = registros.map((r) => r.clienteId).toSet();
+  final clientes = await (db.select(db.clientesTable)
+    ..where((t) => t.id.isIn(idsClientes)))
+    .get();
+  final mapaClientes = {for (var c in clientes) c.id: c.nombre};
+
+  return registros.map((reg) {
+    final nombreCliente = mapaClientes[reg.clienteId] ?? 'Cliente #${reg.clienteId}';
+    final estadoTexto = switch (reg.estado) {
+      CobrarEstado.pagado => 'Pagado',
+      CobrarEstado.vencido => 'Vencido',
+      CobrarEstado.parcial => 'Parcial',
+      _ => 'Pendiente',
+    };
+    return CuentaCobrarItem(
+      clienteNombre: nombreCliente,
+      montoOriginal: reg.montoOriginal,
+      montoAbonado: reg.montoAbonado,
+      saldoPendiente: reg.saldoPendiente,
+      fechaVencimiento: reg.fechaVencimiento,
+      estado: estadoTexto,
+    );
+  }).toList();
+});
+
 class CuentaCobrarItem {
+
   const CuentaCobrarItem({
     required this.clienteNombre,
     required this.montoOriginal,
@@ -27,206 +54,99 @@ class CuentaCobrarItem {
   final String estado;
 }
 
-final listadoCuentasCobrarProvider = FutureProvider<List<CuentaCobrarItem>>((
-  ref,
-) async {
-  final db = ref.watch(databaseProvider);
-  final dao = CuentasCobrarDao(db);
-  final registros = await dao.listarCuentasPorCobrar();
-  return registros.map((reg) {
-    final cuenta = reg.cuenta;
-    final estadoTexto = switch (cuenta.estado) {
-      CobrarEstado.pendiente => 'Pendiente',
-      CobrarEstado.vencido => 'Vencido',
-      CobrarEstado.pagado => 'Pagado',
-      _ => 'Desconocido',
-    };
-    return CuentaCobrarItem(
-      clienteNombre: reg.nombreCliente,
-      montoOriginal: cuenta.montoOriginal,
-      montoAbonado: cuenta.montoAbonado,
-      saldoPendiente: cuenta.saldoPendiente,
-      fechaVencimiento: cuenta.fechaVencimiento,
-      estado: estadoTexto,
-    );
-  }).toList();
-});
-
 class CobrarPage extends ConsumerStatefulWidget {
+
   const CobrarPage({super.key});
-  static const String routeName = 'cobrar';
+  static const String routeName = '/cobrar-page';
 
   @override
   ConsumerState<CobrarPage> createState() => _CobrarPageState();
 }
 
 class _CobrarPageState extends ConsumerState<CobrarPage> {
+  String _formatearFecha(DateTime fecha) {
+    return '${fecha.day.toString().padLeft(2,'0')}/${fecha.month.toString().padLeft(2,'0')}/${fecha.year}';
+  }
+
+  Color _colorEstado(String estado) {
+    return switch (estado) {
+      'Pendiente' => Colors.orange,
+      'Parcial' => Colors.blue,
+      'Pagado' => Colors.green,
+      'Vencido' => Colors.red,
+      _ => Colors.grey,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final listado = ref.watch(listadoCuentasCobrarProvider);
-
-    return AppScaffold(
-      title: 'Cuentas por Cobrar',
-      body: Padding(
-        padding: AppLayout.pantallaPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Gestión de Créditos y Cobros',
-                    style: AppTypography.h3.copyWith(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  AppLayout.vXs,
-                  Text(
-                    'Consulte saldos, registre pagos y administre cuentas pendientes',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            AppLayout.vM,
-            Expanded(
-              child: listado.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(
+    final cuentasAsync = ref.watch(listadoCuentasCobrarProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Cuentas por Cobrar')),
+      body: cuentasAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+        data: (cuentas) {
+          if (cuentas.isEmpty) {
+            return const Center(child: Text('No hay cuentas por cobrar'));
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: cuentas.length,
+            itemBuilder: (context, i) {
+              final c = cuentas[i];
+              final vencida = c.estado == 'Vencido';
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                color: vencida ? Colors.red.shade50 : null,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: AppColors.warning,
-                      ),
-                      AppLayout.vM,
                       Text(
-                        'Error al cargar cuentas: $error',
-                        style: AppTypography.bodyLarge.copyWith(
-                          color: AppColors.textSecondary,
+                        c.clienteNombre,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
-                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      Text('Total: RD\$ ${c.montoOriginal.toStringAsFixed(2)}'),
+                      Text('Abonado: RD\$ ${c.montoAbonado.toStringAsFixed(2)}'),
+                      Text(
+                        'Saldo pendiente: RD\$ ${c.saldoPendiente.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: vencida ? Colors.red.shade700 : Colors.blue.shade700,
+                        ),
+                      ),
+                      Text('Vence: ${_formatearFecha(c.fechaVencimiento)}'),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _colorEstado(c.estado),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          c.estado,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                data: (cuentas) {
-                  if (cuentas.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.payments_outlined,
-                            size: 64,
-                            color: AppColors.textSecondary.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                          AppLayout.vM,
-                          Text(
-                            'No hay cuentas por cobrar',
-                            style: AppTypography.h3.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          AppLayout.vXs,
-                          Text(
-                            'Las ventas a crédito aparecerán aquí',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return ListView.builder(
-                    itemCount: cuentas.length,
-                    padding: EdgeInsets.zero,
-                    itemBuilder: (context, i) {
-                      final cta = cuentas[i];
-                      final colorEstado = switch (cta.estado) {
-                        'Pendiente' => AppColors.info,
-                        'Vencido' => AppColors.error,
-                        'Pagado' => AppColors.success,
-                        _ => AppColors.textSecondary,
-                      };
-                      return Padding(
-                        padding: AppSpacing.vS,
-                        child: AppCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    cta.clienteNombre,
-                                    style: AppTypography.bodyLarge.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Chip(
-                                    label: Text(
-                                      cta.estado,
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: colorEstado,
-                                      ),
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    labelPadding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    side: BorderSide(color: colorEstado),
-                                    backgroundColor: colorEstado.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              AppLayout.vXs,
-                              Text(
-                                'Vencimiento: ${cta.fechaVencimiento.day.toString().padLeft(2, '0')}/${cta.fechaVencimiento.month.toString().padLeft(2, '0')}/${cta.fechaVencimiento.year}',
-                                style: AppTypography.bodySmall,
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Original: \$${cta.montoOriginal.toStringAsFixed(2)}',
-                                    style: AppTypography.bodySmall,
-                                  ),
-                                  Text(
-                                    'Abonado: \$${cta.montoAbonado.toStringAsFixed(2)}',
-                                    style: AppTypography.bodySmall,
-                                  ),
-                                  Text(
-                                    'Pendiente: \$${cta.saldoPendiente.toStringAsFixed(2)}',
-                                    style: AppTypography.labelMedium.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }

@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
-import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
@@ -11,6 +10,8 @@ class RegistrarVentaState {
     this.clienteNombre,
     this.tipoPago = 'Efectivo',
     this.esCredito = false,
+    this.abonoInicial = 0.0,
+    this.vencimiento,
     this.detalles = const [],
     this.subtotal = 0.0,
     this.itbis = 0.0,
@@ -21,11 +22,14 @@ class RegistrarVentaState {
     this.montoDescuento = 0.0,
     this.resultadosBusqueda = const [],
   });
+
   final int usuarioId;
   final int? clienteId;
   final String? clienteNombre;
   final String tipoPago;
   final bool esCredito;
+  final double abonoInicial;
+  final DateTime? vencimiento;
   final List<DetalleVenta> detalles;
   final double subtotal;
   final double itbis;
@@ -42,6 +46,8 @@ class RegistrarVentaState {
     String? clienteNombre,
     String? tipoPago,
     bool? esCredito,
+    double? abonoInicial,
+    DateTime? vencimiento,
     List<DetalleVenta>? detalles,
     double? subtotal,
     double? itbis,
@@ -63,6 +69,8 @@ class RegistrarVentaState {
       clienteNombre: clienteNombre ?? this.clienteNombre,
       tipoPago: tipoPago ?? this.tipoPago,
       esCredito: esCredito ?? this.esCredito,
+      abonoInicial: abonoInicial ?? this.abonoInicial,
+      vencimiento: vencimiento ?? this.vencimiento,
       detalles: detalles ?? this.detalles,
       subtotal: sub,
       itbis: itb,
@@ -78,7 +86,6 @@ class RegistrarVentaState {
 
 class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   static const double _tasaItbis = 0.18;
-  static const int _umbralMayorista = 5;
   late IProductoRepository _productoRepo;
 
   @override
@@ -118,34 +125,11 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     return null;
   }
 
-  // ✅ Tipado corregido: Producto, no dynamic
-  double _calcularPrecioUnitario(Producto producto, int cantidad) {
-    if (producto.ofertaVigente) {
-      return producto.precioEspecial!;
-    }
-    if (cantidad >= _umbralMayorista &&
-        producto.precioMayorista != null &&
-        producto.precioMayorista! > 0) {
-      return producto.precioMayorista!;
-    }
-    return producto.precioVenta;
-  }
-
-  String? _etiquetaOferta(Producto producto) {
-    if (producto.ofertaVigente) {
-      if (producto.fechaFinOferta != null) {
-        final f = producto.fechaFinOferta!;
-        return 'Vigente hasta ${f.day.toString().padLeft(2,'0')}/${f.month.toString().padLeft(2,'0')}';
-      }
-      return 'Oferta disponible';
-    }
-    if (producto.precioEspecial != null && producto.precioEspecial! > 0) {
-      return 'Oferta caducada';
-    }
-    return null;
-  }
-
   String? validarStockAlAgregar(DetalleVenta producto, double cantidad) {
+    final stockDisponible = _obtenerStock(producto);
+    if (stockDisponible != null && cantidad > stockDisponible) {
+      return 'Stock insuficiente. Disponible: $stockDisponible';
+    }
     return null;
   }
 
@@ -257,7 +241,16 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 
   void cambiarFormaPago(String forma) {
-    state = state.copyWith(tipoPago: forma, esCredito: forma == 'crédito');
+    state = state.copyWith(
+      tipoPago: forma,
+      esCredito: forma == 'crédito',
+      abonoInicial: forma == 'crédito' ? 0.0 : 0.0,
+      vencimiento: forma == 'crédito' ? null : null,
+    );
+  }
+
+  void establecerCondicionesCredito(double abono, DateTime? vence) {
+    state = state.copyWith(abonoInicial: abono, vencimiento: vence);
   }
 
   void asignarCostoEnvio(double valor) {
@@ -271,6 +264,8 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   bool validarAntesDeGuardar() {
     return state.detalles.isNotEmpty && state.tipoPago.isNotEmpty && state.total > 0;
   }
+
+  double? _obtenerStock(DetalleVenta linea) => linea.subtotalLinea;
 
   void _recalcularTotales(List<DetalleVenta> lista) {
     final subtotal = lista.fold<double>(0.0, (sum, l) => sum + l.subtotal);
@@ -297,24 +292,14 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       final coincideCodigoBarras = p.codigoBarras?.toLowerCase().contains(textoBusqueda) ?? false;
       return p.activo && (coincideCodigo || coincideNombre || coincideCodigoBarras);
     }).toList();
-
-    final resultados = coinciden.map((producto) {
-      const cantidad = 1;
-      final precioUnitario = _calcularPrecioUnitario(producto, cantidad);
-      final etiquetaOferta = _etiquetaOferta(producto);
-
-      return DetalleVenta(
-        productoId: producto.id ?? 0,
-        cantidad: cantidad,
-        precioUnitario: precioUnitario,
-        subtotal: precioUnitario,
-        nombreProducto: producto.nombre,
-        precioOriginal: producto.ofertaVigente ? producto.precioVenta : null,
-        ofertaNombre: etiquetaOferta,
-        tasaImpuesto: _tasaItbis,
-      );
-    }).toList();
-
+    final resultados = coinciden.map((producto) => DetalleVenta(
+      productoId: producto.id ?? 0,
+      cantidad: 1,
+      precioUnitario: producto.precioVenta,
+      subtotal: producto.precioVenta,
+      nombreProducto: producto.nombre,
+      tasaImpuesto: _tasaItbis,
+    )).toList();
     state = state.copyWith(resultadosBusqueda: resultados);
   }
 

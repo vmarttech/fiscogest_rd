@@ -1,6 +1,5 @@
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_cargada_desde_historial_provider.dart';
@@ -184,7 +183,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           const Text('Productos', style: AppTypography.labelLarge),
           const SizedBox(height: 12),
           ...venta.detalles.map((item) {
-            final linea = item as DetalleVenta;
+            final linea = item;
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(

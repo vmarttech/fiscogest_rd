@@ -39,6 +39,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/kardex_comercial_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 // NUEVAS: Tablas Compras - Etapa 4.1
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
@@ -94,12 +95,11 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => _instance;
   AppDatabase._internal() : super(_openConnection());
-  // ✅ SINGLETON: UNA SOLA INSTANCIA EN TODA LA APP
   static final AppDatabase _instance = AppDatabase._internal();
-  // ✅ VERSIÓN ACTUALIZADA: 14 → 15
+  // ✅ GETTER DAO - CONECTADO
+  CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 15;
-
+  int get schemaVersion => 17;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
@@ -142,9 +142,7 @@ class AppDatabase extends _$AppDatabase {
             ],
           ),
         );
-        await m.alterTable(
-          TableMigration(salidasTable, newColumns: [salidasTable.observacion]),
-        );
+        await m.alterTable(TableMigration(salidasTable, newColumns: [salidasTable.observacion]));
         await m.alterTable(
           TableMigration(
             existenciasTable,
@@ -188,7 +186,6 @@ class AppDatabase extends _$AppDatabase {
           ),
         );
       }
-      // ✅ MIGRACIÓN VERSIÓN 12 → 13: Agregar columnas nuevas a productos
       if (from < 13) {
         await m.alterTable(
           TableMigration(
@@ -203,7 +200,6 @@ class AppDatabase extends _$AppDatabase {
           ),
         );
       }
-      // ✅ MIGRACIÓN VERSIÓN 14 → 15: Agregar columna stockReservado
       if (from < 15) {
         await m.alterTable(
           TableMigration(
@@ -211,6 +207,17 @@ class AppDatabase extends _$AppDatabase {
             newColumns: [productosTable.stockReservado],
           ),
         );
+      }
+      if (from < 17) {
+        try {
+          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN costo_envio REAL DEFAULT 0.0');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN abono_inicial REAL DEFAULT 0.0');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN vencimiento TEXT');
+        } catch (_) {}
       }
     },
   );
@@ -224,7 +231,6 @@ LazyDatabase _openConnection() {
   });
 }
 
-// ✅ PROVIDER GLOBAL: ÚNICA INSTANCIA COMPARTIDA
 final appDatabaseProvider = Provider((ref) {
   final db = AppDatabase();
   ref.onDispose(() => db.close());

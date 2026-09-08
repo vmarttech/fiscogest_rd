@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_cotizacion_service.dart';
 
 class CotizacionServiceImpl implements ICotizacionService {
@@ -36,7 +35,7 @@ class CotizacionServiceImpl implements ICotizacionService {
     texto.writeln('DETALLE DE PRODUCTOS');
     texto.writeln('----------------------------------------');
     for (var i = 0; i < cotizacion.detalles.length; i++) {
-      final detalle = cotizacion.detalles[i] as DetalleVenta;
+      final detalle = cotizacion.detalles[i];
       texto.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}');
       texto.writeln(
         '   Cant: ${detalle.cantidad}  x  ${formatoMoneda.format(detalle.precioUnitario)}',

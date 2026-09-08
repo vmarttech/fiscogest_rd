@@ -8723,6 +8723,29 @@ class $VentasTableTable extends VentasTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _abonoInicialMeta = const VerificationMeta(
+    'abonoInicial',
+  );
+  @override
+  late final GeneratedColumn<double> abonoInicial = GeneratedColumn<double>(
+    'abono_inicial',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _vencimientoMeta = const VerificationMeta(
+    'vencimiento',
+  );
+  @override
+  late final GeneratedColumn<DateTime> vencimiento = GeneratedColumn<DateTime>(
+    'vencimiento',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _montoTotalMeta = const VerificationMeta(
     'montoTotal',
   );
@@ -8789,6 +8812,8 @@ class $VentasTableTable extends VentasTable
     descuentoGlobal,
     itbis,
     costoEnvio,
+    abonoInicial,
+    vencimiento,
     montoTotal,
     formaPago,
     estado,
@@ -8860,6 +8885,24 @@ class $VentasTableTable extends VentasTable
         costoEnvio.isAcceptableOrUnknown(data['costo_envio']!, _costoEnvioMeta),
       );
     }
+    if (data.containsKey('abono_inicial')) {
+      context.handle(
+        _abonoInicialMeta,
+        abonoInicial.isAcceptableOrUnknown(
+          data['abono_inicial']!,
+          _abonoInicialMeta,
+        ),
+      );
+    }
+    if (data.containsKey('vencimiento')) {
+      context.handle(
+        _vencimientoMeta,
+        vencimiento.isAcceptableOrUnknown(
+          data['vencimiento']!,
+          _vencimientoMeta,
+        ),
+      );
+    }
     if (data.containsKey('monto_total')) {
       context.handle(
         _montoTotalMeta,
@@ -8922,6 +8965,14 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.double,
         data['${effectivePrefix}costo_envio'],
       )!,
+      abonoInicial: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}abono_inicial'],
+      )!,
+      vencimiento: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}vencimiento'],
+      ),
       montoTotal: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}monto_total'],
@@ -8968,6 +9019,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
   final double descuentoGlobal;
   final double itbis;
   final double costoEnvio;
+  final double abonoInicial;
+  final DateTime? vencimiento;
   final double montoTotal;
   final FormaPago formaPago;
   final VentaEstado estado;
@@ -8981,6 +9034,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     required this.descuentoGlobal,
     required this.itbis,
     required this.costoEnvio,
+    required this.abonoInicial,
+    this.vencimiento,
     required this.montoTotal,
     required this.formaPago,
     required this.estado,
@@ -8997,6 +9052,10 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     map['descuento_global'] = Variable<double>(descuentoGlobal);
     map['itbis'] = Variable<double>(itbis);
     map['costo_envio'] = Variable<double>(costoEnvio);
+    map['abono_inicial'] = Variable<double>(abonoInicial);
+    if (!nullToAbsent || vencimiento != null) {
+      map['vencimiento'] = Variable<DateTime>(vencimiento);
+    }
     map['monto_total'] = Variable<double>(montoTotal);
     {
       map['forma_pago'] = Variable<String>(
@@ -9022,6 +9081,10 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       descuentoGlobal: Value(descuentoGlobal),
       itbis: Value(itbis),
       costoEnvio: Value(costoEnvio),
+      abonoInicial: Value(abonoInicial),
+      vencimiento: vencimiento == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vencimiento),
       montoTotal: Value(montoTotal),
       formaPago: Value(formaPago),
       estado: Value(estado),
@@ -9043,6 +9106,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       descuentoGlobal: serializer.fromJson<double>(json['descuentoGlobal']),
       itbis: serializer.fromJson<double>(json['itbis']),
       costoEnvio: serializer.fromJson<double>(json['costoEnvio']),
+      abonoInicial: serializer.fromJson<double>(json['abonoInicial']),
+      vencimiento: serializer.fromJson<DateTime?>(json['vencimiento']),
       montoTotal: serializer.fromJson<double>(json['montoTotal']),
       formaPago: $VentasTableTable.$converterformaPago.fromJson(
         serializer.fromJson<String>(json['formaPago']),
@@ -9063,6 +9128,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       'descuentoGlobal': serializer.toJson<double>(descuentoGlobal),
       'itbis': serializer.toJson<double>(itbis),
       'costoEnvio': serializer.toJson<double>(costoEnvio),
+      'abonoInicial': serializer.toJson<double>(abonoInicial),
+      'vencimiento': serializer.toJson<DateTime?>(vencimiento),
       'montoTotal': serializer.toJson<double>(montoTotal),
       'formaPago': serializer.toJson<String>(
         $VentasTableTable.$converterformaPago.toJson(formaPago),
@@ -9081,6 +9148,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     double? descuentoGlobal,
     double? itbis,
     double? costoEnvio,
+    double? abonoInicial,
+    Value<DateTime?> vencimiento = const Value.absent(),
     double? montoTotal,
     FormaPago? formaPago,
     VentaEstado? estado,
@@ -9094,6 +9163,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
     itbis: itbis ?? this.itbis,
     costoEnvio: costoEnvio ?? this.costoEnvio,
+    abonoInicial: abonoInicial ?? this.abonoInicial,
+    vencimiento: vencimiento.present ? vencimiento.value : this.vencimiento,
     montoTotal: montoTotal ?? this.montoTotal,
     formaPago: formaPago ?? this.formaPago,
     estado: estado ?? this.estado,
@@ -9115,6 +9186,12 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       costoEnvio: data.costoEnvio.present
           ? data.costoEnvio.value
           : this.costoEnvio,
+      abonoInicial: data.abonoInicial.present
+          ? data.abonoInicial.value
+          : this.abonoInicial,
+      vencimiento: data.vencimiento.present
+          ? data.vencimiento.value
+          : this.vencimiento,
       montoTotal: data.montoTotal.present
           ? data.montoTotal.value
           : this.montoTotal,
@@ -9137,6 +9214,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
           ..write('descuentoGlobal: $descuentoGlobal, ')
           ..write('itbis: $itbis, ')
           ..write('costoEnvio: $costoEnvio, ')
+          ..write('abonoInicial: $abonoInicial, ')
+          ..write('vencimiento: $vencimiento, ')
           ..write('montoTotal: $montoTotal, ')
           ..write('formaPago: $formaPago, ')
           ..write('estado: $estado, ')
@@ -9155,6 +9234,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     descuentoGlobal,
     itbis,
     costoEnvio,
+    abonoInicial,
+    vencimiento,
     montoTotal,
     formaPago,
     estado,
@@ -9172,6 +9253,8 @@ class VentaData extends DataClass implements Insertable<VentaData> {
           other.descuentoGlobal == this.descuentoGlobal &&
           other.itbis == this.itbis &&
           other.costoEnvio == this.costoEnvio &&
+          other.abonoInicial == this.abonoInicial &&
+          other.vencimiento == this.vencimiento &&
           other.montoTotal == this.montoTotal &&
           other.formaPago == this.formaPago &&
           other.estado == this.estado &&
@@ -9187,6 +9270,8 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
   final Value<double> descuentoGlobal;
   final Value<double> itbis;
   final Value<double> costoEnvio;
+  final Value<double> abonoInicial;
+  final Value<DateTime?> vencimiento;
   final Value<double> montoTotal;
   final Value<FormaPago> formaPago;
   final Value<VentaEstado> estado;
@@ -9200,6 +9285,8 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     this.descuentoGlobal = const Value.absent(),
     this.itbis = const Value.absent(),
     this.costoEnvio = const Value.absent(),
+    this.abonoInicial = const Value.absent(),
+    this.vencimiento = const Value.absent(),
     this.montoTotal = const Value.absent(),
     this.formaPago = const Value.absent(),
     this.estado = const Value.absent(),
@@ -9214,6 +9301,8 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     this.descuentoGlobal = const Value.absent(),
     required double itbis,
     this.costoEnvio = const Value.absent(),
+    this.abonoInicial = const Value.absent(),
+    this.vencimiento = const Value.absent(),
     required double montoTotal,
     required FormaPago formaPago,
     this.estado = const Value.absent(),
@@ -9234,6 +9323,8 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     Expression<double>? descuentoGlobal,
     Expression<double>? itbis,
     Expression<double>? costoEnvio,
+    Expression<double>? abonoInicial,
+    Expression<DateTime>? vencimiento,
     Expression<double>? montoTotal,
     Expression<String>? formaPago,
     Expression<String>? estado,
@@ -9248,6 +9339,8 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
       if (descuentoGlobal != null) 'descuento_global': descuentoGlobal,
       if (itbis != null) 'itbis': itbis,
       if (costoEnvio != null) 'costo_envio': costoEnvio,
+      if (abonoInicial != null) 'abono_inicial': abonoInicial,
+      if (vencimiento != null) 'vencimiento': vencimiento,
       if (montoTotal != null) 'monto_total': montoTotal,
       if (formaPago != null) 'forma_pago': formaPago,
       if (estado != null) 'estado': estado,
@@ -9264,6 +9357,8 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     Value<double>? descuentoGlobal,
     Value<double>? itbis,
     Value<double>? costoEnvio,
+    Value<double>? abonoInicial,
+    Value<DateTime?>? vencimiento,
     Value<double>? montoTotal,
     Value<FormaPago>? formaPago,
     Value<VentaEstado>? estado,
@@ -9278,6 +9373,8 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
       descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
       itbis: itbis ?? this.itbis,
       costoEnvio: costoEnvio ?? this.costoEnvio,
+      abonoInicial: abonoInicial ?? this.abonoInicial,
+      vencimiento: vencimiento ?? this.vencimiento,
       montoTotal: montoTotal ?? this.montoTotal,
       formaPago: formaPago ?? this.formaPago,
       estado: estado ?? this.estado,
@@ -9309,6 +9406,12 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     }
     if (costoEnvio.present) {
       map['costo_envio'] = Variable<double>(costoEnvio.value);
+    }
+    if (abonoInicial.present) {
+      map['abono_inicial'] = Variable<double>(abonoInicial.value);
+    }
+    if (vencimiento.present) {
+      map['vencimiento'] = Variable<DateTime>(vencimiento.value);
     }
     if (montoTotal.present) {
       map['monto_total'] = Variable<double>(montoTotal.value);
@@ -9342,6 +9445,8 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
           ..write('descuentoGlobal: $descuentoGlobal, ')
           ..write('itbis: $itbis, ')
           ..write('costoEnvio: $costoEnvio, ')
+          ..write('abonoInicial: $abonoInicial, ')
+          ..write('vencimiento: $vencimiento, ')
           ..write('montoTotal: $montoTotal, ')
           ..write('formaPago: $formaPago, ')
           ..write('estado: $estado, ')
@@ -24155,6 +24260,8 @@ typedef $$VentasTableTableCreateCompanionBuilder =
       Value<double> descuentoGlobal,
       required double itbis,
       Value<double> costoEnvio,
+      Value<double> abonoInicial,
+      Value<DateTime?> vencimiento,
       required double montoTotal,
       required FormaPago formaPago,
       Value<VentaEstado> estado,
@@ -24170,6 +24277,8 @@ typedef $$VentasTableTableUpdateCompanionBuilder =
       Value<double> descuentoGlobal,
       Value<double> itbis,
       Value<double> costoEnvio,
+      Value<double> abonoInicial,
+      Value<DateTime?> vencimiento,
       Value<double> montoTotal,
       Value<FormaPago> formaPago,
       Value<VentaEstado> estado,
@@ -24373,6 +24482,16 @@ class $$VentasTableTableFilterComposer
 
   ColumnFilters<double> get costoEnvio => $composableBuilder(
     column: $table.costoEnvio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get abonoInicial => $composableBuilder(
+    column: $table.abonoInicial,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get vencimiento => $composableBuilder(
+    column: $table.vencimiento,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -24609,6 +24728,16 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get abonoInicial => $composableBuilder(
+    column: $table.abonoInicial,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get vencimiento => $composableBuilder(
+    column: $table.vencimiento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get montoTotal => $composableBuilder(
     column: $table.montoTotal,
     builder: (column) => ColumnOrderings(column),
@@ -24706,6 +24835,16 @@ class $$VentasTableTableAnnotationComposer
 
   GeneratedColumn<double> get costoEnvio => $composableBuilder(
     column: $table.costoEnvio,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get abonoInicial => $composableBuilder(
+    column: $table.abonoInicial,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get vencimiento => $composableBuilder(
+    column: $table.vencimiento,
     builder: (column) => column,
   );
 
@@ -24944,6 +25083,8 @@ class $$VentasTableTableTableManager
                 Value<double> descuentoGlobal = const Value.absent(),
                 Value<double> itbis = const Value.absent(),
                 Value<double> costoEnvio = const Value.absent(),
+                Value<double> abonoInicial = const Value.absent(),
+                Value<DateTime?> vencimiento = const Value.absent(),
                 Value<double> montoTotal = const Value.absent(),
                 Value<FormaPago> formaPago = const Value.absent(),
                 Value<VentaEstado> estado = const Value.absent(),
@@ -24957,6 +25098,8 @@ class $$VentasTableTableTableManager
                 descuentoGlobal: descuentoGlobal,
                 itbis: itbis,
                 costoEnvio: costoEnvio,
+                abonoInicial: abonoInicial,
+                vencimiento: vencimiento,
                 montoTotal: montoTotal,
                 formaPago: formaPago,
                 estado: estado,
@@ -24972,6 +25115,8 @@ class $$VentasTableTableTableManager
                 Value<double> descuentoGlobal = const Value.absent(),
                 required double itbis,
                 Value<double> costoEnvio = const Value.absent(),
+                Value<double> abonoInicial = const Value.absent(),
+                Value<DateTime?> vencimiento = const Value.absent(),
                 required double montoTotal,
                 required FormaPago formaPago,
                 Value<VentaEstado> estado = const Value.absent(),
@@ -24985,6 +25130,8 @@ class $$VentasTableTableTableManager
                 descuentoGlobal: descuentoGlobal,
                 itbis: itbis,
                 costoEnvio: costoEnvio,
+                abonoInicial: abonoInicial,
+                vencimiento: vencimiento,
                 montoTotal: montoTotal,
                 formaPago: formaPago,
                 estado: estado,

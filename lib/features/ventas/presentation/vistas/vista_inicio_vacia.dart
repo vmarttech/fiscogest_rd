@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -14,9 +15,11 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_ve
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
 import 'package:fiscogest_rd/features/apartados/presentation/providers/apartado_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/widgets/widgets.dart';
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
+
   @override
   ConsumerState<VistaInicioVacia> createState() => _VistaInicioVaciaState();
 }
@@ -56,6 +59,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final estado = ref.read(registrarVentaProvider);
     final modo = ref.read(ventasNavegacionProvider).modoOperacion;
     final valido = ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
+
     if (!valido) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -64,6 +68,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       }
       return;
     }
+    if (!mounted) return;
+
     final esPantallaPequenaDialog = MediaQuery.of(context).size.width < 600;
     const formasPago = ['Efectivo', 'Tarjeta', 'Crédito', 'Transferencia', 'Cheque'];
     final formaSeleccionada = await showDialog<String>(
@@ -91,12 +97,13 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         ),
       ),
     );
-    if (formaSeleccionada == null) return;
+
+    if (formaSeleccionada == null || !mounted) return;
     ref.read(registrarVentaProvider.notifier).cambiarFormaPago(formaSeleccionada);
     final estadoFinal = ref.read(registrarVentaProvider);
     setState(() => _guardando = true);
+
     try {
-      // ✅ MODO APARTADO → CREA APARTADO
       if (modo == ModoOperacion.apartado) {
         final idApartado = await ref.read(apartadoNotifierProvider.notifier).crearApartadoDesdeVenta(estadoFinal);
         if (mounted) {
@@ -110,8 +117,68 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           );
         }
       } else {
-        // ✅ VENTA / COTIZACIÓN
+        if (formaSeleccionada == 'crédito') {
+          final resultadoCredito = await FormularioCreditoDialog.mostrar(
+            context: context,
+            estadoVenta: estadoFinal,
+          );
+
+          if (resultadoCredito == null) {
+            if (mounted) setState(() => _guardando = false);
+            return;
+          }
+
+          try {
+            final abonoRecibido = resultadoCredito.abonoInicial?.monto ?? 0.0;
+            final fechaVence = resultadoCredito.cuenta.fechaVencimiento;
+
+            ref.read(registrarVentaProvider.notifier).establecerCondicionesCredito(abonoRecibido, fechaVence);
+
+            final estadoConCredito = ref.read(registrarVentaProvider);
+            final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoConCredito);
+
+            if (!mounted) return;
+            if (ventaGuardada.id == null) {
+              throw Exception('El repositorio no devolvió ID de venta');
+            }
+
+            final saldoPendiente = estadoConCredito.total - abonoRecibido;
+            if (mounted) {
+              ref.read(registrarVentaProvider.notifier).vaciarVenta();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '✅ Venta #${ventaGuardada.numero} registrada.\n'
+                    '💰 Abono inicial: ${_formatoMonto.format(abonoRecibido)}\n'
+                    '📄 Saldo pendiente: ${_formatoMonto.format(saldoPendiente)}\n'
+                    '📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}'
+                  ),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+              Navigator.popUntil(context, (route) => route.isFirst);
+            }
+            return;
+          } catch (e, stackTrace) {
+            if (kDebugMode) debugPrint('❌ Error crédito: $e\n$stackTrace');
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('❌ ${e.toString().replaceAll("Exception: ", "")}'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 6),
+                ),
+              );
+            }
+          } finally {
+            if (mounted) setState(() => _guardando = false);
+          }
+          return;
+        }
+
         final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoFinal);
+        if (!mounted) return;
         if (ventaGuardada.id == null) {
           throw Exception('El repositorio no devolvió ID de venta');
         }

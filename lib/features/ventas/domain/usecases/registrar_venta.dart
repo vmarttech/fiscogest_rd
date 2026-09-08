@@ -8,6 +8,7 @@ class RegistrarVentaConInventarioUseCase {
 
   Future<Venta> ejecutar(RegistrarVentaState estado) async {
     final venta = Venta(
+      id: null,
       numero: '',
       clienteId: estado.clienteId ?? 0,
       nombreCliente: estado.clienteNombre,
@@ -18,6 +19,8 @@ class RegistrarVentaConInventarioUseCase {
       total: estado.total,
       tipoPago: estado.tipoPago,
       esCredito: estado.esCredito,
+      abonoInicial: estado.abonoInicial,
+      vencimiento: estado.vencimiento,
       usuarioId: estado.usuarioId,
       createdAt: DateTime.now(),
       descuentoId: estado.descuentoId,

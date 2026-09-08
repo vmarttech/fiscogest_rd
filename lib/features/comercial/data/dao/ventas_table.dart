@@ -29,6 +29,10 @@ class VentasTable extends Table {
   RealColumn get itbis => real().named('itbis')();
   RealColumn get costoEnvio =>
       real().named('costo_envio').withDefault(const Constant(0.0))();
+  RealColumn get abonoInicial =>
+      real().named('abono_inicial').withDefault(const Constant(0.0))();
+  DateTimeColumn get vencimiento =>
+      dateTime().named('vencimiento').nullable()();
   RealColumn get montoTotal => real().named('monto_total')();
   TextColumn get formaPago => textEnum<FormaPago>().named('forma_pago')();
   TextColumn get estado => text()

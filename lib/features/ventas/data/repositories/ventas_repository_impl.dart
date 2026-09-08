@@ -30,25 +30,29 @@ class VentasRepositoryImpl implements IVentasRepository {
       usuarioId: usuarioId,
     );
     return resultados.map((e) {
+      final ventaData = e.venta;
+      final esCreditoReal = ventaData.formaPago == FormaPago.credito;
       return Venta(
-        id: e.venta.id,
-        numero: e.venta.id.toString(),
-        clienteId: e.venta.clienteId,
+        id: ventaData.id,
+        numero: ventaData.id.toString(),
+        clienteId: ventaData.clienteId,
         nombreCliente: e.nombreCliente,
-        fecha: e.venta.fecha,
+        fecha: ventaData.fecha,
         detalles: [],
-        subtotal: e.venta.montoSubtotal,
-        itbis: e.venta.itbis,
-        total: e.venta.montoTotal,
-        tipoPago: e.venta.formaPago.name,
-        esCredito: false,
+        subtotal: ventaData.montoSubtotal,
+        itbis: ventaData.itbis,
+        total: ventaData.montoTotal,
+        tipoPago: ventaData.formaPago.name,
+        esCredito: esCreditoReal,
+        abonoInicial: 0.0,
+        vencimiento: null,
         cotizacionOrigenId: null,
         apartadoOrigenId: null,
-        usuarioId: e.venta.usuarioId,
-        createdAt: e.venta.fechaRegistro,
+        usuarioId: ventaData.usuarioId,
+        createdAt: ventaData.fechaRegistro,
         descuentoId: null,
         descuentoNombre: null,
-        montoDescuento: e.venta.descuentoGlobal,
+        montoDescuento: ventaData.descuentoGlobal,
       );
     }).toList();
   }
@@ -67,6 +71,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<Venta?> obtenerVentaPorId(int ventaId) async {
     final e = await _ventasDao.obtenerVentaPorId(ventaId);
     if (e == null) return null;
+    final esCreditoReal = e.formaPago == FormaPago.credito;
     return Venta(
       id: e.id,
       numero: e.id.toString(),
@@ -78,7 +83,9 @@ class VentasRepositoryImpl implements IVentasRepository {
       itbis: e.itbis,
       total: e.montoTotal,
       tipoPago: e.formaPago.name,
-      esCredito: false,
+      esCredito: esCreditoReal,
+      abonoInicial: 0.0,
+      vencimiento: null,
       cotizacionOrigenId: null,
       apartadoOrigenId: null,
       usuarioId: e.usuarioId,
@@ -109,13 +116,17 @@ class VentasRepositoryImpl implements IVentasRepository {
       ),
     );
 
+    // ✅ VENTA A CRÉDITO → CREAR CUENTA POR COBRAR CON DATOS REALES DEL FORMULARIO
     if (venta.esCredito) {
-      final fechaVencimiento = venta.fecha.add(const Duration(days: 30));
+      final montoAbonar = venta.abonoInicial;
+      final fechaVence = venta.vencimiento ?? venta.fecha.add(const Duration(days: 30));
+
       await _cuentasCobrarDao.crearCuentaPorVenta(
         clienteId: venta.clienteId,
         ventaId: ventaId,
         montoOriginal: venta.total,
-        fechaVencimiento: fechaVencimiento,
+        montoAbonado: montoAbonar,
+        fechaVencimiento: fechaVence,
       );
     }
 
@@ -131,6 +142,8 @@ class VentasRepositoryImpl implements IVentasRepository {
       total: venta.total,
       tipoPago: venta.tipoPago,
       esCredito: venta.esCredito,
+      abonoInicial: venta.abonoInicial,
+      vencimiento: venta.vencimiento,
       cotizacionOrigenId: venta.cotizacionOrigenId,
       apartadoOrigenId: venta.apartadoOrigenId,
       usuarioId: venta.usuarioId,
@@ -160,7 +173,6 @@ class VentasRepositoryImpl implements IVentasRepository {
         usuarioId: Value(cotizacion.usuarioId ?? 0),
       ),
     );
-
     return Venta(
       id: ventaId,
       numero: ventaId.toString(),
@@ -173,6 +185,8 @@ class VentasRepositoryImpl implements IVentasRepository {
       total: cotizacion.total,
       tipoPago: cotizacion.tipoPago,
       esCredito: cotizacion.esCredito,
+      abonoInicial: cotizacion.abonoInicial,
+      vencimiento: cotizacion.vencimiento,
       cotizacionOrigenId: cotizacion.cotizacionOrigenId,
       apartadoOrigenId: cotizacion.apartadoOrigenId,
       usuarioId: cotizacion.usuarioId,
@@ -216,7 +230,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   @override
   Future<double> consultarSaldoCliente(int clienteId) async {
     final saldo = await _cuentasCobrarDao.obtenerSaldoPorCliente(clienteId);
-    return saldo ?? 0.0;
+    return saldo;
   }
 
   @override
