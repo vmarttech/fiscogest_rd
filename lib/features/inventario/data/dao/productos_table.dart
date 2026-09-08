@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-
 @DataClassName('ProductoData')
 class ProductosTable extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -36,6 +35,10 @@ class ProductosTable extends Table {
       .nullable()
       .withDefault(const Constant(0.0))();
   RealColumn get stock => real().nullable().withDefault(const Constant(0.0))();
+  RealColumn get stockReservado => real()
+      .named('stock_reservado')
+      .nullable()
+      .withDefault(const Constant(0.0))();
   RealColumn get stockMinimo => real()
       .named('stock_minimo')
       .nullable()

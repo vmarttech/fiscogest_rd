@@ -1173,6 +1173,18 @@ class $ProductosTableTable extends ProductosTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _stockReservadoMeta = const VerificationMeta(
+    'stockReservado',
+  );
+  @override
+  late final GeneratedColumn<double> stockReservado = GeneratedColumn<double>(
+    'stock_reservado',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _stockMinimoMeta = const VerificationMeta(
     'stockMinimo',
   );
@@ -1255,6 +1267,7 @@ class $ProductosTableTable extends ProductosTable
     precioMayorista,
     precioEspecial,
     stock,
+    stockReservado,
     stockMinimo,
     stockMaximo,
     categoriaId,
@@ -1380,6 +1393,15 @@ class $ProductosTableTable extends ProductosTable
         stock.isAcceptableOrUnknown(data['stock']!, _stockMeta),
       );
     }
+    if (data.containsKey('stock_reservado')) {
+      context.handle(
+        _stockReservadoMeta,
+        stockReservado.isAcceptableOrUnknown(
+          data['stock_reservado']!,
+          _stockReservadoMeta,
+        ),
+      );
+    }
     if (data.containsKey('stock_minimo')) {
       context.handle(
         _stockMinimoMeta,
@@ -1495,6 +1517,10 @@ class $ProductosTableTable extends ProductosTable
         DriftSqlType.double,
         data['${effectivePrefix}stock'],
       ),
+      stockReservado: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stock_reservado'],
+      ),
       stockMinimo: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}stock_minimo'],
@@ -1542,6 +1568,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
   final double? precioMayorista;
   final double? precioEspecial;
   final double? stock;
+  final double? stockReservado;
   final double? stockMinimo;
   final double? stockMaximo;
   final int categoriaId;
@@ -1562,6 +1589,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     this.precioMayorista,
     this.precioEspecial,
     this.stock,
+    this.stockReservado,
     this.stockMinimo,
     this.stockMaximo,
     required this.categoriaId,
@@ -1604,6 +1632,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     }
     if (!nullToAbsent || stock != null) {
       map['stock'] = Variable<double>(stock);
+    }
+    if (!nullToAbsent || stockReservado != null) {
+      map['stock_reservado'] = Variable<double>(stockReservado);
     }
     if (!nullToAbsent || stockMinimo != null) {
       map['stock_minimo'] = Variable<double>(stockMinimo);
@@ -1653,6 +1684,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       stock: stock == null && nullToAbsent
           ? const Value.absent()
           : Value(stock),
+      stockReservado: stockReservado == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stockReservado),
       stockMinimo: stockMinimo == null && nullToAbsent
           ? const Value.absent()
           : Value(stockMinimo),
@@ -1685,6 +1719,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       precioMayorista: serializer.fromJson<double?>(json['precioMayorista']),
       precioEspecial: serializer.fromJson<double?>(json['precioEspecial']),
       stock: serializer.fromJson<double?>(json['stock']),
+      stockReservado: serializer.fromJson<double?>(json['stockReservado']),
       stockMinimo: serializer.fromJson<double?>(json['stockMinimo']),
       stockMaximo: serializer.fromJson<double?>(json['stockMaximo']),
       categoriaId: serializer.fromJson<int>(json['categoriaId']),
@@ -1710,6 +1745,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       'precioMayorista': serializer.toJson<double?>(precioMayorista),
       'precioEspecial': serializer.toJson<double?>(precioEspecial),
       'stock': serializer.toJson<double?>(stock),
+      'stockReservado': serializer.toJson<double?>(stockReservado),
       'stockMinimo': serializer.toJson<double?>(stockMinimo),
       'stockMaximo': serializer.toJson<double?>(stockMaximo),
       'categoriaId': serializer.toJson<int>(categoriaId),
@@ -1733,6 +1769,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     Value<double?> precioMayorista = const Value.absent(),
     Value<double?> precioEspecial = const Value.absent(),
     Value<double?> stock = const Value.absent(),
+    Value<double?> stockReservado = const Value.absent(),
     Value<double?> stockMinimo = const Value.absent(),
     Value<double?> stockMaximo = const Value.absent(),
     int? categoriaId,
@@ -1761,6 +1798,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
         ? precioEspecial.value
         : this.precioEspecial,
     stock: stock.present ? stock.value : this.stock,
+    stockReservado: stockReservado.present
+        ? stockReservado.value
+        : this.stockReservado,
     stockMinimo: stockMinimo.present ? stockMinimo.value : this.stockMinimo,
     stockMaximo: stockMaximo.present ? stockMaximo.value : this.stockMaximo,
     categoriaId: categoriaId ?? this.categoriaId,
@@ -1801,6 +1841,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           ? data.precioEspecial.value
           : this.precioEspecial,
       stock: data.stock.present ? data.stock.value : this.stock,
+      stockReservado: data.stockReservado.present
+          ? data.stockReservado.value
+          : this.stockReservado,
       stockMinimo: data.stockMinimo.present
           ? data.stockMinimo.value
           : this.stockMinimo,
@@ -1834,6 +1877,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           ..write('precioMayorista: $precioMayorista, ')
           ..write('precioEspecial: $precioEspecial, ')
           ..write('stock: $stock, ')
+          ..write('stockReservado: $stockReservado, ')
           ..write('stockMinimo: $stockMinimo, ')
           ..write('stockMaximo: $stockMaximo, ')
           ..write('categoriaId: $categoriaId, ')
@@ -1859,6 +1903,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     precioMayorista,
     precioEspecial,
     stock,
+    stockReservado,
     stockMinimo,
     stockMaximo,
     categoriaId,
@@ -1883,6 +1928,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           other.precioMayorista == this.precioMayorista &&
           other.precioEspecial == this.precioEspecial &&
           other.stock == this.stock &&
+          other.stockReservado == this.stockReservado &&
           other.stockMinimo == this.stockMinimo &&
           other.stockMaximo == this.stockMaximo &&
           other.categoriaId == this.categoriaId &&
@@ -1905,6 +1951,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
   final Value<double?> precioMayorista;
   final Value<double?> precioEspecial;
   final Value<double?> stock;
+  final Value<double?> stockReservado;
   final Value<double?> stockMinimo;
   final Value<double?> stockMaximo;
   final Value<int> categoriaId;
@@ -1925,6 +1972,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     this.precioMayorista = const Value.absent(),
     this.precioEspecial = const Value.absent(),
     this.stock = const Value.absent(),
+    this.stockReservado = const Value.absent(),
     this.stockMinimo = const Value.absent(),
     this.stockMaximo = const Value.absent(),
     this.categoriaId = const Value.absent(),
@@ -1946,6 +1994,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     this.precioMayorista = const Value.absent(),
     this.precioEspecial = const Value.absent(),
     this.stock = const Value.absent(),
+    this.stockReservado = const Value.absent(),
     this.stockMinimo = const Value.absent(),
     this.stockMaximo = const Value.absent(),
     required int categoriaId,
@@ -1971,6 +2020,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Expression<double>? precioMayorista,
     Expression<double>? precioEspecial,
     Expression<double>? stock,
+    Expression<double>? stockReservado,
     Expression<double>? stockMinimo,
     Expression<double>? stockMaximo,
     Expression<int>? categoriaId,
@@ -1992,6 +2042,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
       if (precioMayorista != null) 'precio_mayorista': precioMayorista,
       if (precioEspecial != null) 'precio_especial': precioEspecial,
       if (stock != null) 'stock': stock,
+      if (stockReservado != null) 'stock_reservado': stockReservado,
       if (stockMinimo != null) 'stock_minimo': stockMinimo,
       if (stockMaximo != null) 'stock_maximo': stockMaximo,
       if (categoriaId != null) 'categoria_id': categoriaId,
@@ -2015,6 +2066,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Value<double?>? precioMayorista,
     Value<double?>? precioEspecial,
     Value<double?>? stock,
+    Value<double?>? stockReservado,
     Value<double?>? stockMinimo,
     Value<double?>? stockMaximo,
     Value<int>? categoriaId,
@@ -2036,6 +2088,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
       precioMayorista: precioMayorista ?? this.precioMayorista,
       precioEspecial: precioEspecial ?? this.precioEspecial,
       stock: stock ?? this.stock,
+      stockReservado: stockReservado ?? this.stockReservado,
       stockMinimo: stockMinimo ?? this.stockMinimo,
       stockMaximo: stockMaximo ?? this.stockMaximo,
       categoriaId: categoriaId ?? this.categoriaId,
@@ -2087,6 +2140,9 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     if (stock.present) {
       map['stock'] = Variable<double>(stock.value);
     }
+    if (stockReservado.present) {
+      map['stock_reservado'] = Variable<double>(stockReservado.value);
+    }
     if (stockMinimo.present) {
       map['stock_minimo'] = Variable<double>(stockMinimo.value);
     }
@@ -2124,6 +2180,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
           ..write('precioMayorista: $precioMayorista, ')
           ..write('precioEspecial: $precioEspecial, ')
           ..write('stock: $stock, ')
+          ..write('stockReservado: $stockReservado, ')
           ..write('stockMinimo: $stockMinimo, ')
           ..write('stockMaximo: $stockMaximo, ')
           ..write('categoriaId: $categoriaId, ')
@@ -8654,6 +8711,18 @@ class $VentasTableTable extends VentasTable
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _costoEnvioMeta = const VerificationMeta(
+    'costoEnvio',
+  );
+  @override
+  late final GeneratedColumn<double> costoEnvio = GeneratedColumn<double>(
+    'costo_envio',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _montoTotalMeta = const VerificationMeta(
     'montoTotal',
   );
@@ -8719,6 +8788,7 @@ class $VentasTableTable extends VentasTable
     montoSubtotal,
     descuentoGlobal,
     itbis,
+    costoEnvio,
     montoTotal,
     formaPago,
     estado,
@@ -8784,6 +8854,12 @@ class $VentasTableTable extends VentasTable
     } else if (isInserting) {
       context.missing(_itbisMeta);
     }
+    if (data.containsKey('costo_envio')) {
+      context.handle(
+        _costoEnvioMeta,
+        costoEnvio.isAcceptableOrUnknown(data['costo_envio']!, _costoEnvioMeta),
+      );
+    }
     if (data.containsKey('monto_total')) {
       context.handle(
         _montoTotalMeta,
@@ -8842,6 +8918,10 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.double,
         data['${effectivePrefix}itbis'],
       )!,
+      costoEnvio: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}costo_envio'],
+      )!,
       montoTotal: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}monto_total'],
@@ -8887,6 +8967,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
   final double montoSubtotal;
   final double descuentoGlobal;
   final double itbis;
+  final double costoEnvio;
   final double montoTotal;
   final FormaPago formaPago;
   final VentaEstado estado;
@@ -8899,6 +8980,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     required this.montoSubtotal,
     required this.descuentoGlobal,
     required this.itbis,
+    required this.costoEnvio,
     required this.montoTotal,
     required this.formaPago,
     required this.estado,
@@ -8914,6 +8996,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     map['monto_subtotal'] = Variable<double>(montoSubtotal);
     map['descuento_global'] = Variable<double>(descuentoGlobal);
     map['itbis'] = Variable<double>(itbis);
+    map['costo_envio'] = Variable<double>(costoEnvio);
     map['monto_total'] = Variable<double>(montoTotal);
     {
       map['forma_pago'] = Variable<String>(
@@ -8938,6 +9021,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       montoSubtotal: Value(montoSubtotal),
       descuentoGlobal: Value(descuentoGlobal),
       itbis: Value(itbis),
+      costoEnvio: Value(costoEnvio),
       montoTotal: Value(montoTotal),
       formaPago: Value(formaPago),
       estado: Value(estado),
@@ -8958,6 +9042,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       montoSubtotal: serializer.fromJson<double>(json['montoSubtotal']),
       descuentoGlobal: serializer.fromJson<double>(json['descuentoGlobal']),
       itbis: serializer.fromJson<double>(json['itbis']),
+      costoEnvio: serializer.fromJson<double>(json['costoEnvio']),
       montoTotal: serializer.fromJson<double>(json['montoTotal']),
       formaPago: $VentasTableTable.$converterformaPago.fromJson(
         serializer.fromJson<String>(json['formaPago']),
@@ -8977,6 +9062,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       'montoSubtotal': serializer.toJson<double>(montoSubtotal),
       'descuentoGlobal': serializer.toJson<double>(descuentoGlobal),
       'itbis': serializer.toJson<double>(itbis),
+      'costoEnvio': serializer.toJson<double>(costoEnvio),
       'montoTotal': serializer.toJson<double>(montoTotal),
       'formaPago': serializer.toJson<String>(
         $VentasTableTable.$converterformaPago.toJson(formaPago),
@@ -8994,6 +9080,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     double? montoSubtotal,
     double? descuentoGlobal,
     double? itbis,
+    double? costoEnvio,
     double? montoTotal,
     FormaPago? formaPago,
     VentaEstado? estado,
@@ -9006,6 +9093,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     montoSubtotal: montoSubtotal ?? this.montoSubtotal,
     descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
     itbis: itbis ?? this.itbis,
+    costoEnvio: costoEnvio ?? this.costoEnvio,
     montoTotal: montoTotal ?? this.montoTotal,
     formaPago: formaPago ?? this.formaPago,
     estado: estado ?? this.estado,
@@ -9024,6 +9112,9 @@ class VentaData extends DataClass implements Insertable<VentaData> {
           ? data.descuentoGlobal.value
           : this.descuentoGlobal,
       itbis: data.itbis.present ? data.itbis.value : this.itbis,
+      costoEnvio: data.costoEnvio.present
+          ? data.costoEnvio.value
+          : this.costoEnvio,
       montoTotal: data.montoTotal.present
           ? data.montoTotal.value
           : this.montoTotal,
@@ -9045,6 +9136,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
           ..write('montoSubtotal: $montoSubtotal, ')
           ..write('descuentoGlobal: $descuentoGlobal, ')
           ..write('itbis: $itbis, ')
+          ..write('costoEnvio: $costoEnvio, ')
           ..write('montoTotal: $montoTotal, ')
           ..write('formaPago: $formaPago, ')
           ..write('estado: $estado, ')
@@ -9062,6 +9154,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     montoSubtotal,
     descuentoGlobal,
     itbis,
+    costoEnvio,
     montoTotal,
     formaPago,
     estado,
@@ -9078,6 +9171,7 @@ class VentaData extends DataClass implements Insertable<VentaData> {
           other.montoSubtotal == this.montoSubtotal &&
           other.descuentoGlobal == this.descuentoGlobal &&
           other.itbis == this.itbis &&
+          other.costoEnvio == this.costoEnvio &&
           other.montoTotal == this.montoTotal &&
           other.formaPago == this.formaPago &&
           other.estado == this.estado &&
@@ -9092,6 +9186,7 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
   final Value<double> montoSubtotal;
   final Value<double> descuentoGlobal;
   final Value<double> itbis;
+  final Value<double> costoEnvio;
   final Value<double> montoTotal;
   final Value<FormaPago> formaPago;
   final Value<VentaEstado> estado;
@@ -9104,6 +9199,7 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     this.montoSubtotal = const Value.absent(),
     this.descuentoGlobal = const Value.absent(),
     this.itbis = const Value.absent(),
+    this.costoEnvio = const Value.absent(),
     this.montoTotal = const Value.absent(),
     this.formaPago = const Value.absent(),
     this.estado = const Value.absent(),
@@ -9117,6 +9213,7 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     required double montoSubtotal,
     this.descuentoGlobal = const Value.absent(),
     required double itbis,
+    this.costoEnvio = const Value.absent(),
     required double montoTotal,
     required FormaPago formaPago,
     this.estado = const Value.absent(),
@@ -9136,6 +9233,7 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     Expression<double>? montoSubtotal,
     Expression<double>? descuentoGlobal,
     Expression<double>? itbis,
+    Expression<double>? costoEnvio,
     Expression<double>? montoTotal,
     Expression<String>? formaPago,
     Expression<String>? estado,
@@ -9149,6 +9247,7 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
       if (montoSubtotal != null) 'monto_subtotal': montoSubtotal,
       if (descuentoGlobal != null) 'descuento_global': descuentoGlobal,
       if (itbis != null) 'itbis': itbis,
+      if (costoEnvio != null) 'costo_envio': costoEnvio,
       if (montoTotal != null) 'monto_total': montoTotal,
       if (formaPago != null) 'forma_pago': formaPago,
       if (estado != null) 'estado': estado,
@@ -9164,6 +9263,7 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     Value<double>? montoSubtotal,
     Value<double>? descuentoGlobal,
     Value<double>? itbis,
+    Value<double>? costoEnvio,
     Value<double>? montoTotal,
     Value<FormaPago>? formaPago,
     Value<VentaEstado>? estado,
@@ -9177,6 +9277,7 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
       montoSubtotal: montoSubtotal ?? this.montoSubtotal,
       descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
       itbis: itbis ?? this.itbis,
+      costoEnvio: costoEnvio ?? this.costoEnvio,
       montoTotal: montoTotal ?? this.montoTotal,
       formaPago: formaPago ?? this.formaPago,
       estado: estado ?? this.estado,
@@ -9205,6 +9306,9 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     }
     if (itbis.present) {
       map['itbis'] = Variable<double>(itbis.value);
+    }
+    if (costoEnvio.present) {
+      map['costo_envio'] = Variable<double>(costoEnvio.value);
     }
     if (montoTotal.present) {
       map['monto_total'] = Variable<double>(montoTotal.value);
@@ -9237,6 +9341,7 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
           ..write('montoSubtotal: $montoSubtotal, ')
           ..write('descuentoGlobal: $descuentoGlobal, ')
           ..write('itbis: $itbis, ')
+          ..write('costoEnvio: $costoEnvio, ')
           ..write('montoTotal: $montoTotal, ')
           ..write('formaPago: $formaPago, ')
           ..write('estado: $estado, ')
@@ -19452,6 +19557,7 @@ typedef $$ProductosTableTableCreateCompanionBuilder =
       Value<double?> precioMayorista,
       Value<double?> precioEspecial,
       Value<double?> stock,
+      Value<double?> stockReservado,
       Value<double?> stockMinimo,
       Value<double?> stockMaximo,
       required int categoriaId,
@@ -19474,6 +19580,7 @@ typedef $$ProductosTableTableUpdateCompanionBuilder =
       Value<double?> precioMayorista,
       Value<double?> precioEspecial,
       Value<double?> stock,
+      Value<double?> stockReservado,
       Value<double?> stockMinimo,
       Value<double?> stockMaximo,
       Value<int> categoriaId,
@@ -19719,6 +19826,11 @@ class $$ProductosTableTableFilterComposer
 
   ColumnFilters<double> get stock => $composableBuilder(
     column: $table.stock,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get stockReservado => $composableBuilder(
+    column: $table.stockReservado,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -19982,6 +20094,11 @@ class $$ProductosTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get stockReservado => $composableBuilder(
+    column: $table.stockReservado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get stockMinimo => $composableBuilder(
     column: $table.stockMinimo,
     builder: (column) => ColumnOrderings(column),
@@ -20078,6 +20195,11 @@ class $$ProductosTableTableAnnotationComposer
 
   GeneratedColumn<double> get stock =>
       $composableBuilder(column: $table.stock, builder: (column) => column);
+
+  GeneratedColumn<double> get stockReservado => $composableBuilder(
+    column: $table.stockReservado,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get stockMinimo => $composableBuilder(
     column: $table.stockMinimo,
@@ -20313,6 +20435,7 @@ class $$ProductosTableTableTableManager
                 Value<double?> precioMayorista = const Value.absent(),
                 Value<double?> precioEspecial = const Value.absent(),
                 Value<double?> stock = const Value.absent(),
+                Value<double?> stockReservado = const Value.absent(),
                 Value<double?> stockMinimo = const Value.absent(),
                 Value<double?> stockMaximo = const Value.absent(),
                 Value<int> categoriaId = const Value.absent(),
@@ -20333,6 +20456,7 @@ class $$ProductosTableTableTableManager
                 precioMayorista: precioMayorista,
                 precioEspecial: precioEspecial,
                 stock: stock,
+                stockReservado: stockReservado,
                 stockMinimo: stockMinimo,
                 stockMaximo: stockMaximo,
                 categoriaId: categoriaId,
@@ -20355,6 +20479,7 @@ class $$ProductosTableTableTableManager
                 Value<double?> precioMayorista = const Value.absent(),
                 Value<double?> precioEspecial = const Value.absent(),
                 Value<double?> stock = const Value.absent(),
+                Value<double?> stockReservado = const Value.absent(),
                 Value<double?> stockMinimo = const Value.absent(),
                 Value<double?> stockMaximo = const Value.absent(),
                 required int categoriaId,
@@ -20375,6 +20500,7 @@ class $$ProductosTableTableTableManager
                 precioMayorista: precioMayorista,
                 precioEspecial: precioEspecial,
                 stock: stock,
+                stockReservado: stockReservado,
                 stockMinimo: stockMinimo,
                 stockMaximo: stockMaximo,
                 categoriaId: categoriaId,
@@ -24028,6 +24154,7 @@ typedef $$VentasTableTableCreateCompanionBuilder =
       required double montoSubtotal,
       Value<double> descuentoGlobal,
       required double itbis,
+      Value<double> costoEnvio,
       required double montoTotal,
       required FormaPago formaPago,
       Value<VentaEstado> estado,
@@ -24042,6 +24169,7 @@ typedef $$VentasTableTableUpdateCompanionBuilder =
       Value<double> montoSubtotal,
       Value<double> descuentoGlobal,
       Value<double> itbis,
+      Value<double> costoEnvio,
       Value<double> montoTotal,
       Value<FormaPago> formaPago,
       Value<VentaEstado> estado,
@@ -24240,6 +24368,11 @@ class $$VentasTableTableFilterComposer
 
   ColumnFilters<double> get itbis => $composableBuilder(
     column: $table.itbis,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get costoEnvio => $composableBuilder(
+    column: $table.costoEnvio,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -24471,6 +24604,11 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get costoEnvio => $composableBuilder(
+    column: $table.costoEnvio,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get montoTotal => $composableBuilder(
     column: $table.montoTotal,
     builder: (column) => ColumnOrderings(column),
@@ -24565,6 +24703,11 @@ class $$VentasTableTableAnnotationComposer
 
   GeneratedColumn<double> get itbis =>
       $composableBuilder(column: $table.itbis, builder: (column) => column);
+
+  GeneratedColumn<double> get costoEnvio => $composableBuilder(
+    column: $table.costoEnvio,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get montoTotal => $composableBuilder(
     column: $table.montoTotal,
@@ -24800,6 +24943,7 @@ class $$VentasTableTableTableManager
                 Value<double> montoSubtotal = const Value.absent(),
                 Value<double> descuentoGlobal = const Value.absent(),
                 Value<double> itbis = const Value.absent(),
+                Value<double> costoEnvio = const Value.absent(),
                 Value<double> montoTotal = const Value.absent(),
                 Value<FormaPago> formaPago = const Value.absent(),
                 Value<VentaEstado> estado = const Value.absent(),
@@ -24812,6 +24956,7 @@ class $$VentasTableTableTableManager
                 montoSubtotal: montoSubtotal,
                 descuentoGlobal: descuentoGlobal,
                 itbis: itbis,
+                costoEnvio: costoEnvio,
                 montoTotal: montoTotal,
                 formaPago: formaPago,
                 estado: estado,
@@ -24826,6 +24971,7 @@ class $$VentasTableTableTableManager
                 required double montoSubtotal,
                 Value<double> descuentoGlobal = const Value.absent(),
                 required double itbis,
+                Value<double> costoEnvio = const Value.absent(),
                 required double montoTotal,
                 required FormaPago formaPago,
                 Value<VentaEstado> estado = const Value.absent(),
@@ -24838,6 +24984,7 @@ class $$VentasTableTableTableManager
                 montoSubtotal: montoSubtotal,
                 descuentoGlobal: descuentoGlobal,
                 itbis: itbis,
+                costoEnvio: costoEnvio,
                 montoTotal: montoTotal,
                 formaPago: formaPago,
                 estado: estado,

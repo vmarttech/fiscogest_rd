@@ -17,10 +17,8 @@ class VentasContenedorPage extends ConsumerStatefulWidget {
     super.key,
     this.modoInicial = ModoOperacion.venta,
   });
-
   static const String nombreRuta = 'ventas-contenedor';
   final ModoOperacion modoInicial;
-
   @override
   ConsumerState<VentasContenedorPage> createState() =>
       _VentasContenedorPageState();
@@ -42,11 +40,9 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final vistaActual = ref.watch(
       ventasNavegacionProvider.select((e) => e.vistaActual),
     );
-
     final modoOperacion = ref.watch(
       ventasNavegacionProvider.select((e) => e.modoOperacion),
     );
-
     final String tituloDinamico = switch (modoOperacion) {
       ModoOperacion.venta => 'Gestión de Ventas',
       ModoOperacion.cotizacion => 'Gestión de Cotizaciones',
@@ -54,6 +50,8 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
       ModoOperacion.cobrar => 'Cuentas por Cobrar',
     };
 
+    // ✅ TODAS LAS VISTAS ORIGINALES MANTENIDAS SIN CAMBIOS
+    // APARTADO comparte formulario, carrito y vistas con VENTA
     final Widget vistaActiva = switch (vistaActual) {
       VistaActual.inicio => const VistaInicioVacia(),
       VistaActual.inventario => const VistaInventario(),

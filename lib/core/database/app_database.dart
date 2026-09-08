@@ -42,7 +42,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_table.
 // NUEVAS: Tablas Compras - Etapa 4.1
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
-
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -97,9 +96,9 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase._internal() : super(_openConnection());
   // ✅ SINGLETON: UNA SOLA INSTANCIA EN TODA LA APP
   static final AppDatabase _instance = AppDatabase._internal();
-  // ✅ VERSIÓN ACTUALIZADA: 12 → 13
+  // ✅ VERSIÓN ACTUALIZADA: 14 → 15
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -201,6 +200,15 @@ class AppDatabase extends _$AppDatabase {
               productosTable.precioMayorista,
               productosTable.precioEspecial,
             ],
+          ),
+        );
+      }
+      // ✅ MIGRACIÓN VERSIÓN 14 → 15: Agregar columna stockReservado
+      if (from < 15) {
+        await m.alterTable(
+          TableMigration(
+            productosTable,
+            newColumns: [productosTable.stockReservado],
           ),
         );
       }

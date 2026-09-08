@@ -1,0 +1,26 @@
+./app/routes/ajustes.php:4:    'ajusteInventario' => [
+./app/routes/ajustes.php:5:        'controller' => 'ajusteInventarioController',
+./app/controllers/ajusteInventarioController.php:3:require_once "../models/AjusteInventario.php";
+./app/controllers/ajusteInventarioController.php:4:require_once "../models/Inventario.php";
+./app/controllers/ajusteInventarioController.php:8:class ajusteInventarioController
+./app/controllers/ajusteInventarioController.php:12:    private $inventario;
+./app/controllers/ajusteInventarioController.php:18:        $this->ajuste = new AjusteInventario($this->db);
+./app/controllers/ajusteInventarioController.php:19:        $this->inventario = new Inventario($this->db);
+./app/controllers/ajusteInventarioController.php:34:        // 3. Registrar en ajuste_inventario
+./app/controllers/ajusteInventarioController.php:35:        // 4. Actualizar existencias en inventario
+./app/views/ajustes/formAjuste.php:1:<form action="index.php?c=ajusteInventario&a=guardar" method="POST">
+./app/views/ajustes/listadoAjustes.php:1:<h3>Historial de Ajustes de Inventario</h3>
+./app/models/AjusteInventario.php:3:class AjusteInventario
+./app/models/Inventario.php:3:class Inventario
+./app/models/Kardex.php:15:        // tipo movimiento, cantidad, saldo, referencia, motivo
+./database/migraciones/create_ajuste_inventario_table.php:3:Tabla: ajuste_inventario
+./database/migraciones/create_ajuste_inventario_table.php:7:function create_ajuste_inventario_table($conexion)
+./database/migraciones/create_ajuste_inventario_table.php:9:    $sql = "CREATE TABLE IF NOT EXISTS ajuste_inventario (
+./database/migraciones/create_ajuste_inventario_table.php:18:        FOREIGN KEY (id_producto) REFERENCES inventario(id),
+./database/migraciones/create_ajuste_inventario_table.php:23:        echo "Tabla ajuste_inventario creada correctamente\n";
+./database/migraciones/create_kardex_table.php:14:        saldo_actual DECIMAL(10,2) NOT NULL,
+./database/migraciones/create_kardex_table.php:19:        FOREIGN KEY (id_producto) REFERENCES inventario(id),
+./database/migraciones/create_inventario_table.php:3:Tabla: inventario
+./database/migraciones/create_inventario_table.php:7:function create_inventario_table($conexion)
+./database/migraciones/create_inventario_table.php:9:    $sql = "CREATE TABLE IF NOT EXISTS inventario (
+./database/migraciones/create_inventario_table.php:19:        echo "Tabla inventario creada correctamente\n";

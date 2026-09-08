@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_venta
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
+import 'package:fiscogest_rd/features/apartados/presentation/providers/apartado_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
@@ -53,6 +54,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
   Future<void> _cobrar() async {
     final estado = ref.read(registrarVentaProvider);
+    final modo = ref.read(ventasNavegacionProvider).modoOperacion;
     final valido = ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
     if (!valido) {
       if (mounted) {
@@ -67,7 +69,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final formaSeleccionada = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Forma de Pago'),
+        title: Text(modo == ModoOperacion.apartado ? 'Forma de Reserva' : 'Forma de Pago'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,19 +96,35 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final estadoFinal = ref.read(registrarVentaProvider);
     setState(() => _guardando = true);
     try {
-      final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoFinal);
-      if (ventaGuardada.id == null) {
-        throw Exception('El repositorio no devolvió ID de venta');
-      }
-      if (mounted) {
-        ref.read(registrarVentaProvider.notifier).vaciarVenta();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ Venta #${ventaGuardada.numero} registrada — ${_formatoMonto.format(ventaGuardada.total)}'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 4),
-          ),
-        );
+      // ✅ MODO APARTADO → CREA APARTADO
+      if (modo == ModoOperacion.apartado) {
+        final idApartado = await ref.read(apartadoNotifierProvider.notifier).crearApartadoDesdeVenta(estadoFinal);
+        if (mounted) {
+          ref.read(registrarVentaProvider.notifier).vaciarVenta();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Apartado #$idApartado registrado — Stock reservado — ${_formatoMonto.format(estadoFinal.total)}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      } else {
+        // ✅ VENTA / COTIZACIÓN
+        final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoFinal);
+        if (ventaGuardada.id == null) {
+          throw Exception('El repositorio no devolvió ID de venta');
+        }
+        if (mounted) {
+          ref.read(registrarVentaProvider.notifier).vaciarVenta();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Venta #${ventaGuardada.numero} registrada — ${_formatoMonto.format(ventaGuardada.total)}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -167,7 +185,6 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final descuentoPorLinea = _calcularDescuentoPorLinea(estado);
     final subtotalConDescuentoLinea = estado.subtotal - descuentoPorLinea;
     final baseGravable = (subtotalConDescuentoLinea - estado.montoDescuento).clamp(0.0, double.infinity);
-
     final anchoPantalla = MediaQuery.of(context).size.width;
     final esPantallaPequena = anchoPantalla < 600;
     final paddingLateral = esPantallaPequena ? 16.0 : 24.0;
@@ -327,7 +344,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                       ),
                       const SizedBox(height: AppSpacing.m),
                       Text(
-                        'La venta está vacía',
+                        modo == ModoOperacion.apartado ? 'El apartado está vacío' : 'La venta está vacía',
                         style: esPantallaPequena
                             ? AppTypography.labelMedium
                             : AppTypography.labelLarge,
@@ -399,7 +416,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                tieneProductos ? 'COBRAR' : 'AGREGUE PRODUCTOS',
+                                tieneProductos
+                                    ? (modo == ModoOperacion.apartado ? 'RESERVAR' : 'COBRAR')
+                                    : 'AGREGUE PRODUCTOS',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: esPantallaPequena ? 12 : 14,

@@ -91,7 +91,7 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
         child: ListView(
           shrinkWrap: true,
           children: [
-            Text(
+            const Text(
               'Selecciona una opción o ingresa el monto manualmente:',
               style: AppTypography.labelSmall,
             ),
@@ -124,11 +124,11 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
             TextField(
               controller: _montoController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Monto personalizado (RD\$)',
                 labelStyle: AppTypography.labelMedium,
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
               style: AppTypography.labelMedium,
               onChanged: (_) {

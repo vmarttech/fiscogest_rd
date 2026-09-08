@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
@@ -56,7 +57,6 @@ class RegistrarVentaState {
     final itb = itbis ?? this.itbis;
     final desc = montoDescuento ?? this.montoDescuento;
     final totalCalculado = sub + itb + env - desc;
-
     return RegistrarVentaState(
       usuarioId: usuarioId ?? this.usuarioId,
       clienteId: clienteId ?? this.clienteId,
@@ -78,6 +78,7 @@ class RegistrarVentaState {
 
 class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   static const double _tasaItbis = 0.18;
+  static const int _umbralMayorista = 5;
   late IProductoRepository _productoRepo;
 
   @override
@@ -117,11 +118,34 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     return null;
   }
 
-  String? validarStockAlAgregar(DetalleVenta producto, double cantidad) {
-    final stockDisponible = _obtenerStock(producto);
-    if (stockDisponible != null && cantidad > stockDisponible) {
-      return 'Stock insuficiente. Disponible: $stockDisponible';
+  // ✅ Tipado corregido: Producto, no dynamic
+  double _calcularPrecioUnitario(Producto producto, int cantidad) {
+    if (producto.ofertaVigente) {
+      return producto.precioEspecial!;
     }
+    if (cantidad >= _umbralMayorista &&
+        producto.precioMayorista != null &&
+        producto.precioMayorista! > 0) {
+      return producto.precioMayorista!;
+    }
+    return producto.precioVenta;
+  }
+
+  String? _etiquetaOferta(Producto producto) {
+    if (producto.ofertaVigente) {
+      if (producto.fechaFinOferta != null) {
+        final f = producto.fechaFinOferta!;
+        return 'Vigente hasta ${f.day.toString().padLeft(2,'0')}/${f.month.toString().padLeft(2,'0')}';
+      }
+      return 'Oferta disponible';
+    }
+    if (producto.precioEspecial != null && producto.precioEspecial! > 0) {
+      return 'Oferta caducada';
+    }
+    return null;
+  }
+
+  String? validarStockAlAgregar(DetalleVenta producto, double cantidad) {
     return null;
   }
 
@@ -248,8 +272,6 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     return state.detalles.isNotEmpty && state.tipoPago.isNotEmpty && state.total > 0;
   }
 
-  double? _obtenerStock(DetalleVenta linea) => linea.subtotalLinea;
-
   void _recalcularTotales(List<DetalleVenta> lista) {
     final subtotal = lista.fold<double>(0.0, (sum, l) => sum + l.subtotal);
     final itbis = subtotal * _tasaItbis;
@@ -275,14 +297,24 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       final coincideCodigoBarras = p.codigoBarras?.toLowerCase().contains(textoBusqueda) ?? false;
       return p.activo && (coincideCodigo || coincideNombre || coincideCodigoBarras);
     }).toList();
-    final resultados = coinciden.map((producto) => DetalleVenta(
-      productoId: producto.id ?? 0,
-      cantidad: 1,
-      precioUnitario: producto.precioVenta,
-      subtotal: producto.precioVenta,
-      nombreProducto: producto.nombre,
-      tasaImpuesto: _tasaItbis,
-    )).toList();
+
+    final resultados = coinciden.map((producto) {
+      const cantidad = 1;
+      final precioUnitario = _calcularPrecioUnitario(producto, cantidad);
+      final etiquetaOferta = _etiquetaOferta(producto);
+
+      return DetalleVenta(
+        productoId: producto.id ?? 0,
+        cantidad: cantidad,
+        precioUnitario: precioUnitario,
+        subtotal: precioUnitario,
+        nombreProducto: producto.nombre,
+        precioOriginal: producto.ofertaVigente ? producto.precioVenta : null,
+        ofertaNombre: etiquetaOferta,
+        tasaImpuesto: _tasaItbis,
+      );
+    }).toList();
+
     state = state.copyWith(resultadosBusqueda: resultados);
   }
 

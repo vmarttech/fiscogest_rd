@@ -11,6 +11,8 @@ class Producto {
     this.precioMinimo,
     this.precioMayorista,
     this.precioEspecial,
+    this.fechaInicioOferta,
+    this.fechaFinOferta,
     this.gastosAsociados = 0,
     this.stock,
     this.stockMinimo,
@@ -20,7 +22,6 @@ class Producto {
     required this.unidadMedidaId,
     required this.activo,
   });
-
   final int? id;
   final String codigo;
   final String? codigoBarras;
@@ -33,6 +34,8 @@ class Producto {
   final double? precioMinimo;
   final double? precioMayorista;
   final double? precioEspecial;
+  final DateTime? fechaInicioOferta;
+  final DateTime? fechaFinOferta;
   final double? stock;
   final double? stockMinimo;
   final double? stockMaximo;
@@ -53,6 +56,15 @@ class Producto {
     return costo * (1 + margen / 100);
   }
 
+  // ✅ Lógica de vigencia automática de oferta
+  bool get ofertaVigente {
+    if (precioEspecial == null || precioEspecial! <= 0) return false;
+    final hoy = DateTime.now();
+    final inicio = fechaInicioOferta ?? DateTime(2000);
+    final fin = fechaFinOferta ?? DateTime(2100);
+    return hoy.isAfter(inicio) && hoy.isBefore(fin.add(const Duration(days: 1)));
+  }
+
   bool precioVentaEsValido() {
     if (precioMinimo == null) return true;
     return precioVenta >= precioMinimo!;
@@ -71,6 +83,8 @@ class Producto {
     double? precioMinimo,
     double? precioMayorista,
     double? precioEspecial,
+    DateTime? fechaInicioOferta,
+    DateTime? fechaFinOferta,
     double? stock,
     double? stockMinimo,
     double? stockMaximo,
@@ -92,6 +106,8 @@ class Producto {
       precioMinimo: precioMinimo ?? this.precioMinimo,
       precioMayorista: precioMayorista ?? this.precioMayorista,
       precioEspecial: precioEspecial ?? this.precioEspecial,
+      fechaInicioOferta: fechaInicioOferta ?? this.fechaInicioOferta,
+      fechaFinOferta: fechaFinOferta ?? this.fechaFinOferta,
       stock: stock ?? this.stock,
       stockMinimo: stockMinimo ?? this.stockMinimo,
       stockMaximo: stockMaximo ?? this.stockMaximo,
