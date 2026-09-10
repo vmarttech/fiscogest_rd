@@ -15,11 +15,10 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_ve
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
 import 'package:fiscogest_rd/features/apartados/presentation/providers/apartado_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
-import 'package:fiscogest_rd/features/creditos/presentation/widgets/widgets.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
-
   @override
   ConsumerState<VistaInicioVacia> createState() => _VistaInicioVaciaState();
 }
@@ -32,6 +31,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     customPattern: '¤ #,##0.00',
   );
   bool _guardando = false;
+  bool _mostrarFormularioCredito = false;
+  RegistrarVentaState? _estadoPasoCredito;
   final TextEditingController _buscarController = TextEditingController();
 
   @override
@@ -55,11 +56,65 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     }
   }
 
+  void _cerrarFormularioCredito() {
+    setState(() {
+      _mostrarFormularioCredito = false;
+      _estadoPasoCredito = null;
+      _guardando = false;
+    });
+  }
+
+  void _confirmarCredito(ResultadoFormularioCredito resultadoCredito) async {
+    _cerrarFormularioCredito();
+    if (!mounted) return;
+    setState(() => _guardando = true);
+    try {
+      final abonoRecibido = resultadoCredito.abonoInicial?.monto ?? 0.0;
+      final fechaVence = resultadoCredito.cuenta.fechaVencimiento;
+      ref.read(registrarVentaProvider.notifier).establecerCondicionesCredito(abonoRecibido, fechaVence);
+      final estadoConCredito = ref.read(registrarVentaProvider);
+      final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoConCredito);
+      if (!mounted) return;
+      if (ventaGuardada.id == null) {
+        throw Exception('El repositorio no devolvió ID de venta');
+      }
+      final saldoPendiente = estadoConCredito.total - abonoRecibido;
+      if (mounted) {
+        ref.read(registrarVentaProvider.notifier).vaciarVenta();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '✅ Venta #${ventaGuardada.numero} registrada.\n'
+              '💰 Abono inicial: ${_formatoMonto.format(abonoRecibido)}\n'
+              '📄 Saldo pendiente: ${_formatoMonto.format(saldoPendiente)}\n'
+              '📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}'
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+        Navigator.popUntil(context, (route) => route.isFirst);
+      }
+    } catch (e, stackTrace) {
+      if (kDebugMode) debugPrint('❌ Error crédito: $e\n$stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ ${e.toString().replaceAll("Exception: ", "")}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 6),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _guardando = false);
+    }
+  }
+
   Future<void> _cobrar() async {
     final estado = ref.read(registrarVentaProvider);
     final modo = ref.read(ventasNavegacionProvider).modoOperacion;
     final valido = ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
-
     if (!valido) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -69,7 +124,6 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       return;
     }
     if (!mounted) return;
-
     final esPantallaPequenaDialog = MediaQuery.of(context).size.width < 600;
     const formasPago = ['Efectivo', 'Tarjeta', 'Crédito', 'Transferencia', 'Cheque'];
     final formaSeleccionada = await showDialog<String>(
@@ -97,114 +151,44 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         ),
       ),
     );
-
     if (formaSeleccionada == null || !mounted) return;
     ref.read(registrarVentaProvider.notifier).cambiarFormaPago(formaSeleccionada);
     final estadoFinal = ref.read(registrarVentaProvider);
-    setState(() => _guardando = true);
 
-    try {
-      if (modo == ModoOperacion.apartado) {
-        final idApartado = await ref.read(apartadoNotifierProvider.notifier).crearApartadoDesdeVenta(estadoFinal);
-        if (mounted) {
-          ref.read(registrarVentaProvider.notifier).vaciarVenta();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('✅ Apartado #$idApartado registrado — Stock reservado — ${_formatoMonto.format(estadoFinal.total)}'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 4),
-            ),
-          );
-        }
-      } else {
-        if (formaSeleccionada == 'crédito') {
-          final resultadoCredito = await FormularioCreditoDialog.mostrar(
-            context: context,
-            estadoVenta: estadoFinal,
-          );
-
-          if (resultadoCredito == null) {
-            if (mounted) setState(() => _guardando = false);
-            return;
-          }
-
-          try {
-            final abonoRecibido = resultadoCredito.abonoInicial?.monto ?? 0.0;
-            final fechaVence = resultadoCredito.cuenta.fechaVencimiento;
-
-            ref.read(registrarVentaProvider.notifier).establecerCondicionesCredito(abonoRecibido, fechaVence);
-
-            final estadoConCredito = ref.read(registrarVentaProvider);
-            final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoConCredito);
-
-            if (!mounted) return;
-            if (ventaGuardada.id == null) {
-              throw Exception('El repositorio no devolvió ID de venta');
-            }
-
-            final saldoPendiente = estadoConCredito.total - abonoRecibido;
-            if (mounted) {
-              ref.read(registrarVentaProvider.notifier).vaciarVenta();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '✅ Venta #${ventaGuardada.numero} registrada.\n'
-                    '💰 Abono inicial: ${_formatoMonto.format(abonoRecibido)}\n'
-                    '📄 Saldo pendiente: ${_formatoMonto.format(saldoPendiente)}\n'
-                    '📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}'
-                  ),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 5),
-                ),
-              );
-              Navigator.popUntil(context, (route) => route.isFirst);
-            }
-            return;
-          } catch (e, stackTrace) {
-            if (kDebugMode) debugPrint('❌ Error crédito: $e\n$stackTrace');
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('❌ ${e.toString().replaceAll("Exception: ", "")}'),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 6),
-                ),
-              );
-            }
-          } finally {
-            if (mounted) setState(() => _guardando = false);
-          }
-          return;
-        }
-
-        final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoFinal);
-        if (!mounted) return;
-        if (ventaGuardada.id == null) {
-          throw Exception('El repositorio no devolvió ID de venta');
-        }
-        if (mounted) {
-          ref.read(registrarVentaProvider.notifier).vaciarVenta();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('✅ Venta #${ventaGuardada.numero} registrada — ${_formatoMonto.format(ventaGuardada.total)}'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 4),
-            ),
-          );
-        }
-      }
-    } catch (e) {
+    if (modo == ModoOperacion.apartado) {
+      final idApartado = await ref.read(apartadoNotifierProvider.notifier).crearApartadoDesdeVenta(estadoFinal);
       if (mounted) {
+        ref.read(registrarVentaProvider.notifier).vaciarVenta();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Error: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 8),
+            content: Text('✅ Apartado #$idApartado registrado — Stock reservado — ${_formatoMonto.format(estadoFinal.total)}'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _guardando = false);
+    } else if (formaSeleccionada == 'crédito') {
+      setState(() {
+        _mostrarFormularioCredito = true;
+        _estadoPasoCredito = estadoFinal;
+      });
+      return;
+    } else {
+      final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoFinal);
+      if (!mounted) return;
+      if (ventaGuardada.id == null) {
+        throw Exception('El repositorio no devolvió ID de venta');
+      }
+      if (mounted) {
+        ref.read(registrarVentaProvider.notifier).vaciarVenta();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Venta #${ventaGuardada.numero} registrada — ${_formatoMonto.format(ventaGuardada.total)}'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 
@@ -310,6 +294,36 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
               ),
             ),
           ],
+        ),
+      );
+    }
+
+    if (_mostrarFormularioCredito && _estadoPasoCredito != null) {
+      return Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: anchoMaximoContenido),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: paddingLateral, vertical: AppSpacing.m),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: _cerrarFormularioCredito,
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Volver'),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.m),
+                FormularioCreditoVista(
+                  estadoVenta: _estadoPasoCredito!,
+                  onVolver: _cerrarFormularioCredito,
+                  onConfirmado: _confirmarCredito,
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }

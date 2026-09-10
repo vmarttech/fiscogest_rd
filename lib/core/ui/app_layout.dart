@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 abstract class AppLayout {
   // Filas estándar
@@ -57,16 +58,44 @@ abstract class AppLayout {
     );
   }
 
-  // Padding universal: valor uniforme en todos los lados. SafeArea maneja el área inferior.
+  // Padding universal
   static const EdgeInsetsGeometry pantallaPadding = EdgeInsets.only(
     left: AppSpacing.m,
     right: AppSpacing.m,
     top: AppSpacing.m,
     bottom: AppSpacing.m,
   );
+
+  // ✅ NUEVO: Fila estándar Etiqueta ↔ Valor
+  static Widget filaDato({
+    required String etiqueta,
+    required String valor,
+    TextStyle? estiloEtiqueta,
+    TextStyle? estiloValor,
+    bool alinearDerecha = true,
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+  }) {
+    return Padding(
+      padding: padding,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            etiqueta,
+            style: estiloEtiqueta ?? AppTypography.labelMedium,
+          ),
+          Text(
+            valor,
+            style: estiloValor ?? AppTypography.labelMedium,
+            textAlign: alinearDerecha ? TextAlign.right : null,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-// Diseño adaptativo Fila / Columna — Row ↔ Column responsivo
+// Diseño adaptativo Fila / Columna
 class ResponsiveRow extends StatelessWidget {
   const ResponsiveRow({
     super.key,
@@ -75,17 +104,14 @@ class ResponsiveRow extends StatelessWidget {
     this.breakpoint = 600,
     this.spacing,
   });
-
   final Widget child1;
   final Widget child2;
   final double breakpoint;
   final double? spacing;
-
   @override
   Widget build(BuildContext context) {
     final anchoPantalla = MediaQuery.of(context).size.width;
     final espacio = spacing ?? AppSpacing.m;
-
     if (anchoPantalla >= breakpoint) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,9 +122,8 @@ class ResponsiveRow extends StatelessWidget {
         ],
       );
     }
-
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         child1,
         SizedBox(height: espacio),

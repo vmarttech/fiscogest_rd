@@ -4,6 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_form.dart';
+import 'package:fiscogest_rd/core/ui/app_section.dart';
+import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuota.dart';
@@ -12,38 +17,47 @@ import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 
-/// Resultado devuelto por el formulario al confirmar
 class ResultadoFormularioCredito {
   const ResultadoFormularioCredito({
     required this.cuenta,
     this.planPago,
     this.abonoInicial,
   });
-
   final CuentaPorCobrar cuenta;
   final PlanPago? planPago;
   final AbonoCredito? abonoInicial;
 }
 
-/// Formulario de condiciones del fiao / crédito
-/// Se abre al elegir "Crédito" como forma de pago en la venta
-/// Muestra vista previa de cuotas SIN revelar la tasa de interés
 class FormularioCreditoDialog extends ConsumerStatefulWidget {
   const FormularioCreditoDialog({
     super.key,
     required this.estadoVenta,
+    this.onVolver,
+    this.onResultado,
   });
 
   final RegistrarVentaState estadoVenta;
+  final VoidCallback? onVolver;
+  final void Function(ResultadoFormularioCredito)? onResultado;
+  static const String routeName = 'formulario-credito';
 
-  static Future<ResultadoFormularioCredito?> mostrar({
-    required BuildContext context,
-    required RegistrarVentaState estadoVenta,
-  }) async {
+  static Future<ResultadoFormularioCredito?> navegar(
+    BuildContext context,
+    RegistrarVentaState estadoVenta,
+  ) async {
     return showDialog<ResultadoFormularioCredito>(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => FormularioCreditoDialog(estadoVenta: estadoVenta),
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: SizedBox(
+          width: 900,
+          height: 700,
+          child: Scaffold(
+            backgroundColor: AppColors.background,
+            body: FormularioCreditoDialog(estadoVenta: estadoVenta),
+          ),
+        ),
+      ),
     );
   }
 
@@ -72,7 +86,6 @@ class _FormularioCreditoDialogState
   bool _mostrarTablaCuotas = false;
   bool _guardando = false;
 
-  // Opciones predefinidas según uso comercial dominicano
   static const List<int> _opcionesPlazo = [1, 2, 3, 6];
   static const List<int> _opcionesCuotas = [1, 2, 3, 6];
   static const List<double> _opcionesTasa = [0.0, 0.03, 0.05, 0.08, 0.10];
@@ -94,17 +107,15 @@ class _FormularioCreditoDialogState
     super.dispose();
   }
 
-  // ============================================
-  // VALORES CALCULADOS EN TIEMPO REAL
-  // ============================================
-
   double get _totalVenta => widget.estadoVenta.total;
+
   double get _abonoInicial {
     final valor = double.tryParse(_abonoInicialController.text) ?? 0.0;
     return valor.clamp(0.0, _totalVenta);
   }
 
   double get _saldoFinanciado => (_totalVenta - _abonoInicial).clamp(0.0, double.infinity);
+
   double get _tasaMensual {
     return double.tryParse(_tasaInteresController.text) ?? 0.05;
   }
@@ -119,10 +130,6 @@ class _FormularioCreditoDialogState
     );
   }
 
-  // ============================================
-  // ACCIONES
-  // ============================================
-
   Future<void> _seleccionarFecha() async {
     final fecha = await showDatePicker(
       context: context,
@@ -136,14 +143,24 @@ class _FormularioCreditoDialogState
     }
   }
 
+  void _accionVolver() {
+    if (widget.onVolver != null) {
+      widget.onVolver!();
+    } else if (mounted && Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+  }
+
   Future<void> _confirmar() async {
     if (_saldoFinanciado <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('El saldo financiado debe ser mayor a RD\$ 0.00'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('El saldo financiado debe ser mayor a RD\$ 0.00'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
       return;
     }
 
@@ -156,7 +173,6 @@ class _FormularioCreditoDialogState
           ? _fechaPrimerVencimiento
           : _fechaPrimerVencimiento.add(Duration(days: 30 * (_numeroCuotas - 1)));
 
-      // Construir plan de pagos si hay más de 1 cuota
       PlanPago? planPago;
       if (_numeroCuotas > 1) {
         planPago = CalculadoraCreditoService.generarPlanPago(
@@ -167,11 +183,10 @@ class _FormularioCreditoDialogState
         );
       }
 
-      // Construir cuenta por cobrar
       final cuenta = CuentaPorCobrar(
         clienteId: widget.estadoVenta.clienteId ?? 0,
         clienteNombre: widget.estadoVenta.clienteNombre,
-        ventaId: null, // se actualizará después de registrar la venta
+        ventaId: null,
         totalOriginal: _totalVenta,
         abonoInicial: _abonoInicial,
         tasaInteres: _tasaMensual,
@@ -188,11 +203,10 @@ class _FormularioCreditoDialogState
         usuarioId: widget.estadoVenta.usuarioId,
       );
 
-      // Construir abono inicial si existe
       AbonoCredito? abonoInicial;
       if (_abonoInicial > 0.001) {
         abonoInicial = AbonoCredito(
-          cuentaId: 0, // se actualizará después
+          cuentaId: 0,
           monto: _abonoInicial,
           metodoPago: widget.estadoVenta.tipoPago,
           fecha: ahora,
@@ -200,21 +214,25 @@ class _FormularioCreditoDialogState
         );
       }
 
-      if (!mounted) return;
-      Navigator.pop(
-        context,
-        ResultadoFormularioCredito(
-          cuenta: cuenta,
-          planPago: planPago,
-          abonoInicial: abonoInicial,
-        ),
+      final resultado = ResultadoFormularioCredito(
+        cuenta: cuenta,
+        planPago: planPago,
+        abonoInicial: abonoInicial,
       );
+
+      if (!mounted) return;
+
+      if (widget.onResultado != null) {
+        widget.onResultado!(resultado);
+      } else if (Navigator.canPop(context)) {
+        Navigator.pop(context, resultado);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -223,236 +241,215 @@ class _FormularioCreditoDialogState
     }
   }
 
-  // ============================================
-  // BUILD
-  // ============================================
-
   @override
   Widget build(BuildContext context) {
     final resumen = _resumen;
-    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
-
-    return AlertDialog(
-      title: const Text('CONDICIONES DEL CRÉDITO / FIAO'),
-      content: SingleChildScrollView(
-        child: SizedBox(
-          width: esPantallaPequena ? double.maxFinite : 520,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // =====================
-              // DATOS DE LA VENTA
-              // =====================
-              _buildSeccionTitulo('Datos de la venta'),
-              const SizedBox(height: AppSpacing.s),
-              _buildFilaSoloLectura(
-                'Cliente:',
-                widget.estadoVenta.clienteNombre ?? 'Consumidor Final',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            AppButton(
+              text: '← VOLVER',
+              onPressed: _guardando ? null : _accionVolver,
+            ),
+            const SizedBox(width: AppSpacing.m),
+            Expanded(
+              child: Text(
+                'Formulario de Crédito',
+                style: AppTypography.h4Bold.copyWith(color: AppColors.textPrimary),
               ),
-              _buildFilaSoloLectura(
-                'Total de venta:',
-                _formatoMonto.format(_totalVenta),
-                destacado: true,
-              ),
-              const SizedBox(height: AppSpacing.m),
-              const Divider(),
-              const SizedBox(height: AppSpacing.m),
-
-              // =====================
-              // CONDICIONES
-              // =====================
-              _buildSeccionTitulo('Condiciones del crédito'),
-              const SizedBox(height: AppSpacing.s),
-
-              // Abono inicial
-              TextFormField(
-                controller: _abonoInicialController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Abono inicial (RD\$)',
-                  border: OutlineInputBorder(),
-                  hintText: '0.00',
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.m),
+        Flexible(
+          child: SingleChildScrollView(
+            child: AppForm(
+              fields: [
+                AppSection(
+                  title: 'Datos de la venta',
+                  children: [
+                    _buildFilaSoloLectura(
+                      'Cliente:',
+                      widget.estadoVenta.clienteNombre ?? 'Consumidor Final',
+                    ),
+                    _buildFilaSoloLectura(
+                      'Total de venta:',
+                      _formatoMonto.format(_totalVenta),
+                      destacado: true,
+                    ),
+                  ],
                 ),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: AppSpacing.s),
 
-              // Plazo
-              _buildSelectorEtiqueta('Plazo:'),
-              Wrap(
-                spacing: 8,
-                children: _opcionesPlazo.map((meses) {
-                  final activo = _plazoMeses == meses;
-                  return ChoiceChip(
-                    label: Text('$meses ${meses == 1 ? 'mes' : 'meses'}'),
-                    selected: activo,
-                    onSelected: (_) {
-                      setState(() {
-                        _plazoMeses = meses;
-                        if (_numeroCuotas > meses) _numeroCuotas = meses;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: AppSpacing.s),
-
-              // Número de cuotas
-              _buildSelectorEtiqueta('Número de cuotas:'),
-              Wrap(
-                spacing: 8,
-                children: _opcionesCuotas
-                    .where((c) => c <= _plazoMeses)
-                    .map((cuotas) {
-                  final activo = _numeroCuotas == cuotas;
-                  return ChoiceChip(
-                    label: Text('$cuotas ${cuotas == 1 ? 'cuota' : 'cuotas'}'),
-                    selected: activo,
-                    onSelected: (_) => setState(() => _numeroCuotas = cuotas),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: AppSpacing.s),
-
-              // Fecha primer vencimiento
-              InkWell(
-                onTap: _seleccionarFecha,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Fecha primer vencimiento',
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
-                  child: Text(_formatoFecha.format(_fechaPrimerVencimiento)),
+                AppSection(
+                  title: 'Condiciones del crédito',
+                  children: [
+                    AppTextField(
+                      controller: _abonoInicialController,
+                      keyboardType: TextInputType.number,
+                      label: 'Abono inicial (RD\$)',
+                      hint: '0.00',
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    _buildSelectorEtiqueta('Plazo:'),
+                    Wrap(
+                      spacing: AppSpacing.s,
+                      children: _opcionesPlazo.map((meses) {
+                        final activo = _plazoMeses == meses;
+                        return ChoiceChip(
+                          label: Text('$meses ${meses == 1 ? 'mes' : 'meses'}'),
+                          selected: activo,
+                          onSelected: (_) {
+                            setState(() {
+                              _plazoMeses = meses;
+                              if (_numeroCuotas > meses) _numeroCuotas = meses;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    _buildSelectorEtiqueta('Número de cuotas:'),
+                    Wrap(
+                      spacing: AppSpacing.s,
+                      children: _opcionesCuotas
+                          .where((c) => c <= _plazoMeses)
+                          .map((cuotas) {
+                        final activo = _numeroCuotas == cuotas;
+                        return ChoiceChip(
+                          label: Text('$cuotas ${cuotas == 1 ? 'cuota' : 'cuotas'}'),
+                          selected: activo,
+                          onSelected: (_) => setState(() => _numeroCuotas = cuotas),
+                        );
+                      }).toList(),
+                    ),
+                    InkWell(
+                      onTap: _seleccionarFecha,
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Fecha primer vencimiento',
+                          border: OutlineInputBorder(),
+                          suffixIcon: Icon(Icons.calendar_today),
+                        ),
+                        child: Text(
+                          _formatoFecha.format(_fechaPrimerVencimiento),
+                          style: AppTypography.labelMedium,
+                        ),
+                      ),
+                    ),
+                    _buildSelectorEtiqueta('Tasa mensual:'),
+                    Wrap(
+                      spacing: AppSpacing.s,
+                      children: _opcionesTasa.map((tasa) {
+                        final activo = (_tasaMensual - tasa).abs() < 0.001;
+                        return ChoiceChip(
+                          label: Text('${(tasa * 100).toStringAsFixed(0)}%'),
+                          selected: activo,
+                          onSelected: (_) {
+                            setState(() {
+                              _tasaInteresController.text = tasa.toString();
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    AppTextField(
+                      controller: _observacionesController,
+                      label: 'Observaciones (opcional)',
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: AppSpacing.s),
 
-              // Tasa de interés (SOLO PARA USUARIO INTERNO, NO PARA CLIENTE)
-              _buildSelectorEtiqueta('Tasa mensual (uso interno):'),
-              Wrap(
-                spacing: 8,
-                children: _opcionesTasa.map((tasa) {
-                  final activo = (_tasaMensual - tasa).abs() < 0.001;
-                  return ChoiceChip(
-                    label: Text('${(tasa * 100).toStringAsFixed(0)}%'),
-                    selected: activo,
-                    onSelected: (_) {
-                      setState(() {
-                        _tasaInteresController.text = tasa.toString();
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: AppSpacing.s),
-
-              // Observaciones
-              TextField(
-                controller: _observacionesController,
-                decoration: const InputDecoration(
-                  labelText: 'Observaciones (opcional)',
-                  border: OutlineInputBorder(),
+                AppSection(
+                  title: 'Resumen para el cliente',
+                  children: [
+                    _buildFilaResumen(
+                      'Total venta:',
+                      _formatoMonto.format(resumen.totalVenta),
+                    ),
+                    _buildFilaResumen(
+                      'Abono inicial:',
+                      _formatoMonto.format(resumen.abonoInicial),
+                    ),
+                    _buildFilaResumen(
+                      'Saldo financiado:',
+                      _formatoMonto.format(resumen.saldoFinanciado),
+                    ),
+                    if (resumen.montoInteres > 0.001)
+                      _buildFilaResumen(
+                        'Interés:',
+                        '+ ${_formatoMonto.format(resumen.montoInteres)}',
+                        colorTexto: AppColors.error,
+                      ),
+                    _buildFilaResumen(
+                      'TOTAL A PAGAR:',
+                      _formatoMonto.format(resumen.totalAPagar),
+                      destacado: true,
+                      colorTexto: AppColors.primary,
+                    ),
+                    _buildFilaResumen(
+                      resumen.numeroCuotas == 1
+                          ? 'Pago único:'
+                          : '${resumen.numeroCuotas} cuotas de:',
+                      _formatoMonto.format(resumen.montoPorCuota),
+                    ),
+                    _buildFilaResumen(
+                      'Primer vencimiento:',
+                      _formatoFecha.format(resumen.fechaPrimerVencimiento),
+                    ),
+                    if (resumen.cuotas.isNotEmpty) ...[
+                      TextButton.icon(
+                        onPressed: () => setState(
+                            () => _mostrarTablaCuotas = !_mostrarTablaCuotas),
+                        icon: Icon(_mostrarTablaCuotas
+                            ? Icons.expand_less
+                            : Icons.expand_more),
+                        label: Text(
+                          _mostrarTablaCuotas
+                              ? 'Ocultar tabla'
+                              : 'Ver tabla de cuotas',
+                          style: AppTypography.labelMedium,
+                        ),
+                      ),
+                      if (_mostrarTablaCuotas) _buildTablaCuotas(resumen.cuotas),
+                    ],
+                  ],
                 ),
-                maxLines: 2,
-              ),
-              const SizedBox(height: AppSpacing.m),
-              const Divider(),
-              const SizedBox(height: AppSpacing.m),
 
-              // =====================
-              // RESUMEN PARA CLIENTE
-              // =====================
-              _buildSeccionTitulo('Resumen para el cliente'),
-              const SizedBox(height: AppSpacing.s),
-              _buildFilaResumen(
-                'Total venta:',
-                _formatoMonto.format(resumen.totalVenta),
-              ),
-              _buildFilaResumen(
-                'Abono inicial:',
-                _formatoMonto.format(resumen.abonoInicial),
-              ),
-              _buildFilaResumen(
-                'Saldo financiado:',
-                _formatoMonto.format(resumen.saldoFinanciado),
-              ),
-              if (resumen.montoInteres > 0.001)
-                _buildFilaResumen(
-                  'Incremento por tiempo:',
-                  '+ ${_formatoMonto.format(resumen.montoInteres)}',
-                  colorTexto: Colors.red.shade700,
+                AppSection(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppButton(
+                            text: 'CANCELAR',
+                            onPressed: _guardando ? null : _accionVolver,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.m),
+                        Expanded(
+                          child: AppButton(
+                            text: 'CONFIRMAR CRÉDITO',
+                            onPressed: _guardando ? null : _confirmar,
+                            isLoading: _guardando,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              _buildFilaResumen(
-                'TOTAL A PAGAR:',
-                _formatoMonto.format(resumen.totalAPagar),
-                destacado: true,
-                colorTexto: AppColors.primary,
-              ),
-              const SizedBox(height: AppSpacing.s),
-              _buildFilaResumen(
-                resumen.numeroCuotas == 1
-                    ? 'Pago único:'
-                    : '${resumen.numeroCuotas} cuotas de:',
-                _formatoMonto.format(resumen.montoPorCuota),
-              ),
-              _buildFilaResumen(
-                'Primer vencimiento:',
-                _formatoFecha.format(resumen.fechaPrimerVencimiento),
-              ),
-
-              // Tabla de cuotas (expandible)
-              if (resumen.cuotas.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.s),
-                TextButton.icon(
-                  onPressed: () => setState(
-                      () => _mostrarTablaCuotas = !_mostrarTablaCuotas),
-                  icon: Icon(_mostrarTablaCuotas
-                      ? Icons.expand_less
-                      : Icons.expand_more),
-                  label: Text(_mostrarTablaCuotas
-                      ? 'Ocultar tabla de cuotas'
-                      : 'Ver tabla completa de cuotas'),
-                ),
-                if (_mostrarTablaCuotas) _buildTablaCuotas(resumen.cuotas),
               ],
-            ],
+            ),
           ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _guardando ? null : () => Navigator.pop(context),
-          child: const Text('CANCELAR'),
-        ),
-        ElevatedButton(
-          onPressed: _guardando ? null : _confirmar,
-          child: _guardando
-              ? const CircularProgressIndicator(color: Colors.white)
-              : const Text('CONFIRMAR CRÉDITO'),
         ),
       ],
     );
   }
 
-  // ============================================
-  // WIDGETS AUXILIARES
-  // ============================================
-
-  Widget _buildSeccionTitulo(String texto) {
-    return Text(
-      texto,
-      style: AppTypography.labelLarge.copyWith(
-        fontWeight: FontWeight.bold,
-        color: AppColors.primary,
-      ),
-    );
-  }
-
   Widget _buildSelectorEtiqueta(String texto) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(top: AppSpacing.s, bottom: AppSpacing.xs),
       child: Text(
         texto,
         style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600),
@@ -460,10 +457,9 @@ class _FormularioCreditoDialogState
     );
   }
 
-  Widget _buildFilaSoloLectura(String etiqueta, String valor,
-      {bool destacado = false}) {
+  Widget _buildFilaSoloLectura(String etiqueta, String valor, {bool destacado = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -472,7 +468,9 @@ class _FormularioCreditoDialogState
             valor,
             style: destacado
                 ? AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.bold, color: AppColors.primary)
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  )
                 : AppTypography.labelMedium,
           ),
         ],
@@ -480,10 +478,9 @@ class _FormularioCreditoDialogState
     );
   }
 
-  Widget _buildFilaResumen(String etiqueta, String valor,
-      {bool destacado = false, Color? colorTexto}) {
+  Widget _buildFilaResumen(String etiqueta, String valor, {bool destacado = false, Color? colorTexto}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -491,7 +488,9 @@ class _FormularioCreditoDialogState
             etiqueta,
             style: destacado
                 ? AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.bold, color: colorTexto)
+                    fontWeight: FontWeight.bold,
+                    color: colorTexto,
+                  )
                 : AppTypography.labelMedium.copyWith(color: colorTexto),
           ),
           Text(
@@ -499,7 +498,9 @@ class _FormularioCreditoDialogState
             textAlign: TextAlign.right,
             style: destacado
                 ? AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.bold, color: colorTexto)
+                    fontWeight: FontWeight.bold,
+                    color: colorTexto,
+                  )
                 : AppTypography.labelMedium.copyWith(color: colorTexto),
           ),
         ],
@@ -508,33 +509,30 @@ class _FormularioCreditoDialogState
   }
 
   Widget _buildTablaCuotas(List<Cuota> cuotas) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.grey200),
-        borderRadius: BorderRadius.circular(8),
-      ),
+    return AppCard(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+        padding: AppSpacing.allS,
         child: DataTable(
-          columnSpacing: 16,
+          columnSpacing: AppSpacing.m,
           headingRowHeight: 40,
           dataRowMaxHeight: 48,
           columns: const [
-            DataColumn(label: Text('Cuota')),
-            DataColumn(label: Text('Vencimiento')),
-            DataColumn(label: Text('Capital'), numeric: true),
-            DataColumn(label: Text('Interés'), numeric: true),
-            DataColumn(label: Text('Total'), numeric: true),
-            DataColumn(label: Text('Saldo'), numeric: true),
+            DataColumn(label: Text('Cuota', style: AppTypography.labelMedium)),
+            DataColumn(label: Text('Vencimiento', style: AppTypography.labelMedium)),
+            DataColumn(label: Text('Capital', style: AppTypography.labelMedium), numeric: true),
+            DataColumn(label: Text('Interés', style: AppTypography.labelMedium), numeric: true),
+            DataColumn(label: Text('Total', style: AppTypography.labelMedium), numeric: true),
+            DataColumn(label: Text('Saldo', style: AppTypography.labelMedium), numeric: true),
           ],
           rows: cuotas.map((c) {
             return DataRow(cells: [
-              DataCell(Text('#${c.numeroCuota}')),
-              DataCell(Text(_formatoFecha.format(c.fechaVencimiento))),
-              DataCell(Text(_formatoMonto.format(c.montoCapital))),
-              DataCell(Text(_formatoMonto.format(c.montoInteres))),
-              DataCell(Text(_formatoMonto.format(c.montoTotal))),
-              DataCell(Text(_formatoMonto.format(c.saldoDespues))),
+              DataCell(Text('#${c.numeroCuota}', style: AppTypography.labelMedium)),
+              DataCell(Text(_formatoFecha.format(c.fechaVencimiento), style: AppTypography.labelMedium)),
+              DataCell(Text(_formatoMonto.format(c.montoCapital), style: AppTypography.labelMedium)),
+              DataCell(Text(_formatoMonto.format(c.montoInteres), style: AppTypography.labelMedium)),
+              DataCell(Text(_formatoMonto.format(c.montoTotal), style: AppTypography.labelMedium)),
+              DataCell(Text(_formatoMonto.format(c.saldoDespues), style: AppTypography.labelMedium)),
             ]);
           }).toList(),
         ),

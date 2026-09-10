@@ -65,7 +65,7 @@ class AppForm extends StatelessWidget {
     return Padding(
       padding: padding ?? AppSpacing.allM,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: rows,
       ),
     );
