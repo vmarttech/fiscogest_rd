@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_form.dart';
 import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
@@ -38,7 +37,6 @@ class FormularioCreditoVista extends ConsumerStatefulWidget {
   final RegistrarVentaState estadoVenta;
   final VoidCallback onVolver;
   final void Function(ResultadoFormularioCredito) onConfirmado;
-
   @override
   ConsumerState<FormularioCreditoVista> createState() =>
       _FormularioCreditoVistaState();
@@ -227,7 +225,7 @@ class _FormularioCreditoVistaState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
+          Flexible(fit: FlexFit.loose,
             child: Text(
               etiqueta,
               style: AppTypography.labelMedium.copyWith(
@@ -451,7 +449,7 @@ class _FormularioCreditoVistaState
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
+              Flexible(fit: FlexFit.loose,
                 child: Text(
                   'Total a pagar',
                   style: AppTypography.labelMedium.copyWith(
@@ -595,8 +593,10 @@ class _FormularioCreditoVistaState
   Widget _buildContenidoPrincipal(ResumenCreditoCliente resumen) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final ancho = constraints.maxWidth;
-        final usarDosColumnas = ancho >= 720;
+        final anchoPantalla = MediaQuery.of(context).size.width;
+        final anchoDisponible = anchoPantalla - 280;
+        final usarDosColumnas = anchoDisponible >= 580;
+
         final formulario = Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -605,9 +605,11 @@ class _FormularioCreditoVistaState
             _buildCondicionesCredito(),
           ],
         );
+
         final resumenTarjeta = AppSection(
           children: [_buildResumenFinanciero(resumen)],
         );
+
         final tablaPies = resumen.cuotas.isNotEmpty
             ? Column(
                 children: [
@@ -643,30 +645,32 @@ class _FormularioCreditoVistaState
               )
             : const SizedBox.shrink();
 
-        if (!usarDosColumnas) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              formulario,
-              const SizedBox(height: AppSpacing.m),
-              resumenTarjeta,
-              tablaPies,
-            ],
-          );
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: formulario),
-                const SizedBox(width: AppSpacing.l),
-                Expanded(child: resumenTarjeta),
-              ],
-            ),
-            tablaPies,
-          ],
+        return SizedBox(
+          width: double.infinity,
+          child: !usarDosColumnas
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    formulario,
+                    const SizedBox(height: AppSpacing.m),
+                    resumenTarjeta,
+                    tablaPies,
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(fit: FlexFit.loose,flex: 3, child: formulario),
+                        const SizedBox(width: AppSpacing.l),
+                        Flexible(fit: FlexFit.loose,flex: 2, child: resumenTarjeta),
+                      ],
+                    ),
+                    tablaPies,
+                  ],
+                ),
         );
       },
     );
@@ -697,18 +701,18 @@ class _FormularioCreditoVistaState
           ],
         ),
         const SizedBox(height: AppSpacing.l),
-        AppForm(fields: [_buildContenidoPrincipal(resumen)]),
+        _buildContenidoPrincipal(resumen),
         const SizedBox(height: AppSpacing.l),
         Row(
           children: [
-            Expanded(
+            Flexible(fit: FlexFit.loose,
               child: AppButton(
                 text: 'CANCELAR',
                 onPressed: _guardando ? null : widget.onVolver,
               ),
             ),
             const SizedBox(width: AppSpacing.m),
-            Expanded(
+            Flexible(fit: FlexFit.loose,
               child: AppButton(
                 text: 'CONFIRMAR',
                 onPressed: _guardando ? null : _confirmar,

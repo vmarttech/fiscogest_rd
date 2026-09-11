@@ -19,6 +19,7 @@ import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_c
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
+
   @override
   ConsumerState<VistaInicioVacia> createState() => _VistaInicioVaciaState();
 }
@@ -30,6 +31,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     decimalDigits: 2,
     customPattern: '¤ #,##0.00',
   );
+
   bool _guardando = false;
   bool _mostrarFormularioCredito = false;
   RegistrarVentaState? _estadoPasoCredito;
@@ -154,7 +156,6 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     if (formaSeleccionada == null || !mounted) return;
     ref.read(registrarVentaProvider.notifier).cambiarFormaPago(formaSeleccionada);
     final estadoFinal = ref.read(registrarVentaProvider);
-
     if (modo == ModoOperacion.apartado) {
       final idApartado = await ref.read(apartadoNotifierProvider.notifier).crearApartadoDesdeVenta(estadoFinal);
       if (mounted) {
@@ -239,7 +240,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final anchoPantalla = MediaQuery.of(context).size.width;
     final esPantallaPequena = anchoPantalla < 600;
     final paddingLateral = esPantallaPequena ? 16.0 : 24.0;
-    final anchoMaximoContenido = esPantallaPequena ? double.infinity : 900.0;
+    const anchoMaximoContenido = 900.0;
     final espaciadoBotones = esPantallaPequena ? 4.0 : 8.0;
     final anchoColumnaValores = esPantallaPequena ? anchoPantalla * 0.35 : 160.0;
     final espaciadoEtiquetaValor = esPantallaPequena ? 8.0 : 16.0;
@@ -301,7 +302,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     if (_mostrarFormularioCredito && _estadoPasoCredito != null) {
       return Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: anchoMaximoContenido),
+          constraints: const BoxConstraints(maxWidth: anchoMaximoContenido),
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: paddingLateral, vertical: AppSpacing.m),
             child: Column(
@@ -330,7 +331,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
     return Center(
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: anchoMaximoContenido),
+        constraints: const BoxConstraints(maxWidth: anchoMaximoContenido),
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: paddingLateral, vertical: AppSpacing.m),
           child: Column(
