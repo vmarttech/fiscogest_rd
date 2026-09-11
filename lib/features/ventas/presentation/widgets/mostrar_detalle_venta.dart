@@ -17,7 +17,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
   }
 
   String _formatearMonto(double valor) {
-    return NumberFormat.currency(symbol: 'RD\$ ').format(valor);
+    return 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
   }
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {

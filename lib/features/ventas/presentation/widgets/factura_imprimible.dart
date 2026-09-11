@@ -9,16 +9,11 @@ class FacturaImprimible extends StatelessWidget {
     required this.venta,
     required this.onCerrar,
   });
-
   final Venta venta;
   final VoidCallback onCerrar;
 
   String _formatearMonto(double valor) {
-    return NumberFormat.currency(
-      locale: 'es_DO',
-      symbol: 'RD\$',
-      decimalDigits: 2,
-    ).format(valor);
+    return 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
   }
 
   String _formatearFecha(DateTime fecha) {
@@ -39,7 +34,6 @@ class FacturaImprimible extends StatelessWidget {
     final esCredito = venta.esCredito;
     final descuentoTotal = _descuentoTotal;
     final baseGravable = _baseGravable;
-
     return Dialog(
       insetPadding: const EdgeInsets.all(16),
       child: SingleChildScrollView(
@@ -127,7 +121,6 @@ class FacturaImprimible extends StatelessWidget {
               final tieneDescuento = linea.montoDescuento != 0.0;
               final cantidad = linea.cantidad;
               final subtotalLinea = linea.subtotalLinea ?? linea.subtotal;
-
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

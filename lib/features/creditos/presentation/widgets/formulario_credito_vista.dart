@@ -21,7 +21,6 @@ class ResultadoFormularioCredito {
     this.planPago,
     this.abonoInicial,
   });
-
   final CuentaPorCobrar cuenta;
   final PlanPago? planPago;
   final AbonoCredito? abonoInicial;
@@ -34,7 +33,6 @@ class FormularioCreditoVista extends ConsumerStatefulWidget {
     required this.onVolver,
     required this.onConfirmado,
   });
-
   final RegistrarVentaState estadoVenta;
   final VoidCallback onVolver;
   final void Function(ResultadoFormularioCredito) onConfirmado;
@@ -46,24 +44,19 @@ class FormularioCreditoVista extends ConsumerStatefulWidget {
 
 class _FormularioCreditoVistaState
     extends ConsumerState<FormularioCreditoVista> {
-  static final NumberFormat _formatoMonto = NumberFormat.currency(
-    locale: 'es_DO',
-    symbol: 'RD\$ ',
-    decimalDigits: 2,
-  );
+  // ✅ Reemplazado NumberFormat.currency por formateador sin símbolo
+  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
+  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
 
   static final DateFormat _formatoFecha = DateFormat('dd/MM/yyyy');
-
   late final TextEditingController _abonoInicialController;
   late final TextEditingController _tasaInteresController;
   late final TextEditingController _observacionesController;
-
   int _plazoMeses = 1;
   int _numeroCuotas = 1;
   late DateTime _fechaPrimerVencimiento;
   bool _mostrarTablaCuotas = false;
   bool _guardando = false;
-
   static const List<int> _opcionesPlazo = [1, 2, 3, 6];
   static const List<int> _opcionesCuotas = [1, 2, 3, 6];
   static const List<double> _opcionesTasa = [0.0, 0.03, 0.05, 0.08, 0.10];
@@ -86,16 +79,13 @@ class _FormularioCreditoVistaState
   }
 
   double get _totalVenta => widget.estadoVenta.total;
-
   double get _abonoInicial =>
       (double.tryParse(_abonoInicialController.text) ?? 0.0).clamp(
         0.0,
         _totalVenta,
       );
-
   double get _saldoFinanciado =>
       (_totalVenta - _abonoInicial).clamp(0.0, double.infinity);
-
   double get _tasaMensual =>
       double.tryParse(_tasaInteresController.text) ?? 0.05;
 
@@ -133,18 +123,15 @@ class _FormularioCreditoVistaState
       }
       return;
     }
-
     setState(() => _guardando = true);
     try {
       final resumen = _resumen;
       final ahora = DateTime.now();
-
       final fechaVencimientoFinal = _numeroCuotas <= 1
           ? _fechaPrimerVencimiento
           : _fechaPrimerVencimiento.add(
               Duration(days: 30 * (_numeroCuotas - 1)),
             );
-
       PlanPago? planPago;
       if (_numeroCuotas > 1) {
         planPago = CalculadoraCreditoService.generarPlanPago(
@@ -154,7 +141,6 @@ class _FormularioCreditoVistaState
           fechaPrimerVencimiento: _fechaPrimerVencimiento,
         );
       }
-
       final cuenta = CuentaPorCobrar(
         clienteId: widget.estadoVenta.clienteId ?? 0,
         clienteNombre: widget.estadoVenta.clienteNombre,
@@ -174,7 +160,6 @@ class _FormularioCreditoVistaState
             : _observacionesController.text.trim(),
         usuarioId: widget.estadoVenta.usuarioId,
       );
-
       AbonoCredito? abonoInicial;
       if (_abonoInicial > 0.001) {
         abonoInicial = AbonoCredito(
@@ -185,7 +170,6 @@ class _FormularioCreditoVistaState
           usuarioId: widget.estadoVenta.usuarioId,
         );
       }
-
       if (!mounted) return;
       widget.onConfirmado(
         ResultadoFormularioCredito(
@@ -367,19 +351,19 @@ class _FormularioCreditoVistaState
                 ),
                 DataCell(
                   Text(
-                    _formatoMonto.format(c.montoCapital),
+                    _formatearMonto(c.montoCapital), // ✅
                     style: AppTypography.labelMedium,
                   ),
                 ),
                 DataCell(
                   Text(
-                    _formatoMonto.format(c.montoInteres),
+                    _formatearMonto(c.montoInteres), // ✅
                     style: AppTypography.labelMedium,
                   ),
                 ),
                 DataCell(
                   Text(
-                    _formatoMonto.format(c.montoTotal),
+                    _formatearMonto(c.montoTotal), // ✅
                     style: AppTypography.labelMedium.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -387,7 +371,7 @@ class _FormularioCreditoVistaState
                 ),
                 DataCell(
                   Text(
-                    _formatoMonto.format(c.saldoDespues),
+                    _formatearMonto(c.saldoDespues), // ✅
                     style: AppTypography.labelMedium,
                   ),
                 ),
@@ -430,21 +414,21 @@ class _FormularioCreditoVistaState
           const SizedBox(height: AppSpacing.s),
           _buildFilaDato(
             'Total venta',
-            _formatoMonto.format(resumen.totalVenta),
+            _formatearMonto(resumen.totalVenta), // ✅
           ),
           _buildFilaDato(
             'Abono inicial',
-            _formatoMonto.format(resumen.abonoInicial),
+            _formatearMonto(resumen.abonoInicial), // ✅
           ),
           _buildFilaDato(
             'Saldo financiado',
-            _formatoMonto.format(resumen.saldoFinanciado),
+            _formatearMonto(resumen.saldoFinanciado), // ✅
             destacado: true,
           ),
           if (resumen.montoInteres > 0.001)
             _buildFilaDato(
               'Interés',
-              '+ ${_formatoMonto.format(resumen.montoInteres)}',
+              '+ ${_formatearMonto(resumen.montoInteres)}', // ✅
               colorTexto: AppColors.error,
             ),
           const SizedBox(height: AppSpacing.xs),
@@ -469,7 +453,7 @@ class _FormularioCreditoVistaState
               Expanded(
                 flex: 2,
                 child: Text(
-                  _formatoMonto.format(resumen.totalAPagar),
+                  _formatearMonto(resumen.totalAPagar), // ✅
                   textAlign: TextAlign.right,
                   softWrap: false,
                   style: AppTypography.labelMedium.copyWith(
@@ -497,7 +481,7 @@ class _FormularioCreditoVistaState
             child: Column(
               children: [
                 Text(
-                  _formatoMonto.format(resumen.montoPorCuota),
+                  _formatearMonto(resumen.montoPorCuota), // ✅
                   textAlign: TextAlign.center,
                   softWrap: false,
                   style: AppTypography.labelMedium.copyWith(
@@ -552,7 +536,7 @@ class _FormularioCreditoVistaState
         const SizedBox(height: AppSpacing.s),
         _buildFilaDato(
           'Total de venta',
-          _formatoMonto.format(_totalVenta),
+          _formatearMonto(_totalVenta), // ✅
           destacado: true,
         ),
       ],
@@ -613,7 +597,6 @@ class _FormularioCreditoVistaState
     );
   }
 
-  /// Envuelve un child en un contenedor con el mismo estilo visual que el resumen
   Widget _buildContenedorEstilizado(Widget child) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
@@ -637,11 +620,9 @@ class _FormularioCreditoVistaState
 
   Widget _buildContenidoPrincipal(ResumenCreditoCliente resumen) {
     final anchoPantalla = MediaQuery.of(context).size.width;
-    // Considerar el drawer lateral (280) + padding del scaffold
     final anchoDisponible = anchoPantalla - 280 - 32;
     final usarDosColumnas = anchoDisponible >= 580;
 
-    // Formulario izquierdo envuelto en contenedor estilizado
     final formulario = _buildContenedorEstilizado(
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -653,7 +634,6 @@ class _FormularioCreditoVistaState
       ),
     );
 
-    // Resumen derecho
     final resumenTarjeta = _buildContenedorEstilizado(
       _buildResumenFinanciero(resumen),
     );

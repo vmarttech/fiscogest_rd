@@ -19,11 +19,11 @@ class SelectorDeliveryDialog extends ConsumerStatefulWidget {
 class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog> {
   late final TextEditingController _montoController;
   String? _opcionSeleccionada;
-  static final NumberFormat _formatoMonto = NumberFormat.currency(
-    locale: 'es_DO',
-    symbol: 'RD\$ ',
-    decimalDigits: 2,
-  );
+
+  // ✅ Reemplazado NumberFormat.currency por formateador sin símbolo
+  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
+  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
+
   static const List<Map<String, dynamic>> _opciones = [
     {'nombre': 'Santo Domingo', 'monto': 50.0},
     {'nombre': 'Nacional', 'monto': 150.0},
@@ -112,7 +112,8 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
                   ),
                 ),
                 subtitle: Text(
-                  _formatoMonto.format(monto),
+                  // ✅ Cambiado: usa la nueva función con RD$ al principio
+                  _formatearMonto(monto),
                   style: AppTypography.labelSmall,
                 ),
                 selected: seleccionada,

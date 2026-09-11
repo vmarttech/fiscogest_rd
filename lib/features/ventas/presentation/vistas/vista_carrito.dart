@@ -385,7 +385,7 @@ class _FilaProducto extends ConsumerWidget {
   }
 
   String formatearMonto(double valor) =>
-      NumberFormat.currency(symbol: 'RD\$ ', decimalDigits: 2).format(valor);
+      'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
 }
 
 class _FilaTotal extends StatelessWidget {

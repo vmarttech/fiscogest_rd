@@ -23,7 +23,6 @@ class ResultadoFormularioCredito {
     this.planPago,
     this.abonoInicial,
   });
-
   final CuentaPorCobrar cuenta;
   final PlanPago? planPago;
   final AbonoCredito? abonoInicial;
@@ -36,10 +35,10 @@ class FormularioCreditoDialog extends ConsumerStatefulWidget {
     this.onVolver,
     this.onResultado,
   });
-
   final RegistrarVentaState estadoVenta;
   final VoidCallback? onVolver;
   final void Function(ResultadoFormularioCredito)? onResultado;
+
   static const String routeName = 'formulario-credito';
 
   static Future<ResultadoFormularioCredito?> navegar(
@@ -69,14 +68,11 @@ class FormularioCreditoDialog extends ConsumerStatefulWidget {
 
 class _FormularioCreditoDialogState
     extends ConsumerState<FormularioCreditoDialog> {
-  static final NumberFormat _formatoMonto = NumberFormat.currency(
-    locale: 'es_DO',
-    symbol: 'RD\$ ',
-    decimalDigits: 2,
-    customPattern: '¤ #,##0.00',
-  );
-  static final DateFormat _formatoFecha = DateFormat('dd/MM/yyyy');
+  // ✅ Reemplazado NumberFormat.currency por formateador sin símbolo
+  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
+  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
 
+  static final DateFormat _formatoFecha = DateFormat('dd/MM/yyyy');
   late final TextEditingController _abonoInicialController;
   late final TextEditingController _tasaInteresController;
   late final TextEditingController _observacionesController;
@@ -85,7 +81,6 @@ class _FormularioCreditoDialogState
   late DateTime _fechaPrimerVencimiento;
   bool _mostrarTablaCuotas = false;
   bool _guardando = false;
-
   static const List<int> _opcionesPlazo = [1, 2, 3, 6];
   static const List<int> _opcionesCuotas = [1, 2, 3, 6];
   static const List<double> _opcionesTasa = [0.0, 0.03, 0.05, 0.08, 0.10];
@@ -162,16 +157,13 @@ class _FormularioCreditoDialogState
       }
       return;
     }
-
     setState(() => _guardando = true);
-
     try {
       final resumen = _resumen;
       final ahora = DateTime.now();
       final fechaVencimientoFinal = _numeroCuotas <= 1
           ? _fechaPrimerVencimiento
           : _fechaPrimerVencimiento.add(Duration(days: 30 * (_numeroCuotas - 1)));
-
       PlanPago? planPago;
       if (_numeroCuotas > 1) {
         planPago = CalculadoraCreditoService.generarPlanPago(
@@ -181,7 +173,6 @@ class _FormularioCreditoDialogState
           fechaPrimerVencimiento: _fechaPrimerVencimiento,
         );
       }
-
       final cuenta = CuentaPorCobrar(
         clienteId: widget.estadoVenta.clienteId ?? 0,
         clienteNombre: widget.estadoVenta.clienteNombre,
@@ -201,7 +192,6 @@ class _FormularioCreditoDialogState
             : _observacionesController.text.trim(),
         usuarioId: widget.estadoVenta.usuarioId,
       );
-
       AbonoCredito? abonoInicial;
       if (_abonoInicial > 0.001) {
         abonoInicial = AbonoCredito(
@@ -212,15 +202,12 @@ class _FormularioCreditoDialogState
           usuarioId: widget.estadoVenta.usuarioId,
         );
       }
-
       final resultado = ResultadoFormularioCredito(
         cuenta: cuenta,
         planPago: planPago,
         abonoInicial: abonoInicial,
       );
-
       if (!mounted) return;
-
       if (widget.onResultado != null) {
         widget.onResultado!(resultado);
       } else if (Navigator.canPop(context)) {
@@ -247,7 +234,6 @@ class _FormularioCreditoDialogState
   @override
   Widget build(BuildContext context) {
     final resumen = _resumen;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -281,7 +267,7 @@ class _FormularioCreditoDialogState
                     ),
                     _buildFilaSoloLectura(
                       'Total de venta:',
-                      _formatoMonto.format(_totalVenta),
+                      _formatearMonto(_totalVenta), // ✅
                       destacado: true,
                     ),
                   ],
@@ -370,25 +356,25 @@ class _FormularioCreditoDialogState
                   children: [
                     _buildFilaResumen(
                       'Total venta:',
-                      _formatoMonto.format(resumen.totalVenta),
+                      _formatearMonto(resumen.totalVenta), // ✅
                     ),
                     _buildFilaResumen(
                       'Abono inicial:',
-                      _formatoMonto.format(resumen.abonoInicial),
+                      _formatearMonto(resumen.abonoInicial), // ✅
                     ),
                     _buildFilaResumen(
                       'Saldo financiado:',
-                      _formatoMonto.format(resumen.saldoFinanciado),
+                      _formatearMonto(resumen.saldoFinanciado), // ✅
                     ),
                     if (resumen.montoInteres > 0.001)
                       _buildFilaResumen(
                         'Interés:',
-                        '+ ${_formatoMonto.format(resumen.montoInteres)}',
+                        '+ ${_formatearMonto(resumen.montoInteres)}', // ✅
                         colorTexto: AppColors.error,
                       ),
                     _buildFilaResumen(
                       'TOTAL A PAGAR:',
-                      _formatoMonto.format(resumen.totalAPagar),
+                      _formatearMonto(resumen.totalAPagar), // ✅
                       destacado: true,
                       colorTexto: AppColors.primary,
                     ),
@@ -396,7 +382,7 @@ class _FormularioCreditoDialogState
                       resumen.numeroCuotas == 1
                           ? 'Pago único:'
                           : '${resumen.numeroCuotas} cuotas de:',
-                      _formatoMonto.format(resumen.montoPorCuota),
+                      _formatearMonto(resumen.montoPorCuota), // ✅
                     ),
                     _buildFilaResumen(
                       'Primer vencimiento:',
@@ -533,10 +519,10 @@ class _FormularioCreditoDialogState
             return DataRow(cells: [
               DataCell(Text('#${c.numeroCuota}', style: AppTypography.labelMedium)),
               DataCell(Text(_formatoFecha.format(c.fechaVencimiento), style: AppTypography.labelMedium)),
-              DataCell(Text(_formatoMonto.format(c.montoCapital), style: AppTypography.labelMedium)),
-              DataCell(Text(_formatoMonto.format(c.montoInteres), style: AppTypography.labelMedium)),
-              DataCell(Text(_formatoMonto.format(c.montoTotal), style: AppTypography.labelMedium)),
-              DataCell(Text(_formatoMonto.format(c.saldoDespues), style: AppTypography.labelMedium)),
+              DataCell(Text(_formatearMonto(c.montoCapital), style: AppTypography.labelMedium)), // ✅
+              DataCell(Text(_formatearMonto(c.montoInteres), style: AppTypography.labelMedium)), // ✅
+              DataCell(Text(_formatearMonto(c.montoTotal), style: AppTypography.labelMedium)), // ✅
+              DataCell(Text(_formatearMonto(c.saldoDespues), style: AppTypography.labelMedium)), // ✅
             ]);
           }).toList(),
         ),

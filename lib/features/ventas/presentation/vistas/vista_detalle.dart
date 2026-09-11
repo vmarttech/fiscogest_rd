@@ -32,7 +32,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       'Hoy · ${DateFormat.Hm().format(fecha)}';
 
   String _formatearMonto(double valor) =>
-      NumberFormat.currency(symbol: 'RD\$ ').format(valor);
+      'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {

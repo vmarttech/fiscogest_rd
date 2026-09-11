@@ -11,11 +11,10 @@ class CotizacionServiceImpl implements ICotizacionService {
 
   String _generarTextoCotizacion(Venta cotizacion) {
     final formatoFecha = DateFormat('dd/MM/yyyy HH:mm');
-    final formatoMoneda = NumberFormat.currency(
-      locale: 'es_DO',
-      symbol: 'RD\$ ',
-      decimalDigits: 2,
-    );
+    final formatoNumero = NumberFormat('#,##0.00', 'es_DO');
+
+    String formatearMonto(double valor) => 'RD\$${formatoNumero.format(valor)}';
+
     final texto = StringBuffer();
     texto.writeln('========================================');
     texto.writeln('           FISCOGEST RD');
@@ -38,7 +37,7 @@ class CotizacionServiceImpl implements ICotizacionService {
       final detalle = cotizacion.detalles[i];
       texto.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}');
       texto.writeln(
-        '   Cant: ${detalle.cantidad}  x  ${formatoMoneda.format(detalle.precioUnitario)}',
+        '   Cant: ${detalle.cantidad}  x  ${formatearMonto(detalle.precioUnitario)}',
       );
       if (detalle.descuentoPorcentaje > 0) {
         texto.writeln(
@@ -47,23 +46,23 @@ class CotizacionServiceImpl implements ICotizacionService {
       }
       if (detalle.montoDescuento > 0) {
         texto.writeln(
-          '   Desc: ${formatoMoneda.format(detalle.montoDescuento)}',
+          '   Desc: ${formatearMonto(detalle.montoDescuento)}',
         );
       }
       final subtotalLinea = detalle.subtotalLinea ?? detalle.subtotal;
-      texto.writeln('   Subtotal: ${formatoMoneda.format(subtotalLinea)}');
+      texto.writeln('   Subtotal: ${formatearMonto(subtotalLinea)}');
       texto.writeln('');
     }
     texto.writeln('----------------------------------------');
     texto.writeln(
-      'Subtotal:          ${formatoMoneda.format(cotizacion.subtotal)}',
+      'Subtotal:          ${formatearMonto(cotizacion.subtotal)}',
     );
     texto.writeln(
-      'ITBIS (18%):       ${formatoMoneda.format(cotizacion.itbis)}',
+      'ITBIS (18%):       ${formatearMonto(cotizacion.itbis)}',
     );
     texto.writeln('========================================');
     texto.writeln(
-      'TOTAL COTIZACIÓN:  ${formatoMoneda.format(cotizacion.total)}',
+      'TOTAL COTIZACIÓN:  ${formatearMonto(cotizacion.total)}',
     );
     texto.writeln('========================================');
     texto.writeln('');

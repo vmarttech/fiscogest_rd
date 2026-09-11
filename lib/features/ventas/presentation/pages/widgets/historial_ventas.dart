@@ -13,7 +13,7 @@ class HistorialVentas extends ConsumerWidget {
   const HistorialVentas({super.key});
 
   String formatearFecha(DateTime fecha) => DateFormat('dd/MM · HH:mm').format(fecha);
-  String formatearMonto(double valor) => NumberFormat.currency(symbol: 'RD\$ ', decimalDigits: 2).format(valor);
+  String formatearMonto(double valor) => 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
 
   String obtenerEtiquetaTipo(Venta v) {
     if (v.numero.startsWith('C')) return 'Cotización';

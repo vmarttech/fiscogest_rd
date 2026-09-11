@@ -8,11 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 
 String _formatearMonto(double monto) {
-  return NumberFormat.currency(
-    locale: 'es_DO',
-    symbol: '',
-    decimalDigits: 2,
-  ).format(monto);
+  return 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(monto)}';
 }
 
 class ItemCarrito extends ConsumerWidget {
@@ -22,7 +18,6 @@ class ItemCarrito extends ConsumerWidget {
     required this.indice,
     required this.alEliminar,
   });
-
   final DetalleVenta detalle;
   final int indice;
   final VoidCallback alEliminar;
@@ -67,8 +62,6 @@ class ItemCarrito extends ConsumerWidget {
   void _abrirDescuentoLinea(BuildContext context, WidgetRef ref) {
     final tienePorcentaje = detalle.descuentoPorcentaje > 0;
     final tieneMonto = detalle.montoDescuento > 0;
-
-    // ✅ ANTES de abrir el diálogo — validar reglas
     final notifier = ref.read(registrarVentaProvider.notifier);
     final error = notifier.puedeAplicarDescuentoLinea(detalle);
     if (error != null) {
@@ -82,7 +75,6 @@ class ItemCarrito extends ConsumerWidget {
       );
       return;
     }
-
     final controlador = TextEditingController(
       text: tienePorcentaje
           ? detalle.descuentoPorcentaje.toStringAsFixed(2)
@@ -91,7 +83,6 @@ class ItemCarrito extends ConsumerWidget {
           : '',
     );
     bool esPorcentaje = tienePorcentaje;
-
     showDialog<dynamic>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -184,7 +175,6 @@ class ItemCarrito extends ConsumerWidget {
     final tieneOferta = detalle.ofertaId != null;
     final tieneDescuento =
         detalle.descuentoPorcentaje > 0 || detalle.montoDescuento > 0;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: LayoutBuilder(
@@ -201,7 +191,7 @@ class ItemCarrito extends ConsumerWidget {
             context,
             ref,
             tieneOferta,
-            tieneDescuento,
+              tieneDescuento,
           );
         },
       ),

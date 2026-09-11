@@ -19,18 +19,13 @@ import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_c
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
-
   @override
   ConsumerState<VistaInicioVacia> createState() => _VistaInicioVaciaState();
 }
 
 class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
-  static final NumberFormat _formatoMonto = NumberFormat.currency(
-    locale: 'es_DO',
-    symbol: 'RD\$ ',
-    decimalDigits: 2,
-    customPattern: '¤ #,##0.00',
-  );
+  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
+  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
 
   bool _guardando = false;
   bool _mostrarFormularioCredito = false;
@@ -87,8 +82,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           SnackBar(
             content: Text(
               '✅ Venta #${ventaGuardada.numero} registrada.\n'
-              '💰 Abono inicial: ${_formatoMonto.format(abonoRecibido)}\n'
-              '📄 Saldo pendiente: ${_formatoMonto.format(saldoPendiente)}\n'
+              '💰 Abono inicial: ${_formatearMonto(abonoRecibido)}\n'
+              '📄 Saldo pendiente: ${_formatearMonto(saldoPendiente)}\n'
               '📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}'
             ),
             backgroundColor: Colors.green,
@@ -137,7 +132,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Total: ${_formatoMonto.format(estado.total)}',
+              'Total: ${_formatearMonto(estado.total)}',
               style: TextStyle(
                 fontSize: esPantallaPequenaDialog ? 14 : 18,
                 fontWeight: FontWeight.bold,
@@ -162,7 +157,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ Apartado #$idApartado registrado — Stock reservado — ${_formatoMonto.format(estadoFinal.total)}'),
+            content: Text('✅ Apartado #$idApartado registrado — Stock reservado — ${_formatearMonto(estadoFinal.total)}'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 4),
           ),
@@ -184,7 +179,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ Venta #${ventaGuardada.numero} registrada — ${_formatoMonto.format(ventaGuardada.total)}'),
+            content: Text('✅ Venta #${ventaGuardada.numero} registrada — ${_formatearMonto(ventaGuardada.total)}'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 4),
           ),
@@ -232,7 +227,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         : 'Consumidor Final';
     final tieneProductos = estado.detalles.isNotEmpty;
     final tieneResultados = estado.resultadosBusqueda.isNotEmpty;
-    final montoTotal = _formatoMonto.format(estado.total);
+    final montoTotal = _formatearMonto(estado.total);
     final tieneDescuentoGeneral = estado.montoDescuento > 0;
     final descuentoPorLinea = _calcularDescuentoPorLinea(estado);
     final subtotalConDescuentoLinea = estado.subtotal - descuentoPorLinea;
@@ -379,7 +374,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                               return ListTile(
                                 dense: true,
                                 title: Text(prod.nombreProducto ?? 'Producto'),
-                                subtitle: Text(_formatoMonto.format(prod.precioUnitario)),
+                                subtitle: Text(_formatearMonto(prod.precioUnitario)),
                                 onTap: () {
                                   _seleccionarProducto(prod);
                                 },
@@ -452,23 +447,23 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       if (estado.costoEnvio > 0)
-                        filaTotal('Envío / Delivery:', _formatoMonto.format(estado.costoEnvio)),
+                        filaTotal('Envío / Delivery:', _formatearMonto(estado.costoEnvio)),
                       if (!esConsumidorFinal) ...[
-                        filaTotal('Subtotal:', _formatoMonto.format(estado.subtotal)),
+                        filaTotal('Subtotal:', _formatearMonto(estado.subtotal)),
                         if (descuentoPorLinea > 0.001)
                           filaTotal(
                             'Descuento por línea:',
-                            '- ${_formatoMonto.format(descuentoPorLinea)}',
+                            '- ${_formatearMonto(descuentoPorLinea)}',
                             colorTexto: Colors.red.shade700,
                           ),
                         if (tieneDescuentoGeneral)
                           filaTotal(
                             'Descuento general:',
-                            '- ${_formatoMonto.format(estado.montoDescuento)}',
+                            '- ${_formatearMonto(estado.montoDescuento)}',
                             colorTexto: Colors.red.shade700,
                           ),
-                        filaTotal('Base Gravable:', _formatoMonto.format(baseGravable)),
-                        filaTotal('ITBIS (18%):', _formatoMonto.format(estado.itbis)),
+                        filaTotal('Base Gravable:', _formatearMonto(baseGravable)),
+                        filaTotal('ITBIS (18%):', _formatearMonto(estado.itbis)),
                       ],
                       const SizedBox(height: 8),
                       filaTotal('TOTAL:', montoTotal, esDestacado: true, colorTexto: colorPrimario),
