@@ -40,13 +40,19 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       final resultado = await servicio.generarImpresion(venta);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(resultado), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text(resultado),
+            backgroundColor: AppColors.success,
+          ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al imprimir: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error al imprimir: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -58,13 +64,19 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       final ruta = await servicio.exportarPDF(venta);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Archivo generado: $ruta'), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text('Archivo generado: $ruta'),
+            backgroundColor: AppColors.success,
+          ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al generar archivo: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error al generar archivo: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -77,7 +89,10 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al enviar: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error al enviar: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -118,9 +133,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
             backgroundColor: AppColors.success,
           ),
         );
-        ref
-            .read(ventaCargadaDesdeHistorialProvider.notifier)
-            .limpiarVenta();
+        ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
         ref
             .read(ventasNavegacionProvider.notifier)
             .cambiarVista(VistaActual.inicio);
@@ -142,7 +155,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -222,7 +235,11 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           _FilaResumen('ITBIS', _formatearMonto(venta.itbis)),
           const SizedBox(height: 4),
           const Divider(),
-          _FilaResumen('TOTAL', _formatearMonto(venta.total), esResaltado: true),
+          _FilaResumen(
+            'TOTAL',
+            _formatearMonto(venta.total),
+            esResaltado: true,
+          ),
           const SizedBox(height: 24),
           const Text('Pago', style: AppTypography.labelLarge),
           const SizedBox(height: 8),

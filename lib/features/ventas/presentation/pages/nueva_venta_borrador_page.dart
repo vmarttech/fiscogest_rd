@@ -193,7 +193,7 @@ class _NuevaVentaBorradorPageState
 
   Widget _buildUnaColumna(VentaBorradorState estado) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildCabecera(),
         const SizedBox(height: AppSpacing.m),
@@ -247,7 +247,7 @@ class _NuevaVentaBorradorPageState
 
   Widget _buildCabecera() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('NUEVA VENTA', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
@@ -256,7 +256,10 @@ class _NuevaVentaBorradorPageState
           child: Column(
             children: [
               ListTile(
-                title: const Text('Vencimiento', style: AppTypography.bodyMedium),
+                title: const Text(
+                  'Vencimiento',
+                  style: AppTypography.bodyMedium,
+                ),
                 subtitle: Text(
                   _fechaVencimientoSeleccionada != null
                       ? '${_fechaVencimientoSeleccionada!.day}/${_fechaVencimientoSeleccionada!.month}/${_fechaVencimientoSeleccionada!.year}'
@@ -278,7 +281,7 @@ class _NuevaVentaBorradorPageState
         ? estado.clienteNombre!
         : 'Consumidor Final';
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Cliente', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
@@ -287,14 +290,21 @@ class _NuevaVentaBorradorPageState
           // ✅ Reemplazado ListTile → Row. Ningún gestor nativo interfiere
           child: Row(
             children: [
-              const Icon(Icons.person_outline, size: 20, color: AppColors.primary),
+              const Icon(
+                Icons.person_outline,
+                size: 20,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(nombreCliente, style: AppTypography.labelMedium),
-                    const Text('Predeterminado', style: AppTypography.bodySmall),
+                    const Text(
+                      'Predeterminado',
+                      style: AppTypography.bodySmall,
+                    ),
                   ],
                 ),
               ),
@@ -313,7 +323,7 @@ class _NuevaVentaBorradorPageState
 
   Widget _buildProductos() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Productos', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
@@ -327,7 +337,7 @@ class _NuevaVentaBorradorPageState
 
   Widget _buildResumen(VentaBorradorState estado) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Resumen', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
@@ -387,7 +397,7 @@ class _NuevaVentaBorradorPageState
 
   Widget _buildBotonera() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppButton(
           text: _guardando ? 'Guardando...' : 'Guardar Cotización',

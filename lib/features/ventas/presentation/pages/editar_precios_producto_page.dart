@@ -125,7 +125,7 @@ class _EditarPreciosProductoPageState
                 });
               }
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Producto: ${widget.producto.nombre}',

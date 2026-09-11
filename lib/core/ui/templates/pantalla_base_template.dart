@@ -79,7 +79,7 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
     return SingleChildScrollView(
       padding: AppSpacing.allM,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildColumnaIzquierda(),
           const SizedBox(height: AppSpacing.m),
@@ -92,7 +92,7 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
   // === COLUMNA IZQUIERDA ===
   Widget _buildColumnaIzquierda() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Contenido Izquierda', style: AppTypography.labelMedium),
         const SizedBox(height: AppSpacing.s),
@@ -115,7 +115,7 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
   // === COLUMNA DERECHA ===
   Widget _buildColumnaDerecha() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Contenido Derecha', style: AppTypography.labelMedium),
         const SizedBox(height: AppSpacing.s),

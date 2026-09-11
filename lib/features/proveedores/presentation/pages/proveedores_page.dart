@@ -46,7 +46,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
             children: [
               esPantallaPequena
                   ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Administración de datos generales, contactos, RNC y direcciones comerciales.',

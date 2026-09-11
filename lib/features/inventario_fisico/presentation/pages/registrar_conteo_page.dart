@@ -84,7 +84,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
       title: 'Nuevo Conteo Físico', // ✅ Recibe String?
       padding: AppSpacing.allL,
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppTextField(
             controller: _nombreCtrl,

@@ -26,7 +26,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
     return Padding(
       padding: AppSpacing.allM,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

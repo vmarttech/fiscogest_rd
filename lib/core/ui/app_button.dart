@@ -16,6 +16,7 @@ class AppButton extends StatelessWidget {
     this.height = AppSizes.buttonHeightMd,
     this.width,
   });
+
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -28,7 +29,6 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveOnPressed = (isDisabled || isLoading) ? null : onPressed;
-
     return SizedBox(
       width: width,
       height: height,
@@ -60,6 +60,7 @@ class AppButton extends StatelessWidget {
       );
     }
 
+    // ✅ AQUÍ SE DECLARAN LAS VARIABLES QUE FALTABAN
     final iconWidget = icon != null
         ? Icon(icon, size: AppSizes.iconMd)
         : const SizedBox.shrink();

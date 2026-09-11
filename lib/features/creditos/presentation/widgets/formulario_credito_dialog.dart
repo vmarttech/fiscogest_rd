@@ -23,6 +23,7 @@ class ResultadoFormularioCredito {
     this.planPago,
     this.abonoInicial,
   });
+
   final CuentaPorCobrar cuenta;
   final PlanPago? planPago;
   final AbonoCredito? abonoInicial;
@@ -79,7 +80,6 @@ class _FormularioCreditoDialogState
   late final TextEditingController _abonoInicialController;
   late final TextEditingController _tasaInteresController;
   late final TextEditingController _observacionesController;
-
   int _plazoMeses = 1;
   int _numeroCuotas = 1;
   late DateTime _fechaPrimerVencimiento;
@@ -108,14 +108,11 @@ class _FormularioCreditoDialogState
   }
 
   double get _totalVenta => widget.estadoVenta.total;
-
   double get _abonoInicial {
     final valor = double.tryParse(_abonoInicialController.text) ?? 0.0;
     return valor.clamp(0.0, _totalVenta);
   }
-
   double get _saldoFinanciado => (_totalVenta - _abonoInicial).clamp(0.0, double.infinity);
-
   double get _tasaMensual {
     return double.tryParse(_tasaInteresController.text) ?? 0.05;
   }
@@ -139,7 +136,9 @@ class _FormularioCreditoDialogState
       locale: const Locale('es', 'DO'),
     );
     if (fecha != null) {
-      setState(() => _fechaPrimerVencimiento = fecha);
+      setState(() {
+        _fechaPrimerVencimiento = fecha;
+      });
     }
   }
 
@@ -237,13 +236,18 @@ class _FormularioCreditoDialogState
         );
       }
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) {
+        setState(() {
+          _guardando = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final resumen = _resumen;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -282,7 +286,6 @@ class _FormularioCreditoDialogState
                     ),
                   ],
                 ),
-
                 AppSection(
                   title: 'Condiciones del crédito',
                   children: [
@@ -304,7 +307,9 @@ class _FormularioCreditoDialogState
                           onSelected: (_) {
                             setState(() {
                               _plazoMeses = meses;
-                              if (_numeroCuotas > meses) _numeroCuotas = meses;
+                              if (_numeroCuotas > meses) {
+                                _numeroCuotas = meses;
+                              }
                             });
                           },
                         );
@@ -360,7 +365,6 @@ class _FormularioCreditoDialogState
                     ),
                   ],
                 ),
-
                 AppSection(
                   title: 'Resumen para el cliente',
                   children: [
@@ -412,11 +416,11 @@ class _FormularioCreditoDialogState
                           style: AppTypography.labelMedium,
                         ),
                       ),
-                      if (_mostrarTablaCuotas) _buildTablaCuotas(resumen.cuotas),
+                      if (_mostrarTablaCuotas)
+                        _buildTablaCuotas(resumen.cuotas),
                     ],
                   ],
                 ),
-
                 AppSection(
                   children: [
                     Row(

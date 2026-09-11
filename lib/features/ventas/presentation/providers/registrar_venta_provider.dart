@@ -63,6 +63,7 @@ class RegistrarVentaState {
     final itb = itbis ?? this.itbis;
     final desc = montoDescuento ?? this.montoDescuento;
     final totalCalculado = sub + itb + env - desc;
+
     return RegistrarVentaState(
       usuarioId: usuarioId ?? this.usuarioId,
       clienteId: clienteId ?? this.clienteId,
@@ -97,6 +98,13 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   bool get esConsumidorFinal {
     return state.clienteId == 0 ||
         state.clienteNombre == 'Consumidor Final';
+  }
+
+  double _precioConOferta({required double? precioEspecial, required double precioVenta}) {
+    if (precioEspecial != null && precioEspecial > 0) {
+      return precioEspecial;
+    }
+    return precioVenta;
   }
 
   double precioUnitarioConImpuesto(DetalleVenta linea) {
@@ -136,11 +144,13 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   String? agregarProducto(DetalleVenta linea) {
     final lista = List<DetalleVenta>.from(state.detalles);
     final indice = lista.indexWhere((p) => p.productoId == linea.productoId);
+
     if (indice >= 0) {
       final existente = lista[indice];
       final nuevaCantidad = existente.cantidad + linea.cantidad;
       final mensajeStock = validarStockAlAgregar(linea, nuevaCantidad.toDouble());
       if (mensajeStock != null) return mensajeStock;
+
       final nuevoSubtotal = existente.precioUnitario * nuevaCantidad;
       lista[indice] = existente.copyWith(
         cantidad: nuevaCantidad,
@@ -152,6 +162,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       if (mensajeStock != null) return mensajeStock;
       lista.add(linea);
     }
+
     _recalcularTotales(lista);
     return null;
   }
@@ -185,11 +196,13 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   void aplicarDescuentoGeneral(double monto, {bool esPorcentaje = false}) {
     final lista = state.detalles;
     double nuevoMontoDescuento = 0.0;
+
     if (esPorcentaje) {
       nuevoMontoDescuento = state.subtotal * (monto / 100.0);
     } else {
       nuevoMontoDescuento = monto;
     }
+
     state = state.copyWith(montoDescuento: nuevoMontoDescuento);
     _recalcularTotales(lista);
   }
@@ -204,6 +217,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       final linea = lista[indice];
       final precioBase = linea.precioUnitario * linea.cantidad;
       double nuevoSubtotal;
+
       if (esPorcentaje) {
         nuevoSubtotal = precioBase * (100 - valor) / 100;
         lista[indice] = linea.copyWith(descuentoPorcentaje: valor, montoDescuento: 0);
@@ -211,6 +225,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
         nuevoSubtotal = precioBase - valor;
         lista[indice] = linea.copyWith(montoDescuento: valor, descuentoPorcentaje: 0);
       }
+
       if (nuevoSubtotal < 0) nuevoSubtotal = 0;
       lista[indice] = linea.copyWith(subtotal: nuevoSubtotal, subtotalLinea: nuevoSubtotal);
       _recalcularTotales(lista);
@@ -271,6 +286,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     final subtotal = lista.fold<double>(0.0, (sum, l) => sum + l.subtotal);
     final itbis = subtotal * _tasaItbis;
     final total = subtotal + itbis + state.costoEnvio - state.montoDescuento;
+
     state = state.copyWith(
       detalles: lista,
       subtotal: subtotal,
@@ -285,6 +301,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       state = state.copyWith(resultadosBusqueda: const []);
       return;
     }
+
     final todos = await _productoRepo.obtenerProductos();
     final coinciden = todos.where((p) {
       final coincideCodigo = p.codigo.toLowerCase().contains(textoBusqueda);
@@ -292,14 +309,22 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       final coincideCodigoBarras = p.codigoBarras?.toLowerCase().contains(textoBusqueda) ?? false;
       return p.activo && (coincideCodigo || coincideNombre || coincideCodigoBarras);
     }).toList();
-    final resultados = coinciden.map((producto) => DetalleVenta(
-      productoId: producto.id ?? 0,
-      cantidad: 1,
-      precioUnitario: producto.precioVenta,
-      subtotal: producto.precioVenta,
-      nombreProducto: producto.nombre,
-      tasaImpuesto: _tasaItbis,
-    )).toList();
+
+    final resultados = coinciden.map((producto) {
+      final precioFinal = _precioConOferta(
+        precioEspecial: producto.precioEspecial,
+        precioVenta: producto.precioVenta,
+      );
+      return DetalleVenta(
+        productoId: producto.id ?? 0,
+        cantidad: 1,
+        precioUnitario: precioFinal,
+        subtotal: precioFinal,
+        nombreProducto: producto.nombre,
+        tasaImpuesto: _tasaItbis,
+      );
+    }).toList();
+
     state = state.copyWith(resultadosBusqueda: resultados);
   }
 

@@ -46,7 +46,7 @@ class SeleccionarClienteDialog extends ConsumerWidget {
             width: 500,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppTextField(
                   label: 'Buscar cliente',

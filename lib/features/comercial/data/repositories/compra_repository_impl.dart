@@ -12,7 +12,6 @@ int _extraerId(dynamic valor) {
 
 class CompraRepositoryImpl implements ICompraRepository {
   CompraRepositoryImpl(this.db);
-
   final AppDatabase db;
 
   ComprasTableCompanion _compraToCompanion(Compra compra) {
@@ -35,23 +34,23 @@ class CompraRepositoryImpl implements ICompraRepository {
     );
   }
 
-  Compra _filaToCompra(dynamic fila) {
+  Compra _filaToCompra(ComprasTableData fila) {
     return Compra(
       id: _extraerId(fila.id),
       proveedorId: _extraerId(fila.proveedorId),
-      nombreProveedor: fila.nombreProveedor as String,
-      fechaEmision: fila.fechaEmision as DateTime,
-      fechaConfirmacion: fila.fechaConfirmacion as DateTime?,
-      numeroComprobante: fila.numeroComprobante as String,
-      subtotalSinImpuestos: fila.subtotalSinImpuestos as double,
-      montoDescuentoGlobal: fila.montoDescuentoGlobal as double,
-      tasaImpuesto: fila.tasaImpuesto as double,
-      montoImpuesto: fila.montoImpuesto as double,
-      totalCompra: fila.totalCompra as double,
-      observaciones: fila.observaciones as String,
-      estado: fila.estado as EstadoCompra,
-      creadoEn: fila.creadoEn as DateTime,
-      actualizadoEn: fila.actualizadoEn as DateTime?,
+      nombreProveedor: fila.nombreProveedor,
+      fechaEmision: fila.fechaEmision,
+      fechaConfirmacion: fila.fechaConfirmacion,
+      numeroComprobante: fila.numeroComprobante,
+      subtotalSinImpuestos: fila.subtotalSinImpuestos,
+      montoDescuentoGlobal: fila.montoDescuentoGlobal,
+      tasaImpuesto: fila.tasaImpuesto,
+      montoImpuesto: fila.montoImpuesto,
+      totalCompra: fila.totalCompra,
+      observaciones: fila.observaciones,
+      estado: fila.estado,
+      creadoEn: fila.creadoEn,
+      actualizadoEn: fila.actualizadoEn,
     );
   }
 
@@ -69,17 +68,17 @@ class CompraRepositoryImpl implements ICompraRepository {
     );
   }
 
-  DetalleCompra _filaToDetalle(dynamic fila) {
+  DetalleCompra _filaToDetalle(DetalleCompraTableData fila) {
     return DetalleCompra(
       id: _extraerId(fila.id),
       compraId: _extraerId(fila.compraId),
       productoId: _extraerId(fila.productoId),
-      nombreProducto: fila.nombreProducto as String,
-      cantidad: fila.cantidad as double,
-      costoUnitario: fila.costoUnitario as double,
-      descuentoPorcentaje: fila.descuentoPorcentaje as double,
-      montoDescuentoLinea: fila.montoDescuentoLinea as double,
-      subtotalLinea: fila.subtotalLinea as double,
+      nombreProducto: fila.nombreProducto,
+      cantidad: fila.cantidad,
+      costoUnitario: fila.costoUnitario,
+      descuentoPorcentaje: fila.descuentoPorcentaje,
+      montoDescuentoLinea: fila.montoDescuentoLinea,
+      subtotalLinea: fila.subtotalLinea,
     );
   }
 
@@ -96,7 +95,7 @@ class CompraRepositoryImpl implements ICompraRepository {
     final filas = await (db.select(
       db.comprasTable,
     )..orderBy([(t) => OrderingTerm.desc(t.fechaEmision)])).get();
-    return filas.map(_filaToCompra).toList();
+    return filas.map((ComprasTableData f) => _filaToCompra(f)).toList();
   }
 
   @override
@@ -104,7 +103,7 @@ class CompraRepositoryImpl implements ICompraRepository {
     final filas = await (db.select(
       db.detalleCompraTable,
     )..where((t) => t.compraId.equals(compraId))).get();
-    return filas.map(_filaToDetalle).toList();
+    return filas.map((DetalleCompraTableData f) => _filaToDetalle(f)).toList();
   }
 
   @override

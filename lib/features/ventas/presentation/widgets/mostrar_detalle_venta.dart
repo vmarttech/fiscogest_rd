@@ -140,7 +140,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
     return SingleChildScrollView(
       padding: AppSpacing.allM,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [

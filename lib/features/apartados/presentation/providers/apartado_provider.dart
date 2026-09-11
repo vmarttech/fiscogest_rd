@@ -57,9 +57,12 @@ class ApartadoNotifier extends StateNotifier<AsyncValue<List<Apartado>>> {
     state = const AsyncValue.loading();
     try {
       final IApartadoRepository repo = ref.read(apartadoRepositoryProvider);
-      final ProductoNotifier productoNotifier = ref.read(productoProvider.notifier);
-
-      final List<Map<String, dynamic>> productos = venta.detalles.map((DetalleVenta detalle) {
+      final ProductoNotifier productoNotifier = ref.read(
+        productoProvider.notifier,
+      );
+      final List<Map<String, dynamic>> productos = venta.detalles.map((
+        DetalleVenta detalle,
+      ) {
         return <String, dynamic>{
           'productoId': detalle.productoId,
           'cantidad': detalle.cantidad,
@@ -76,7 +79,6 @@ class ApartadoNotifier extends StateNotifier<AsyncValue<List<Apartado>>> {
       }
 
       final double anticipo = venta.esCredito ? 0.0 : venta.total;
-
       final int nuevoId = await repo.registrarApartado(
         fecha: DateTime.now(),
         clienteId: venta.clienteId ?? 0,
@@ -99,20 +101,33 @@ class ApartadoNotifier extends StateNotifier<AsyncValue<List<Apartado>>> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final IApartadoRepository repo = ref.read(apartadoRepositoryProvider);
-      final Map<String, dynamic>? apartadoMap = await repo.obtenerPorId(apartadoId);
+      final Map<String, dynamic>? apartadoMap = await repo.obtenerPorId(
+        apartadoId,
+      );
+
       if (apartadoMap != null) {
-        final List<dynamic>? productos = apartadoMap['productos'] as List<dynamic>?;
-        final ProductoNotifier productoNotifier = ref.read(productoProvider.notifier);
-        for (final dynamic p in productos ?? <dynamic>[]) {
-          final dynamic productoId = p['productoId'];
+        // ✅ Tipo explícito: eliminada la advertencia strict_raw_type
+        final List<dynamic>? productosRaw =
+            apartadoMap['productos'] as List<dynamic>?;
+        final List<Map<String, dynamic>> productos = productosRaw != null
+            ? productosRaw.cast<Map<String, dynamic>>()
+            : <Map<String, dynamic>>[];
+
+        final ProductoNotifier productoNotifier = ref.read(
+          productoProvider.notifier,
+        );
+
+        for (final Map<String, dynamic> p in productos) {
+          final int? productoId = p['productoId'] as int?;
           final int cantidadEntera = p['cantidad'] as int? ?? 0;
           final double cantidad = cantidadEntera.toDouble();
+
           if (productoId != null) {
-            final int prodId = productoId as int;
-            await productoNotifier.liberarStockReservado(prodId, cantidad);
+            await productoNotifier.liberarStockReservado(productoId, cantidad);
           }
         }
       }
+
       await repo.cancelarApartado(apartadoId, motivo);
       await _cargarTodos();
       return state.value ?? <Apartado>[];
@@ -131,6 +146,8 @@ class ApartadoNotifier extends StateNotifier<AsyncValue<List<Apartado>>> {
 }
 
 final apartadoNotifierProvider =
-    StateNotifierProvider<ApartadoNotifier, AsyncValue<List<Apartado>>>((Ref ref) {
-  return ApartadoNotifier(ref);
-});
+    StateNotifierProvider<ApartadoNotifier, AsyncValue<List<Apartado>>>((
+      Ref ref,
+    ) {
+      return ApartadoNotifier(ref);
+    });

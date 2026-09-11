@@ -19,6 +19,7 @@ class RegistrarRecepcionPage extends ConsumerStatefulWidget {
     this.usuarioResponsable = 'usuario_actual',
     this.detallesCompra = const [],
   });
+
   static const String routeName = 'registrar-recepcion';
   final int compraId;
   final int proveedorId;
@@ -70,8 +71,12 @@ class _RegistrarRecepcionPageState
                 enabled: false,
               ),
               AppLayout.vM,
-              const Text('Estado de Recepción', style: AppTypography.labelMedium),
+              const Text(
+                'Estado de Recepción',
+                style: AppTypography.labelMedium,
+              ),
               AppLayout.vS,
+              // ✅ Forma compatible con tu versión de Flutter
               Row(
                 children: [
                   Radio<String>(
@@ -98,7 +103,10 @@ class _RegistrarRecepcionPageState
                 ],
               ),
               AppLayout.vM,
-              const Text('Detalle de Productos', style: AppTypography.labelMedium),
+              const Text(
+                'Detalle de Productos',
+                style: AppTypography.labelMedium,
+              ),
               AppLayout.vS,
               ...detalles.map(
                 (DetalleRecepcion det) => Padding(

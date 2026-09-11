@@ -46,7 +46,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
             children: [
               esPantallaPequena
                   ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Administración de unidades y presentaciones de productos.',

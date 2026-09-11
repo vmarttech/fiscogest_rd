@@ -154,7 +154,11 @@ class ItemCarrito extends ConsumerWidget {
             TextButton(
               onPressed: () {
                 final valor = double.tryParse(controlador.text) ?? 0.0;
-                final err = notifier.aplicarDescuentoLinea(indice, valor, esPorcentaje);
+                final err = notifier.aplicarDescuentoLinea(
+                  indice,
+                  valor,
+                  esPorcentaje,
+                );
                 if (err != null && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -346,7 +350,7 @@ class ItemCarrito extends ConsumerWidget {
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [

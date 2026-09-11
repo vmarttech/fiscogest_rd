@@ -24,7 +24,7 @@ class HistorialApartados extends ConsumerWidget {
     return Padding(
       padding: AppSpacing.allM,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Apartados', style: AppTypography.h4),
           const SizedBox(height: AppSpacing.xs),

@@ -12,7 +12,8 @@ class VistaCarrito extends ConsumerWidget {
   const VistaCarrito({super.key});
 
   String formatearMonto(double valor) {
-    return NumberFormat.currency(symbol: 'RD\$ ', decimalDigits: 2).format(valor);
+    final numero = NumberFormat('#,##0.00', 'es_DO').format(valor);
+    return 'RD\$ $numero';
   }
 
   @override
@@ -43,7 +44,9 @@ class VistaCarrito extends ConsumerWidget {
     final espaciadoAntesTotal = esPantallaPequena ? 12.0 : 20.0;
 
     final venta = ref.watch(registrarVentaProvider);
-    final modo = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
+    final modo = ref.watch(
+      ventasNavegacionProvider.select((e) => e.modoOperacion),
+    );
 
     final titulo = switch (modo) {
       ModoOperacion.venta => 'CARRITO DE VENTA',
@@ -78,8 +81,12 @@ class VistaCarrito extends ConsumerWidget {
                 ),
               ),
               TextButton.icon(
-                onPressed: () => ref.read(registrarVentaProvider.notifier).vaciarVenta(),
-                icon: Icon(Icons.delete_outline, size: tamanoIconoVaciar), // ✅ AHORA ADAPTATIVO
+                onPressed: () =>
+                    ref.read(registrarVentaProvider.notifier).vaciarVenta(),
+                icon: Icon(
+                  Icons.delete_outline,
+                  size: tamanoIconoVaciar,
+                ), // ✅ AHORA ADAPTATIVO
                 label: const Text('Vaciar'),
                 style: TextButton.styleFrom(foregroundColor: AppColors.error),
               ),
@@ -91,10 +98,8 @@ class VistaCarrito extends ConsumerWidget {
           child: ListView.builder(
             padding: paddingLista, // ✅ AHORA ADAPTATIVO
             itemCount: venta.detalles.length,
-            itemBuilder: (context, i) => _FilaProducto(
-              linea: venta.detalles[i],
-              indice: i,
-            ),
+            itemBuilder: (context, i) =>
+                _FilaProducto(linea: venta.detalles[i], indice: i),
           ),
         ),
         const Divider(height: 1),
@@ -105,7 +110,10 @@ class VistaCarrito extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _FilaTotal(etiqueta: 'Subtotal', valor: formatearMonto(venta.subtotal)),
+              _FilaTotal(
+                etiqueta: 'Subtotal',
+                valor: formatearMonto(venta.subtotal),
+              ),
               SizedBox(height: espaciadoDespuesDivisor), // ✅ AHORA ADAPTATIVO
               _FilaTotal(etiqueta: 'ITBIS', valor: formatearMonto(venta.itbis)),
               if (venta.montoDescuento > 0) ...[
@@ -115,7 +123,9 @@ class VistaCarrito extends ConsumerWidget {
                   valor: '- ${formatearMonto(venta.montoDescuento)}',
                 ),
               ],
-              SizedBox(height: espaciadoDespuesDivisor * 2), // ✅ AHORA ADAPTATIVO
+              SizedBox(
+                height: espaciadoDespuesDivisor * 2,
+              ), // ✅ AHORA ADAPTATIVO
               const Divider(),
               SizedBox(height: espaciadoDespuesDivisor), // ✅ AHORA ADAPTATIVO
               _FilaTotal(
@@ -128,15 +138,22 @@ class VistaCarrito extends ConsumerWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+                    ref
+                        .read(ventasNavegacionProvider.notifier)
+                        .cambiarVista(VistaActual.inicio);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorPrincipal,
                     foregroundColor: Colors.white,
                     padding: paddingBotonPago, // ✅ AHORA ADAPTATIVO
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  icon: Icon(Icons.payment, size: tamanoIconoBotonPago), // ✅ AHORA ADAPTATIVO
+                  icon: Icon(
+                    Icons.payment,
+                    size: tamanoIconoBotonPago,
+                  ), // ✅ AHORA ADAPTATIVO
                   label: Text(
                     'SELECCIONAR FORMA DE PAGO',
                     style: TextStyle(
@@ -205,11 +222,14 @@ class _CarritoVacio extends ConsumerWidget {
             ),
             SizedBox(height: espaciadoAntesBoton), // ✅ AHORA ADAPTATIVO
             FilledButton.icon(
-              onPressed: () =>
-                  ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inventario),
+              onPressed: () => ref
+                  .read(ventasNavegacionProvider.notifier)
+                  .cambiarVista(VistaActual.inventario),
               icon: const Icon(Icons.add_circle_outline),
               label: const Text('AGREGAR PRODUCTOS'),
-              style: FilledButton.styleFrom(padding: paddingBoton), // ✅ AHORA ADAPTATIVO
+              style: FilledButton.styleFrom(
+                padding: paddingBoton,
+              ), // ✅ AHORA ADAPTATIVO
             ),
           ],
         ),
@@ -309,7 +329,9 @@ class _FilaProducto extends ConsumerWidget {
                   child: Text(
                     '${linea.cantidad}',
                     textAlign: TextAlign.center,
-                    style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTypography.labelMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -329,7 +351,9 @@ class _FilaProducto extends ConsumerWidget {
                 ),
               ],
             ),
-            SizedBox(width: espaciadoEntreCantidadYPrecio), // ✅ AHORA ADAPTATIVO
+            SizedBox(
+              width: espaciadoEntreCantidadYPrecio,
+            ), // ✅ AHORA ADAPTATIVO
             Expanded(
               flex: 2,
               child: Text(
@@ -343,8 +367,9 @@ class _FilaProducto extends ConsumerWidget {
               width: anchoBotonEliminar, // ✅ AHORA ADAPTATIVO
               height: anchoBotonEliminar,
               child: IconButton(
-                onPressed: () =>
-                    ref.read(registrarVentaProvider.notifier).eliminarProducto(indice),
+                onPressed: () => ref
+                    .read(registrarVentaProvider.notifier)
+                    .eliminarProducto(indice),
                 icon: Icon(
                   Icons.close,
                   size: tamanoIconoEliminar, // ✅ AHORA ADAPTATIVO
@@ -389,7 +414,9 @@ class _FilaTotal extends StatelessWidget {
           etiqueta,
           style: AppTypography.bodyMedium.copyWith(
             fontWeight: resaltado ? FontWeight.bold : FontWeight.normal,
-            fontSize: resaltado ? fontSizeResaltado : fontSizeNormal, // ✅ AHORA ADAPTATIVO
+            fontSize: resaltado
+                ? fontSizeResaltado
+                : fontSizeNormal, // ✅ AHORA ADAPTATIVO
             color: resaltado ? AppColors.primary : AppColors.textSecondary,
           ),
         ),
@@ -397,7 +424,9 @@ class _FilaTotal extends StatelessWidget {
           valor,
           style: AppTypography.bodyMedium.copyWith(
             fontWeight: resaltado ? FontWeight.bold : FontWeight.w500,
-            fontSize: resaltado ? fontSizeResaltado : fontSizeNormal, // ✅ AHORA ADAPTATIVO
+            fontSize: resaltado
+                ? fontSizeResaltado
+                : fontSizeNormal, // ✅ AHORA ADAPTATIVO
             color: resaltado ? AppColors.primary : null,
           ),
         ),

@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
@@ -22,6 +21,7 @@ class ResultadoFormularioCredito {
     this.planPago,
     this.abonoInicial,
   });
+
   final CuentaPorCobrar cuenta;
   final PlanPago? planPago;
   final AbonoCredito? abonoInicial;
@@ -34,9 +34,11 @@ class FormularioCreditoVista extends ConsumerStatefulWidget {
     required this.onVolver,
     required this.onConfirmado,
   });
+
   final RegistrarVentaState estadoVenta;
   final VoidCallback onVolver;
   final void Function(ResultadoFormularioCredito) onConfirmado;
+
   @override
   ConsumerState<FormularioCreditoVista> createState() =>
       _FormularioCreditoVistaState();
@@ -49,6 +51,7 @@ class _FormularioCreditoVistaState
     symbol: 'RD\$ ',
     decimalDigits: 2,
   );
+
   static final DateFormat _formatoFecha = DateFormat('dd/MM/yyyy');
 
   late final TextEditingController _abonoInicialController;
@@ -83,13 +86,16 @@ class _FormularioCreditoVistaState
   }
 
   double get _totalVenta => widget.estadoVenta.total;
+
   double get _abonoInicial =>
       (double.tryParse(_abonoInicialController.text) ?? 0.0).clamp(
         0.0,
         _totalVenta,
       );
+
   double get _saldoFinanciado =>
       (_totalVenta - _abonoInicial).clamp(0.0, double.infinity);
+
   double get _tasaMensual =>
       double.tryParse(_tasaInteresController.text) ?? 0.05;
 
@@ -132,6 +138,7 @@ class _FormularioCreditoVistaState
     try {
       final resumen = _resumen;
       final ahora = DateTime.now();
+
       final fechaVencimientoFinal = _numeroCuotas <= 1
           ? _fechaPrimerVencimiento
           : _fechaPrimerVencimiento.add(
@@ -225,7 +232,7 @@ class _FormularioCreditoVistaState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Flexible(fit: FlexFit.loose,
+          Expanded(
             child: Text(
               etiqueta,
               style: AppTypography.labelMedium.copyWith(
@@ -235,7 +242,7 @@ class _FormularioCreditoVistaState
             ),
           ),
           const SizedBox(width: AppSpacing.m),
-          Flexible(
+          Expanded(
             child: Text(
               valor,
               textAlign: TextAlign.right,
@@ -449,7 +456,7 @@ class _FormularioCreditoVistaState
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Flexible(fit: FlexFit.loose,
+              Expanded(
                 child: Text(
                   'Total a pagar',
                   style: AppTypography.labelMedium.copyWith(
@@ -459,7 +466,7 @@ class _FormularioCreditoVistaState
                 ),
               ),
               const SizedBox(width: AppSpacing.s),
-              Flexible(
+              Expanded(
                 flex: 2,
                 child: Text(
                   _formatoMonto.format(resumen.totalAPagar),
@@ -527,9 +534,17 @@ class _FormularioCreditoVistaState
   }
 
   Widget _buildDatosVenta() {
-    return AppSection(
-      title: 'Datos de la venta',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text(
+          'Datos de la venta',
+          style: AppTypography.labelLarge.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s),
         _buildFilaDato(
           'Cliente',
           widget.estadoVenta.clienteNombre ?? 'Consumidor Final',
@@ -545,9 +560,17 @@ class _FormularioCreditoVistaState
   }
 
   Widget _buildCondicionesCredito() {
-    return AppSection(
-      title: 'Condiciones del crédito',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text(
+          'Condiciones del crédito',
+          style: AppTypography.labelLarge.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s),
         AppTextField(
           controller: _abonoInicialController,
           keyboardType: TextInputType.number,
@@ -590,138 +613,164 @@ class _FormularioCreditoVistaState
     );
   }
 
+  /// Envuelve un child en un contenedor con el mismo estilo visual que el resumen
+  Widget _buildContenedorEstilizado(Widget child) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.m),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
   Widget _buildContenidoPrincipal(ResumenCreditoCliente resumen) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final anchoPantalla = MediaQuery.of(context).size.width;
-        final anchoDisponible = anchoPantalla - 280;
-        final usarDosColumnas = anchoDisponible >= 580;
+    final anchoPantalla = MediaQuery.of(context).size.width;
+    // Considerar el drawer lateral (280) + padding del scaffold
+    final anchoDisponible = anchoPantalla - 280 - 32;
+    final usarDosColumnas = anchoDisponible >= 580;
 
-        final formulario = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildDatosVenta(),
-            const SizedBox(height: AppSpacing.m),
-            _buildCondicionesCredito(),
-          ],
-        );
+    // Formulario izquierdo envuelto en contenedor estilizado
+    final formulario = _buildContenedorEstilizado(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildDatosVenta(),
+          const SizedBox(height: AppSpacing.l),
+          _buildCondicionesCredito(),
+        ],
+      ),
+    );
 
-        final resumenTarjeta = AppSection(
-          children: [_buildResumenFinanciero(resumen)],
-        );
+    // Resumen derecho
+    final resumenTarjeta = _buildContenedorEstilizado(
+      _buildResumenFinanciero(resumen),
+    );
 
-        final tablaPies = resumen.cuotas.isNotEmpty
-            ? Column(
-                children: [
-                  const SizedBox(height: AppSpacing.l),
-                  Align(
-                    alignment: Alignment.center,
-                    child: TextButton.icon(
-                      onPressed: () => setState(
-                        () => _mostrarTablaCuotas = !_mostrarTablaCuotas,
-                      ),
-                      icon: Icon(
-                        _mostrarTablaCuotas
-                            ? Icons.expand_less
-                            : Icons.expand_more,
-                        color: AppColors.primary,
-                      ),
-                      label: Text(
-                        _mostrarTablaCuotas
-                            ? 'Ocultar tabla de cuotas'
-                            : 'Ver tabla completa de cuotas',
-                        style: AppTypography.labelMedium.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+    final tablaPies = resumen.cuotas.isNotEmpty
+        ? Column(
+            children: [
+              const SizedBox(height: AppSpacing.l),
+              Align(
+                alignment: Alignment.center,
+                child: TextButton.icon(
+                  onPressed: () => setState(
+                    () => _mostrarTablaCuotas = !_mostrarTablaCuotas,
+                  ),
+                  icon: Icon(
+                    _mostrarTablaCuotas
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                    color: AppColors.primary,
+                  ),
+                  label: Text(
+                    _mostrarTablaCuotas
+                        ? 'Ocultar tabla de cuotas'
+                        : 'Ver tabla completa de cuotas',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  if (_mostrarTablaCuotas) ...[
-                    const SizedBox(height: AppSpacing.s),
-                    _buildTablaCuotas(resumen.cuotas),
-                  ],
-                ],
-              )
-            : const SizedBox.shrink();
+                ),
+              ),
+              if (_mostrarTablaCuotas) ...[
+                const SizedBox(height: AppSpacing.s),
+                _buildTablaCuotas(resumen.cuotas),
+              ],
+            ],
+          )
+        : const SizedBox.shrink();
 
-        return SizedBox(
-          width: double.infinity,
-          child: !usarDosColumnas
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SizedBox(
+      width: double.infinity,
+      child: !usarDosColumnas
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                formulario,
+                const SizedBox(height: AppSpacing.m),
+                resumenTarjeta,
+                tablaPies,
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    formulario,
-                    const SizedBox(height: AppSpacing.m),
-                    resumenTarjeta,
-                    tablaPies,
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Flexible(fit: FlexFit.loose,flex: 3, child: formulario),
-                        const SizedBox(width: AppSpacing.l),
-                        Flexible(fit: FlexFit.loose,flex: 2, child: resumenTarjeta),
-                      ],
-                    ),
-                    tablaPies,
+                    Expanded(flex: 3, child: formulario),
+                    const SizedBox(width: AppSpacing.l),
+                    Expanded(flex: 2, child: resumenTarjeta),
                   ],
                 ),
-        );
-      },
+                tablaPies,
+              ],
+            ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final resumen = _resumen;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Crédito / Financiamiento',
-              style: AppTypography.labelLarge.copyWith(
-                color: AppColors.textPrimary,
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Crédito / Financiamiento',
+                style: AppTypography.labelLarge.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Configure las condiciones de pago',
-              style: AppTypography.labelMedium.copyWith(
-                color: AppColors.textSecondary,
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Configure las condiciones de pago',
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.l),
-        _buildContenidoPrincipal(resumen),
-        const SizedBox(height: AppSpacing.l),
-        Row(
-          children: [
-            Flexible(fit: FlexFit.loose,
-              child: AppButton(
-                text: 'CANCELAR',
-                onPressed: _guardando ? null : widget.onVolver,
+            ],
+          ),
+          const SizedBox(height: AppSpacing.l),
+          _buildContenidoPrincipal(resumen),
+          const SizedBox(height: AppSpacing.l),
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  text: 'CANCELAR',
+                  onPressed: _guardando ? null : widget.onVolver,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.m),
-            Flexible(fit: FlexFit.loose,
-              child: AppButton(
-                text: 'CONFIRMAR',
-                onPressed: _guardando ? null : _confirmar,
-                isLoading: _guardando,
+              const SizedBox(width: AppSpacing.m),
+              Expanded(
+                child: AppButton(
+                  text: 'CONFIRMAR',
+                  onPressed: _guardando ? null : _confirmar,
+                  isLoading: _guardando,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
