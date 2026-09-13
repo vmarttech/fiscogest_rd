@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 
 @immutable
 class VentaBorradorState {
@@ -20,6 +21,7 @@ class VentaBorradorState {
     this.tipoPago = 'Contado',
     this.esCredito = false,
     this.detalles = const [],
+    this.estadoDocumento = EstadoDocumento.borrador,
   });
 
   final String numero;
@@ -38,6 +40,7 @@ class VentaBorradorState {
   final String tipoPago;
   final bool esCredito;
   final List<dynamic> detalles;
+  final EstadoDocumento estadoDocumento;
 
   VentaBorradorState copyWith({
     String? numero,
@@ -56,6 +59,7 @@ class VentaBorradorState {
     String? tipoPago,
     bool? esCredito,
     List<dynamic>? detalles,
+    EstadoDocumento? estadoDocumento,
   }) {
     return VentaBorradorState(
       numero: numero ?? this.numero,
@@ -74,6 +78,7 @@ class VentaBorradorState {
       tipoPago: tipoPago ?? this.tipoPago,
       esCredito: esCredito ?? this.esCredito,
       detalles: detalles ?? this.detalles,
+      estadoDocumento: estadoDocumento ?? this.estadoDocumento,
     );
   }
 }
@@ -105,7 +110,20 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     state = state.copyWith(vencimiento: fecha);
   }
 
-  void _recalcularTotal({double? nuevoSubtotal, double? nuevoItbis, double? nuevoEnvio, double? nuevoDescuento}) {
+  void establecerNumeroCotizacion(String numero) {
+    state = state.copyWith(numero: numero);
+  }
+
+  void establecerEstadoDocumento(EstadoDocumento estado) {
+    state = state.copyWith(estadoDocumento: estado);
+  }
+
+  void _recalcularTotal({
+    double? nuevoSubtotal,
+    double? nuevoItbis,
+    double? nuevoEnvio,
+    double? nuevoDescuento,
+  }) {
     final subt = nuevoSubtotal ?? state.subtotal;
     final itb = nuevoItbis ?? state.itbis;
     final env = nuevoEnvio ?? state.costoEnvio;
@@ -167,6 +185,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       tipoPago: 'Contado',
       esCredito: false,
       detalles: const [],
+      estadoDocumento: EstadoDocumento.borrador,
     );
   }
 
@@ -188,6 +207,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
   }
 }
 
-final ventaBorradorProvider = StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>((ref) {
+final ventaBorradorProvider =
+    StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>((ref) {
   return VentaBorradorNotifier();
 });

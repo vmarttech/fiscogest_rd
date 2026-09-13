@@ -9,13 +9,13 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
+import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
   static const String routeName = 'nueva-venta-borrador';
-
   @override
   ConsumerState<NuevaVentaBorradorPage> createState() =>
       _NuevaVentaBorradorPageState();
@@ -69,6 +69,8 @@ class _NuevaVentaBorradorPageState
 
   Future<void> _guardarCotizacion() async {
     final notificador = ref.read(ventaBorradorProvider.notifier);
+    final repositorio = ref.read(ventasRepositoryProvider);
+
     if (!notificador.validarAntesDeGuardar()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -80,24 +82,38 @@ class _NuevaVentaBorradorPageState
       }
       return;
     }
+
     setState(() => _guardando = true);
     try {
-      final numero = notificador.guardar();
+      final numeroCotizacion = await repositorio.siguienteNumeroCotizacion();
+
+      notificador.establecerNumeroCotizacion(numeroCotizacion);
+      notificador.establecerEstadoDocumento(EstadoDocumento.cotizado);
+
+      final numeroGuardado = notificador.guardar();
+
       if (!mounted) return;
-      setState(() => _numeroCotizacionGuardada = numero);
+      setState(() => _numeroCotizacionGuardada = numeroGuardado);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Cotización guardada — N° $numero'),
+          content: Text(
+            '✅ Cotización N° $numeroGuardado generada.\nEntregar comprobante al cliente.',
+          ),
           backgroundColor: AppColors.success,
+          duration: const Duration(seconds: 4),
         ),
       );
+
       notificador.vaciar();
       setState(() => _fechaVencimientoSeleccionada = null);
-      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+        SnackBar(
+          content: Text('Error al generar cotización: $e'),
+          backgroundColor: AppColors.error,
+        ),
       );
     } finally {
       if (mounted) {
@@ -249,7 +265,7 @@ class _NuevaVentaBorradorPageState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('NUEVA VENTA', style: AppTypography.h4),
+        const Text('NUEVA COTIZACIÓN', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
         AppCard(
           padding: AppSpacing.allM,
@@ -287,7 +303,6 @@ class _NuevaVentaBorradorPageState
         const SizedBox(height: AppSpacing.s),
         AppCard(
           padding: AppSpacing.allM,
-          // ✅ Reemplazado ListTile → Row. Ningún gestor nativo interfiere
           child: Row(
             children: [
               const Icon(
@@ -400,7 +415,7 @@ class _NuevaVentaBorradorPageState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppButton(
-          text: _guardando ? 'Guardando...' : 'Guardar Cotización',
+          text: _guardando ? 'Generando...' : 'GENERAR COTIZACIÓN',
           onPressed: _guardando ? null : _guardarCotizacion,
           isLoading: _guardando,
           icon: Icons.save,
