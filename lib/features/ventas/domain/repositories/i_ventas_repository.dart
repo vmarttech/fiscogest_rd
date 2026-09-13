@@ -7,26 +7,17 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 
 abstract class IVentasRepository {
-  Future<List<Venta>> listarVentas({
-    DateTime? desde,
-    DateTime? hasta,
-    int? clienteId,
-    int? usuarioId,
-  });
-  Future<List<Venta>> listarCotizaciones({
-    DateTime? desde,
-    DateTime? hasta,
-    int? clienteId,
-    int? usuarioId,
-  });
+  Future<List<Venta>> listarVentas({DateTime? desde, DateTime? hasta, int? clienteId, int? usuarioId});
+  Future<List<Venta>> listarCotizaciones({DateTime? desde, DateTime? hasta, int? clienteId, int? usuarioId});
   Future<Venta?> obtenerVentaPorId(int ventaId);
+  Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId);
   Future<String> siguienteNumeroCotizacion();
   Future<Venta> cambiarEstadoDocumento(int ventaId, EstadoDocumento nuevoEstado);
   Future<Venta> registrarVenta(Venta venta);
   Future<Venta> registrarVentaBorrador(Venta cotizacion);
-  Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId);
   Future<Venta> actualizarVentaBorrador(Venta cotizacion);
   Future<Venta> confirmarVentaBorrador(int cotizacionId);
+  Future<Venta> registrarVentaConAbono(int ventaId, double montoAbono, String referencia);
   Future<Apartado> registrarApartado(Apartado apartado);
   Future<Devolucion> registrarDevolucion(Devolucion devolucion);
   Future<Pago> registrarPago(Pago pago);
