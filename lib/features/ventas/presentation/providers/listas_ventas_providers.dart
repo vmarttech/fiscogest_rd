@@ -27,6 +27,7 @@ final listaCotizacionesProvider = FutureProvider<List<Venta>>((ref) async {
 
 VentaBorradorState _ventaABorradorState(Venta v) {
   return VentaBorradorState(
+    id: v.id,
     numero: v.numero,
     fecha: v.fecha,
     vencimiento: v.vencimiento,
@@ -43,6 +44,7 @@ VentaBorradorState _ventaABorradorState(Venta v) {
     tipoPago: v.tipoPago,
     esCredito: v.esCredito,
     detalles: v.detalles,
+    estadoDocumento: v.estadoDocumento,
   );
 }
 

@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 @immutable
 class VentaBorradorState {
   const VentaBorradorState({
+    this.id,
     required this.numero,
     required this.fecha,
     this.vencimiento,
@@ -24,6 +25,7 @@ class VentaBorradorState {
     this.estadoDocumento = EstadoDocumento.borrador,
   });
 
+  final int? id;
   final String numero;
   final DateTime fecha;
   final DateTime? vencimiento;
@@ -43,6 +45,7 @@ class VentaBorradorState {
   final EstadoDocumento estadoDocumento;
 
   VentaBorradorState copyWith({
+    int? id,
     String? numero,
     DateTime? fecha,
     DateTime? vencimiento,
@@ -62,6 +65,7 @@ class VentaBorradorState {
     EstadoDocumento? estadoDocumento,
   }) {
     return VentaBorradorState(
+      id: id ?? this.id,
       numero: numero ?? this.numero,
       fecha: fecha ?? this.fecha,
       vencimiento: vencimiento ?? this.vencimiento,

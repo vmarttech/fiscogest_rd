@@ -4,6 +4,8 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/devolucion.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/pago.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
+
 abstract class IVentasRepository {
   Future<List<Venta>> listarVentas({
     DateTime? desde,
@@ -19,6 +21,7 @@ abstract class IVentasRepository {
   });
   Future<Venta?> obtenerVentaPorId(int ventaId);
   Future<String> siguienteNumeroCotizacion();
+  Future<Venta> cambiarEstadoDocumento(int ventaId, EstadoDocumento nuevoEstado);
   Future<Venta> registrarVenta(Venta venta);
   Future<Venta> registrarVentaBorrador(Venta cotizacion);
   Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId);

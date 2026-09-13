@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 
 class VentasRepositoryImpl implements IVentasRepository {
   VentasRepositoryImpl(this._ventasDao, [CuentasCobrarDao? _]);
+
   final VentasDao _ventasDao;
 
   Venta _mapearDesdeDatos(
@@ -118,6 +119,21 @@ class VentasRepositoryImpl implements IVentasRepository {
     final siguiente = ultimo + 1;
     final numeroStr = siguiente.toString();
     return 'COT-${ceros.substring(numeroStr.length)}$numeroStr';
+  }
+
+  @override
+  Future<Venta> cambiarEstadoDocumento(
+    int ventaId,
+    EstadoDocumento nuevoEstado,
+  ) async {
+    await _ventasDao.actualizarVenta(
+      ventaId,
+      VentasTableCompanion(
+        estadoDocumento: Value(nuevoEstado.name),
+      ),
+    );
+    final actualizada = await _ventasDao.obtenerVentaPorId(ventaId);
+    return _mapearDesdeDatos(actualizada!, null);
   }
 
   @override
