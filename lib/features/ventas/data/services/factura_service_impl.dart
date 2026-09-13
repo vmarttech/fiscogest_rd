@@ -60,7 +60,6 @@ class FacturaServiceImpl implements IFacturaService {
     factura.writeln('TOTAL A PAGAR:     ${formatearMonto(venta.total)}');
     factura.writeln('========================================');
     factura.writeln('');
-    factura.writeln('Usuario ID: ${venta.usuarioId ?? "N/A"}');
     factura.writeln('');
     factura.writeln('       ¡GRACIAS POR SU COMPRA!');
     factura.writeln('========================================');

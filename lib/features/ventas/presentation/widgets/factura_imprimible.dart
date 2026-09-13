@@ -194,10 +194,7 @@ class FacturaImprimible extends StatelessWidget {
               '========================================',
               style: TextStyle(fontFamily: 'Courier', fontSize: 12),
             ),
-            Text(
-              'Usuario ID: ${venta.usuarioId ?? "N/A"}',
-              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
-            ),
+            const Text(" "),
             const SizedBox(height: 16),
             const Text(
               '       ¡GRACIAS POR SU COMPRA!',
@@ -280,7 +277,6 @@ class FacturaImprimible extends StatelessWidget {
     buffer.writeln('========================================');
     buffer.writeln('TOTAL A PAGAR:     ${_formatearMonto(venta.total)}');
     buffer.writeln('========================================');
-    buffer.writeln('Usuario ID: ${venta.usuarioId ?? "N/A"}');
     buffer.writeln('       ¡GRACIAS POR SU COMPRA!');
     return buffer.toString();
   }

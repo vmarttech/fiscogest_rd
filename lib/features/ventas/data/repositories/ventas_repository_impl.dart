@@ -8,13 +8,55 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/pago.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
-import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:drift/drift.dart';
 
 class VentasRepositoryImpl implements IVentasRepository {
   VentasRepositoryImpl(this._ventasDao, this._cuentasCobrarDao);
   final VentasDao _ventasDao;
   final CuentasCobrarDao _cuentasCobrarDao;
+
+  Venta _mapearDesdeDatos(
+    VentasTableData ventaData,
+    String? nombreCliente, {
+    bool esCotizacion = false,
+  }) {
+    EstadoDocumento parsearEstado(String valor) => switch(valor) {
+      'borrador' => EstadoDocumento.borrador,
+      'cotizado' => EstadoDocumento.cotizado,
+      'enCredito' => EstadoDocumento.enCredito,
+      'aprobado' => EstadoDocumento.aprobado,
+      'anulado' => EstadoDocumento.anulado,
+      'facturado' => EstadoDocumento.facturado,
+      _ => EstadoDocumento.borrador,
+    };
+
+    final estadoDoc = parsearEstado(ventaData.estadoDocumento);
+
+    return Venta(
+      id: ventaData.id,
+      numeroCotizacion: ventaData.numeroCotizacion,
+      numeroFactura: ventaData.numeroFactura,
+      clienteId: ventaData.clienteId,
+      nombreCliente: nombreCliente,
+      fecha: ventaData.fecha,
+      detalles: const [],
+      montoSubtotal: ventaData.montoSubtotal,
+      descuentoGlobal: ventaData.descuentoGlobal,
+      itbis: ventaData.itbis,
+      montoTotal: ventaData.montoTotal,
+      formaPago: ventaData.formaPago,
+      costoEnvio: ventaData.costoEnvio,
+      abonoInicial: ventaData.abonoInicial,
+      vencimiento: ventaData.vencimiento,
+      estadoDocumento: estadoDoc,
+      usuarioId: ventaData.usuarioId,
+      fechaRegistro: ventaData.fechaRegistro,
+      descuentoId: ventaData.descuentoId,
+      descuentoNombre: ventaData.descuentoNombre,
+      montoDescuento: ventaData.montoDescuento,
+    );
+  }
 
   @override
   Future<List<Venta>> listarVentas({
@@ -29,32 +71,9 @@ class VentasRepositoryImpl implements IVentasRepository {
       clienteId: clienteId,
       usuarioId: usuarioId,
     );
-    return resultados.map((e) {
-      final ventaData = e.venta;
-      final esCreditoReal = ventaData.formaPago == FormaPago.credito;
-      return Venta(
-        id: ventaData.id,
-        numero: ventaData.id.toString(),
-        clienteId: ventaData.clienteId,
-        nombreCliente: e.nombreCliente,
-        fecha: ventaData.fecha,
-        detalles: [],
-        subtotal: ventaData.montoSubtotal,
-        itbis: ventaData.itbis,
-        total: ventaData.montoTotal,
-        tipoPago: ventaData.formaPago.name,
-        esCredito: esCreditoReal,
-        abonoInicial: 0.0,
-        vencimiento: null,
-        cotizacionOrigenId: null,
-        apartadoOrigenId: null,
-        usuarioId: ventaData.usuarioId,
-        createdAt: ventaData.fechaRegistro,
-        descuentoId: null,
-        descuentoNombre: null,
-        montoDescuento: ventaData.descuentoGlobal,
-      );
-    }).toList();
+    return resultados
+        .map((e) => _mapearDesdeDatos(e.venta, e.nombreCliente))
+        .toList();
   }
 
   @override
@@ -64,36 +83,35 @@ class VentasRepositoryImpl implements IVentasRepository {
     int? clienteId,
     int? usuarioId,
   }) async {
-    return [];
+    final resultados = await _ventasDao.listarCotizaciones(
+      desde: desde,
+      hasta: hasta,
+      clienteId: clienteId,
+      usuarioId: usuarioId,
+    );
+    return resultados
+        .map(
+          (e) => _mapearDesdeDatos(
+            e.venta,
+            e.nombreCliente,
+            esCotizacion: true,
+          ),
+        )
+        .toList();
   }
 
   @override
   Future<Venta?> obtenerVentaPorId(int ventaId) async {
     final e = await _ventasDao.obtenerVentaPorId(ventaId);
     if (e == null) return null;
-    final esCreditoReal = e.formaPago == FormaPago.credito;
-    return Venta(
-      id: e.id,
-      numero: e.id.toString(),
-      clienteId: e.clienteId,
-      nombreCliente: null,
-      fecha: e.fecha,
-      detalles: [],
-      subtotal: e.montoSubtotal,
-      itbis: e.itbis,
-      total: e.montoTotal,
-      tipoPago: e.formaPago.name,
-      esCredito: esCreditoReal,
-      abonoInicial: 0.0,
-      vencimiento: null,
-      cotizacionOrigenId: null,
-      apartadoOrigenId: null,
-      usuarioId: e.usuarioId,
-      createdAt: e.fechaRegistro,
-      descuentoId: null,
-      descuentoNombre: null,
-      montoDescuento: e.descuentoGlobal,
-    );
+    return _mapearDesdeDatos(e, null);
+  }
+
+  @override
+  Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId) async {
+    final e = await _ventasDao.obtenerVentaPorId(cotizacionId);
+    if (e == null) return null;
+    return _mapearDesdeDatos(e, null, esCotizacion: true);
   }
 
   @override
@@ -102,56 +120,37 @@ class VentasRepositoryImpl implements IVentasRepository {
       VentasTableCompanion(
         clienteId: Value(venta.clienteId),
         fecha: Value(venta.fecha),
-        montoSubtotal: Value(venta.subtotal),
-        descuentoGlobal: Value(venta.montoDescuento),
+        numeroCotizacion: Value(venta.numeroCotizacion),
+        numeroFactura: Value(venta.numeroFactura),
+        montoSubtotal: Value(venta.montoSubtotal),
+        descuentoGlobal: Value(venta.descuentoGlobal),
         itbis: Value(venta.itbis),
-        montoTotal: Value(venta.total),
-        formaPago: Value(
-          FormaPago.values.firstWhere(
-            (e) => e.name == venta.tipoPago,
-            orElse: () => FormaPago.efectivo,
-          ),
-        ),
-        usuarioId: Value(venta.usuarioId ?? 0),
+        montoTotal: Value(venta.montoTotal),
+        formaPago: Value(venta.formaPago),
+        costoEnvio: Value(venta.costoEnvio),
+        abonoInicial: Value(venta.abonoInicial),
+        vencimiento: Value(venta.vencimiento),
+        estadoDocumento: Value(venta.estadoDocumento.name),
+        usuarioId: Value(venta.usuarioId),
+        fechaRegistro: Value(venta.fechaRegistro),
+        descuentoId: Value(venta.descuentoId),
+        descuentoNombre: Value(venta.descuentoNombre),
+        montoDescuento: Value(venta.montoDescuento),
       ),
     );
-
-    // ✅ VENTA A CRÉDITO → CREAR CUENTA POR COBRAR CON DATOS REALES DEL FORMULARIO
-    if (venta.esCredito) {
+    if (venta.estadoDocumento == EstadoDocumento.enCredito) {
       final montoAbonar = venta.abonoInicial;
-      final fechaVence = venta.vencimiento ?? venta.fecha.add(const Duration(days: 30));
-
+      final fechaVence =
+          venta.vencimiento ?? venta.fecha.add(const Duration(days: 30));
       await _cuentasCobrarDao.crearCuentaPorVenta(
         clienteId: venta.clienteId,
         ventaId: ventaId,
-        montoOriginal: venta.total,
+        montoOriginal: venta.montoTotal,
         montoAbonado: montoAbonar,
         fechaVencimiento: fechaVence,
       );
     }
-
-    return Venta(
-      id: ventaId,
-      numero: ventaId.toString(),
-      clienteId: venta.clienteId,
-      nombreCliente: venta.nombreCliente,
-      fecha: venta.fecha,
-      detalles: venta.detalles,
-      subtotal: venta.subtotal,
-      itbis: venta.itbis,
-      total: venta.total,
-      tipoPago: venta.tipoPago,
-      esCredito: venta.esCredito,
-      abonoInicial: venta.abonoInicial,
-      vencimiento: venta.vencimiento,
-      cotizacionOrigenId: venta.cotizacionOrigenId,
-      apartadoOrigenId: venta.apartadoOrigenId,
-      usuarioId: venta.usuarioId,
-      createdAt: venta.createdAt ?? DateTime.now(),
-      descuentoId: venta.descuentoId,
-      descuentoNombre: venta.descuentoNombre,
-      montoDescuento: venta.montoDescuento,
-    );
+    return venta.copyWith(id: ventaId);
   }
 
   @override
@@ -160,56 +159,70 @@ class VentasRepositoryImpl implements IVentasRepository {
       VentasTableCompanion(
         clienteId: Value(cotizacion.clienteId),
         fecha: Value(cotizacion.fecha),
-        montoSubtotal: Value(cotizacion.subtotal),
-        descuentoGlobal: Value(cotizacion.montoDescuento),
+        numeroCotizacion: Value(cotizacion.numeroCotizacion),
+        numeroFactura: Value(cotizacion.numeroFactura),
+        montoSubtotal: Value(cotizacion.montoSubtotal),
+        descuentoGlobal: Value(cotizacion.descuentoGlobal),
         itbis: Value(cotizacion.itbis),
-        montoTotal: Value(cotizacion.total),
-        formaPago: Value(
-          FormaPago.values.firstWhere(
-            (e) => e.name == cotizacion.tipoPago,
-            orElse: () => FormaPago.efectivo,
-          ),
-        ),
-        usuarioId: Value(cotizacion.usuarioId ?? 0),
+        montoTotal: Value(cotizacion.montoTotal),
+        formaPago: Value(cotizacion.formaPago),
+        costoEnvio: Value(cotizacion.costoEnvio),
+        abonoInicial: Value(cotizacion.abonoInicial),
+        vencimiento: Value(cotizacion.vencimiento),
+        estadoDocumento: Value(EstadoDocumento.borrador.name),
+        usuarioId: Value(cotizacion.usuarioId),
+        fechaRegistro: Value(cotizacion.fechaRegistro),
+        descuentoId: Value(cotizacion.descuentoId),
+        descuentoNombre: Value(cotizacion.descuentoNombre),
+        montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );
-    return Venta(
+    return cotizacion.copyWith(
       id: ventaId,
-      numero: ventaId.toString(),
-      clienteId: cotizacion.clienteId,
-      nombreCliente: cotizacion.nombreCliente,
-      fecha: cotizacion.fecha,
-      detalles: cotizacion.detalles,
-      subtotal: cotizacion.subtotal,
-      itbis: cotizacion.itbis,
-      total: cotizacion.total,
-      tipoPago: cotizacion.tipoPago,
-      esCredito: cotizacion.esCredito,
-      abonoInicial: cotizacion.abonoInicial,
-      vencimiento: cotizacion.vencimiento,
-      cotizacionOrigenId: cotizacion.cotizacionOrigenId,
-      apartadoOrigenId: cotizacion.apartadoOrigenId,
-      usuarioId: cotizacion.usuarioId,
-      createdAt: cotizacion.createdAt ?? DateTime.now(),
-      descuentoId: cotizacion.descuentoId,
-      descuentoNombre: cotizacion.descuentoNombre,
-      montoDescuento: cotizacion.montoDescuento,
+      numeroCotizacion: 'C-$ventaId',
+      estadoDocumento: EstadoDocumento.borrador,
     );
-  }
-
-  @override
-  Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId) async {
-    return null;
   }
 
   @override
   Future<Venta> actualizarVentaBorrador(Venta cotizacion) async {
+    final int id = cotizacion.id!;
+    await _ventasDao.actualizarVenta(
+      id,
+      VentasTableCompanion(
+        clienteId: Value(cotizacion.clienteId),
+        fecha: Value(cotizacion.fecha),
+        numeroCotizacion: Value(cotizacion.numeroCotizacion),
+        numeroFactura: Value(cotizacion.numeroFactura),
+        montoSubtotal: Value(cotizacion.montoSubtotal),
+        descuentoGlobal: Value(cotizacion.descuentoGlobal),
+        itbis: Value(cotizacion.itbis),
+        montoTotal: Value(cotizacion.montoTotal),
+        formaPago: Value(cotizacion.formaPago),
+        costoEnvio: Value(cotizacion.costoEnvio),
+        abonoInicial: Value(cotizacion.abonoInicial),
+        vencimiento: Value(cotizacion.vencimiento),
+        estadoDocumento: Value(cotizacion.estadoDocumento.name),
+        usuarioId: Value(cotizacion.usuarioId),
+        descuentoId: Value(cotizacion.descuentoId),
+        descuentoNombre: Value(cotizacion.descuentoNombre),
+        montoDescuento: Value(cotizacion.montoDescuento),
+      ),
+    );
     return cotizacion;
   }
 
   @override
   Future<Venta> confirmarVentaBorrador(int cotizacionId) async {
-    throw UnimplementedError();
+    final cotizacion = await obtenerVentaBorradorPorId(cotizacionId);
+    if (cotizacion == null) {
+      throw Exception('Cotización no encontrada');
+    }
+    final ventaConvertida = cotizacion.copyWith(
+      numeroCotizacion: cotizacion.numeroCotizacion.replaceFirst('C-', ''),
+      estadoDocumento: EstadoDocumento.facturado,
+    );
+    return await actualizarVentaBorrador(ventaConvertida);
   }
 
   @override
@@ -229,18 +242,17 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<double> consultarSaldoCliente(int clienteId) async {
-    final saldo = await _cuentasCobrarDao.obtenerSaldoPorCliente(clienteId);
-    return saldo;
+    return await _cuentasCobrarDao.obtenerSaldoPorCliente(clienteId);
   }
 
   @override
   Future<List<Descuento>> obtenerDescuentosActivos() async {
-    return [];
+    return const [];
   }
 
   @override
   Future<List<Oferta>> obtenerOfertasActivas() async {
-    return [];
+    return const [];
   }
 
   @override
@@ -254,7 +266,5 @@ class VentasRepositoryImpl implements IVentasRepository {
   }
 
   @override
-  Future<void> actualizarEnCascada(int ventaId) async {
-    // Pendiente
-  }
+  Future<void> actualizarEnCascada(int ventaId) async {}
 }

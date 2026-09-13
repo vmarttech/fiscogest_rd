@@ -28,7 +28,6 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       throw Exception('No se pudo guardar la venta');
     }
 
-    final usuarioIdSeguro = venta.usuarioId ?? 1;
 
     for (final elemento in venta.detalles) {
       final detalle = elemento;
@@ -53,7 +52,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         fechaMovimiento: venta.fecha,
         documentoReferencia: 'Venta #${ventaRegistrada.numero}',
         observacion: 'Venta de ${detalle.nombreProducto ?? "Producto"}',
-        usuarioId: usuarioIdSeguro,
+        usuarioId: venta.usuarioId,
       );
 
       await kardexRepository.registrarMovimiento(movimientoKardex);

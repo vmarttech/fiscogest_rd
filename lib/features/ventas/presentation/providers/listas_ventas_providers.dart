@@ -1,65 +1,56 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
+import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_borrador_provider.dart';
+import 'package:riverpod/riverpod.dart';
 
-Venta _convertirVentaDeDao(VentaConCliente origen) {
-  return Venta(
-    id: origen.venta.id,
-    numero: origen.venta.id.toString(),
-    clienteId: origen.venta.clienteId,
-    nombreCliente: origen.nombreCliente,
-    fecha: origen.venta.fecha,
-    detalles: [],
-    subtotal: origen.venta.montoSubtotal,
-    itbis: origen.venta.itbis,
-    total: origen.venta.montoTotal,
-    tipoPago: origen.venta.formaPago.name,
-    esCredito: false,
-    cotizacionOrigenId: null,
-    apartadoOrigenId: null,
-    usuarioId: origen.venta.usuarioId,
-    createdAt: origen.venta.fechaRegistro,
-    descuentoId: null,
-    descuentoNombre: null,
-    montoDescuento: origen.venta.descuentoGlobal,
+final ventasRepositoryProvider = Provider<VentasRepositoryImpl>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return VentasRepositoryImpl(
+    VentasDao(db),
+    CuentasCobrarDao(db),
+  );
+});
+
+final listaVentasProvider = FutureProvider<List<Venta>>((ref) async {
+  final repo = ref.watch(ventasRepositoryProvider);
+  return await repo.listarVentas();
+});
+
+final listaCotizacionesProvider = FutureProvider<List<Venta>>((ref) async {
+  final repo = ref.watch(ventasRepositoryProvider);
+  return await repo.listarCotizaciones();
+});
+
+VentaBorradorState _ventaABorradorState(Venta v) {
+  return VentaBorradorState(
+    numero: v.numero,
+    fecha: v.fecha,
+    vencimiento: v.vencimiento,
+    clienteId: v.clienteId,
+    clienteNombre: v.nombreCliente,
+    subtotal: v.subtotal,
+    itbis: v.itbis,
+    costoEnvio: 0.0,
+    descuento: v.montoDescuento > 0 ? v.montoDescuento : null,
+    descuentoId: v.descuentoId,
+    descuentoNombre: v.descuentoNombre,
+    montoDescuento: v.montoDescuento,
+    montoTotal: v.total,
+    tipoPago: v.tipoPago,
+    esCredito: v.esCredito,
+    detalles: v.detalles,
   );
 }
 
-extension VentaExtension on Venta {
-  VentaBorradorState toVentaBorradorState() {
-    final double descuentoCalc = total - subtotal - itbis;
-    return VentaBorradorState(
-      numero: numero,
-      fecha: fecha,
-      vencimiento: null,
-      clienteId: clienteId,
-      clienteNombre: nombreCliente,
-      subtotal: subtotal,
-      itbis: itbis,
-      descuento: descuentoCalc,
-      montoDescuento: descuentoCalc,
-      montoTotal: total,
-    );
-  }
-}
-
-final listaVentasProvider = FutureProvider<List<Venta>>((ref) async {
-  final AppDatabase db = ref.watch(databaseProvider);
-  final dao = VentasDao(db);
-  final resultado = await dao.listarVentas();
-  return resultado.map((e) => _convertirVentaDeDao(e)).toList();
+final listaVentasBorradorProvider = FutureProvider<List<VentaBorradorState>>((ref) async {
+  final lista = await ref.watch(listaCotizacionesProvider.future);
+  return lista.map((v) => _ventaABorradorState(v)).toList();
 });
 
-final listaVentasBorradorProvider = FutureProvider<List<VentaBorradorState>>((
-  ref,
-) async {
-  final ventas = await ref.watch(listaVentasProvider.future);
-  return ventas.map((e) => e.toVentaBorradorState()).toList();
-});
-
-final listaApartadosProvider = FutureProvider<List<dynamic>>((ref) async {
+final listaApartadosProvider = FutureProvider<List<Apartado>>((ref) async {
   return [];
 });

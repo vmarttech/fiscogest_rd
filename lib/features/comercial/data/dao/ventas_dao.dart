@@ -1,20 +1,15 @@
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'package:fiscogest_rd/features/comercial/data/dao/ventas_table.dart';
-import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
-import 'package:fiscogest_rd/features/comercial/data/dao/ventas_detalle_table.dart';
 
-part 'ventas_dao.g.dart';
+typedef VentaConCliente = ({VentasTableData venta, String? nombreCliente});
 
-class VentaConCliente {
-  VentaConCliente({required this.venta, this.nombreCliente});
-  final VentaData venta;
-  final String? nombreCliente;
-}
+class VentasDao {
+  VentasDao(this._db);
+  final AppDatabase _db;
 
-@DriftAccessor(tables: [VentasTable, ClientesTable, VentasDetalleTable])
-class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
-  VentasDao(super.db);
+  Future<int> insertarVenta(VentasTableCompanion venta) async {
+    return await _db.into(_db.ventasTable).insert(venta);
+  }
 
   Future<List<VentaConCliente>> listarVentas({
     DateTime? desde,
@@ -22,52 +17,63 @@ class VentasDao extends DatabaseAccessor<AppDatabase> with _$VentasDaoMixin {
     int? clienteId,
     int? usuarioId,
   }) async {
-    final v = ventasTable;
-    final c = clientesTable;
-    final query = select(
-      v,
-    ).join([leftOuterJoin(c, v.clienteId.equalsExp(c.id))]);
+    final query = _db.select(_db.ventasTable)
+      ..orderBy([(t) => OrderingTerm.desc(t.fechaRegistro)]);
+
     if (desde != null) {
-      query.where(v.fecha.isBiggerOrEqualValue(desde));
+      query.where((t) => t.fechaRegistro.isBiggerOrEqualValue(desde));
     }
     if (hasta != null) {
-      query.where(v.fecha.isSmallerOrEqualValue(hasta));
+      query.where((t) => t.fechaRegistro.isSmallerOrEqualValue(hasta));
     }
     if (clienteId != null) {
-      query.where(v.clienteId.equals(clienteId));
+      query.where((t) => t.clienteId.equals(clienteId));
     }
     if (usuarioId != null) {
-      query.where(v.usuarioId.equals(usuarioId));
+      query.where((t) => t.usuarioId.equals(usuarioId));
     }
-    query.orderBy([OrderingTerm.desc(v.fecha)]);
-    final resultados = await query.get();
-    return resultados.map((fila) {
-      final venta = fila.readTable(v);
-      final cliente = fila.readTableOrNull(c);
-      return VentaConCliente(venta: venta, nombreCliente: cliente?.nombre);
-    }).toList();
+
+    final filas = await query.get();
+    return filas.map((v) => (venta: v, nombreCliente: null)).toList();
   }
 
-  Future<VentaData?> obtenerVentaPorId(int ventaId) async {
-    return await (select(
-      ventasTable,
-    )..where((VentasTable t) => t.id.equals(ventaId))).getSingleOrNull();
+  Future<List<VentaConCliente>> listarCotizaciones({
+    DateTime? desde,
+    DateTime? hasta,
+    int? clienteId,
+    int? usuarioId,
+  }) async {
+    const estadoPendiente = 'borrador';
+    final query = _db.select(_db.ventasTable)
+      ..where((t) => t.estadoDocumento.equals(estadoPendiente))
+      ..orderBy([(t) => OrderingTerm.desc(t.fechaRegistro)]);
+
+    if (desde != null) {
+      query.where((t) => t.fechaRegistro.isBiggerOrEqualValue(desde));
+    }
+    if (hasta != null) {
+      query.where((t) => t.fechaRegistro.isSmallerOrEqualValue(hasta));
+    }
+    if (clienteId != null) {
+      query.where((t) => t.clienteId.equals(clienteId));
+    }
+    if (usuarioId != null) {
+      query.where((t) => t.usuarioId.equals(usuarioId));
+    }
+
+    final filas = await query.get();
+    return filas.map((v) => (venta: v, nombreCliente: null)).toList();
   }
 
-  Future<List<VentaDetalleData>> listarDetallePorVenta(int ventaId) async {
-    return await (select(
-      ventasDetalleTable,
-    )..where((VentasDetalleTable t) => t.ventaId.equals(ventaId))).get();
-  }
-
-  Future<int> insertarVenta(VentasTableCompanion venta) async {
-    return await into(ventasTable).insert(venta);
+  Future<VentasTableData?> obtenerVentaPorId(int ventaId) async {
+    return await (_db.select(_db.ventasTable)
+          ..where((t) => t.id.equals(ventaId)))
+        .getSingleOrNull();
   }
 
   Future<bool> actualizarVenta(int ventaId, VentasTableCompanion venta) async {
-    final filasAfectadas = await (update(
-      ventasTable,
-    )..where((VentasTable t) => t.id.equals(ventaId))).write(venta);
-    return filasAfectadas > 0;
+    return await (_db.update(_db.ventasTable)
+      ..where((t) => t.id.equals(ventaId)))
+        .replace(venta);
   }
 }

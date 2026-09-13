@@ -1,47 +1,109 @@
+import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 
 class Venta {
   const Venta({
     required this.id,
-    required this.numero,
+    required this.numeroCotizacion,
+    this.numeroFactura,
     required this.clienteId,
-    required this.nombreCliente,
+    this.nombreCliente,
     required this.fecha,
     required this.detalles,
-    required this.subtotal,
+    required this.montoSubtotal,
+    required this.descuentoGlobal,
     required this.itbis,
-    required this.total,
-    required this.tipoPago,
-    required this.esCredito,
-    this.abonoInicial = 0.0,
+    required this.montoTotal,
+    required this.formaPago,
+    required this.costoEnvio,
+    required this.abonoInicial,
     this.vencimiento,
-    this.cotizacionOrigenId,
-    this.apartadoOrigenId,
+    required this.estadoDocumento,
     required this.usuarioId,
-    this.createdAt,
+    required this.fechaRegistro,
     this.descuentoId,
     this.descuentoNombre,
     required this.montoDescuento,
   });
 
   final int? id;
-  final String numero;
+  final String numeroCotizacion;
+  final String? numeroFactura;
   final int clienteId;
   final String? nombreCliente;
   final DateTime fecha;
   final List<DetalleVenta> detalles;
-  final double subtotal;
+  final double montoSubtotal;
+  final double descuentoGlobal;
   final double itbis;
-  final double total;
-  final String tipoPago;
-  final bool esCredito;
+  final double montoTotal;
+  final String formaPago;
+  final double costoEnvio;
   final double abonoInicial;
   final DateTime? vencimiento;
-  final int? cotizacionOrigenId;
-  final int? apartadoOrigenId;
-  final int? usuarioId;
-  final DateTime? createdAt;
+  final EstadoDocumento estadoDocumento;
+  final int usuarioId;
+  final DateTime fechaRegistro;
   final int? descuentoId;
   final String? descuentoNombre;
   final double montoDescuento;
+
+  // ==============================================
+  // ✅ GETTERS DE COMPATIBILIDAD — NOMBRES ANTIGUOS
+  // ==============================================
+  String get numero => numeroCotizacion;
+  String get tipoPago => formaPago;
+  bool get esCredito => formaPago == 'credito';
+  double get subtotal => montoSubtotal;
+  double get total => montoTotal;
+  DateTime? get createdAt => fechaRegistro;
+  EstadoDocumento get estado => estadoDocumento;
+
+  Venta copyWith({
+    int? id,
+    String? numeroCotizacion,
+    String? numeroFactura,
+    int? clienteId,
+    String? nombreCliente,
+    DateTime? fecha,
+    List<DetalleVenta>? detalles,
+    double? montoSubtotal,
+    double? descuentoGlobal,
+    double? itbis,
+    double? montoTotal,
+    String? formaPago,
+    double? costoEnvio,
+    double? abonoInicial,
+    DateTime? vencimiento,
+    EstadoDocumento? estadoDocumento,
+    int? usuarioId,
+    DateTime? fechaRegistro,
+    int? descuentoId,
+    String? descuentoNombre,
+    double? montoDescuento,
+  }) {
+    return Venta(
+      id: id ?? this.id,
+      numeroCotizacion: numeroCotizacion ?? this.numeroCotizacion,
+      numeroFactura: numeroFactura ?? this.numeroFactura,
+      clienteId: clienteId ?? this.clienteId,
+      nombreCliente: nombreCliente ?? this.nombreCliente,
+      fecha: fecha ?? this.fecha,
+      detalles: detalles ?? this.detalles,
+      montoSubtotal: montoSubtotal ?? this.montoSubtotal,
+      descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
+      itbis: itbis ?? this.itbis,
+      montoTotal: montoTotal ?? this.montoTotal,
+      formaPago: formaPago ?? this.formaPago,
+      costoEnvio: costoEnvio ?? this.costoEnvio,
+      abonoInicial: abonoInicial ?? this.abonoInicial,
+      vencimiento: vencimiento ?? this.vencimiento,
+      estadoDocumento: estadoDocumento ?? this.estadoDocumento,
+      usuarioId: usuarioId ?? this.usuarioId,
+      fechaRegistro: fechaRegistro ?? this.fechaRegistro,
+      descuentoId: descuentoId ?? this.descuentoId,
+      descuentoNombre: descuentoNombre ?? this.descuentoNombre,
+      montoDescuento: montoDescuento ?? this.montoDescuento,
+    );
+  }
 }

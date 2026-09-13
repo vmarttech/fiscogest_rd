@@ -4,8 +4,6 @@ part of 'devoluciones_dao.dart';
 
 // ignore_for_file: type=lint
 mixin _$DevolucionesDaoMixin on DatabaseAccessor<AppDatabase> {
-  $ClientesTableTable get clientesTable => attachedDatabase.clientesTable;
-  $UsuariosTableTable get usuariosTable => attachedDatabase.usuariosTable;
   $VentasTableTable get ventasTable => attachedDatabase.ventasTable;
   $DevolucionesTableTable get devolucionesTable =>
       attachedDatabase.devolucionesTable;

@@ -44,7 +44,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
 part 'app_database.g.dart';
-
 @DriftDatabase(
   tables: [
     // Tablas existentes
@@ -99,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   // ✅ GETTER DAO - CONECTADO
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
@@ -219,10 +218,14 @@ class AppDatabase extends _$AppDatabase {
           await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN vencimiento TEXT');
         } catch (_) {}
       }
+      if (from < 18) {
+        try {
+          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN estado TEXT DEFAULT "pendiente"');
+        } catch (_) {}
+      }
     },
   );
 }
-
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final carpetaBase = await getApplicationDocumentsDirectory();
@@ -230,7 +233,6 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(archivoDb);
   });
 }
-
 final appDatabaseProvider = Provider((ref) {
   final db = AppDatabase();
   ref.onDispose(() => db.close());

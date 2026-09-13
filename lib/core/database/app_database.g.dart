@@ -8638,7 +8638,7 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
 }
 
 class $VentasTableTable extends VentasTable
-    with TableInfo<$VentasTableTable, VentaData> {
+    with TableInfo<$VentasTableTable, VentasTableData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -8666,9 +8666,17 @@ class $VentasTableTable extends VentasTable
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES clientes_table (id)',
-    ),
+  );
+  static const VerificationMeta _nombreClienteMeta = const VerificationMeta(
+    'nombreCliente',
+  );
+  @override
+  late final GeneratedColumn<String> nombreCliente = GeneratedColumn<String>(
+    'nombre_cliente',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _fechaMeta = const VerificationMeta('fecha');
   @override
@@ -8688,7 +8696,8 @@ class $VentasTableTable extends VentasTable
     aliasedName,
     false,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _descuentoGlobalMeta = const VerificationMeta(
     'descuentoGlobal',
@@ -8709,6 +8718,30 @@ class $VentasTableTable extends VentasTable
     aliasedName,
     false,
     type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _montoTotalMeta = const VerificationMeta(
+    'montoTotal',
+  );
+  @override
+  late final GeneratedColumn<double> montoTotal = GeneratedColumn<double>(
+    'monto_total',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _formaPagoMeta = const VerificationMeta(
+    'formaPago',
+  );
+  @override
+  late final GeneratedColumn<String> formaPago = GeneratedColumn<String>(
+    'forma_pago',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _costoEnvioMeta = const VerificationMeta(
@@ -8746,36 +8779,39 @@ class $VentasTableTable extends VentasTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _montoTotalMeta = const VerificationMeta(
-    'montoTotal',
+  static const VerificationMeta _numeroCotizacionMeta = const VerificationMeta(
+    'numeroCotizacion',
   );
   @override
-  late final GeneratedColumn<double> montoTotal = GeneratedColumn<double>(
-    'monto_total',
+  late final GeneratedColumn<String> numeroCotizacion = GeneratedColumn<String>(
+    'numero_cotizacion',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _numeroFacturaMeta = const VerificationMeta(
+    'numeroFactura',
+  );
   @override
-  late final GeneratedColumnWithTypeConverter<FormaPago, String> formaPago =
-      GeneratedColumn<String>(
-        'forma_pago',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<FormaPago>($VentasTableTable.$converterformaPago);
+  late final GeneratedColumn<String> numeroFactura = GeneratedColumn<String>(
+    'numero_factura',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _estadoDocumentoMeta = const VerificationMeta(
+    'estadoDocumento',
+  );
   @override
-  late final GeneratedColumnWithTypeConverter<VentaEstado, String> estado =
-      GeneratedColumn<String>(
-        'estado',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('borrador'),
-      ).withConverter<VentaEstado>($VentasTableTable.$converterestado);
+  late final GeneratedColumn<String> estadoDocumento = GeneratedColumn<String>(
+    'estado_documento',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _usuarioIdMeta = const VerificationMeta(
     'usuarioId',
   );
@@ -8786,9 +8822,6 @@ class $VentasTableTable extends VentasTable
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES usuarios_table (id)',
-    ),
   );
   static const VerificationMeta _fechaRegistroMeta = const VerificationMeta(
     'fechaRegistro',
@@ -8800,25 +8833,64 @@ class $VentasTableTable extends VentasTable
         aliasedName,
         false,
         type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-        defaultValue: currentDateAndTime,
+        requiredDuringInsert: true,
       );
+  static const VerificationMeta _descuentoIdMeta = const VerificationMeta(
+    'descuentoId',
+  );
+  @override
+  late final GeneratedColumn<int> descuentoId = GeneratedColumn<int>(
+    'descuento_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _descuentoNombreMeta = const VerificationMeta(
+    'descuentoNombre',
+  );
+  @override
+  late final GeneratedColumn<String> descuentoNombre = GeneratedColumn<String>(
+    'descuento_nombre',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _montoDescuentoMeta = const VerificationMeta(
+    'montoDescuento',
+  );
+  @override
+  late final GeneratedColumn<double> montoDescuento = GeneratedColumn<double>(
+    'monto_descuento',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     clienteId,
+    nombreCliente,
     fecha,
     montoSubtotal,
     descuentoGlobal,
     itbis,
+    montoTotal,
+    formaPago,
     costoEnvio,
     abonoInicial,
     vencimiento,
-    montoTotal,
-    formaPago,
-    estado,
+    numeroCotizacion,
+    numeroFactura,
+    estadoDocumento,
     usuarioId,
     fechaRegistro,
+    descuentoId,
+    descuentoNombre,
+    montoDescuento,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -8827,7 +8899,7 @@ class $VentasTableTable extends VentasTable
   static const String $name = 'ventas_table';
   @override
   VerificationContext validateIntegrity(
-    Insertable<VentaData> instance, {
+    Insertable<VentasTableData> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -8842,6 +8914,15 @@ class $VentasTableTable extends VentasTable
       );
     } else if (isInserting) {
       context.missing(_clienteIdMeta);
+    }
+    if (data.containsKey('nombre_cliente')) {
+      context.handle(
+        _nombreClienteMeta,
+        nombreCliente.isAcceptableOrUnknown(
+          data['nombre_cliente']!,
+          _nombreClienteMeta,
+        ),
+      );
     }
     if (data.containsKey('fecha')) {
       context.handle(
@@ -8859,8 +8940,6 @@ class $VentasTableTable extends VentasTable
           _montoSubtotalMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_montoSubtotalMeta);
     }
     if (data.containsKey('descuento_global')) {
       context.handle(
@@ -8876,8 +8955,20 @@ class $VentasTableTable extends VentasTable
         _itbisMeta,
         itbis.isAcceptableOrUnknown(data['itbis']!, _itbisMeta),
       );
+    }
+    if (data.containsKey('monto_total')) {
+      context.handle(
+        _montoTotalMeta,
+        montoTotal.isAcceptableOrUnknown(data['monto_total']!, _montoTotalMeta),
+      );
+    }
+    if (data.containsKey('forma_pago')) {
+      context.handle(
+        _formaPagoMeta,
+        formaPago.isAcceptableOrUnknown(data['forma_pago']!, _formaPagoMeta),
+      );
     } else if (isInserting) {
-      context.missing(_itbisMeta);
+      context.missing(_formaPagoMeta);
     }
     if (data.containsKey('costo_envio')) {
       context.handle(
@@ -8903,13 +8994,36 @@ class $VentasTableTable extends VentasTable
         ),
       );
     }
-    if (data.containsKey('monto_total')) {
+    if (data.containsKey('numero_cotizacion')) {
       context.handle(
-        _montoTotalMeta,
-        montoTotal.isAcceptableOrUnknown(data['monto_total']!, _montoTotalMeta),
+        _numeroCotizacionMeta,
+        numeroCotizacion.isAcceptableOrUnknown(
+          data['numero_cotizacion']!,
+          _numeroCotizacionMeta,
+        ),
       );
     } else if (isInserting) {
-      context.missing(_montoTotalMeta);
+      context.missing(_numeroCotizacionMeta);
+    }
+    if (data.containsKey('numero_factura')) {
+      context.handle(
+        _numeroFacturaMeta,
+        numeroFactura.isAcceptableOrUnknown(
+          data['numero_factura']!,
+          _numeroFacturaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('estado_documento')) {
+      context.handle(
+        _estadoDocumentoMeta,
+        estadoDocumento.isAcceptableOrUnknown(
+          data['estado_documento']!,
+          _estadoDocumentoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_estadoDocumentoMeta);
     }
     if (data.containsKey('usuario_id')) {
       context.handle(
@@ -8927,6 +9041,35 @@ class $VentasTableTable extends VentasTable
           _fechaRegistroMeta,
         ),
       );
+    } else if (isInserting) {
+      context.missing(_fechaRegistroMeta);
+    }
+    if (data.containsKey('descuento_id')) {
+      context.handle(
+        _descuentoIdMeta,
+        descuentoId.isAcceptableOrUnknown(
+          data['descuento_id']!,
+          _descuentoIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('descuento_nombre')) {
+      context.handle(
+        _descuentoNombreMeta,
+        descuentoNombre.isAcceptableOrUnknown(
+          data['descuento_nombre']!,
+          _descuentoNombreMeta,
+        ),
+      );
+    }
+    if (data.containsKey('monto_descuento')) {
+      context.handle(
+        _montoDescuentoMeta,
+        montoDescuento.isAcceptableOrUnknown(
+          data['monto_descuento']!,
+          _montoDescuentoMeta,
+        ),
+      );
     }
     return context;
   }
@@ -8934,9 +9077,9 @@ class $VentasTableTable extends VentasTable
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  VentaData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  VentasTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return VentaData(
+    return VentasTableData(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -8945,6 +9088,10 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.int,
         data['${effectivePrefix}cliente_id'],
       )!,
+      nombreCliente: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre_cliente'],
+      ),
       fecha: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha'],
@@ -8961,6 +9108,14 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.double,
         data['${effectivePrefix}itbis'],
       )!,
+      montoTotal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_total'],
+      )!,
+      formaPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}forma_pago'],
+      )!,
       costoEnvio: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}costo_envio'],
@@ -8973,22 +9128,18 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}vencimiento'],
       ),
-      montoTotal: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}monto_total'],
+      numeroCotizacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}numero_cotizacion'],
       )!,
-      formaPago: $VentasTableTable.$converterformaPago.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}forma_pago'],
-        )!,
+      numeroFactura: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}numero_factura'],
       ),
-      estado: $VentasTableTable.$converterestado.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}estado'],
-        )!,
-      ),
+      estadoDocumento: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}estado_documento'],
+      )!,
       usuarioId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}usuario_id'],
@@ -8997,6 +9148,18 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha_registro'],
       )!,
+      descuentoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}descuento_id'],
+      ),
+      descuentoNombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}descuento_nombre'],
+      ),
+      montoDescuento: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_descuento'],
+      )!,
     );
   }
 
@@ -9004,71 +9167,84 @@ class $VentasTableTable extends VentasTable
   $VentasTableTable createAlias(String alias) {
     return $VentasTableTable(attachedDatabase, alias);
   }
-
-  static JsonTypeConverter2<FormaPago, String, String> $converterformaPago =
-      const EnumNameConverter<FormaPago>(FormaPago.values);
-  static TypeConverter<VentaEstado, String> $converterestado =
-      const VentaEstadoConverter();
 }
 
-class VentaData extends DataClass implements Insertable<VentaData> {
+class VentasTableData extends DataClass implements Insertable<VentasTableData> {
   final int id;
   final int clienteId;
+  final String? nombreCliente;
   final DateTime fecha;
   final double montoSubtotal;
   final double descuentoGlobal;
   final double itbis;
+  final double montoTotal;
+  final String formaPago;
   final double costoEnvio;
   final double abonoInicial;
   final DateTime? vencimiento;
-  final double montoTotal;
-  final FormaPago formaPago;
-  final VentaEstado estado;
+  final String numeroCotizacion;
+  final String? numeroFactura;
+  final String estadoDocumento;
   final int usuarioId;
   final DateTime fechaRegistro;
-  const VentaData({
+  final int? descuentoId;
+  final String? descuentoNombre;
+  final double montoDescuento;
+  const VentasTableData({
     required this.id,
     required this.clienteId,
+    this.nombreCliente,
     required this.fecha,
     required this.montoSubtotal,
     required this.descuentoGlobal,
     required this.itbis,
+    required this.montoTotal,
+    required this.formaPago,
     required this.costoEnvio,
     required this.abonoInicial,
     this.vencimiento,
-    required this.montoTotal,
-    required this.formaPago,
-    required this.estado,
+    required this.numeroCotizacion,
+    this.numeroFactura,
+    required this.estadoDocumento,
     required this.usuarioId,
     required this.fechaRegistro,
+    this.descuentoId,
+    this.descuentoNombre,
+    required this.montoDescuento,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['cliente_id'] = Variable<int>(clienteId);
+    if (!nullToAbsent || nombreCliente != null) {
+      map['nombre_cliente'] = Variable<String>(nombreCliente);
+    }
     map['fecha'] = Variable<DateTime>(fecha);
     map['monto_subtotal'] = Variable<double>(montoSubtotal);
     map['descuento_global'] = Variable<double>(descuentoGlobal);
     map['itbis'] = Variable<double>(itbis);
+    map['monto_total'] = Variable<double>(montoTotal);
+    map['forma_pago'] = Variable<String>(formaPago);
     map['costo_envio'] = Variable<double>(costoEnvio);
     map['abono_inicial'] = Variable<double>(abonoInicial);
     if (!nullToAbsent || vencimiento != null) {
       map['vencimiento'] = Variable<DateTime>(vencimiento);
     }
-    map['monto_total'] = Variable<double>(montoTotal);
-    {
-      map['forma_pago'] = Variable<String>(
-        $VentasTableTable.$converterformaPago.toSql(formaPago),
-      );
+    map['numero_cotizacion'] = Variable<String>(numeroCotizacion);
+    if (!nullToAbsent || numeroFactura != null) {
+      map['numero_factura'] = Variable<String>(numeroFactura);
     }
-    {
-      map['estado'] = Variable<String>(
-        $VentasTableTable.$converterestado.toSql(estado),
-      );
-    }
+    map['estado_documento'] = Variable<String>(estadoDocumento);
     map['usuario_id'] = Variable<int>(usuarioId);
     map['fecha_registro'] = Variable<DateTime>(fechaRegistro);
+    if (!nullToAbsent || descuentoId != null) {
+      map['descuento_id'] = Variable<int>(descuentoId);
+    }
+    if (!nullToAbsent || descuentoNombre != null) {
+      map['descuento_nombre'] = Variable<String>(descuentoNombre);
+    }
+    map['monto_descuento'] = Variable<double>(montoDescuento);
     return map;
   }
 
@@ -9076,45 +9252,63 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     return VentasTableCompanion(
       id: Value(id),
       clienteId: Value(clienteId),
+      nombreCliente: nombreCliente == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nombreCliente),
       fecha: Value(fecha),
       montoSubtotal: Value(montoSubtotal),
       descuentoGlobal: Value(descuentoGlobal),
       itbis: Value(itbis),
+      montoTotal: Value(montoTotal),
+      formaPago: Value(formaPago),
       costoEnvio: Value(costoEnvio),
       abonoInicial: Value(abonoInicial),
       vencimiento: vencimiento == null && nullToAbsent
           ? const Value.absent()
           : Value(vencimiento),
-      montoTotal: Value(montoTotal),
-      formaPago: Value(formaPago),
-      estado: Value(estado),
+      numeroCotizacion: Value(numeroCotizacion),
+      numeroFactura: numeroFactura == null && nullToAbsent
+          ? const Value.absent()
+          : Value(numeroFactura),
+      estadoDocumento: Value(estadoDocumento),
       usuarioId: Value(usuarioId),
       fechaRegistro: Value(fechaRegistro),
+      descuentoId: descuentoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(descuentoId),
+      descuentoNombre: descuentoNombre == null && nullToAbsent
+          ? const Value.absent()
+          : Value(descuentoNombre),
+      montoDescuento: Value(montoDescuento),
     );
   }
 
-  factory VentaData.fromJson(
+  factory VentasTableData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return VentaData(
+    return VentasTableData(
       id: serializer.fromJson<int>(json['id']),
       clienteId: serializer.fromJson<int>(json['clienteId']),
+      nombreCliente: serializer.fromJson<String?>(json['nombreCliente']),
       fecha: serializer.fromJson<DateTime>(json['fecha']),
       montoSubtotal: serializer.fromJson<double>(json['montoSubtotal']),
       descuentoGlobal: serializer.fromJson<double>(json['descuentoGlobal']),
       itbis: serializer.fromJson<double>(json['itbis']),
+      montoTotal: serializer.fromJson<double>(json['montoTotal']),
+      formaPago: serializer.fromJson<String>(json['formaPago']),
       costoEnvio: serializer.fromJson<double>(json['costoEnvio']),
       abonoInicial: serializer.fromJson<double>(json['abonoInicial']),
       vencimiento: serializer.fromJson<DateTime?>(json['vencimiento']),
-      montoTotal: serializer.fromJson<double>(json['montoTotal']),
-      formaPago: $VentasTableTable.$converterformaPago.fromJson(
-        serializer.fromJson<String>(json['formaPago']),
-      ),
-      estado: serializer.fromJson<VentaEstado>(json['estado']),
+      numeroCotizacion: serializer.fromJson<String>(json['numeroCotizacion']),
+      numeroFactura: serializer.fromJson<String?>(json['numeroFactura']),
+      estadoDocumento: serializer.fromJson<String>(json['estadoDocumento']),
       usuarioId: serializer.fromJson<int>(json['usuarioId']),
       fechaRegistro: serializer.fromJson<DateTime>(json['fechaRegistro']),
+      descuentoId: serializer.fromJson<int?>(json['descuentoId']),
+      descuentoNombre: serializer.fromJson<String?>(json['descuentoNombre']),
+      montoDescuento: serializer.fromJson<double>(json['montoDescuento']),
     );
   }
   @override
@@ -9123,58 +9317,83 @@ class VentaData extends DataClass implements Insertable<VentaData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'clienteId': serializer.toJson<int>(clienteId),
+      'nombreCliente': serializer.toJson<String?>(nombreCliente),
       'fecha': serializer.toJson<DateTime>(fecha),
       'montoSubtotal': serializer.toJson<double>(montoSubtotal),
       'descuentoGlobal': serializer.toJson<double>(descuentoGlobal),
       'itbis': serializer.toJson<double>(itbis),
+      'montoTotal': serializer.toJson<double>(montoTotal),
+      'formaPago': serializer.toJson<String>(formaPago),
       'costoEnvio': serializer.toJson<double>(costoEnvio),
       'abonoInicial': serializer.toJson<double>(abonoInicial),
       'vencimiento': serializer.toJson<DateTime?>(vencimiento),
-      'montoTotal': serializer.toJson<double>(montoTotal),
-      'formaPago': serializer.toJson<String>(
-        $VentasTableTable.$converterformaPago.toJson(formaPago),
-      ),
-      'estado': serializer.toJson<VentaEstado>(estado),
+      'numeroCotizacion': serializer.toJson<String>(numeroCotizacion),
+      'numeroFactura': serializer.toJson<String?>(numeroFactura),
+      'estadoDocumento': serializer.toJson<String>(estadoDocumento),
       'usuarioId': serializer.toJson<int>(usuarioId),
       'fechaRegistro': serializer.toJson<DateTime>(fechaRegistro),
+      'descuentoId': serializer.toJson<int?>(descuentoId),
+      'descuentoNombre': serializer.toJson<String?>(descuentoNombre),
+      'montoDescuento': serializer.toJson<double>(montoDescuento),
     };
   }
 
-  VentaData copyWith({
+  VentasTableData copyWith({
     int? id,
     int? clienteId,
+    Value<String?> nombreCliente = const Value.absent(),
     DateTime? fecha,
     double? montoSubtotal,
     double? descuentoGlobal,
     double? itbis,
+    double? montoTotal,
+    String? formaPago,
     double? costoEnvio,
     double? abonoInicial,
     Value<DateTime?> vencimiento = const Value.absent(),
-    double? montoTotal,
-    FormaPago? formaPago,
-    VentaEstado? estado,
+    String? numeroCotizacion,
+    Value<String?> numeroFactura = const Value.absent(),
+    String? estadoDocumento,
     int? usuarioId,
     DateTime? fechaRegistro,
-  }) => VentaData(
+    Value<int?> descuentoId = const Value.absent(),
+    Value<String?> descuentoNombre = const Value.absent(),
+    double? montoDescuento,
+  }) => VentasTableData(
     id: id ?? this.id,
     clienteId: clienteId ?? this.clienteId,
+    nombreCliente: nombreCliente.present
+        ? nombreCliente.value
+        : this.nombreCliente,
     fecha: fecha ?? this.fecha,
     montoSubtotal: montoSubtotal ?? this.montoSubtotal,
     descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
     itbis: itbis ?? this.itbis,
+    montoTotal: montoTotal ?? this.montoTotal,
+    formaPago: formaPago ?? this.formaPago,
     costoEnvio: costoEnvio ?? this.costoEnvio,
     abonoInicial: abonoInicial ?? this.abonoInicial,
     vencimiento: vencimiento.present ? vencimiento.value : this.vencimiento,
-    montoTotal: montoTotal ?? this.montoTotal,
-    formaPago: formaPago ?? this.formaPago,
-    estado: estado ?? this.estado,
+    numeroCotizacion: numeroCotizacion ?? this.numeroCotizacion,
+    numeroFactura: numeroFactura.present
+        ? numeroFactura.value
+        : this.numeroFactura,
+    estadoDocumento: estadoDocumento ?? this.estadoDocumento,
     usuarioId: usuarioId ?? this.usuarioId,
     fechaRegistro: fechaRegistro ?? this.fechaRegistro,
+    descuentoId: descuentoId.present ? descuentoId.value : this.descuentoId,
+    descuentoNombre: descuentoNombre.present
+        ? descuentoNombre.value
+        : this.descuentoNombre,
+    montoDescuento: montoDescuento ?? this.montoDescuento,
   );
-  VentaData copyWithCompanion(VentasTableCompanion data) {
-    return VentaData(
+  VentasTableData copyWithCompanion(VentasTableCompanion data) {
+    return VentasTableData(
       id: data.id.present ? data.id.value : this.id,
       clienteId: data.clienteId.present ? data.clienteId.value : this.clienteId,
+      nombreCliente: data.nombreCliente.present
+          ? data.nombreCliente.value
+          : this.nombreCliente,
       fecha: data.fecha.present ? data.fecha.value : this.fecha,
       montoSubtotal: data.montoSubtotal.present
           ? data.montoSubtotal.value
@@ -9183,6 +9402,10 @@ class VentaData extends DataClass implements Insertable<VentaData> {
           ? data.descuentoGlobal.value
           : this.descuentoGlobal,
       itbis: data.itbis.present ? data.itbis.value : this.itbis,
+      montoTotal: data.montoTotal.present
+          ? data.montoTotal.value
+          : this.montoTotal,
+      formaPago: data.formaPago.present ? data.formaPago.value : this.formaPago,
       costoEnvio: data.costoEnvio.present
           ? data.costoEnvio.value
           : this.costoEnvio,
@@ -9192,35 +9415,54 @@ class VentaData extends DataClass implements Insertable<VentaData> {
       vencimiento: data.vencimiento.present
           ? data.vencimiento.value
           : this.vencimiento,
-      montoTotal: data.montoTotal.present
-          ? data.montoTotal.value
-          : this.montoTotal,
-      formaPago: data.formaPago.present ? data.formaPago.value : this.formaPago,
-      estado: data.estado.present ? data.estado.value : this.estado,
+      numeroCotizacion: data.numeroCotizacion.present
+          ? data.numeroCotizacion.value
+          : this.numeroCotizacion,
+      numeroFactura: data.numeroFactura.present
+          ? data.numeroFactura.value
+          : this.numeroFactura,
+      estadoDocumento: data.estadoDocumento.present
+          ? data.estadoDocumento.value
+          : this.estadoDocumento,
       usuarioId: data.usuarioId.present ? data.usuarioId.value : this.usuarioId,
       fechaRegistro: data.fechaRegistro.present
           ? data.fechaRegistro.value
           : this.fechaRegistro,
+      descuentoId: data.descuentoId.present
+          ? data.descuentoId.value
+          : this.descuentoId,
+      descuentoNombre: data.descuentoNombre.present
+          ? data.descuentoNombre.value
+          : this.descuentoNombre,
+      montoDescuento: data.montoDescuento.present
+          ? data.montoDescuento.value
+          : this.montoDescuento,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('VentaData(')
+    return (StringBuffer('VentasTableData(')
           ..write('id: $id, ')
           ..write('clienteId: $clienteId, ')
+          ..write('nombreCliente: $nombreCliente, ')
           ..write('fecha: $fecha, ')
           ..write('montoSubtotal: $montoSubtotal, ')
           ..write('descuentoGlobal: $descuentoGlobal, ')
           ..write('itbis: $itbis, ')
+          ..write('montoTotal: $montoTotal, ')
+          ..write('formaPago: $formaPago, ')
           ..write('costoEnvio: $costoEnvio, ')
           ..write('abonoInicial: $abonoInicial, ')
           ..write('vencimiento: $vencimiento, ')
-          ..write('montoTotal: $montoTotal, ')
-          ..write('formaPago: $formaPago, ')
-          ..write('estado: $estado, ')
+          ..write('numeroCotizacion: $numeroCotizacion, ')
+          ..write('numeroFactura: $numeroFactura, ')
+          ..write('estadoDocumento: $estadoDocumento, ')
           ..write('usuarioId: $usuarioId, ')
-          ..write('fechaRegistro: $fechaRegistro')
+          ..write('fechaRegistro: $fechaRegistro, ')
+          ..write('descuentoId: $descuentoId, ')
+          ..write('descuentoNombre: $descuentoNombre, ')
+          ..write('montoDescuento: $montoDescuento')
           ..write(')'))
         .toString();
   }
@@ -9229,157 +9471,211 @@ class VentaData extends DataClass implements Insertable<VentaData> {
   int get hashCode => Object.hash(
     id,
     clienteId,
+    nombreCliente,
     fecha,
     montoSubtotal,
     descuentoGlobal,
     itbis,
+    montoTotal,
+    formaPago,
     costoEnvio,
     abonoInicial,
     vencimiento,
-    montoTotal,
-    formaPago,
-    estado,
+    numeroCotizacion,
+    numeroFactura,
+    estadoDocumento,
     usuarioId,
     fechaRegistro,
+    descuentoId,
+    descuentoNombre,
+    montoDescuento,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is VentaData &&
+      (other is VentasTableData &&
           other.id == this.id &&
           other.clienteId == this.clienteId &&
+          other.nombreCliente == this.nombreCliente &&
           other.fecha == this.fecha &&
           other.montoSubtotal == this.montoSubtotal &&
           other.descuentoGlobal == this.descuentoGlobal &&
           other.itbis == this.itbis &&
+          other.montoTotal == this.montoTotal &&
+          other.formaPago == this.formaPago &&
           other.costoEnvio == this.costoEnvio &&
           other.abonoInicial == this.abonoInicial &&
           other.vencimiento == this.vencimiento &&
-          other.montoTotal == this.montoTotal &&
-          other.formaPago == this.formaPago &&
-          other.estado == this.estado &&
+          other.numeroCotizacion == this.numeroCotizacion &&
+          other.numeroFactura == this.numeroFactura &&
+          other.estadoDocumento == this.estadoDocumento &&
           other.usuarioId == this.usuarioId &&
-          other.fechaRegistro == this.fechaRegistro);
+          other.fechaRegistro == this.fechaRegistro &&
+          other.descuentoId == this.descuentoId &&
+          other.descuentoNombre == this.descuentoNombre &&
+          other.montoDescuento == this.montoDescuento);
 }
 
-class VentasTableCompanion extends UpdateCompanion<VentaData> {
+class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
   final Value<int> id;
   final Value<int> clienteId;
+  final Value<String?> nombreCliente;
   final Value<DateTime> fecha;
   final Value<double> montoSubtotal;
   final Value<double> descuentoGlobal;
   final Value<double> itbis;
+  final Value<double> montoTotal;
+  final Value<String> formaPago;
   final Value<double> costoEnvio;
   final Value<double> abonoInicial;
   final Value<DateTime?> vencimiento;
-  final Value<double> montoTotal;
-  final Value<FormaPago> formaPago;
-  final Value<VentaEstado> estado;
+  final Value<String> numeroCotizacion;
+  final Value<String?> numeroFactura;
+  final Value<String> estadoDocumento;
   final Value<int> usuarioId;
   final Value<DateTime> fechaRegistro;
+  final Value<int?> descuentoId;
+  final Value<String?> descuentoNombre;
+  final Value<double> montoDescuento;
   const VentasTableCompanion({
     this.id = const Value.absent(),
     this.clienteId = const Value.absent(),
+    this.nombreCliente = const Value.absent(),
     this.fecha = const Value.absent(),
     this.montoSubtotal = const Value.absent(),
     this.descuentoGlobal = const Value.absent(),
     this.itbis = const Value.absent(),
+    this.montoTotal = const Value.absent(),
+    this.formaPago = const Value.absent(),
     this.costoEnvio = const Value.absent(),
     this.abonoInicial = const Value.absent(),
     this.vencimiento = const Value.absent(),
-    this.montoTotal = const Value.absent(),
-    this.formaPago = const Value.absent(),
-    this.estado = const Value.absent(),
+    this.numeroCotizacion = const Value.absent(),
+    this.numeroFactura = const Value.absent(),
+    this.estadoDocumento = const Value.absent(),
     this.usuarioId = const Value.absent(),
     this.fechaRegistro = const Value.absent(),
+    this.descuentoId = const Value.absent(),
+    this.descuentoNombre = const Value.absent(),
+    this.montoDescuento = const Value.absent(),
   });
   VentasTableCompanion.insert({
     this.id = const Value.absent(),
     required int clienteId,
+    this.nombreCliente = const Value.absent(),
     required DateTime fecha,
-    required double montoSubtotal,
+    this.montoSubtotal = const Value.absent(),
     this.descuentoGlobal = const Value.absent(),
-    required double itbis,
+    this.itbis = const Value.absent(),
+    this.montoTotal = const Value.absent(),
+    required String formaPago,
     this.costoEnvio = const Value.absent(),
     this.abonoInicial = const Value.absent(),
     this.vencimiento = const Value.absent(),
-    required double montoTotal,
-    required FormaPago formaPago,
-    this.estado = const Value.absent(),
+    required String numeroCotizacion,
+    this.numeroFactura = const Value.absent(),
+    required String estadoDocumento,
     required int usuarioId,
-    this.fechaRegistro = const Value.absent(),
+    required DateTime fechaRegistro,
+    this.descuentoId = const Value.absent(),
+    this.descuentoNombre = const Value.absent(),
+    this.montoDescuento = const Value.absent(),
   }) : clienteId = Value(clienteId),
        fecha = Value(fecha),
-       montoSubtotal = Value(montoSubtotal),
-       itbis = Value(itbis),
-       montoTotal = Value(montoTotal),
        formaPago = Value(formaPago),
-       usuarioId = Value(usuarioId);
-  static Insertable<VentaData> custom({
+       numeroCotizacion = Value(numeroCotizacion),
+       estadoDocumento = Value(estadoDocumento),
+       usuarioId = Value(usuarioId),
+       fechaRegistro = Value(fechaRegistro);
+  static Insertable<VentasTableData> custom({
     Expression<int>? id,
     Expression<int>? clienteId,
+    Expression<String>? nombreCliente,
     Expression<DateTime>? fecha,
     Expression<double>? montoSubtotal,
     Expression<double>? descuentoGlobal,
     Expression<double>? itbis,
+    Expression<double>? montoTotal,
+    Expression<String>? formaPago,
     Expression<double>? costoEnvio,
     Expression<double>? abonoInicial,
     Expression<DateTime>? vencimiento,
-    Expression<double>? montoTotal,
-    Expression<String>? formaPago,
-    Expression<String>? estado,
+    Expression<String>? numeroCotizacion,
+    Expression<String>? numeroFactura,
+    Expression<String>? estadoDocumento,
     Expression<int>? usuarioId,
     Expression<DateTime>? fechaRegistro,
+    Expression<int>? descuentoId,
+    Expression<String>? descuentoNombre,
+    Expression<double>? montoDescuento,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (clienteId != null) 'cliente_id': clienteId,
+      if (nombreCliente != null) 'nombre_cliente': nombreCliente,
       if (fecha != null) 'fecha': fecha,
       if (montoSubtotal != null) 'monto_subtotal': montoSubtotal,
       if (descuentoGlobal != null) 'descuento_global': descuentoGlobal,
       if (itbis != null) 'itbis': itbis,
+      if (montoTotal != null) 'monto_total': montoTotal,
+      if (formaPago != null) 'forma_pago': formaPago,
       if (costoEnvio != null) 'costo_envio': costoEnvio,
       if (abonoInicial != null) 'abono_inicial': abonoInicial,
       if (vencimiento != null) 'vencimiento': vencimiento,
-      if (montoTotal != null) 'monto_total': montoTotal,
-      if (formaPago != null) 'forma_pago': formaPago,
-      if (estado != null) 'estado': estado,
+      if (numeroCotizacion != null) 'numero_cotizacion': numeroCotizacion,
+      if (numeroFactura != null) 'numero_factura': numeroFactura,
+      if (estadoDocumento != null) 'estado_documento': estadoDocumento,
       if (usuarioId != null) 'usuario_id': usuarioId,
       if (fechaRegistro != null) 'fecha_registro': fechaRegistro,
+      if (descuentoId != null) 'descuento_id': descuentoId,
+      if (descuentoNombre != null) 'descuento_nombre': descuentoNombre,
+      if (montoDescuento != null) 'monto_descuento': montoDescuento,
     });
   }
 
   VentasTableCompanion copyWith({
     Value<int>? id,
     Value<int>? clienteId,
+    Value<String?>? nombreCliente,
     Value<DateTime>? fecha,
     Value<double>? montoSubtotal,
     Value<double>? descuentoGlobal,
     Value<double>? itbis,
+    Value<double>? montoTotal,
+    Value<String>? formaPago,
     Value<double>? costoEnvio,
     Value<double>? abonoInicial,
     Value<DateTime?>? vencimiento,
-    Value<double>? montoTotal,
-    Value<FormaPago>? formaPago,
-    Value<VentaEstado>? estado,
+    Value<String>? numeroCotizacion,
+    Value<String?>? numeroFactura,
+    Value<String>? estadoDocumento,
     Value<int>? usuarioId,
     Value<DateTime>? fechaRegistro,
+    Value<int?>? descuentoId,
+    Value<String?>? descuentoNombre,
+    Value<double>? montoDescuento,
   }) {
     return VentasTableCompanion(
       id: id ?? this.id,
       clienteId: clienteId ?? this.clienteId,
+      nombreCliente: nombreCliente ?? this.nombreCliente,
       fecha: fecha ?? this.fecha,
       montoSubtotal: montoSubtotal ?? this.montoSubtotal,
       descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
       itbis: itbis ?? this.itbis,
+      montoTotal: montoTotal ?? this.montoTotal,
+      formaPago: formaPago ?? this.formaPago,
       costoEnvio: costoEnvio ?? this.costoEnvio,
       abonoInicial: abonoInicial ?? this.abonoInicial,
       vencimiento: vencimiento ?? this.vencimiento,
-      montoTotal: montoTotal ?? this.montoTotal,
-      formaPago: formaPago ?? this.formaPago,
-      estado: estado ?? this.estado,
+      numeroCotizacion: numeroCotizacion ?? this.numeroCotizacion,
+      numeroFactura: numeroFactura ?? this.numeroFactura,
+      estadoDocumento: estadoDocumento ?? this.estadoDocumento,
       usuarioId: usuarioId ?? this.usuarioId,
       fechaRegistro: fechaRegistro ?? this.fechaRegistro,
+      descuentoId: descuentoId ?? this.descuentoId,
+      descuentoNombre: descuentoNombre ?? this.descuentoNombre,
+      montoDescuento: montoDescuento ?? this.montoDescuento,
     );
   }
 
@@ -9391,6 +9687,9 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     }
     if (clienteId.present) {
       map['cliente_id'] = Variable<int>(clienteId.value);
+    }
+    if (nombreCliente.present) {
+      map['nombre_cliente'] = Variable<String>(nombreCliente.value);
     }
     if (fecha.present) {
       map['fecha'] = Variable<DateTime>(fecha.value);
@@ -9404,6 +9703,12 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     if (itbis.present) {
       map['itbis'] = Variable<double>(itbis.value);
     }
+    if (montoTotal.present) {
+      map['monto_total'] = Variable<double>(montoTotal.value);
+    }
+    if (formaPago.present) {
+      map['forma_pago'] = Variable<String>(formaPago.value);
+    }
     if (costoEnvio.present) {
       map['costo_envio'] = Variable<double>(costoEnvio.value);
     }
@@ -9413,24 +9718,29 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     if (vencimiento.present) {
       map['vencimiento'] = Variable<DateTime>(vencimiento.value);
     }
-    if (montoTotal.present) {
-      map['monto_total'] = Variable<double>(montoTotal.value);
+    if (numeroCotizacion.present) {
+      map['numero_cotizacion'] = Variable<String>(numeroCotizacion.value);
     }
-    if (formaPago.present) {
-      map['forma_pago'] = Variable<String>(
-        $VentasTableTable.$converterformaPago.toSql(formaPago.value),
-      );
+    if (numeroFactura.present) {
+      map['numero_factura'] = Variable<String>(numeroFactura.value);
     }
-    if (estado.present) {
-      map['estado'] = Variable<String>(
-        $VentasTableTable.$converterestado.toSql(estado.value),
-      );
+    if (estadoDocumento.present) {
+      map['estado_documento'] = Variable<String>(estadoDocumento.value);
     }
     if (usuarioId.present) {
       map['usuario_id'] = Variable<int>(usuarioId.value);
     }
     if (fechaRegistro.present) {
       map['fecha_registro'] = Variable<DateTime>(fechaRegistro.value);
+    }
+    if (descuentoId.present) {
+      map['descuento_id'] = Variable<int>(descuentoId.value);
+    }
+    if (descuentoNombre.present) {
+      map['descuento_nombre'] = Variable<String>(descuentoNombre.value);
+    }
+    if (montoDescuento.present) {
+      map['monto_descuento'] = Variable<double>(montoDescuento.value);
     }
     return map;
   }
@@ -9440,18 +9750,24 @@ class VentasTableCompanion extends UpdateCompanion<VentaData> {
     return (StringBuffer('VentasTableCompanion(')
           ..write('id: $id, ')
           ..write('clienteId: $clienteId, ')
+          ..write('nombreCliente: $nombreCliente, ')
           ..write('fecha: $fecha, ')
           ..write('montoSubtotal: $montoSubtotal, ')
           ..write('descuentoGlobal: $descuentoGlobal, ')
           ..write('itbis: $itbis, ')
+          ..write('montoTotal: $montoTotal, ')
+          ..write('formaPago: $formaPago, ')
           ..write('costoEnvio: $costoEnvio, ')
           ..write('abonoInicial: $abonoInicial, ')
           ..write('vencimiento: $vencimiento, ')
-          ..write('montoTotal: $montoTotal, ')
-          ..write('formaPago: $formaPago, ')
-          ..write('estado: $estado, ')
+          ..write('numeroCotizacion: $numeroCotizacion, ')
+          ..write('numeroFactura: $numeroFactura, ')
+          ..write('estadoDocumento: $estadoDocumento, ')
           ..write('usuarioId: $usuarioId, ')
-          ..write('fechaRegistro: $fechaRegistro')
+          ..write('fechaRegistro: $fechaRegistro, ')
+          ..write('descuentoId: $descuentoId, ')
+          ..write('descuentoNombre: $descuentoNombre, ')
+          ..write('montoDescuento: $montoDescuento')
           ..write(')'))
         .toString();
   }
@@ -18730,27 +19046,6 @@ final class $$ClientesTableTableReferences
     super.$_typedResult,
   );
 
-  static MultiTypedResultKey<$VentasTableTable, List<VentaData>>
-  _ventasTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.ventasTable,
-    aliasName: $_aliasNameGenerator(
-      db.clientesTable.id,
-      db.ventasTable.clienteId,
-    ),
-  );
-
-  $$VentasTableTableProcessedTableManager get ventasTableRefs {
-    final manager = $$VentasTableTableTableManager(
-      $_db,
-      $_db.ventasTable,
-    ).filter((f) => f.clienteId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_ventasTableRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
   static MultiTypedResultKey<$CotizacionesTableTable, List<CotizacionData>>
   _cotizacionesTableRefsTable(_$AppDatabase db) =>
       MultiTypedResultKey.fromTable(
@@ -18874,31 +19169,6 @@ class $$ClientesTableTableFilterComposer
     column: $table.saldoPendiente,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> ventasTableRefs(
-    Expression<bool> Function($$VentasTableTableFilterComposer f) f,
-  ) {
-    final $$VentasTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.ventasTable,
-      getReferencedColumn: (t) => t.clienteId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$VentasTableTableFilterComposer(
-            $db: $db,
-            $table: $db.ventasTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 
   Expression<bool> cotizacionesTableRefs(
     Expression<bool> Function($$CotizacionesTableTableFilterComposer f) f,
@@ -19069,31 +19339,6 @@ class $$ClientesTableTableAnnotationComposer
     builder: (column) => column,
   );
 
-  Expression<T> ventasTableRefs<T extends Object>(
-    Expression<T> Function($$VentasTableTableAnnotationComposer a) f,
-  ) {
-    final $$VentasTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.ventasTable,
-      getReferencedColumn: (t) => t.clienteId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$VentasTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.ventasTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
   Expression<T> cotizacionesTableRefs<T extends Object>(
     Expression<T> Function($$CotizacionesTableTableAnnotationComposer a) f,
   ) {
@@ -19186,7 +19431,6 @@ class $$ClientesTableTableTableManager
           (ClientesTableData, $$ClientesTableTableReferences),
           ClientesTableData,
           PrefetchHooks Function({
-            bool ventasTableRefs,
             bool cotizacionesTableRefs,
             bool apartadosTableRefs,
             bool cuentasCobrarTableRefs,
@@ -19257,7 +19501,6 @@ class $$ClientesTableTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
-                ventasTableRefs = false,
                 cotizacionesTableRefs = false,
                 apartadosTableRefs = false,
                 cuentasCobrarTableRefs = false,
@@ -19265,7 +19508,6 @@ class $$ClientesTableTableTableManager
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
-                    if (ventasTableRefs) db.ventasTable,
                     if (cotizacionesTableRefs) db.cotizacionesTable,
                     if (apartadosTableRefs) db.apartadosTable,
                     if (cuentasCobrarTableRefs) db.cuentasCobrarTable,
@@ -19273,27 +19515,6 @@ class $$ClientesTableTableTableManager
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
-                      if (ventasTableRefs)
-                        await $_getPrefetchedData<
-                          ClientesTableData,
-                          $ClientesTableTable,
-                          VentaData
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ClientesTableTableReferences
-                              ._ventasTableRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ClientesTableTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).ventasTableRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.clienteId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
                       if (cotizacionesTableRefs)
                         await $_getPrefetchedData<
                           ClientesTableData,
@@ -19378,7 +19599,6 @@ typedef $$ClientesTableTableProcessedTableManager =
       (ClientesTableData, $$ClientesTableTableReferences),
       ClientesTableData,
       PrefetchHooks Function({
-        bool ventasTableRefs,
         bool cotizacionesTableRefs,
         bool apartadosTableRefs,
         bool cuentasCobrarTableRefs,
@@ -23863,36 +24083,6 @@ typedef $$UsuariosTableTableUpdateCompanionBuilder =
       Value<DateTime?> fechaUltimoAcceso,
     });
 
-final class $$UsuariosTableTableReferences
-    extends BaseReferences<_$AppDatabase, $UsuariosTableTable, UsuarioData> {
-  $$UsuariosTableTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static MultiTypedResultKey<$VentasTableTable, List<VentaData>>
-  _ventasTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.ventasTable,
-    aliasName: $_aliasNameGenerator(
-      db.usuariosTable.id,
-      db.ventasTable.usuarioId,
-    ),
-  );
-
-  $$VentasTableTableProcessedTableManager get ventasTableRefs {
-    final manager = $$VentasTableTableTableManager(
-      $_db,
-      $_db.ventasTable,
-    ).filter((f) => f.usuarioId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_ventasTableRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
 class $$UsuariosTableTableFilterComposer
     extends Composer<_$AppDatabase, $UsuariosTableTable> {
   $$UsuariosTableTableFilterComposer({
@@ -23951,31 +24141,6 @@ class $$UsuariosTableTableFilterComposer
     column: $table.fechaUltimoAcceso,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> ventasTableRefs(
-    Expression<bool> Function($$VentasTableTableFilterComposer f) f,
-  ) {
-    final $$VentasTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.ventasTable,
-      getReferencedColumn: (t) => t.usuarioId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$VentasTableTableFilterComposer(
-            $db: $db,
-            $table: $db.ventasTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$UsuariosTableTableOrderingComposer
@@ -24082,31 +24247,6 @@ class $$UsuariosTableTableAnnotationComposer
     column: $table.fechaUltimoAcceso,
     builder: (column) => column,
   );
-
-  Expression<T> ventasTableRefs<T extends Object>(
-    Expression<T> Function($$VentasTableTableAnnotationComposer a) f,
-  ) {
-    final $$VentasTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.ventasTable,
-      getReferencedColumn: (t) => t.usuarioId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$VentasTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.ventasTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$UsuariosTableTableTableManager
@@ -24120,9 +24260,12 @@ class $$UsuariosTableTableTableManager
           $$UsuariosTableTableAnnotationComposer,
           $$UsuariosTableTableCreateCompanionBuilder,
           $$UsuariosTableTableUpdateCompanionBuilder,
-          (UsuarioData, $$UsuariosTableTableReferences),
+          (
+            UsuarioData,
+            BaseReferences<_$AppDatabase, $UsuariosTableTable, UsuarioData>,
+          ),
           UsuarioData,
-          PrefetchHooks Function({bool ventasTableRefs})
+          PrefetchHooks Function()
         > {
   $$UsuariosTableTableTableManager(_$AppDatabase db, $UsuariosTableTable table)
     : super(
@@ -24184,43 +24327,9 @@ class $$UsuariosTableTableTableManager
                 fechaUltimoAcceso: fechaUltimoAcceso,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$UsuariosTableTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({ventasTableRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (ventasTableRefs) db.ventasTable],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (ventasTableRefs)
-                    await $_getPrefetchedData<
-                      UsuarioData,
-                      $UsuariosTableTable,
-                      VentaData
-                    >(
-                      currentTable: table,
-                      referencedTable: $$UsuariosTableTableReferences
-                          ._ventasTableRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$UsuariosTableTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).ventasTableRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.usuarioId == item.id),
-                      typedResults: items,
-                    ),
-                ];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -24235,86 +24344,63 @@ typedef $$UsuariosTableTableProcessedTableManager =
       $$UsuariosTableTableAnnotationComposer,
       $$UsuariosTableTableCreateCompanionBuilder,
       $$UsuariosTableTableUpdateCompanionBuilder,
-      (UsuarioData, $$UsuariosTableTableReferences),
+      (
+        UsuarioData,
+        BaseReferences<_$AppDatabase, $UsuariosTableTable, UsuarioData>,
+      ),
       UsuarioData,
-      PrefetchHooks Function({bool ventasTableRefs})
+      PrefetchHooks Function()
     >;
 typedef $$VentasTableTableCreateCompanionBuilder =
     VentasTableCompanion Function({
       Value<int> id,
       required int clienteId,
+      Value<String?> nombreCliente,
       required DateTime fecha,
-      required double montoSubtotal,
+      Value<double> montoSubtotal,
       Value<double> descuentoGlobal,
-      required double itbis,
+      Value<double> itbis,
+      Value<double> montoTotal,
+      required String formaPago,
       Value<double> costoEnvio,
       Value<double> abonoInicial,
       Value<DateTime?> vencimiento,
-      required double montoTotal,
-      required FormaPago formaPago,
-      Value<VentaEstado> estado,
+      required String numeroCotizacion,
+      Value<String?> numeroFactura,
+      required String estadoDocumento,
       required int usuarioId,
-      Value<DateTime> fechaRegistro,
+      required DateTime fechaRegistro,
+      Value<int?> descuentoId,
+      Value<String?> descuentoNombre,
+      Value<double> montoDescuento,
     });
 typedef $$VentasTableTableUpdateCompanionBuilder =
     VentasTableCompanion Function({
       Value<int> id,
       Value<int> clienteId,
+      Value<String?> nombreCliente,
       Value<DateTime> fecha,
       Value<double> montoSubtotal,
       Value<double> descuentoGlobal,
       Value<double> itbis,
+      Value<double> montoTotal,
+      Value<String> formaPago,
       Value<double> costoEnvio,
       Value<double> abonoInicial,
       Value<DateTime?> vencimiento,
-      Value<double> montoTotal,
-      Value<FormaPago> formaPago,
-      Value<VentaEstado> estado,
+      Value<String> numeroCotizacion,
+      Value<String?> numeroFactura,
+      Value<String> estadoDocumento,
       Value<int> usuarioId,
       Value<DateTime> fechaRegistro,
+      Value<int?> descuentoId,
+      Value<String?> descuentoNombre,
+      Value<double> montoDescuento,
     });
 
 final class $$VentasTableTableReferences
-    extends BaseReferences<_$AppDatabase, $VentasTableTable, VentaData> {
+    extends BaseReferences<_$AppDatabase, $VentasTableTable, VentasTableData> {
   $$VentasTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $ClientesTableTable _clienteIdTable(_$AppDatabase db) =>
-      db.clientesTable.createAlias(
-        $_aliasNameGenerator(db.ventasTable.clienteId, db.clientesTable.id),
-      );
-
-  $$ClientesTableTableProcessedTableManager get clienteId {
-    final $_column = $_itemColumn<int>('cliente_id')!;
-
-    final manager = $$ClientesTableTableTableManager(
-      $_db,
-      $_db.clientesTable,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_clienteIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static $UsuariosTableTable _usuarioIdTable(_$AppDatabase db) =>
-      db.usuariosTable.createAlias(
-        $_aliasNameGenerator(db.ventasTable.usuarioId, db.usuariosTable.id),
-      );
-
-  $$UsuariosTableTableProcessedTableManager get usuarioId {
-    final $_column = $_itemColumn<int>('usuario_id')!;
-
-    final manager = $$UsuariosTableTableTableManager(
-      $_db,
-      $_db.usuariosTable,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_usuarioIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 
   static MultiTypedResultKey<$VentasDetalleTableTable, List<VentaDetalleData>>
   _ventasDetalleTableRefsTable(_$AppDatabase db) =>
@@ -24448,6 +24534,16 @@ class $$VentasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get clienteId => $composableBuilder(
+    column: $table.clienteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get fecha => $composableBuilder(
     column: $table.fecha,
     builder: (column) => ColumnFilters(column),
@@ -24468,6 +24564,16 @@ class $$VentasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get montoTotal => $composableBuilder(
+    column: $table.montoTotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get formaPago => $composableBuilder(
+    column: $table.formaPago,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<double> get costoEnvio => $composableBuilder(
     column: $table.costoEnvio,
     builder: (column) => ColumnFilters(column),
@@ -24483,73 +24589,45 @@ class $$VentasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get montoTotal => $composableBuilder(
-    column: $table.montoTotal,
+  ColumnFilters<String> get numeroCotizacion => $composableBuilder(
+    column: $table.numeroCotizacion,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<FormaPago, FormaPago, String> get formaPago =>
-      $composableBuilder(
-        column: $table.formaPago,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnFilters<String> get numeroFactura => $composableBuilder(
+    column: $table.numeroFactura,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnWithTypeConverterFilters<VentaEstado, VentaEstado, String> get estado =>
-      $composableBuilder(
-        column: $table.estado,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnFilters<String> get estadoDocumento => $composableBuilder(
+    column: $table.estadoDocumento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get usuarioId => $composableBuilder(
+    column: $table.usuarioId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get fechaRegistro => $composableBuilder(
     column: $table.fechaRegistro,
     builder: (column) => ColumnFilters(column),
   );
 
-  $$ClientesTableTableFilterComposer get clienteId {
-    final $$ClientesTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.clienteId,
-      referencedTable: $db.clientesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ClientesTableTableFilterComposer(
-            $db: $db,
-            $table: $db.clientesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  ColumnFilters<int> get descuentoId => $composableBuilder(
+    column: $table.descuentoId,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  $$UsuariosTableTableFilterComposer get usuarioId {
-    final $$UsuariosTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.usuarioId,
-      referencedTable: $db.usuariosTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsuariosTableTableFilterComposer(
-            $db: $db,
-            $table: $db.usuariosTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  ColumnFilters<String> get descuentoNombre => $composableBuilder(
+    column: $table.descuentoNombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montoDescuento => $composableBuilder(
+    column: $table.montoDescuento,
+    builder: (column) => ColumnFilters(column),
+  );
 
   Expression<bool> ventasDetalleTableRefs(
     Expression<bool> Function($$VentasDetalleTableTableFilterComposer f) f,
@@ -24691,6 +24769,16 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get clienteId => $composableBuilder(
+    column: $table.clienteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get fecha => $composableBuilder(
     column: $table.fecha,
     builder: (column) => ColumnOrderings(column),
@@ -24711,6 +24799,16 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get montoTotal => $composableBuilder(
+    column: $table.montoTotal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get formaPago => $composableBuilder(
+    column: $table.formaPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get costoEnvio => $composableBuilder(
     column: $table.costoEnvio,
     builder: (column) => ColumnOrderings(column),
@@ -24726,18 +24824,23 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get montoTotal => $composableBuilder(
-    column: $table.montoTotal,
+  ColumnOrderings<String> get numeroCotizacion => $composableBuilder(
+    column: $table.numeroCotizacion,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get formaPago => $composableBuilder(
-    column: $table.formaPago,
+  ColumnOrderings<String> get numeroFactura => $composableBuilder(
+    column: $table.numeroFactura,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get estado => $composableBuilder(
-    column: $table.estado,
+  ColumnOrderings<String> get estadoDocumento => $composableBuilder(
+    column: $table.estadoDocumento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get usuarioId => $composableBuilder(
+    column: $table.usuarioId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -24746,51 +24849,20 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$ClientesTableTableOrderingComposer get clienteId {
-    final $$ClientesTableTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.clienteId,
-      referencedTable: $db.clientesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ClientesTableTableOrderingComposer(
-            $db: $db,
-            $table: $db.clientesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  ColumnOrderings<int> get descuentoId => $composableBuilder(
+    column: $table.descuentoId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  $$UsuariosTableTableOrderingComposer get usuarioId {
-    final $$UsuariosTableTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.usuarioId,
-      referencedTable: $db.usuariosTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsuariosTableTableOrderingComposer(
-            $db: $db,
-            $table: $db.usuariosTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  ColumnOrderings<String> get descuentoNombre => $composableBuilder(
+    column: $table.descuentoNombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montoDescuento => $composableBuilder(
+    column: $table.montoDescuento,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$VentasTableTableAnnotationComposer
@@ -24804,6 +24876,14 @@ class $$VentasTableTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get clienteId =>
+      $composableBuilder(column: $table.clienteId, builder: (column) => column);
+
+  GeneratedColumn<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get fecha =>
       $composableBuilder(column: $table.fecha, builder: (column) => column);
@@ -24821,6 +24901,14 @@ class $$VentasTableTableAnnotationComposer
   GeneratedColumn<double> get itbis =>
       $composableBuilder(column: $table.itbis, builder: (column) => column);
 
+  GeneratedColumn<double> get montoTotal => $composableBuilder(
+    column: $table.montoTotal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get formaPago =>
+      $composableBuilder(column: $table.formaPago, builder: (column) => column);
+
   GeneratedColumn<double> get costoEnvio => $composableBuilder(
     column: $table.costoEnvio,
     builder: (column) => column,
@@ -24836,67 +24924,43 @@ class $$VentasTableTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get montoTotal => $composableBuilder(
-    column: $table.montoTotal,
+  GeneratedColumn<String> get numeroCotizacion => $composableBuilder(
+    column: $table.numeroCotizacion,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<FormaPago, String> get formaPago =>
-      $composableBuilder(column: $table.formaPago, builder: (column) => column);
+  GeneratedColumn<String> get numeroFactura => $composableBuilder(
+    column: $table.numeroFactura,
+    builder: (column) => column,
+  );
 
-  GeneratedColumnWithTypeConverter<VentaEstado, String> get estado =>
-      $composableBuilder(column: $table.estado, builder: (column) => column);
+  GeneratedColumn<String> get estadoDocumento => $composableBuilder(
+    column: $table.estadoDocumento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get usuarioId =>
+      $composableBuilder(column: $table.usuarioId, builder: (column) => column);
 
   GeneratedColumn<DateTime> get fechaRegistro => $composableBuilder(
     column: $table.fechaRegistro,
     builder: (column) => column,
   );
 
-  $$ClientesTableTableAnnotationComposer get clienteId {
-    final $$ClientesTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.clienteId,
-      referencedTable: $db.clientesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ClientesTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.clientesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  GeneratedColumn<int> get descuentoId => $composableBuilder(
+    column: $table.descuentoId,
+    builder: (column) => column,
+  );
 
-  $$UsuariosTableTableAnnotationComposer get usuarioId {
-    final $$UsuariosTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.usuarioId,
-      referencedTable: $db.usuariosTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsuariosTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.usuariosTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
+  GeneratedColumn<String> get descuentoNombre => $composableBuilder(
+    column: $table.descuentoNombre,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get montoDescuento => $composableBuilder(
+    column: $table.montoDescuento,
+    builder: (column) => column,
+  );
 
   Expression<T> ventasDetalleTableRefs<T extends Object>(
     Expression<T> Function($$VentasDetalleTableTableAnnotationComposer a) f,
@@ -25033,17 +25097,15 @@ class $$VentasTableTableTableManager
         RootTableManager<
           _$AppDatabase,
           $VentasTableTable,
-          VentaData,
+          VentasTableData,
           $$VentasTableTableFilterComposer,
           $$VentasTableTableOrderingComposer,
           $$VentasTableTableAnnotationComposer,
           $$VentasTableTableCreateCompanionBuilder,
           $$VentasTableTableUpdateCompanionBuilder,
-          (VentaData, $$VentasTableTableReferences),
-          VentaData,
+          (VentasTableData, $$VentasTableTableReferences),
+          VentasTableData,
           PrefetchHooks Function({
-            bool clienteId,
-            bool usuarioId,
             bool ventasDetalleTableRefs,
             bool cotizacionesTableRefs,
             bool apartadosTableRefs,
@@ -25066,65 +25128,89 @@ class $$VentasTableTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> clienteId = const Value.absent(),
+                Value<String?> nombreCliente = const Value.absent(),
                 Value<DateTime> fecha = const Value.absent(),
                 Value<double> montoSubtotal = const Value.absent(),
                 Value<double> descuentoGlobal = const Value.absent(),
                 Value<double> itbis = const Value.absent(),
+                Value<double> montoTotal = const Value.absent(),
+                Value<String> formaPago = const Value.absent(),
                 Value<double> costoEnvio = const Value.absent(),
                 Value<double> abonoInicial = const Value.absent(),
                 Value<DateTime?> vencimiento = const Value.absent(),
-                Value<double> montoTotal = const Value.absent(),
-                Value<FormaPago> formaPago = const Value.absent(),
-                Value<VentaEstado> estado = const Value.absent(),
+                Value<String> numeroCotizacion = const Value.absent(),
+                Value<String?> numeroFactura = const Value.absent(),
+                Value<String> estadoDocumento = const Value.absent(),
                 Value<int> usuarioId = const Value.absent(),
                 Value<DateTime> fechaRegistro = const Value.absent(),
+                Value<int?> descuentoId = const Value.absent(),
+                Value<String?> descuentoNombre = const Value.absent(),
+                Value<double> montoDescuento = const Value.absent(),
               }) => VentasTableCompanion(
                 id: id,
                 clienteId: clienteId,
+                nombreCliente: nombreCliente,
                 fecha: fecha,
                 montoSubtotal: montoSubtotal,
                 descuentoGlobal: descuentoGlobal,
                 itbis: itbis,
+                montoTotal: montoTotal,
+                formaPago: formaPago,
                 costoEnvio: costoEnvio,
                 abonoInicial: abonoInicial,
                 vencimiento: vencimiento,
-                montoTotal: montoTotal,
-                formaPago: formaPago,
-                estado: estado,
+                numeroCotizacion: numeroCotizacion,
+                numeroFactura: numeroFactura,
+                estadoDocumento: estadoDocumento,
                 usuarioId: usuarioId,
                 fechaRegistro: fechaRegistro,
+                descuentoId: descuentoId,
+                descuentoNombre: descuentoNombre,
+                montoDescuento: montoDescuento,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required int clienteId,
+                Value<String?> nombreCliente = const Value.absent(),
                 required DateTime fecha,
-                required double montoSubtotal,
+                Value<double> montoSubtotal = const Value.absent(),
                 Value<double> descuentoGlobal = const Value.absent(),
-                required double itbis,
+                Value<double> itbis = const Value.absent(),
+                Value<double> montoTotal = const Value.absent(),
+                required String formaPago,
                 Value<double> costoEnvio = const Value.absent(),
                 Value<double> abonoInicial = const Value.absent(),
                 Value<DateTime?> vencimiento = const Value.absent(),
-                required double montoTotal,
-                required FormaPago formaPago,
-                Value<VentaEstado> estado = const Value.absent(),
+                required String numeroCotizacion,
+                Value<String?> numeroFactura = const Value.absent(),
+                required String estadoDocumento,
                 required int usuarioId,
-                Value<DateTime> fechaRegistro = const Value.absent(),
+                required DateTime fechaRegistro,
+                Value<int?> descuentoId = const Value.absent(),
+                Value<String?> descuentoNombre = const Value.absent(),
+                Value<double> montoDescuento = const Value.absent(),
               }) => VentasTableCompanion.insert(
                 id: id,
                 clienteId: clienteId,
+                nombreCliente: nombreCliente,
                 fecha: fecha,
                 montoSubtotal: montoSubtotal,
                 descuentoGlobal: descuentoGlobal,
                 itbis: itbis,
+                montoTotal: montoTotal,
+                formaPago: formaPago,
                 costoEnvio: costoEnvio,
                 abonoInicial: abonoInicial,
                 vencimiento: vencimiento,
-                montoTotal: montoTotal,
-                formaPago: formaPago,
-                estado: estado,
+                numeroCotizacion: numeroCotizacion,
+                numeroFactura: numeroFactura,
+                estadoDocumento: estadoDocumento,
                 usuarioId: usuarioId,
                 fechaRegistro: fechaRegistro,
+                descuentoId: descuentoId,
+                descuentoNombre: descuentoNombre,
+                montoDescuento: montoDescuento,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -25136,8 +25222,6 @@ class $$VentasTableTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
-                clienteId = false,
-                usuarioId = false,
                 ventasDetalleTableRefs = false,
                 cotizacionesTableRefs = false,
                 apartadosTableRefs = false,
@@ -25153,60 +25237,12 @@ class $$VentasTableTableTableManager
                     if (devolucionesTableRefs) db.devolucionesTable,
                     if (cuentasCobrarTableRefs) db.cuentasCobrarTable,
                   ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (clienteId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.clienteId,
-                                    referencedTable:
-                                        $$VentasTableTableReferences
-                                            ._clienteIdTable(db),
-                                    referencedColumn:
-                                        $$VentasTableTableReferences
-                                            ._clienteIdTable(db)
-                                            .id,
-                                  )
-                                  as T;
-                        }
-                        if (usuarioId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.usuarioId,
-                                    referencedTable:
-                                        $$VentasTableTableReferences
-                                            ._usuarioIdTable(db),
-                                    referencedColumn:
-                                        $$VentasTableTableReferences
-                                            ._usuarioIdTable(db)
-                                            .id,
-                                  )
-                                  as T;
-                        }
-
-                        return state;
-                      },
+                  addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (ventasDetalleTableRefs)
                         await $_getPrefetchedData<
-                          VentaData,
+                          VentasTableData,
                           $VentasTableTable,
                           VentaDetalleData
                         >(
@@ -25227,7 +25263,7 @@ class $$VentasTableTableTableManager
                         ),
                       if (cotizacionesTableRefs)
                         await $_getPrefetchedData<
-                          VentaData,
+                          VentasTableData,
                           $VentasTableTable,
                           CotizacionData
                         >(
@@ -25248,7 +25284,7 @@ class $$VentasTableTableTableManager
                         ),
                       if (apartadosTableRefs)
                         await $_getPrefetchedData<
-                          VentaData,
+                          VentasTableData,
                           $VentasTableTable,
                           ApartadoData
                         >(
@@ -25269,7 +25305,7 @@ class $$VentasTableTableTableManager
                         ),
                       if (devolucionesTableRefs)
                         await $_getPrefetchedData<
-                          VentaData,
+                          VentasTableData,
                           $VentasTableTable,
                           DevolucionData
                         >(
@@ -25290,7 +25326,7 @@ class $$VentasTableTableTableManager
                         ),
                       if (cuentasCobrarTableRefs)
                         await $_getPrefetchedData<
-                          VentaData,
+                          VentasTableData,
                           $VentasTableTable,
                           CuentaCobrarData
                         >(
@@ -25321,17 +25357,15 @@ typedef $$VentasTableTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $VentasTableTable,
-      VentaData,
+      VentasTableData,
       $$VentasTableTableFilterComposer,
       $$VentasTableTableOrderingComposer,
       $$VentasTableTableAnnotationComposer,
       $$VentasTableTableCreateCompanionBuilder,
       $$VentasTableTableUpdateCompanionBuilder,
-      (VentaData, $$VentasTableTableReferences),
-      VentaData,
+      (VentasTableData, $$VentasTableTableReferences),
+      VentasTableData,
       PrefetchHooks Function({
-        bool clienteId,
-        bool usuarioId,
         bool ventasDetalleTableRefs,
         bool cotizacionesTableRefs,
         bool apartadosTableRefs,

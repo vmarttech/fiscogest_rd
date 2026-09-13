@@ -193,8 +193,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
           FilaDetalle('Fecha y Hora', _formatearFecha(venta.fecha)),
           FilaDetalle('Forma de Pago', venta.tipoPago),
           FilaDetalle('A crédito', venta.esCredito ? 'Sí' : 'No'),
-          if (venta.usuarioId != null)
-            FilaDetalle('Atendido por', 'Usuario ${venta.usuarioId}'),
+          FilaDetalle('Atendido por', 'Usuario ${venta.usuarioId}'),
           const SizedBox(height: AppSpacing.l),
           const Text('Detalle de Artículos', style: AppTypography.labelLarge),
           const SizedBox(height: AppSpacing.s),

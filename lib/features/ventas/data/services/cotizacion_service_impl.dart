@@ -66,7 +66,6 @@ class CotizacionServiceImpl implements ICotizacionService {
     );
     texto.writeln('========================================');
     texto.writeln('');
-    texto.writeln('Usuario ID: ${cotizacion.usuarioId ?? "N/A"}');
     texto.writeln('');
     texto.writeln('       VÁLIDO COMO COTIZACIÓN');
     texto.writeln('========================================');
