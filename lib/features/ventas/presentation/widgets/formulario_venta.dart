@@ -89,6 +89,9 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
 
   Widget _buildModoNormal() {
     final estado = ref.watch(registrarVentaProvider);
+    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
+    final tamanoTexto = esPantallaPequena ? 13.0 : 14.0;
+
     return AppCard(
       child: Padding(
         padding: AppSpacing.allM,
@@ -98,19 +101,30 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
           children: [
             Text(
               'Datos de la Venta',
-              style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+              style: AppTypography.labelLarge.copyWith(
+                fontSize: esPantallaPequena ? 15.0 : 16.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: AppSpacing.m),
             InkWell(
               onTap: widget.alSeleccionarCliente,
               borderRadius: AppRadius.allM,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s, horizontal: AppSpacing.xs),
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.s,
+                  horizontal: AppSpacing.xs,
+                ),
                 child: Row(
                   children: [
                     const Icon(Icons.person, color: AppColors.primary),
                     const SizedBox(width: AppSpacing.m),
-                    const Expanded(child: Text('Cliente', style: AppTypography.labelMedium)),
+                    Expanded(
+                      child: Text(
+                        'Cliente',
+                        style: AppTypography.labelMedium.copyWith(fontSize: tamanoTexto),
+                      ),
+                    ),
                     Row(
                       children: [
                         Text(
@@ -118,12 +132,17 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
                               ? estado.clienteNombre ?? 'Seleccionar'
                               : 'Seleccionar',
                           style: AppTypography.labelMedium.copyWith(
+                            fontSize: tamanoTexto,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(width: AppSpacing.xs),
-                        const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textSecondary),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ],
                     ),
                   ],
@@ -135,12 +154,20 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
               onTap: widget.alSeleccionarFormaPago,
               borderRadius: AppRadius.allM,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s, horizontal: AppSpacing.xs),
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.s,
+                  horizontal: AppSpacing.xs,
+                ),
                 child: Row(
                   children: [
                     const Icon(Icons.payment, color: AppColors.primary),
                     const SizedBox(width: AppSpacing.m),
-                    const Expanded(child: Text('Forma de Pago', style: AppTypography.labelMedium)),
+                    Expanded(
+                      child: Text(
+                        'Forma de Pago',
+                        style: AppTypography.labelMedium.copyWith(fontSize: tamanoTexto),
+                      ),
+                    ),
                     Row(
                       children: [
                         Text(
@@ -148,6 +175,7 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
                               ? '${estado.tipoPago[0].toUpperCase()}${estado.tipoPago.substring(1)}${estado.esCredito ? ' (Crédito)' : ''}'
                               : 'Seleccionar',
                           style: AppTypography.labelMedium.copyWith(
+                            fontSize: tamanoTexto,
                             fontWeight: FontWeight.w500,
                             color: estado.tipoPago.isNotEmpty
                                 ? AppColors.textPrimary
@@ -155,7 +183,11 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
                           ),
                         ),
                         const SizedBox(width: AppSpacing.xs),
-                        const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textSecondary),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ],
                     ),
                   ],
@@ -177,10 +209,13 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
   }
 
   Widget _buildModoCobro() {
+    final estado = ref.read(registrarVentaProvider);
+    final clienteId = estado.clienteId ?? 0;
     return AppCard(
       child: Padding(
         padding: AppSpacing.allM,
         child: CobrarPage(
+          clienteIdFiltro: clienteId,
           onVolver: _cerrarModo,
           onIrACredito: _abrirModoCredito,
         ),

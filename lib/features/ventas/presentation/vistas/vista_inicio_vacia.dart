@@ -19,6 +19,7 @@ import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_c
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
+
   @override
   ConsumerState<VistaInicioVacia> createState() => _VistaInicioVaciaState();
 }
@@ -26,7 +27,6 @@ class VistaInicioVacia extends ConsumerStatefulWidget {
 class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
   String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
-
   bool _guardando = false;
   bool _mostrarFormularioCredito = false;
   RegistrarVentaState? _estadoPasoCredito;
@@ -36,7 +36,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(registrarVentaProvider.notifier).establecerConsumidorFinal();
+      ref
+          .read(registrarVentaProvider.notifier)
+          .establecerConsumidorFinal();
     });
   }
 
@@ -76,23 +78,31 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           .read(registrarVentaProvider.notifier)
           .establecerCondicionesCredito(abonoRecibido, fechaVence);
       final estadoConCredito = ref.read(registrarVentaProvider);
-      final ventaGuardada = await ref
-          .read(registrarVentaUseCaseProvider)
-          .ejecutar(estadoConCredito);
-      if (!mounted) return;
-      if (ventaGuardada.id == null) {
-        throw Exception('El repositorio no devolvió ID de venta');
+
+      final modo = ref.read(ventasNavegacionProvider).modoOperacion;
+      if (modo == ModoOperacion.apartado) {
+        await ref
+            .read(apartadoNotifierProvider.notifier)
+            .crearApartadoDesdeVenta(estadoConCredito);
+      } else {
+        final ventaGuardada = await ref
+            .read(registrarVentaUseCaseProvider)
+            .ejecutar(estadoConCredito);
+        if (!mounted) return;
+        if (ventaGuardada.id == null) {
+          throw Exception('El repositorio no devolvió ID de venta');
+        }
       }
+
       final saldoPendiente = estadoConCredito.total - abonoRecibido;
       if (mounted) {
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '✅ Venta #${ventaGuardada.numero} registrada.\n'
-              '💰 Abono inicial: ${_formatearMonto(abonoRecibido)}\n'
-              '📄 Saldo pendiente: ${_formatearMonto(saldoPendiente)}\n'
-              '📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}',
+              modo == ModoOperacion.apartado
+                  ? '✅ Apartado registrado — Crédito vinculado.\n💰 Abono inicial: ${_formatearMonto(abonoRecibido)}\n📄 Saldo pendiente: ${_formatearMonto(saldoPendiente)}\n📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}'
+                  : '✅ Venta registrada.\n💰 Abono inicial: ${_formatearMonto(abonoRecibido)}\n📄 Saldo pendiente: ${_formatearMonto(saldoPendiente)}\n📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}',
             ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 5),
@@ -175,6 +185,15 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         .read(registrarVentaProvider.notifier)
         .cambiarFormaPago(formaSeleccionada);
     final estadoFinal = ref.read(registrarVentaProvider);
+
+    if (formaSeleccionada == 'crédito') {
+      setState(() {
+        _mostrarFormularioCredito = true;
+        _estadoPasoCredito = estadoFinal;
+      });
+      return;
+    }
+
     if (modo == ModoOperacion.apartado) {
       final idApartado = await ref
           .read(apartadoNotifierProvider.notifier)
@@ -191,12 +210,6 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           ),
         );
       }
-    } else if (formaSeleccionada == 'crédito') {
-      setState(() {
-        _mostrarFormularioCredito = true;
-        _estadoPasoCredito = estadoFinal;
-      });
-      return;
     } else {
       final ventaGuardada = await ref
           .read(registrarVentaUseCaseProvider)
@@ -283,6 +296,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final fontSizeMontoBoton = esPantallaPequena ? 14.0 : 18.0;
     final espaciadoCliente = esPantallaPequena ? 6.0 : 8.0;
     final espaciadoBotonesCliente = esPantallaPequena ? 8.0 : 12.0;
+    final tamanoTextoEtiqueta = esPantallaPequena ? 13.0 : 14.0;
 
     Widget botonModo(ModoOperacion m, String etiqueta) {
       final activo = modo == m;
@@ -329,10 +343,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
               etiqueta,
               style: esDestacado
                   ? AppTypography.labelLarge.copyWith(
+                      fontSize: tamanoTextoEtiqueta,
                       fontWeight: FontWeight.bold,
                       color: colorTexto,
                     )
-                  : AppTypography.labelMedium.copyWith(color: colorTexto),
+                  : AppTypography.labelMedium.copyWith(
+                      fontSize: tamanoTextoEtiqueta,
+                      color: colorTexto,
+                    ),
             ),
             SizedBox(width: espaciadoEtiquetaValor),
             SizedBox(
@@ -342,10 +360,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 textAlign: TextAlign.right,
                 style: esDestacado
                     ? AppTypography.labelLarge.copyWith(
+                        fontSize: tamanoTextoEtiqueta,
                         fontWeight: FontWeight.bold,
                         color: colorTexto,
                       )
-                    : AppTypography.labelMedium.copyWith(color: colorTexto),
+                    : AppTypography.labelMedium.copyWith(
+                        fontSize: tamanoTextoEtiqueta,
+                        color: colorTexto,
+                      ),
               ),
             ),
           ],
@@ -446,9 +468,13 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                               final prod = estado.resultadosBusqueda[i];
                               return ListTile(
                                 dense: true,
-                                title: Text(prod.nombreProducto ?? 'Producto'),
+                                title: Text(
+                                  prod.nombreProducto ?? 'Producto',
+                                  style: TextStyle(fontSize: tamanoTextoEtiqueta),
+                                ),
                                 subtitle: Text(
                                   _formatearMonto(prod.precioUnitario),
+                                  style: TextStyle(fontSize: tamanoTextoEtiqueta - 1),
                                 ),
                                 onTap: () {
                                   _seleccionarProducto(prod);
@@ -473,7 +499,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   Expanded(
                     child: Text(
                       nombreCliente,
-                      style: AppTypography.labelMedium,
+                      style: AppTypography.labelMedium.copyWith(fontSize: tamanoTextoEtiqueta),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -504,14 +530,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                             ? 'El apartado está vacío'
                             : 'La venta está vacía',
                         style: esPantallaPequena
-                            ? AppTypography.labelMedium
+                            ? AppTypography.labelMedium.copyWith(fontSize: tamanoTextoEtiqueta)
                             : AppTypography.labelLarge,
                       ),
                       const SizedBox(height: AppSpacing.s),
                       Text(
                         'Busca un producto para comenzar',
                         style: esPantallaPequena
-                            ? AppTypography.labelSmall
+                            ? AppTypography.labelSmall.copyWith(fontSize: tamanoTextoEtiqueta - 1)
                             : AppTypography.bodyMedium,
                       ),
                     ],
