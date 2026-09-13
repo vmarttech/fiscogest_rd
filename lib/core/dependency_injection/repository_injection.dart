@@ -16,6 +16,12 @@ import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_reposi
 import 'package:fiscogest_rd/features/inventario/data/services/inventario_service_impl.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
+import 'package:fiscogest_rd/features/comercial/data/repositories/compra_repository_impl.dart';
+import 'package:fiscogest_rd/features/comercial/data/repositories/inventario_repository_impl.dart';
+import 'package:fiscogest_rd/features/comercial/data/repositories/producto_repository_impl.dart';
+import 'package:fiscogest_rd/features/comercial/data/repositories/proveedor_repository_impl.dart';
+import 'package:fiscogest_rd/features/comercial/domain/services/compra_eventos_listener.dart';
+import 'package:fiscogest_rd/features/inventario/domain/usecases/registrar_movimiento_kardex.dart';
 
 class RepositoryInjection {
   RepositoryInjection._({
@@ -54,33 +60,42 @@ class RepositoryInjection {
     final cajaMovimientosDao = CajaMovimientosDao(db);
     final productosDao = ProductosDao(db);
     final kardexDatasource = DriftKardexDatasource(db);
-    final kardexRepository = KardexRepositoryImpl(kardexDatasource);
+    final kardexRepo = KardexRepositoryImpl(kardexDatasource);
     final inventarioService = InventarioServiceImpl(db);
     final ventasDao = VentasDao(db);
     final cuentasCobrarDao = CuentasCobrarDao(db);
     final ventasRepository = VentasRepositoryImpl(ventasDao, cuentasCobrarDao);
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,
-      kardexRepository: kardexRepository,
+      kardexRepository: kardexRepo,
       inventarioService: inventarioService,
       productosDao: productosDao,
     );
-    final apartadoRepository = ApartadoRepositoryImpl(
-      apartadosDao: apartadosDao,
+    final apartadoRepository = ApartadoRepositoryImpl(apartadosDao: apartadosDao);
+    final devolucionRepository = DevolucionRepositoryImpl(devolucionesDao: devolucionesDao);
+    final cajaRepository = CajaRepositoryImpl(cajaMovimientosDao: cajaMovimientosDao);
+
+    final compraRepo = CompraRepositoryImpl(db);
+    final inventarioRepo = InventarioRepositoryImpl(db);
+    final productoRepo = ProductoRepositoryImpl(db);
+    final proveedorRepo = ProveedorRepositoryImpl();
+    final kardexUsecase = RegistrarMovimientoKardex(kardexRepo);
+
+    CompraEventosListener(
+      compraRepo,
+      inventarioRepo,
+      productoRepo,
+      kardexUsecase,
+      proveedorRepo,
     );
-    final devolucionRepository = DevolucionRepositoryImpl(
-      devolucionesDao: devolucionesDao,
-    );
-    final cajaRepository = CajaRepositoryImpl(
-      cajaMovimientosDao: cajaMovimientosDao,
-    );
+
     _instance = RepositoryInjection._(
       db: db,
       ventasRepository: ventasRepository,
       apartadoRepository: apartadoRepository,
       devolucionRepository: devolucionRepository,
       cajaRepository: cajaRepository,
-      kardexRepository: kardexRepository,
+      kardexRepository: kardexRepo,
       inventarioService: inventarioService,
       productosDao: productosDao,
       ventaInventarioService: ventaInventarioService,

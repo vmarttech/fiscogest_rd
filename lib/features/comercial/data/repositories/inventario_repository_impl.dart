@@ -7,6 +7,15 @@ class InventarioRepositoryImpl implements IInventarioRepository {
   final AppDatabase _db;
 
   @override
+  Future<double?> obtenerStockActual(int productoId) async {
+    final registro = await (_db.select(_db.productosTable)
+          ..where((fila) => fila.id.equals(productoId))
+          ..limit(1))
+        .getSingleOrNull();
+    return registro?.stock;
+  }
+
+  @override
   Future<void> aumentarExistencias({
     required int productoId,
     required double cantidad,
