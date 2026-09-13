@@ -11,17 +11,20 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
-final listadoCuentasCobrarProvider = FutureProvider<List<CuentaCobrarItem>>((ref) async {
+final listadoCuentasCobrarProvider = FutureProvider<List<CuentaCobrarItem>>((
+  ref,
+) async {
   final db = ref.watch<AppDatabase>(appDatabaseProvider);
   final dao = CuentasCobrarDao(db);
   final registros = await dao.listarCuentasPorCobrar();
   final idsClientes = registros.map((r) => r.clienteId).toSet();
-  final clientes = await (db.select(db.clientesTable)
-    ..where((t) => t.id.isIn(idsClientes)))
-    .get();
+  final clientes = await (db.select(
+    db.clientesTable,
+  )..where((t) => t.id.isIn(idsClientes))).get();
   final mapaClientes = {for (var c in clientes) c.id: c.nombre};
   return registros.map((reg) {
-    final nombreCliente = mapaClientes[reg.clienteId] ?? 'Cliente #${reg.clienteId}';
+    final nombreCliente =
+        mapaClientes[reg.clienteId] ?? 'Cliente #${reg.clienteId}';
     final estadoTexto = switch (reg.estado) {
       CobrarEstado.pagado => 'Pagado',
       CobrarEstado.vencido => 'Vencido',
@@ -48,6 +51,7 @@ class CuentaCobrarItem {
     required this.fechaVencimiento,
     required this.estado,
   });
+
   final String clienteNombre;
   final double montoOriginal;
   final double montoAbonado;
@@ -57,16 +61,12 @@ class CuentaCobrarItem {
 }
 
 class CobrarPage extends ConsumerWidget {
-  const CobrarPage({
-    super.key,
-    this.onVolver,
-    this.onIrACredito,
-  });
+  const CobrarPage({super.key, this.onVolver, this.onIrACredito});
 
   final VoidCallback? onVolver;
   final VoidCallback? onIrACredito;
-  static const String routeName = '/cobrar-page';
 
+  static const String routeName = '/cobrar-page';
   static final DateFormat _formatoFecha = DateFormat('dd/MM/yyyy');
 
   Color _colorEstado(String estado) {
@@ -103,14 +103,13 @@ class CobrarPage extends ConsumerWidget {
             Expanded(
               child: Text(
                 'Cuentas por Cobrar',
-                style: AppTypography.h4Bold.copyWith(color: AppColors.textPrimary),
+                style: AppTypography.h4Bold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
             if (onIrACredito != null)
-              AppButton(
-                text: 'NUEVO CRÉDITO',
-                onPressed: onIrACredito,
-              ),
+              AppButton(text: 'NUEVO CRÉDITO', onPressed: onIrACredito),
           ],
         ),
         const SizedBox(height: AppSpacing.m),
@@ -125,7 +124,9 @@ class CobrarPage extends ConsumerWidget {
                 return Center(
                   child: Text(
                     'No hay cuentas por cobrar',
-                    style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 );
               }
@@ -146,7 +147,9 @@ class CobrarPage extends ConsumerWidget {
                           children: [
                             Text(
                               c.clienteNombre,
-                              style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                              style: AppTypography.labelLarge.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: AppSpacing.xs),
                             Text(
@@ -161,7 +164,9 @@ class CobrarPage extends ConsumerWidget {
                               'Saldo pendiente: RD\$ ${c.saldoPendiente.toStringAsFixed(2)}',
                               style: AppTypography.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: vencida ? AppColors.error : AppColors.primary,
+                                color: vencida
+                                    ? AppColors.error
+                                    : AppColors.primary,
                               ),
                             ),
                             Text(
@@ -180,7 +185,9 @@ class CobrarPage extends ConsumerWidget {
                               ),
                               child: Text(
                                 c.estado,
-                                style: AppTypography.labelSmall.copyWith(color: AppColors.white),
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: AppColors.white,
+                                ),
                               ),
                             ),
                           ],

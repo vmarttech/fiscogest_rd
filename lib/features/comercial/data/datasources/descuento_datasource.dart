@@ -20,11 +20,11 @@ class DescuentoDatasource {
   Descuento mapToEntity(Map<String, dynamic> mapa) {
     return Descuento(
       id: mapa['id'] as int,
-      tipo: TipoDescuento.values.byName(mapa['tipo'] as String),
+      tipo: TipoDescuento.values.byName((mapa['tipo'] as String).toLowerCase()),
       valor: (mapa['valor'] as num).toDouble(),
       motivo: mapa['motivo'] as String,
       estadoAutorizacion: EstadoAutorizacion.values.byName(
-        mapa['estado_autorizacion'] as String,
+        (mapa['estado_autorizacion'] as String).toLowerCase(),
       ),
       autorizadoPor: mapa['autorizado_por'] as String?,
       fechaRegistro: DateTime.parse(mapa['fecha_registro'] as String),

@@ -6,10 +6,7 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 
 part 'cuentas_cobrar_dao.g.dart';
 
-@DriftAccessor(tables: [
-  CuentasCobrarTable,
-  CobrosTable,
-])
+@DriftAccessor(tables: [CuentasCobrarTable, CobrosTable])
 class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     with _$CuentasCobrarDaoMixin {
   CuentasCobrarDao(super.db);
@@ -42,15 +39,15 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<CuentaCobrarData?> obtenerCuentaPorId(int cuentaId) async {
-    return await (select(cuentasCobrarTable)
-          ..where((t) => t.id.equals(cuentaId)))
-        .getSingleOrNull();
+    return await (select(
+      cuentasCobrarTable,
+    )..where((t) => t.id.equals(cuentaId))).getSingleOrNull();
   }
 
   Future<double> obtenerSaldoPorCliente(int clienteId) async {
-    final cuentas = await (select(cuentasCobrarTable)
-          ..where((t) => t.clienteId.equals(clienteId)))
-        .get();
+    final cuentas = await (select(
+      cuentasCobrarTable,
+    )..where((t) => t.clienteId.equals(clienteId))).get();
     return cuentas.fold<double>(0.0, (sum, c) => sum + c.saldoPendiente);
   }
 
@@ -84,7 +81,8 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
       query.where((t) => t.montoOriginal.isSmallerOrEqualValue(montoMaximo));
     }
     query.orderBy([
-      (t) => OrderingTerm(expression: t.fechaVencimiento, mode: OrderingMode.asc),
+      (t) =>
+          OrderingTerm(expression: t.fechaVencimiento, mode: OrderingMode.asc),
     ]);
     return await query.get();
   }
@@ -106,11 +104,8 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
   );
 
   Future<void> actualizarEstado(int cuentaId, CobrarEstado estado) async {
-    await (update(cuentasCobrarTable)
-          ..where((t) => t.id.equals(cuentaId)))
-        .write(CuentasCobrarTableCompanion(
-          estado: Value(estado),
-        ));
+    await (update(cuentasCobrarTable)..where((t) => t.id.equals(cuentaId)))
+        .write(CuentasCobrarTableCompanion(estado: Value(estado)));
   }
 
   Future<int> registrarCobro(CobrosTableCompanion cobro) async {
@@ -135,8 +130,13 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     if (cuenta == null) return;
     final cobros = await listarCobros(cuentaId);
     final totalAbonado = cobros.fold<double>(
-        0.0, (sum, c) => sum + c.montoAbonado);
-    final saldoPendiente = (cuenta.montoOriginal - totalAbonado).clamp(0.0, double.infinity);
+      0.0,
+      (sum, c) => sum + c.montoAbonado,
+    );
+    final saldoPendiente = (cuenta.montoOriginal - totalAbonado).clamp(
+      0.0,
+      double.infinity,
+    );
     CobrarEstado nuevoEstado;
     if (saldoPendiente <= 0.001) {
       nuevoEstado = CobrarEstado.pagado;
@@ -150,13 +150,15 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
         nuevoEstado = CobrarEstado.pendiente;
       }
     }
-    await (update(cuentasCobrarTable)
-          ..where((t) => t.id.equals(cuentaId)))
-        .write(CuentasCobrarTableCompanion(
-          montoAbonado: Value(totalAbonado),
-          saldoPendiente: Value(saldoPendiente),
-          estado: Value(nuevoEstado),
-        ));
+    await (update(
+      cuentasCobrarTable,
+    )..where((t) => t.id.equals(cuentaId))).write(
+      CuentasCobrarTableCompanion(
+        montoAbonado: Value(totalAbonado),
+        saldoPendiente: Value(saldoPendiente),
+        estado: Value(nuevoEstado),
+      ),
+    );
   }
 
   Future<double> totalPorCobrar() async {
@@ -204,6 +206,8 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
       venceHasta: fechaLimite,
     );
     final filtradas = lista.where((c) => c.estado != CobrarEstado.pagado);
-    return limite != null ? filtradas.take(limite).toList() : filtradas.toList();
+    return limite != null
+        ? filtradas.take(limite).toList()
+        : filtradas.toList();
   }
 }

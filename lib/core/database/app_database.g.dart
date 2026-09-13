@@ -10083,7 +10083,7 @@ class $CotizacionesTableTable extends CotizacionesTable
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('Pendiente'),
+        defaultValue: const Constant('pendiente'),
       ).withConverter<CotizacionEstado>(
         $CotizacionesTableTable.$converterestado,
       );
@@ -10288,8 +10288,8 @@ class $CotizacionesTableTable extends CotizacionesTable
     return $CotizacionesTableTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<CotizacionEstado, String, String> $converterestado =
-      const EnumNameConverter<CotizacionEstado>(CotizacionEstado.values);
+  static TypeConverter<CotizacionEstado, String> $converterestado =
+      const CotizacionEstadoConverter();
 }
 
 class CotizacionData extends DataClass implements Insertable<CotizacionData> {
@@ -10376,9 +10376,7 @@ class CotizacionData extends DataClass implements Insertable<CotizacionData> {
       descuentoGlobal: serializer.fromJson<double>(json['descuentoGlobal']),
       itbis: serializer.fromJson<double>(json['itbis']),
       montoTotal: serializer.fromJson<double>(json['montoTotal']),
-      estado: $CotizacionesTableTable.$converterestado.fromJson(
-        serializer.fromJson<String>(json['estado']),
-      ),
+      estado: serializer.fromJson<CotizacionEstado>(json['estado']),
       ventaConvertidaId: serializer.fromJson<int?>(json['ventaConvertidaId']),
       observaciones: serializer.fromJson<String?>(json['observaciones']),
     );
@@ -10395,9 +10393,7 @@ class CotizacionData extends DataClass implements Insertable<CotizacionData> {
       'descuentoGlobal': serializer.toJson<double>(descuentoGlobal),
       'itbis': serializer.toJson<double>(itbis),
       'montoTotal': serializer.toJson<double>(montoTotal),
-      'estado': serializer.toJson<String>(
-        $CotizacionesTableTable.$converterestado.toJson(estado),
-      ),
+      'estado': serializer.toJson<CotizacionEstado>(estado),
       'ventaConvertidaId': serializer.toJson<int?>(ventaConvertidaId),
       'observaciones': serializer.toJson<String?>(observaciones),
     };
@@ -13320,7 +13316,7 @@ class $CuentasCobrarTableTable extends CuentasCobrarTable
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('Pendiente'),
+        defaultValue: const Constant('pendiente'),
       ).withConverter<CobrarEstado>($CuentasCobrarTableTable.$converterestado);
   @override
   List<GeneratedColumn> get $columns => [
@@ -13457,8 +13453,8 @@ class $CuentasCobrarTableTable extends CuentasCobrarTable
     return $CuentasCobrarTableTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<CobrarEstado, String, String> $converterestado =
-      const EnumNameConverter<CobrarEstado>(CobrarEstado.values);
+  static TypeConverter<CobrarEstado, String> $converterestado =
+      const CobrarEstadoConverter();
 }
 
 class CuentaCobrarData extends DataClass
@@ -13525,9 +13521,7 @@ class CuentaCobrarData extends DataClass
       montoAbonado: serializer.fromJson<double>(json['montoAbonado']),
       saldoPendiente: serializer.fromJson<double>(json['saldoPendiente']),
       fechaVencimiento: serializer.fromJson<DateTime>(json['fechaVencimiento']),
-      estado: $CuentasCobrarTableTable.$converterestado.fromJson(
-        serializer.fromJson<String>(json['estado']),
-      ),
+      estado: serializer.fromJson<CobrarEstado>(json['estado']),
     );
   }
   @override
@@ -13541,9 +13535,7 @@ class CuentaCobrarData extends DataClass
       'montoAbonado': serializer.toJson<double>(montoAbonado),
       'saldoPendiente': serializer.toJson<double>(saldoPendiente),
       'fechaVencimiento': serializer.toJson<DateTime>(fechaVencimiento),
-      'estado': serializer.toJson<String>(
-        $CuentasCobrarTableTable.$converterestado.toJson(estado),
-      ),
+      'estado': serializer.toJson<CobrarEstado>(estado),
     };
   }
 
@@ -14316,7 +14308,7 @@ class $CuentasPagarTableTable extends CuentasPagarTable
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('Pendiente'),
+        defaultValue: const Constant('pendiente'),
       ).withConverter<PagarEstado>($CuentasPagarTableTable.$converterestado);
   @override
   late final GeneratedColumnWithTypeConverter<TipoGasto, String> tipoGasto =
@@ -14455,8 +14447,8 @@ class $CuentasPagarTableTable extends CuentasPagarTable
     return $CuentasPagarTableTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<PagarEstado, String, String> $converterestado =
-      const EnumNameConverter<PagarEstado>(PagarEstado.values);
+  static TypeConverter<PagarEstado, String> $converterestado =
+      const PagarEstadoConverter();
   static JsonTypeConverter2<TipoGasto, String, String> $convertertipoGasto =
       const EnumNameConverter<TipoGasto>(TipoGasto.values);
 }
@@ -14527,9 +14519,7 @@ class CuentaPagarData extends DataClass implements Insertable<CuentaPagarData> {
       monto: serializer.fromJson<double>(json['monto']),
       fechaEmision: serializer.fromJson<DateTime>(json['fechaEmision']),
       fechaVencimiento: serializer.fromJson<DateTime>(json['fechaVencimiento']),
-      estado: $CuentasPagarTableTable.$converterestado.fromJson(
-        serializer.fromJson<String>(json['estado']),
-      ),
+      estado: serializer.fromJson<PagarEstado>(json['estado']),
       tipoGasto: $CuentasPagarTableTable.$convertertipoGasto.fromJson(
         serializer.fromJson<String>(json['tipoGasto']),
       ),
@@ -14545,9 +14535,7 @@ class CuentaPagarData extends DataClass implements Insertable<CuentaPagarData> {
       'monto': serializer.toJson<double>(monto),
       'fechaEmision': serializer.toJson<DateTime>(fechaEmision),
       'fechaVencimiento': serializer.toJson<DateTime>(fechaVencimiento),
-      'estado': serializer.toJson<String>(
-        $CuentasPagarTableTable.$converterestado.toJson(estado),
-      ),
+      'estado': serializer.toJson<PagarEstado>(estado),
       'tipoGasto': serializer.toJson<String>(
         $CuentasPagarTableTable.$convertertipoGasto.toJson(tipoGasto),
       ),

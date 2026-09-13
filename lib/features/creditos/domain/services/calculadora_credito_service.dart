@@ -70,14 +70,16 @@ class CalculadoraCreditoService {
         fechaPrimerVencimiento.day,
       );
 
-      cuotas.add(Cuota(
-        numeroCuota: i,
-        fechaVencimiento: fechaVencimiento,
-        montoCapital: _redondear(capitalFinal),
-        montoInteres: _redondear(interes),
-        montoTotal: _redondear(totalFinal),
-        saldoDespues: _redondear(nuevoSaldo),
-      ));
+      cuotas.add(
+        Cuota(
+          numeroCuota: i,
+          fechaVencimiento: fechaVencimiento,
+          montoCapital: _redondear(capitalFinal),
+          montoInteres: _redondear(interes),
+          montoTotal: _redondear(totalFinal),
+          saldoDespues: _redondear(nuevoSaldo),
+        ),
+      );
 
       saldoPendiente = nuevoSaldo;
     }
@@ -117,8 +119,10 @@ class CalculadoraCreditoService {
     required int numeroCuotas,
     required DateTime fechaPrimerVencimiento,
   }) {
-    final double saldoFinanciado =
-        (totalVenta - abonoInicial).clamp(0.0, double.infinity);
+    final double saldoFinanciado = (totalVenta - abonoInicial).clamp(
+      0.0,
+      double.infinity,
+    );
 
     if (numeroCuotas <= 1) {
       // Pago único

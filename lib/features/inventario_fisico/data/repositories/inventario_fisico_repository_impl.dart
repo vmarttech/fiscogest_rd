@@ -7,7 +7,6 @@ import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interf
 class InventarioFisicoRepositoryImpl
     implements InventarioFisicoRepositoryInterface {
   InventarioFisicoRepositoryImpl(this._db);
-
   final AppDatabase _db;
 
   @override
@@ -38,7 +37,7 @@ class InventarioFisicoRepositoryImpl
             observaciones: r.observaciones,
             usuarioId: r.usuarioId,
             fechaCreacion: r.fechaCreacion,
-            estado: EstadoConteo.values.byName(r.estado),
+            estado: EstadoConteo.values.byName(r.estado.toLowerCase()),
           ),
         )
         .toList();
