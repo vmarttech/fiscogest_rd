@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
@@ -9,12 +10,10 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
-import 'package:drift/drift.dart';
 
 class VentasRepositoryImpl implements IVentasRepository {
-  VentasRepositoryImpl(this._ventasDao, this._cuentasCobrarDao);
+  VentasRepositoryImpl(this._ventasDao, [CuentasCobrarDao? _]);
   final VentasDao _ventasDao;
-  final CuentasCobrarDao _cuentasCobrarDao;
 
   Venta _mapearDesdeDatos(
     VentasTableData ventaData,
@@ -30,9 +29,7 @@ class VentasRepositoryImpl implements IVentasRepository {
       'facturado' => EstadoDocumento.facturado,
       _ => EstadoDocumento.borrador,
     };
-
     final estadoDoc = parsearEstado(ventaData.estadoDocumento);
-
     return Venta(
       id: ventaData.id,
       numeroCotizacion: ventaData.numeroCotizacion,
@@ -115,6 +112,15 @@ class VentasRepositoryImpl implements IVentasRepository {
   }
 
   @override
+  Future<String> siguienteNumeroCotizacion() async {
+    const ceros = '00000';
+    final ultimo = await _ventasDao.obtenerUltimoCorrelativoCotizacion();
+    final siguiente = ultimo + 1;
+    final numeroStr = siguiente.toString();
+    return 'COT-${ceros.substring(numeroStr.length)}$numeroStr';
+  }
+
+  @override
   Future<Venta> registrarVenta(Venta venta) async {
     final ventaId = await _ventasDao.insertarVenta(
       VentasTableCompanion(
@@ -138,19 +144,8 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoDescuento: Value(venta.montoDescuento),
       ),
     );
-    if (venta.estadoDocumento == EstadoDocumento.enCredito) {
-      final montoAbonar = venta.abonoInicial;
-      final fechaVence =
-          venta.vencimiento ?? venta.fecha.add(const Duration(days: 30));
-      await _cuentasCobrarDao.crearCuentaPorVenta(
-        clienteId: venta.clienteId,
-        ventaId: ventaId,
-        montoOriginal: venta.montoTotal,
-        montoAbonado: montoAbonar,
-        fechaVencimiento: fechaVence,
-      );
-    }
-    return venta.copyWith(id: ventaId);
+    final guardada = await _ventasDao.obtenerVentaPorId(ventaId);
+    return _mapearDesdeDatos(guardada!, null);
   }
 
   @override
@@ -169,7 +164,7 @@ class VentasRepositoryImpl implements IVentasRepository {
         costoEnvio: Value(cotizacion.costoEnvio),
         abonoInicial: Value(cotizacion.abonoInicial),
         vencimiento: Value(cotizacion.vencimiento),
-        estadoDocumento: Value(EstadoDocumento.borrador.name),
+        estadoDocumento: Value(cotizacion.estadoDocumento.name),
         usuarioId: Value(cotizacion.usuarioId),
         fechaRegistro: Value(cotizacion.fechaRegistro),
         descuentoId: Value(cotizacion.descuentoId),
@@ -177,18 +172,14 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );
-    return cotizacion.copyWith(
-      id: ventaId,
-      numeroCotizacion: 'C-$ventaId',
-      estadoDocumento: EstadoDocumento.borrador,
-    );
+    final guardada = await _ventasDao.obtenerVentaPorId(ventaId);
+    return _mapearDesdeDatos(guardada!, null, esCotizacion: true);
   }
 
   @override
   Future<Venta> actualizarVentaBorrador(Venta cotizacion) async {
-    final int id = cotizacion.id!;
     await _ventasDao.actualizarVenta(
-      id,
+      cotizacion.id!,
       VentasTableCompanion(
         clienteId: Value(cotizacion.clienteId),
         fecha: Value(cotizacion.fecha),
@@ -204,25 +195,26 @@ class VentasRepositoryImpl implements IVentasRepository {
         vencimiento: Value(cotizacion.vencimiento),
         estadoDocumento: Value(cotizacion.estadoDocumento.name),
         usuarioId: Value(cotizacion.usuarioId),
+        fechaRegistro: Value(cotizacion.fechaRegistro),
         descuentoId: Value(cotizacion.descuentoId),
         descuentoNombre: Value(cotizacion.descuentoNombre),
         montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );
-    return cotizacion;
+    final actualizada = await _ventasDao.obtenerVentaPorId(cotizacion.id!);
+    return _mapearDesdeDatos(actualizada!, null, esCotizacion: true);
   }
 
   @override
   Future<Venta> confirmarVentaBorrador(int cotizacionId) async {
-    final cotizacion = await obtenerVentaBorradorPorId(cotizacionId);
-    if (cotizacion == null) {
-      throw Exception('Cotización no encontrada');
-    }
-    final ventaConvertida = cotizacion.copyWith(
-      numeroCotizacion: cotizacion.numeroCotizacion.replaceFirst('C-', ''),
-      estadoDocumento: EstadoDocumento.facturado,
+    await _ventasDao.actualizarVenta(
+      cotizacionId,
+      const VentasTableCompanion(
+        estadoDocumento: Value('facturado'),
+      ),
     );
-    return await actualizarVentaBorrador(ventaConvertida);
+    final confirmada = await _ventasDao.obtenerVentaPorId(cotizacionId);
+    return _mapearDesdeDatos(confirmada!, null);
   }
 
   @override
@@ -242,29 +234,31 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<double> consultarSaldoCliente(int clienteId) async {
-    return await _cuentasCobrarDao.obtenerSaldoPorCliente(clienteId);
+    throw UnimplementedError();
   }
 
   @override
   Future<List<Descuento>> obtenerDescuentosActivos() async {
-    return const [];
+    throw UnimplementedError();
   }
 
   @override
   Future<List<Oferta>> obtenerOfertasActivas() async {
-    return const [];
+    throw UnimplementedError();
   }
 
   @override
   Future<bool> aplicarDescuento(int ventaId, int descuentoId) async {
-    return false;
+    throw UnimplementedError();
   }
 
   @override
   Future<bool> validarOferta(int ofertaId, double montoCompra) async {
-    return false;
+    throw UnimplementedError();
   }
 
   @override
-  Future<void> actualizarEnCascada(int ventaId) async {}
+  Future<void> actualizarEnCascada(int ventaId) async {
+    throw UnimplementedError();
+  }
 }

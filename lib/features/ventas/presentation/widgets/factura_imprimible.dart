@@ -194,7 +194,7 @@ class FacturaImprimible extends StatelessWidget {
               '========================================',
               style: TextStyle(fontFamily: 'Courier', fontSize: 12),
             ),
-            const Text(" "),
+            const Text(' '),
             const SizedBox(height: 16),
             const Text(
               '       ¡GRACIAS POR SU COMPRA!',
