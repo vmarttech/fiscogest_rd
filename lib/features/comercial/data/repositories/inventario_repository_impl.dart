@@ -1,13 +1,25 @@
+import 'package:drift/drift.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_inventario_repository.dart';
 
 class InventarioRepositoryImpl implements IInventarioRepository {
-  final _existencias = <int, double>{};
+  InventarioRepositoryImpl(this._db);
+  final AppDatabase _db;
+
   @override
   Future<void> aumentarExistencias({
     required int productoId,
     required double cantidad,
   }) async {
-    _existencias[productoId] = (_existencias[productoId] ?? 0) + cantidad;
+    final registro = await (_db.select(_db.productosTable)
+          ..where((fila) => fila.id.equals(productoId))
+          ..limit(1))
+        .getSingleOrNull();
+    final actual = registro?.stock ?? 0.0;
+    final nuevoStock = actual + cantidad;
+    await (_db.update(_db.productosTable)
+          ..where((fila) => fila.id.equals(productoId)))
+        .write(ProductosTableCompanion(stock: Value(nuevoStock)));
   }
 
   @override
@@ -15,10 +27,17 @@ class InventarioRepositoryImpl implements IInventarioRepository {
     required int productoId,
     required double cantidad,
   }) async {
-    final actual = _existencias[productoId] ?? 0;
+    final registro = await (_db.select(_db.productosTable)
+          ..where((fila) => fila.id.equals(productoId))
+          ..limit(1))
+        .getSingleOrNull();
+    final actual = registro?.stock ?? 0.0;
     if (actual < cantidad) {
       throw StateError('Existencias insuficientes para producto: $productoId');
     }
-    _existencias[productoId] = actual - cantidad;
+    final nuevoStock = actual - cantidad;
+    await (_db.update(_db.productosTable)
+          ..where((fila) => fila.id.equals(productoId)))
+        .write(ProductosTableCompanion(stock: Value(nuevoStock)));
   }
 }

@@ -37,7 +37,8 @@ final compraRepositoryProvider = Provider<ICompraRepository>((ref) {
 });
 
 final inventarioRepositoryProvider = Provider<IInventarioRepository>((ref) {
-  return InventarioRepositoryImpl();
+  final db = ref.watch(appDatabaseProvider);
+  return InventarioRepositoryImpl(db);
 });
 
 final productoRepositoryProvider = Provider<IProductoRepository>((ref) {

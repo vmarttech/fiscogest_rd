@@ -98,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   // ✅ GETTER DAO - CONECTADO
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
@@ -221,6 +221,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 18) {
         try {
           await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN estado TEXT DEFAULT "pendiente"');
+        } catch (_) {}
+      }
+      if (from < 19) {
+        try {
+          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN numero_cotizacion TEXT');
         } catch (_) {}
       }
     },
