@@ -10,12 +10,14 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
   static const String routeName = 'nueva-venta-borrador';
+
   @override
   ConsumerState<NuevaVentaBorradorPage> createState() =>
       _NuevaVentaBorradorPageState();
@@ -26,6 +28,7 @@ class _NuevaVentaBorradorPageState
   final TextEditingController _buscadorController = TextEditingController();
   DateTime? _fechaVencimientoSeleccionada;
   String? _numeroCotizacionGuardada;
+  int? _ventaIdGenerado;
   bool _guardando = false;
 
   @override
@@ -67,10 +70,24 @@ class _NuevaVentaBorradorPageState
     }
   }
 
+  Future<void> _irACobrar() async {
+    if (_ventaIdGenerado == null || !mounted) return;
+    final estado = ref.read(ventaBorradorProvider);
+    const esCredito = false;
+    await Navigator.pushNamed(
+      context,
+      CobroVentaPage.routeName,
+      arguments: {
+        'ventaId': _ventaIdGenerado!,
+        'montoTotal': estado.montoTotal,
+        'esCredito': esCredito,
+      },
+    );
+  }
+
   Future<void> _guardarCotizacion() async {
     final notificador = ref.read(ventaBorradorProvider.notifier);
     final repositorio = ref.read(ventasRepositoryProvider);
-
     if (!notificador.validarAntesDeGuardar()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -82,29 +99,27 @@ class _NuevaVentaBorradorPageState
       }
       return;
     }
-
     setState(() => _guardando = true);
     try {
       final numeroCotizacion = await repositorio.siguienteNumeroCotizacion();
-
       notificador.establecerNumeroCotizacion(numeroCotizacion);
-      notificador.establecerEstadoDocumento(EstadoDocumento.cotizado);
-
+      notificador.establecerEstadoDocumento(EstadoDocumento.aprobado);
       final numeroGuardado = notificador.guardar();
-
       if (!mounted) return;
-      setState(() => _numeroCotizacionGuardada = numeroGuardado);
-
+      setState(() {
+        _numeroCotizacionGuardada = numeroGuardado;
+        _ventaIdGenerado = int.tryParse(numeroGuardado ?? '0');
+      });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '✅ Cotización N° $numeroGuardado generada.\nEntregar comprobante al cliente.',
+            '✅ Cotización N° $numeroGuardado generada.\nPuede proceder a cobrar.',
           ),
           backgroundColor: AppColors.success,
           duration: const Duration(seconds: 4),
         ),
       );
-
       notificador.vaciar();
       setState(() => _fechaVencimientoSeleccionada = null);
     } catch (e) {
@@ -120,6 +135,7 @@ class _NuevaVentaBorradorPageState
         setState(() => _guardando = false);
       }
     }
+    return;
   }
 
   Future<void> _imprimir() async {
@@ -191,7 +207,6 @@ class _NuevaVentaBorradorPageState
     final estado = ref.watch(ventaBorradorProvider);
     final anchoPantalla = MediaQuery.of(context).size.width;
     final pantallaPequena = anchoPantalla < 720;
-
     return AppScaffold(
       body: SafeArea(
         bottom: true,
@@ -219,7 +234,7 @@ class _NuevaVentaBorradorPageState
         const SizedBox(height: AppSpacing.m),
         _buildResumen(estado),
         const SizedBox(height: AppSpacing.l),
-        _buildBotonera(),
+        _buildBotonera(estado),
       ],
     );
   }
@@ -252,7 +267,7 @@ class _NuevaVentaBorradorPageState
               children: [
                 _buildResumen(estado),
                 const SizedBox(height: AppSpacing.l),
-                _buildBotonera(),
+                _buildBotonera(estado),
               ],
             ),
           ),
@@ -344,7 +359,7 @@ class _NuevaVentaBorradorPageState
         const SizedBox(height: AppSpacing.s),
         PanelProductos(
           controlador: _buscadorController,
-          alAgregar: (_) async {},
+          alAgregar: null,
         ),
       ],
     );
@@ -410,10 +425,20 @@ class _NuevaVentaBorradorPageState
     );
   }
 
-  Widget _buildBotonera() {
+  Widget _buildBotonera(VentaBorradorState estado) {
+    final mostrarBotonCobro = _ventaIdGenerado != null &&
+        estado.estadoDocumento == EstadoDocumento.aprobado;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (mostrarBotonCobro) ...[
+          AppButton(
+            text: 'IR A COBRAR / FACTURAR',
+            onPressed: _irACobrar,
+            icon: Icons.payment,
+          ),
+          const SizedBox(height: AppSpacing.m),
+        ],
         AppButton(
           text: _guardando ? 'Generando...' : 'GENERAR COTIZACIÓN',
           onPressed: _guardando ? null : _guardarCotizacion,
