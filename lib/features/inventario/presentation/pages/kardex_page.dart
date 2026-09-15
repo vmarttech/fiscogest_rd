@@ -12,7 +12,6 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 
 class KardexPage extends ConsumerStatefulWidget {
   const KardexPage({super.key, this.productoId});
-
   static const String routeName = 'kardex';
   final String? productoId;
 
@@ -35,9 +34,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
 
   @override
   Widget build(BuildContext context) {
-    final movimientosAsync = ref.watch(
-      kardexPorProductoProvider(_productoIdFijo ?? 0),
-    );
+    final productoIdConsulta = _productoIdFijo ?? 1;
+    final movimientosAsync = ref.watch(kardexPorProductoProvider(productoIdConsulta));
 
     return AppScaffold(
       body: SafeArea(
@@ -105,13 +103,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                               return false;
                             }
                             final coincideTexto =
-                                mov.productoId.toString().contains(
-                                  _filtroBusqueda,
-                                ) ||
-                                (mov.documentoReferencia
-                                        ?.toLowerCase()
-                                        .contains(_filtroBusqueda) ??
-                                    false);
+                                mov.productoId.toString().contains(_filtroBusqueda) ||
+                                ((mov.documentoReferencia ?? '').toLowerCase().contains(_filtroBusqueda));
                             final coincideTipo =
                                 _filtroTipo == null ||
                                 mov.tipoMovimiento == _filtroTipo;
@@ -148,9 +141,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                 TipoMovimiento.transferencia => AppColors.info,
                                 _ => AppColors.secondary,
                               };
-                              final fechaValida =
-                                  mov.fechaMovimiento ?? DateTime.now();
-
+                              final fechaValida = mov.fechaMovimiento ?? DateTime.now();
                               return Padding(
                                 padding: AppSpacing.vS,
                                 child: Row(
@@ -167,25 +158,18 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                     const SizedBox(width: AppSpacing.m),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            mov.tipoMovimiento.name
-                                                .toUpperCase(),
+                                            mov.tipoMovimiento.name.toUpperCase(),
                                             style: AppTypography.labelLarge
-                                                .copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                                .copyWith(fontWeight: FontWeight.bold),
                                           ),
                                           AppLayout.vXs,
                                           Text(
                                             'Prod: ${mov.productoId} • Doc: ${mov.documentoReferencia ?? 'Sin documento'}',
                                             style: AppTypography.bodySmall
-                                                .copyWith(
-                                                  color:
-                                                      AppColors.textSecondary,
-                                                ),
+                                                .copyWith(color: AppColors.textSecondary),
                                           ),
                                           Text(
                                             'Cant: ${mov.cantidad} • Saldo: ${mov.saldoAnterior} → ${mov.saldoNuevo}',

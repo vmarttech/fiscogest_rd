@@ -27,6 +27,8 @@ class KardexRepositoryImpl implements IKardexRepository {
         documentoReferencia: Value(movimiento.documentoReferencia),
         observacion: Value(movimiento.observacion),
         usuarioId: Value(movimiento.usuarioId),
+        motivo: const Value.absent(),
+        referenciaId: const Value.absent(),
       ),
     );
   }

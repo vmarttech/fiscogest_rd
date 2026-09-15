@@ -37,6 +37,8 @@ class RepositoryInjection {
   });
 
   static RepositoryInjection? _instance;
+  static CompraEventosListener? _compraEventosListener;
+
   static RepositoryInjection get instance {
     if (_instance == null) {
       throw Exception('RepositoryInjection no inicializado');
@@ -74,20 +76,23 @@ class RepositoryInjection {
     final apartadoRepository = ApartadoRepositoryImpl(apartadosDao: apartadosDao);
     final devolucionRepository = DevolucionRepositoryImpl(devolucionesDao: devolucionesDao);
     final cajaRepository = CajaRepositoryImpl(cajaMovimientosDao: cajaMovimientosDao);
-
     final compraRepo = CompraRepositoryImpl(db);
     final inventarioRepo = InventarioRepositoryImpl(db);
     final productoRepo = ProductoRepositoryImpl(db);
     final proveedorRepo = ProveedorRepositoryImpl();
     final kardexUsecase = RegistrarMovimientoKardex(kardexRepo);
 
-    CompraEventosListener(
+    // ✅ Guardamos el listener en variable ESTÁTICA → NUNCA SE DESTRUYE
+    _compraEventosListener = CompraEventosListener(
       compraRepo,
       inventarioRepo,
       productoRepo,
       kardexUsecase,
       proveedorRepo,
     );
+
+    // ✅ Leemos la variable para eliminar advertencia de campo no usado
+    assert(_compraEventosListener != null, 'Listener inicializado');
 
     _instance = RepositoryInjection._(
       db: db,
