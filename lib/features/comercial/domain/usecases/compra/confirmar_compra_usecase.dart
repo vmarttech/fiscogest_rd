@@ -2,6 +2,7 @@ import 'package:fiscogest_rd/core/eventos/evento_bus.dart';
 import 'package:fiscogest_rd/core/eventos/eventos_sistema.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
+import 'package:fiscogest_rd/features/comercial/domain/usecases/calcular_costo_adquisicion.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/ejecutar_actualizaciones_comerciales.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/usecases/registrar_movimiento_kardex.dart';
@@ -11,17 +12,19 @@ class ConfirmarCompraUseCase {
     required ICompraRepository compraRepository,
     required EjecutarActualizacionesComerciales ejecutarActualizaciones,
     required RegistrarMovimientoKardex registrarMovimientoKardex,
+    required CalcularCostoAdquisicion calcularCostoAdquisicion,
   }) : _compraRepository = compraRepository,
        _ejecutarActualizaciones = ejecutarActualizaciones,
-       _registrarMovimientoKardex = registrarMovimientoKardex;
+       _registrarMovimientoKardex = registrarMovimientoKardex,
+       _calcularCostoAdquisicion = calcularCostoAdquisicion;
 
   final ICompraRepository _compraRepository;
   final EjecutarActualizacionesComerciales _ejecutarActualizaciones;
   final RegistrarMovimientoKardex _registrarMovimientoKardex;
+  final CalcularCostoAdquisicion _calcularCostoAdquisicion;
 
   Future<Compra> call(int compraId) async {
     print('🔵 Confirmando compraId=$compraId');
-
     final compra = await _compraRepository.obtenerCompraPorId(compraId);
     if (compra == null) throw StateError('Compra no encontrada: $compraId');
 
@@ -35,28 +38,40 @@ class ConfirmarCompraUseCase {
       final idProd = linea.productoId;
       if (idProd <= 0) continue;
 
-      // ✅ Actualiza existencias y costos
+      // ✅ COMPRAS CALCULA EL COSTO REAL — Inventario NO lo hace
+      final costoAdquisicion = _calcularCostoAdquisicion(
+        costoUnitario: linea.costoUnitario,
+        fleteUnitario: linea.fleteUnitario,
+        seguroUnitario: linea.seguroUnitario,
+        arancelesUnitario: linea.arancelesUnitario,
+        gastosUnitario: linea.gastosUnitario,
+      );
+
+      print('🔵 Producto=$idProd: costoUnitario=${linea.costoUnitario} → costoAdquisicion=$costoAdquisicion');
+
+      // ✅ Se envía a Inventario EL COSTO YA CALCULADO — NO componentes
       await _ejecutarActualizaciones.ejecutarCompra(
         idProducto: idProd,
         cantidad: linea.cantidad,
-        costoUnitario: linea.costoUnitario,
+        costoUnitario: costoAdquisicion,
         proveedorId: compra.proveedorId,
         montoTotal: compra.totalCompra,
         fecha: compra.fechaEmision,
       );
 
-      // ✅ REGISTRAMOS KARDEX usando el CASO DE USO que ya existe
+      // ✅ Kárdex recibe EL COSTO FINAL — SOLO lo registra, no calcula
       try {
-        print('🔵 Kardex prod=$idProd: cant=${linea.cantidad}, costo=${linea.costoUnitario}');
+        final totalMovimiento = linea.cantidad * costoAdquisicion;
+        print('🔵 Kardex prod=$idProd: cant=${linea.cantidad}, costo=$costoAdquisicion');
 
         await _registrarMovimientoKardex.ejecutar(
           productoId: idProd,
           tipoMovimiento: TipoMovimiento.entrada,
           cantidad: linea.cantidad,
-          saldoAnterior: 0.0, // ⚠️ Lo corregimos luego, por ahora pasa
+          saldoAnterior: 0.0,
           saldoNuevo: linea.cantidad,
-          costoUnitario: linea.costoUnitario,
-          totalMovimiento: linea.cantidad * linea.costoUnitario,
+          costoUnitario: costoAdquisicion,
+          totalMovimiento: totalMovimiento,
           fechaMovimiento: fechaCompra,
           documentoReferencia: 'Compra #$compraId',
           observacion: 'Entrada por compra',
@@ -71,7 +86,6 @@ class ConfirmarCompraUseCase {
     final compraConfirmada = await _compraRepository.confirmarCompra(compraId);
     EventoBus.emitir(EventosSistema.compraConfirmada, {'compraId': compraId});
     print('✅ Compra confirmada y Kardex procesado');
-
     return compraConfirmada;
   }
 }

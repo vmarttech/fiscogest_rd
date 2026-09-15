@@ -4,13 +4,24 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
+
 int _extraerId(dynamic valor) {
+  if (valor == null) return 0;
   final texto = valor.toString().replaceAll(RegExp(r'[^0-9]'), '');
   return int.tryParse(texto) ?? 0;
 }
+
+double _seguro(dynamic v) {
+  if (v == null) return 0.0;
+  if (v is double) return v;
+  if (v is int) return v.toDouble();
+  return (num.tryParse(v.toString()) ?? 0).toDouble();
+}
+
 class CompraRepositoryImpl implements ICompraRepository {
   CompraRepositoryImpl(this.db);
   final AppDatabase db;
+
   ComprasTableCompanion _compraToCompanion(Compra compra) {
     return ComprasTableCompanion(
       id: Value(compra.id),
@@ -30,6 +41,7 @@ class CompraRepositoryImpl implements ICompraRepository {
       actualizadoEn: Value(compra.actualizadoEn),
     );
   }
+
   Compra _filaToCompra(ComprasTableData fila) {
     return Compra(
       id: _extraerId(fila.id),
@@ -49,6 +61,7 @@ class CompraRepositoryImpl implements ICompraRepository {
       actualizadoEn: fila.actualizadoEn,
     );
   }
+
   DetalleCompraTableCompanion _detalleToCompanion(DetalleCompra detalle) {
     return DetalleCompraTableCompanion(
       id: Value(detalle.id),
@@ -57,24 +70,37 @@ class CompraRepositoryImpl implements ICompraRepository {
       nombreProducto: Value(detalle.nombreProducto),
       cantidad: Value(detalle.cantidad),
       costoUnitario: Value(detalle.costoUnitario),
+      fleteUnitario: Value(detalle.fleteUnitario),
+      seguroUnitario: Value(detalle.seguroUnitario),
+      arancelesUnitario: Value(detalle.arancelesUnitario),
+      gastosUnitario: Value(detalle.gastosUnitario),
+      costoAdquisicion: Value(detalle.costoAdquisicion),
       descuentoPorcentaje: Value(detalle.descuentoPorcentaje),
       montoDescuentoLinea: Value(detalle.montoDescuentoLinea),
       subtotalLinea: Value(detalle.subtotalLinea),
     );
   }
+
   DetalleCompra _filaToDetalle(DetalleCompraTableData fila) {
+    final datos = fila.toJson();
     return DetalleCompra(
-      id: _extraerId(fila.id),
-      compraId: _extraerId(fila.compraId),
-      productoId: _extraerId(fila.productoId),
-      nombreProducto: fila.nombreProducto,
-      cantidad: fila.cantidad,
-      costoUnitario: fila.costoUnitario,
-      descuentoPorcentaje: fila.descuentoPorcentaje,
-      montoDescuentoLinea: fila.montoDescuentoLinea,
-      subtotalLinea: fila.subtotalLinea,
+      id: _extraerId(datos['id']),
+      compraId: _extraerId(datos['compraId']),
+      productoId: _extraerId(datos['productoId']),
+      nombreProducto: (datos['nombreProducto'] as String?) ?? '',
+      cantidad: _seguro(datos['cantidad']),
+      costoUnitario: _seguro(datos['costoUnitario']),
+      fleteUnitario: _seguro(datos['fleteUnitario']),
+      seguroUnitario: _seguro(datos['seguroUnitario']),
+      arancelesUnitario: _seguro(datos['arancelesUnitario']),
+      gastosUnitario: _seguro(datos['gastosUnitario']),
+      costoAdquisicion: _seguro(datos['costoAdquisicion']),
+      descuentoPorcentaje: _seguro(datos['descuentoPorcentaje']),
+      montoDescuentoLinea: _seguro(datos['montoDescuentoLinea']),
+      subtotalLinea: _seguro(datos['subtotalLinea']),
     );
   }
+
   @override
   Future<Compra?> obtenerCompraPorId(int compraId) async {
     final fila = await (db.select(
@@ -82,6 +108,7 @@ class CompraRepositoryImpl implements ICompraRepository {
     )..where((t) => t.id.equals(compraId))).getSingleOrNull();
     return fila == null ? null : _filaToCompra(fila);
   }
+
   @override
   Future<List<Compra>> listarCompras() async {
     final filas = await (db.select(
@@ -89,6 +116,7 @@ class CompraRepositoryImpl implements ICompraRepository {
     )..orderBy([(t) => OrderingTerm.desc(t.fechaEmision)])).get();
     return filas.map((ComprasTableData f) => _filaToCompra(f)).toList();
   }
+
   @override
   Future<List<DetalleCompra>> listarDetallesDeCompra(int compraId) async {
     final filas = await (db.select(
@@ -96,6 +124,7 @@ class CompraRepositoryImpl implements ICompraRepository {
     )..where((t) => t.compraId.equals(compraId))).get();
     return filas.map((DetalleCompraTableData f) => _filaToDetalle(f)).toList();
   }
+
   @override
   Future<Compra> confirmarCompra(int compraId) async {
     return await db.transaction(() async {
@@ -105,10 +134,6 @@ class CompraRepositoryImpl implements ICompraRepository {
       }
       if (compra.estado != EstadoCompra.borrador) {
         throw StateError('Compra no está en estado Borrador');
-      }
-      final lineasDetalle = await listarDetallesDeCompra(compraId);
-      if (lineasDetalle.isEmpty) {
-        throw StateError('La compra no tiene productos registrados');
       }
       final compraConfirmada = compra.copyWith(
         estado: EstadoCompra.confirmada,
@@ -120,6 +145,7 @@ class CompraRepositoryImpl implements ICompraRepository {
       return compraConfirmada;
     });
   }
+
   @override
   Future<Compra> registrarCompra({
     required Compra compra,

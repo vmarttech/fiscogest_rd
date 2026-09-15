@@ -1,7 +1,7 @@
 /// Entidad de dominio: Línea de detalle de una [Compra].
 ///
 /// Cada instancia representa un producto incluido en la compra,
-/// con cantidad, costo unitario, descuento por línea e importe.
+/// con cantidad, costo unitario, componentes de costo, descuento por línea e importe.
 class DetalleCompra {
   const DetalleCompra({
     required this.id,
@@ -10,6 +10,11 @@ class DetalleCompra {
     required this.nombreProducto,
     required this.cantidad,
     required this.costoUnitario,
+    this.fleteUnitario = 0.0,
+    this.seguroUnitario = 0.0,
+    this.arancelesUnitario = 0.0,
+    this.gastosUnitario = 0.0,
+    required this.costoAdquisicion,
     required this.descuentoPorcentaje,
     required this.montoDescuentoLinea,
     required this.subtotalLinea,
@@ -21,6 +26,11 @@ class DetalleCompra {
   final String nombreProducto;
   final double cantidad;
   final double costoUnitario;
+  final double fleteUnitario;
+  final double seguroUnitario;
+  final double arancelesUnitario;
+  final double gastosUnitario;
+  final double costoAdquisicion;
   final double descuentoPorcentaje;
   final double montoDescuentoLinea;
   final double subtotalLinea;
@@ -34,6 +44,11 @@ class DetalleCompra {
     String? nombreProducto,
     double? cantidad,
     double? costoUnitario,
+    double? fleteUnitario,
+    double? seguroUnitario,
+    double? arancelesUnitario,
+    double? gastosUnitario,
+    double? costoAdquisicion,
     double? descuentoPorcentaje,
     double? montoDescuentoLinea,
     double? subtotalLinea,
@@ -45,6 +60,11 @@ class DetalleCompra {
       nombreProducto: nombreProducto ?? this.nombreProducto,
       cantidad: cantidad ?? this.cantidad,
       costoUnitario: costoUnitario ?? this.costoUnitario,
+      fleteUnitario: fleteUnitario ?? this.fleteUnitario,
+      seguroUnitario: seguroUnitario ?? this.seguroUnitario,
+      arancelesUnitario: arancelesUnitario ?? this.arancelesUnitario,
+      gastosUnitario: gastosUnitario ?? this.gastosUnitario,
+      costoAdquisicion: costoAdquisicion ?? this.costoAdquisicion,
       descuentoPorcentaje: descuentoPorcentaje ?? this.descuentoPorcentaje,
       montoDescuentoLinea: montoDescuentoLinea ?? this.montoDescuentoLinea,
       subtotalLinea: subtotalLinea ?? this.subtotalLinea,

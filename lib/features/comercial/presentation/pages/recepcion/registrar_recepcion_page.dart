@@ -35,6 +35,45 @@ class RegistrarRecepcionPage extends ConsumerStatefulWidget {
 class _RegistrarRecepcionPageState
     extends ConsumerState<RegistrarRecepcionPage> {
   String _estadoRecepcion = 'parcial';
+  late List<DetalleRecepcion> _detallesEditables;
+  final List<TextEditingController> _costoControllers = [];
+  final List<TextEditingController> _fleteControllers = [];
+  final List<TextEditingController> _seguroControllers = [];
+  final List<TextEditingController> _arancelesControllers = [];
+  final List<TextEditingController> _gastosControllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _detallesEditables = widget.detallesCompra.map((d) => d).toList();
+    for (final d in _detallesEditables) {
+      _costoControllers.add(TextEditingController(text: (d.costoUnitario ?? 0).toString()));
+      _fleteControllers.add(TextEditingController(text: d.fleteUnitario.toString()));
+      _seguroControllers.add(TextEditingController(text: d.seguroUnitario.toString()));
+      _arancelesControllers.add(TextEditingController(text: d.arancelesUnitario.toString()));
+      _gastosControllers.add(TextEditingController(text: d.gastosUnitario.toString()));
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final c in _costoControllers) {
+      c.dispose();
+    }
+    for (final c in _fleteControllers) {
+      c.dispose();
+    }
+    for (final c in _seguroControllers) {
+      c.dispose();
+    }
+    for (final c in _arancelesControllers) {
+      c.dispose();
+    }
+    for (final c in _gastosControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +85,6 @@ class _RegistrarRecepcionPageState
       text: widget.proveedorNombre ?? widget.proveedorId.toString(),
     );
     final observacionesController = TextEditingController();
-    final List<DetalleRecepcion> detalles = widget.detallesCompra;
 
     return AppScaffold(
       title: 'Registrar Recepción',
@@ -76,7 +114,6 @@ class _RegistrarRecepcionPageState
                 style: AppTypography.labelMedium,
               ),
               AppLayout.vS,
-              // ✅ Forma compatible con tu versión de Flutter
               Row(
                 children: [
                   Radio<String>(
@@ -108,31 +145,126 @@ class _RegistrarRecepcionPageState
                 style: AppTypography.labelMedium,
               ),
               AppLayout.vS,
-              ...detalles.map(
-                (DetalleRecepcion det) => Padding(
+              ..._detallesEditables.asMap().entries.map((entry) {
+                final index = entry.key;
+                final det = entry.value;
+                return Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.s),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        det.productoNombre ?? 'Producto',
-                        style: AppTypography.labelMedium,
-                      ),
-                      Text(
-                        'Pedida: ${det.cantidadPedida ?? 0} — Recibida: ${det.cantidadRecibida ?? 0}',
-                        style: AppTypography.bodySmall,
-                      ),
-                      if ((det.diferencia ?? 0) != 0)
-                        Text(
-                          'Diferencia: ${det.diferencia}',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: Colors.red,
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: AppSpacing.allM,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            det.productoNombre ?? 'Producto',
+                            style: AppTypography.labelMedium,
                           ),
-                        ),
-                    ],
+                          const SizedBox(height: 2),
+                          Text(
+                            'Pedida: ${det.cantidadPedida ?? 0} — Recibida: ${det.cantidadRecibida ?? 0}',
+                            style: AppTypography.bodySmall,
+                          ),
+                          if ((det.diferencia ?? 0) != 0)
+                            Text(
+                              'Diferencia: ${det.diferencia}',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: Colors.red,
+                              ),
+                            ),
+                          AppLayout.vS,
+                          AppTextField(
+                            controller: _costoControllers[index],
+                            label: 'Costo Unitario',
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            onChanged: (valor) {
+                              final nuevoCosto = double.tryParse(valor) ?? 0.0;
+                              setState(() {
+                                _detallesEditables[index] = _detallesEditables[index].copyWith(
+                                  costoUnitario: nuevoCosto,
+                                );
+                              });
+                            },
+                          ),
+                          AppLayout.vS,
+                          AppTextField(
+                            controller: _fleteControllers[index],
+                            label: 'Flete por unidad',
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            onChanged: (valor) {
+                              final nuevo = double.tryParse(valor) ?? 0.0;
+                              setState(() {
+                                _detallesEditables[index] = _detallesEditables[index].copyWith(
+                                  fleteUnitario: nuevo,
+                                );
+                              });
+                            },
+                          ),
+                          AppLayout.vS,
+                          AppTextField(
+                            controller: _seguroControllers[index],
+                            label: 'Seguro por unidad',
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            onChanged: (valor) {
+                              final nuevo = double.tryParse(valor) ?? 0.0;
+                              setState(() {
+                                _detallesEditables[index] = _detallesEditables[index].copyWith(
+                                  seguroUnitario: nuevo,
+                                );
+                              });
+                            },
+                          ),
+                          AppLayout.vS,
+                          AppTextField(
+                            controller: _arancelesControllers[index],
+                            label: 'Aranceles por unidad',
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            onChanged: (valor) {
+                              final nuevo = double.tryParse(valor) ?? 0.0;
+                              setState(() {
+                                _detallesEditables[index] = _detallesEditables[index].copyWith(
+                                  arancelesUnitario: nuevo,
+                                );
+                              });
+                            },
+                          ),
+                          AppLayout.vS,
+                          AppTextField(
+                            controller: _gastosControllers[index],
+                            label: 'Gastos por unidad',
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            onChanged: (valor) {
+                              final nuevo = double.tryParse(valor) ?? 0.0;
+                              setState(() {
+                                _detallesEditables[index] = _detallesEditables[index].copyWith(
+                                  gastosUnitario: nuevo,
+                                );
+                              });
+                            },
+                          ),
+                          AppLayout.vS,
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Costo Adquisición: RD\$ ${det.costoAdquisicion.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              }),
               AppLayout.vM,
               AppTextField(
                 controller: observacionesController,
@@ -153,7 +285,7 @@ class _RegistrarRecepcionPageState
                         fechaRecepcion: DateTime.now(),
                         estado: _estadoRecepcion,
                         observaciones: observacionesController.text,
-                        detalles: detalles,
+                        detalles: _detallesEditables,
                         usuarioResponsable: widget.usuarioResponsable,
                         fechaCreacion: DateTime.now(),
                       );

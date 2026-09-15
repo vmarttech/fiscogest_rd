@@ -6,6 +6,10 @@ class DetalleRecepcion {
     this.cantidadPedida,
     this.cantidadRecibida,
     this.costoUnitario,
+    this.fleteUnitario = 0.0,
+    this.seguroUnitario = 0.0,
+    this.arancelesUnitario = 0.0,
+    this.gastosUnitario = 0.0,
     this.subtotal,
     this.diferencia,
     this.motivoDiferencia,
@@ -17,9 +21,16 @@ class DetalleRecepcion {
   final double? cantidadPedida;
   final double? cantidadRecibida;
   final double? costoUnitario;
+  final double fleteUnitario;
+  final double seguroUnitario;
+  final double arancelesUnitario;
+  final double gastosUnitario;
   final double? subtotal;
   final double? diferencia;
   final String? motivoDiferencia;
+
+  double get costoAdquisicion =>
+      (costoUnitario ?? 0) + fleteUnitario + seguroUnitario + arancelesUnitario + gastosUnitario;
 
   DetalleRecepcion copyWith({
     int? id,
@@ -28,6 +39,10 @@ class DetalleRecepcion {
     double? cantidadPedida,
     double? cantidadRecibida,
     double? costoUnitario,
+    double? fleteUnitario,
+    double? seguroUnitario,
+    double? arancelesUnitario,
+    double? gastosUnitario,
     double? subtotal,
     double? diferencia,
     String? motivoDiferencia,
@@ -39,6 +54,10 @@ class DetalleRecepcion {
       cantidadPedida: cantidadPedida ?? this.cantidadPedida,
       cantidadRecibida: cantidadRecibida ?? this.cantidadRecibida,
       costoUnitario: costoUnitario ?? this.costoUnitario,
+      fleteUnitario: fleteUnitario ?? this.fleteUnitario,
+      seguroUnitario: seguroUnitario ?? this.seguroUnitario,
+      arancelesUnitario: arancelesUnitario ?? this.arancelesUnitario,
+      gastosUnitario: gastosUnitario ?? this.gastosUnitario,
       subtotal: subtotal ?? this.subtotal,
       diferencia: diferencia ?? this.diferencia,
       motivoDiferencia: motivoDiferencia ?? this.motivoDiferencia,
@@ -68,6 +87,10 @@ class RecepcionElemento {
     this.productoNombre,
     this.cantidad,
     this.precioUnitario,
+    this.fleteUnitario = 0.0,
+    this.seguroUnitario = 0.0,
+    this.arancelesUnitario = 0.0,
+    this.gastosUnitario = 0.0,
     this.subtotal,
     this.impuesto,
     this.total,
@@ -82,12 +105,19 @@ class RecepcionElemento {
   final String? productoNombre;
   final double? cantidad;
   final double? precioUnitario;
+  final double fleteUnitario;
+  final double seguroUnitario;
+  final double arancelesUnitario;
+  final double gastosUnitario;
   final double? subtotal;
   final double? impuesto;
   final double? total;
   final String? lote;
   final DateTime? fechaVencimiento;
   final String? observaciones;
+
+  double get costoAdquisicion =>
+      (precioUnitario ?? 0) + fleteUnitario + seguroUnitario + arancelesUnitario + gastosUnitario;
 
   RecepcionElemento copyWith({
     int? id,
@@ -96,6 +126,10 @@ class RecepcionElemento {
     String? productoNombre,
     double? cantidad,
     double? precioUnitario,
+    double? fleteUnitario,
+    double? seguroUnitario,
+    double? arancelesUnitario,
+    double? gastosUnitario,
     double? subtotal,
     double? impuesto,
     double? total,
@@ -110,6 +144,10 @@ class RecepcionElemento {
       productoNombre: productoNombre ?? this.productoNombre,
       cantidad: cantidad ?? this.cantidad,
       precioUnitario: precioUnitario ?? this.precioUnitario,
+      fleteUnitario: fleteUnitario ?? this.fleteUnitario,
+      seguroUnitario: seguroUnitario ?? this.seguroUnitario,
+      arancelesUnitario: arancelesUnitario ?? this.arancelesUnitario,
+      gastosUnitario: gastosUnitario ?? this.gastosUnitario,
       subtotal: subtotal ?? this.subtotal,
       impuesto: impuesto ?? this.impuesto,
       total: total ?? this.total,

@@ -18340,9 +18340,9 @@ class $DetalleCompraTableTable extends DetalleCompraTable
   late final GeneratedColumn<double> cantidad = GeneratedColumn<double>(
     'cantidad',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _costoUnitarioMeta = const VerificationMeta(
     'costoUnitario',
@@ -18351,9 +18351,58 @@ class $DetalleCompraTableTable extends DetalleCompraTable
   late final GeneratedColumn<double> costoUnitario = GeneratedColumn<double>(
     'costo_unitario',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fleteUnitarioMeta = const VerificationMeta(
+    'fleteUnitario',
+  );
+  @override
+  late final GeneratedColumn<double> fleteUnitario = GeneratedColumn<double>(
+    'flete_unitario',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _seguroUnitarioMeta = const VerificationMeta(
+    'seguroUnitario',
+  );
+  @override
+  late final GeneratedColumn<double> seguroUnitario = GeneratedColumn<double>(
+    'seguro_unitario',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _arancelesUnitarioMeta = const VerificationMeta(
+    'arancelesUnitario',
+  );
+  @override
+  late final GeneratedColumn<double> arancelesUnitario =
+      GeneratedColumn<double>(
+        'aranceles_unitario',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
+      );
+  static const VerificationMeta _gastosUnitarioMeta = const VerificationMeta(
+    'gastosUnitario',
+  );
+  @override
+  late final GeneratedColumn<double> gastosUnitario = GeneratedColumn<double>(
+    'gastos_unitario',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
   );
   static const VerificationMeta _descuentoPorcentajeMeta =
       const VerificationMeta('descuentoPorcentaje');
@@ -18362,9 +18411,9 @@ class $DetalleCompraTableTable extends DetalleCompraTable
       GeneratedColumn<double>(
         'descuento_porcentaje',
         aliasedName,
-        false,
+        true,
         type: DriftSqlType.double,
-        requiredDuringInsert: true,
+        requiredDuringInsert: false,
       );
   static const VerificationMeta _montoDescuentoLineaMeta =
       const VerificationMeta('montoDescuentoLinea');
@@ -18373,9 +18422,9 @@ class $DetalleCompraTableTable extends DetalleCompraTable
       GeneratedColumn<double>(
         'monto_descuento_linea',
         aliasedName,
-        false,
+        true,
         type: DriftSqlType.double,
-        requiredDuringInsert: true,
+        requiredDuringInsert: false,
       );
   static const VerificationMeta _subtotalLineaMeta = const VerificationMeta(
     'subtotalLinea',
@@ -18384,9 +18433,20 @@ class $DetalleCompraTableTable extends DetalleCompraTable
   late final GeneratedColumn<double> subtotalLinea = GeneratedColumn<double>(
     'subtotal_linea',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _costoAdquisicionMeta = const VerificationMeta(
+    'costoAdquisicion',
+  );
+  @override
+  late final GeneratedColumn<double> costoAdquisicion = GeneratedColumn<double>(
+    'costo_adquisicion',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -18396,9 +18456,14 @@ class $DetalleCompraTableTable extends DetalleCompraTable
     nombreProducto,
     cantidad,
     costoUnitario,
+    fleteUnitario,
+    seguroUnitario,
+    arancelesUnitario,
+    gastosUnitario,
     descuentoPorcentaje,
     montoDescuentoLinea,
     subtotalLinea,
+    costoAdquisicion,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -18447,8 +18512,6 @@ class $DetalleCompraTableTable extends DetalleCompraTable
         _cantidadMeta,
         cantidad.isAcceptableOrUnknown(data['cantidad']!, _cantidadMeta),
       );
-    } else if (isInserting) {
-      context.missing(_cantidadMeta);
     }
     if (data.containsKey('costo_unitario')) {
       context.handle(
@@ -18458,8 +18521,42 @@ class $DetalleCompraTableTable extends DetalleCompraTable
           _costoUnitarioMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_costoUnitarioMeta);
+    }
+    if (data.containsKey('flete_unitario')) {
+      context.handle(
+        _fleteUnitarioMeta,
+        fleteUnitario.isAcceptableOrUnknown(
+          data['flete_unitario']!,
+          _fleteUnitarioMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seguro_unitario')) {
+      context.handle(
+        _seguroUnitarioMeta,
+        seguroUnitario.isAcceptableOrUnknown(
+          data['seguro_unitario']!,
+          _seguroUnitarioMeta,
+        ),
+      );
+    }
+    if (data.containsKey('aranceles_unitario')) {
+      context.handle(
+        _arancelesUnitarioMeta,
+        arancelesUnitario.isAcceptableOrUnknown(
+          data['aranceles_unitario']!,
+          _arancelesUnitarioMeta,
+        ),
+      );
+    }
+    if (data.containsKey('gastos_unitario')) {
+      context.handle(
+        _gastosUnitarioMeta,
+        gastosUnitario.isAcceptableOrUnknown(
+          data['gastos_unitario']!,
+          _gastosUnitarioMeta,
+        ),
+      );
     }
     if (data.containsKey('descuento_porcentaje')) {
       context.handle(
@@ -18469,8 +18566,6 @@ class $DetalleCompraTableTable extends DetalleCompraTable
           _descuentoPorcentajeMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_descuentoPorcentajeMeta);
     }
     if (data.containsKey('monto_descuento_linea')) {
       context.handle(
@@ -18480,8 +18575,6 @@ class $DetalleCompraTableTable extends DetalleCompraTable
           _montoDescuentoLineaMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_montoDescuentoLineaMeta);
     }
     if (data.containsKey('subtotal_linea')) {
       context.handle(
@@ -18491,8 +18584,15 @@ class $DetalleCompraTableTable extends DetalleCompraTable
           _subtotalLineaMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_subtotalLineaMeta);
+    }
+    if (data.containsKey('costo_adquisicion')) {
+      context.handle(
+        _costoAdquisicionMeta,
+        costoAdquisicion.isAcceptableOrUnknown(
+          data['costo_adquisicion']!,
+          _costoAdquisicionMeta,
+        ),
+      );
     }
     return context;
   }
@@ -18522,23 +18622,43 @@ class $DetalleCompraTableTable extends DetalleCompraTable
       cantidad: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}cantidad'],
-      )!,
+      ),
       costoUnitario: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}costo_unitario'],
-      )!,
+      ),
+      fleteUnitario: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}flete_unitario'],
+      ),
+      seguroUnitario: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}seguro_unitario'],
+      ),
+      arancelesUnitario: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}aranceles_unitario'],
+      ),
+      gastosUnitario: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gastos_unitario'],
+      ),
       descuentoPorcentaje: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}descuento_porcentaje'],
-      )!,
+      ),
       montoDescuentoLinea: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}monto_descuento_linea'],
-      )!,
+      ),
       subtotalLinea: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}subtotal_linea'],
-      )!,
+      ),
+      costoAdquisicion: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}costo_adquisicion'],
+      ),
     );
   }
 
@@ -18554,21 +18674,31 @@ class DetalleCompraTableData extends DataClass
   final int compraId;
   final int productoId;
   final String nombreProducto;
-  final double cantidad;
-  final double costoUnitario;
-  final double descuentoPorcentaje;
-  final double montoDescuentoLinea;
-  final double subtotalLinea;
+  final double? cantidad;
+  final double? costoUnitario;
+  final double? fleteUnitario;
+  final double? seguroUnitario;
+  final double? arancelesUnitario;
+  final double? gastosUnitario;
+  final double? descuentoPorcentaje;
+  final double? montoDescuentoLinea;
+  final double? subtotalLinea;
+  final double? costoAdquisicion;
   const DetalleCompraTableData({
     required this.id,
     required this.compraId,
     required this.productoId,
     required this.nombreProducto,
-    required this.cantidad,
-    required this.costoUnitario,
-    required this.descuentoPorcentaje,
-    required this.montoDescuentoLinea,
-    required this.subtotalLinea,
+    this.cantidad,
+    this.costoUnitario,
+    this.fleteUnitario,
+    this.seguroUnitario,
+    this.arancelesUnitario,
+    this.gastosUnitario,
+    this.descuentoPorcentaje,
+    this.montoDescuentoLinea,
+    this.subtotalLinea,
+    this.costoAdquisicion,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -18577,11 +18707,36 @@ class DetalleCompraTableData extends DataClass
     map['compra_id'] = Variable<int>(compraId);
     map['producto_id'] = Variable<int>(productoId);
     map['nombre_producto'] = Variable<String>(nombreProducto);
-    map['cantidad'] = Variable<double>(cantidad);
-    map['costo_unitario'] = Variable<double>(costoUnitario);
-    map['descuento_porcentaje'] = Variable<double>(descuentoPorcentaje);
-    map['monto_descuento_linea'] = Variable<double>(montoDescuentoLinea);
-    map['subtotal_linea'] = Variable<double>(subtotalLinea);
+    if (!nullToAbsent || cantidad != null) {
+      map['cantidad'] = Variable<double>(cantidad);
+    }
+    if (!nullToAbsent || costoUnitario != null) {
+      map['costo_unitario'] = Variable<double>(costoUnitario);
+    }
+    if (!nullToAbsent || fleteUnitario != null) {
+      map['flete_unitario'] = Variable<double>(fleteUnitario);
+    }
+    if (!nullToAbsent || seguroUnitario != null) {
+      map['seguro_unitario'] = Variable<double>(seguroUnitario);
+    }
+    if (!nullToAbsent || arancelesUnitario != null) {
+      map['aranceles_unitario'] = Variable<double>(arancelesUnitario);
+    }
+    if (!nullToAbsent || gastosUnitario != null) {
+      map['gastos_unitario'] = Variable<double>(gastosUnitario);
+    }
+    if (!nullToAbsent || descuentoPorcentaje != null) {
+      map['descuento_porcentaje'] = Variable<double>(descuentoPorcentaje);
+    }
+    if (!nullToAbsent || montoDescuentoLinea != null) {
+      map['monto_descuento_linea'] = Variable<double>(montoDescuentoLinea);
+    }
+    if (!nullToAbsent || subtotalLinea != null) {
+      map['subtotal_linea'] = Variable<double>(subtotalLinea);
+    }
+    if (!nullToAbsent || costoAdquisicion != null) {
+      map['costo_adquisicion'] = Variable<double>(costoAdquisicion);
+    }
     return map;
   }
 
@@ -18591,11 +18746,36 @@ class DetalleCompraTableData extends DataClass
       compraId: Value(compraId),
       productoId: Value(productoId),
       nombreProducto: Value(nombreProducto),
-      cantidad: Value(cantidad),
-      costoUnitario: Value(costoUnitario),
-      descuentoPorcentaje: Value(descuentoPorcentaje),
-      montoDescuentoLinea: Value(montoDescuentoLinea),
-      subtotalLinea: Value(subtotalLinea),
+      cantidad: cantidad == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cantidad),
+      costoUnitario: costoUnitario == null && nullToAbsent
+          ? const Value.absent()
+          : Value(costoUnitario),
+      fleteUnitario: fleteUnitario == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fleteUnitario),
+      seguroUnitario: seguroUnitario == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seguroUnitario),
+      arancelesUnitario: arancelesUnitario == null && nullToAbsent
+          ? const Value.absent()
+          : Value(arancelesUnitario),
+      gastosUnitario: gastosUnitario == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gastosUnitario),
+      descuentoPorcentaje: descuentoPorcentaje == null && nullToAbsent
+          ? const Value.absent()
+          : Value(descuentoPorcentaje),
+      montoDescuentoLinea: montoDescuentoLinea == null && nullToAbsent
+          ? const Value.absent()
+          : Value(montoDescuentoLinea),
+      subtotalLinea: subtotalLinea == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subtotalLinea),
+      costoAdquisicion: costoAdquisicion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(costoAdquisicion),
     );
   }
 
@@ -18609,15 +18789,22 @@ class DetalleCompraTableData extends DataClass
       compraId: serializer.fromJson<int>(json['compraId']),
       productoId: serializer.fromJson<int>(json['productoId']),
       nombreProducto: serializer.fromJson<String>(json['nombreProducto']),
-      cantidad: serializer.fromJson<double>(json['cantidad']),
-      costoUnitario: serializer.fromJson<double>(json['costoUnitario']),
-      descuentoPorcentaje: serializer.fromJson<double>(
+      cantidad: serializer.fromJson<double?>(json['cantidad']),
+      costoUnitario: serializer.fromJson<double?>(json['costoUnitario']),
+      fleteUnitario: serializer.fromJson<double?>(json['fleteUnitario']),
+      seguroUnitario: serializer.fromJson<double?>(json['seguroUnitario']),
+      arancelesUnitario: serializer.fromJson<double?>(
+        json['arancelesUnitario'],
+      ),
+      gastosUnitario: serializer.fromJson<double?>(json['gastosUnitario']),
+      descuentoPorcentaje: serializer.fromJson<double?>(
         json['descuentoPorcentaje'],
       ),
-      montoDescuentoLinea: serializer.fromJson<double>(
+      montoDescuentoLinea: serializer.fromJson<double?>(
         json['montoDescuentoLinea'],
       ),
-      subtotalLinea: serializer.fromJson<double>(json['subtotalLinea']),
+      subtotalLinea: serializer.fromJson<double?>(json['subtotalLinea']),
+      costoAdquisicion: serializer.fromJson<double?>(json['costoAdquisicion']),
     );
   }
   @override
@@ -18628,11 +18815,16 @@ class DetalleCompraTableData extends DataClass
       'compraId': serializer.toJson<int>(compraId),
       'productoId': serializer.toJson<int>(productoId),
       'nombreProducto': serializer.toJson<String>(nombreProducto),
-      'cantidad': serializer.toJson<double>(cantidad),
-      'costoUnitario': serializer.toJson<double>(costoUnitario),
-      'descuentoPorcentaje': serializer.toJson<double>(descuentoPorcentaje),
-      'montoDescuentoLinea': serializer.toJson<double>(montoDescuentoLinea),
-      'subtotalLinea': serializer.toJson<double>(subtotalLinea),
+      'cantidad': serializer.toJson<double?>(cantidad),
+      'costoUnitario': serializer.toJson<double?>(costoUnitario),
+      'fleteUnitario': serializer.toJson<double?>(fleteUnitario),
+      'seguroUnitario': serializer.toJson<double?>(seguroUnitario),
+      'arancelesUnitario': serializer.toJson<double?>(arancelesUnitario),
+      'gastosUnitario': serializer.toJson<double?>(gastosUnitario),
+      'descuentoPorcentaje': serializer.toJson<double?>(descuentoPorcentaje),
+      'montoDescuentoLinea': serializer.toJson<double?>(montoDescuentoLinea),
+      'subtotalLinea': serializer.toJson<double?>(subtotalLinea),
+      'costoAdquisicion': serializer.toJson<double?>(costoAdquisicion),
     };
   }
 
@@ -18641,21 +18833,49 @@ class DetalleCompraTableData extends DataClass
     int? compraId,
     int? productoId,
     String? nombreProducto,
-    double? cantidad,
-    double? costoUnitario,
-    double? descuentoPorcentaje,
-    double? montoDescuentoLinea,
-    double? subtotalLinea,
+    Value<double?> cantidad = const Value.absent(),
+    Value<double?> costoUnitario = const Value.absent(),
+    Value<double?> fleteUnitario = const Value.absent(),
+    Value<double?> seguroUnitario = const Value.absent(),
+    Value<double?> arancelesUnitario = const Value.absent(),
+    Value<double?> gastosUnitario = const Value.absent(),
+    Value<double?> descuentoPorcentaje = const Value.absent(),
+    Value<double?> montoDescuentoLinea = const Value.absent(),
+    Value<double?> subtotalLinea = const Value.absent(),
+    Value<double?> costoAdquisicion = const Value.absent(),
   }) => DetalleCompraTableData(
     id: id ?? this.id,
     compraId: compraId ?? this.compraId,
     productoId: productoId ?? this.productoId,
     nombreProducto: nombreProducto ?? this.nombreProducto,
-    cantidad: cantidad ?? this.cantidad,
-    costoUnitario: costoUnitario ?? this.costoUnitario,
-    descuentoPorcentaje: descuentoPorcentaje ?? this.descuentoPorcentaje,
-    montoDescuentoLinea: montoDescuentoLinea ?? this.montoDescuentoLinea,
-    subtotalLinea: subtotalLinea ?? this.subtotalLinea,
+    cantidad: cantidad.present ? cantidad.value : this.cantidad,
+    costoUnitario: costoUnitario.present
+        ? costoUnitario.value
+        : this.costoUnitario,
+    fleteUnitario: fleteUnitario.present
+        ? fleteUnitario.value
+        : this.fleteUnitario,
+    seguroUnitario: seguroUnitario.present
+        ? seguroUnitario.value
+        : this.seguroUnitario,
+    arancelesUnitario: arancelesUnitario.present
+        ? arancelesUnitario.value
+        : this.arancelesUnitario,
+    gastosUnitario: gastosUnitario.present
+        ? gastosUnitario.value
+        : this.gastosUnitario,
+    descuentoPorcentaje: descuentoPorcentaje.present
+        ? descuentoPorcentaje.value
+        : this.descuentoPorcentaje,
+    montoDescuentoLinea: montoDescuentoLinea.present
+        ? montoDescuentoLinea.value
+        : this.montoDescuentoLinea,
+    subtotalLinea: subtotalLinea.present
+        ? subtotalLinea.value
+        : this.subtotalLinea,
+    costoAdquisicion: costoAdquisicion.present
+        ? costoAdquisicion.value
+        : this.costoAdquisicion,
   );
   DetalleCompraTableData copyWithCompanion(DetalleCompraTableCompanion data) {
     return DetalleCompraTableData(
@@ -18671,6 +18891,18 @@ class DetalleCompraTableData extends DataClass
       costoUnitario: data.costoUnitario.present
           ? data.costoUnitario.value
           : this.costoUnitario,
+      fleteUnitario: data.fleteUnitario.present
+          ? data.fleteUnitario.value
+          : this.fleteUnitario,
+      seguroUnitario: data.seguroUnitario.present
+          ? data.seguroUnitario.value
+          : this.seguroUnitario,
+      arancelesUnitario: data.arancelesUnitario.present
+          ? data.arancelesUnitario.value
+          : this.arancelesUnitario,
+      gastosUnitario: data.gastosUnitario.present
+          ? data.gastosUnitario.value
+          : this.gastosUnitario,
       descuentoPorcentaje: data.descuentoPorcentaje.present
           ? data.descuentoPorcentaje.value
           : this.descuentoPorcentaje,
@@ -18680,6 +18912,9 @@ class DetalleCompraTableData extends DataClass
       subtotalLinea: data.subtotalLinea.present
           ? data.subtotalLinea.value
           : this.subtotalLinea,
+      costoAdquisicion: data.costoAdquisicion.present
+          ? data.costoAdquisicion.value
+          : this.costoAdquisicion,
     );
   }
 
@@ -18692,9 +18927,14 @@ class DetalleCompraTableData extends DataClass
           ..write('nombreProducto: $nombreProducto, ')
           ..write('cantidad: $cantidad, ')
           ..write('costoUnitario: $costoUnitario, ')
+          ..write('fleteUnitario: $fleteUnitario, ')
+          ..write('seguroUnitario: $seguroUnitario, ')
+          ..write('arancelesUnitario: $arancelesUnitario, ')
+          ..write('gastosUnitario: $gastosUnitario, ')
           ..write('descuentoPorcentaje: $descuentoPorcentaje, ')
           ..write('montoDescuentoLinea: $montoDescuentoLinea, ')
-          ..write('subtotalLinea: $subtotalLinea')
+          ..write('subtotalLinea: $subtotalLinea, ')
+          ..write('costoAdquisicion: $costoAdquisicion')
           ..write(')'))
         .toString();
   }
@@ -18707,9 +18947,14 @@ class DetalleCompraTableData extends DataClass
     nombreProducto,
     cantidad,
     costoUnitario,
+    fleteUnitario,
+    seguroUnitario,
+    arancelesUnitario,
+    gastosUnitario,
     descuentoPorcentaje,
     montoDescuentoLinea,
     subtotalLinea,
+    costoAdquisicion,
   );
   @override
   bool operator ==(Object other) =>
@@ -18721,9 +18966,14 @@ class DetalleCompraTableData extends DataClass
           other.nombreProducto == this.nombreProducto &&
           other.cantidad == this.cantidad &&
           other.costoUnitario == this.costoUnitario &&
+          other.fleteUnitario == this.fleteUnitario &&
+          other.seguroUnitario == this.seguroUnitario &&
+          other.arancelesUnitario == this.arancelesUnitario &&
+          other.gastosUnitario == this.gastosUnitario &&
           other.descuentoPorcentaje == this.descuentoPorcentaje &&
           other.montoDescuentoLinea == this.montoDescuentoLinea &&
-          other.subtotalLinea == this.subtotalLinea);
+          other.subtotalLinea == this.subtotalLinea &&
+          other.costoAdquisicion == this.costoAdquisicion);
 }
 
 class DetalleCompraTableCompanion
@@ -18732,11 +18982,16 @@ class DetalleCompraTableCompanion
   final Value<int> compraId;
   final Value<int> productoId;
   final Value<String> nombreProducto;
-  final Value<double> cantidad;
-  final Value<double> costoUnitario;
-  final Value<double> descuentoPorcentaje;
-  final Value<double> montoDescuentoLinea;
-  final Value<double> subtotalLinea;
+  final Value<double?> cantidad;
+  final Value<double?> costoUnitario;
+  final Value<double?> fleteUnitario;
+  final Value<double?> seguroUnitario;
+  final Value<double?> arancelesUnitario;
+  final Value<double?> gastosUnitario;
+  final Value<double?> descuentoPorcentaje;
+  final Value<double?> montoDescuentoLinea;
+  final Value<double?> subtotalLinea;
+  final Value<double?> costoAdquisicion;
   const DetalleCompraTableCompanion({
     this.id = const Value.absent(),
     this.compraId = const Value.absent(),
@@ -18744,28 +18999,33 @@ class DetalleCompraTableCompanion
     this.nombreProducto = const Value.absent(),
     this.cantidad = const Value.absent(),
     this.costoUnitario = const Value.absent(),
+    this.fleteUnitario = const Value.absent(),
+    this.seguroUnitario = const Value.absent(),
+    this.arancelesUnitario = const Value.absent(),
+    this.gastosUnitario = const Value.absent(),
     this.descuentoPorcentaje = const Value.absent(),
     this.montoDescuentoLinea = const Value.absent(),
     this.subtotalLinea = const Value.absent(),
+    this.costoAdquisicion = const Value.absent(),
   });
   DetalleCompraTableCompanion.insert({
     this.id = const Value.absent(),
     required int compraId,
     required int productoId,
     required String nombreProducto,
-    required double cantidad,
-    required double costoUnitario,
-    required double descuentoPorcentaje,
-    required double montoDescuentoLinea,
-    required double subtotalLinea,
+    this.cantidad = const Value.absent(),
+    this.costoUnitario = const Value.absent(),
+    this.fleteUnitario = const Value.absent(),
+    this.seguroUnitario = const Value.absent(),
+    this.arancelesUnitario = const Value.absent(),
+    this.gastosUnitario = const Value.absent(),
+    this.descuentoPorcentaje = const Value.absent(),
+    this.montoDescuentoLinea = const Value.absent(),
+    this.subtotalLinea = const Value.absent(),
+    this.costoAdquisicion = const Value.absent(),
   }) : compraId = Value(compraId),
        productoId = Value(productoId),
-       nombreProducto = Value(nombreProducto),
-       cantidad = Value(cantidad),
-       costoUnitario = Value(costoUnitario),
-       descuentoPorcentaje = Value(descuentoPorcentaje),
-       montoDescuentoLinea = Value(montoDescuentoLinea),
-       subtotalLinea = Value(subtotalLinea);
+       nombreProducto = Value(nombreProducto);
   static Insertable<DetalleCompraTableData> custom({
     Expression<int>? id,
     Expression<int>? compraId,
@@ -18773,9 +19033,14 @@ class DetalleCompraTableCompanion
     Expression<String>? nombreProducto,
     Expression<double>? cantidad,
     Expression<double>? costoUnitario,
+    Expression<double>? fleteUnitario,
+    Expression<double>? seguroUnitario,
+    Expression<double>? arancelesUnitario,
+    Expression<double>? gastosUnitario,
     Expression<double>? descuentoPorcentaje,
     Expression<double>? montoDescuentoLinea,
     Expression<double>? subtotalLinea,
+    Expression<double>? costoAdquisicion,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -18784,11 +19049,16 @@ class DetalleCompraTableCompanion
       if (nombreProducto != null) 'nombre_producto': nombreProducto,
       if (cantidad != null) 'cantidad': cantidad,
       if (costoUnitario != null) 'costo_unitario': costoUnitario,
+      if (fleteUnitario != null) 'flete_unitario': fleteUnitario,
+      if (seguroUnitario != null) 'seguro_unitario': seguroUnitario,
+      if (arancelesUnitario != null) 'aranceles_unitario': arancelesUnitario,
+      if (gastosUnitario != null) 'gastos_unitario': gastosUnitario,
       if (descuentoPorcentaje != null)
         'descuento_porcentaje': descuentoPorcentaje,
       if (montoDescuentoLinea != null)
         'monto_descuento_linea': montoDescuentoLinea,
       if (subtotalLinea != null) 'subtotal_linea': subtotalLinea,
+      if (costoAdquisicion != null) 'costo_adquisicion': costoAdquisicion,
     });
   }
 
@@ -18797,11 +19067,16 @@ class DetalleCompraTableCompanion
     Value<int>? compraId,
     Value<int>? productoId,
     Value<String>? nombreProducto,
-    Value<double>? cantidad,
-    Value<double>? costoUnitario,
-    Value<double>? descuentoPorcentaje,
-    Value<double>? montoDescuentoLinea,
-    Value<double>? subtotalLinea,
+    Value<double?>? cantidad,
+    Value<double?>? costoUnitario,
+    Value<double?>? fleteUnitario,
+    Value<double?>? seguroUnitario,
+    Value<double?>? arancelesUnitario,
+    Value<double?>? gastosUnitario,
+    Value<double?>? descuentoPorcentaje,
+    Value<double?>? montoDescuentoLinea,
+    Value<double?>? subtotalLinea,
+    Value<double?>? costoAdquisicion,
   }) {
     return DetalleCompraTableCompanion(
       id: id ?? this.id,
@@ -18810,9 +19085,14 @@ class DetalleCompraTableCompanion
       nombreProducto: nombreProducto ?? this.nombreProducto,
       cantidad: cantidad ?? this.cantidad,
       costoUnitario: costoUnitario ?? this.costoUnitario,
+      fleteUnitario: fleteUnitario ?? this.fleteUnitario,
+      seguroUnitario: seguroUnitario ?? this.seguroUnitario,
+      arancelesUnitario: arancelesUnitario ?? this.arancelesUnitario,
+      gastosUnitario: gastosUnitario ?? this.gastosUnitario,
       descuentoPorcentaje: descuentoPorcentaje ?? this.descuentoPorcentaje,
       montoDescuentoLinea: montoDescuentoLinea ?? this.montoDescuentoLinea,
       subtotalLinea: subtotalLinea ?? this.subtotalLinea,
+      costoAdquisicion: costoAdquisicion ?? this.costoAdquisicion,
     );
   }
 
@@ -18837,6 +19117,18 @@ class DetalleCompraTableCompanion
     if (costoUnitario.present) {
       map['costo_unitario'] = Variable<double>(costoUnitario.value);
     }
+    if (fleteUnitario.present) {
+      map['flete_unitario'] = Variable<double>(fleteUnitario.value);
+    }
+    if (seguroUnitario.present) {
+      map['seguro_unitario'] = Variable<double>(seguroUnitario.value);
+    }
+    if (arancelesUnitario.present) {
+      map['aranceles_unitario'] = Variable<double>(arancelesUnitario.value);
+    }
+    if (gastosUnitario.present) {
+      map['gastos_unitario'] = Variable<double>(gastosUnitario.value);
+    }
     if (descuentoPorcentaje.present) {
       map['descuento_porcentaje'] = Variable<double>(descuentoPorcentaje.value);
     }
@@ -18847,6 +19139,9 @@ class DetalleCompraTableCompanion
     }
     if (subtotalLinea.present) {
       map['subtotal_linea'] = Variable<double>(subtotalLinea.value);
+    }
+    if (costoAdquisicion.present) {
+      map['costo_adquisicion'] = Variable<double>(costoAdquisicion.value);
     }
     return map;
   }
@@ -18860,9 +19155,14 @@ class DetalleCompraTableCompanion
           ..write('nombreProducto: $nombreProducto, ')
           ..write('cantidad: $cantidad, ')
           ..write('costoUnitario: $costoUnitario, ')
+          ..write('fleteUnitario: $fleteUnitario, ')
+          ..write('seguroUnitario: $seguroUnitario, ')
+          ..write('arancelesUnitario: $arancelesUnitario, ')
+          ..write('gastosUnitario: $gastosUnitario, ')
           ..write('descuentoPorcentaje: $descuentoPorcentaje, ')
           ..write('montoDescuentoLinea: $montoDescuentoLinea, ')
-          ..write('subtotalLinea: $subtotalLinea')
+          ..write('subtotalLinea: $subtotalLinea, ')
+          ..write('costoAdquisicion: $costoAdquisicion')
           ..write(')'))
         .toString();
   }
@@ -32328,11 +32628,16 @@ typedef $$DetalleCompraTableTableCreateCompanionBuilder =
       required int compraId,
       required int productoId,
       required String nombreProducto,
-      required double cantidad,
-      required double costoUnitario,
-      required double descuentoPorcentaje,
-      required double montoDescuentoLinea,
-      required double subtotalLinea,
+      Value<double?> cantidad,
+      Value<double?> costoUnitario,
+      Value<double?> fleteUnitario,
+      Value<double?> seguroUnitario,
+      Value<double?> arancelesUnitario,
+      Value<double?> gastosUnitario,
+      Value<double?> descuentoPorcentaje,
+      Value<double?> montoDescuentoLinea,
+      Value<double?> subtotalLinea,
+      Value<double?> costoAdquisicion,
     });
 typedef $$DetalleCompraTableTableUpdateCompanionBuilder =
     DetalleCompraTableCompanion Function({
@@ -32340,11 +32645,16 @@ typedef $$DetalleCompraTableTableUpdateCompanionBuilder =
       Value<int> compraId,
       Value<int> productoId,
       Value<String> nombreProducto,
-      Value<double> cantidad,
-      Value<double> costoUnitario,
-      Value<double> descuentoPorcentaje,
-      Value<double> montoDescuentoLinea,
-      Value<double> subtotalLinea,
+      Value<double?> cantidad,
+      Value<double?> costoUnitario,
+      Value<double?> fleteUnitario,
+      Value<double?> seguroUnitario,
+      Value<double?> arancelesUnitario,
+      Value<double?> gastosUnitario,
+      Value<double?> descuentoPorcentaje,
+      Value<double?> montoDescuentoLinea,
+      Value<double?> subtotalLinea,
+      Value<double?> costoAdquisicion,
     });
 
 final class $$DetalleCompraTableTableReferences
@@ -32417,6 +32727,26 @@ class $$DetalleCompraTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get fleteUnitario => $composableBuilder(
+    column: $table.fleteUnitario,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get seguroUnitario => $composableBuilder(
+    column: $table.seguroUnitario,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get arancelesUnitario => $composableBuilder(
+    column: $table.arancelesUnitario,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gastosUnitario => $composableBuilder(
+    column: $table.gastosUnitario,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<double> get descuentoPorcentaje => $composableBuilder(
     column: $table.descuentoPorcentaje,
     builder: (column) => ColumnFilters(column),
@@ -32429,6 +32759,11 @@ class $$DetalleCompraTableTableFilterComposer
 
   ColumnFilters<double> get subtotalLinea => $composableBuilder(
     column: $table.subtotalLinea,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get costoAdquisicion => $composableBuilder(
+    column: $table.costoAdquisicion,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -32490,6 +32825,26 @@ class $$DetalleCompraTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get fleteUnitario => $composableBuilder(
+    column: $table.fleteUnitario,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get seguroUnitario => $composableBuilder(
+    column: $table.seguroUnitario,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get arancelesUnitario => $composableBuilder(
+    column: $table.arancelesUnitario,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gastosUnitario => $composableBuilder(
+    column: $table.gastosUnitario,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get descuentoPorcentaje => $composableBuilder(
     column: $table.descuentoPorcentaje,
     builder: (column) => ColumnOrderings(column),
@@ -32502,6 +32857,11 @@ class $$DetalleCompraTableTableOrderingComposer
 
   ColumnOrderings<double> get subtotalLinea => $composableBuilder(
     column: $table.subtotalLinea,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get costoAdquisicion => $composableBuilder(
+    column: $table.costoAdquisicion,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -32559,6 +32919,26 @@ class $$DetalleCompraTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<double> get fleteUnitario => $composableBuilder(
+    column: $table.fleteUnitario,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get seguroUnitario => $composableBuilder(
+    column: $table.seguroUnitario,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get arancelesUnitario => $composableBuilder(
+    column: $table.arancelesUnitario,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get gastosUnitario => $composableBuilder(
+    column: $table.gastosUnitario,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<double> get descuentoPorcentaje => $composableBuilder(
     column: $table.descuentoPorcentaje,
     builder: (column) => column,
@@ -32571,6 +32951,11 @@ class $$DetalleCompraTableTableAnnotationComposer
 
   GeneratedColumn<double> get subtotalLinea => $composableBuilder(
     column: $table.subtotalLinea,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get costoAdquisicion => $composableBuilder(
+    column: $table.costoAdquisicion,
     builder: (column) => column,
   );
 
@@ -32635,11 +33020,16 @@ class $$DetalleCompraTableTableTableManager
                 Value<int> compraId = const Value.absent(),
                 Value<int> productoId = const Value.absent(),
                 Value<String> nombreProducto = const Value.absent(),
-                Value<double> cantidad = const Value.absent(),
-                Value<double> costoUnitario = const Value.absent(),
-                Value<double> descuentoPorcentaje = const Value.absent(),
-                Value<double> montoDescuentoLinea = const Value.absent(),
-                Value<double> subtotalLinea = const Value.absent(),
+                Value<double?> cantidad = const Value.absent(),
+                Value<double?> costoUnitario = const Value.absent(),
+                Value<double?> fleteUnitario = const Value.absent(),
+                Value<double?> seguroUnitario = const Value.absent(),
+                Value<double?> arancelesUnitario = const Value.absent(),
+                Value<double?> gastosUnitario = const Value.absent(),
+                Value<double?> descuentoPorcentaje = const Value.absent(),
+                Value<double?> montoDescuentoLinea = const Value.absent(),
+                Value<double?> subtotalLinea = const Value.absent(),
+                Value<double?> costoAdquisicion = const Value.absent(),
               }) => DetalleCompraTableCompanion(
                 id: id,
                 compraId: compraId,
@@ -32647,9 +33037,14 @@ class $$DetalleCompraTableTableTableManager
                 nombreProducto: nombreProducto,
                 cantidad: cantidad,
                 costoUnitario: costoUnitario,
+                fleteUnitario: fleteUnitario,
+                seguroUnitario: seguroUnitario,
+                arancelesUnitario: arancelesUnitario,
+                gastosUnitario: gastosUnitario,
                 descuentoPorcentaje: descuentoPorcentaje,
                 montoDescuentoLinea: montoDescuentoLinea,
                 subtotalLinea: subtotalLinea,
+                costoAdquisicion: costoAdquisicion,
               ),
           createCompanionCallback:
               ({
@@ -32657,11 +33052,16 @@ class $$DetalleCompraTableTableTableManager
                 required int compraId,
                 required int productoId,
                 required String nombreProducto,
-                required double cantidad,
-                required double costoUnitario,
-                required double descuentoPorcentaje,
-                required double montoDescuentoLinea,
-                required double subtotalLinea,
+                Value<double?> cantidad = const Value.absent(),
+                Value<double?> costoUnitario = const Value.absent(),
+                Value<double?> fleteUnitario = const Value.absent(),
+                Value<double?> seguroUnitario = const Value.absent(),
+                Value<double?> arancelesUnitario = const Value.absent(),
+                Value<double?> gastosUnitario = const Value.absent(),
+                Value<double?> descuentoPorcentaje = const Value.absent(),
+                Value<double?> montoDescuentoLinea = const Value.absent(),
+                Value<double?> subtotalLinea = const Value.absent(),
+                Value<double?> costoAdquisicion = const Value.absent(),
               }) => DetalleCompraTableCompanion.insert(
                 id: id,
                 compraId: compraId,
@@ -32669,9 +33069,14 @@ class $$DetalleCompraTableTableTableManager
                 nombreProducto: nombreProducto,
                 cantidad: cantidad,
                 costoUnitario: costoUnitario,
+                fleteUnitario: fleteUnitario,
+                seguroUnitario: seguroUnitario,
+                arancelesUnitario: arancelesUnitario,
+                gastosUnitario: gastosUnitario,
                 descuentoPorcentaje: descuentoPorcentaje,
                 montoDescuentoLinea: montoDescuentoLinea,
                 subtotalLinea: subtotalLinea,
+                costoAdquisicion: costoAdquisicion,
               ),
           withReferenceMapper: (p0) => p0
               .map(

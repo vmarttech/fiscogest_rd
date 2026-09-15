@@ -35,6 +35,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     final repositorio = ref.watch(compraRepositoryProvider);
 
     return AppScaffold(
+      title: 'Detalle de Compra',
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(
@@ -47,9 +48,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                 child: Text(
                   'Error al cargar compra: $error',
                   textAlign: TextAlign.center,
-                  style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.error,
-                  ),
+                  style: AppTypography.labelMedium.copyWith(color: AppColors.error),
                 ),
               ),
             ),
@@ -58,10 +57,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                 return const Center(
                   child: Padding(
                     padding: AppSpacing.allL,
-                    child: Text(
-                      'Compra no encontrada.',
-                      style: AppTypography.bodyMedium,
-                    ),
+                    child: Text('Compra no encontrada.', style: AppTypography.bodyMedium),
                   ),
                 );
               }
@@ -74,23 +70,15 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Proveedor: ${compra.nombreProveedor}',
-                        style: AppTypography.h4Bold,
-                      ),
+                      Text('Proveedor: ${compra.nombreProveedor}', style: AppTypography.h4Bold),
                       const SizedBox(height: 4),
-                      Text(
-                        'Fecha: ${compra.fechaEmision}',
-                        style: AppTypography.bodyMedium,
-                      ),
+                      Text('Fecha: ${compra.fechaEmision}', style: AppTypography.bodyMedium),
                       const SizedBox(height: 16),
                       const Divider(height: 1, thickness: 1),
                       const SizedBox(height: 12),
-                      Text(
-                        'Productos (${detalles.length})',
-                        style: AppTypography.labelLarge,
-                      ),
+                      Text('Productos (${detalles.length})', style: AppTypography.labelLarge),
                       const SizedBox(height: 8),
+
                       if (snapshot.connectionState == ConnectionState.waiting)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
@@ -128,37 +116,79 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                               ),
                             ],
                           ),
-                          child: Row(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      detalle.nombreProducto,
-                                      style: AppTypography.bodyMediumSemiBold,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Cantidad: ${detalle.cantidad}',
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                    Text(
-                                      'Precio: RD\$ ${detalle.costoUnitario.toStringAsFixed(2)}',
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                  ],
-                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(detalle.nombreProducto, style: AppTypography.bodyMediumSemiBold),
+                                  ),
+                                  Text(
+                                    'RD\$ ${detalle.subtotalLinea.toStringAsFixed(2)}',
+                                    style: AppTypography.bodyMediumBold,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'RD\$ ${(detalle.cantidad * detalle.costoUnitario).toStringAsFixed(2)}',
-                                style: AppTypography.bodyMediumBold,
+                              const SizedBox(height: 6),
+                              Wrap(
+                                spacing: 12,
+                                runSpacing: 2,
+                                children: [
+                                  Text('Cant: ${detalle.cantidad}', style: AppTypography.bodySmall),
+                                  Text('Costo: RD\$ ${detalle.costoUnitario.toStringAsFixed(2)}', style: AppTypography.bodySmall),
+                                  if (detalle.fleteUnitario > 0)
+                                    Text('Flete: RD\$ ${detalle.fleteUnitario.toStringAsFixed(2)}', style: AppTypography.bodySmall),
+                                  if (detalle.seguroUnitario > 0)
+                                    Text('Seguro: RD\$ ${detalle.seguroUnitario.toStringAsFixed(2)}', style: AppTypography.bodySmall),
+                                  if (detalle.arancelesUnitario > 0)
+                                    Text('Aranceles: RD\$ ${detalle.arancelesUnitario.toStringAsFixed(2)}', style: AppTypography.bodySmall),
+                                  if (detalle.gastosUnitario > 0)
+                                    Text('Gastos: RD\$ ${detalle.gastosUnitario.toStringAsFixed(2)}', style: AppTypography.bodySmall),
+                                  if (detalle.descuentoPorcentaje > 0)
+                                    Text('Desc: ${detalle.descuentoPorcentaje.toStringAsFixed(0)}%', style: AppTypography.bodySmall),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Costo Adquisición: RD\$ ${detalle.costoAdquisicion.toStringAsFixed(2)}',
+                                  style: AppTypography.bodyMediumSemiBold.copyWith(color: AppColors.primary),
+                                ),
                               ),
                             ],
                           ),
                         )),
+
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text('Subtotal: RD\$ ${compra.subtotalSinImpuestos.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                              Text('Descuentos: RD\$ ${compra.montoDescuentoGlobal.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                              Text('ITBIS (18%): RD\$ ${compra.montoImpuesto.toStringAsFixed(2)}', style: AppTypography.bodyMedium),
+                              const Divider(),
+                              Text(
+                                'TOTAL: RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
+                                style: AppTypography.h4Bold.copyWith(color: AppColors.primary),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ],
                   );
                 },
