@@ -11,7 +11,6 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
-// Provider filtrante: opcionalmente por clienteId; si es 0 retorna todo
 final listadoCuentasCobrarProvider = FutureProvider.family<List<CuentaCobrarItem>, int>((
   ref,
   clienteIdFiltro,
@@ -23,15 +22,16 @@ final listadoCuentasCobrarProvider = FutureProvider.family<List<CuentaCobrarItem
       ? registros.where((r) => r.clienteId == clienteIdFiltro).toList()
       : registros;
   final idsClientes = registrosFiltrados.map((r) => r.clienteId).toSet();
-  final List<dynamic> clientes = idsClientes.isNotEmpty
+  final List<dynamic> registrosClientes = idsClientes.isNotEmpty
       ? await (db.select(db.clientesTable)
             ..where((t) => t.id.isIn(idsClientes)))
           .get()
-      : [];
+      : <dynamic>[];
   final mapaClientes = <int, String>{};
-  for (final c in clientes) {
-    final id = (c as dynamic).id as int;
-    final nombre = c.nombre as String;
+  for (final reg in registrosClientes) {
+    final Map<String, dynamic> mapa = (reg as dynamic).toMap() as Map<String, dynamic>;
+    final id = mapa['id'] as int;
+    final nombre = mapa['nombre'] as String;
     mapaClientes[id] = nombre;
   }
   return registrosFiltrados.map((reg) {
