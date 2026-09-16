@@ -8,4 +8,6 @@ mixin _$CuentasPagarDaoMixin on DatabaseAccessor<AppDatabase> {
       attachedDatabase.proveedoresTable;
   $CuentasPagarTableTable get cuentasPagarTable =>
       attachedDatabase.cuentasPagarTable;
+  $PagosProveedorTableTable get pagosProveedorTable =>
+      attachedDatabase.pagosProveedorTable;
 }

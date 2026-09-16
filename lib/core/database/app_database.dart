@@ -6,6 +6,7 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod/riverpod.dart';
+
 // Tablas existentes
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
@@ -35,6 +36,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_detalle_ta
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cobros_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/pagos_proveedor_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/kardex_comercial_table.dart';
@@ -82,6 +84,7 @@ part 'app_database.g.dart';
     CobrosTable,
     // NUEVAS: Fase 4 - Cuentas por Pagar
     CuentasPagarTable,
+    PagosProveedorTable,
     // NUEVAS: Fase 4 - Configuración comercial
     DescuentosTable,
     OfertasTable,
@@ -102,7 +105,7 @@ class AppDatabase extends _$AppDatabase {
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -235,7 +238,6 @@ class AppDatabase extends _$AppDatabase {
       }
       // ✅ VERSIÓN 20: Nuevos campos en Compras y DetalleCompra
       if (from < 20) {
-        // Tabla compras_table
         try {
           await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN fecha_vencimiento TEXT');
         } catch (_) {}
@@ -251,8 +253,6 @@ class AppDatabase extends _$AppDatabase {
         try {
           await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN dias_credito INTEGER NOT NULL DEFAULT 0');
         } catch (_) {}
-
-        // Tabla detalle_compra_table
         try {
           await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN subtotal_linea REAL');
         } catch (_) {}
@@ -265,6 +265,10 @@ class AppDatabase extends _$AppDatabase {
         try {
           await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN total_linea REAL');
         } catch (_) {}
+      }
+      // ✅ VERSIÓN 21: Tabla de pagos a proveedores
+      if (from < 21) {
+        await m.createTable(pagosProveedorTable);
       }
     },
   );

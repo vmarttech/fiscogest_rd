@@ -15064,6 +15064,523 @@ class CuentasPagarTableCompanion extends UpdateCompanion<CuentaPagarData> {
   }
 }
 
+class $PagosProveedorTableTable extends PagosProveedorTable
+    with TableInfo<$PagosProveedorTableTable, PagoProveedorData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PagosProveedorTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _cuentaPagarIdMeta = const VerificationMeta(
+    'cuentaPagarId',
+  );
+  @override
+  late final GeneratedColumn<int> cuentaPagarId = GeneratedColumn<int>(
+    'cuenta_pagar_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES cuentas_pagar_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _proveedorIdMeta = const VerificationMeta(
+    'proveedorId',
+  );
+  @override
+  late final GeneratedColumn<int> proveedorId = GeneratedColumn<int>(
+    'proveedor_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES proveedores_table (id)',
+    ),
+  );
+  static const VerificationMeta _montoMeta = const VerificationMeta('monto');
+  @override
+  late final GeneratedColumn<double> monto = GeneratedColumn<double>(
+    'monto',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fechaPagoMeta = const VerificationMeta(
+    'fechaPago',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaPago = GeneratedColumn<DateTime>(
+    'fecha_pago',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _formaPagoMeta = const VerificationMeta(
+    'formaPago',
+  );
+  @override
+  late final GeneratedColumn<String> formaPago = GeneratedColumn<String>(
+    'forma_pago',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenciaMeta = const VerificationMeta(
+    'referencia',
+  );
+  @override
+  late final GeneratedColumn<String> referencia = GeneratedColumn<String>(
+    'referencia',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notaMeta = const VerificationMeta('nota');
+  @override
+  late final GeneratedColumn<String> nota = GeneratedColumn<String>(
+    'nota',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    cuentaPagarId,
+    proveedorId,
+    monto,
+    fechaPago,
+    formaPago,
+    referencia,
+    nota,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pagos_proveedor_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PagoProveedorData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('cuenta_pagar_id')) {
+      context.handle(
+        _cuentaPagarIdMeta,
+        cuentaPagarId.isAcceptableOrUnknown(
+          data['cuenta_pagar_id']!,
+          _cuentaPagarIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_cuentaPagarIdMeta);
+    }
+    if (data.containsKey('proveedor_id')) {
+      context.handle(
+        _proveedorIdMeta,
+        proveedorId.isAcceptableOrUnknown(
+          data['proveedor_id']!,
+          _proveedorIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_proveedorIdMeta);
+    }
+    if (data.containsKey('monto')) {
+      context.handle(
+        _montoMeta,
+        monto.isAcceptableOrUnknown(data['monto']!, _montoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_montoMeta);
+    }
+    if (data.containsKey('fecha_pago')) {
+      context.handle(
+        _fechaPagoMeta,
+        fechaPago.isAcceptableOrUnknown(data['fecha_pago']!, _fechaPagoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaPagoMeta);
+    }
+    if (data.containsKey('forma_pago')) {
+      context.handle(
+        _formaPagoMeta,
+        formaPago.isAcceptableOrUnknown(data['forma_pago']!, _formaPagoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_formaPagoMeta);
+    }
+    if (data.containsKey('referencia')) {
+      context.handle(
+        _referenciaMeta,
+        referencia.isAcceptableOrUnknown(data['referencia']!, _referenciaMeta),
+      );
+    }
+    if (data.containsKey('nota')) {
+      context.handle(
+        _notaMeta,
+        nota.isAcceptableOrUnknown(data['nota']!, _notaMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PagoProveedorData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PagoProveedorData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      cuentaPagarId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cuenta_pagar_id'],
+      )!,
+      proveedorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}proveedor_id'],
+      )!,
+      monto: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto'],
+      )!,
+      fechaPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_pago'],
+      )!,
+      formaPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}forma_pago'],
+      )!,
+      referencia: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}referencia'],
+      ),
+      nota: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nota'],
+      ),
+    );
+  }
+
+  @override
+  $PagosProveedorTableTable createAlias(String alias) {
+    return $PagosProveedorTableTable(attachedDatabase, alias);
+  }
+}
+
+class PagoProveedorData extends DataClass
+    implements Insertable<PagoProveedorData> {
+  final int id;
+  final int cuentaPagarId;
+  final int proveedorId;
+  final double monto;
+  final DateTime fechaPago;
+  final String formaPago;
+  final String? referencia;
+  final String? nota;
+  const PagoProveedorData({
+    required this.id,
+    required this.cuentaPagarId,
+    required this.proveedorId,
+    required this.monto,
+    required this.fechaPago,
+    required this.formaPago,
+    this.referencia,
+    this.nota,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['cuenta_pagar_id'] = Variable<int>(cuentaPagarId);
+    map['proveedor_id'] = Variable<int>(proveedorId);
+    map['monto'] = Variable<double>(monto);
+    map['fecha_pago'] = Variable<DateTime>(fechaPago);
+    map['forma_pago'] = Variable<String>(formaPago);
+    if (!nullToAbsent || referencia != null) {
+      map['referencia'] = Variable<String>(referencia);
+    }
+    if (!nullToAbsent || nota != null) {
+      map['nota'] = Variable<String>(nota);
+    }
+    return map;
+  }
+
+  PagosProveedorTableCompanion toCompanion(bool nullToAbsent) {
+    return PagosProveedorTableCompanion(
+      id: Value(id),
+      cuentaPagarId: Value(cuentaPagarId),
+      proveedorId: Value(proveedorId),
+      monto: Value(monto),
+      fechaPago: Value(fechaPago),
+      formaPago: Value(formaPago),
+      referencia: referencia == null && nullToAbsent
+          ? const Value.absent()
+          : Value(referencia),
+      nota: nota == null && nullToAbsent ? const Value.absent() : Value(nota),
+    );
+  }
+
+  factory PagoProveedorData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PagoProveedorData(
+      id: serializer.fromJson<int>(json['id']),
+      cuentaPagarId: serializer.fromJson<int>(json['cuentaPagarId']),
+      proveedorId: serializer.fromJson<int>(json['proveedorId']),
+      monto: serializer.fromJson<double>(json['monto']),
+      fechaPago: serializer.fromJson<DateTime>(json['fechaPago']),
+      formaPago: serializer.fromJson<String>(json['formaPago']),
+      referencia: serializer.fromJson<String?>(json['referencia']),
+      nota: serializer.fromJson<String?>(json['nota']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'cuentaPagarId': serializer.toJson<int>(cuentaPagarId),
+      'proveedorId': serializer.toJson<int>(proveedorId),
+      'monto': serializer.toJson<double>(monto),
+      'fechaPago': serializer.toJson<DateTime>(fechaPago),
+      'formaPago': serializer.toJson<String>(formaPago),
+      'referencia': serializer.toJson<String?>(referencia),
+      'nota': serializer.toJson<String?>(nota),
+    };
+  }
+
+  PagoProveedorData copyWith({
+    int? id,
+    int? cuentaPagarId,
+    int? proveedorId,
+    double? monto,
+    DateTime? fechaPago,
+    String? formaPago,
+    Value<String?> referencia = const Value.absent(),
+    Value<String?> nota = const Value.absent(),
+  }) => PagoProveedorData(
+    id: id ?? this.id,
+    cuentaPagarId: cuentaPagarId ?? this.cuentaPagarId,
+    proveedorId: proveedorId ?? this.proveedorId,
+    monto: monto ?? this.monto,
+    fechaPago: fechaPago ?? this.fechaPago,
+    formaPago: formaPago ?? this.formaPago,
+    referencia: referencia.present ? referencia.value : this.referencia,
+    nota: nota.present ? nota.value : this.nota,
+  );
+  PagoProveedorData copyWithCompanion(PagosProveedorTableCompanion data) {
+    return PagoProveedorData(
+      id: data.id.present ? data.id.value : this.id,
+      cuentaPagarId: data.cuentaPagarId.present
+          ? data.cuentaPagarId.value
+          : this.cuentaPagarId,
+      proveedorId: data.proveedorId.present
+          ? data.proveedorId.value
+          : this.proveedorId,
+      monto: data.monto.present ? data.monto.value : this.monto,
+      fechaPago: data.fechaPago.present ? data.fechaPago.value : this.fechaPago,
+      formaPago: data.formaPago.present ? data.formaPago.value : this.formaPago,
+      referencia: data.referencia.present
+          ? data.referencia.value
+          : this.referencia,
+      nota: data.nota.present ? data.nota.value : this.nota,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PagoProveedorData(')
+          ..write('id: $id, ')
+          ..write('cuentaPagarId: $cuentaPagarId, ')
+          ..write('proveedorId: $proveedorId, ')
+          ..write('monto: $monto, ')
+          ..write('fechaPago: $fechaPago, ')
+          ..write('formaPago: $formaPago, ')
+          ..write('referencia: $referencia, ')
+          ..write('nota: $nota')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    cuentaPagarId,
+    proveedorId,
+    monto,
+    fechaPago,
+    formaPago,
+    referencia,
+    nota,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PagoProveedorData &&
+          other.id == this.id &&
+          other.cuentaPagarId == this.cuentaPagarId &&
+          other.proveedorId == this.proveedorId &&
+          other.monto == this.monto &&
+          other.fechaPago == this.fechaPago &&
+          other.formaPago == this.formaPago &&
+          other.referencia == this.referencia &&
+          other.nota == this.nota);
+}
+
+class PagosProveedorTableCompanion extends UpdateCompanion<PagoProveedorData> {
+  final Value<int> id;
+  final Value<int> cuentaPagarId;
+  final Value<int> proveedorId;
+  final Value<double> monto;
+  final Value<DateTime> fechaPago;
+  final Value<String> formaPago;
+  final Value<String?> referencia;
+  final Value<String?> nota;
+  const PagosProveedorTableCompanion({
+    this.id = const Value.absent(),
+    this.cuentaPagarId = const Value.absent(),
+    this.proveedorId = const Value.absent(),
+    this.monto = const Value.absent(),
+    this.fechaPago = const Value.absent(),
+    this.formaPago = const Value.absent(),
+    this.referencia = const Value.absent(),
+    this.nota = const Value.absent(),
+  });
+  PagosProveedorTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int cuentaPagarId,
+    required int proveedorId,
+    required double monto,
+    required DateTime fechaPago,
+    required String formaPago,
+    this.referencia = const Value.absent(),
+    this.nota = const Value.absent(),
+  }) : cuentaPagarId = Value(cuentaPagarId),
+       proveedorId = Value(proveedorId),
+       monto = Value(monto),
+       fechaPago = Value(fechaPago),
+       formaPago = Value(formaPago);
+  static Insertable<PagoProveedorData> custom({
+    Expression<int>? id,
+    Expression<int>? cuentaPagarId,
+    Expression<int>? proveedorId,
+    Expression<double>? monto,
+    Expression<DateTime>? fechaPago,
+    Expression<String>? formaPago,
+    Expression<String>? referencia,
+    Expression<String>? nota,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (cuentaPagarId != null) 'cuenta_pagar_id': cuentaPagarId,
+      if (proveedorId != null) 'proveedor_id': proveedorId,
+      if (monto != null) 'monto': monto,
+      if (fechaPago != null) 'fecha_pago': fechaPago,
+      if (formaPago != null) 'forma_pago': formaPago,
+      if (referencia != null) 'referencia': referencia,
+      if (nota != null) 'nota': nota,
+    });
+  }
+
+  PagosProveedorTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? cuentaPagarId,
+    Value<int>? proveedorId,
+    Value<double>? monto,
+    Value<DateTime>? fechaPago,
+    Value<String>? formaPago,
+    Value<String?>? referencia,
+    Value<String?>? nota,
+  }) {
+    return PagosProveedorTableCompanion(
+      id: id ?? this.id,
+      cuentaPagarId: cuentaPagarId ?? this.cuentaPagarId,
+      proveedorId: proveedorId ?? this.proveedorId,
+      monto: monto ?? this.monto,
+      fechaPago: fechaPago ?? this.fechaPago,
+      formaPago: formaPago ?? this.formaPago,
+      referencia: referencia ?? this.referencia,
+      nota: nota ?? this.nota,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (cuentaPagarId.present) {
+      map['cuenta_pagar_id'] = Variable<int>(cuentaPagarId.value);
+    }
+    if (proveedorId.present) {
+      map['proveedor_id'] = Variable<int>(proveedorId.value);
+    }
+    if (monto.present) {
+      map['monto'] = Variable<double>(monto.value);
+    }
+    if (fechaPago.present) {
+      map['fecha_pago'] = Variable<DateTime>(fechaPago.value);
+    }
+    if (formaPago.present) {
+      map['forma_pago'] = Variable<String>(formaPago.value);
+    }
+    if (referencia.present) {
+      map['referencia'] = Variable<String>(referencia.value);
+    }
+    if (nota.present) {
+      map['nota'] = Variable<String>(nota.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PagosProveedorTableCompanion(')
+          ..write('id: $id, ')
+          ..write('cuentaPagarId: $cuentaPagarId, ')
+          ..write('proveedorId: $proveedorId, ')
+          ..write('monto: $monto, ')
+          ..write('fechaPago: $fechaPago, ')
+          ..write('formaPago: $formaPago, ')
+          ..write('referencia: $referencia, ')
+          ..write('nota: $nota')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $DescuentosTableTable extends DescuentosTable
     with TableInfo<$DescuentosTableTable, DescuentoData> {
   @override
@@ -19740,6 +20257,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CobrosTableTable cobrosTable = $CobrosTableTable(this);
   late final $CuentasPagarTableTable cuentasPagarTable =
       $CuentasPagarTableTable(this);
+  late final $PagosProveedorTableTable pagosProveedorTable =
+      $PagosProveedorTableTable(this);
   late final $DescuentosTableTable descuentosTable = $DescuentosTableTable(
     this,
   );
@@ -19782,6 +20301,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cuentasCobrarTable,
     cobrosTable,
     cuentasPagarTable,
+    pagosProveedorTable,
     descuentosTable,
     ofertasTable,
     kardexComercialTable,
@@ -19829,6 +20349,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('cobros_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'cuentas_pagar_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('pagos_proveedor_table', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -24450,6 +24977,30 @@ final class $$ProveedoresTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$PagosProveedorTableTable, List<PagoProveedorData>>
+  _pagosProveedorTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.pagosProveedorTable,
+        aliasName: $_aliasNameGenerator(
+          db.proveedoresTable.id,
+          db.pagosProveedorTable.proveedorId,
+        ),
+      );
+
+  $$PagosProveedorTableTableProcessedTableManager get pagosProveedorTableRefs {
+    final manager = $$PagosProveedorTableTableTableManager(
+      $_db,
+      $_db.pagosProveedorTable,
+    ).filter((f) => f.proveedorId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pagosProveedorTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ProveedoresTableTableFilterComposer
@@ -24547,6 +25098,31 @@ class $$ProveedoresTableTableFilterComposer
           }) => $$CuentasPagarTableTableFilterComposer(
             $db: $db,
             $table: $db.cuentasPagarTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> pagosProveedorTableRefs(
+    Expression<bool> Function($$PagosProveedorTableTableFilterComposer f) f,
+  ) {
+    final $$PagosProveedorTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pagosProveedorTable,
+      getReferencedColumn: (t) => t.proveedorId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PagosProveedorTableTableFilterComposer(
+            $db: $db,
+            $table: $db.pagosProveedorTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -24723,6 +25299,32 @@ class $$ProveedoresTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> pagosProveedorTableRefs<T extends Object>(
+    Expression<T> Function($$PagosProveedorTableTableAnnotationComposer a) f,
+  ) {
+    final $$PagosProveedorTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.pagosProveedorTable,
+          getReferencedColumn: (t) => t.proveedorId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PagosProveedorTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.pagosProveedorTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ProveedoresTableTableTableManager
@@ -24738,7 +25340,10 @@ class $$ProveedoresTableTableTableManager
           $$ProveedoresTableTableUpdateCompanionBuilder,
           (ProveedorData, $$ProveedoresTableTableReferences),
           ProveedorData,
-          PrefetchHooks Function({bool cuentasPagarTableRefs})
+          PrefetchHooks Function({
+            bool cuentasPagarTableRefs,
+            bool pagosProveedorTableRefs,
+          })
         > {
   $$ProveedoresTableTableTableManager(
     _$AppDatabase db,
@@ -24825,40 +25430,66 @@ class $$ProveedoresTableTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({cuentasPagarTableRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (cuentasPagarTableRefs) db.cuentasPagarTable,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (cuentasPagarTableRefs)
-                    await $_getPrefetchedData<
-                      ProveedorData,
-                      $ProveedoresTableTable,
-                      CuentaPagarData
-                    >(
-                      currentTable: table,
-                      referencedTable: $$ProveedoresTableTableReferences
-                          ._cuentasPagarTableRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$ProveedoresTableTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).cuentasPagarTableRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.proveedorId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({
+                cuentasPagarTableRefs = false,
+                pagosProveedorTableRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (cuentasPagarTableRefs) db.cuentasPagarTable,
+                    if (pagosProveedorTableRefs) db.pagosProveedorTable,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (cuentasPagarTableRefs)
+                        await $_getPrefetchedData<
+                          ProveedorData,
+                          $ProveedoresTableTable,
+                          CuentaPagarData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProveedoresTableTableReferences
+                              ._cuentasPagarTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProveedoresTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cuentasPagarTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.proveedorId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (pagosProveedorTableRefs)
+                        await $_getPrefetchedData<
+                          ProveedorData,
+                          $ProveedoresTableTable,
+                          PagoProveedorData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProveedoresTableTableReferences
+                              ._pagosProveedorTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProveedoresTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pagosProveedorTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.proveedorId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -24875,7 +25506,10 @@ typedef $$ProveedoresTableTableProcessedTableManager =
       $$ProveedoresTableTableUpdateCompanionBuilder,
       (ProveedorData, $$ProveedoresTableTableReferences),
       ProveedorData,
-      PrefetchHooks Function({bool cuentasPagarTableRefs})
+      PrefetchHooks Function({
+        bool cuentasPagarTableRefs,
+        bool pagosProveedorTableRefs,
+      })
     >;
 typedef $$UsuariosTableTableCreateCompanionBuilder =
     UsuariosTableCompanion Function({
@@ -30894,6 +31528,30 @@ final class $$CuentasPagarTableTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$PagosProveedorTableTable, List<PagoProveedorData>>
+  _pagosProveedorTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.pagosProveedorTable,
+        aliasName: $_aliasNameGenerator(
+          db.cuentasPagarTable.id,
+          db.pagosProveedorTable.cuentaPagarId,
+        ),
+      );
+
+  $$PagosProveedorTableTableProcessedTableManager get pagosProveedorTableRefs {
+    final manager = $$PagosProveedorTableTableTableManager(
+      $_db,
+      $_db.pagosProveedorTable,
+    ).filter((f) => f.cuentaPagarId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pagosProveedorTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CuentasPagarTableTableFilterComposer
@@ -30963,6 +31621,31 @@ class $$CuentasPagarTableTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> pagosProveedorTableRefs(
+    Expression<bool> Function($$PagosProveedorTableTableFilterComposer f) f,
+  ) {
+    final $$PagosProveedorTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pagosProveedorTable,
+      getReferencedColumn: (t) => t.cuentaPagarId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PagosProveedorTableTableFilterComposer(
+            $db: $db,
+            $table: $db.pagosProveedorTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -31090,6 +31773,32 @@ class $$CuentasPagarTableTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> pagosProveedorTableRefs<T extends Object>(
+    Expression<T> Function($$PagosProveedorTableTableAnnotationComposer a) f,
+  ) {
+    final $$PagosProveedorTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.pagosProveedorTable,
+          getReferencedColumn: (t) => t.cuentaPagarId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PagosProveedorTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.pagosProveedorTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CuentasPagarTableTableTableManager
@@ -31105,7 +31814,10 @@ class $$CuentasPagarTableTableTableManager
           $$CuentasPagarTableTableUpdateCompanionBuilder,
           (CuentaPagarData, $$CuentasPagarTableTableReferences),
           CuentaPagarData,
-          PrefetchHooks Function({bool proveedorId})
+          PrefetchHooks Function({
+            bool proveedorId,
+            bool pagosProveedorTableRefs,
+          })
         > {
   $$CuentasPagarTableTableTableManager(
     _$AppDatabase db,
@@ -31171,49 +31883,74 @@ class $$CuentasPagarTableTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({proveedorId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (proveedorId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.proveedorId,
-                                referencedTable:
-                                    $$CuentasPagarTableTableReferences
-                                        ._proveedorIdTable(db),
-                                referencedColumn:
-                                    $$CuentasPagarTableTableReferences
-                                        ._proveedorIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({proveedorId = false, pagosProveedorTableRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (pagosProveedorTableRefs) db.pagosProveedorTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (proveedorId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.proveedorId,
+                                    referencedTable:
+                                        $$CuentasPagarTableTableReferences
+                                            ._proveedorIdTable(db),
+                                    referencedColumn:
+                                        $$CuentasPagarTableTableReferences
+                                            ._proveedorIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (pagosProveedorTableRefs)
+                        await $_getPrefetchedData<
+                          CuentaPagarData,
+                          $CuentasPagarTableTable,
+                          PagoProveedorData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CuentasPagarTableTableReferences
+                              ._pagosProveedorTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CuentasPagarTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pagosProveedorTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.cuentaPagarId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -31230,7 +31967,496 @@ typedef $$CuentasPagarTableTableProcessedTableManager =
       $$CuentasPagarTableTableUpdateCompanionBuilder,
       (CuentaPagarData, $$CuentasPagarTableTableReferences),
       CuentaPagarData,
-      PrefetchHooks Function({bool proveedorId})
+      PrefetchHooks Function({bool proveedorId, bool pagosProveedorTableRefs})
+    >;
+typedef $$PagosProveedorTableTableCreateCompanionBuilder =
+    PagosProveedorTableCompanion Function({
+      Value<int> id,
+      required int cuentaPagarId,
+      required int proveedorId,
+      required double monto,
+      required DateTime fechaPago,
+      required String formaPago,
+      Value<String?> referencia,
+      Value<String?> nota,
+    });
+typedef $$PagosProveedorTableTableUpdateCompanionBuilder =
+    PagosProveedorTableCompanion Function({
+      Value<int> id,
+      Value<int> cuentaPagarId,
+      Value<int> proveedorId,
+      Value<double> monto,
+      Value<DateTime> fechaPago,
+      Value<String> formaPago,
+      Value<String?> referencia,
+      Value<String?> nota,
+    });
+
+final class $$PagosProveedorTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $PagosProveedorTableTable,
+          PagoProveedorData
+        > {
+  $$PagosProveedorTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CuentasPagarTableTable _cuentaPagarIdTable(_$AppDatabase db) =>
+      db.cuentasPagarTable.createAlias(
+        $_aliasNameGenerator(
+          db.pagosProveedorTable.cuentaPagarId,
+          db.cuentasPagarTable.id,
+        ),
+      );
+
+  $$CuentasPagarTableTableProcessedTableManager get cuentaPagarId {
+    final $_column = $_itemColumn<int>('cuenta_pagar_id')!;
+
+    final manager = $$CuentasPagarTableTableTableManager(
+      $_db,
+      $_db.cuentasPagarTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cuentaPagarIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ProveedoresTableTable _proveedorIdTable(_$AppDatabase db) =>
+      db.proveedoresTable.createAlias(
+        $_aliasNameGenerator(
+          db.pagosProveedorTable.proveedorId,
+          db.proveedoresTable.id,
+        ),
+      );
+
+  $$ProveedoresTableTableProcessedTableManager get proveedorId {
+    final $_column = $_itemColumn<int>('proveedor_id')!;
+
+    final manager = $$ProveedoresTableTableTableManager(
+      $_db,
+      $_db.proveedoresTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_proveedorIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PagosProveedorTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PagosProveedorTableTable> {
+  $$PagosProveedorTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaPago => $composableBuilder(
+    column: $table.fechaPago,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get formaPago => $composableBuilder(
+    column: $table.formaPago,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get referencia => $composableBuilder(
+    column: $table.referencia,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nota => $composableBuilder(
+    column: $table.nota,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CuentasPagarTableTableFilterComposer get cuentaPagarId {
+    final $$CuentasPagarTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cuentaPagarId,
+      referencedTable: $db.cuentasPagarTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CuentasPagarTableTableFilterComposer(
+            $db: $db,
+            $table: $db.cuentasPagarTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProveedoresTableTableFilterComposer get proveedorId {
+    final $$ProveedoresTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.proveedorId,
+      referencedTable: $db.proveedoresTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProveedoresTableTableFilterComposer(
+            $db: $db,
+            $table: $db.proveedoresTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PagosProveedorTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PagosProveedorTableTable> {
+  $$PagosProveedorTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaPago => $composableBuilder(
+    column: $table.fechaPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get formaPago => $composableBuilder(
+    column: $table.formaPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get referencia => $composableBuilder(
+    column: $table.referencia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nota => $composableBuilder(
+    column: $table.nota,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CuentasPagarTableTableOrderingComposer get cuentaPagarId {
+    final $$CuentasPagarTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cuentaPagarId,
+      referencedTable: $db.cuentasPagarTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CuentasPagarTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.cuentasPagarTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ProveedoresTableTableOrderingComposer get proveedorId {
+    final $$ProveedoresTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.proveedorId,
+      referencedTable: $db.proveedoresTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProveedoresTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.proveedoresTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PagosProveedorTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PagosProveedorTableTable> {
+  $$PagosProveedorTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get monto =>
+      $composableBuilder(column: $table.monto, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fechaPago =>
+      $composableBuilder(column: $table.fechaPago, builder: (column) => column);
+
+  GeneratedColumn<String> get formaPago =>
+      $composableBuilder(column: $table.formaPago, builder: (column) => column);
+
+  GeneratedColumn<String> get referencia => $composableBuilder(
+    column: $table.referencia,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get nota =>
+      $composableBuilder(column: $table.nota, builder: (column) => column);
+
+  $$CuentasPagarTableTableAnnotationComposer get cuentaPagarId {
+    final $$CuentasPagarTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.cuentaPagarId,
+          referencedTable: $db.cuentasPagarTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CuentasPagarTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.cuentasPagarTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$ProveedoresTableTableAnnotationComposer get proveedorId {
+    final $$ProveedoresTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.proveedorId,
+      referencedTable: $db.proveedoresTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProveedoresTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.proveedoresTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PagosProveedorTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PagosProveedorTableTable,
+          PagoProveedorData,
+          $$PagosProveedorTableTableFilterComposer,
+          $$PagosProveedorTableTableOrderingComposer,
+          $$PagosProveedorTableTableAnnotationComposer,
+          $$PagosProveedorTableTableCreateCompanionBuilder,
+          $$PagosProveedorTableTableUpdateCompanionBuilder,
+          (PagoProveedorData, $$PagosProveedorTableTableReferences),
+          PagoProveedorData,
+          PrefetchHooks Function({bool cuentaPagarId, bool proveedorId})
+        > {
+  $$PagosProveedorTableTableTableManager(
+    _$AppDatabase db,
+    $PagosProveedorTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PagosProveedorTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PagosProveedorTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PagosProveedorTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> cuentaPagarId = const Value.absent(),
+                Value<int> proveedorId = const Value.absent(),
+                Value<double> monto = const Value.absent(),
+                Value<DateTime> fechaPago = const Value.absent(),
+                Value<String> formaPago = const Value.absent(),
+                Value<String?> referencia = const Value.absent(),
+                Value<String?> nota = const Value.absent(),
+              }) => PagosProveedorTableCompanion(
+                id: id,
+                cuentaPagarId: cuentaPagarId,
+                proveedorId: proveedorId,
+                monto: monto,
+                fechaPago: fechaPago,
+                formaPago: formaPago,
+                referencia: referencia,
+                nota: nota,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int cuentaPagarId,
+                required int proveedorId,
+                required double monto,
+                required DateTime fechaPago,
+                required String formaPago,
+                Value<String?> referencia = const Value.absent(),
+                Value<String?> nota = const Value.absent(),
+              }) => PagosProveedorTableCompanion.insert(
+                id: id,
+                cuentaPagarId: cuentaPagarId,
+                proveedorId: proveedorId,
+                monto: monto,
+                fechaPago: fechaPago,
+                formaPago: formaPago,
+                referencia: referencia,
+                nota: nota,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PagosProveedorTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({cuentaPagarId = false, proveedorId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (cuentaPagarId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.cuentaPagarId,
+                                    referencedTable:
+                                        $$PagosProveedorTableTableReferences
+                                            ._cuentaPagarIdTable(db),
+                                    referencedColumn:
+                                        $$PagosProveedorTableTableReferences
+                                            ._cuentaPagarIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (proveedorId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.proveedorId,
+                                    referencedTable:
+                                        $$PagosProveedorTableTableReferences
+                                            ._proveedorIdTable(db),
+                                    referencedColumn:
+                                        $$PagosProveedorTableTableReferences
+                                            ._proveedorIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$PagosProveedorTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PagosProveedorTableTable,
+      PagoProveedorData,
+      $$PagosProveedorTableTableFilterComposer,
+      $$PagosProveedorTableTableOrderingComposer,
+      $$PagosProveedorTableTableAnnotationComposer,
+      $$PagosProveedorTableTableCreateCompanionBuilder,
+      $$PagosProveedorTableTableUpdateCompanionBuilder,
+      (PagoProveedorData, $$PagosProveedorTableTableReferences),
+      PagoProveedorData,
+      PrefetchHooks Function({bool cuentaPagarId, bool proveedorId})
     >;
 typedef $$DescuentosTableTableCreateCompanionBuilder =
     DescuentosTableCompanion Function({
@@ -33697,6 +34923,8 @@ class $AppDatabaseManager {
       $$CobrosTableTableTableManager(_db, _db.cobrosTable);
   $$CuentasPagarTableTableTableManager get cuentasPagarTable =>
       $$CuentasPagarTableTableTableManager(_db, _db.cuentasPagarTable);
+  $$PagosProveedorTableTableTableManager get pagosProveedorTable =>
+      $$PagosProveedorTableTableTableManager(_db, _db.pagosProveedorTable);
   $$DescuentosTableTableTableManager get descuentosTable =>
       $$DescuentosTableTableTableManager(_db, _db.descuentosTable);
   $$OfertasTableTableTableManager get ofertasTable =>
