@@ -90,7 +90,11 @@ class ConfirmarCompraUseCase {
         esAdeudo: true,
       );
 
-      final fechaVencimiento = compraConfirmada.fechaVencimiento ?? compraConfirmada.fechaEmision.add(const Duration(days: 30));
+      final diasParaVencimiento = compraConfirmada.diasCredito > 0
+          ? compraConfirmada.diasCredito
+          : 30;
+      final fechaVencimiento = compraConfirmada.fechaVencimiento ??
+          compraConfirmada.fechaEmision.add(Duration(days: diasParaVencimiento));
 
       await _cuentasPagarDao.registrarCuentaPagar(
         proveedorId: compraConfirmada.proveedorId,
