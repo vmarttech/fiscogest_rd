@@ -17373,8 +17373,12 @@ class $ComprasTableTable extends ComprasTable
     'id',
     aliasedName,
     false,
+    hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
   static const VerificationMeta _proveedorIdMeta = const VerificationMeta(
     'proveedorId',
@@ -17409,6 +17413,18 @@ class $ComprasTableTable extends ComprasTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _fechaVencimientoMeta = const VerificationMeta(
+    'fechaVencimiento',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaVencimiento =
+      GeneratedColumn<DateTime>(
+        'fecha_vencimiento',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
   static const VerificationMeta _fechaConfirmacionMeta = const VerificationMeta(
     'fechaConfirmacion',
   );
@@ -17416,6 +17432,18 @@ class $ComprasTableTable extends ComprasTable
   late final GeneratedColumn<DateTime> fechaConfirmacion =
       GeneratedColumn<DateTime>(
         'fecha_confirmacion',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _fechaRecepcionMeta = const VerificationMeta(
+    'fechaRecepcion',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaRecepcion =
+      GeneratedColumn<DateTime>(
+        'fecha_recepcion',
         aliasedName,
         true,
         type: DriftSqlType.dateTime,
@@ -17433,6 +17461,60 @@ class $ComprasTableTable extends ComprasTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _ncfMeta = const VerificationMeta('ncf');
+  @override
+  late final GeneratedColumn<String> ncf = GeneratedColumn<String>(
+    'ncf',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tipoComprobanteMeta = const VerificationMeta(
+    'tipoComprobante',
+  );
+  @override
+  late final GeneratedColumn<String> tipoComprobante = GeneratedColumn<String>(
+    'tipo_comprobante',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _formaPagoMeta = const VerificationMeta(
+    'formaPago',
+  );
+  @override
+  late final GeneratedColumn<String> formaPago = GeneratedColumn<String>(
+    'forma_pago',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _condicionPagoMeta = const VerificationMeta(
+    'condicionPago',
+  );
+  @override
+  late final GeneratedColumn<String> condicionPago = GeneratedColumn<String>(
+    'condicion_pago',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _diasCreditoMeta = const VerificationMeta(
+    'diasCredito',
+  );
+  @override
+  late final GeneratedColumn<int> diasCredito = GeneratedColumn<int>(
+    'dias_credito',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _subtotalSinImpuestosMeta =
       const VerificationMeta('subtotalSinImpuestos');
   @override
@@ -17488,17 +17570,6 @@ class $ComprasTableTable extends ComprasTable
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _observacionesMeta = const VerificationMeta(
-    'observaciones',
-  );
-  @override
-  late final GeneratedColumn<String> observaciones = GeneratedColumn<String>(
-    'observaciones',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   @override
   late final GeneratedColumnWithTypeConverter<EstadoCompra, int> estado =
       GeneratedColumn<int>(
@@ -17508,6 +17579,18 @@ class $ComprasTableTable extends ComprasTable
         type: DriftSqlType.int,
         requiredDuringInsert: true,
       ).withConverter<EstadoCompra>($ComprasTableTable.$converterestado);
+  static const VerificationMeta _observacionesMeta = const VerificationMeta(
+    'observaciones',
+  );
+  @override
+  late final GeneratedColumn<String> observaciones = GeneratedColumn<String>(
+    'observaciones',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _creadoEnMeta = const VerificationMeta(
     'creadoEn',
   );
@@ -17537,15 +17620,22 @@ class $ComprasTableTable extends ComprasTable
     proveedorId,
     nombreProveedor,
     fechaEmision,
+    fechaVencimiento,
     fechaConfirmacion,
+    fechaRecepcion,
     numeroComprobante,
+    ncf,
+    tipoComprobante,
+    formaPago,
+    condicionPago,
+    diasCredito,
     subtotalSinImpuestos,
     montoDescuentoGlobal,
     tasaImpuesto,
     montoImpuesto,
     totalCompra,
-    observaciones,
     estado,
+    observaciones,
     creadoEn,
     actualizadoEn,
   ];
@@ -17597,12 +17687,32 @@ class $ComprasTableTable extends ComprasTable
     } else if (isInserting) {
       context.missing(_fechaEmisionMeta);
     }
+    if (data.containsKey('fecha_vencimiento')) {
+      context.handle(
+        _fechaVencimientoMeta,
+        fechaVencimiento.isAcceptableOrUnknown(
+          data['fecha_vencimiento']!,
+          _fechaVencimientoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaVencimientoMeta);
+    }
     if (data.containsKey('fecha_confirmacion')) {
       context.handle(
         _fechaConfirmacionMeta,
         fechaConfirmacion.isAcceptableOrUnknown(
           data['fecha_confirmacion']!,
           _fechaConfirmacionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fecha_recepcion')) {
+      context.handle(
+        _fechaRecepcionMeta,
+        fechaRecepcion.isAcceptableOrUnknown(
+          data['fecha_recepcion']!,
+          _fechaRecepcionMeta,
         ),
       );
     }
@@ -17616,6 +17726,53 @@ class $ComprasTableTable extends ComprasTable
       );
     } else if (isInserting) {
       context.missing(_numeroComprobanteMeta);
+    }
+    if (data.containsKey('ncf')) {
+      context.handle(
+        _ncfMeta,
+        ncf.isAcceptableOrUnknown(data['ncf']!, _ncfMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ncfMeta);
+    }
+    if (data.containsKey('tipo_comprobante')) {
+      context.handle(
+        _tipoComprobanteMeta,
+        tipoComprobante.isAcceptableOrUnknown(
+          data['tipo_comprobante']!,
+          _tipoComprobanteMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_tipoComprobanteMeta);
+    }
+    if (data.containsKey('forma_pago')) {
+      context.handle(
+        _formaPagoMeta,
+        formaPago.isAcceptableOrUnknown(data['forma_pago']!, _formaPagoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_formaPagoMeta);
+    }
+    if (data.containsKey('condicion_pago')) {
+      context.handle(
+        _condicionPagoMeta,
+        condicionPago.isAcceptableOrUnknown(
+          data['condicion_pago']!,
+          _condicionPagoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_condicionPagoMeta);
+    }
+    if (data.containsKey('dias_credito')) {
+      context.handle(
+        _diasCreditoMeta,
+        diasCredito.isAcceptableOrUnknown(
+          data['dias_credito']!,
+          _diasCreditoMeta,
+        ),
+      );
     }
     if (data.containsKey('subtotal_sin_impuestos')) {
       context.handle(
@@ -17680,8 +17837,6 @@ class $ComprasTableTable extends ComprasTable
           _observacionesMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_observacionesMeta);
     }
     if (data.containsKey('creado_en')) {
       context.handle(
@@ -17725,13 +17880,41 @@ class $ComprasTableTable extends ComprasTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha_emision'],
       )!,
+      fechaVencimiento: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_vencimiento'],
+      )!,
       fechaConfirmacion: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha_confirmacion'],
       ),
+      fechaRecepcion: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_recepcion'],
+      ),
       numeroComprobante: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}numero_comprobante'],
+      )!,
+      ncf: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ncf'],
+      )!,
+      tipoComprobante: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo_comprobante'],
+      )!,
+      formaPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}forma_pago'],
+      )!,
+      condicionPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}condicion_pago'],
+      )!,
+      diasCredito: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}dias_credito'],
       )!,
       subtotalSinImpuestos: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
@@ -17753,16 +17936,16 @@ class $ComprasTableTable extends ComprasTable
         DriftSqlType.double,
         data['${effectivePrefix}total_compra'],
       )!,
-      observaciones: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}observaciones'],
-      )!,
       estado: $ComprasTableTable.$converterestado.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
           data['${effectivePrefix}estado'],
         )!,
       ),
+      observaciones: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}observaciones'],
+      )!,
       creadoEn: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}creado_en'],
@@ -17789,15 +17972,22 @@ class ComprasTableData extends DataClass
   final int proveedorId;
   final String nombreProveedor;
   final DateTime fechaEmision;
+  final DateTime fechaVencimiento;
   final DateTime? fechaConfirmacion;
+  final DateTime? fechaRecepcion;
   final String numeroComprobante;
+  final String ncf;
+  final String tipoComprobante;
+  final String formaPago;
+  final String condicionPago;
+  final int diasCredito;
   final double subtotalSinImpuestos;
   final double montoDescuentoGlobal;
   final double tasaImpuesto;
   final double montoImpuesto;
   final double totalCompra;
-  final String observaciones;
   final EstadoCompra estado;
+  final String observaciones;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
   const ComprasTableData({
@@ -17805,15 +17995,22 @@ class ComprasTableData extends DataClass
     required this.proveedorId,
     required this.nombreProveedor,
     required this.fechaEmision,
+    required this.fechaVencimiento,
     this.fechaConfirmacion,
+    this.fechaRecepcion,
     required this.numeroComprobante,
+    required this.ncf,
+    required this.tipoComprobante,
+    required this.formaPago,
+    required this.condicionPago,
+    required this.diasCredito,
     required this.subtotalSinImpuestos,
     required this.montoDescuentoGlobal,
     required this.tasaImpuesto,
     required this.montoImpuesto,
     required this.totalCompra,
-    required this.observaciones,
     required this.estado,
+    required this.observaciones,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -17824,21 +18021,30 @@ class ComprasTableData extends DataClass
     map['proveedor_id'] = Variable<int>(proveedorId);
     map['nombre_proveedor'] = Variable<String>(nombreProveedor);
     map['fecha_emision'] = Variable<DateTime>(fechaEmision);
+    map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento);
     if (!nullToAbsent || fechaConfirmacion != null) {
       map['fecha_confirmacion'] = Variable<DateTime>(fechaConfirmacion);
     }
+    if (!nullToAbsent || fechaRecepcion != null) {
+      map['fecha_recepcion'] = Variable<DateTime>(fechaRecepcion);
+    }
     map['numero_comprobante'] = Variable<String>(numeroComprobante);
+    map['ncf'] = Variable<String>(ncf);
+    map['tipo_comprobante'] = Variable<String>(tipoComprobante);
+    map['forma_pago'] = Variable<String>(formaPago);
+    map['condicion_pago'] = Variable<String>(condicionPago);
+    map['dias_credito'] = Variable<int>(diasCredito);
     map['subtotal_sin_impuestos'] = Variable<double>(subtotalSinImpuestos);
     map['monto_descuento_global'] = Variable<double>(montoDescuentoGlobal);
     map['tasa_impuesto'] = Variable<double>(tasaImpuesto);
     map['monto_impuesto'] = Variable<double>(montoImpuesto);
     map['total_compra'] = Variable<double>(totalCompra);
-    map['observaciones'] = Variable<String>(observaciones);
     {
       map['estado'] = Variable<int>(
         $ComprasTableTable.$converterestado.toSql(estado),
       );
     }
+    map['observaciones'] = Variable<String>(observaciones);
     map['creado_en'] = Variable<DateTime>(creadoEn);
     if (!nullToAbsent || actualizadoEn != null) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
@@ -17852,17 +18058,26 @@ class ComprasTableData extends DataClass
       proveedorId: Value(proveedorId),
       nombreProveedor: Value(nombreProveedor),
       fechaEmision: Value(fechaEmision),
+      fechaVencimiento: Value(fechaVencimiento),
       fechaConfirmacion: fechaConfirmacion == null && nullToAbsent
           ? const Value.absent()
           : Value(fechaConfirmacion),
+      fechaRecepcion: fechaRecepcion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaRecepcion),
       numeroComprobante: Value(numeroComprobante),
+      ncf: Value(ncf),
+      tipoComprobante: Value(tipoComprobante),
+      formaPago: Value(formaPago),
+      condicionPago: Value(condicionPago),
+      diasCredito: Value(diasCredito),
       subtotalSinImpuestos: Value(subtotalSinImpuestos),
       montoDescuentoGlobal: Value(montoDescuentoGlobal),
       tasaImpuesto: Value(tasaImpuesto),
       montoImpuesto: Value(montoImpuesto),
       totalCompra: Value(totalCompra),
-      observaciones: Value(observaciones),
       estado: Value(estado),
+      observaciones: Value(observaciones),
       creadoEn: Value(creadoEn),
       actualizadoEn: actualizadoEn == null && nullToAbsent
           ? const Value.absent()
@@ -17880,10 +18095,17 @@ class ComprasTableData extends DataClass
       proveedorId: serializer.fromJson<int>(json['proveedorId']),
       nombreProveedor: serializer.fromJson<String>(json['nombreProveedor']),
       fechaEmision: serializer.fromJson<DateTime>(json['fechaEmision']),
+      fechaVencimiento: serializer.fromJson<DateTime>(json['fechaVencimiento']),
       fechaConfirmacion: serializer.fromJson<DateTime?>(
         json['fechaConfirmacion'],
       ),
+      fechaRecepcion: serializer.fromJson<DateTime?>(json['fechaRecepcion']),
       numeroComprobante: serializer.fromJson<String>(json['numeroComprobante']),
+      ncf: serializer.fromJson<String>(json['ncf']),
+      tipoComprobante: serializer.fromJson<String>(json['tipoComprobante']),
+      formaPago: serializer.fromJson<String>(json['formaPago']),
+      condicionPago: serializer.fromJson<String>(json['condicionPago']),
+      diasCredito: serializer.fromJson<int>(json['diasCredito']),
       subtotalSinImpuestos: serializer.fromJson<double>(
         json['subtotalSinImpuestos'],
       ),
@@ -17893,10 +18115,10 @@ class ComprasTableData extends DataClass
       tasaImpuesto: serializer.fromJson<double>(json['tasaImpuesto']),
       montoImpuesto: serializer.fromJson<double>(json['montoImpuesto']),
       totalCompra: serializer.fromJson<double>(json['totalCompra']),
-      observaciones: serializer.fromJson<String>(json['observaciones']),
       estado: $ComprasTableTable.$converterestado.fromJson(
         serializer.fromJson<int>(json['estado']),
       ),
+      observaciones: serializer.fromJson<String>(json['observaciones']),
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
     );
@@ -17909,17 +18131,24 @@ class ComprasTableData extends DataClass
       'proveedorId': serializer.toJson<int>(proveedorId),
       'nombreProveedor': serializer.toJson<String>(nombreProveedor),
       'fechaEmision': serializer.toJson<DateTime>(fechaEmision),
+      'fechaVencimiento': serializer.toJson<DateTime>(fechaVencimiento),
       'fechaConfirmacion': serializer.toJson<DateTime?>(fechaConfirmacion),
+      'fechaRecepcion': serializer.toJson<DateTime?>(fechaRecepcion),
       'numeroComprobante': serializer.toJson<String>(numeroComprobante),
+      'ncf': serializer.toJson<String>(ncf),
+      'tipoComprobante': serializer.toJson<String>(tipoComprobante),
+      'formaPago': serializer.toJson<String>(formaPago),
+      'condicionPago': serializer.toJson<String>(condicionPago),
+      'diasCredito': serializer.toJson<int>(diasCredito),
       'subtotalSinImpuestos': serializer.toJson<double>(subtotalSinImpuestos),
       'montoDescuentoGlobal': serializer.toJson<double>(montoDescuentoGlobal),
       'tasaImpuesto': serializer.toJson<double>(tasaImpuesto),
       'montoImpuesto': serializer.toJson<double>(montoImpuesto),
       'totalCompra': serializer.toJson<double>(totalCompra),
-      'observaciones': serializer.toJson<String>(observaciones),
       'estado': serializer.toJson<int>(
         $ComprasTableTable.$converterestado.toJson(estado),
       ),
+      'observaciones': serializer.toJson<String>(observaciones),
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
     };
@@ -17930,15 +18159,22 @@ class ComprasTableData extends DataClass
     int? proveedorId,
     String? nombreProveedor,
     DateTime? fechaEmision,
+    DateTime? fechaVencimiento,
     Value<DateTime?> fechaConfirmacion = const Value.absent(),
+    Value<DateTime?> fechaRecepcion = const Value.absent(),
     String? numeroComprobante,
+    String? ncf,
+    String? tipoComprobante,
+    String? formaPago,
+    String? condicionPago,
+    int? diasCredito,
     double? subtotalSinImpuestos,
     double? montoDescuentoGlobal,
     double? tasaImpuesto,
     double? montoImpuesto,
     double? totalCompra,
-    String? observaciones,
     EstadoCompra? estado,
+    String? observaciones,
     DateTime? creadoEn,
     Value<DateTime?> actualizadoEn = const Value.absent(),
   }) => ComprasTableData(
@@ -17946,17 +18182,26 @@ class ComprasTableData extends DataClass
     proveedorId: proveedorId ?? this.proveedorId,
     nombreProveedor: nombreProveedor ?? this.nombreProveedor,
     fechaEmision: fechaEmision ?? this.fechaEmision,
+    fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
     fechaConfirmacion: fechaConfirmacion.present
         ? fechaConfirmacion.value
         : this.fechaConfirmacion,
+    fechaRecepcion: fechaRecepcion.present
+        ? fechaRecepcion.value
+        : this.fechaRecepcion,
     numeroComprobante: numeroComprobante ?? this.numeroComprobante,
+    ncf: ncf ?? this.ncf,
+    tipoComprobante: tipoComprobante ?? this.tipoComprobante,
+    formaPago: formaPago ?? this.formaPago,
+    condicionPago: condicionPago ?? this.condicionPago,
+    diasCredito: diasCredito ?? this.diasCredito,
     subtotalSinImpuestos: subtotalSinImpuestos ?? this.subtotalSinImpuestos,
     montoDescuentoGlobal: montoDescuentoGlobal ?? this.montoDescuentoGlobal,
     tasaImpuesto: tasaImpuesto ?? this.tasaImpuesto,
     montoImpuesto: montoImpuesto ?? this.montoImpuesto,
     totalCompra: totalCompra ?? this.totalCompra,
-    observaciones: observaciones ?? this.observaciones,
     estado: estado ?? this.estado,
+    observaciones: observaciones ?? this.observaciones,
     creadoEn: creadoEn ?? this.creadoEn,
     actualizadoEn: actualizadoEn.present
         ? actualizadoEn.value
@@ -17974,12 +18219,29 @@ class ComprasTableData extends DataClass
       fechaEmision: data.fechaEmision.present
           ? data.fechaEmision.value
           : this.fechaEmision,
+      fechaVencimiento: data.fechaVencimiento.present
+          ? data.fechaVencimiento.value
+          : this.fechaVencimiento,
       fechaConfirmacion: data.fechaConfirmacion.present
           ? data.fechaConfirmacion.value
           : this.fechaConfirmacion,
+      fechaRecepcion: data.fechaRecepcion.present
+          ? data.fechaRecepcion.value
+          : this.fechaRecepcion,
       numeroComprobante: data.numeroComprobante.present
           ? data.numeroComprobante.value
           : this.numeroComprobante,
+      ncf: data.ncf.present ? data.ncf.value : this.ncf,
+      tipoComprobante: data.tipoComprobante.present
+          ? data.tipoComprobante.value
+          : this.tipoComprobante,
+      formaPago: data.formaPago.present ? data.formaPago.value : this.formaPago,
+      condicionPago: data.condicionPago.present
+          ? data.condicionPago.value
+          : this.condicionPago,
+      diasCredito: data.diasCredito.present
+          ? data.diasCredito.value
+          : this.diasCredito,
       subtotalSinImpuestos: data.subtotalSinImpuestos.present
           ? data.subtotalSinImpuestos.value
           : this.subtotalSinImpuestos,
@@ -17995,10 +18257,10 @@ class ComprasTableData extends DataClass
       totalCompra: data.totalCompra.present
           ? data.totalCompra.value
           : this.totalCompra,
+      estado: data.estado.present ? data.estado.value : this.estado,
       observaciones: data.observaciones.present
           ? data.observaciones.value
           : this.observaciones,
-      estado: data.estado.present ? data.estado.value : this.estado,
       creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
       actualizadoEn: data.actualizadoEn.present
           ? data.actualizadoEn.value
@@ -18013,15 +18275,22 @@ class ComprasTableData extends DataClass
           ..write('proveedorId: $proveedorId, ')
           ..write('nombreProveedor: $nombreProveedor, ')
           ..write('fechaEmision: $fechaEmision, ')
+          ..write('fechaVencimiento: $fechaVencimiento, ')
           ..write('fechaConfirmacion: $fechaConfirmacion, ')
+          ..write('fechaRecepcion: $fechaRecepcion, ')
           ..write('numeroComprobante: $numeroComprobante, ')
+          ..write('ncf: $ncf, ')
+          ..write('tipoComprobante: $tipoComprobante, ')
+          ..write('formaPago: $formaPago, ')
+          ..write('condicionPago: $condicionPago, ')
+          ..write('diasCredito: $diasCredito, ')
           ..write('subtotalSinImpuestos: $subtotalSinImpuestos, ')
           ..write('montoDescuentoGlobal: $montoDescuentoGlobal, ')
           ..write('tasaImpuesto: $tasaImpuesto, ')
           ..write('montoImpuesto: $montoImpuesto, ')
           ..write('totalCompra: $totalCompra, ')
-          ..write('observaciones: $observaciones, ')
           ..write('estado: $estado, ')
+          ..write('observaciones: $observaciones, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -18029,23 +18298,30 @@ class ComprasTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     proveedorId,
     nombreProveedor,
     fechaEmision,
+    fechaVencimiento,
     fechaConfirmacion,
+    fechaRecepcion,
     numeroComprobante,
+    ncf,
+    tipoComprobante,
+    formaPago,
+    condicionPago,
+    diasCredito,
     subtotalSinImpuestos,
     montoDescuentoGlobal,
     tasaImpuesto,
     montoImpuesto,
     totalCompra,
-    observaciones,
     estado,
+    observaciones,
     creadoEn,
     actualizadoEn,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -18054,15 +18330,22 @@ class ComprasTableData extends DataClass
           other.proveedorId == this.proveedorId &&
           other.nombreProveedor == this.nombreProveedor &&
           other.fechaEmision == this.fechaEmision &&
+          other.fechaVencimiento == this.fechaVencimiento &&
           other.fechaConfirmacion == this.fechaConfirmacion &&
+          other.fechaRecepcion == this.fechaRecepcion &&
           other.numeroComprobante == this.numeroComprobante &&
+          other.ncf == this.ncf &&
+          other.tipoComprobante == this.tipoComprobante &&
+          other.formaPago == this.formaPago &&
+          other.condicionPago == this.condicionPago &&
+          other.diasCredito == this.diasCredito &&
           other.subtotalSinImpuestos == this.subtotalSinImpuestos &&
           other.montoDescuentoGlobal == this.montoDescuentoGlobal &&
           other.tasaImpuesto == this.tasaImpuesto &&
           other.montoImpuesto == this.montoImpuesto &&
           other.totalCompra == this.totalCompra &&
-          other.observaciones == this.observaciones &&
           other.estado == this.estado &&
+          other.observaciones == this.observaciones &&
           other.creadoEn == this.creadoEn &&
           other.actualizadoEn == this.actualizadoEn);
 }
@@ -18072,15 +18355,22 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
   final Value<int> proveedorId;
   final Value<String> nombreProveedor;
   final Value<DateTime> fechaEmision;
+  final Value<DateTime> fechaVencimiento;
   final Value<DateTime?> fechaConfirmacion;
+  final Value<DateTime?> fechaRecepcion;
   final Value<String> numeroComprobante;
+  final Value<String> ncf;
+  final Value<String> tipoComprobante;
+  final Value<String> formaPago;
+  final Value<String> condicionPago;
+  final Value<int> diasCredito;
   final Value<double> subtotalSinImpuestos;
   final Value<double> montoDescuentoGlobal;
   final Value<double> tasaImpuesto;
   final Value<double> montoImpuesto;
   final Value<double> totalCompra;
-  final Value<String> observaciones;
   final Value<EstadoCompra> estado;
+  final Value<String> observaciones;
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
   const ComprasTableCompanion({
@@ -18088,15 +18378,22 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     this.proveedorId = const Value.absent(),
     this.nombreProveedor = const Value.absent(),
     this.fechaEmision = const Value.absent(),
+    this.fechaVencimiento = const Value.absent(),
     this.fechaConfirmacion = const Value.absent(),
+    this.fechaRecepcion = const Value.absent(),
     this.numeroComprobante = const Value.absent(),
+    this.ncf = const Value.absent(),
+    this.tipoComprobante = const Value.absent(),
+    this.formaPago = const Value.absent(),
+    this.condicionPago = const Value.absent(),
+    this.diasCredito = const Value.absent(),
     this.subtotalSinImpuestos = const Value.absent(),
     this.montoDescuentoGlobal = const Value.absent(),
     this.tasaImpuesto = const Value.absent(),
     this.montoImpuesto = const Value.absent(),
     this.totalCompra = const Value.absent(),
-    this.observaciones = const Value.absent(),
     this.estado = const Value.absent(),
+    this.observaciones = const Value.absent(),
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
   });
@@ -18105,27 +18402,38 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     required int proveedorId,
     required String nombreProveedor,
     required DateTime fechaEmision,
+    required DateTime fechaVencimiento,
     this.fechaConfirmacion = const Value.absent(),
+    this.fechaRecepcion = const Value.absent(),
     required String numeroComprobante,
+    required String ncf,
+    required String tipoComprobante,
+    required String formaPago,
+    required String condicionPago,
+    this.diasCredito = const Value.absent(),
     required double subtotalSinImpuestos,
     required double montoDescuentoGlobal,
     required double tasaImpuesto,
     required double montoImpuesto,
     required double totalCompra,
-    required String observaciones,
     required EstadoCompra estado,
+    this.observaciones = const Value.absent(),
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
   }) : proveedorId = Value(proveedorId),
        nombreProveedor = Value(nombreProveedor),
        fechaEmision = Value(fechaEmision),
+       fechaVencimiento = Value(fechaVencimiento),
        numeroComprobante = Value(numeroComprobante),
+       ncf = Value(ncf),
+       tipoComprobante = Value(tipoComprobante),
+       formaPago = Value(formaPago),
+       condicionPago = Value(condicionPago),
        subtotalSinImpuestos = Value(subtotalSinImpuestos),
        montoDescuentoGlobal = Value(montoDescuentoGlobal),
        tasaImpuesto = Value(tasaImpuesto),
        montoImpuesto = Value(montoImpuesto),
        totalCompra = Value(totalCompra),
-       observaciones = Value(observaciones),
        estado = Value(estado),
        creadoEn = Value(creadoEn);
   static Insertable<ComprasTableData> custom({
@@ -18133,15 +18441,22 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     Expression<int>? proveedorId,
     Expression<String>? nombreProveedor,
     Expression<DateTime>? fechaEmision,
+    Expression<DateTime>? fechaVencimiento,
     Expression<DateTime>? fechaConfirmacion,
+    Expression<DateTime>? fechaRecepcion,
     Expression<String>? numeroComprobante,
+    Expression<String>? ncf,
+    Expression<String>? tipoComprobante,
+    Expression<String>? formaPago,
+    Expression<String>? condicionPago,
+    Expression<int>? diasCredito,
     Expression<double>? subtotalSinImpuestos,
     Expression<double>? montoDescuentoGlobal,
     Expression<double>? tasaImpuesto,
     Expression<double>? montoImpuesto,
     Expression<double>? totalCompra,
-    Expression<String>? observaciones,
     Expression<int>? estado,
+    Expression<String>? observaciones,
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
   }) {
@@ -18150,8 +18465,15 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       if (proveedorId != null) 'proveedor_id': proveedorId,
       if (nombreProveedor != null) 'nombre_proveedor': nombreProveedor,
       if (fechaEmision != null) 'fecha_emision': fechaEmision,
+      if (fechaVencimiento != null) 'fecha_vencimiento': fechaVencimiento,
       if (fechaConfirmacion != null) 'fecha_confirmacion': fechaConfirmacion,
+      if (fechaRecepcion != null) 'fecha_recepcion': fechaRecepcion,
       if (numeroComprobante != null) 'numero_comprobante': numeroComprobante,
+      if (ncf != null) 'ncf': ncf,
+      if (tipoComprobante != null) 'tipo_comprobante': tipoComprobante,
+      if (formaPago != null) 'forma_pago': formaPago,
+      if (condicionPago != null) 'condicion_pago': condicionPago,
+      if (diasCredito != null) 'dias_credito': diasCredito,
       if (subtotalSinImpuestos != null)
         'subtotal_sin_impuestos': subtotalSinImpuestos,
       if (montoDescuentoGlobal != null)
@@ -18159,8 +18481,8 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       if (tasaImpuesto != null) 'tasa_impuesto': tasaImpuesto,
       if (montoImpuesto != null) 'monto_impuesto': montoImpuesto,
       if (totalCompra != null) 'total_compra': totalCompra,
-      if (observaciones != null) 'observaciones': observaciones,
       if (estado != null) 'estado': estado,
+      if (observaciones != null) 'observaciones': observaciones,
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
     });
@@ -18171,15 +18493,22 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     Value<int>? proveedorId,
     Value<String>? nombreProveedor,
     Value<DateTime>? fechaEmision,
+    Value<DateTime>? fechaVencimiento,
     Value<DateTime?>? fechaConfirmacion,
+    Value<DateTime?>? fechaRecepcion,
     Value<String>? numeroComprobante,
+    Value<String>? ncf,
+    Value<String>? tipoComprobante,
+    Value<String>? formaPago,
+    Value<String>? condicionPago,
+    Value<int>? diasCredito,
     Value<double>? subtotalSinImpuestos,
     Value<double>? montoDescuentoGlobal,
     Value<double>? tasaImpuesto,
     Value<double>? montoImpuesto,
     Value<double>? totalCompra,
-    Value<String>? observaciones,
     Value<EstadoCompra>? estado,
+    Value<String>? observaciones,
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
   }) {
@@ -18188,15 +18517,22 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       proveedorId: proveedorId ?? this.proveedorId,
       nombreProveedor: nombreProveedor ?? this.nombreProveedor,
       fechaEmision: fechaEmision ?? this.fechaEmision,
+      fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
       fechaConfirmacion: fechaConfirmacion ?? this.fechaConfirmacion,
+      fechaRecepcion: fechaRecepcion ?? this.fechaRecepcion,
       numeroComprobante: numeroComprobante ?? this.numeroComprobante,
+      ncf: ncf ?? this.ncf,
+      tipoComprobante: tipoComprobante ?? this.tipoComprobante,
+      formaPago: formaPago ?? this.formaPago,
+      condicionPago: condicionPago ?? this.condicionPago,
+      diasCredito: diasCredito ?? this.diasCredito,
       subtotalSinImpuestos: subtotalSinImpuestos ?? this.subtotalSinImpuestos,
       montoDescuentoGlobal: montoDescuentoGlobal ?? this.montoDescuentoGlobal,
       tasaImpuesto: tasaImpuesto ?? this.tasaImpuesto,
       montoImpuesto: montoImpuesto ?? this.montoImpuesto,
       totalCompra: totalCompra ?? this.totalCompra,
-      observaciones: observaciones ?? this.observaciones,
       estado: estado ?? this.estado,
+      observaciones: observaciones ?? this.observaciones,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
     );
@@ -18217,11 +18553,32 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     if (fechaEmision.present) {
       map['fecha_emision'] = Variable<DateTime>(fechaEmision.value);
     }
+    if (fechaVencimiento.present) {
+      map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento.value);
+    }
     if (fechaConfirmacion.present) {
       map['fecha_confirmacion'] = Variable<DateTime>(fechaConfirmacion.value);
     }
+    if (fechaRecepcion.present) {
+      map['fecha_recepcion'] = Variable<DateTime>(fechaRecepcion.value);
+    }
     if (numeroComprobante.present) {
       map['numero_comprobante'] = Variable<String>(numeroComprobante.value);
+    }
+    if (ncf.present) {
+      map['ncf'] = Variable<String>(ncf.value);
+    }
+    if (tipoComprobante.present) {
+      map['tipo_comprobante'] = Variable<String>(tipoComprobante.value);
+    }
+    if (formaPago.present) {
+      map['forma_pago'] = Variable<String>(formaPago.value);
+    }
+    if (condicionPago.present) {
+      map['condicion_pago'] = Variable<String>(condicionPago.value);
+    }
+    if (diasCredito.present) {
+      map['dias_credito'] = Variable<int>(diasCredito.value);
     }
     if (subtotalSinImpuestos.present) {
       map['subtotal_sin_impuestos'] = Variable<double>(
@@ -18242,13 +18599,13 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     if (totalCompra.present) {
       map['total_compra'] = Variable<double>(totalCompra.value);
     }
-    if (observaciones.present) {
-      map['observaciones'] = Variable<String>(observaciones.value);
-    }
     if (estado.present) {
       map['estado'] = Variable<int>(
         $ComprasTableTable.$converterestado.toSql(estado.value),
       );
+    }
+    if (observaciones.present) {
+      map['observaciones'] = Variable<String>(observaciones.value);
     }
     if (creadoEn.present) {
       map['creado_en'] = Variable<DateTime>(creadoEn.value);
@@ -18266,15 +18623,22 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
           ..write('proveedorId: $proveedorId, ')
           ..write('nombreProveedor: $nombreProveedor, ')
           ..write('fechaEmision: $fechaEmision, ')
+          ..write('fechaVencimiento: $fechaVencimiento, ')
           ..write('fechaConfirmacion: $fechaConfirmacion, ')
+          ..write('fechaRecepcion: $fechaRecepcion, ')
           ..write('numeroComprobante: $numeroComprobante, ')
+          ..write('ncf: $ncf, ')
+          ..write('tipoComprobante: $tipoComprobante, ')
+          ..write('formaPago: $formaPago, ')
+          ..write('condicionPago: $condicionPago, ')
+          ..write('diasCredito: $diasCredito, ')
           ..write('subtotalSinImpuestos: $subtotalSinImpuestos, ')
           ..write('montoDescuentoGlobal: $montoDescuentoGlobal, ')
           ..write('tasaImpuesto: $tasaImpuesto, ')
           ..write('montoImpuesto: $montoImpuesto, ')
           ..write('totalCompra: $totalCompra, ')
-          ..write('observaciones: $observaciones, ')
           ..write('estado: $estado, ')
+          ..write('observaciones: $observaciones, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -18294,8 +18658,12 @@ class $DetalleCompraTableTable extends DetalleCompraTable
     'id',
     aliasedName,
     false,
+    hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
   static const VerificationMeta _compraIdMeta = const VerificationMeta(
     'compraId',
@@ -18307,9 +18675,6 @@ class $DetalleCompraTableTable extends DetalleCompraTable
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES compras_table (id) ON DELETE CASCADE',
-    ),
   );
   static const VerificationMeta _productoIdMeta = const VerificationMeta(
     'productoId',
@@ -18414,6 +18779,7 @@ class $DetalleCompraTableTable extends DetalleCompraTable
         true,
         type: DriftSqlType.double,
         requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
       );
   static const VerificationMeta _montoDescuentoLineaMeta =
       const VerificationMeta('montoDescuentoLinea');
@@ -18425,6 +18791,7 @@ class $DetalleCompraTableTable extends DetalleCompraTable
         true,
         type: DriftSqlType.double,
         requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
       );
   static const VerificationMeta _subtotalLineaMeta = const VerificationMeta(
     'subtotalLinea',
@@ -18432,6 +18799,39 @@ class $DetalleCompraTableTable extends DetalleCompraTable
   @override
   late final GeneratedColumn<double> subtotalLinea = GeneratedColumn<double>(
     'subtotal_linea',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _baseImponibleLineaMeta =
+      const VerificationMeta('baseImponibleLinea');
+  @override
+  late final GeneratedColumn<double> baseImponibleLinea =
+      GeneratedColumn<double>(
+        'base_imponible_linea',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _itbisLineaMeta = const VerificationMeta(
+    'itbisLinea',
+  );
+  @override
+  late final GeneratedColumn<double> itbisLinea = GeneratedColumn<double>(
+    'itbis_linea',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _totalLineaMeta = const VerificationMeta(
+    'totalLinea',
+  );
+  @override
+  late final GeneratedColumn<double> totalLinea = GeneratedColumn<double>(
+    'total_linea',
     aliasedName,
     true,
     type: DriftSqlType.double,
@@ -18463,6 +18863,9 @@ class $DetalleCompraTableTable extends DetalleCompraTable
     descuentoPorcentaje,
     montoDescuentoLinea,
     subtotalLinea,
+    baseImponibleLinea,
+    itbisLinea,
+    totalLinea,
     costoAdquisicion,
   ];
   @override
@@ -18585,6 +18988,27 @@ class $DetalleCompraTableTable extends DetalleCompraTable
         ),
       );
     }
+    if (data.containsKey('base_imponible_linea')) {
+      context.handle(
+        _baseImponibleLineaMeta,
+        baseImponibleLinea.isAcceptableOrUnknown(
+          data['base_imponible_linea']!,
+          _baseImponibleLineaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('itbis_linea')) {
+      context.handle(
+        _itbisLineaMeta,
+        itbisLinea.isAcceptableOrUnknown(data['itbis_linea']!, _itbisLineaMeta),
+      );
+    }
+    if (data.containsKey('total_linea')) {
+      context.handle(
+        _totalLineaMeta,
+        totalLinea.isAcceptableOrUnknown(data['total_linea']!, _totalLineaMeta),
+      );
+    }
     if (data.containsKey('costo_adquisicion')) {
       context.handle(
         _costoAdquisicionMeta,
@@ -18655,6 +19079,18 @@ class $DetalleCompraTableTable extends DetalleCompraTable
         DriftSqlType.double,
         data['${effectivePrefix}subtotal_linea'],
       ),
+      baseImponibleLinea: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}base_imponible_linea'],
+      ),
+      itbisLinea: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}itbis_linea'],
+      ),
+      totalLinea: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_linea'],
+      ),
       costoAdquisicion: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}costo_adquisicion'],
@@ -18683,6 +19119,9 @@ class DetalleCompraTableData extends DataClass
   final double? descuentoPorcentaje;
   final double? montoDescuentoLinea;
   final double? subtotalLinea;
+  final double? baseImponibleLinea;
+  final double? itbisLinea;
+  final double? totalLinea;
   final double? costoAdquisicion;
   const DetalleCompraTableData({
     required this.id,
@@ -18698,6 +19137,9 @@ class DetalleCompraTableData extends DataClass
     this.descuentoPorcentaje,
     this.montoDescuentoLinea,
     this.subtotalLinea,
+    this.baseImponibleLinea,
+    this.itbisLinea,
+    this.totalLinea,
     this.costoAdquisicion,
   });
   @override
@@ -18733,6 +19175,15 @@ class DetalleCompraTableData extends DataClass
     }
     if (!nullToAbsent || subtotalLinea != null) {
       map['subtotal_linea'] = Variable<double>(subtotalLinea);
+    }
+    if (!nullToAbsent || baseImponibleLinea != null) {
+      map['base_imponible_linea'] = Variable<double>(baseImponibleLinea);
+    }
+    if (!nullToAbsent || itbisLinea != null) {
+      map['itbis_linea'] = Variable<double>(itbisLinea);
+    }
+    if (!nullToAbsent || totalLinea != null) {
+      map['total_linea'] = Variable<double>(totalLinea);
     }
     if (!nullToAbsent || costoAdquisicion != null) {
       map['costo_adquisicion'] = Variable<double>(costoAdquisicion);
@@ -18773,6 +19224,15 @@ class DetalleCompraTableData extends DataClass
       subtotalLinea: subtotalLinea == null && nullToAbsent
           ? const Value.absent()
           : Value(subtotalLinea),
+      baseImponibleLinea: baseImponibleLinea == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseImponibleLinea),
+      itbisLinea: itbisLinea == null && nullToAbsent
+          ? const Value.absent()
+          : Value(itbisLinea),
+      totalLinea: totalLinea == null && nullToAbsent
+          ? const Value.absent()
+          : Value(totalLinea),
       costoAdquisicion: costoAdquisicion == null && nullToAbsent
           ? const Value.absent()
           : Value(costoAdquisicion),
@@ -18804,6 +19264,11 @@ class DetalleCompraTableData extends DataClass
         json['montoDescuentoLinea'],
       ),
       subtotalLinea: serializer.fromJson<double?>(json['subtotalLinea']),
+      baseImponibleLinea: serializer.fromJson<double?>(
+        json['baseImponibleLinea'],
+      ),
+      itbisLinea: serializer.fromJson<double?>(json['itbisLinea']),
+      totalLinea: serializer.fromJson<double?>(json['totalLinea']),
       costoAdquisicion: serializer.fromJson<double?>(json['costoAdquisicion']),
     );
   }
@@ -18824,6 +19289,9 @@ class DetalleCompraTableData extends DataClass
       'descuentoPorcentaje': serializer.toJson<double?>(descuentoPorcentaje),
       'montoDescuentoLinea': serializer.toJson<double?>(montoDescuentoLinea),
       'subtotalLinea': serializer.toJson<double?>(subtotalLinea),
+      'baseImponibleLinea': serializer.toJson<double?>(baseImponibleLinea),
+      'itbisLinea': serializer.toJson<double?>(itbisLinea),
+      'totalLinea': serializer.toJson<double?>(totalLinea),
       'costoAdquisicion': serializer.toJson<double?>(costoAdquisicion),
     };
   }
@@ -18842,6 +19310,9 @@ class DetalleCompraTableData extends DataClass
     Value<double?> descuentoPorcentaje = const Value.absent(),
     Value<double?> montoDescuentoLinea = const Value.absent(),
     Value<double?> subtotalLinea = const Value.absent(),
+    Value<double?> baseImponibleLinea = const Value.absent(),
+    Value<double?> itbisLinea = const Value.absent(),
+    Value<double?> totalLinea = const Value.absent(),
     Value<double?> costoAdquisicion = const Value.absent(),
   }) => DetalleCompraTableData(
     id: id ?? this.id,
@@ -18873,6 +19344,11 @@ class DetalleCompraTableData extends DataClass
     subtotalLinea: subtotalLinea.present
         ? subtotalLinea.value
         : this.subtotalLinea,
+    baseImponibleLinea: baseImponibleLinea.present
+        ? baseImponibleLinea.value
+        : this.baseImponibleLinea,
+    itbisLinea: itbisLinea.present ? itbisLinea.value : this.itbisLinea,
+    totalLinea: totalLinea.present ? totalLinea.value : this.totalLinea,
     costoAdquisicion: costoAdquisicion.present
         ? costoAdquisicion.value
         : this.costoAdquisicion,
@@ -18912,6 +19388,15 @@ class DetalleCompraTableData extends DataClass
       subtotalLinea: data.subtotalLinea.present
           ? data.subtotalLinea.value
           : this.subtotalLinea,
+      baseImponibleLinea: data.baseImponibleLinea.present
+          ? data.baseImponibleLinea.value
+          : this.baseImponibleLinea,
+      itbisLinea: data.itbisLinea.present
+          ? data.itbisLinea.value
+          : this.itbisLinea,
+      totalLinea: data.totalLinea.present
+          ? data.totalLinea.value
+          : this.totalLinea,
       costoAdquisicion: data.costoAdquisicion.present
           ? data.costoAdquisicion.value
           : this.costoAdquisicion,
@@ -18934,6 +19419,9 @@ class DetalleCompraTableData extends DataClass
           ..write('descuentoPorcentaje: $descuentoPorcentaje, ')
           ..write('montoDescuentoLinea: $montoDescuentoLinea, ')
           ..write('subtotalLinea: $subtotalLinea, ')
+          ..write('baseImponibleLinea: $baseImponibleLinea, ')
+          ..write('itbisLinea: $itbisLinea, ')
+          ..write('totalLinea: $totalLinea, ')
           ..write('costoAdquisicion: $costoAdquisicion')
           ..write(')'))
         .toString();
@@ -18954,6 +19442,9 @@ class DetalleCompraTableData extends DataClass
     descuentoPorcentaje,
     montoDescuentoLinea,
     subtotalLinea,
+    baseImponibleLinea,
+    itbisLinea,
+    totalLinea,
     costoAdquisicion,
   );
   @override
@@ -18973,6 +19464,9 @@ class DetalleCompraTableData extends DataClass
           other.descuentoPorcentaje == this.descuentoPorcentaje &&
           other.montoDescuentoLinea == this.montoDescuentoLinea &&
           other.subtotalLinea == this.subtotalLinea &&
+          other.baseImponibleLinea == this.baseImponibleLinea &&
+          other.itbisLinea == this.itbisLinea &&
+          other.totalLinea == this.totalLinea &&
           other.costoAdquisicion == this.costoAdquisicion);
 }
 
@@ -18991,6 +19485,9 @@ class DetalleCompraTableCompanion
   final Value<double?> descuentoPorcentaje;
   final Value<double?> montoDescuentoLinea;
   final Value<double?> subtotalLinea;
+  final Value<double?> baseImponibleLinea;
+  final Value<double?> itbisLinea;
+  final Value<double?> totalLinea;
   final Value<double?> costoAdquisicion;
   const DetalleCompraTableCompanion({
     this.id = const Value.absent(),
@@ -19006,6 +19503,9 @@ class DetalleCompraTableCompanion
     this.descuentoPorcentaje = const Value.absent(),
     this.montoDescuentoLinea = const Value.absent(),
     this.subtotalLinea = const Value.absent(),
+    this.baseImponibleLinea = const Value.absent(),
+    this.itbisLinea = const Value.absent(),
+    this.totalLinea = const Value.absent(),
     this.costoAdquisicion = const Value.absent(),
   });
   DetalleCompraTableCompanion.insert({
@@ -19022,6 +19522,9 @@ class DetalleCompraTableCompanion
     this.descuentoPorcentaje = const Value.absent(),
     this.montoDescuentoLinea = const Value.absent(),
     this.subtotalLinea = const Value.absent(),
+    this.baseImponibleLinea = const Value.absent(),
+    this.itbisLinea = const Value.absent(),
+    this.totalLinea = const Value.absent(),
     this.costoAdquisicion = const Value.absent(),
   }) : compraId = Value(compraId),
        productoId = Value(productoId),
@@ -19040,6 +19543,9 @@ class DetalleCompraTableCompanion
     Expression<double>? descuentoPorcentaje,
     Expression<double>? montoDescuentoLinea,
     Expression<double>? subtotalLinea,
+    Expression<double>? baseImponibleLinea,
+    Expression<double>? itbisLinea,
+    Expression<double>? totalLinea,
     Expression<double>? costoAdquisicion,
   }) {
     return RawValuesInsertable({
@@ -19058,6 +19564,10 @@ class DetalleCompraTableCompanion
       if (montoDescuentoLinea != null)
         'monto_descuento_linea': montoDescuentoLinea,
       if (subtotalLinea != null) 'subtotal_linea': subtotalLinea,
+      if (baseImponibleLinea != null)
+        'base_imponible_linea': baseImponibleLinea,
+      if (itbisLinea != null) 'itbis_linea': itbisLinea,
+      if (totalLinea != null) 'total_linea': totalLinea,
       if (costoAdquisicion != null) 'costo_adquisicion': costoAdquisicion,
     });
   }
@@ -19076,6 +19586,9 @@ class DetalleCompraTableCompanion
     Value<double?>? descuentoPorcentaje,
     Value<double?>? montoDescuentoLinea,
     Value<double?>? subtotalLinea,
+    Value<double?>? baseImponibleLinea,
+    Value<double?>? itbisLinea,
+    Value<double?>? totalLinea,
     Value<double?>? costoAdquisicion,
   }) {
     return DetalleCompraTableCompanion(
@@ -19092,6 +19605,9 @@ class DetalleCompraTableCompanion
       descuentoPorcentaje: descuentoPorcentaje ?? this.descuentoPorcentaje,
       montoDescuentoLinea: montoDescuentoLinea ?? this.montoDescuentoLinea,
       subtotalLinea: subtotalLinea ?? this.subtotalLinea,
+      baseImponibleLinea: baseImponibleLinea ?? this.baseImponibleLinea,
+      itbisLinea: itbisLinea ?? this.itbisLinea,
+      totalLinea: totalLinea ?? this.totalLinea,
       costoAdquisicion: costoAdquisicion ?? this.costoAdquisicion,
     );
   }
@@ -19140,6 +19656,15 @@ class DetalleCompraTableCompanion
     if (subtotalLinea.present) {
       map['subtotal_linea'] = Variable<double>(subtotalLinea.value);
     }
+    if (baseImponibleLinea.present) {
+      map['base_imponible_linea'] = Variable<double>(baseImponibleLinea.value);
+    }
+    if (itbisLinea.present) {
+      map['itbis_linea'] = Variable<double>(itbisLinea.value);
+    }
+    if (totalLinea.present) {
+      map['total_linea'] = Variable<double>(totalLinea.value);
+    }
     if (costoAdquisicion.present) {
       map['costo_adquisicion'] = Variable<double>(costoAdquisicion.value);
     }
@@ -19162,6 +19687,9 @@ class DetalleCompraTableCompanion
           ..write('descuentoPorcentaje: $descuentoPorcentaje, ')
           ..write('montoDescuentoLinea: $montoDescuentoLinea, ')
           ..write('subtotalLinea: $subtotalLinea, ')
+          ..write('baseImponibleLinea: $baseImponibleLinea, ')
+          ..write('itbisLinea: $itbisLinea, ')
+          ..write('totalLinea: $totalLinea, ')
           ..write('costoAdquisicion: $costoAdquisicion')
           ..write(')'))
         .toString();
@@ -19301,13 +19829,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('cobros_table', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'compras_table',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('detalle_compra_table', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -32105,15 +32626,22 @@ typedef $$ComprasTableTableCreateCompanionBuilder =
       required int proveedorId,
       required String nombreProveedor,
       required DateTime fechaEmision,
+      required DateTime fechaVencimiento,
       Value<DateTime?> fechaConfirmacion,
+      Value<DateTime?> fechaRecepcion,
       required String numeroComprobante,
+      required String ncf,
+      required String tipoComprobante,
+      required String formaPago,
+      required String condicionPago,
+      Value<int> diasCredito,
       required double subtotalSinImpuestos,
       required double montoDescuentoGlobal,
       required double tasaImpuesto,
       required double montoImpuesto,
       required double totalCompra,
-      required String observaciones,
       required EstadoCompra estado,
+      Value<String> observaciones,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -32123,51 +32651,25 @@ typedef $$ComprasTableTableUpdateCompanionBuilder =
       Value<int> proveedorId,
       Value<String> nombreProveedor,
       Value<DateTime> fechaEmision,
+      Value<DateTime> fechaVencimiento,
       Value<DateTime?> fechaConfirmacion,
+      Value<DateTime?> fechaRecepcion,
       Value<String> numeroComprobante,
+      Value<String> ncf,
+      Value<String> tipoComprobante,
+      Value<String> formaPago,
+      Value<String> condicionPago,
+      Value<int> diasCredito,
       Value<double> subtotalSinImpuestos,
       Value<double> montoDescuentoGlobal,
       Value<double> tasaImpuesto,
       Value<double> montoImpuesto,
       Value<double> totalCompra,
-      Value<String> observaciones,
       Value<EstadoCompra> estado,
+      Value<String> observaciones,
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
     });
-
-final class $$ComprasTableTableReferences
-    extends
-        BaseReferences<_$AppDatabase, $ComprasTableTable, ComprasTableData> {
-  $$ComprasTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<
-    $DetalleCompraTableTable,
-    List<DetalleCompraTableData>
-  >
-  _detalleCompraTableRefsTable(_$AppDatabase db) =>
-      MultiTypedResultKey.fromTable(
-        db.detalleCompraTable,
-        aliasName: $_aliasNameGenerator(
-          db.comprasTable.id,
-          db.detalleCompraTable.compraId,
-        ),
-      );
-
-  $$DetalleCompraTableTableProcessedTableManager get detalleCompraTableRefs {
-    final manager = $$DetalleCompraTableTableTableManager(
-      $_db,
-      $_db.detalleCompraTable,
-    ).filter((f) => f.compraId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(
-      _detalleCompraTableRefsTable($_db),
-    );
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
 
 class $$ComprasTableTableFilterComposer
     extends Composer<_$AppDatabase, $ComprasTableTable> {
@@ -32198,13 +32700,48 @@ class $$ComprasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get fechaConfirmacion => $composableBuilder(
     column: $table.fechaConfirmacion,
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get fechaRecepcion => $composableBuilder(
+    column: $table.fechaRecepcion,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get numeroComprobante => $composableBuilder(
     column: $table.numeroComprobante,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ncf => $composableBuilder(
+    column: $table.ncf,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipoComprobante => $composableBuilder(
+    column: $table.tipoComprobante,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get formaPago => $composableBuilder(
+    column: $table.formaPago,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get condicionPago => $composableBuilder(
+    column: $table.condicionPago,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get diasCredito => $composableBuilder(
+    column: $table.diasCredito,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -32233,16 +32770,16 @@ class $$ComprasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get observaciones => $composableBuilder(
-    column: $table.observaciones,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnWithTypeConverterFilters<EstadoCompra, EstadoCompra, int> get estado =>
       $composableBuilder(
         column: $table.estado,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  ColumnFilters<String> get observaciones => $composableBuilder(
+    column: $table.observaciones,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get creadoEn => $composableBuilder(
     column: $table.creadoEn,
@@ -32253,31 +32790,6 @@ class $$ComprasTableTableFilterComposer
     column: $table.actualizadoEn,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> detalleCompraTableRefs(
-    Expression<bool> Function($$DetalleCompraTableTableFilterComposer f) f,
-  ) {
-    final $$DetalleCompraTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.detalleCompraTable,
-      getReferencedColumn: (t) => t.compraId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DetalleCompraTableTableFilterComposer(
-            $db: $db,
-            $table: $db.detalleCompraTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$ComprasTableTableOrderingComposer
@@ -32309,13 +32821,48 @@ class $$ComprasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get fechaConfirmacion => $composableBuilder(
     column: $table.fechaConfirmacion,
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get fechaRecepcion => $composableBuilder(
+    column: $table.fechaRecepcion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get numeroComprobante => $composableBuilder(
     column: $table.numeroComprobante,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ncf => $composableBuilder(
+    column: $table.ncf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipoComprobante => $composableBuilder(
+    column: $table.tipoComprobante,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get formaPago => $composableBuilder(
+    column: $table.formaPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get condicionPago => $composableBuilder(
+    column: $table.condicionPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get diasCredito => $composableBuilder(
+    column: $table.diasCredito,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -32344,13 +32891,13 @@ class $$ComprasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get observaciones => $composableBuilder(
-    column: $table.observaciones,
+  ColumnOrderings<int> get estado => $composableBuilder(
+    column: $table.estado,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get estado => $composableBuilder(
-    column: $table.estado,
+  ColumnOrderings<String> get observaciones => $composableBuilder(
+    column: $table.observaciones,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -32392,13 +32939,44 @@ class $$ComprasTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get fechaConfirmacion => $composableBuilder(
     column: $table.fechaConfirmacion,
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get fechaRecepcion => $composableBuilder(
+    column: $table.fechaRecepcion,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get numeroComprobante => $composableBuilder(
     column: $table.numeroComprobante,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ncf =>
+      $composableBuilder(column: $table.ncf, builder: (column) => column);
+
+  GeneratedColumn<String> get tipoComprobante => $composableBuilder(
+    column: $table.tipoComprobante,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get formaPago =>
+      $composableBuilder(column: $table.formaPago, builder: (column) => column);
+
+  GeneratedColumn<String> get condicionPago => $composableBuilder(
+    column: $table.condicionPago,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get diasCredito => $composableBuilder(
+    column: $table.diasCredito,
     builder: (column) => column,
   );
 
@@ -32427,13 +33005,13 @@ class $$ComprasTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumnWithTypeConverter<EstadoCompra, int> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
   GeneratedColumn<String> get observaciones => $composableBuilder(
     column: $table.observaciones,
     builder: (column) => column,
   );
-
-  GeneratedColumnWithTypeConverter<EstadoCompra, int> get estado =>
-      $composableBuilder(column: $table.estado, builder: (column) => column);
 
   GeneratedColumn<DateTime> get creadoEn =>
       $composableBuilder(column: $table.creadoEn, builder: (column) => column);
@@ -32442,32 +33020,6 @@ class $$ComprasTableTableAnnotationComposer
     column: $table.actualizadoEn,
     builder: (column) => column,
   );
-
-  Expression<T> detalleCompraTableRefs<T extends Object>(
-    Expression<T> Function($$DetalleCompraTableTableAnnotationComposer a) f,
-  ) {
-    final $$DetalleCompraTableTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.id,
-          referencedTable: $db.detalleCompraTable,
-          getReferencedColumn: (t) => t.compraId,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$DetalleCompraTableTableAnnotationComposer(
-                $db: $db,
-                $table: $db.detalleCompraTable,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
-    return f(composer);
-  }
 }
 
 class $$ComprasTableTableTableManager
@@ -32481,9 +33033,12 @@ class $$ComprasTableTableTableManager
           $$ComprasTableTableAnnotationComposer,
           $$ComprasTableTableCreateCompanionBuilder,
           $$ComprasTableTableUpdateCompanionBuilder,
-          (ComprasTableData, $$ComprasTableTableReferences),
+          (
+            ComprasTableData,
+            BaseReferences<_$AppDatabase, $ComprasTableTable, ComprasTableData>,
+          ),
           ComprasTableData,
-          PrefetchHooks Function({bool detalleCompraTableRefs})
+          PrefetchHooks Function()
         > {
   $$ComprasTableTableTableManager(_$AppDatabase db, $ComprasTableTable table)
     : super(
@@ -32502,15 +33057,22 @@ class $$ComprasTableTableTableManager
                 Value<int> proveedorId = const Value.absent(),
                 Value<String> nombreProveedor = const Value.absent(),
                 Value<DateTime> fechaEmision = const Value.absent(),
+                Value<DateTime> fechaVencimiento = const Value.absent(),
                 Value<DateTime?> fechaConfirmacion = const Value.absent(),
+                Value<DateTime?> fechaRecepcion = const Value.absent(),
                 Value<String> numeroComprobante = const Value.absent(),
+                Value<String> ncf = const Value.absent(),
+                Value<String> tipoComprobante = const Value.absent(),
+                Value<String> formaPago = const Value.absent(),
+                Value<String> condicionPago = const Value.absent(),
+                Value<int> diasCredito = const Value.absent(),
                 Value<double> subtotalSinImpuestos = const Value.absent(),
                 Value<double> montoDescuentoGlobal = const Value.absent(),
                 Value<double> tasaImpuesto = const Value.absent(),
                 Value<double> montoImpuesto = const Value.absent(),
                 Value<double> totalCompra = const Value.absent(),
-                Value<String> observaciones = const Value.absent(),
                 Value<EstadoCompra> estado = const Value.absent(),
+                Value<String> observaciones = const Value.absent(),
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => ComprasTableCompanion(
@@ -32518,15 +33080,22 @@ class $$ComprasTableTableTableManager
                 proveedorId: proveedorId,
                 nombreProveedor: nombreProveedor,
                 fechaEmision: fechaEmision,
+                fechaVencimiento: fechaVencimiento,
                 fechaConfirmacion: fechaConfirmacion,
+                fechaRecepcion: fechaRecepcion,
                 numeroComprobante: numeroComprobante,
+                ncf: ncf,
+                tipoComprobante: tipoComprobante,
+                formaPago: formaPago,
+                condicionPago: condicionPago,
+                diasCredito: diasCredito,
                 subtotalSinImpuestos: subtotalSinImpuestos,
                 montoDescuentoGlobal: montoDescuentoGlobal,
                 tasaImpuesto: tasaImpuesto,
                 montoImpuesto: montoImpuesto,
                 totalCompra: totalCompra,
-                observaciones: observaciones,
                 estado: estado,
+                observaciones: observaciones,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
@@ -32536,15 +33105,22 @@ class $$ComprasTableTableTableManager
                 required int proveedorId,
                 required String nombreProveedor,
                 required DateTime fechaEmision,
+                required DateTime fechaVencimiento,
                 Value<DateTime?> fechaConfirmacion = const Value.absent(),
+                Value<DateTime?> fechaRecepcion = const Value.absent(),
                 required String numeroComprobante,
+                required String ncf,
+                required String tipoComprobante,
+                required String formaPago,
+                required String condicionPago,
+                Value<int> diasCredito = const Value.absent(),
                 required double subtotalSinImpuestos,
                 required double montoDescuentoGlobal,
                 required double tasaImpuesto,
                 required double montoImpuesto,
                 required double totalCompra,
-                required String observaciones,
                 required EstadoCompra estado,
+                Value<String> observaciones = const Value.absent(),
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => ComprasTableCompanion.insert(
@@ -32552,58 +33128,29 @@ class $$ComprasTableTableTableManager
                 proveedorId: proveedorId,
                 nombreProveedor: nombreProveedor,
                 fechaEmision: fechaEmision,
+                fechaVencimiento: fechaVencimiento,
                 fechaConfirmacion: fechaConfirmacion,
+                fechaRecepcion: fechaRecepcion,
                 numeroComprobante: numeroComprobante,
+                ncf: ncf,
+                tipoComprobante: tipoComprobante,
+                formaPago: formaPago,
+                condicionPago: condicionPago,
+                diasCredito: diasCredito,
                 subtotalSinImpuestos: subtotalSinImpuestos,
                 montoDescuentoGlobal: montoDescuentoGlobal,
                 tasaImpuesto: tasaImpuesto,
                 montoImpuesto: montoImpuesto,
                 totalCompra: totalCompra,
-                observaciones: observaciones,
                 estado: estado,
+                observaciones: observaciones,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$ComprasTableTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({detalleCompraTableRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (detalleCompraTableRefs) db.detalleCompraTable,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (detalleCompraTableRefs)
-                    await $_getPrefetchedData<
-                      ComprasTableData,
-                      $ComprasTableTable,
-                      DetalleCompraTableData
-                    >(
-                      currentTable: table,
-                      referencedTable: $$ComprasTableTableReferences
-                          ._detalleCompraTableRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$ComprasTableTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).detalleCompraTableRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.compraId == item.id),
-                      typedResults: items,
-                    ),
-                ];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -32618,9 +33165,12 @@ typedef $$ComprasTableTableProcessedTableManager =
       $$ComprasTableTableAnnotationComposer,
       $$ComprasTableTableCreateCompanionBuilder,
       $$ComprasTableTableUpdateCompanionBuilder,
-      (ComprasTableData, $$ComprasTableTableReferences),
+      (
+        ComprasTableData,
+        BaseReferences<_$AppDatabase, $ComprasTableTable, ComprasTableData>,
+      ),
       ComprasTableData,
-      PrefetchHooks Function({bool detalleCompraTableRefs})
+      PrefetchHooks Function()
     >;
 typedef $$DetalleCompraTableTableCreateCompanionBuilder =
     DetalleCompraTableCompanion Function({
@@ -32637,6 +33187,9 @@ typedef $$DetalleCompraTableTableCreateCompanionBuilder =
       Value<double?> descuentoPorcentaje,
       Value<double?> montoDescuentoLinea,
       Value<double?> subtotalLinea,
+      Value<double?> baseImponibleLinea,
+      Value<double?> itbisLinea,
+      Value<double?> totalLinea,
       Value<double?> costoAdquisicion,
     });
 typedef $$DetalleCompraTableTableUpdateCompanionBuilder =
@@ -32654,44 +33207,11 @@ typedef $$DetalleCompraTableTableUpdateCompanionBuilder =
       Value<double?> descuentoPorcentaje,
       Value<double?> montoDescuentoLinea,
       Value<double?> subtotalLinea,
+      Value<double?> baseImponibleLinea,
+      Value<double?> itbisLinea,
+      Value<double?> totalLinea,
       Value<double?> costoAdquisicion,
     });
-
-final class $$DetalleCompraTableTableReferences
-    extends
-        BaseReferences<
-          _$AppDatabase,
-          $DetalleCompraTableTable,
-          DetalleCompraTableData
-        > {
-  $$DetalleCompraTableTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $ComprasTableTable _compraIdTable(_$AppDatabase db) =>
-      db.comprasTable.createAlias(
-        $_aliasNameGenerator(
-          db.detalleCompraTable.compraId,
-          db.comprasTable.id,
-        ),
-      );
-
-  $$ComprasTableTableProcessedTableManager get compraId {
-    final $_column = $_itemColumn<int>('compra_id')!;
-
-    final manager = $$ComprasTableTableTableManager(
-      $_db,
-      $_db.comprasTable,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_compraIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
 
 class $$DetalleCompraTableTableFilterComposer
     extends Composer<_$AppDatabase, $DetalleCompraTableTable> {
@@ -32704,6 +33224,11 @@ class $$DetalleCompraTableTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get compraId => $composableBuilder(
+    column: $table.compraId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -32762,33 +33287,25 @@ class $$DetalleCompraTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get baseImponibleLinea => $composableBuilder(
+    column: $table.baseImponibleLinea,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get itbisLinea => $composableBuilder(
+    column: $table.itbisLinea,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalLinea => $composableBuilder(
+    column: $table.totalLinea,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<double> get costoAdquisicion => $composableBuilder(
     column: $table.costoAdquisicion,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$ComprasTableTableFilterComposer get compraId {
-    final $$ComprasTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.compraId,
-      referencedTable: $db.comprasTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ComprasTableTableFilterComposer(
-            $db: $db,
-            $table: $db.comprasTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$DetalleCompraTableTableOrderingComposer
@@ -32802,6 +33319,11 @@ class $$DetalleCompraTableTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get compraId => $composableBuilder(
+    column: $table.compraId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -32860,33 +33382,25 @@ class $$DetalleCompraTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get baseImponibleLinea => $composableBuilder(
+    column: $table.baseImponibleLinea,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get itbisLinea => $composableBuilder(
+    column: $table.itbisLinea,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get totalLinea => $composableBuilder(
+    column: $table.totalLinea,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get costoAdquisicion => $composableBuilder(
     column: $table.costoAdquisicion,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$ComprasTableTableOrderingComposer get compraId {
-    final $$ComprasTableTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.compraId,
-      referencedTable: $db.comprasTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ComprasTableTableOrderingComposer(
-            $db: $db,
-            $table: $db.comprasTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$DetalleCompraTableTableAnnotationComposer
@@ -32900,6 +33414,9 @@ class $$DetalleCompraTableTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get compraId =>
+      $composableBuilder(column: $table.compraId, builder: (column) => column);
 
   GeneratedColumn<int> get productoId => $composableBuilder(
     column: $table.productoId,
@@ -32954,33 +33471,25 @@ class $$DetalleCompraTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<double> get baseImponibleLinea => $composableBuilder(
+    column: $table.baseImponibleLinea,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get itbisLinea => $composableBuilder(
+    column: $table.itbisLinea,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get totalLinea => $composableBuilder(
+    column: $table.totalLinea,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<double> get costoAdquisicion => $composableBuilder(
     column: $table.costoAdquisicion,
     builder: (column) => column,
   );
-
-  $$ComprasTableTableAnnotationComposer get compraId {
-    final $$ComprasTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.compraId,
-      referencedTable: $db.comprasTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ComprasTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.comprasTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$DetalleCompraTableTableTableManager
@@ -32994,9 +33503,16 @@ class $$DetalleCompraTableTableTableManager
           $$DetalleCompraTableTableAnnotationComposer,
           $$DetalleCompraTableTableCreateCompanionBuilder,
           $$DetalleCompraTableTableUpdateCompanionBuilder,
-          (DetalleCompraTableData, $$DetalleCompraTableTableReferences),
+          (
+            DetalleCompraTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $DetalleCompraTableTable,
+              DetalleCompraTableData
+            >,
+          ),
           DetalleCompraTableData,
-          PrefetchHooks Function({bool compraId})
+          PrefetchHooks Function()
         > {
   $$DetalleCompraTableTableTableManager(
     _$AppDatabase db,
@@ -33029,6 +33545,9 @@ class $$DetalleCompraTableTableTableManager
                 Value<double?> descuentoPorcentaje = const Value.absent(),
                 Value<double?> montoDescuentoLinea = const Value.absent(),
                 Value<double?> subtotalLinea = const Value.absent(),
+                Value<double?> baseImponibleLinea = const Value.absent(),
+                Value<double?> itbisLinea = const Value.absent(),
+                Value<double?> totalLinea = const Value.absent(),
                 Value<double?> costoAdquisicion = const Value.absent(),
               }) => DetalleCompraTableCompanion(
                 id: id,
@@ -33044,6 +33563,9 @@ class $$DetalleCompraTableTableTableManager
                 descuentoPorcentaje: descuentoPorcentaje,
                 montoDescuentoLinea: montoDescuentoLinea,
                 subtotalLinea: subtotalLinea,
+                baseImponibleLinea: baseImponibleLinea,
+                itbisLinea: itbisLinea,
+                totalLinea: totalLinea,
                 costoAdquisicion: costoAdquisicion,
               ),
           createCompanionCallback:
@@ -33061,6 +33583,9 @@ class $$DetalleCompraTableTableTableManager
                 Value<double?> descuentoPorcentaje = const Value.absent(),
                 Value<double?> montoDescuentoLinea = const Value.absent(),
                 Value<double?> subtotalLinea = const Value.absent(),
+                Value<double?> baseImponibleLinea = const Value.absent(),
+                Value<double?> itbisLinea = const Value.absent(),
+                Value<double?> totalLinea = const Value.absent(),
                 Value<double?> costoAdquisicion = const Value.absent(),
               }) => DetalleCompraTableCompanion.insert(
                 id: id,
@@ -33076,59 +33601,15 @@ class $$DetalleCompraTableTableTableManager
                 descuentoPorcentaje: descuentoPorcentaje,
                 montoDescuentoLinea: montoDescuentoLinea,
                 subtotalLinea: subtotalLinea,
+                baseImponibleLinea: baseImponibleLinea,
+                itbisLinea: itbisLinea,
+                totalLinea: totalLinea,
                 costoAdquisicion: costoAdquisicion,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$DetalleCompraTableTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({compraId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (compraId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.compraId,
-                                referencedTable:
-                                    $$DetalleCompraTableTableReferences
-                                        ._compraIdTable(db),
-                                referencedColumn:
-                                    $$DetalleCompraTableTableReferences
-                                        ._compraIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -33143,9 +33624,16 @@ typedef $$DetalleCompraTableTableProcessedTableManager =
       $$DetalleCompraTableTableAnnotationComposer,
       $$DetalleCompraTableTableCreateCompanionBuilder,
       $$DetalleCompraTableTableUpdateCompanionBuilder,
-      (DetalleCompraTableData, $$DetalleCompraTableTableReferences),
+      (
+        DetalleCompraTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $DetalleCompraTableTable,
+          DetalleCompraTableData
+        >,
+      ),
       DetalleCompraTableData,
-      PrefetchHooks Function({bool compraId})
+      PrefetchHooks Function()
     >;
 
 class $AppDatabaseManager {

@@ -7,11 +7,21 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 
 abstract class IVentasRepository {
-  Future<List<Venta>> listarVentas({DateTime? desde, DateTime? hasta, int? clienteId, int? usuarioId});
-  Future<List<Venta>> listarCotizaciones({DateTime? desde, DateTime? hasta, int? clienteId, int? usuarioId});
+  Future<List<Venta>> listarVentas({
+    DateTime? desde,
+    DateTime? hasta,
+    int? clienteId,
+    int? usuarioId,
+  });
+  Future<List<Venta>> listarCotizaciones({
+    DateTime? desde,
+    DateTime? hasta,
+    int? clienteId,
+    int? usuarioId,
+  });
   Future<Venta?> obtenerVentaPorId(int ventaId);
   Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId);
-  Future<String> siguienteNumeroCotizacion();
+  Future<String> siguienteNumeroCotizacion({bool esCredito});
   Future<Venta> cambiarEstadoDocumento(int ventaId, EstadoDocumento nuevoEstado);
   Future<Venta> registrarVenta(Venta venta);
   Future<Venta> registrarVentaBorrador(Venta cotizacion);
@@ -24,7 +34,7 @@ abstract class IVentasRepository {
   Future<double> consultarSaldoCliente(int clienteId);
   Future<List<Descuento>> obtenerDescuentosActivos();
   Future<List<Oferta>> obtenerOfertasActivas();
-  Future<bool> aplicarDescuento(int ventaId, int descuentoId);
+  Future<bool> aplicarDescuento(int ofertaId, double montoCompra);
   Future<bool> validarOferta(int ofertaId, double montoCompra);
   Future<void> actualizarEnCascada(int ventaId);
 }

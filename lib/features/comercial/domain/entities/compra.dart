@@ -1,23 +1,27 @@
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
 /// Entidad de dominio: Compra de mercancías.
-///
-/// Encabezado de operación de compra realizada a proveedor,
-/// con totales, impuestos y estado.
 class Compra {
   const Compra({
     required this.id,
     required this.proveedorId,
     required this.nombreProveedor,
     required this.fechaEmision,
+    this.fechaVencimiento,
     this.fechaConfirmacion,
+    this.fechaRecepcion,
     required this.numeroComprobante,
+    this.ncf = '',
+    this.tipoComprobante = 'B01',
+    this.formaPago = 'contado',
+    this.condicionPago = 'contado',
+    this.diasCredito = 0,
     required this.subtotalSinImpuestos,
     required this.montoDescuentoGlobal,
     required this.tasaImpuesto,
     required this.montoImpuesto,
     required this.totalCompra,
-    required this.observaciones,
+    this.observaciones = '',
     required this.estado,
     required this.creadoEn,
     this.actualizadoEn,
@@ -27,8 +31,15 @@ class Compra {
   final int proveedorId;
   final String nombreProveedor;
   final DateTime fechaEmision;
+  final DateTime? fechaVencimiento;
   final DateTime? fechaConfirmacion;
+  final DateTime? fechaRecepcion;
   final String numeroComprobante;
+  final String ncf;
+  final String tipoComprobante;
+  final String formaPago;
+  final String condicionPago;
+  final int diasCredito;
   final double subtotalSinImpuestos;
   final double montoDescuentoGlobal;
   final double tasaImpuesto;
@@ -44,8 +55,15 @@ class Compra {
     int? proveedorId,
     String? nombreProveedor,
     DateTime? fechaEmision,
+    DateTime? fechaVencimiento,
     DateTime? fechaConfirmacion,
+    DateTime? fechaRecepcion,
     String? numeroComprobante,
+    String? ncf,
+    String? tipoComprobante,
+    String? formaPago,
+    String? condicionPago,
+    int? diasCredito,
     double? subtotalSinImpuestos,
     double? montoDescuentoGlobal,
     double? tasaImpuesto,
@@ -61,8 +79,15 @@ class Compra {
       proveedorId: proveedorId ?? this.proveedorId,
       nombreProveedor: nombreProveedor ?? this.nombreProveedor,
       fechaEmision: fechaEmision ?? this.fechaEmision,
+      fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
       fechaConfirmacion: fechaConfirmacion ?? this.fechaConfirmacion,
+      fechaRecepcion: fechaRecepcion ?? this.fechaRecepcion,
       numeroComprobante: numeroComprobante ?? this.numeroComprobante,
+      ncf: ncf ?? this.ncf,
+      tipoComprobante: tipoComprobante ?? this.tipoComprobante,
+      formaPago: formaPago ?? this.formaPago,
+      condicionPago: condicionPago ?? this.condicionPago,
+      diasCredito: diasCredito ?? this.diasCredito,
       subtotalSinImpuestos: subtotalSinImpuestos ?? this.subtotalSinImpuestos,
       montoDescuentoGlobal: montoDescuentoGlobal ?? this.montoDescuentoGlobal,
       tasaImpuesto: tasaImpuesto ?? this.tasaImpuesto,
@@ -77,4 +102,9 @@ class Compra {
 
   bool get esConfirmada => estado == EstadoCompra.confirmada;
   bool get esBorrador => estado == EstadoCompra.borrador;
+  bool get esCredito => formaPago == 'crédito' || formaPago == 'credito';
+  bool get estaVencida {
+    if (fechaVencimiento == null || !esConfirmada) return false;
+    return DateTime.now().isAfter(fechaVencimiento!);
+  }
 }

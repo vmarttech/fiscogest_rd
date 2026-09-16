@@ -47,11 +47,21 @@ class _RegistrarRecepcionPageState
     super.initState();
     _detallesEditables = widget.detallesCompra.map((d) => d).toList();
     for (final d in _detallesEditables) {
-      _costoControllers.add(TextEditingController(text: (d.costoUnitario ?? 0).toString()));
-      _fleteControllers.add(TextEditingController(text: d.fleteUnitario.toString()));
-      _seguroControllers.add(TextEditingController(text: d.seguroUnitario.toString()));
-      _arancelesControllers.add(TextEditingController(text: d.arancelesUnitario.toString()));
-      _gastosControllers.add(TextEditingController(text: d.gastosUnitario.toString()));
+      _costoControllers.add(TextEditingController(
+        text: (d.costoUnitario ?? 0).toString(),
+      ));
+      _fleteControllers.add(TextEditingController(
+        text: d.fleteUnitario.toString(),
+      ));
+      _seguroControllers.add(TextEditingController(
+        text: d.seguroUnitario.toString(),
+      ));
+      _arancelesControllers.add(TextEditingController(
+        text: d.arancelesUnitario.toString(),
+      ));
+      _gastosControllers.add(TextEditingController(
+        text: d.gastosUnitario.toString(),
+      ));
     }
   }
 
@@ -116,27 +126,9 @@ class _RegistrarRecepcionPageState
               AppLayout.vS,
               Row(
                 children: [
-                  Radio<String>(
-                    value: 'parcial',
-                    groupValue: _estadoRecepcion,
-                    onChanged: (String? value) {
-                      if (value != null) {
-                        setState(() => _estadoRecepcion = value);
-                      }
-                    },
-                  ),
-                  const Text('Parcial', style: AppTypography.bodyMedium),
+                  _buildBotonEstado('parcial', 'Parcial'),
                   AppLayout.hM,
-                  Radio<String>(
-                    value: 'completa',
-                    groupValue: _estadoRecepcion,
-                    onChanged: (String? value) {
-                      if (value != null) {
-                        setState(() => _estadoRecepcion = value);
-                      }
-                    },
-                  ),
-                  const Text('Completa', style: AppTypography.bodyMedium),
+                  _buildBotonEstado('completa', 'Completa'),
                 ],
               ),
               AppLayout.vM,
@@ -301,6 +293,53 @@ class _RegistrarRecepcionPageState
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBotonEstado(String valor, String etiqueta) {
+    final seleccionado = _estadoRecepcion == valor;
+    return InkWell(
+      onTap: () => setState(() => _estadoRecepcion = valor),
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: seleccionado ? Theme.of(context).primaryColor : Colors.grey.shade400,
+                  width: 2,
+                ),
+              ),
+              child: seleccionado
+                  ? Center(
+                      child: Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              etiqueta,
+              style: AppTypography.bodyMedium.copyWith(
+                color: seleccionado ? Theme.of(context).primaryColor : null,
+                fontWeight: seleccionado ? FontWeight.w500 : null,
+              ),
+            ),
+          ],
         ),
       ),
     );

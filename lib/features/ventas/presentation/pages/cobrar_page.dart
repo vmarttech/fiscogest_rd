@@ -23,12 +23,17 @@ final listadoCuentasCobrarProvider = FutureProvider.family<List<CuentaCobrarItem
       ? registros.where((r) => r.clienteId == clienteIdFiltro).toList()
       : registros;
   final idsClientes = registrosFiltrados.map((r) => r.clienteId).toSet();
-  final clientes = idsClientes.isNotEmpty
+  final List<dynamic> clientes = idsClientes.isNotEmpty
       ? await (db.select(db.clientesTable)
             ..where((t) => t.id.isIn(idsClientes)))
           .get()
-      : <dynamic>[];
-  final mapaClientes = {for (var c in clientes) c.id as int: c.nombre as String};
+      : [];
+  final mapaClientes = <int, String>{};
+  for (final c in clientes) {
+    final id = (c as dynamic).id as int;
+    final nombre = c.nombre as String;
+    mapaClientes[id] = nombre;
+  }
   return registrosFiltrados.map((reg) {
     final nombreCliente =
         mapaClientes[reg.clienteId] ?? 'Cliente #${reg.clienteId}';
@@ -60,6 +65,7 @@ class CuentaCobrarItem {
     required this.fechaVencimiento,
     required this.estado,
   });
+
   final int clienteId;
   final String clienteNombre;
   final double montoOriginal;

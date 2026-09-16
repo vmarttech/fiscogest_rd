@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
-
 part 'detalle_compra_dao.g.dart';
 
 @DriftAccessor(tables: [DetalleCompraTable, ComprasTable])
@@ -22,9 +21,9 @@ class DetalleCompraDao extends DatabaseAccessor<AppDatabase> with _$DetalleCompr
 
   Future<int> insertDetalleCompra(DetalleCompraTableCompanion detalle) async {
     final calculado = calcularLinea(
-      cantidad: detalle.cantidad.value,
-      costoUnitario: detalle.costoUnitario.value,
-      descuentoPorcentaje: detalle.descuentoPorcentaje.value,
+      cantidad: detalle.cantidad.value ?? 0.0,
+      costoUnitario: detalle.costoUnitario.value ?? 0.0,
+      descuentoPorcentaje: detalle.descuentoPorcentaje.value ?? 0.0,
     );
     return await into<DetalleCompraTable, DetalleCompraTableData>(detalleCompraTable).insert(
       detalle.copyWith(
@@ -46,9 +45,9 @@ class DetalleCompraDao extends DatabaseAccessor<AppDatabase> with _$DetalleCompr
     int contador = 0;
     for (final fila in lista) {
       final calc = calcularLinea(
-        cantidad: fila.cantidad,
-        costoUnitario: fila.costoUnitario,
-        descuentoPorcentaje: fila.descuentoPorcentaje,
+        cantidad: fila.cantidad ?? 0.0,
+        costoUnitario: fila.costoUnitario ?? 0.0,
+        descuentoPorcentaje: fila.descuentoPorcentaje ?? 0.0,
       );
       final afectadas = await update<DetalleCompraTable, DetalleCompraTableData>(detalleCompraTable)
           .replace(

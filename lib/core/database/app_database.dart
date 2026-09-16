@@ -43,7 +43,9 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart
 // NUEVAS: Tablas Compras - Etapa 4.1
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
+
 part 'app_database.g.dart';
+
 @DriftDatabase(
   tables: [
     // Tablas existentes
@@ -95,10 +97,13 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => _instance;
   AppDatabase._internal() : super(_openConnection());
   static final AppDatabase _instance = AppDatabase._internal();
+
   // ✅ GETTER DAO - CONECTADO
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
+
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
@@ -228,9 +233,43 @@ class AppDatabase extends _$AppDatabase {
           await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN numero_cotizacion TEXT');
         } catch (_) {}
       }
+      // ✅ VERSIÓN 20: Nuevos campos en Compras y DetalleCompra
+      if (from < 20) {
+        // Tabla compras_table
+        try {
+          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN fecha_vencimiento TEXT');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN fecha_recepcion TEXT');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN ncf TEXT NOT NULL DEFAULT ""');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN forma_pago TEXT NOT NULL DEFAULT "contado"');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN dias_credito INTEGER NOT NULL DEFAULT 0');
+        } catch (_) {}
+
+        // Tabla detalle_compra_table
+        try {
+          await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN subtotal_linea REAL');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN base_imponible_linea REAL');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN itbis_linea REAL');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN total_linea REAL');
+        } catch (_) {}
+      }
     },
   );
 }
+
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final carpetaBase = await getApplicationDocumentsDirectory();
@@ -238,6 +277,7 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(archivoDb);
   });
 }
+
 final appDatabaseProvider = Provider((ref) {
   final db = AppDatabase();
   ref.onDispose(() => db.close());

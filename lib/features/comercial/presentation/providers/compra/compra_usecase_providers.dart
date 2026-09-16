@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/registrar_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/listar_compras_usecase.dart';
+import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/calcular_totales_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/calcular_costo_adquisicion.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/ejecutar_actualizaciones_comerciales.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
@@ -15,6 +16,10 @@ import 'package:fiscogest_rd/features/comercial/domain/usecases/actualizar_caja.
 import 'package:fiscogest_rd/features/comercial/domain/usecases/actualizar_estadisticas.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/actualizar_reportes.dart';
 import 'package:fiscogest_rd/features/inventario/domain/usecases/registrar_movimiento_kardex.dart';
+
+final calcularTotalesCompraUseCaseProvider = Provider<CalcularTotalesCompraUseCase>((ref) {
+  return const CalcularTotalesCompraUseCase();
+});
 
 final actualizarInventarioProvider = Provider<ActualizarInventario>((ref) {
   final repo = ref.watch(inventarioRepositoryProvider);
@@ -30,9 +35,7 @@ final actualizarSaldoClienteProvider = Provider<ActualizarSaldoCliente>((ref) {
   return ActualizarSaldoCliente(repo);
 });
 
-final actualizarSaldoProveedorProvider = Provider<ActualizarSaldoProveedor>((
-  ref,
-) {
+final actualizarSaldoProveedorProvider = Provider<ActualizarSaldoProveedor>((ref) {
   final repo = ref.watch(proveedorRepositoryProvider);
   return ActualizarSaldoProveedor(repo);
 });
@@ -52,18 +55,17 @@ final actualizarReportesProvider = Provider<ActualizarReportes>((ref) {
   return ActualizarReportes(repo);
 });
 
-final ejecutarActualizacionesProvider =
-    Provider<EjecutarActualizacionesComerciales>((ref) {
-      return EjecutarActualizacionesComerciales(
-        actualizarInventario: ref.watch(actualizarInventarioProvider),
-        actualizarCostos: ref.watch(actualizarCostosProvider),
-        actualizarSaldoCliente: ref.watch(actualizarSaldoClienteProvider),
-        actualizarSaldoProveedor: ref.watch(actualizarSaldoProveedorProvider),
-        actualizarCaja: ref.watch(actualizarCajaProvider),
-        actualizarEstadisticas: ref.watch(actualizarEstadisticasProvider),
-        actualizarReportes: ref.watch(actualizarReportesProvider),
-      );
-    });
+final ejecutarActualizacionesProvider = Provider<EjecutarActualizacionesComerciales>((ref) {
+  return EjecutarActualizacionesComerciales(
+    actualizarInventario: ref.watch(actualizarInventarioProvider),
+    actualizarCostos: ref.watch(actualizarCostosProvider),
+    actualizarSaldoCliente: ref.watch(actualizarSaldoClienteProvider),
+    actualizarSaldoProveedor: ref.watch(actualizarSaldoProveedorProvider),
+    actualizarCaja: ref.watch(actualizarCajaProvider),
+    actualizarEstadisticas: ref.watch(actualizarEstadisticasProvider),
+    actualizarReportes: ref.watch(actualizarReportesProvider),
+  );
+});
 
 final calcularCostoAdquisicionProvider = Provider<CalcularCostoAdquisicion>((ref) {
   return CalcularCostoAdquisicion();

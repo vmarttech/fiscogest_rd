@@ -1,7 +1,4 @@
 /// Entidad de dominio: Línea de detalle de una [Compra].
-///
-/// Cada instancia representa un producto incluido en la compra,
-/// con cantidad, costo unitario, componentes de costo, descuento por línea e importe.
 class DetalleCompra {
   const DetalleCompra({
     required this.id,
@@ -15,9 +12,13 @@ class DetalleCompra {
     this.arancelesUnitario = 0.0,
     this.gastosUnitario = 0.0,
     required this.costoAdquisicion,
-    required this.descuentoPorcentaje,
-    required this.montoDescuentoLinea,
+    this.descuentoPorcentaje = 0.0,
+    this.montoDescuentoLinea = 0.0,
     required this.subtotalLinea,
+    this.baseImponibleLinea = 0.0,
+    this.tasaImpuestoLinea = 0.0,
+    this.itbisLinea = 0.0,
+    this.totalLinea = 0.0,
   });
 
   final int id;
@@ -34,6 +35,10 @@ class DetalleCompra {
   final double descuentoPorcentaje;
   final double montoDescuentoLinea;
   final double subtotalLinea;
+  final double baseImponibleLinea;
+  final double tasaImpuestoLinea;
+  final double itbisLinea;
+  final double totalLinea;
 
   double get importeBruto => cantidad * costoUnitario;
 
@@ -52,6 +57,10 @@ class DetalleCompra {
     double? descuentoPorcentaje,
     double? montoDescuentoLinea,
     double? subtotalLinea,
+    double? baseImponibleLinea,
+    double? tasaImpuestoLinea,
+    double? itbisLinea,
+    double? totalLinea,
   }) {
     return DetalleCompra(
       id: id ?? this.id,
@@ -68,6 +77,10 @@ class DetalleCompra {
       descuentoPorcentaje: descuentoPorcentaje ?? this.descuentoPorcentaje,
       montoDescuentoLinea: montoDescuentoLinea ?? this.montoDescuentoLinea,
       subtotalLinea: subtotalLinea ?? this.subtotalLinea,
+      baseImponibleLinea: baseImponibleLinea ?? this.baseImponibleLinea,
+      tasaImpuestoLinea: tasaImpuestoLinea ?? this.tasaImpuestoLinea,
+      itbisLinea: itbisLinea ?? this.itbisLinea,
+      totalLinea: totalLinea ?? this.totalLinea,
     );
   }
 }

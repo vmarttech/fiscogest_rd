@@ -17,7 +17,6 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_producto
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
   static const String routeName = 'nueva-venta-borrador';
-
   @override
   ConsumerState<NuevaVentaBorradorPage> createState() =>
       _NuevaVentaBorradorPageState();
@@ -29,6 +28,7 @@ class _NuevaVentaBorradorPageState
   DateTime? _fechaVencimientoSeleccionada;
   String? _numeroCotizacionGuardada;
   int? _ventaIdGenerado;
+  bool _esCredito = false;
   bool _guardando = false;
 
   @override
@@ -71,16 +71,16 @@ class _NuevaVentaBorradorPageState
   }
 
   Future<void> _irACobrar() async {
-    if (_ventaIdGenerado == null || !mounted) return;
+    if (_ventaIdGenerado == null || !mounted || _numeroCotizacionGuardada == null) return;
     final estado = ref.read(ventaBorradorProvider);
-    const esCredito = false;
     await Navigator.pushNamed(
       context,
       CobroVentaPage.routeName,
       arguments: {
         'ventaId': _ventaIdGenerado!,
         'montoTotal': estado.montoTotal,
-        'esCredito': esCredito,
+        'esCredito': _esCredito,
+        'numeroCotizacion': _numeroCotizacionGuardada!,
       },
     );
   }
@@ -101,14 +101,14 @@ class _NuevaVentaBorradorPageState
     }
     setState(() => _guardando = true);
     try {
-      final numeroCotizacion = await repositorio.siguienteNumeroCotizacion();
+      final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(esCredito: _esCredito);
       notificador.establecerNumeroCotizacion(numeroCotizacion);
-      notificador.establecerEstadoDocumento(EstadoDocumento.aprobado);
+      notificador.establecerEstadoDocumento(EstadoDocumento.cotizado);
       final numeroGuardado = notificador.guardar();
       if (!mounted) return;
       setState(() {
         _numeroCotizacionGuardada = numeroGuardado;
-        _ventaIdGenerado = int.tryParse(numeroGuardado ?? '0');
+        _ventaIdGenerado = int.tryParse(numeroGuardado?.replaceAll(RegExp(r'[^0-9]'), '') ?? '0');
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -121,7 +121,10 @@ class _NuevaVentaBorradorPageState
         ),
       );
       notificador.vaciar();
-      setState(() => _fechaVencimientoSeleccionada = null);
+      setState(() {
+        _fechaVencimientoSeleccionada = null;
+        _esCredito = false;
+      });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -228,6 +231,8 @@ class _NuevaVentaBorradorPageState
       children: [
         _buildCabecera(),
         const SizedBox(height: AppSpacing.m),
+        _buildTipoVenta(),
+        const SizedBox(height: AppSpacing.m),
         _buildCliente(estado),
         const SizedBox(height: AppSpacing.m),
         _buildProductos(),
@@ -250,6 +255,8 @@ class _NuevaVentaBorradorPageState
             child: Column(
               children: [
                 _buildCabecera(),
+                const SizedBox(height: AppSpacing.m),
+                _buildTipoVenta(),
                 const SizedBox(height: AppSpacing.m),
                 _buildCliente(estado),
                 const SizedBox(height: AppSpacing.m),
@@ -304,6 +311,25 @@ class _NuevaVentaBorradorPageState
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTipoVenta() {
+    return AppCard(
+      padding: AppSpacing.allM,
+      child: SwitchListTile(
+        title: const Text('Venta a Crédito', style: AppTypography.bodyMedium),
+        subtitle: Text(
+          _esCredito ? 'Genera cotización con prefijo CR' : 'Genera cotización con prefijo C',
+          style: AppTypography.bodySmall,
+        ),
+        value: _esCredito,
+        onChanged: (valor) => setState(() => _esCredito = valor),
+        secondary: Icon(
+          _esCredito ? Icons.schedule : Icons.payments_outlined,
+          color: AppColors.primary,
+        ),
+      ),
     );
   }
 
@@ -427,7 +453,7 @@ class _NuevaVentaBorradorPageState
 
   Widget _buildBotonera(VentaBorradorState estado) {
     final mostrarBotonCobro = _ventaIdGenerado != null &&
-        estado.estadoDocumento == EstadoDocumento.aprobado;
+        estado.estadoDocumento == EstadoDocumento.cotizado;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

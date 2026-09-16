@@ -2,7 +2,6 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 
 class ValidarOferta {
   ValidarOferta(this._repository);
-
   final IVentasRepository _repository;
 
   Future<bool> call(int ofertaId, double montoCompra) async {

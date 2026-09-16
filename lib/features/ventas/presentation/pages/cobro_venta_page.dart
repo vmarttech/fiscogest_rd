@@ -7,14 +7,8 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_venta
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart' as venta_providers;
 
 class CobroVentaPage extends ConsumerStatefulWidget {
-  const CobroVentaPage({super.key, required this.ventaId, required this.montoTotal, required this.esCredito});
-
-  final int ventaId;
-  final double montoTotal;
-  final bool esCredito;
-
+  const CobroVentaPage({super.key});
   static const String routeName = 'cobro-venta';
-
   @override
   ConsumerState<CobroVentaPage> createState() => _CobroVentaPageState();
 }
@@ -22,19 +16,28 @@ class CobroVentaPage extends ConsumerStatefulWidget {
 class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   final TextEditingController _abonoController = TextEditingController();
   final TextEditingController _referenciaController = TextEditingController();
+  late final int ventaId;
+  late final double montoTotal;
+  late final bool esCredito;
+  late final String numeroCotizacion;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(cajaProvider.notifier).inicializarVenta(widget.montoTotal, widget.esCredito);
-      if (widget.esCredito) {
-        final abonoMinimo = widget.montoTotal * 0.30;
+      final args = ModalRoute.of(context)?.settings.arguments as Map?;
+      ventaId = args?['ventaId'] as int? ?? 0;
+      montoTotal = (args?['montoTotal'] as double?) ?? 0.0;
+      esCredito = args?['esCredito'] as bool? ?? false;
+      numeroCotizacion = args?['numeroCotizacion'] as String? ?? 'N/A';
+      ref.read(cajaProvider.notifier).inicializarVenta(montoTotal, esCredito);
+      if (esCredito) {
+        final abonoMinimo = montoTotal * 0.30;
         _abonoController.text = abonoMinimo.toStringAsFixed(2);
         ref.read(cajaProvider.notifier).establecerAbono(abonoMinimo);
       } else {
-        _abonoController.text = widget.montoTotal.toStringAsFixed(2);
-        ref.read(cajaProvider.notifier).establecerAbono(widget.montoTotal);
+        _abonoController.text = montoTotal.toStringAsFixed(2);
+        ref.read(cajaProvider.notifier).establecerAbono(montoTotal);
       }
     });
   }
@@ -50,8 +53,6 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     if (!mounted) return;
     final cajaNotifier = ref.read(cajaProvider.notifier);
     final estado = ref.read(cajaProvider);
-    final esCredito = widget.esCredito;
-
     if (!cajaNotifier.validarCobroCompleto()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -65,23 +66,19 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       }
       return;
     }
-
     try {
       final repositorio = ref.read(venta_providers.ventasRepositoryProvider);
-
       if (esCredito) {
         await repositorio.registrarVentaConAbono(
-          widget.ventaId,
+          ventaId,
           estado.abono,
           estado.referencia,
         );
       } else {
-        await repositorio.confirmarVentaBorrador(widget.ventaId);
+        await repositorio.confirmarVentaBorrador(ventaId);
       }
-
       ref.invalidate(listaVentasBorradorProvider);
       ref.invalidate(listaCotizacionesProvider);
-
       if (!mounted) return;
       final saldo = estado.saldoPendiente;
       if (mounted) {
@@ -107,11 +104,14 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
 
   @override
   Widget build(BuildContext context) {
-    final esCredito = widget.esCredito;
-
+    final args = ModalRoute.of(context)?.settings.arguments as Map?;
+    final esCreditoPantalla = args?['esCredito'] as bool? ?? false;
+    final numeroCotizacionPantalla = args?['numeroCotizacion'] as String? ?? 'N/A';
+    final montoTotalPantalla = (args?['montoTotal'] as double?) ?? 0.0;
+    final titulo = esCreditoPantalla ? 'Venta a Crédito' : 'Cobro de Venta';
     return Scaffold(
       appBar: AppBar(
-        title: Text(esCredito ? 'Venta a Crédito' : 'Cobro de Venta'),
+        title: Text(titulo),
         leading: const BackButton(),
       ),
       body: SafeArea(
@@ -121,12 +121,14 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const AppCard(
-                  padding: EdgeInsets.all(16),
+                AppCard(
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      _FilaResumen('Monto Total', ''),
-                      Divider(height: 24),
+                      _FilaResumen('N° Cotización', numeroCotizacionPantalla),
+                      const Divider(height: 24),
+                      _FilaResumen('Monto Total', 'RD\$ ${montoTotalPantalla.toStringAsFixed(2)}'),
+                      const Divider(height: 24),
                     ],
                   ),
                 ),
@@ -148,7 +150,6 @@ class _FilaResumen extends StatelessWidget {
   const _FilaResumen(this.etiqueta, this.valor);
   final String etiqueta;
   final String valor;
-
   @override
   Widget build(BuildContext context) {
     return Padding(

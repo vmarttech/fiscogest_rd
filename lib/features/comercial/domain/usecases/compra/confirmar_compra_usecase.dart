@@ -24,13 +24,10 @@ class ConfirmarCompraUseCase {
   final CalcularCostoAdquisicion _calcularCostoAdquisicion;
 
   Future<Compra> call(int compraId) async {
-    print('🔵 Confirmando compraId=$compraId');
     final compra = await _compraRepository.obtenerCompraPorId(compraId);
     if (compra == null) throw StateError('Compra no encontrada: $compraId');
 
     final lineasDetalle = await _compraRepository.listarDetallesDeCompra(compraId);
-    print('🔵 Líneas a procesar: ${lineasDetalle.length}');
-
     final fechaCompra = compra.fechaConfirmacion ?? compra.fechaEmision;
     const usuarioId = 1;
 
@@ -47,8 +44,6 @@ class ConfirmarCompraUseCase {
         gastosUnitario: linea.gastosUnitario,
       );
 
-      print('🔵 Producto=$idProd: costoUnitario=${linea.costoUnitario} → costoAdquisicion=$costoAdquisicion');
-
       // ✅ Se envía a Inventario EL COSTO YA CALCULADO — NO componentes
       await _ejecutarActualizaciones.ejecutarCompra(
         idProducto: idProd,
@@ -62,7 +57,6 @@ class ConfirmarCompraUseCase {
       // ✅ Kárdex recibe EL COSTO FINAL — SOLO lo registra, no calcula
       try {
         final totalMovimiento = linea.cantidad * costoAdquisicion;
-        print('🔵 Kardex prod=$idProd: cant=${linea.cantidad}, costo=$costoAdquisicion');
 
         await _registrarMovimientoKardex.ejecutar(
           productoId: idProd,
@@ -77,15 +71,14 @@ class ConfirmarCompraUseCase {
           observacion: 'Entrada por compra',
           usuarioId: usuarioId,
         );
-        print('✅ Kardex registrado prod=$idProd');
       } catch (e) {
-        print('❌ ERROR Kardex prod=$idProd: $e');
+        throw Exception('Error al registrar movimiento para producto $idProd: $e');
       }
     }
 
     final compraConfirmada = await _compraRepository.confirmarCompra(compraId);
     EventoBus.emitir(EventosSistema.compraConfirmada, {'compraId': compraId});
-    print('✅ Compra confirmada y Kardex procesado');
+
     return compraConfirmada;
   }
 }
