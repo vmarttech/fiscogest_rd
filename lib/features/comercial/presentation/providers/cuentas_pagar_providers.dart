@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
@@ -12,6 +13,11 @@ final cuentasPagarDaoProvider = Provider<CuentasPagarDao>((ref) {
 final registrarAbonoUseCaseProvider = Provider<RegistrarAbonoUseCase>((ref) {
   final dao = ref.watch(cuentasPagarDaoProvider);
   return RegistrarAbonoUseCase(cuentasPagarDao: dao);
+});
+
+final historialPagosPorCuentaProvider = FutureProvider.family<List<PagoProveedorData>, int>((ref, cuentaId) async {
+  final dao = ref.watch(cuentasPagarDaoProvider);
+  return dao.listarPagosPorCuenta(cuentaId);
 });
 
 class CuentaPagarItem {
