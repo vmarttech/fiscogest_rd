@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/calcular_costo_adquisicion.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/ejecutar_actualizaciones_comerciales.dart';
+import 'package:fiscogest_rd/features/comercial/domain/usecases/actualizar_saldo_proveedor.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/usecases/registrar_movimiento_kardex.dart';
 
@@ -13,15 +14,18 @@ class ConfirmarCompraUseCase {
     required EjecutarActualizacionesComerciales ejecutarActualizaciones,
     required RegistrarMovimientoKardex registrarMovimientoKardex,
     required CalcularCostoAdquisicion calcularCostoAdquisicion,
+    required ActualizarSaldoProveedor actualizarSaldoProveedor,
   }) : _compraRepository = compraRepository,
        _ejecutarActualizaciones = ejecutarActualizaciones,
        _registrarMovimientoKardex = registrarMovimientoKardex,
-       _calcularCostoAdquisicion = calcularCostoAdquisicion;
+       _calcularCostoAdquisicion = calcularCostoAdquisicion,
+       _actualizarSaldoProveedor = actualizarSaldoProveedor;
 
   final ICompraRepository _compraRepository;
   final EjecutarActualizacionesComerciales _ejecutarActualizaciones;
   final RegistrarMovimientoKardex _registrarMovimientoKardex;
   final CalcularCostoAdquisicion _calcularCostoAdquisicion;
+  final ActualizarSaldoProveedor _actualizarSaldoProveedor;
 
   Future<Compra> call(int compraId) async {
     final compra = await _compraRepository.obtenerCompraPorId(compraId);
@@ -73,6 +77,14 @@ class ConfirmarCompraUseCase {
     }
 
     final compraConfirmada = await _compraRepository.confirmarCompra(compraId);
+
+    if (compraConfirmada.esCredito) {
+      await _actualizarSaldoProveedor(
+        proveedorId: compraConfirmada.proveedorId,
+        monto: compraConfirmada.totalCompra,
+        esAdeudo: true,
+      );
+    }
 
     EventoBus.emitir(EventosSistema.compraConfirmada, {'compraId': compraId});
     return compraConfirmada;

@@ -81,11 +81,13 @@ final confirmarCompraUseCaseProvider = Provider<ConfirmarCompraUseCase>((ref) {
   final ejecutarActualizaciones = ref.watch(ejecutarActualizacionesProvider);
   final registrarKardex = ref.watch(registrarMovimientoKardexProvider);
   final calcularCostoAdquisicion = ref.watch(calcularCostoAdquisicionProvider);
+  final actualizarSaldoProveedor = ref.watch(actualizarSaldoProveedorProvider);
   return ConfirmarCompraUseCase(
     compraRepository: compraRepository,
     ejecutarActualizaciones: ejecutarActualizaciones,
     registrarMovimientoKardex: registrarKardex,
     calcularCostoAdquisicion: calcularCostoAdquisicion,
+    actualizarSaldoProveedor: actualizarSaldoProveedor,
   );
 });
 
