@@ -5,6 +5,8 @@ import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_rep
 import 'package:fiscogest_rd/features/comercial/domain/usecases/calcular_costo_adquisicion.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/ejecutar_actualizaciones_comerciales.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/actualizar_saldo_proveedor.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_dao.dart';
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/usecases/registrar_movimiento_kardex.dart';
 
@@ -15,17 +17,20 @@ class ConfirmarCompraUseCase {
     required RegistrarMovimientoKardex registrarMovimientoKardex,
     required CalcularCostoAdquisicion calcularCostoAdquisicion,
     required ActualizarSaldoProveedor actualizarSaldoProveedor,
+    required CuentasPagarDao cuentasPagarDao,
   }) : _compraRepository = compraRepository,
        _ejecutarActualizaciones = ejecutarActualizaciones,
        _registrarMovimientoKardex = registrarMovimientoKardex,
        _calcularCostoAdquisicion = calcularCostoAdquisicion,
-       _actualizarSaldoProveedor = actualizarSaldoProveedor;
+       _actualizarSaldoProveedor = actualizarSaldoProveedor,
+       _cuentasPagarDao = cuentasPagarDao;
 
   final ICompraRepository _compraRepository;
   final EjecutarActualizacionesComerciales _ejecutarActualizaciones;
   final RegistrarMovimientoKardex _registrarMovimientoKardex;
   final CalcularCostoAdquisicion _calcularCostoAdquisicion;
   final ActualizarSaldoProveedor _actualizarSaldoProveedor;
+  final CuentasPagarDao _cuentasPagarDao;
 
   Future<Compra> call(int compraId) async {
     final compra = await _compraRepository.obtenerCompraPorId(compraId);
@@ -83,6 +88,18 @@ class ConfirmarCompraUseCase {
         proveedorId: compraConfirmada.proveedorId,
         monto: compraConfirmada.totalCompra,
         esAdeudo: true,
+      );
+
+      final fechaVencimiento = compraConfirmada.fechaVencimiento ?? compraConfirmada.fechaEmision.add(const Duration(days: 30));
+
+      await _cuentasPagarDao.registrarCuentaPagar(
+        proveedorId: compraConfirmada.proveedorId,
+        concepto: 'Compra #$compraId',
+        monto: compraConfirmada.totalCompra,
+        fechaEmision: compraConfirmada.fechaEmision,
+        fechaVencimiento: fechaVencimiento,
+        tipoGasto: TipoGasto.compra,
+        estado: PagarEstado.pendiente,
       );
     }
 

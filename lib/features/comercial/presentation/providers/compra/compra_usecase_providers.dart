@@ -7,7 +7,9 @@ import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/calcular_
 import 'package:fiscogest_rd/features/comercial/domain/usecases/calcular_costo_adquisicion.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/ejecutar_actualizaciones_comerciales.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/inventario_providers.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/actualizar_inventario.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/actualizar_costos.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/actualizar_saldo_cliente.dart';
@@ -76,18 +78,19 @@ final registrarMovimientoKardexProvider = Provider<RegistrarMovimientoKardex>((r
   return RegistrarMovimientoKardex(kardexRepo);
 });
 
+final cuentasPagarDaoProvider = Provider<CuentasPagarDao>((ref) {
+  final db = ref.watch(databaseProvider);
+  return CuentasPagarDao(db);
+});
+
 final confirmarCompraUseCaseProvider = Provider<ConfirmarCompraUseCase>((ref) {
-  final compraRepository = ref.watch(compraRepositoryProvider);
-  final ejecutarActualizaciones = ref.watch(ejecutarActualizacionesProvider);
-  final registrarKardex = ref.watch(registrarMovimientoKardexProvider);
-  final calcularCostoAdquisicion = ref.watch(calcularCostoAdquisicionProvider);
-  final actualizarSaldoProveedor = ref.watch(actualizarSaldoProveedorProvider);
   return ConfirmarCompraUseCase(
-    compraRepository: compraRepository,
-    ejecutarActualizaciones: ejecutarActualizaciones,
-    registrarMovimientoKardex: registrarKardex,
-    calcularCostoAdquisicion: calcularCostoAdquisicion,
-    actualizarSaldoProveedor: actualizarSaldoProveedor,
+    compraRepository: ref.watch(compraRepositoryProvider),
+    ejecutarActualizaciones: ref.watch(ejecutarActualizacionesProvider),
+    registrarMovimientoKardex: ref.watch(registrarMovimientoKardexProvider),
+    calcularCostoAdquisicion: ref.watch(calcularCostoAdquisicionProvider),
+    actualizarSaldoProveedor: ref.watch(actualizarSaldoProveedorProvider),
+    cuentasPagarDao: ref.watch(cuentasPagarDaoProvider),
   );
 });
 
@@ -102,6 +105,5 @@ final listarComprasUseCaseProvider = Provider<ListarComprasUseCase>((ref) {
 });
 
 final compraPorIdProvider = FutureProvider.family<Compra?, int>((ref, compraId) async {
-  final compraRepository = ref.watch(compraRepositoryProvider);
-  return compraRepository.obtenerCompraPorId(compraId);
+  return ref.watch(compraRepositoryProvider).obtenerCompraPorId(compraId);
 });

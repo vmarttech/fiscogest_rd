@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_table.dar
 // ignore: unused_import — necesario para el join con ProveedoresTable
 import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
-
 part 'cuentas_pagar_dao.g.dart';
 
 @DriftAccessor(tables: [CuentasPagarTable])
@@ -21,11 +20,9 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
         proveedoresTable.id.equalsExp(cuentasPagarTable.proveedorId),
       ),
     ]);
-
     if (estado != null) {
       q.where(cuentasPagarTable.estado.equals(estado.name));
     }
-
     final registros = await q.get();
     return registros.map((fila) {
       final cuenta = fila.readTable(cuentasPagarTable);
@@ -35,6 +32,28 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
         nombreProveedor: proveedor.nombreEmpresa,
       );
     }).toList();
+  }
+
+  Future<int> registrarCuentaPagar({
+    required int proveedorId,
+    required String concepto,
+    required double monto,
+    required DateTime fechaEmision,
+    required DateTime fechaVencimiento,
+    TipoGasto tipoGasto = TipoGasto.compra,
+    PagarEstado estado = PagarEstado.pendiente,
+  }) async {
+    return await into(cuentasPagarTable).insert(
+      CuentasPagarTableCompanion(
+        proveedorId: Value(proveedorId),
+        concepto: Value(concepto),
+        monto: Value(monto),
+        fechaEmision: Value(fechaEmision),
+        fechaVencimiento: Value(fechaVencimiento),
+        tipoGasto: Value(tipoGasto),
+        estado: Value(estado),
+      ),
+    );
   }
 }
 
