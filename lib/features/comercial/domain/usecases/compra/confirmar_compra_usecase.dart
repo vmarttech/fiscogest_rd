@@ -35,7 +35,6 @@ class ConfirmarCompraUseCase {
       final idProd = linea.productoId;
       if (idProd <= 0) continue;
 
-      // ✅ COMPRAS CALCULA EL COSTO REAL — Inventario NO lo hace
       final costoAdquisicion = _calcularCostoAdquisicion(
         costoUnitario: linea.costoUnitario,
         fleteUnitario: linea.fleteUnitario,
@@ -44,7 +43,6 @@ class ConfirmarCompraUseCase {
         gastosUnitario: linea.gastosUnitario,
       );
 
-      // ✅ Se envía a Inventario EL COSTO YA CALCULADO — NO componentes
       await _ejecutarActualizaciones.ejecutarCompra(
         idProducto: idProd,
         cantidad: linea.cantidad,
@@ -54,10 +52,8 @@ class ConfirmarCompraUseCase {
         fecha: compra.fechaEmision,
       );
 
-      // ✅ Kárdex recibe EL COSTO FINAL — SOLO lo registra, no calcula
       try {
         final totalMovimiento = linea.cantidad * costoAdquisicion;
-
         await _registrarMovimientoKardex.ejecutar(
           productoId: idProd,
           tipoMovimiento: TipoMovimiento.entrada,
@@ -77,8 +73,8 @@ class ConfirmarCompraUseCase {
     }
 
     final compraConfirmada = await _compraRepository.confirmarCompra(compraId);
-    EventoBus.emitir(EventosSistema.compraConfirmada, {'compraId': compraId});
 
+    EventoBus.emitir(EventosSistema.compraConfirmada, {'compraId': compraId});
     return compraConfirmada;
   }
 }
