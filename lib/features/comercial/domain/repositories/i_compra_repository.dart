@@ -2,27 +2,25 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
 
 /// Contrato abstracto para el repositorio de Compras.
-///
-/// Define operaciones disponibles sobre compras y sus líneas,
-/// sin exponer detalles de almacenamiento ni tecnología.
 abstract class ICompraRepository {
   /// Registra una nueva compra con sus líneas de detalle.
-  /// Devuelve la compra registrada incluyendo su identificador.
   Future<Compra> registrarCompra({
     required Compra compra,
     required List<DetalleCompra> detalles,
   });
 
   /// Consulta una compra por su identificador único.
-  /// Devuelve null si no existe.
   Future<Compra?> obtenerCompraPorId(int compraId);
 
-  /// Obtiene el listado completo de compras registradas.
+  /// Obtiene el listado completo de compras.
   Future<List<Compra>> listarCompras();
 
-  /// Obtiene las líneas de detalle correspondientes a una compra.
+  /// Obtiene las líneas de detalle de una compra.
   Future<List<DetalleCompra>> listarDetallesDeCompra(int compraId);
 
-  /// Actualiza el estado de una compra y marca fecha de confirmación.
+  /// Confirma una compra: cambia estado y fecha de confirmación.
   Future<Compra> confirmarCompra(int compraId);
+
+  /// Anula una compra: cambia estado a anulada y fecha de actualización.
+  Future<Compra> anularCompra(int compraId);
 }
