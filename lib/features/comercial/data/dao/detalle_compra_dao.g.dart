@@ -6,5 +6,7 @@ part of 'detalle_compra_dao.dart';
 mixin _$DetalleCompraDaoMixin on DatabaseAccessor<AppDatabase> {
   $DetalleCompraTableTable get detalleCompraTable =>
       attachedDatabase.detalleCompraTable;
+  $ProveedoresTableTable get proveedoresTable =>
+      attachedDatabase.proveedoresTable;
   $ComprasTableTable get comprasTable => attachedDatabase.comprasTable;
 }

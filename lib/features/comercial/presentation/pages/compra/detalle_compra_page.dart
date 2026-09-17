@@ -141,7 +141,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                           ],
                         ],
                       ),
-                      if (compra.observaciones.isNotEmpty) ...[
+                      if (compra.observaciones?.isNotEmpty == true) ...[
                         const SizedBox(height: 8),
                         Text(
                           'Observaciones: ${compra.observaciones}',
