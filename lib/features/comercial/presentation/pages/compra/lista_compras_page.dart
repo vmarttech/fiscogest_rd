@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/compra_usecase_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
-import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
 class ListaComprasPage extends ConsumerWidget {
   const ListaComprasPage({super.key});
@@ -104,6 +107,7 @@ class ListaComprasPage extends ConsumerWidget {
                 ),
               );
             }
+
             return ListView.separated(
               padding: AppLayout.pantallaPadding,
               itemCount: compras.length,
@@ -194,7 +198,6 @@ class ListaComprasPage extends ConsumerWidget {
                     ),
                   );
                   if (confirmar != true || !context.mounted) return;
-
                   try {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Confirmando compra...')),
@@ -216,6 +219,126 @@ class ListaComprasPage extends ConsumerWidget {
                         content: Text('Error: $e'),
                         backgroundColor: Colors.red,
                       ),
+                    );
+                  }
+                }
+
+                Future<void> duplicar() async {
+                  try {
+                    final repo = ref.read(compraRepositoryProvider);
+                    final detalles = await repo.listarDetallesDeCompra(compra.id);
+                    final ahora = DateTime.now();
+                    final nuevoId = ahora.millisecondsSinceEpoch;
+
+                    final nuevaCompra = compra.copyWith(
+                      id: nuevoId,
+                      numeroComprobante: '${compra.numeroComprobante}-COPIA',
+                      estado: EstadoCompra.borrador,
+                      fechaEmision: ahora,
+                      fechaConfirmacion: null,
+                      creadoEn: ahora,
+                      actualizadoEn: null,
+                      observaciones: 'Duplicado de #${compra.id}',
+                    );
+
+                    final nuevosDetalles = <DetalleCompra>[];
+                    for (var i = 0; i < detalles.length; i++) {
+                      final d = detalles[i];
+                      nuevosDetalles.add(
+                        d.copyWith(
+                          id: nuevoId * 1000 + i,
+                          compraId: nuevoId,
+                        ),
+                      );
+                    }
+
+                    await repo.registrarCompra(
+                      compra: nuevaCompra,
+                      detalles: nuevosDetalles,
+                    );
+
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Compra duplicada como borrador ✅'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    ref.invalidate(listadoComprasProvider);
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error al duplicar: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+
+                Future<void> imprimir() async {
+                  final buffer = StringBuffer();
+                  buffer.writeln('══════════════════════════════════');
+                  buffer.writeln('       COMPROBANTE DE COMPRA');
+                  buffer.writeln('══════════════════════════════════');
+                  buffer.writeln('Nº: ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : compra.id}');
+                  buffer.writeln('Fecha: ${_formatearFecha(compra.fechaEmision)}');
+                  buffer.writeln('Proveedor: ${compra.nombreProveedor}');
+                  if (compra.ncf.isNotEmpty) buffer.writeln('NCF: ${compra.ncf}');
+                  buffer.writeln('Tipo: ${compra.tipoComprobante}');
+                  buffer.writeln('Pago: ${compra.esCredito ? 'Crédito (${compra.diasCredito} días)' : 'Contado'}');
+                  buffer.writeln('Estado: ${compra.estado.name}');
+                  buffer.writeln('──────────────────────────────────');
+                  buffer.writeln('Subtotal:  RD\$ ${compra.subtotalSinImpuestos.toStringAsFixed(2)}');
+                  buffer.writeln('Descuento: RD\$ ${compra.montoDescuentoGlobal.toStringAsFixed(2)}');
+                  buffer.writeln('ITBIS:     RD\$ ${compra.montoImpuesto.toStringAsFixed(2)}');
+                  buffer.writeln('TOTAL:     RD\$ ${compra.totalCompra.toStringAsFixed(2)}');
+                  buffer.writeln('══════════════════════════════════');
+                  buffer.writeln('FiscoGest RD');
+
+                  await Share.share(
+                    buffer.toString(),
+                    subject: 'Compra ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : '#${compra.id}'}',
+                  );
+                }
+
+                Future<void> anular() async {
+                  final ok = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Anular Compra'),
+                      content: const Text('¿Anular esta compra?\n\nEsta acción no se puede deshacer.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Cancelar'),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade700,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Sí, Anular'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (ok != true || !context.mounted) return;
+                  try {
+                    await ref.read(compraRepositoryProvider).anularCompra(compra.id);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Compra anulada ✅'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    ref.invalidate(listadoComprasProvider);
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
                     );
                   }
                 }
@@ -253,6 +376,98 @@ class ListaComprasPage extends ConsumerWidget {
                               ),
                             ),
                             buildEstadoTag(),
+                            // MENÚ DE ACCIONES
+                            PopupMenuButton<String>(
+                              icon: const Icon(Icons.more_vert, size: 20),
+                              onSelected: (value) async {
+                                switch (value) {
+                                  case 'ver':
+                                    verDetalle();
+                                    break;
+                                  case 'editar':
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Edición de borradores: próximamente (requiere precarga en RegistrarCompraPage)',
+                                        ),
+                                      ),
+                                    );
+                                    break;
+                                  case 'duplicar':
+                                    await duplicar();
+                                    break;
+                                  case 'imprimir':
+                                    await imprimir();
+                                    break;
+                                  case 'confirmar':
+                                    await confirmar();
+                                    break;
+                                  case 'anular':
+                                    await anular();
+                                    break;
+                                }
+                              },
+                              itemBuilder: (ctx) => [
+                                const PopupMenuItem(
+                                  value: 'ver',
+                                  child: ListTile(
+                                    leading: Icon(Icons.visibility, size: 20),
+                                    title: Text('Ver'),
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                                if (compra.estado == EstadoCompra.borrador)
+                                  const PopupMenuItem(
+                                    value: 'editar',
+                                    child: ListTile(
+                                      leading: Icon(Icons.edit, size: 20),
+                                      title: Text('Editar'),
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                  ),
+                                const PopupMenuItem(
+                                  value: 'duplicar',
+                                  child: ListTile(
+                                    leading: Icon(Icons.copy, size: 20),
+                                    title: Text('Duplicar'),
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'imprimir',
+                                  child: ListTile(
+                                    leading: Icon(Icons.print, size: 20),
+                                    title: Text('Imprimir'),
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                                if (compra.estado == EstadoCompra.borrador)
+                                  const PopupMenuItem(
+                                    value: 'confirmar',
+                                    child: ListTile(
+                                      leading: Icon(Icons.check_circle, size: 20, color: Colors.green),
+                                      title: Text('Confirmar'),
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                  ),
+                                if (compra.estado != EstadoCompra.anulada &&
+                                    compra.estado != EstadoCompra.borrador)
+                                  const PopupMenuItem(
+                                    value: 'anular',
+                                    child: ListTile(
+                                      leading: Icon(Icons.cancel, size: 20, color: Colors.red),
+                                      title: Text('Anular'),
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -286,58 +501,13 @@ class ListaComprasPage extends ConsumerWidget {
                               ),
                             ),
                             if (!esPequena)
-                              Row(
-                                children: [
-                                  TextButton.icon(
-                                    icon: const Icon(Icons.visibility, size: 16),
-                                    label: const Text('Ver'),
-                                    onPressed: verDetalle,
-                                  ),
-                                  if (compra.estado == EstadoCompra.borrador) ...[
-                                    const SizedBox(width: 4),
-                                    ElevatedButton.icon(
-                                      icon: const Icon(Icons.check, size: 16),
-                                      label: const Text('Confirmar'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green.shade700,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      onPressed: confirmar,
-                                    ),
-                                  ],
-                                ],
+                              TextButton.icon(
+                                icon: const Icon(Icons.visibility, size: 16),
+                                label: const Text('Ver'),
+                                onPressed: verDetalle,
                               ),
                           ],
                         ),
-                        if (esPequena)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextButton.icon(
-                                    icon: const Icon(Icons.visibility, size: 16),
-                                    label: const Text('Ver Detalle'),
-                                    onPressed: verDetalle,
-                                  ),
-                                ),
-                                if (compra.estado == EstadoCompra.borrador) ...[
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      icon: const Icon(Icons.check, size: 16),
-                                      label: const Text('Confirmar'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green.shade700,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      onPressed: confirmar,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
                       ],
                     ),
                   ),
