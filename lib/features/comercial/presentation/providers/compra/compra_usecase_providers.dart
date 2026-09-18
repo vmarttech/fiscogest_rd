@@ -19,6 +19,7 @@ final compraPorIdProvider = FutureProvider.family.autoDispose<Compra?, int>((ref
 final confirmarCompraUseCaseProvider = Provider<Future<void> Function(dynamic)>((ref) {
   return (compraId) async {
     final id = compraId is int ? compraId : int.tryParse(compraId.toString()) ?? 0;
+    if (id <= 0) return;
     final repositorio = ref.read(compraRepositoryProvider);
     await repositorio.confirmarCompra(id);
     ref.invalidate(listadoComprasProvider);
