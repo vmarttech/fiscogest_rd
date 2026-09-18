@@ -37,6 +37,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
   @override
   Widget build(BuildContext context) {
     final compraAsync = ref.watch(compraPorIdProvider(_idNumerico));
+
     return AppScaffold(
       title: 'Detalle de Compra',
       body: SafeArea(
@@ -67,6 +68,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                   ),
                 );
               }
+
               return FutureBuilder<List<DetalleCompra>>(
                 future: _detallesFuture,
                 builder: (context, snapshot) {
@@ -80,11 +82,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                         'Fecha Emisión: ${compra.fechaEmision.toString().split(' ')[0]}',
                         style: AppTypography.bodyMedium,
                       ),
-                      if (compra.fechaVencimiento != null)
-                        Text(
-                          'Vencimiento: ${compra.fechaVencimiento!.toString().split(' ')[0]}',
-                          style: AppTypography.bodyMedium,
-                        ),
+                      Text(
+                        'Vencimiento: ${compra.fechaVencimiento?.toString().split(' ')[0] ?? 'No establecida'}',
+                        style: AppTypography.bodyMedium,
+                      ),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 16,

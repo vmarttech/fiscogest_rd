@@ -1,6 +1,7 @@
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_dao.dart';
 
 class ConfirmarCompraUseCase {
   ConfirmarCompraUseCase({
@@ -13,11 +14,11 @@ class ConfirmarCompraUseCase {
   });
 
   final ICompraRepository compraRepository;
-  final dynamic ejecutarActualizaciones;
-  final dynamic registrarMovimientoKardex;
-  final dynamic calcularCostoAdquisicion;
-  final dynamic actualizarSaldoProveedor;
-  final dynamic cuentasPagarDao;
+  final Future<void> Function(Compra) ejecutarActualizaciones;
+  final Future<void> Function(Compra) registrarMovimientoKardex;
+  final Future<void> Function(Compra) calcularCostoAdquisicion;
+  final Future<void> Function(int) actualizarSaldoProveedor;
+  final CuentasPagarDao cuentasPagarDao;
 
   Future<Compra> call(final int compraId) async {
     final compra = await compraRepository.obtenerCompraPorId(compraId);
@@ -30,19 +31,22 @@ class ConfirmarCompraUseCase {
     final compraConfirmada = await compraRepository.confirmarCompra(compraId);
 
     if (compra.esCredito) {
-      await cuentasPagarDao.crearCuentaPorPagar(
+      await cuentasPagarDao.registrarCuentaPagar(
         proveedorId: compra.proveedorId,
-        numeroDocumento: compra.numeroComprobante,
         concepto: 'Compra ${compra.nombreProveedor}',
         monto: compra.totalCompra,
         fechaEmision: compra.fechaEmision,
-        fechaVencimiento: fechaVencimientoFinal,
+        fechaVencimiento: fechaVencimientoFinal!,
         tipoGasto: TipoGasto.compra,
         estado: PagarEstado.pendiente,
       );
     }
 
+    await calcularCostoAdquisicion(compraConfirmada);
+    await registrarMovimientoKardex(compraConfirmada);
+    await ejecutarActualizaciones(compraConfirmada);
     await actualizarSaldoProveedor(compra.proveedorId);
+
     return compraConfirmada;
   }
 }
