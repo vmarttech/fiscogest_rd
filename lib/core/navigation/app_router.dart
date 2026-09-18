@@ -34,6 +34,7 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/dashbo
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/lista_compras_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
 import 'package:fiscogest_rd/features/presentaciones/presentation/pages/presentaciones_page.dart';
 import 'package:fiscogest_rd/features/categorias/presentation/pages/categorias_page.dart';
 import 'package:fiscogest_rd/features/marcas/presentation/pages/marcas_page.dart';
@@ -94,7 +95,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      // ========== MÓDULO COMPRAS (Dashboard como entrada) ==========
+      // ========== MÓDULO COMPRAS ==========
       GoRoute(
         path: '/compras',
         name: DashboardComprasPage.routeName,
@@ -118,6 +119,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               final soloDigitos = idCrudo.replaceAll(RegExp(r'[^0-9]'), '');
               final compraId = int.tryParse(soloDigitos) ?? 0;
               return AppShell(child: DetalleCompraPage(compraId: compraId));
+            },
+          ),
+          GoRoute(
+            path: 'historial-costos/:productoId',
+            name: HistorialCostosPage.routeName,
+            builder: (context, state) {
+              final idCrudo = state.pathParameters['productoId'] ?? '0';
+              final soloDigitos = idCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+              final productoId = int.tryParse(soloDigitos) ?? 0;
+              return AppShell(
+                child: HistorialCostosPage(productoId: productoId),
+              );
             },
           ),
         ],

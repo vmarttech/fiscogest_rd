@@ -82,9 +82,9 @@ final dashboardComprasKpisProvider =
     final saldo = (cuenta.monto ) - totalAbonado;
     if (saldo <= 0) continue;
 
-    final DateTime? fechaVenc = cuenta.fechaVencimiento;
+    final DateTime fechaVenc = cuenta.fechaVencimiento;
     final bool estaVencida = estado == PagarEstado.vencido ||
-        (fechaVenc != null && DateTime.now().isAfter(fechaVenc));
+        (DateTime.now().isAfter(fechaVenc));
 
     if (estaVencida) {
       vencido += saldo;

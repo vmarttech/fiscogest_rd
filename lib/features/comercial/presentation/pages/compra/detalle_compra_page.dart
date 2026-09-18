@@ -12,12 +12,12 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
 
 class DetalleCompraPage extends ConsumerStatefulWidget {
   const DetalleCompraPage({super.key, required this.compraId});
   static const String routeName = 'detalle-compra';
   final Object compraId;
-
   @override
   ConsumerState<DetalleCompraPage> createState() => _DetalleCompraPageState();
 }
@@ -81,9 +81,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                   ),
                 );
               }
-
               final vencida = compra.estaVencida;
-
               return FutureBuilder<List<DetalleCompra>>(
                 future: _detallesFuture,
                 builder: (context, snapshot) {
@@ -291,6 +289,20 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                       style: AppTypography.bodyMediumSemiBold,
                                     ),
                                   ),
+                                  // BOTÓN HISTORIAL DE COSTOS
+                                  IconButton(
+                                    tooltip: 'Historial de costos',
+                                    icon: const Icon(Icons.history, size: 20),
+                                    color: Colors.indigo,
+                                    onPressed: () {
+                                      context.goNamed(
+                                        HistorialCostosPage.routeName,
+                                        pathParameters: {
+                                          'productoId': detalle.productoId.toString(),
+                                        },
+                                      );
+                                    },
+                                  ),
                                   Text(
                                     'RD\$ ${detalle.totalLinea.toStringAsFixed(2)}',
                                     style: AppTypography.bodyMediumBold.copyWith(
@@ -305,9 +317,15 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                 runSpacing: 4,
                                 children: [
                                   Text('Cant: ${detalle.cantidad}', style: AppTypography.bodySmall),
-                                  Text('Costo Unit: RD\$ ${detalle.costoUnitario.toStringAsFixed(2)}', style: AppTypography.bodySmall),
+                                  Text(
+                                    'Costo Unit: RD\$ ${detalle.costoUnitario.toStringAsFixed(2)}',
+                                    style: AppTypography.bodySmall,
+                                  ),
                                   if (detalle.descuentoPorcentaje > 0)
-                                    Text('Desc: ${detalle.descuentoPorcentaje.toStringAsFixed(0)}%', style: AppTypography.bodySmall),
+                                    Text(
+                                      'Desc: ${detalle.descuentoPorcentaje.toStringAsFixed(0)}%',
+                                      style: AppTypography.bodySmall,
+                                    ),
                                 ],
                               ),
                               const SizedBox(height: 8),
@@ -392,7 +410,8 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                       backgroundColor: Colors.green.shade700,
                                       foregroundColor: Colors.white,
                                     ),
-                                    onPressed: () => _confirmarCompra(compra.id, confirmarCompra.call),
+                                    onPressed: () =>
+                                        _confirmarCompra(compra.id, confirmarCompra.call),
                                   ),
                                   const SizedBox(width: 8),
                                 ],
@@ -423,7 +442,8 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                 backgroundColor: Colors.green.shade700,
                                 foregroundColor: Colors.white,
                               ),
-                              onPressed: () => _confirmarCompra(compra.id, confirmarCompra.call),
+                              onPressed: () =>
+                                  _confirmarCompra(compra.id, confirmarCompra.call),
                             ),
                           ),
                         if (compra.estado != EstadoCompra.anulada) ...[
@@ -465,7 +485,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Sí, Confirmar'),
           ),
@@ -473,11 +496,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       ),
     );
     if (ok != true) return;
-
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(const SnackBar(content: Text('Confirmando compra...')));
-
     try {
       await confirmar(compraId);
       if (!mounted) return;
@@ -507,7 +528,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade700, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Sí, Anular'),
           ),
@@ -515,10 +539,8 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       ),
     );
     if (ok != true) return;
-
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Anulando compra...')));
-
     try {
       await anular(compraId);
       if (!mounted) return;
