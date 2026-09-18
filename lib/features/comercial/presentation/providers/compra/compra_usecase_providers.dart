@@ -3,8 +3,14 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' as repo;
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
+import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/calcular_totales_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_services.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_usecase.dart';
+import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/registrar_compra_usecase.dart';
+
+final calcularTotalesCompraUseCaseProvider = Provider<CalcularTotalesCompraUseCase>((Ref ref) {
+  return const CalcularTotalesCompraUseCase();
+});
 
 final listadoComprasProvider = FutureProvider.autoDispose<List<Compra>>((Ref ref) async {
   final ICompraRepository repoCompra = ref.watch(repo.compraRepositoryProvider);
@@ -29,25 +35,25 @@ final confirmarCompraUseCaseProvider = Provider.autoDispose<ConfirmarCompraUseCa
   final ConfirmarCompraServices svc = ref.watch(confirmarCompraServicesProvider);
   return ConfirmarCompraUseCase(
     compraRepository: ref.watch(repo.compraRepositoryProvider),
+    cuentasPagarDao: ref.watch(repo.cuentasPagarDaoProvider),
     ejecutarActualizaciones: svc.ejecutarActualizaciones,
     registrarMovimientoKardex: svc.registrarMovimientoKardex,
     calcularCostoAdquisicion: svc.calcularCostoAdquisicion,
-    actualizarSaldoProveedor: (int proveedorId) async {
-      final List<Compra> todas = await ref.watch(listadoComprasProvider.future);
-      final Compra compra = todas.firstWhere(
-        (Compra c) => c.proveedorId == proveedorId && c.esCredito,
-        orElse: () => throw StateError('Compra no encontrada para proveedor $proveedorId'),
-      );
+    actualizarSaldoProveedor: (int compraId) async {
+      final Compra? compra = await ref.watch(compraPorIdProvider(compraId).future);
+      if (compra == null) throw StateError('Compra no encontrada: $compraId');
       await svc.actualizarSaldoProveedor(compra);
     },
-    cuentasPagarDao: ref.watch(repo.cuentasPagarDaoProvider),
   );
 });
 
 final registrarCompraUseCaseProvider = Provider.autoDispose<Future<Compra> Function({required Compra compra, required List<DetalleCompra> detalles})>((Ref ref) {
+  final CalcularTotalesCompraUseCase calculador = ref.watch(calcularTotalesCompraUseCaseProvider);
+  final ICompraRepository repoCompra = ref.read(repo.compraRepositoryProvider);
+  final RegistrarCompraUseCase casoUso = RegistrarCompraUseCase(repoCompra, calculador);
+
   return ({required compra, required detalles}) async {
-    final ICompraRepository repoCompra = ref.read(repo.compraRepositoryProvider);
-    final Compra resultado = await repoCompra.registrarCompra(compra: compra, detalles: detalles);
+    final Compra resultado = await casoUso(compra: compra, detalles: detalles);
     ref.invalidate(listadoComprasProvider);
     return resultado;
   };
