@@ -50,8 +50,8 @@ final dashboardComprasKpisProvider =
   final comprasMes = compras.where((Compra c) {
     final fecha = c.fechaEmision;
     final mismoMes = fecha.year == ahora.year && fecha.month == ahora.month;
-    final valida = c.estado != EstadoCompra.borrador &&
-        c.estado != EstadoCompra.anulada;
+    final valida =
+        c.estado != EstadoCompra.borrador && c.estado != EstadoCompra.anulada;
     return mismoMes && valida && !fecha.isBefore(inicioMes);
   }).toList();
 
@@ -66,6 +66,7 @@ final dashboardComprasKpisProvider =
 
   // Cuentas pendientes / parciales → por pagar
   // Cuentas vencidas (por estado o por fecha) → vencido
+  // saldo pendiente = monto - suma de abonos
   double porPagar = 0;
   double vencido = 0;
 
@@ -73,18 +74,21 @@ final dashboardComprasKpisProvider =
     final cuenta = item.cuenta;
     final estado = cuenta.estado;
 
+    // Ignorar cuentas ya pagadas
     if (estado == PagarEstado.pagado) continue;
 
-    // Calcular saldo pendiente = monto - suma de abonos
+    // Calcular saldo real a partir de los abonos registrados
     final pagos = await cuentasDao.listarPagosPorCuenta(cuenta.id);
     final totalAbonado =
-        pagos.fold<double>(0, (double s, p) => s + (p.monto ));
-    final saldo = (cuenta.monto ) - totalAbonado;
+        pagos.fold<double>(0, (double s, p) => s + p.monto);
+    final saldo = cuenta.monto - totalAbonado;
+
+    // Si no queda nada pendiente, no lo contamos
     if (saldo <= 0) continue;
 
     final DateTime fechaVenc = cuenta.fechaVencimiento;
     final bool estaVencida = estado == PagarEstado.vencido ||
-        (DateTime.now().isAfter(fechaVenc));
+        (ahora.isAfter(fechaVenc));
 
     if (estaVencida) {
       vencido += saldo;
