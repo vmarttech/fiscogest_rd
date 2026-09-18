@@ -1,288 +1,265 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/features/comercial/domain/entities/cuenta_pagar.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/cuentas_pagar_providers.dart';
 
 class RegistrarAbonoPage extends ConsumerStatefulWidget {
-  const RegistrarAbonoPage({super.key, required this.cuentaPagarId});
-  final int cuentaPagarId;
+  const RegistrarAbonoPage({super.key, required this.cuentaId});
+  static const String routeName = 'registrar-abono';
+  final Object cuentaId;
 
   @override
   ConsumerState<RegistrarAbonoPage> createState() => _RegistrarAbonoPageState();
 }
 
 class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _montoController = TextEditingController();
-  final _referenciaController = TextEditingController();
-  final _notaController = TextEditingController();
-
-  DateTime _fechaPago = DateTime.now();
+  late final int _idNumerico;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late DateTime _fecha;
+  final TextEditingController _montoCtrl = TextEditingController();
   String _formaPago = 'efectivo';
-  bool _isSubmitting = false;
+  final TextEditingController _referenciaCtrl = TextEditingController();
+  final TextEditingController _notaCtrl = TextEditingController();
+  bool _cargando = false;
 
-  static const List<Map<String, String>> formasPago = [
-    {'value': 'efectivo', 'label': 'Efectivo'},
-    {'value': 'transferencia', 'label': 'Transferencia'},
-    {'value': 'cheque', 'label': 'Cheque'},
-    {'value': 'tarjeta', 'label': 'Tarjeta'},
-    {'value': 'otro', 'label': 'Otro'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _idNumerico = switch (widget.cuentaId) {
+      final int id => id,
+      final String idStr => int.tryParse(idStr) ?? 0,
+      _ => 0,
+    };
+    _fecha = DateTime.now();
+  }
 
   @override
   void dispose() {
-    _montoController.dispose();
-    _referenciaController.dispose();
-    _notaController.dispose();
+    _montoCtrl.dispose();
+    _referenciaCtrl.dispose();
+    _notaCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _seleccionarFecha() async {
-    final seleccionada = await showDatePicker(
-      context: context,
-      initialDate: _fechaPago,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
-    if (seleccionada != null) setState(() => _fechaPago = seleccionada);
-  }
-
-  Future<void> _guardarAbono() async {
+  Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
-    final monto = double.tryParse(_montoController.text.replaceAll(',', '.'));
+
+    final double? monto = double.tryParse(_montoCtrl.text.replaceAll(',', '.'));
     if (monto == null || monto <= 0) return;
 
-    setState(() => _isSubmitting = true);
+    setState(() => _cargando = true);
+
     try {
-      final cuenta = await ref.read(cuentasPagarDaoProvider).obtenerCuentaPorId(widget.cuentaPagarId);
-      if (!mounted) return;
-      if (cuenta == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cuenta no encontrada'), backgroundColor: Colors.red),
-        );
-        return;
-      }
-
-      await ref.read(registrarAbonoUseCaseProvider).call(
-            cuentaPagarId: widget.cuentaPagarId,
-            proveedorId: cuenta.proveedorId,
-            monto: monto,
-            fechaPago: _fechaPago,
-            formaPago: _formaPago,
-            referencia: _referenciaController.text.trim().isNotEmpty ? _referenciaController.text.trim() : null,
-            nota: _notaController.text.trim().isNotEmpty ? _notaController.text.trim() : null,
-          );
-
-      if (!mounted) return;
-      ref.invalidate(listadoCuentasPagarProvider);
-      ref.invalidate(historialPagosPorCuentaProvider(widget.cuentaPagarId));
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Abono registrado correctamente'), backgroundColor: Colors.green),
+      final registrar = ref.read(registrarAbonoProvider);
+      final ok = await registrar(
+        cuentaPagarId: _idNumerico,
+        monto: monto,
+        fechaPago: _fecha,
+        formaPago: _formaPago,
+        referencia: _referenciaCtrl.text.trim(),
+        nota: _notaCtrl.text.trim().isNotEmpty ? _notaCtrl.text.trim() : null,
       );
-      if (mounted) Navigator.of(context).pop();
+
+      if (!mounted) return;
+      setState(() => _cargando = false);
+
+      if (ok) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Abono registrado ✅'), backgroundColor: Colors.green),
+        );
+        context.pop();
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo registrar el abono'), backgroundColor: Colors.red),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
+      setState(() => _cargando = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final cuentaAsync = ref.watch(listadoCuentasPagarProvider);
-    final pagosAsync = ref.watch(historialPagosPorCuentaProvider(widget.cuentaPagarId));
+    final AsyncValue<CuentaPagar?> cuentaAsync = ref.watch(cuentaPagarPorIdProvider(_idNumerico));
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Registrar Abono'), elevation: 0),
-      body: cuentaAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error al cargar datos: $e')),
-        data: (items) {
-          final cuentaItem = items.firstWhere(
-            (i) => i.id == widget.cuentaPagarId,
-            orElse: () => throw StateError('Cuenta no encontrada'),
-          );
+    return AppScaffold(
+      title: 'Registrar Abono',
+      body: SafeArea(
+        bottom: true,
+        child: cuentaAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (Object error, StackTrace? _) => Center(
+            child: Padding(
+              padding: AppLayout.pantallaPadding,
+              child: Text(
+                'Error: $error',
+                style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+              ),
+            ),
+          ),
+          data: (CuentaPagar? cuenta) {
+            if (cuenta == null) {
+              return const Center(child: Text('Cuenta no encontrada'));
+            }
+            final double saldoPendiente = cuenta.saldoPendiente;
 
-          return pagosAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Error cargando pagos: $e')),
-            data: (List<PagoProveedorData> pagos) {
-              final totalAbonado = pagos.fold<double>(0.0, (sum, PagoProveedorData p) => sum + p.monto);
-              final saldoPendiente = cuentaItem.monto - totalAbonado;
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
+            if (saldoPendiente <= 0) {
+              return Center(
+                child: Padding(
+                  padding: AppLayout.pantallaPadding,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Card(
-                        elevation: 2,
-                        margin: const EdgeInsets.only(bottom: 20),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Proveedor: ${cuentaItem.proveedorNombre}',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              ),
-                              const SizedBox(height: 8),
-                              Text('Concepto: ${cuentaItem.concepto}', style: const TextStyle(fontSize: 14)),
-                              const Divider(height: 24),
-                              _filaResumen('Total cuenta', cuentaItem.monto),
-                              const SizedBox(height: 4),
-                              _filaResumen('Total abonado', totalAbonado),
-                              const Divider(height: 16),
-                              _filaResumen('Saldo pendiente', saldoPendiente, esDestacado: true),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      TextFormField(
-                        controller: _montoController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(
-                          labelText: 'Monto del abono RD\$',
-                          border: OutlineInputBorder(),
-                          prefixText: 'RD\$ ',
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                        ),
-                        style: const TextStyle(fontSize: 16),
-                        validator: (value) {
-                          final m = double.tryParse(value?.replaceAll(',', '.') ?? '');
-                          if (m == null || m <= 0) return 'Ingrese un monto válido mayor a cero';
-                          if (m > saldoPendiente) return 'Excede saldo pendiente (RD\$ ${saldoPendiente.toStringAsFixed(2)})';
-                          return null;
-                        },
-                        enabled: !_isSubmitting,
-                      ),
+                      const Icon(Icons.check_circle, size: 48, color: Colors.green),
                       const SizedBox(height: 16),
-
-                      InkWell(
-                        onTap: _isSubmitting ? null : _seleccionarFecha,
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Fecha de pago',
-                            border: OutlineInputBorder(),
-                            suffixIcon: Icon(Icons.calendar_today, size: 20),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                          ),
-                          child: Text('${_fechaPago.day}/${_fechaPago.month}/${_fechaPago.year}', style: const TextStyle(fontSize: 16)),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      DropdownButtonFormField<String>(
-                        initialValue: _formaPago,
-                        decoration: const InputDecoration(
-                          labelText: 'Forma de pago',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                        ),
-                        style: const TextStyle(fontSize: 16, color: Colors.black87),
-                        items: formasPago.map((fp) => DropdownMenuItem(value: fp['value'], child: Text(fp['label']!))).toList(),
-                        onChanged: _isSubmitting ? null : (v) => setState(() => _formaPago = v!),
-                      ),
-                      const SizedBox(height: 16),
-
-                      TextFormField(
-                        controller: _referenciaController,
-                        decoration: const InputDecoration(
-                          labelText: 'Referencia (opcional)',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                        ),
-                        style: const TextStyle(fontSize: 16),
-                        enabled: !_isSubmitting,
-                      ),
-                      const SizedBox(height: 16),
-
-                      TextFormField(
-                        controller: _notaController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nota / Observación (opcional)',
-                          border: OutlineInputBorder(),
-                          alignLabelWithHint: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                        ),
-                        style: const TextStyle(fontSize: 16),
-                        maxLines: 2,
-                        enabled: !_isSubmitting,
+                      const Text(
+                        'Esta cuenta ya está pagada.',
+                        style: AppTypography.h4Bold,
                       ),
                       const SizedBox(height: 24),
-
-                      ElevatedButton(
-                        onPressed: _isSubmitting ? null : _guardarAbono,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          minimumSize: const Size(double.infinity, 48),
-                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                        ),
-                        child: _isSubmitting
-                            ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                            : const Text('✅ Registrar Abono'),
+                      TextButton.icon(
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Volver'),
+                        onPressed: () => context.pop(),
                       ),
-                      const SizedBox(height: 32),
-
-                      const Text('Historial de pagos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 12),
-                      if (pagos.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Text('Sin abonos registrados aún.', style: TextStyle(color: Colors.grey, fontSize: 15), textAlign: TextAlign.center),
-                        )
-                      else
-                        ...pagos.map((PagoProveedorData pago) {
-                          final refVal = pago.referencia;
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 4),
-                            child: ListTile(
-                              title: Text('RD\$ ${pago.monto.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                              subtitle: Text(
-                                '${pago.fechaPago.day}/${pago.fechaPago.month}/${pago.fechaPago.year} • ${_etiquetaFormaPago(pago.formaPago)}'
-                                '${refVal?.isNotEmpty == true ? '\n$refVal' : ''}',
-                                style: const TextStyle(fontSize: 14, height: 1.4),
-                              ),
-                              isThreeLine: refVal?.isNotEmpty == true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            ),
-                          );
-                        }),
                     ],
                   ),
                 ),
               );
-            },
-          );
-        },
+            }
+
+            return SingleChildScrollView(
+              padding: AppLayout.pantallaPadding,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Card(
+                      color: AppColors.primary.withValues(alpha: 0.06),
+                      child: Padding(
+                        padding: AppSpacing.allM,
+                        child: Column(
+                          children: [
+                            Text(cuenta.nombreProveedor, style: AppTypography.h4Bold),
+                            const SizedBox(height: 8),
+                            const Text('Saldo pendiente a la fecha:', style: AppTypography.bodyMedium),
+                            const SizedBox(height: 4),
+                            Text(
+                              'RD\$ ${saldoPendiente.toStringAsFixed(2)}',
+                              style: AppTypography.h4Bold.copyWith(color: AppColors.primary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Fecha',
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                      initialValue: _fecha.toString().split(' ')[0],
+                      readOnly: true,
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _fecha,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                        );
+                        if (picked != null) setState(() => _fecha = picked);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _montoCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                        labelText: 'Monto del Abono',
+                        prefixText: 'RD\$ ',
+                      ),
+                      validator: (String? value) {
+                        final double? v = double.tryParse(value?.replaceAll(',', '.') ?? '');
+                        if (v == null || v <= 0) return 'Ingrese un monto válido';
+                        if (v > saldoPendiente) {
+                          return 'Excede saldo pendiente (RD\$ ${saldoPendiente.toStringAsFixed(2)})';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      initialValue: _formaPago,
+                      decoration: const InputDecoration(labelText: 'Forma de Pago'),
+                      items: const [
+                        DropdownMenuItem<String>(value: 'efectivo', child: Text('Efectivo')),
+                        DropdownMenuItem<String>(value: 'transferencia', child: Text('Transferencia')),
+                        DropdownMenuItem<String>(value: 'cheque', child: Text('Cheque')),
+                        DropdownMenuItem<String>(value: 'tarjeta', child: Text('Tarjeta')),
+                      ],
+                      onChanged: (String? v) => setState(() => _formaPago = v ?? 'efectivo'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _referenciaCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Referencia / Nº Comprobante',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _notaCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Nota (opcional)',
+                      ),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: _cargando ? null : () => context.pop(),
+                            child: const Text('Cancelar'),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            onPressed: _cargando ? null : _guardar,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            child: _cargando
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : const Text('Registrar Abono', style: TextStyle(fontSize: 16)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
-
-  Widget _filaResumen(String etiqueta, double valor, {bool esDestacado = false}) => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(etiqueta, style: TextStyle(fontSize: 15, fontWeight: esDestacado ? FontWeight.bold : FontWeight.normal)),
-          Text(
-            'RD\$ ${valor.toStringAsFixed(2)}',
-            style: TextStyle(fontSize: 15, fontWeight: esDestacado ? FontWeight.bold : FontWeight.normal, color: esDestacado ? Colors.blue[800] : null),
-          ),
-        ],
-      );
-
-  String _etiquetaFormaPago(String valor) => const {
-        'efectivo': 'Efectivo',
-        'transferencia': 'Transferencia',
-        'cheque': 'Cheque',
-        'tarjeta': 'Tarjeta',
-        'otro': 'Otro',
-      }[valor] ?? valor;
 }

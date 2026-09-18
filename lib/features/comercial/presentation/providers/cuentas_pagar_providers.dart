@@ -1,75 +1,122 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'package:fiscogest_rd/core/database/database_provider.dart';
-import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_dao.dart';
-import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
-import 'package:fiscogest_rd/features/comercial/domain/usecases/cuentas_pagar/registrar_abono_usecase.dart';
+import 'package:fiscogest_rd/features/comercial/domain/entities/cuenta_pagar.dart';
+import 'package:fiscogest_rd/features/comercial/domain/entities/abono.dart';
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 
-final cuentasPagarDaoProvider = Provider<CuentasPagarDao>((final ref) {
-  final db = ref.watch(databaseProvider);
-  return CuentasPagarDao(db);
-});
-
-final registrarAbonoUseCaseProvider = Provider<RegistrarAbonoUseCase>((final ref) {
-  final dao = ref.watch(cuentasPagarDaoProvider);
-  return RegistrarAbonoUseCase(cuentasPagarDao: dao);
-});
-
-final historialPagosPorCuentaProvider =
-    FutureProvider.family<List<PagoProveedorData>, int>((final ref, final cuentaId) async {
-  final dao = ref.watch(cuentasPagarDaoProvider);
-  return dao.listarPagosPorCuenta(cuentaId);
-});
-
-class CuentaPagarItem {
-  const CuentaPagarItem({
-    required this.id,
-    required this.proveedorNombre,
-    required this.concepto,
-    required this.monto,
-    required this.fechaEmision,
-    required this.fechaVencimiento,
-    required this.estado,
-    required this.tipoGasto,
-  });
-
-  final int id;
-  final String proveedorNombre;
-  final String concepto;
-  final double monto;
-  final DateTime fechaEmision;
-  final DateTime fechaVencimiento;
-  final String estado;
-  final String tipoGasto;
-}
-
-final listadoCuentasPagarProvider = FutureProvider<List<CuentaPagarItem>>((final ref) async {
+final listadoCuentasPagarProvider =
+    FutureProvider.autoDispose<List<CuentaPagar>>((Ref ref) async {
   final dao = ref.watch(cuentasPagarDaoProvider);
   final registros = await dao.listarCuentasPorPagar();
-  return registros.map((final reg) {
-    final cuenta = reg.cuenta;
-    final estadoTexto = switch (cuenta.estado) {
-      PagarEstado.pagado => 'Pagada',
-      PagarEstado.parcial => 'Abono parcial',
-      PagarEstado.pendiente => 'Pendiente',
-      PagarEstado.vencido => 'Vencida',
-    };
-    final tipoGastoTexto = switch (cuenta.tipoGasto) {
-      TipoGasto.compra => 'Compra',
-      TipoGasto.servicio => 'Servicio',
-      TipoGasto.impuesto => 'Impuesto',
-      TipoGasto.nomina => 'Nómina',
-      TipoGasto.otro => 'Otro',
-    };
-    return CuentaPagarItem(
+
+  return registros
+      .map(
+        (r) => CuentaPagar(
+          id: r.cuenta.id,
+          compraId: 0,
+          nombreProveedor: r.nombreProveedor,
+          numeroDocumento: r.cuenta.concepto,
+          fechaEmision: r.cuenta.fechaEmision,
+          fechaVencimiento: r.cuenta.fechaVencimiento,
+          montoTotal: r.cuenta.monto,
+          montoAbonado: 0.0,
+          estado: r.cuenta.estado,
+        ),
+      )
+      .toList();
+});
+
+final cuentaPagarPorIdProvider =
+    FutureProvider.autoDispose.family<CuentaPagar?, int>(
+  (Ref ref, int id) async {
+    final dao = ref.watch(cuentasPagarDaoProvider);
+    final cuenta = await dao.obtenerCuentaPorId(id);
+
+    if (cuenta == null) return null;
+
+    final pagos = await dao.listarPagosPorCuenta(id);
+    final totalAbonado =
+        pagos.fold<double>(0.0, (sum, p) => sum + p.monto);
+
+    return CuentaPagar(
       id: cuenta.id,
-      proveedorNombre: reg.nombreProveedor,
-      concepto: cuenta.concepto,
-      monto: cuenta.monto,
+      compraId: 0,
+      nombreProveedor: '',
+      numeroDocumento: cuenta.concepto,
       fechaEmision: cuenta.fechaEmision,
       fechaVencimiento: cuenta.fechaVencimiento,
-      estado: estadoTexto,
-      tipoGasto: tipoGastoTexto,
+      montoTotal: cuenta.monto,
+      montoAbonado: totalAbonado,
+      estado: cuenta.estado,
     );
-  }).toList();
+  },
+);
+
+final historialAbonosProvider =
+    FutureProvider.autoDispose.family<List<Abono>, int>(
+  (Ref ref, int cuentaId) async {
+    final dao = ref.watch(cuentasPagarDaoProvider);
+    final registros = await dao.listarPagosPorCuenta(cuentaId);
+
+    return registros
+        .map(
+          (r) => Abono(
+            id: r.id,
+            cuentaPagarId: r.cuentaPagarId,
+            fecha: r.fechaPago,
+            monto: r.monto,
+            formaPago: r.formaPago,
+            referencia: r.referencia ?? '',
+            nota: r.nota,
+          ),
+        )
+        .toList();
+  },
+);
+
+final registrarAbonoProvider =
+    Provider.autoDispose<
+        Future<bool> Function({
+          required int cuentaPagarId,
+          required double monto,
+          required DateTime fechaPago,
+          String formaPago,
+          String? referencia,
+          String? nota,
+        })>((Ref ref) {
+  final dao = ref.read(cuentasPagarDaoProvider);
+
+  return ({
+    required int cuentaPagarId,
+    required double monto,
+    required DateTime fechaPago,
+    String formaPago = 'efectivo',
+    String? referencia,
+    String? nota,
+  }) async {
+    try {
+      final cuenta = await dao.obtenerCuentaPorId(cuentaPagarId);
+
+      if (cuenta == null) {
+        return false;
+      }
+
+      await dao.registrarAbono(
+        cuentaPagarId: cuentaPagarId,
+        proveedorId: cuenta.proveedorId,
+        monto: monto,
+        fechaPago: fechaPago,
+        formaPago: formaPago,
+        referencia: referencia,
+        nota: nota,
+      );
+
+      ref.invalidate(listadoCuentasPagarProvider);
+      ref.invalidate(cuentaPagarPorIdProvider(cuentaPagarId));
+      ref.invalidate(historialAbonosProvider(cuentaPagarId));
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
 });
