@@ -11,7 +11,6 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 
 class DetalleCompraPage extends ConsumerStatefulWidget {
   const DetalleCompraPage({super.key, required this.compraId});
-
   static const String routeName = 'detalle-compra';
   final Object compraId;
 
@@ -21,38 +20,23 @@ class DetalleCompraPage extends ConsumerStatefulWidget {
 
 class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
   late final int _idNumerico;
+  late final Future<List<DetalleCompra>> _detallesFuture;
 
   @override
   void initState() {
     super.initState();
-    final texto = widget.compraId.toString();
-    final soloDigitos = texto.replaceAll(RegExp(r'[^0-9]'), '');
-    _idNumerico = int.tryParse(soloDigitos) ?? 0;
-  }
-
-  String _etiquetaTipoComprobante(String codigo) {
-    return switch (codigo) {
-      'B01' => 'B01 • Gastos',
-      'B02' => 'B02 • Activos Fijos',
-      'B14' => 'B14 • Gastos Menores',
-      'B15' => 'B15 • Compras Exentas',
-      _ => codigo,
+    _idNumerico = switch (widget.compraId) {
+      final int id => id,
+      final String idStr => int.tryParse(idStr) ?? 0,
+      _ => 0,
     };
-  }
-
-  String _etiquetaFormaPago(String codigo) {
-    return switch (codigo) {
-      'contado' => 'Contado',
-      'credito' => 'Crédito',
-      _ => codigo,
-    };
+    final repositorio = ref.read(compraRepositoryProvider);
+    _detallesFuture = repositorio.listarDetallesDeCompra(_idNumerico);
   }
 
   @override
   Widget build(BuildContext context) {
     final compraAsync = ref.watch(compraPorIdProvider(_idNumerico));
-    final repositorio = ref.watch(compraRepositoryProvider);
-
     return AppScaffold(
       title: 'Detalle de Compra',
       body: SafeArea(
@@ -83,12 +67,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                   ),
                 );
               }
-
               return FutureBuilder<List<DetalleCompra>>(
-                future: repositorio.listarDetallesDeCompra(_idNumerico),
+                future: _detallesFuture,
                 builder: (context, snapshot) {
-                  final detalles = snapshot.data ?? [];
-
+                  final detalles = snapshot.data ?? const <DetalleCompra>[];
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -126,11 +108,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                         runSpacing: 6,
                         children: [
                           Text(
-                            'Tipo: ${_etiquetaTipoComprobante(compra.tipoComprobante)}',
+                            'Tipo: ${compra.tipoComprobante}',
                             style: AppTypography.bodySmall,
                           ),
                           Text(
-                            'Pago: ${_etiquetaFormaPago(compra.formaPago)}',
+                            'Pago: ${compra.formaPago}',
                             style: AppTypography.bodySmall,
                           ),
                           if (compra.formaPago == 'credito') ...[
@@ -179,17 +161,17 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                           ),
                         )
                       else
-                        ...detalles.map((detalle) => Container(
+                        ...detalles.map((final DetalleCompra detalle) => Container(
                           margin: const EdgeInsets.symmetric(vertical: 4),
                           padding: AppSpacing.allM,
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
+                                color: Colors.black12,
                                 blurRadius: 2,
-                                offset: const Offset(0, 1),
+                                offset: Offset(0, 1),
                               ),
                             ],
                           ),
@@ -255,7 +237,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                 width: double.infinity,
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.08),
+                                  color: AppColors.primary.withAlpha(20),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Column(

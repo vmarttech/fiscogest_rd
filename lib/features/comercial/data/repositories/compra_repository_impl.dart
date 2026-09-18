@@ -66,8 +66,8 @@ Compra _filaToCompra(ComprasTableData fila) {
     tasaImpuesto: fila.tasaImpuesto,
     montoImpuesto: fila.montoImpuesto,
     totalCompra: fila.totalCompra,
-    observaciones: fila.observaciones,
     estado: fila.estado,
+    observaciones: fila.observaciones,
     creadoEn: fila.creadoEn,
     actualizadoEn: fila.actualizadoEn,
   );
@@ -127,7 +127,6 @@ class CompraRepositoryImpl implements ICompraRepository {
     final fila = await (db.select(
       db.comprasTable,
     )..where((t) => t.id.equals(compraId))).getSingleOrNull();
-
     return fila == null ? null : _filaToCompra(fila);
   }
 
@@ -138,7 +137,6 @@ class CompraRepositoryImpl implements ICompraRepository {
     )..orderBy([
         (t) => OrderingTerm.desc(t.fechaEmision),
       ])).get();
-
     return filas.map((ComprasTableData f) => _filaToCompra(f)).toList();
   }
 
@@ -147,7 +145,6 @@ class CompraRepositoryImpl implements ICompraRepository {
     final filas = await (db.select(
       db.detalleCompraTable,
     )..where((t) => t.compraId.equals(compraId))).get();
-
     return filas.map((DetalleCompraTableData f) => _filaToDetalle(f)).toList();
   }
 
@@ -160,7 +157,6 @@ class CompraRepositoryImpl implements ICompraRepository {
       await db.into(db.comprasTable).insert(
             _compraToCompanion(compra),
           );
-
       await db.batch((batch) {
         for (final detalle in detalles) {
           batch.insert(
@@ -170,7 +166,6 @@ class CompraRepositoryImpl implements ICompraRepository {
         }
       });
     });
-
     return compra;
   }
 
@@ -178,29 +173,24 @@ class CompraRepositoryImpl implements ICompraRepository {
   Future<Compra> confirmarCompra(int compraId) async {
     return await db.transaction(() async {
       final compra = await obtenerCompraPorId(compraId);
-
       if (compra == null) {
         throw StateError('Compra no encontrada: $compraId');
       }
-
       if (compra.estado != EstadoCompra.borrador) {
         throw StateError(
           'Solo se puede confirmar compras en estado Borrador',
         );
       }
-
       final compraConfirmada = compra.copyWith(
         estado: EstadoCompra.confirmada,
         fechaConfirmacion: DateTime.now(),
         actualizadoEn: DateTime.now(),
       );
-
       await (db.update(db.comprasTable)
             ..where((t) => t.id.equals(compraId)))
           .write(
         _compraToCompanion(compraConfirmada),
       );
-
       return compraConfirmada;
     });
   }
@@ -209,32 +199,26 @@ class CompraRepositoryImpl implements ICompraRepository {
   Future<Compra> anularCompra(int compraId) async {
     return await db.transaction(() async {
       final compra = await obtenerCompraPorId(compraId);
-
       if (compra == null) {
         throw StateError('Compra no encontrada: $compraId');
       }
-
       if (compra.estado == EstadoCompra.anulada) {
         throw StateError('La compra ya se encuentra anulada');
       }
-
       if (compra.estado == EstadoCompra.borrador) {
         throw StateError(
           'No se anulan borradores — elimine directamente',
         );
       }
-
       final compraAnulada = compra.copyWith(
         estado: EstadoCompra.anulada,
         actualizadoEn: DateTime.now(),
       );
-
       await (db.update(db.comprasTable)
             ..where((t) => t.id.equals(compraId)))
           .write(
         _compraToCompanion(compraAnulada),
       );
-
       return compraAnulada;
     });
   }

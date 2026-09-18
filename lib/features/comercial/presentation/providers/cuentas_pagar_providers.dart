@@ -5,17 +5,18 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_dao.dart'
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/cuentas_pagar/registrar_abono_usecase.dart';
 
-final cuentasPagarDaoProvider = Provider<CuentasPagarDao>((ref) {
+final cuentasPagarDaoProvider = Provider<CuentasPagarDao>((final ref) {
   final db = ref.watch(databaseProvider);
   return CuentasPagarDao(db);
 });
 
-final registrarAbonoUseCaseProvider = Provider<RegistrarAbonoUseCase>((ref) {
+final registrarAbonoUseCaseProvider = Provider<RegistrarAbonoUseCase>((final ref) {
   final dao = ref.watch(cuentasPagarDaoProvider);
   return RegistrarAbonoUseCase(cuentasPagarDao: dao);
 });
 
-final historialPagosPorCuentaProvider = FutureProvider.family<List<PagoProveedorData>, int>((ref, cuentaId) async {
+final historialPagosPorCuentaProvider =
+    FutureProvider.family<List<PagoProveedorData>, int>((final ref, final cuentaId) async {
   final dao = ref.watch(cuentasPagarDaoProvider);
   return dao.listarPagosPorCuenta(cuentaId);
 });
@@ -31,6 +32,7 @@ class CuentaPagarItem {
     required this.estado,
     required this.tipoGasto,
   });
+
   final int id;
   final String proveedorNombre;
   final String concepto;
@@ -41,10 +43,10 @@ class CuentaPagarItem {
   final String tipoGasto;
 }
 
-final listadoCuentasPagarProvider = FutureProvider<List<CuentaPagarItem>>((ref) async {
+final listadoCuentasPagarProvider = FutureProvider<List<CuentaPagarItem>>((final ref) async {
   final dao = ref.watch(cuentasPagarDaoProvider);
   final registros = await dao.listarCuentasPorPagar();
-  return registros.map((reg) {
+  return registros.map((final reg) {
     final cuenta = reg.cuenta;
     final estadoTexto = switch (cuenta.estado) {
       PagarEstado.pagado => 'Pagada',

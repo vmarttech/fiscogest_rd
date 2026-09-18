@@ -4,11 +4,11 @@ class ProveedorRepository {
   final List<Proveedor> _proveedoresLocales = [
     Proveedor(
       id: 1,
-      nombre: 'Distribuidora Global, S.A.',
-      contacto: 'Lic. Juan Pérez',
+      nombreEmpresa: 'Distribuidora Global, S.A.',
+      nombreContacto: 'Lic. Juan Pérez',
       direccion: 'Av. John F. Kennedy, Santo Domingo',
       telefono: '809-555-1234',
-      correo: 'contacto@distribuidoraglobal.do',
+      email: 'contacto@distribuidoraglobal.do',
       rnc: '101-23456-7',
     ),
   ];
@@ -19,7 +19,7 @@ class ProveedorRepository {
 
   Future<void> agregarProveedor(Proveedor proveedor) async {
     final existe = _proveedoresLocales.any(
-      (p) => p.rnc.trim() == proveedor.rnc.trim(),
+      (p) => p.rnc?.trim() == proveedor.rnc?.trim(),
     );
     if (existe) {
       throw Exception('Ya existe un proveedor registrado con ese RNC.');
@@ -35,7 +35,7 @@ class ProveedorRepository {
 
   Future<void> actualizarProveedor(Proveedor proveedor) async {
     final duplicado = _proveedoresLocales.any(
-      (p) => p.id != proveedor.id && p.rnc.trim() == proveedor.rnc.trim(),
+      (p) => p.id != proveedor.id && p.rnc?.trim() == proveedor.rnc?.trim(),
     );
     if (duplicado) {
       throw Exception('Ya existe otro proveedor registrado con ese RNC.');

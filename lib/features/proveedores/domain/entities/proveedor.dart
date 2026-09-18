@@ -1,42 +1,89 @@
 class Proveedor {
   Proveedor({
     this.id,
-    required this.nombre,
-    required this.contacto,
-    required this.direccion,
-    required this.telefono,
-    required this.correo,
-    required this.rnc,
-    this.activo = true,
+    required this.nombreEmpresa,
+    this.nombreContacto,
+    this.rnc,
+    this.telefono,
+    this.celular,
+    this.whatsApp,
+    this.email,
+    this.direccion,
+    this.ciudad,
+    this.provincia,
+    this.limiteCredito = 0.0,
+    this.diasCredito = 0,
+    this.condicionesNota,
+    this.estado = 'Activo',
+    this.fechaCreacion,
+    this.fechaActualizacion,
   });
+
   final int? id;
-  final String nombre;
-  final String contacto;
-  final String direccion;
-  final String telefono;
-  final String correo;
-  final String rnc;
-  final bool activo;
+  final String nombreEmpresa;
+  final String? nombreContacto;
+  final String? rnc;
+  final String? telefono;
+  final String? celular;
+  final String? whatsApp;
+  final String? email;
+  final String? direccion;
+  final String? ciudad;
+  final String? provincia;
+  final double limiteCredito;
+  final int diasCredito;
+  final String? condicionesNota;
+  final String estado;
+  final DateTime? fechaCreacion;
+  final DateTime? fechaActualizacion;
+
+  bool get tieneCredito => limiteCredito > 0 || diasCredito > 0;
+
+  String get direccionCompleta {
+    final partes = <String>[];
+    if (direccion?.isNotEmpty == true) partes.add(direccion!);
+    if (ciudad?.isNotEmpty == true) partes.add(ciudad!);
+    if (provincia?.isNotEmpty == true) partes.add(provincia!);
+    return partes.join(', ');
+  }
 
   Proveedor copyWith({
     int? id,
-    String? nombre,
-    String? contacto,
-    String? direccion,
-    String? telefono,
-    String? correo,
+    String? nombreEmpresa,
+    String? nombreContacto,
     String? rnc,
-    bool? activo,
+    String? telefono,
+    String? celular,
+    String? whatsApp,
+    String? email,
+    String? direccion,
+    String? ciudad,
+    String? provincia,
+    double? limiteCredito,
+    int? diasCredito,
+    String? condicionesNota,
+    String? estado,
+    DateTime? fechaCreacion,
+    DateTime? fechaActualizacion,
   }) {
     return Proveedor(
       id: id ?? this.id,
-      nombre: nombre ?? this.nombre,
-      contacto: contacto ?? this.contacto,
-      direccion: direccion ?? this.direccion,
-      telefono: telefono ?? this.telefono,
-      correo: correo ?? this.correo,
+      nombreEmpresa: nombreEmpresa ?? this.nombreEmpresa,
+      nombreContacto: nombreContacto ?? this.nombreContacto,
       rnc: rnc ?? this.rnc,
-      activo: activo ?? this.activo,
+      telefono: telefono ?? this.telefono,
+      celular: celular ?? this.celular,
+      whatsApp: whatsApp ?? this.whatsApp,
+      email: email ?? this.email,
+      direccion: direccion ?? this.direccion,
+      ciudad: ciudad ?? this.ciudad,
+      provincia: provincia ?? this.provincia,
+      limiteCredito: limiteCredito ?? this.limiteCredito,
+      diasCredito: diasCredito ?? this.diasCredito,
+      condicionesNota: condicionesNota ?? this.condicionesNota,
+      estado: estado ?? this.estado,
+      fechaCreacion: fechaCreacion ?? this.fechaCreacion,
+      fechaActualizacion: fechaActualizacion ?? this.fechaActualizacion,
     );
   }
 }

@@ -7212,7 +7212,7 @@ class ExistenciasTableCompanion extends UpdateCompanion<ExistenciaData> {
 }
 
 class $ProveedoresTableTable extends ProveedoresTable
-    with TableInfo<$ProveedoresTableTable, ProveedorData> {
+    with TableInfo<$ProveedoresTableTable, ProveedoresTableData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -7284,6 +7284,17 @@ class $ProveedoresTableTable extends ProveedoresTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _whatsAppMeta = const VerificationMeta(
+    'whatsApp',
+  );
+  @override
+  late final GeneratedColumn<String> whatsApp = GeneratedColumn<String>(
+    'whatsapp',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _emailMeta = const VerificationMeta('email');
   @override
   late final GeneratedColumn<String> email = GeneratedColumn<String>(
@@ -7324,6 +7335,18 @@ class $ProveedoresTableTable extends ProveedoresTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _limiteCreditoMeta = const VerificationMeta(
+    'limiteCredito',
+  );
+  @override
+  late final GeneratedColumn<double> limiteCredito = GeneratedColumn<double>(
+    'limite_credito',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _diasCreditoMeta = const VerificationMeta(
     'diasCredito',
   );
@@ -7335,6 +7358,17 @@ class $ProveedoresTableTable extends ProveedoresTable
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _condicionesNotaMeta = const VerificationMeta(
+    'condicionesNota',
+  );
+  @override
+  late final GeneratedColumn<String> condicionesNota = GeneratedColumn<String>(
+    'condiciones_nota',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
@@ -7378,11 +7412,14 @@ class $ProveedoresTableTable extends ProveedoresTable
     rnc,
     telefono,
     celular,
+    whatsApp,
     email,
     direccion,
     ciudad,
     provincia,
+    limiteCredito,
     diasCredito,
+    condicionesNota,
     estado,
     fechaCreacion,
     fechaActualizacion,
@@ -7394,7 +7431,7 @@ class $ProveedoresTableTable extends ProveedoresTable
   static const String $name = 'proveedores_table';
   @override
   VerificationContext validateIntegrity(
-    Insertable<ProveedorData> instance, {
+    Insertable<ProveedoresTableData> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -7440,6 +7477,12 @@ class $ProveedoresTableTable extends ProveedoresTable
         celular.isAcceptableOrUnknown(data['celular']!, _celularMeta),
       );
     }
+    if (data.containsKey('whatsapp')) {
+      context.handle(
+        _whatsAppMeta,
+        whatsApp.isAcceptableOrUnknown(data['whatsapp']!, _whatsAppMeta),
+      );
+    }
     if (data.containsKey('email')) {
       context.handle(
         _emailMeta,
@@ -7464,12 +7507,30 @@ class $ProveedoresTableTable extends ProveedoresTable
         provincia.isAcceptableOrUnknown(data['provincia']!, _provinciaMeta),
       );
     }
+    if (data.containsKey('limite_credito')) {
+      context.handle(
+        _limiteCreditoMeta,
+        limiteCredito.isAcceptableOrUnknown(
+          data['limite_credito']!,
+          _limiteCreditoMeta,
+        ),
+      );
+    }
     if (data.containsKey('dias_credito')) {
       context.handle(
         _diasCreditoMeta,
         diasCredito.isAcceptableOrUnknown(
           data['dias_credito']!,
           _diasCreditoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('condiciones_nota')) {
+      context.handle(
+        _condicionesNotaMeta,
+        condicionesNota.isAcceptableOrUnknown(
+          data['condiciones_nota']!,
+          _condicionesNotaMeta,
         ),
       );
     }
@@ -7503,9 +7564,9 @@ class $ProveedoresTableTable extends ProveedoresTable
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ProveedorData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ProveedoresTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ProveedorData(
+    return ProveedoresTableData(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -7530,6 +7591,10 @@ class $ProveedoresTableTable extends ProveedoresTable
         DriftSqlType.string,
         data['${effectivePrefix}celular'],
       ),
+      whatsApp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}whatsapp'],
+      ),
       email: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}email'],
@@ -7546,10 +7611,18 @@ class $ProveedoresTableTable extends ProveedoresTable
         DriftSqlType.string,
         data['${effectivePrefix}provincia'],
       ),
+      limiteCredito: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}limite_credito'],
+      )!,
       diasCredito: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}dias_credito'],
       )!,
+      condicionesNota: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}condiciones_nota'],
+      ),
       estado: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}estado'],
@@ -7571,33 +7644,40 @@ class $ProveedoresTableTable extends ProveedoresTable
   }
 }
 
-class ProveedorData extends DataClass implements Insertable<ProveedorData> {
+class ProveedoresTableData extends DataClass
+    implements Insertable<ProveedoresTableData> {
   final int id;
   final String nombreEmpresa;
   final String? nombreContacto;
   final String? rnc;
   final String? telefono;
   final String? celular;
+  final String? whatsApp;
   final String? email;
   final String? direccion;
   final String? ciudad;
   final String? provincia;
+  final double limiteCredito;
   final int diasCredito;
+  final String? condicionesNota;
   final String estado;
   final DateTime fechaCreacion;
   final DateTime? fechaActualizacion;
-  const ProveedorData({
+  const ProveedoresTableData({
     required this.id,
     required this.nombreEmpresa,
     this.nombreContacto,
     this.rnc,
     this.telefono,
     this.celular,
+    this.whatsApp,
     this.email,
     this.direccion,
     this.ciudad,
     this.provincia,
+    required this.limiteCredito,
     required this.diasCredito,
+    this.condicionesNota,
     required this.estado,
     required this.fechaCreacion,
     this.fechaActualizacion,
@@ -7619,6 +7699,9 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
     if (!nullToAbsent || celular != null) {
       map['celular'] = Variable<String>(celular);
     }
+    if (!nullToAbsent || whatsApp != null) {
+      map['whatsapp'] = Variable<String>(whatsApp);
+    }
     if (!nullToAbsent || email != null) {
       map['email'] = Variable<String>(email);
     }
@@ -7631,7 +7714,11 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
     if (!nullToAbsent || provincia != null) {
       map['provincia'] = Variable<String>(provincia);
     }
+    map['limite_credito'] = Variable<double>(limiteCredito);
     map['dias_credito'] = Variable<int>(diasCredito);
+    if (!nullToAbsent || condicionesNota != null) {
+      map['condiciones_nota'] = Variable<String>(condicionesNota);
+    }
     map['estado'] = Variable<String>(estado);
     map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
     if (!nullToAbsent || fechaActualizacion != null) {
@@ -7654,6 +7741,9 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
       celular: celular == null && nullToAbsent
           ? const Value.absent()
           : Value(celular),
+      whatsApp: whatsApp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(whatsApp),
       email: email == null && nullToAbsent
           ? const Value.absent()
           : Value(email),
@@ -7666,7 +7756,11 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
       provincia: provincia == null && nullToAbsent
           ? const Value.absent()
           : Value(provincia),
+      limiteCredito: Value(limiteCredito),
       diasCredito: Value(diasCredito),
+      condicionesNota: condicionesNota == null && nullToAbsent
+          ? const Value.absent()
+          : Value(condicionesNota),
       estado: Value(estado),
       fechaCreacion: Value(fechaCreacion),
       fechaActualizacion: fechaActualizacion == null && nullToAbsent
@@ -7675,23 +7769,26 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
     );
   }
 
-  factory ProveedorData.fromJson(
+  factory ProveedoresTableData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ProveedorData(
+    return ProveedoresTableData(
       id: serializer.fromJson<int>(json['id']),
       nombreEmpresa: serializer.fromJson<String>(json['nombreEmpresa']),
       nombreContacto: serializer.fromJson<String?>(json['nombreContacto']),
       rnc: serializer.fromJson<String?>(json['rnc']),
       telefono: serializer.fromJson<String?>(json['telefono']),
       celular: serializer.fromJson<String?>(json['celular']),
+      whatsApp: serializer.fromJson<String?>(json['whatsApp']),
       email: serializer.fromJson<String?>(json['email']),
       direccion: serializer.fromJson<String?>(json['direccion']),
       ciudad: serializer.fromJson<String?>(json['ciudad']),
       provincia: serializer.fromJson<String?>(json['provincia']),
+      limiteCredito: serializer.fromJson<double>(json['limiteCredito']),
       diasCredito: serializer.fromJson<int>(json['diasCredito']),
+      condicionesNota: serializer.fromJson<String?>(json['condicionesNota']),
       estado: serializer.fromJson<String>(json['estado']),
       fechaCreacion: serializer.fromJson<DateTime>(json['fechaCreacion']),
       fechaActualizacion: serializer.fromJson<DateTime?>(
@@ -7709,33 +7806,39 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
       'rnc': serializer.toJson<String?>(rnc),
       'telefono': serializer.toJson<String?>(telefono),
       'celular': serializer.toJson<String?>(celular),
+      'whatsApp': serializer.toJson<String?>(whatsApp),
       'email': serializer.toJson<String?>(email),
       'direccion': serializer.toJson<String?>(direccion),
       'ciudad': serializer.toJson<String?>(ciudad),
       'provincia': serializer.toJson<String?>(provincia),
+      'limiteCredito': serializer.toJson<double>(limiteCredito),
       'diasCredito': serializer.toJson<int>(diasCredito),
+      'condicionesNota': serializer.toJson<String?>(condicionesNota),
       'estado': serializer.toJson<String>(estado),
       'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
       'fechaActualizacion': serializer.toJson<DateTime?>(fechaActualizacion),
     };
   }
 
-  ProveedorData copyWith({
+  ProveedoresTableData copyWith({
     int? id,
     String? nombreEmpresa,
     Value<String?> nombreContacto = const Value.absent(),
     Value<String?> rnc = const Value.absent(),
     Value<String?> telefono = const Value.absent(),
     Value<String?> celular = const Value.absent(),
+    Value<String?> whatsApp = const Value.absent(),
     Value<String?> email = const Value.absent(),
     Value<String?> direccion = const Value.absent(),
     Value<String?> ciudad = const Value.absent(),
     Value<String?> provincia = const Value.absent(),
+    double? limiteCredito,
     int? diasCredito,
+    Value<String?> condicionesNota = const Value.absent(),
     String? estado,
     DateTime? fechaCreacion,
     Value<DateTime?> fechaActualizacion = const Value.absent(),
-  }) => ProveedorData(
+  }) => ProveedoresTableData(
     id: id ?? this.id,
     nombreEmpresa: nombreEmpresa ?? this.nombreEmpresa,
     nombreContacto: nombreContacto.present
@@ -7744,19 +7847,24 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
     rnc: rnc.present ? rnc.value : this.rnc,
     telefono: telefono.present ? telefono.value : this.telefono,
     celular: celular.present ? celular.value : this.celular,
+    whatsApp: whatsApp.present ? whatsApp.value : this.whatsApp,
     email: email.present ? email.value : this.email,
     direccion: direccion.present ? direccion.value : this.direccion,
     ciudad: ciudad.present ? ciudad.value : this.ciudad,
     provincia: provincia.present ? provincia.value : this.provincia,
+    limiteCredito: limiteCredito ?? this.limiteCredito,
     diasCredito: diasCredito ?? this.diasCredito,
+    condicionesNota: condicionesNota.present
+        ? condicionesNota.value
+        : this.condicionesNota,
     estado: estado ?? this.estado,
     fechaCreacion: fechaCreacion ?? this.fechaCreacion,
     fechaActualizacion: fechaActualizacion.present
         ? fechaActualizacion.value
         : this.fechaActualizacion,
   );
-  ProveedorData copyWithCompanion(ProveedoresTableCompanion data) {
-    return ProveedorData(
+  ProveedoresTableData copyWithCompanion(ProveedoresTableCompanion data) {
+    return ProveedoresTableData(
       id: data.id.present ? data.id.value : this.id,
       nombreEmpresa: data.nombreEmpresa.present
           ? data.nombreEmpresa.value
@@ -7767,13 +7875,20 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
       rnc: data.rnc.present ? data.rnc.value : this.rnc,
       telefono: data.telefono.present ? data.telefono.value : this.telefono,
       celular: data.celular.present ? data.celular.value : this.celular,
+      whatsApp: data.whatsApp.present ? data.whatsApp.value : this.whatsApp,
       email: data.email.present ? data.email.value : this.email,
       direccion: data.direccion.present ? data.direccion.value : this.direccion,
       ciudad: data.ciudad.present ? data.ciudad.value : this.ciudad,
       provincia: data.provincia.present ? data.provincia.value : this.provincia,
+      limiteCredito: data.limiteCredito.present
+          ? data.limiteCredito.value
+          : this.limiteCredito,
       diasCredito: data.diasCredito.present
           ? data.diasCredito.value
           : this.diasCredito,
+      condicionesNota: data.condicionesNota.present
+          ? data.condicionesNota.value
+          : this.condicionesNota,
       estado: data.estado.present ? data.estado.value : this.estado,
       fechaCreacion: data.fechaCreacion.present
           ? data.fechaCreacion.value
@@ -7786,18 +7901,21 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
 
   @override
   String toString() {
-    return (StringBuffer('ProveedorData(')
+    return (StringBuffer('ProveedoresTableData(')
           ..write('id: $id, ')
           ..write('nombreEmpresa: $nombreEmpresa, ')
           ..write('nombreContacto: $nombreContacto, ')
           ..write('rnc: $rnc, ')
           ..write('telefono: $telefono, ')
           ..write('celular: $celular, ')
+          ..write('whatsApp: $whatsApp, ')
           ..write('email: $email, ')
           ..write('direccion: $direccion, ')
           ..write('ciudad: $ciudad, ')
           ..write('provincia: $provincia, ')
+          ..write('limiteCredito: $limiteCredito, ')
           ..write('diasCredito: $diasCredito, ')
+          ..write('condicionesNota: $condicionesNota, ')
           ..write('estado: $estado, ')
           ..write('fechaCreacion: $fechaCreacion, ')
           ..write('fechaActualizacion: $fechaActualizacion')
@@ -7813,11 +7931,14 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
     rnc,
     telefono,
     celular,
+    whatsApp,
     email,
     direccion,
     ciudad,
     provincia,
+    limiteCredito,
     diasCredito,
+    condicionesNota,
     estado,
     fechaCreacion,
     fechaActualizacion,
@@ -7825,35 +7946,41 @@ class ProveedorData extends DataClass implements Insertable<ProveedorData> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ProveedorData &&
+      (other is ProveedoresTableData &&
           other.id == this.id &&
           other.nombreEmpresa == this.nombreEmpresa &&
           other.nombreContacto == this.nombreContacto &&
           other.rnc == this.rnc &&
           other.telefono == this.telefono &&
           other.celular == this.celular &&
+          other.whatsApp == this.whatsApp &&
           other.email == this.email &&
           other.direccion == this.direccion &&
           other.ciudad == this.ciudad &&
           other.provincia == this.provincia &&
+          other.limiteCredito == this.limiteCredito &&
           other.diasCredito == this.diasCredito &&
+          other.condicionesNota == this.condicionesNota &&
           other.estado == this.estado &&
           other.fechaCreacion == this.fechaCreacion &&
           other.fechaActualizacion == this.fechaActualizacion);
 }
 
-class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
+class ProveedoresTableCompanion extends UpdateCompanion<ProveedoresTableData> {
   final Value<int> id;
   final Value<String> nombreEmpresa;
   final Value<String?> nombreContacto;
   final Value<String?> rnc;
   final Value<String?> telefono;
   final Value<String?> celular;
+  final Value<String?> whatsApp;
   final Value<String?> email;
   final Value<String?> direccion;
   final Value<String?> ciudad;
   final Value<String?> provincia;
+  final Value<double> limiteCredito;
   final Value<int> diasCredito;
+  final Value<String?> condicionesNota;
   final Value<String> estado;
   final Value<DateTime> fechaCreacion;
   final Value<DateTime?> fechaActualizacion;
@@ -7864,11 +7991,14 @@ class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
     this.rnc = const Value.absent(),
     this.telefono = const Value.absent(),
     this.celular = const Value.absent(),
+    this.whatsApp = const Value.absent(),
     this.email = const Value.absent(),
     this.direccion = const Value.absent(),
     this.ciudad = const Value.absent(),
     this.provincia = const Value.absent(),
+    this.limiteCredito = const Value.absent(),
     this.diasCredito = const Value.absent(),
+    this.condicionesNota = const Value.absent(),
     this.estado = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
     this.fechaActualizacion = const Value.absent(),
@@ -7880,27 +8010,33 @@ class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
     this.rnc = const Value.absent(),
     this.telefono = const Value.absent(),
     this.celular = const Value.absent(),
+    this.whatsApp = const Value.absent(),
     this.email = const Value.absent(),
     this.direccion = const Value.absent(),
     this.ciudad = const Value.absent(),
     this.provincia = const Value.absent(),
+    this.limiteCredito = const Value.absent(),
     this.diasCredito = const Value.absent(),
+    this.condicionesNota = const Value.absent(),
     this.estado = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
     this.fechaActualizacion = const Value.absent(),
   }) : nombreEmpresa = Value(nombreEmpresa);
-  static Insertable<ProveedorData> custom({
+  static Insertable<ProveedoresTableData> custom({
     Expression<int>? id,
     Expression<String>? nombreEmpresa,
     Expression<String>? nombreContacto,
     Expression<String>? rnc,
     Expression<String>? telefono,
     Expression<String>? celular,
+    Expression<String>? whatsApp,
     Expression<String>? email,
     Expression<String>? direccion,
     Expression<String>? ciudad,
     Expression<String>? provincia,
+    Expression<double>? limiteCredito,
     Expression<int>? diasCredito,
+    Expression<String>? condicionesNota,
     Expression<String>? estado,
     Expression<DateTime>? fechaCreacion,
     Expression<DateTime>? fechaActualizacion,
@@ -7912,11 +8048,14 @@ class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
       if (rnc != null) 'rnc': rnc,
       if (telefono != null) 'telefono': telefono,
       if (celular != null) 'celular': celular,
+      if (whatsApp != null) 'whatsapp': whatsApp,
       if (email != null) 'email': email,
       if (direccion != null) 'direccion': direccion,
       if (ciudad != null) 'ciudad': ciudad,
       if (provincia != null) 'provincia': provincia,
+      if (limiteCredito != null) 'limite_credito': limiteCredito,
       if (diasCredito != null) 'dias_credito': diasCredito,
+      if (condicionesNota != null) 'condiciones_nota': condicionesNota,
       if (estado != null) 'estado': estado,
       if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
       if (fechaActualizacion != null) 'fecha_actualizacion': fechaActualizacion,
@@ -7930,11 +8069,14 @@ class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
     Value<String?>? rnc,
     Value<String?>? telefono,
     Value<String?>? celular,
+    Value<String?>? whatsApp,
     Value<String?>? email,
     Value<String?>? direccion,
     Value<String?>? ciudad,
     Value<String?>? provincia,
+    Value<double>? limiteCredito,
     Value<int>? diasCredito,
+    Value<String?>? condicionesNota,
     Value<String>? estado,
     Value<DateTime>? fechaCreacion,
     Value<DateTime?>? fechaActualizacion,
@@ -7946,11 +8088,14 @@ class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
       rnc: rnc ?? this.rnc,
       telefono: telefono ?? this.telefono,
       celular: celular ?? this.celular,
+      whatsApp: whatsApp ?? this.whatsApp,
       email: email ?? this.email,
       direccion: direccion ?? this.direccion,
       ciudad: ciudad ?? this.ciudad,
       provincia: provincia ?? this.provincia,
+      limiteCredito: limiteCredito ?? this.limiteCredito,
       diasCredito: diasCredito ?? this.diasCredito,
+      condicionesNota: condicionesNota ?? this.condicionesNota,
       estado: estado ?? this.estado,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
       fechaActualizacion: fechaActualizacion ?? this.fechaActualizacion,
@@ -7978,6 +8123,9 @@ class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
     if (celular.present) {
       map['celular'] = Variable<String>(celular.value);
     }
+    if (whatsApp.present) {
+      map['whatsapp'] = Variable<String>(whatsApp.value);
+    }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
     }
@@ -7990,8 +8138,14 @@ class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
     if (provincia.present) {
       map['provincia'] = Variable<String>(provincia.value);
     }
+    if (limiteCredito.present) {
+      map['limite_credito'] = Variable<double>(limiteCredito.value);
+    }
     if (diasCredito.present) {
       map['dias_credito'] = Variable<int>(diasCredito.value);
+    }
+    if (condicionesNota.present) {
+      map['condiciones_nota'] = Variable<String>(condicionesNota.value);
     }
     if (estado.present) {
       map['estado'] = Variable<String>(estado.value);
@@ -8014,11 +8168,14 @@ class ProveedoresTableCompanion extends UpdateCompanion<ProveedorData> {
           ..write('rnc: $rnc, ')
           ..write('telefono: $telefono, ')
           ..write('celular: $celular, ')
+          ..write('whatsApp: $whatsApp, ')
           ..write('email: $email, ')
           ..write('direccion: $direccion, ')
           ..write('ciudad: $ciudad, ')
           ..write('provincia: $provincia, ')
+          ..write('limiteCredito: $limiteCredito, ')
           ..write('diasCredito: $diasCredito, ')
+          ..write('condicionesNota: $condicionesNota, ')
           ..write('estado: $estado, ')
           ..write('fechaCreacion: $fechaCreacion, ')
           ..write('fechaActualizacion: $fechaActualizacion')
@@ -24927,11 +25084,14 @@ typedef $$ProveedoresTableTableCreateCompanionBuilder =
       Value<String?> rnc,
       Value<String?> telefono,
       Value<String?> celular,
+      Value<String?> whatsApp,
       Value<String?> email,
       Value<String?> direccion,
       Value<String?> ciudad,
       Value<String?> provincia,
+      Value<double> limiteCredito,
       Value<int> diasCredito,
+      Value<String?> condicionesNota,
       Value<String> estado,
       Value<DateTime> fechaCreacion,
       Value<DateTime?> fechaActualizacion,
@@ -24944,11 +25104,14 @@ typedef $$ProveedoresTableTableUpdateCompanionBuilder =
       Value<String?> rnc,
       Value<String?> telefono,
       Value<String?> celular,
+      Value<String?> whatsApp,
       Value<String?> email,
       Value<String?> direccion,
       Value<String?> ciudad,
       Value<String?> provincia,
+      Value<double> limiteCredito,
       Value<int> diasCredito,
+      Value<String?> condicionesNota,
       Value<String> estado,
       Value<DateTime> fechaCreacion,
       Value<DateTime?> fechaActualizacion,
@@ -24956,7 +25119,11 @@ typedef $$ProveedoresTableTableUpdateCompanionBuilder =
 
 final class $$ProveedoresTableTableReferences
     extends
-        BaseReferences<_$AppDatabase, $ProveedoresTableTable, ProveedorData> {
+        BaseReferences<
+          _$AppDatabase,
+          $ProveedoresTableTable,
+          ProveedoresTableData
+        > {
   $$ProveedoresTableTableReferences(
     super.$_db,
     super.$_table,
@@ -25072,6 +25239,11 @@ class $$ProveedoresTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get whatsApp => $composableBuilder(
+    column: $table.whatsApp,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get email => $composableBuilder(
     column: $table.email,
     builder: (column) => ColumnFilters(column),
@@ -25092,8 +25264,18 @@ class $$ProveedoresTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get limiteCredito => $composableBuilder(
+    column: $table.limiteCredito,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get diasCredito => $composableBuilder(
     column: $table.diasCredito,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get condicionesNota => $composableBuilder(
+    column: $table.condicionesNota,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -25227,6 +25409,11 @@ class $$ProveedoresTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get whatsApp => $composableBuilder(
+    column: $table.whatsApp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get email => $composableBuilder(
     column: $table.email,
     builder: (column) => ColumnOrderings(column),
@@ -25247,8 +25434,18 @@ class $$ProveedoresTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get limiteCredito => $composableBuilder(
+    column: $table.limiteCredito,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get diasCredito => $composableBuilder(
     column: $table.diasCredito,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get condicionesNota => $composableBuilder(
+    column: $table.condicionesNota,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -25299,6 +25496,9 @@ class $$ProveedoresTableTableAnnotationComposer
   GeneratedColumn<String> get celular =>
       $composableBuilder(column: $table.celular, builder: (column) => column);
 
+  GeneratedColumn<String> get whatsApp =>
+      $composableBuilder(column: $table.whatsApp, builder: (column) => column);
+
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
 
@@ -25311,8 +25511,18 @@ class $$ProveedoresTableTableAnnotationComposer
   GeneratedColumn<String> get provincia =>
       $composableBuilder(column: $table.provincia, builder: (column) => column);
 
+  GeneratedColumn<double> get limiteCredito => $composableBuilder(
+    column: $table.limiteCredito,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get diasCredito => $composableBuilder(
     column: $table.diasCredito,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get condicionesNota => $composableBuilder(
+    column: $table.condicionesNota,
     builder: (column) => column,
   );
 
@@ -25412,14 +25622,14 @@ class $$ProveedoresTableTableTableManager
         RootTableManager<
           _$AppDatabase,
           $ProveedoresTableTable,
-          ProveedorData,
+          ProveedoresTableData,
           $$ProveedoresTableTableFilterComposer,
           $$ProveedoresTableTableOrderingComposer,
           $$ProveedoresTableTableAnnotationComposer,
           $$ProveedoresTableTableCreateCompanionBuilder,
           $$ProveedoresTableTableUpdateCompanionBuilder,
-          (ProveedorData, $$ProveedoresTableTableReferences),
-          ProveedorData,
+          (ProveedoresTableData, $$ProveedoresTableTableReferences),
+          ProveedoresTableData,
           PrefetchHooks Function({
             bool cuentasPagarTableRefs,
             bool pagosProveedorTableRefs,
@@ -25447,11 +25657,14 @@ class $$ProveedoresTableTableTableManager
                 Value<String?> rnc = const Value.absent(),
                 Value<String?> telefono = const Value.absent(),
                 Value<String?> celular = const Value.absent(),
+                Value<String?> whatsApp = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> direccion = const Value.absent(),
                 Value<String?> ciudad = const Value.absent(),
                 Value<String?> provincia = const Value.absent(),
+                Value<double> limiteCredito = const Value.absent(),
                 Value<int> diasCredito = const Value.absent(),
+                Value<String?> condicionesNota = const Value.absent(),
                 Value<String> estado = const Value.absent(),
                 Value<DateTime> fechaCreacion = const Value.absent(),
                 Value<DateTime?> fechaActualizacion = const Value.absent(),
@@ -25462,11 +25675,14 @@ class $$ProveedoresTableTableTableManager
                 rnc: rnc,
                 telefono: telefono,
                 celular: celular,
+                whatsApp: whatsApp,
                 email: email,
                 direccion: direccion,
                 ciudad: ciudad,
                 provincia: provincia,
+                limiteCredito: limiteCredito,
                 diasCredito: diasCredito,
+                condicionesNota: condicionesNota,
                 estado: estado,
                 fechaCreacion: fechaCreacion,
                 fechaActualizacion: fechaActualizacion,
@@ -25479,11 +25695,14 @@ class $$ProveedoresTableTableTableManager
                 Value<String?> rnc = const Value.absent(),
                 Value<String?> telefono = const Value.absent(),
                 Value<String?> celular = const Value.absent(),
+                Value<String?> whatsApp = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> direccion = const Value.absent(),
                 Value<String?> ciudad = const Value.absent(),
                 Value<String?> provincia = const Value.absent(),
+                Value<double> limiteCredito = const Value.absent(),
                 Value<int> diasCredito = const Value.absent(),
+                Value<String?> condicionesNota = const Value.absent(),
                 Value<String> estado = const Value.absent(),
                 Value<DateTime> fechaCreacion = const Value.absent(),
                 Value<DateTime?> fechaActualizacion = const Value.absent(),
@@ -25494,11 +25713,14 @@ class $$ProveedoresTableTableTableManager
                 rnc: rnc,
                 telefono: telefono,
                 celular: celular,
+                whatsApp: whatsApp,
                 email: email,
                 direccion: direccion,
                 ciudad: ciudad,
                 provincia: provincia,
+                limiteCredito: limiteCredito,
                 diasCredito: diasCredito,
+                condicionesNota: condicionesNota,
                 estado: estado,
                 fechaCreacion: fechaCreacion,
                 fechaActualizacion: fechaActualizacion,
@@ -25529,7 +25751,7 @@ class $$ProveedoresTableTableTableManager
                     return [
                       if (cuentasPagarTableRefs)
                         await $_getPrefetchedData<
-                          ProveedorData,
+                          ProveedoresTableData,
                           $ProveedoresTableTable,
                           CuentaPagarData
                         >(
@@ -25550,7 +25772,7 @@ class $$ProveedoresTableTableTableManager
                         ),
                       if (pagosProveedorTableRefs)
                         await $_getPrefetchedData<
-                          ProveedorData,
+                          ProveedoresTableData,
                           $ProveedoresTableTable,
                           PagoProveedorData
                         >(
@@ -25571,7 +25793,7 @@ class $$ProveedoresTableTableTableManager
                         ),
                       if (comprasTableRefs)
                         await $_getPrefetchedData<
-                          ProveedorData,
+                          ProveedoresTableData,
                           $ProveedoresTableTable,
                           ComprasTableData
                         >(
@@ -25602,14 +25824,14 @@ typedef $$ProveedoresTableTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $ProveedoresTableTable,
-      ProveedorData,
+      ProveedoresTableData,
       $$ProveedoresTableTableFilterComposer,
       $$ProveedoresTableTableOrderingComposer,
       $$ProveedoresTableTableAnnotationComposer,
       $$ProveedoresTableTableCreateCompanionBuilder,
       $$ProveedoresTableTableUpdateCompanionBuilder,
-      (ProveedorData, $$ProveedoresTableTableReferences),
-      ProveedorData,
+      (ProveedoresTableData, $$ProveedoresTableTableReferences),
+      ProveedoresTableData,
       PrefetchHooks Function({
         bool cuentasPagarTableRefs,
         bool pagosProveedorTableRefs,

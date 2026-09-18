@@ -3,7 +3,6 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
 
 class ConfirmarCompraUseCase {
-
   ConfirmarCompraUseCase({
     required this.compraRepository,
     required this.ejecutarActualizaciones,
@@ -12,6 +11,7 @@ class ConfirmarCompraUseCase {
     required this.actualizarSaldoProveedor,
     required this.cuentasPagarDao,
   });
+
   final ICompraRepository compraRepository;
   final dynamic ejecutarActualizaciones;
   final dynamic registrarMovimientoKardex;
@@ -19,7 +19,7 @@ class ConfirmarCompraUseCase {
   final dynamic actualizarSaldoProveedor;
   final dynamic cuentasPagarDao;
 
-  Future<Compra> call(int compraId) async {
+  Future<Compra> call(final int compraId) async {
     final compra = await compraRepository.obtenerCompraPorId(compraId);
     if (compra == null) throw StateError('Compra no encontrada');
     if (compra.estado != EstadoCompra.borrador) {

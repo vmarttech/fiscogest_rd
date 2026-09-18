@@ -1,15 +1,14 @@
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
-
 /// Caso de uso: Cálculo automático de totales por línea y generales de compra.
 ///
 /// Aplica la lógica fiscal:
 /// - Subtotal por línea → cantidad × costo unitario − descuento
 /// - Base imponible → monto sobre el que se calcula impuesto
 /// - ITBIS por línea → base × tasa (18% estándar RD)
-/// - Total por línea → base + ITBIS
+/// - Gastos asociados → flete + seguro + aranceles + otros gastos (por cantidad)
+/// - Total por línea → base + ITBIS + gastos asociados
 /// - Totales generales → suma de todas las líneas
 class CalcularTotalesCompraUseCase {
-
   const CalcularTotalesCompraUseCase();
   static const double tasaItbis = 0.18;
 
@@ -20,7 +19,12 @@ class CalcularTotalesCompraUseCase {
     final subtotalLinea = importeBruto - montoDescuento;
     final baseImponible = subtotalLinea;
     final itbis = baseImponible * tasaItbis;
-    final totalLinea = baseImponible + itbis;
+    final gastosAsociados =
+        (linea.fleteUnitario * linea.cantidad) +
+        (linea.seguroUnitario * linea.cantidad) +
+        (linea.arancelesUnitario * linea.cantidad) +
+        (linea.gastosUnitario * linea.cantidad);
+    final totalLinea = baseImponible + itbis + gastosAsociados;
 
     return linea.copyWith(
       montoDescuentoLinea: montoDescuento,

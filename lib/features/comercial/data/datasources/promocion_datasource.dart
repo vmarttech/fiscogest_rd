@@ -2,20 +2,23 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/promocion.dart';
 
 class PromocionDatasource {
   final List<Map<String, dynamic>> _almacen = [];
+
   Future<List<Map<String, dynamic>>> listarTodos() async {
     return List.unmodifiable(_almacen);
   }
 
   Future<List<Map<String, dynamic>>> listarActivas() async {
-    return _almacen.where((registro) => registro['activa'] == true).toList();
+    return _almacen
+        .where((final registro) => registro['activa'] == true)
+        .toList();
   }
 
-  Future<Map<String, dynamic>?> buscarPorId(int id) async {
-    final coinciden = _almacen.where((r) => r['id'] == id);
+  Future<Map<String, dynamic>?> buscarPorId(final int id) async {
+    final coinciden = _almacen.where((final r) => r['id'] == id);
     return coinciden.isNotEmpty ? coinciden.first : null;
   }
 
-  Future<void> registrar(Promocion entidad) async {
+  Future<void> registrar(final Promocion entidad) async {
     _almacen.add({
       'id': entidad.id,
       'nombre': entidad.nombre,
@@ -28,8 +31,8 @@ class PromocionDatasource {
     });
   }
 
-  Future<void> modificar(Promocion entidad) async {
-    final indice = _almacen.indexWhere((r) => r['id'] == entidad.id);
+  Future<void> modificar(final Promocion entidad) async {
+    final indice = _almacen.indexWhere((final r) => r['id'] == entidad.id);
     if (indice >= 0) {
       _almacen[indice] = {
         'id': entidad.id,
@@ -44,7 +47,7 @@ class PromocionDatasource {
     }
   }
 
-  Future<void> eliminar(int id) async {
-    _almacen.removeWhere((r) => r['id'] == id);
+  Future<void> eliminar(final int id) async {
+    _almacen.removeWhere((final r) => r['id'] == id);
   }
 }

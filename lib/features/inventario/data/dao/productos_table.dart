@@ -1,6 +1,10 @@
 import 'package:drift/drift.dart';
+
 @DataClassName('ProductoData')
 class ProductosTable extends Table {
+  @override
+  String get tableName => 'productos_table';
+
   IntColumn get id => integer().autoIncrement()();
   TextColumn get codigo => text()();
   TextColumn get codigoBarras => text().nullable().named('codigo_barras')();

@@ -6,7 +6,8 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod/riverpod.dart';
-
+// Importar migración
+import 'package:fiscogest_rd/core/database/migrations/migracion_002_agregar_campos_productos.dart';
 // Tablas existentes
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
@@ -45,7 +46,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart
 // NUEVAS: Tablas Compras - Etapa 4.1
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
-
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -100,12 +100,10 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => _instance;
   AppDatabase._internal() : super(_openConnection());
   static final AppDatabase _instance = AppDatabase._internal();
-
   // ✅ GETTER DAO - CONECTADO
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
-
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -269,6 +267,22 @@ class AppDatabase extends _$AppDatabase {
       // ✅ VERSIÓN 21: Tabla de pagos a proveedores
       if (from < 21) {
         await m.createTable(pagosProveedorTable);
+      }
+      // ✅ VERSIÓN 22: Unificar nombres y agregar campos faltantes en Productos
+      if (from < 22) {
+        await migrar002AgregarCamposProductos(m);
+      }
+      // ✅ VERSIÓN 23: Campos Ficha Completa de Proveedor
+      if (from < 23) {
+        try {
+          await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN whatsapp TEXT');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN limite_credito REAL NOT NULL DEFAULT 0.0');
+        } catch (_) {}
+        try {
+          await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN condiciones_nota TEXT');
+        } catch (_) {}
       }
     },
   );
