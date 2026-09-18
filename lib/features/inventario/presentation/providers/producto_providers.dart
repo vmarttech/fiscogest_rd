@@ -1,22 +1,15 @@
-import 'package:fiscogest_rd/core/database/database_provider.dart';
-import 'package:fiscogest_rd/features/inventario/presentation/providers/inventario_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
-import 'package:fiscogest_rd/features/inventario/data/repositories/producto_repository_impl.dart';
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
+import 'package:fiscogest_rd/features/comercial/domain/repositories/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
-import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
-
-final productoRepositoryProvider = Provider<IProductoRepository>((ref) {
-  final db = ref.watch(databaseProvider);
-  final kardexRepo = ref.watch(kardexRepositoryProvider);
-  return ProductoRepositoryImpl(db, kardexRepo);
-});
 
 class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
   ProductoController(this._repository, this._ref)
     : super(const AsyncValue.loading()) {
     cargarProductos();
   }
+
   final IProductoRepository _repository;
   final Ref _ref;
 
@@ -63,10 +56,7 @@ class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
     return state
             .whenData(
               (lista) => lista
-                  .where(
-                    (producto) =>
-                        producto.nombre.toLowerCase().contains(termino),
-                  )
+                  .where((p) => p.nombre.toLowerCase().contains(termino))
                   .toList(),
             )
             .value ??
@@ -75,8 +65,6 @@ class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
 }
 
 final productoControllerProvider =
-    StateNotifierProvider<ProductoController, AsyncValue<List<Producto>>>((
-      ref,
-    ) {
-      return ProductoController(ref.watch(productoRepositoryProvider), ref);
-    });
+    StateNotifierProvider<ProductoController, AsyncValue<List<Producto>>>((ref) {
+  return ProductoController(ref.watch(productoRepositoryProvider), ref);
+});

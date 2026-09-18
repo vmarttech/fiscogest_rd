@@ -1,33 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/servicios_transversales/operaciones_salida_service.dart';
-import 'package:fiscogest_rd/features/inventario/data/repositories/salida_repository_impl.dart';
-import 'package:fiscogest_rd/features/inventario/domain/entities/salida.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_salida_repository.dart';
+import 'package:fiscogest_rd/features/inventario/data/repositories/salida_repository_impl.dart';
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' as repo;
+import 'package:fiscogest_rd/features/inventario/domain/entities/salida.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
-final salidaRepositoryProvider = Provider<ISalidaRepository>((ref) {
-  final db = ref.watch(databaseProvider);
-  return SalidaRepositoryImpl(db);
+final salidaRepositoryProvider = Provider<ISalidaRepository>((Ref ref) {
+  return SalidaRepositoryImpl(ref.watch(databaseProvider));
 });
 
-final operacionesSalidaServiceProvider = Provider<OperacionesSalidaService>((
-  ref,
-) {
+final operacionesSalidaServiceProvider = Provider<OperacionesSalidaService>((Ref ref) {
   return OperacionesSalidaService(
     salidaRepository: ref.watch(salidaRepositoryProvider),
-    productoRepository: ref.watch(productoRepositoryProvider),
+    productoRepository: ref.watch(repo.inventarioProductoRepositoryProvider),
     db: ref.watch(databaseProvider),
   );
 });
 
-final historialSalidasProvider = FutureProvider<List<Salida>>((ref) async {
+final historialSalidasProvider = FutureProvider<List<Salida>>((Ref ref) async {
   return ref.watch(salidaRepositoryProvider).obtenerHistorialSalidas();
 });
 
 class SalidaController extends StateNotifier<AsyncValue<void>> {
-  SalidaController(this._servicio, this._ref)
-    : super(const AsyncValue.data(null));
+  SalidaController(this._servicio, this._ref) : super(const AsyncValue.data(null));
 
   final OperacionesSalidaService _servicio;
   final Ref _ref;
@@ -46,16 +43,15 @@ class SalidaController extends StateNotifier<AsyncValue<void>> {
         motivo: motivo,
         usuario: usuario,
       );
-      _ref.invalidate(productoControllerProvider);
       _ref.invalidate(historialSalidasProvider);
+      _ref.invalidate(productoControllerProvider);
       state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
     }
   }
 }
 
-final salidaControllerProvider =
-    StateNotifierProvider<SalidaController, AsyncValue<void>>((ref) {
-      return SalidaController(ref.watch(operacionesSalidaServiceProvider), ref);
-    });
+final salidaControllerProvider = StateNotifierProvider<SalidaController, AsyncValue<void>>((Ref ref) {
+  return SalidaController(ref.watch(operacionesSalidaServiceProvider), ref);
+});
