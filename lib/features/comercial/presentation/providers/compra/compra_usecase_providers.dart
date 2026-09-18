@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/calcular_
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_services.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/registrar_compra_usecase.dart';
+import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/anular_compra_usecase.dart';
 
 final calcularTotalesCompraUseCaseProvider = Provider<CalcularTotalesCompraUseCase>((Ref ref) {
   return const CalcularTotalesCompraUseCase();
@@ -47,11 +48,30 @@ final confirmarCompraUseCaseProvider = Provider.autoDispose<ConfirmarCompraUseCa
   );
 });
 
+final anularCompraUseCaseProvider = Provider.autoDispose<AnularCompraUseCase>((Ref ref) {
+  final ConfirmarCompraServices svc = ref.watch(confirmarCompraServicesProvider);
+  return AnularCompraUseCase(
+    compraRepository: ref.watch(repo.compraRepositoryProvider),
+    services: svc,
+    cuentasPagarDao: ref.watch(repo.cuentasPagarDaoProvider),
+  );
+});
+
+/// Helper listo para usar desde la UI
+final anularCompraProvider = Provider.autoDispose<Future<Compra> Function(int)>((Ref ref) {
+  final useCase = ref.watch(anularCompraUseCaseProvider);
+  return (int compraId) async {
+    final resultado = await useCase(compraId);
+    ref.invalidate(listadoComprasProvider);
+    ref.invalidate(compraPorIdProvider(compraId));
+    return resultado;
+  };
+});
+
 final registrarCompraUseCaseProvider = Provider.autoDispose<Future<Compra> Function({required Compra compra, required List<DetalleCompra> detalles})>((Ref ref) {
   final CalcularTotalesCompraUseCase calculador = ref.watch(calcularTotalesCompraUseCaseProvider);
   final ICompraRepository repoCompra = ref.read(repo.compraRepositoryProvider);
   final RegistrarCompraUseCase casoUso = RegistrarCompraUseCase(repoCompra, calculador);
-
   return ({required compra, required detalles}) async {
     final Compra resultado = await casoUso(compra: compra, detalles: detalles);
     ref.invalidate(listadoComprasProvider);

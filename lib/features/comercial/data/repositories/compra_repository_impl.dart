@@ -225,6 +225,10 @@ class CompraRepositoryImpl implements ICompraRepository {
           'No se anulan borradores — elimine directamente',
         );
       }
+
+      // Solo se permite anular compras que ya impactaron el sistema
+      // (confirmada o recibida). El caller (use case) debe haber llamado
+      // previamente a ConfirmarCompraServices.revertirActualizaciones.
       final compraAnulada = compra.copyWith(
         estado: EstadoCompra.anulada,
         actualizadoEn: DateTime.now(),
