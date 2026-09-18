@@ -19,7 +19,6 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 class RegistrarCompraPage extends ConsumerStatefulWidget {
   const RegistrarCompraPage({super.key});
   static String routeName = 'registrar-compra';
-
   @override
   ConsumerState<RegistrarCompraPage> createState() =>
       _RegistrarCompraPageState();
@@ -38,21 +37,13 @@ class _DetalleLinea {
 
   double get gastosAsociados =>
       fleteUnitario + seguroUnitario + arancelesUnitario + gastosUnitario;
-
   double get costoReal => costoUnitario + gastosAsociados;
-
   double get importeBruto => cantidad * costoUnitario;
-
   double get montoDescuentoLinea => importeBruto * (descuentoPorcentaje / 100);
-
   double get subtotalLinea => importeBruto - montoDescuentoLinea;
-
   double get baseImponibleLinea => subtotalLinea;
-
   double get tasaImpuestoLinea => 0.18;
-
   double get itbisLinea => baseImponibleLinea * tasaImpuestoLinea;
-
   double get totalLinea => baseImponibleLinea + itbisLinea + gastosAsociados;
 }
 
@@ -137,15 +128,11 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
 
   double get _subtotalSinImpuestos =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.subtotalLinea);
-
   double get _descuentoGlobal =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.montoDescuentoLinea);
-
   double get _tasaImpuesto => 0.18;
-
   double get _montoImpuesto =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.itbisLinea);
-
   double get _totalCompra =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.totalLinea);
 
@@ -345,7 +332,6 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     }
 
     final int? proveedorId = int.tryParse(_proveedorIdController.text.trim());
-
     for (var i = 0; i < _lineas.length; i++) {
       final linea = _lineas[i];
       if (linea.productoId == null) {
