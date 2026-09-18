@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/pagos_proveedor_table.d
 // ignore: unused_import — necesario para el join con ProveedoresTable
 import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+
 part 'cuentas_pagar_dao.g.dart';
 
 @DriftAccessor(tables: [CuentasPagarTable, PagosProveedorTable])
@@ -76,18 +77,15 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
       if (cuenta == null) {
         throw StateError('Cuenta por pagar no encontrada');
       }
-
       final pagosAnteriores = await listarPagosPorCuenta(cuentaPagarId);
       final totalAbonado = pagosAnteriores.fold(0.0, (sum, p) => sum + p.monto);
       final saldoPendiente = cuenta.monto - totalAbonado;
-
       if (monto <= 0) {
         throw StateError('El monto del abono debe ser mayor a cero');
       }
       if (monto > saldoPendiente) {
         throw StateError('El abono excede el saldo pendiente');
       }
-
       final pagoId = await into(pagosProveedorTable).insert(
         PagosProveedorTableCompanion(
           cuentaPagarId: Value(cuentaPagarId),
@@ -99,13 +97,11 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
           nota: Value(nota),
         ),
       );
-
       final nuevoTotalAbonado = totalAbonado + monto;
       final nuevoSaldo = cuenta.monto - nuevoTotalAbonado;
       final nuevoEstado = nuevoSaldo <= 0
           ? PagarEstado.pagado
           : PagarEstado.parcial;
-
       await update(cuentasPagarTable).replace(
         CuentasPagarTableCompanion(
           id: Value(cuenta.id),
@@ -118,7 +114,6 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
           estado: Value(nuevoEstado),
         ),
       );
-
       return pagoId;
     });
   }
@@ -128,6 +123,57 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
           ..where((t) => t.cuentaPagarId.equals(cuentaPagarId))
           ..orderBy([(t) => OrderingTerm(expression: t.fechaPago, mode: OrderingMode.desc)]))
         .get();
+  }
+
+  /// Anula (elimina) la cuenta por pagar asociada a una compra.
+  /// Solo se permite si no tiene abonos registrados.
+  /// Busca por proveedor + monto + fecha de emisión (tolerancia de 1 día).
+  Future<bool> anularCuentaRelacionadaACompra({
+    required int proveedorId,
+    required double monto,
+    required DateTime fechaEmision,
+    String? conceptoContiene,
+  }) async {
+    return await transaction(() async {
+      final inicio = DateTime(fechaEmision.year, fechaEmision.month, fechaEmision.day);
+      final fin = inicio.add(const Duration(days: 1));
+
+      final query = select(cuentasPagarTable)
+        ..where((t) =>
+            t.proveedorId.equals(proveedorId) &
+            t.monto.equals(monto) &
+            t.fechaEmision.isBiggerOrEqualValue(inicio) &
+            t.fechaEmision.isSmallerThanValue(fin) &
+            t.estado.isIn([PagarEstado.pendiente.name, PagarEstado.parcial.name, PagarEstado.vencido.name]));
+
+      final candidatas = await query.get();
+
+      CuentaPagarData? cuenta;
+      if (conceptoContiene != null && conceptoContiene.isNotEmpty) {
+        cuenta = candidatas.cast<CuentaPagarData?>().firstWhere(
+              (c) => c!.concepto.contains(conceptoContiene),
+              orElse: () => candidatas.isNotEmpty ? candidatas.first : null,
+            );
+      } else if (candidatas.isNotEmpty) {
+        cuenta = candidatas.first;
+      }
+
+      if (cuenta == null) return false;
+
+      // Verificar que no tenga abonos
+      final pagos = await listarPagosPorCuenta(cuenta.id);
+      if (pagos.isNotEmpty) {
+        throw StateError(
+          'No se puede anular la cuenta por pagar #${cuenta.id}: '
+          'tiene ${pagos.length} abono(s) registrado(s). '
+          'Elimine primero los abonos o registre una nota de crédito.',
+        );
+      }
+
+      // Eliminar la cuenta (no hay estado "anulado" en el enum actual)
+      await (delete(cuentasPagarTable)..where((t) => t.id.equals(cuenta!.id))).go();
+      return true;
+    });
   }
 }
 

@@ -9,7 +9,7 @@ import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar
 /// Flujo:
 /// 1. Validar estado (solo confirmada / recibida)
 /// 2. Revertir inventario + kardex + costo promedio + saldo proveedor
-/// 3. (Opcional) Anular la cuenta por pagar asociada
+/// 3. Anular la cuenta por pagar asociada (si existe y no tiene abonos)
 /// 4. Marcar la compra como anulada
 class AnularCompraUseCase {
   AnularCompraUseCase({
@@ -45,13 +45,13 @@ class AnularCompraUseCase {
     await services.revertirActualizaciones(compra);
 
     // 2. Anular la cuenta por pagar asociada (si era a crédito)
-    //    TODO: implementar cuando el DAO tenga un método seguro de anulación
-    //    por ejemplo: await cuentasPagarDao.anularPorProveedorYMonto(...)
-    //    Por ahora se deja como no-bloqueante para no romper la anulación.
     if (compra.esCredito) {
-      // Placeholder seguro: no hacemos nada hasta que exista el método en el DAO.
-      // Cuando esté listo, descomentar y ajustar:
-      // await cuentasPagarDao.anularCuentaRelacionadaACompra(compra);
+      await cuentasPagarDao.anularCuentaRelacionadaACompra(
+        proveedorId: compra.proveedorId,
+        monto: compra.totalCompra,
+        fechaEmision: compra.fechaEmision,
+        conceptoContiene: 'Compra ${compra.nombreProveedor}',
+      );
     }
 
     // 3. Marcar la compra como anulada
