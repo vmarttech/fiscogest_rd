@@ -14,6 +14,7 @@ class Producto {
     this.fechaInicioOferta,
     this.fechaFinOferta,
     this.gastosAsociados = 0,
+    this.costoPromedio = 0.0,
     this.stock,
     this.stockMinimo,
     this.stockMaximo,
@@ -22,6 +23,7 @@ class Producto {
     required this.unidadMedidaId,
     required this.activo,
   });
+
   final int? id;
   final String codigo;
   final String? codigoBarras;
@@ -36,6 +38,7 @@ class Producto {
   final double? precioEspecial;
   final DateTime? fechaInicioOferta;
   final DateTime? fechaFinOferta;
+  final double costoPromedio;
   final double? stock;
   final double? stockMinimo;
   final double? stockMaximo;
@@ -56,7 +59,14 @@ class Producto {
     return costo * (1 + margen / 100);
   }
 
-  // ✅ Lógica de vigencia automática de oferta
+  // Cálculo de Costo Promedio Ponderado al recibir nueva compra
+  double recalcularCostoPromedio(double cantidadAnterior, double cantidadNueva, double costoUnitarioNuevo) {
+    if (cantidadAnterior <= 0) return costoUnitarioNuevo;
+    final inventarioAnterior = cantidadAnterior * costoPromedio;
+    final montoNuevaEntrada = cantidadNueva * costoUnitarioNuevo;
+    return (inventarioAnterior + montoNuevaEntrada) / (cantidadAnterior + cantidadNueva);
+  }
+
   bool get ofertaVigente {
     if (precioEspecial == null || precioEspecial! <= 0) return false;
     final hoy = DateTime.now();
@@ -85,6 +95,7 @@ class Producto {
     double? precioEspecial,
     DateTime? fechaInicioOferta,
     DateTime? fechaFinOferta,
+    double? costoPromedio,
     double? stock,
     double? stockMinimo,
     double? stockMaximo,
@@ -108,6 +119,7 @@ class Producto {
       precioEspecial: precioEspecial ?? this.precioEspecial,
       fechaInicioOferta: fechaInicioOferta ?? this.fechaInicioOferta,
       fechaFinOferta: fechaFinOferta ?? this.fechaFinOferta,
+      costoPromedio: costoPromedio ?? this.costoPromedio,
       stock: stock ?? this.stock,
       stockMinimo: stockMinimo ?? this.stockMinimo,
       stockMaximo: stockMaximo ?? this.stockMaximo,

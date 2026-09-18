@@ -12,6 +12,7 @@ class Proveedor {
     this.ciudad,
     this.provincia,
     this.limiteCredito = 0.0,
+    this.saldo = 0.0,
     this.diasCredito = 0,
     this.condicionesNota,
     this.estado = 'Activo',
@@ -31,13 +32,15 @@ class Proveedor {
   final String? ciudad;
   final String? provincia;
   final double limiteCredito;
+  final double saldo;
   final int diasCredito;
   final String? condicionesNota;
   final String estado;
   final DateTime? fechaCreacion;
   final DateTime? fechaActualizacion;
 
-  bool get tieneCredito => limiteCredito > 0 || diasCredito > 0;
+  bool tieneCredito() => limiteCredito > 0 || diasCredito > 0;
+  bool excedeLimite(double montoCompra) => limiteCredito > 0 && (saldo + montoCompra) > limiteCredito;
 
   String get direccionCompleta {
     final partes = <String>[];
@@ -60,6 +63,7 @@ class Proveedor {
     String? ciudad,
     String? provincia,
     double? limiteCredito,
+    double? saldo,
     int? diasCredito,
     String? condicionesNota,
     String? estado,
@@ -79,6 +83,7 @@ class Proveedor {
       ciudad: ciudad ?? this.ciudad,
       provincia: provincia ?? this.provincia,
       limiteCredito: limiteCredito ?? this.limiteCredito,
+      saldo: saldo ?? this.saldo,
       diasCredito: diasCredito ?? this.diasCredito,
       condicionesNota: condicionesNota ?? this.condicionesNota,
       estado: estado ?? this.estado,
