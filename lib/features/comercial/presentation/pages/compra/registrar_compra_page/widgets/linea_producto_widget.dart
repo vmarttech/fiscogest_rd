@@ -6,7 +6,6 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/tipos_linea.dart';
 
 class LineaProductoWidget extends StatelessWidget {
-
   const LineaProductoWidget({
     super.key,
     required this.index,
@@ -24,6 +23,7 @@ class LineaProductoWidget extends StatelessWidget {
     required this.esPequena,
     required this.filaResponsiva,
   });
+
   final int index;
   final DetalleLinea linea;
   final ControladoresLinea ctrl;

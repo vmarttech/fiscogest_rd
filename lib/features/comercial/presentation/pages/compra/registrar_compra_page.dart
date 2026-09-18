@@ -39,6 +39,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   final _diasCreditoController = TextEditingController(text: '0');
   final _fechaVencimientoController = TextEditingController();
   EstadoCompra _estadoGuardado = EstadoCompra.borrador;
+
   final List<DetalleLinea> _lineas = [];
   final List<ControladoresLinea> _controladores = [];
 
@@ -80,13 +81,24 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     });
   }
 
+  /// ✅ FUNCIÓN CLAVE: Leer controlador → actualizar modelo → recálculo automático
+  void _actualizarLineaEnTiempoReal(int index, String campo) {
+    setState(() {
+      _lineas[index] = _controladores[index].haciaLinea();
+    });
+  }
+
   double get _subtotalSinImpuestos =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.subtotalLinea);
+
   double get _descuentoGlobal =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.montoDescuentoLinea);
+
   double get _tasaImpuesto => 0.18;
+
   double get _montoImpuesto =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.itbisLinea);
+
   double get _totalCompra =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.totalLinea);
 
@@ -198,6 +210,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       _lineas[i].descuentoPorcentaje =
           double.tryParse(ctrl.descuento.text) ?? 0;
     }
+
     if (!_formKey.currentState!.validate()) return;
     if (_lineas.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -205,6 +218,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       );
       return;
     }
+
     final int? proveedorId = int.tryParse(_proveedorIdController.text.trim());
     for (var i = 0; i < _lineas.length; i++) {
       final linea = _lineas[i];
@@ -233,12 +247,14 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
         return;
       }
     }
+
     if (proveedorId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('⚠️ Seleccione un proveedor')),
       );
       return;
     }
+
     final ahora = DateTime.now();
     final compraId = ahora.millisecondsSinceEpoch;
     final diasCredito = int.tryParse(_diasCreditoController.text) ?? 0;
@@ -246,6 +262,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     final fechaVencimiento = fechaVencimientoTexto.isNotEmpty
         ? DateTime.tryParse(fechaVencimientoTexto)
         : null;
+
     final compra = Compra(
       id: compraId,
       proveedorId: proveedorId,
@@ -270,6 +287,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       creadoEn: ahora,
       actualizadoEn: null,
     );
+
     final detalles = _lineas.asMap().entries.map((entry) {
       final i = entry.key;
       final linea = entry.value;
@@ -294,6 +312,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
         totalLinea: linea.totalLinea,
       );
     }).toList();
+
     try {
       await ref
           .read(registrarCompraUseCaseProvider)
@@ -387,7 +406,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   onAgregarLinea: _agregarLinea,
                   onEliminarLinea: _eliminarLinea,
                   onSeleccionarProducto: _seleccionarProducto,
-                  onValorCambiado: (_, __) => setState(() {}),
+                  onValorCambiado: _actualizarLineaEnTiempoReal, // ✅ CONECTADO
                   esPequena: esPequena,
                   filaResponsiva: filaResponsiva,
                 ),

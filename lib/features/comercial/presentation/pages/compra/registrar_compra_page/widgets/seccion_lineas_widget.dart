@@ -5,7 +5,6 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/regist
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/linea_producto_widget.dart';
 
 class SeccionLineasWidget extends StatelessWidget {
-
   const SeccionLineasWidget({
     super.key,
     required this.lineas,
@@ -17,6 +16,7 @@ class SeccionLineasWidget extends StatelessWidget {
     required this.esPequena,
     required this.filaResponsiva,
   });
+
   final List<DetalleLinea> lineas;
   final List<ControladoresLinea> controladores;
   final VoidCallback onAgregarLinea;
