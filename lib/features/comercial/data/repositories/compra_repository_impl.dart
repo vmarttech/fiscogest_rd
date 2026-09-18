@@ -18,6 +18,21 @@ double _seguro(dynamic v) {
   return (num.tryParse(v.toString()) ?? 0).toDouble();
 }
 
+String _str(dynamic v, [String def = '']) {
+  if (v == null) return def;
+  return v.toString();
+}
+
+EstadoCompra _estadoSeguro(dynamic v) {
+  if (v == null) return EstadoCompra.borrador;
+  if (v is EstadoCompra) return v;
+  final nombre = v.toString().toLowerCase().trim();
+  for (final e in EstadoCompra.values) {
+    if (e.name.toLowerCase() == nombre) return e;
+  }
+  return EstadoCompra.borrador;
+}
+
 ComprasTableCompanion _compraToCompanion(Compra compra) {
   final ahora = DateTime.now();
   return ComprasTableCompanion(
@@ -50,23 +65,23 @@ Compra _filaToCompra(ComprasTableData fila) {
   return Compra(
     id: fila.id,
     proveedorId: fila.proveedorId,
-    nombreProveedor: fila.nombreProveedor,
+    nombreProveedor: _str(fila.nombreProveedor, 'Sin nombre'),
     fechaEmision: fila.fechaEmision,
     fechaVencimiento: fila.fechaVencimiento,
     fechaRecepcion: fila.fechaRecepcion,
     fechaConfirmacion: fila.fechaConfirmacion,
-    numeroComprobante: fila.numeroComprobante,
-    tipoComprobante: fila.tipoComprobante,
-    condicionPago: fila.condicionPago,
-    ncf: fila.ncf,
-    formaPago: fila.formaPago,
+    numeroComprobante: _str(fila.numeroComprobante),
+    tipoComprobante: _str(fila.tipoComprobante, '01'),
+    condicionPago: _str(fila.condicionPago, 'contado'),
+    ncf: _str(fila.ncf),
+    formaPago: _str(fila.formaPago, 'contado'),
     diasCredito: fila.diasCredito,
     subtotalSinImpuestos: fila.subtotalSinImpuestos,
     montoDescuentoGlobal: fila.montoDescuentoGlobal,
     tasaImpuesto: fila.tasaImpuesto,
     montoImpuesto: fila.montoImpuesto,
     totalCompra: fila.totalCompra,
-    estado: fila.estado,
+    estado: _estadoSeguro(fila.estado),
     observaciones: fila.observaciones,
     creadoEn: fila.creadoEn,
     actualizadoEn: fila.actualizadoEn,

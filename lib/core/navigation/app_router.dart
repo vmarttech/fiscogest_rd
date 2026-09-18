@@ -30,6 +30,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/list
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart';
 import 'package:fiscogest_rd/features/transferencias/presentation/pages/registrar_transferencia_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/recepcion/registrar_recepcion_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/dashboard_compras_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/lista_compras_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
@@ -93,11 +94,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      // ========== MÓDULO COMPRAS (Dashboard como entrada) ==========
       GoRoute(
         path: '/compras',
-        name: ListaComprasPage.routeName,
-        builder: (_, __) => const AppShell(child: ListaComprasPage()),
+        name: DashboardComprasPage.routeName,
+        builder: (_, __) => const AppShell(child: DashboardComprasPage()),
         routes: [
+          GoRoute(
+            path: 'lista',
+            name: ListaComprasPage.routeName,
+            builder: (_, __) => const AppShell(child: ListaComprasPage()),
+          ),
           GoRoute(
             path: 'registrar',
             name: RegistrarCompraPage.routeName,
