@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/compra_usecase_providers.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
+import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -34,10 +35,72 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     _detallesFuture = repositorio.listarDetallesDeCompra(_idNumerico);
   }
 
+  String _formatearFecha(DateTime? fecha) {
+    if (fecha == null) return 'No establecida';
+    return fecha.toString().split(' ')[0];
+  }
+
+  String _formatearFormaPago(String formaPago) {
+    return switch (formaPago) {
+      'contado' => 'Contado',
+      'credito' => 'Crédito',
+      _ => formaPago,
+    };
+  }
+
+  Widget _buildEstadoTag(EstadoCompra estado) {
+    final Color color;
+    final String texto;
+    switch (estado) {
+      case EstadoCompra.borrador:
+        color = Colors.orange;
+        texto = 'Borrador';
+        break;
+      case EstadoCompra.registrada:
+        color = Colors.blue;
+        texto = 'Registrada';
+        break;
+      case EstadoCompra.confirmada:
+        color = Colors.green;
+        texto = 'Confirmada';
+        break;
+      case EstadoCompra.recibida:
+        color = Colors.teal;
+        texto = 'Recibida';
+        break;
+      case EstadoCompra.pagada:
+        color = Colors.purple;
+        texto = 'Pagada';
+        break;
+      case EstadoCompra.vencida:
+        color = Colors.amber.shade700;
+        texto = 'Vencida';
+        break;
+      case EstadoCompra.anulada:
+        color = Colors.red;
+        texto = 'Anulada';
+        break;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        texto,
+        style: TextStyle(
+          color: color,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final compraAsync = ref.watch(compraPorIdProvider(_idNumerico));
-
     return AppScaffold(
       title: 'Detalle de Compra',
       body: SafeArea(
@@ -68,7 +131,6 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                   ),
                 );
               }
-
               return FutureBuilder<List<DetalleCompra>>(
                 future: _detallesFuture,
                 builder: (context, snapshot) {
@@ -76,14 +138,25 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(compra.nombreProveedor, style: AppTypography.h4Bold),
-                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              compra.nombreProveedor,
+                              style: AppTypography.h4Bold,
+                            ),
+                          ),
+                          _buildEstadoTag(compra.estado),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        'Fecha Emisión: ${compra.fechaEmision.toString().split(' ')[0]}',
+                        'Fecha Emisión: ${_formatearFecha(compra.fechaEmision)}',
                         style: AppTypography.bodyMedium,
                       ),
                       Text(
-                        'Vencimiento: ${compra.fechaVencimiento?.toString().split(' ')[0] ?? 'No establecida'}',
+                        'Vencimiento: ${_formatearFecha(compra.fechaVencimiento)}',
                         style: AppTypography.bodyMedium,
                       ),
                       const SizedBox(height: 12),
@@ -113,10 +186,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                             style: AppTypography.bodySmall,
                           ),
                           Text(
-                            'Pago: ${compra.formaPago}',
+                            'Pago: ${_formatearFormaPago(compra.formaPago)}',
                             style: AppTypography.bodySmall,
                           ),
-                          if (compra.formaPago == 'credito') ...[
+                          if (compra.esCredito) ...[
                             Text(
                               'Condición: ${compra.condicionPago} (${compra.diasCredito} días)',
                               style: AppTypography.bodySmall,
@@ -125,20 +198,22 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                         ],
                       ),
                       if (compra.observaciones?.isNotEmpty == true) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Text(
                           'Observaciones: ${compra.observaciones}',
-                          style: AppTypography.bodySmall.copyWith(fontStyle: FontStyle.italic),
+                          style: AppTypography.bodySmall.copyWith(
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       const Divider(height: 1, thickness: 1),
                       const SizedBox(height: 16),
                       Text(
                         'Productos (${detalles.length})',
                         style: AppTypography.labelLarge,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       if (snapshot.connectionState == ConnectionState.waiting)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
@@ -149,7 +224,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                           padding: AppSpacing.allM,
                           child: Text(
                             'No se pudieron cargar los detalles: ${snapshot.error}',
-                            style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.error,
+                            ),
                           ),
                         )
                       else if (detalles.isEmpty)
@@ -196,12 +273,15 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 8),
                               Wrap(
                                 spacing: 12,
-                                runSpacing: 2,
+                                runSpacing: 4,
                                 children: [
-                                  Text('Cant: ${detalle.cantidad}', style: AppTypography.bodySmall),
+                                  Text(
+                                    'Cant: ${detalle.cantidad}',
+                                    style: AppTypography.bodySmall,
+                                  ),
                                   Text(
                                     'Costo Unit: RD\$ ${detalle.costoUnitario.toStringAsFixed(2)}',
                                     style: AppTypography.bodySmall,
@@ -233,13 +313,16 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                     ),
                                 ],
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 8),
                               Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.primary.withAlpha(20),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,7 +333,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                         color: AppColors.primary,
                                       ),
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: 4),
                                     Text(
                                       'Subtotal: RD\$ ${detalle.subtotalLinea.toStringAsFixed(2)}',
                                       style: AppTypography.bodySmall,
@@ -269,9 +352,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                             ],
                           ),
                         )),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       const Divider(),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -290,10 +373,15 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                 'ITBIS: RD\$ ${compra.montoImpuesto.toStringAsFixed(2)}',
                                 style: AppTypography.bodyMedium,
                               ),
-                              const Divider(),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 4),
+                                child: Divider(),
+                              ),
                               Text(
                                 'TOTAL: RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
-                                style: AppTypography.h4Bold.copyWith(color: AppColors.primary),
+                                style: AppTypography.h4Bold.copyWith(
+                                  color: AppColors.primary,
+                                ),
                               ),
                             ],
                           ),

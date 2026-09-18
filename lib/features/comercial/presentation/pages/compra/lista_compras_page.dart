@@ -20,6 +20,28 @@ class ListaComprasPage extends ConsumerWidget {
     return texto;
   }
 
+  String _formatearFecha(DateTime fecha) {
+    return fecha.toString().split(' ')[0];
+  }
+
+  Widget _buildChipInfo(String etiqueta, String valor, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '$etiqueta: $valor',
+        style: TextStyle(
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final comprasAsync = ref.watch(listadoComprasProvider);
@@ -63,6 +85,7 @@ class ListaComprasPage extends ConsumerWidget {
                 ),
               );
             }
+
             return ListView.separated(
               padding: AppLayout.pantallaPadding,
               itemCount: compras.length,
@@ -72,8 +95,11 @@ class ListaComprasPage extends ConsumerWidget {
                 final idLimpio = _limpiarId(compra.id);
                 final numeroComprobante = compra.numeroComprobante;
                 final nombreProveedor = compra.nombreProveedor;
-                final fechaTexto = compra.fechaEmision.toString().split(' ')[0];
+                final fechaTexto = _formatearFecha(compra.fechaEmision);
                 final total = compra.totalCompra;
+                final ncf = compra.ncf;
+                final tipoComprobante = compra.tipoComprobante;
+                final esCredito = compra.esCredito;
 
                 return Card(
                   child: Padding(
@@ -82,17 +108,63 @@ class ListaComprasPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ListTile(
-                          title: Text(
-                            numeroComprobante.isNotEmpty
-                                ? 'Compra $numeroComprobante'
-                                : 'Compra sin número',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  numeroComprobante.isNotEmpty
+                                      ? 'Compra $numeroComprobante'
+                                      : 'Compra sin número',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              _buildEstadoTag(compra.estado),
+                            ],
                           ),
-                          subtitle: Text(
-                            'Proveedor: $nombreProveedor\n'
-                            'Fecha: $fechaTexto • Total: \$${total.toStringAsFixed(2)}',
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(
+                                'Proveedor: $nombreProveedor',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Fecha: $fechaTexto • Total: RD\$ ${total.toStringAsFixed(2)}',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                              const SizedBox(height: 6),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 4,
+                                children: [
+                                  if (ncf.isNotEmpty)
+                                    _buildChipInfo(
+                                      'NCF',
+                                      ncf,
+                                      Colors.indigo.shade700,
+                                    ),
+                                  _buildChipInfo(
+                                    'Tipo',
+                                    tipoComprobante,
+                                    Colors.blue.shade700,
+                                  ),
+                                  _buildChipInfo(
+                                    'Pago',
+                                    esCredito ? 'Crédito' : 'Contado',
+                                    esCredito ? Colors.orange.shade700 : Colors.green.shade700,
+                                  ),
+                                  if (esCredito && compra.diasCredito > 0)
+                                    _buildChipInfo(
+                                      'Plazo',
+                                      '${compra.diasCredito} días',
+                                      Colors.deepPurple.shade700,
+                                    ),
+                                ],
+                              ),
+                            ],
                           ),
-                          trailing: _buildEstadoTag(compra.estado),
                           onTap: () {
                             if (idLimpio.isNotEmpty) {
                               context.goNamed(
