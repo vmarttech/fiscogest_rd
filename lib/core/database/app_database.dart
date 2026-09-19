@@ -42,7 +42,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
 part 'app_database.g.dart';
-
 @DriftDatabase(
   tables: [
     ClientesTable,
@@ -84,12 +83,9 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => _instance;
   AppDatabase._internal() : super(_openConnection());
   static final AppDatabase _instance = AppDatabase._internal();
-
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
-
   @override
-  int get schemaVersion => 26;
-
+  int get schemaVersion => 27;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
@@ -326,10 +322,16 @@ class AppDatabase extends _$AppDatabase {
           );
         } catch (_) {}
       }
+      if (from < 27) {
+        try {
+          await m.database.customStatement(
+            'ALTER TABLE compras_table ADD COLUMN fecha_pago TEXT',
+          );
+        } catch (_) {}
+      }
     },
   );
 }
-
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final carpetaBase = await getApplicationDocumentsDirectory();
@@ -337,7 +339,6 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(archivoDb);
   });
 }
-
 final appDatabaseProvider = Provider((ref) {
   final db = AppDatabase();
   ref.onDispose(() => db.close());

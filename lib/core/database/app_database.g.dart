@@ -18120,6 +18120,17 @@ class $ComprasTableTable extends ComprasTable
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _fechaPagoMeta = const VerificationMeta(
+    'fechaPago',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaPago = GeneratedColumn<DateTime>(
+    'fecha_pago',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _ncfMeta = const VerificationMeta('ncf');
   @override
   late final GeneratedColumn<String> ncf = GeneratedColumn<String>(
@@ -18298,6 +18309,7 @@ class $ComprasTableTable extends ComprasTable
     fechaConfirmacion,
     fechaVencimiento,
     fechaRecepcion,
+    fechaPago,
     ncf,
     formaPago,
     diasCredito,
@@ -18387,6 +18399,12 @@ class $ComprasTableTable extends ComprasTable
           data['fecha_recepcion']!,
           _fechaRecepcionMeta,
         ),
+      );
+    }
+    if (data.containsKey('fecha_pago')) {
+      context.handle(
+        _fechaPagoMeta,
+        fechaPago.isAcceptableOrUnknown(data['fecha_pago']!, _fechaPagoMeta),
       );
     }
     if (data.containsKey('ncf')) {
@@ -18561,6 +18579,10 @@ class $ComprasTableTable extends ComprasTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha_recepcion'],
       ),
+      fechaPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_pago'],
+      ),
       ncf: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}ncf'],
@@ -18644,6 +18666,7 @@ class ComprasTableData extends DataClass
   final DateTime? fechaConfirmacion;
   final DateTime? fechaVencimiento;
   final DateTime? fechaRecepcion;
+  final DateTime? fechaPago;
   final String ncf;
   final String formaPago;
   final int diasCredito;
@@ -18667,6 +18690,7 @@ class ComprasTableData extends DataClass
     this.fechaConfirmacion,
     this.fechaVencimiento,
     this.fechaRecepcion,
+    this.fechaPago,
     required this.ncf,
     required this.formaPago,
     required this.diasCredito,
@@ -18698,6 +18722,9 @@ class ComprasTableData extends DataClass
     }
     if (!nullToAbsent || fechaRecepcion != null) {
       map['fecha_recepcion'] = Variable<DateTime>(fechaRecepcion);
+    }
+    if (!nullToAbsent || fechaPago != null) {
+      map['fecha_pago'] = Variable<DateTime>(fechaPago);
     }
     map['ncf'] = Variable<String>(ncf);
     map['forma_pago'] = Variable<String>(formaPago);
@@ -18740,6 +18767,9 @@ class ComprasTableData extends DataClass
       fechaRecepcion: fechaRecepcion == null && nullToAbsent
           ? const Value.absent()
           : Value(fechaRecepcion),
+      fechaPago: fechaPago == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaPago),
       ncf: Value(ncf),
       formaPago: Value(formaPago),
       diasCredito: Value(diasCredito),
@@ -18779,6 +18809,7 @@ class ComprasTableData extends DataClass
         json['fechaVencimiento'],
       ),
       fechaRecepcion: serializer.fromJson<DateTime?>(json['fechaRecepcion']),
+      fechaPago: serializer.fromJson<DateTime?>(json['fechaPago']),
       ncf: serializer.fromJson<String>(json['ncf']),
       formaPago: serializer.fromJson<String>(json['formaPago']),
       diasCredito: serializer.fromJson<int>(json['diasCredito']),
@@ -18811,6 +18842,7 @@ class ComprasTableData extends DataClass
       'fechaConfirmacion': serializer.toJson<DateTime?>(fechaConfirmacion),
       'fechaVencimiento': serializer.toJson<DateTime?>(fechaVencimiento),
       'fechaRecepcion': serializer.toJson<DateTime?>(fechaRecepcion),
+      'fechaPago': serializer.toJson<DateTime?>(fechaPago),
       'ncf': serializer.toJson<String>(ncf),
       'formaPago': serializer.toJson<String>(formaPago),
       'diasCredito': serializer.toJson<int>(diasCredito),
@@ -18837,6 +18869,7 @@ class ComprasTableData extends DataClass
     Value<DateTime?> fechaConfirmacion = const Value.absent(),
     Value<DateTime?> fechaVencimiento = const Value.absent(),
     Value<DateTime?> fechaRecepcion = const Value.absent(),
+    Value<DateTime?> fechaPago = const Value.absent(),
     String? ncf,
     String? formaPago,
     int? diasCredito,
@@ -18866,6 +18899,7 @@ class ComprasTableData extends DataClass
     fechaRecepcion: fechaRecepcion.present
         ? fechaRecepcion.value
         : this.fechaRecepcion,
+    fechaPago: fechaPago.present ? fechaPago.value : this.fechaPago,
     ncf: ncf ?? this.ncf,
     formaPago: formaPago ?? this.formaPago,
     diasCredito: diasCredito ?? this.diasCredito,
@@ -18907,6 +18941,7 @@ class ComprasTableData extends DataClass
       fechaRecepcion: data.fechaRecepcion.present
           ? data.fechaRecepcion.value
           : this.fechaRecepcion,
+      fechaPago: data.fechaPago.present ? data.fechaPago.value : this.fechaPago,
       ncf: data.ncf.present ? data.ncf.value : this.ncf,
       formaPago: data.formaPago.present ? data.formaPago.value : this.formaPago,
       diasCredito: data.diasCredito.present
@@ -18957,6 +18992,7 @@ class ComprasTableData extends DataClass
           ..write('fechaConfirmacion: $fechaConfirmacion, ')
           ..write('fechaVencimiento: $fechaVencimiento, ')
           ..write('fechaRecepcion: $fechaRecepcion, ')
+          ..write('fechaPago: $fechaPago, ')
           ..write('ncf: $ncf, ')
           ..write('formaPago: $formaPago, ')
           ..write('diasCredito: $diasCredito, ')
@@ -18985,6 +19021,7 @@ class ComprasTableData extends DataClass
     fechaConfirmacion,
     fechaVencimiento,
     fechaRecepcion,
+    fechaPago,
     ncf,
     formaPago,
     diasCredito,
@@ -19012,6 +19049,7 @@ class ComprasTableData extends DataClass
           other.fechaConfirmacion == this.fechaConfirmacion &&
           other.fechaVencimiento == this.fechaVencimiento &&
           other.fechaRecepcion == this.fechaRecepcion &&
+          other.fechaPago == this.fechaPago &&
           other.ncf == this.ncf &&
           other.formaPago == this.formaPago &&
           other.diasCredito == this.diasCredito &&
@@ -19037,6 +19075,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
   final Value<DateTime?> fechaConfirmacion;
   final Value<DateTime?> fechaVencimiento;
   final Value<DateTime?> fechaRecepcion;
+  final Value<DateTime?> fechaPago;
   final Value<String> ncf;
   final Value<String> formaPago;
   final Value<int> diasCredito;
@@ -19060,6 +19099,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     this.fechaConfirmacion = const Value.absent(),
     this.fechaVencimiento = const Value.absent(),
     this.fechaRecepcion = const Value.absent(),
+    this.fechaPago = const Value.absent(),
     this.ncf = const Value.absent(),
     this.formaPago = const Value.absent(),
     this.diasCredito = const Value.absent(),
@@ -19084,6 +19124,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     this.fechaConfirmacion = const Value.absent(),
     this.fechaVencimiento = const Value.absent(),
     this.fechaRecepcion = const Value.absent(),
+    this.fechaPago = const Value.absent(),
     this.ncf = const Value.absent(),
     this.formaPago = const Value.absent(),
     this.diasCredito = const Value.absent(),
@@ -19119,6 +19160,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     Expression<DateTime>? fechaConfirmacion,
     Expression<DateTime>? fechaVencimiento,
     Expression<DateTime>? fechaRecepcion,
+    Expression<DateTime>? fechaPago,
     Expression<String>? ncf,
     Expression<String>? formaPago,
     Expression<int>? diasCredito,
@@ -19143,6 +19185,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       if (fechaConfirmacion != null) 'fecha_confirmacion': fechaConfirmacion,
       if (fechaVencimiento != null) 'fecha_vencimiento': fechaVencimiento,
       if (fechaRecepcion != null) 'fecha_recepcion': fechaRecepcion,
+      if (fechaPago != null) 'fecha_pago': fechaPago,
       if (ncf != null) 'ncf': ncf,
       if (formaPago != null) 'forma_pago': formaPago,
       if (diasCredito != null) 'dias_credito': diasCredito,
@@ -19171,6 +19214,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     Value<DateTime?>? fechaConfirmacion,
     Value<DateTime?>? fechaVencimiento,
     Value<DateTime?>? fechaRecepcion,
+    Value<DateTime?>? fechaPago,
     Value<String>? ncf,
     Value<String>? formaPago,
     Value<int>? diasCredito,
@@ -19195,6 +19239,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       fechaConfirmacion: fechaConfirmacion ?? this.fechaConfirmacion,
       fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
       fechaRecepcion: fechaRecepcion ?? this.fechaRecepcion,
+      fechaPago: fechaPago ?? this.fechaPago,
       ncf: ncf ?? this.ncf,
       formaPago: formaPago ?? this.formaPago,
       diasCredito: diasCredito ?? this.diasCredito,
@@ -19236,6 +19281,9 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     }
     if (fechaRecepcion.present) {
       map['fecha_recepcion'] = Variable<DateTime>(fechaRecepcion.value);
+    }
+    if (fechaPago.present) {
+      map['fecha_pago'] = Variable<DateTime>(fechaPago.value);
     }
     if (ncf.present) {
       map['ncf'] = Variable<String>(ncf.value);
@@ -19301,6 +19349,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
           ..write('fechaConfirmacion: $fechaConfirmacion, ')
           ..write('fechaVencimiento: $fechaVencimiento, ')
           ..write('fechaRecepcion: $fechaRecepcion, ')
+          ..write('fechaPago: $fechaPago, ')
           ..write('ncf: $ncf, ')
           ..write('formaPago: $formaPago, ')
           ..write('diasCredito: $diasCredito, ')
@@ -34184,6 +34233,7 @@ typedef $$ComprasTableTableCreateCompanionBuilder =
       Value<DateTime?> fechaConfirmacion,
       Value<DateTime?> fechaVencimiento,
       Value<DateTime?> fechaRecepcion,
+      Value<DateTime?> fechaPago,
       Value<String> ncf,
       Value<String> formaPago,
       Value<int> diasCredito,
@@ -34209,6 +34259,7 @@ typedef $$ComprasTableTableUpdateCompanionBuilder =
       Value<DateTime?> fechaConfirmacion,
       Value<DateTime?> fechaVencimiento,
       Value<DateTime?> fechaRecepcion,
+      Value<DateTime?> fechaPago,
       Value<String> ncf,
       Value<String> formaPago,
       Value<int> diasCredito,
@@ -34295,6 +34346,11 @@ class $$ComprasTableTableFilterComposer
 
   ColumnFilters<DateTime> get fechaRecepcion => $composableBuilder(
     column: $table.fechaRecepcion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaPago => $composableBuilder(
+    column: $table.fechaPago,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -34437,6 +34493,11 @@ class $$ComprasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get fechaPago => $composableBuilder(
+    column: $table.fechaPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get ncf => $composableBuilder(
     column: $table.ncf,
     builder: (column) => ColumnOrderings(column),
@@ -34573,6 +34634,9 @@ class $$ComprasTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get fechaPago =>
+      $composableBuilder(column: $table.fechaPago, builder: (column) => column);
+
   GeneratedColumn<String> get ncf =>
       $composableBuilder(column: $table.ncf, builder: (column) => column);
 
@@ -34694,6 +34758,7 @@ class $$ComprasTableTableTableManager
                 Value<DateTime?> fechaConfirmacion = const Value.absent(),
                 Value<DateTime?> fechaVencimiento = const Value.absent(),
                 Value<DateTime?> fechaRecepcion = const Value.absent(),
+                Value<DateTime?> fechaPago = const Value.absent(),
                 Value<String> ncf = const Value.absent(),
                 Value<String> formaPago = const Value.absent(),
                 Value<int> diasCredito = const Value.absent(),
@@ -34717,6 +34782,7 @@ class $$ComprasTableTableTableManager
                 fechaConfirmacion: fechaConfirmacion,
                 fechaVencimiento: fechaVencimiento,
                 fechaRecepcion: fechaRecepcion,
+                fechaPago: fechaPago,
                 ncf: ncf,
                 formaPago: formaPago,
                 diasCredito: diasCredito,
@@ -34742,6 +34808,7 @@ class $$ComprasTableTableTableManager
                 Value<DateTime?> fechaConfirmacion = const Value.absent(),
                 Value<DateTime?> fechaVencimiento = const Value.absent(),
                 Value<DateTime?> fechaRecepcion = const Value.absent(),
+                Value<DateTime?> fechaPago = const Value.absent(),
                 Value<String> ncf = const Value.absent(),
                 Value<String> formaPago = const Value.absent(),
                 Value<int> diasCredito = const Value.absent(),
@@ -34765,6 +34832,7 @@ class $$ComprasTableTableTableManager
                 fechaConfirmacion: fechaConfirmacion,
                 fechaVencimiento: fechaVencimiento,
                 fechaRecepcion: fechaRecepcion,
+                fechaPago: fechaPago,
                 ncf: ncf,
                 formaPago: formaPago,
                 diasCredito: diasCredito,

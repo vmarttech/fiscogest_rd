@@ -43,6 +43,7 @@ ComprasTableCompanion _compraToCompanion(Compra compra) {
     fechaEmision: Value(compra.fechaEmision),
     fechaVencimiento: Value(compra.fechaVencimiento ?? ahora),
     fechaRecepcion: Value(compra.fechaRecepcion),
+    fechaPago: Value(compra.fechaPago),
     fechaConfirmacion: Value(compra.fechaConfirmacion ?? ahora),
     numeroComprobante: Value(compra.numeroComprobante),
     tipoComprobante: Value(compra.tipoComprobante),
@@ -70,6 +71,7 @@ Compra _filaToCompra(ComprasTableData fila) {
     fechaEmision: fila.fechaEmision,
     fechaVencimiento: fila.fechaVencimiento,
     fechaRecepcion: fila.fechaRecepcion,
+    fechaPago: fila.fechaPago,
     fechaConfirmacion: fila.fechaConfirmacion,
     numeroComprobante: _str(fila.numeroComprobante),
     tipoComprobante: _str(fila.tipoComprobante, '01'),
@@ -193,14 +195,12 @@ class CompraRepositoryImpl implements ICompraRepository {
     return await db.transaction(() async {
       final compra = await obtenerCompraPorId(compraId);
       if (compra == null) throw StateError('Compra no encontrada: $compraId');
-
       if (compra.estado != EstadoCompra.borrador &&
           compra.estado != EstadoCompra.registrada) {
         throw StateError(
           'Solo se puede confirmar compras en estado Borrador o Registrada',
         );
       }
-
       final compraConfirmada = compra.copyWith(
         estado: EstadoCompra.confirmada,
         fechaConfirmacion: DateTime.now(),
@@ -218,13 +218,11 @@ class CompraRepositoryImpl implements ICompraRepository {
     return await db.transaction(() async {
       final compra = await obtenerCompraPorId(compraId);
       if (compra == null) throw StateError('Compra no encontrada: $compraId');
-
       if (compra.estado != EstadoCompra.confirmada) {
         throw StateError(
           'Solo se puede marcar como Recibida una compra en estado Confirmada',
         );
       }
-
       final compraRecibida = compra.copyWith(
         estado: EstadoCompra.recibida,
         fechaRecepcion: DateTime.now(),
@@ -238,18 +236,39 @@ class CompraRepositoryImpl implements ICompraRepository {
   }
 
   @override
+  Future<Compra> marcarComoPagada(int compraId) async {
+    return await db.transaction(() async {
+      final compra = await obtenerCompraPorId(compraId);
+      if (compra == null) throw StateError('Compra no encontrada: $compraId');
+      if (compra.estado != EstadoCompra.recibida &&
+          compra.estado != EstadoCompra.confirmada) {
+        throw StateError(
+          'Solo se puede marcar como Pagada una compra en estado Confirmada o Recibida',
+        );
+      }
+      final compraPagada = compra.copyWith(
+        estado: EstadoCompra.pagada,
+        fechaPago: DateTime.now(),
+        actualizadoEn: DateTime.now(),
+      );
+      await (db.update(db.comprasTable)
+        ..where((t) => t.id.equals(compraId)))
+          .write(_compraToCompanion(compraPagada));
+      return compraPagada;
+    });
+  }
+
+  @override
   Future<Compra> anularCompra(int compraId) async {
     return await db.transaction(() async {
       final compra = await obtenerCompraPorId(compraId);
       if (compra == null) throw StateError('Compra no encontrada: $compraId');
-
       if (compra.estado == EstadoCompra.anulada) {
         throw StateError('La compra ya se encuentra anulada');
       }
       if (compra.estado == EstadoCompra.borrador) {
         throw StateError('No se anulan borradores — elimine directamente');
       }
-
       final compraAnulada = compra.copyWith(
         estado: EstadoCompra.anulada,
         actualizadoEn: DateTime.now(),

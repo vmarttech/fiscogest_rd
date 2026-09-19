@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/calcular_
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_services.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/marcar_como_recibida_usecase.dart';
+import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/marcar_como_pagada_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/registrar_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/anular_compra_usecase.dart';
 
@@ -63,6 +64,22 @@ final marcarComoRecibidaUseCaseProvider = Provider.autoDispose<MarcarComoRecibid
 
 final marcarComoRecibidaProvider = Provider.autoDispose<Future<Compra> Function(int)>((Ref ref) {
   final useCase = ref.watch(marcarComoRecibidaUseCaseProvider);
+  return (int compraId) async {
+    final resultado = await useCase(compraId);
+    ref.invalidate(listadoComprasProvider);
+    ref.invalidate(compraPorIdProvider(compraId));
+    return resultado;
+  };
+});
+
+final marcarComoPagadaUseCaseProvider = Provider.autoDispose<MarcarComoPagadaUseCase>((Ref ref) {
+  return MarcarComoPagadaUseCase(
+    compraRepository: ref.watch(repo.compraRepositoryProvider),
+  );
+});
+
+final marcarComoPagadaProvider = Provider.autoDispose<Future<Compra> Function(int)>((Ref ref) {
+  final useCase = ref.watch(marcarComoPagadaUseCaseProvider);
   return (int compraId) async {
     final resultado = await useCase(compraId);
     ref.invalidate(listadoComprasProvider);

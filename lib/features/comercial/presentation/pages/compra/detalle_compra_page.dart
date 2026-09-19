@@ -16,11 +16,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
 
 class DetalleCompraPage extends ConsumerStatefulWidget {
-  const DetalleCompraPage({
-    super.key,
-    required this.compraId,
-  });
-
+  const DetalleCompraPage({super.key, required this.compraId});
   static const String routeName = 'detalle-compra';
   final Object compraId;
 
@@ -142,7 +138,6 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                       ),
                     );
                   }
-
                   final vencida = compra.estaVencida;
                   return RefreshIndicator(
                     onRefresh: () async {
@@ -185,7 +180,6 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       EstadoCompra.anulada => (AppColors.error, 'Anulada'),
       _ => (AppColors.grey500, 'Desconocida'),
     };
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -290,6 +284,18 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                   _formatearFecha(compra.fechaConfirmacion!),
                   esPequena,
                 ),
+              if (compra.fechaRecepcion != null)
+                _datoInformacion(
+                  'Recepción',
+                  _formatearFecha(compra.fechaRecepcion!),
+                  esPequena,
+                ),
+              if (compra.fechaPago != null)
+                _datoInformacion(
+                  'Fecha Pago',
+                  _formatearFecha(compra.fechaPago!),
+                  esPequena,
+                ),
             ],
           ),
           if (compra.observaciones != null && compra.observaciones!.isNotEmpty) ...[
@@ -322,7 +328,6 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
   }) {
     final colorEtiqueta = destacado ? AppColors.error : AppColors.textSecondary;
     final colorValor = destacado ? AppColors.error : AppColors.textPrimary;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -560,32 +565,49 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
 
   Widget _buildBotonesAccion(Compra compra, bool esPequena) {
     final confirmarCompra = ref.read(confirmarCompraUseCaseProvider);
+    final marcarComoRecibida = ref.read(marcarComoRecibidaProvider);
+    final marcarComoPagada = ref.read(marcarComoPagadaProvider);
     final anularCompra = ref.read(anularCompraProvider);
 
-    Future<void> ejecutarConfirmar() async {
-      final ok = await showDialog<bool>(
+    Future<bool?> confirmarDialogo({
+      required String titulo,
+      required String contenido,
+      required String etiquetaBoton,
+      required Color colorBoton,
+    }) async {
+      return showDialog<bool>(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Confirmar Compra'),
-          content: const Text(
-            '¿Confirmar esta compra?\n\n'
-            'Se actualizará inventario, Kardex, costos de producto y el saldo del proveedor.',
-          ),
+        builder: (BuildContext ctx) => AlertDialog(
+          title: Text(titulo),
+          content: Text(contenido),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
+              onPressed: () {
+                Navigator.of(ctx).pop(false);
+              },
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.success,
+                backgroundColor: colorBoton,
                 foregroundColor: AppColors.white,
               ),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Sí, Confirmar'),
+              onPressed: () {
+                Navigator.of(ctx).pop(true);
+              },
+              child: Text(etiquetaBoton),
             ),
           ],
         ),
+      );
+    }
+
+    Future<void> ejecutarConfirmar() async {
+      final ok = await confirmarDialogo(
+        titulo: 'Confirmar Compra',
+        contenido: '¿Confirmar esta compra?\n\nSe actualizará inventario, Kardex, costos de producto y el saldo del proveedor.',
+        etiquetaBoton: 'Sí, Confirmar',
+        colorBoton: AppColors.success,
       );
       if (ok != true) return;
       if (!mounted) return;
@@ -616,30 +638,84 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       }
     }
 
+    Future<void> ejecutarMarcarComoRecibida() async {
+      final ok = await confirmarDialogo(
+        titulo: 'Marcar como Recibida',
+        contenido: '¿Confirmas que los productos de esta compra han sido recibidos?\n\nSe registrará la fecha de recepción.',
+        etiquetaBoton: 'Sí, Recibida',
+        colorBoton: AppColors.secondary,
+      );
+      if (ok != true) return;
+      if (!mounted) return;
+      try {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registrando recepción...')),
+          );
+        }
+        await marcarComoRecibida(compra.id);
+        if (!mounted) return;
+        ref.invalidate(compraPorIdProvider(_compraId));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Compra marcada como Recibida ✅'),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          );
+        }
+      }
+    }
+
+    Future<void> ejecutarMarcarComoPagada() async {
+      final ok = await confirmarDialogo(
+        titulo: 'Marcar como Pagada',
+        contenido: '¿Marcar esta compra como Pagada?\n\nSe registrará la fecha de pago y pasará a estado Pagada.',
+        etiquetaBoton: 'Sí, Pagada',
+        colorBoton: AppColors.primaryDark,
+      );
+      if (ok != true) return;
+      if (!mounted) return;
+      try {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registrando pago...')),
+          );
+        }
+        await marcarComoPagada(compra.id);
+        if (!mounted) return;
+        ref.invalidate(compraPorIdProvider(_compraId));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Compra marcada como Pagada ✅'),
+              backgroundColor: AppColors.primaryDark,
+            ),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          );
+        }
+      }
+    }
+
     Future<void> ejecutarAnular() async {
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Anular Compra'),
-          content: const Text(
-            '¿Anular esta compra?\n\n'
-            'Se revertirá el impacto en inventario, costos y saldo del proveedor.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: AppColors.white,
-              ),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Sí, Anular'),
-            ),
-          ],
-        ),
+      final ok = await confirmarDialogo(
+        titulo: 'Anular Compra',
+        contenido: '¿Anular esta compra?\n\nEsta acción no se puede deshacer.',
+        etiquetaBoton: 'Sí, Anular',
+        colorBoton: AppColors.error,
       );
       if (ok != true) return;
       if (!mounted) return;
@@ -656,7 +732,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Compra anulada ✅'),
-              backgroundColor: AppColors.success,
+              backgroundColor: AppColors.error,
             ),
           );
         }
@@ -670,64 +746,84 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       }
     }
 
-    Widget botonConfirmar() => ElevatedButton.icon(
-          icon: const Icon(Icons.check_circle, color: AppColors.white, size: 18),
-          label: const Text('Confirmar', style: TextStyle(color: AppColors.white)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.success,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+    final botones = <Widget>[];
+
+    if (compra.estado == EstadoCompra.borrador ||
+        compra.estado == EstadoCompra.registrada) {
+      botones.add(
+        SizedBox(
+          width: esPequena ? double.infinity : 160,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.check_circle, size: 18),
+            label: const Text('Confirmar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: AppColors.white,
+            ),
+            onPressed: ejecutarConfirmar,
           ),
-          onPressed: ejecutarConfirmar,
-        );
-
-    Widget botonAnular() => ElevatedButton.icon(
-          icon: const Icon(Icons.cancel, color: AppColors.white, size: 18),
-          label: const Text('Anular', style: TextStyle(color: AppColors.white)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.error,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-          ),
-          onPressed: ejecutarAnular,
-        );
-
-    Widget botonVolver() => OutlinedButton.icon(
-          icon: const Icon(Icons.arrow_back, size: 18),
-          label: const Text('Volver'),
-          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-          onPressed: () {
-            if (mounted) context.pop();
-          },
-        );
-
-    final lista = <Widget>[];
-    if (compra.estado == EstadoCompra.borrador) {
-      lista.add(botonConfirmar());
-    }
-    if (compra.estado != EstadoCompra.anulada &&
-        compra.estado != EstadoCompra.borrador) {
-      lista.add(botonAnular());
-    }
-    lista.add(botonVolver());
-
-    if (esPequena) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < lista.length; i++) ...[
-            if (i > 0) const SizedBox(height: 8),
-            lista[i],
-          ],
-        ],
+        ),
       );
     }
 
-    return Row(
-      children: [
-        for (var i = 0; i < lista.length; i++) ...[
-          if (i > 0) const SizedBox(width: 12),
-          Expanded(child: lista[i]),
-        ],
-      ],
+    if (compra.estado == EstadoCompra.confirmada) {
+      botones.add(
+        SizedBox(
+          width: esPequena ? double.infinity : 160,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.inventory, size: 18),
+            label: const Text('Marcar Recibida'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.white,
+            ),
+            onPressed: ejecutarMarcarComoRecibida,
+          ),
+        ),
+      );
+    }
+
+    if (compra.estado == EstadoCompra.recibida ||
+        compra.estado == EstadoCompra.confirmada) {
+      botones.add(
+        SizedBox(
+          width: esPequena ? double.infinity : 160,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.payment, size: 18),
+            label: const Text('Marcar Pagada'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryDark,
+              foregroundColor: AppColors.white,
+            ),
+            onPressed: ejecutarMarcarComoPagada,
+          ),
+        ),
+      );
+    }
+
+    if (compra.estado != EstadoCompra.anulada &&
+        compra.estado != EstadoCompra.borrador) {
+      botones.add(
+        SizedBox(
+          width: esPequena ? double.infinity : 160,
+          child: OutlinedButton.icon(
+            icon: const Icon(Icons.cancel, size: 18),
+            label: const Text('Anular'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.error,
+              side: const BorderSide(color: AppColors.error),
+            ),
+            onPressed: ejecutarAnular,
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      alignment: WrapAlignment.center,
+      children: botones,
     );
   }
 }

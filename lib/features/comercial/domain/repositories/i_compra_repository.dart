@@ -6,16 +6,11 @@ abstract class ICompraRepository {
     required Compra compra,
     required List<DetalleCompra> detalles,
   });
-
   Future<Compra?> obtenerCompraPorId(int compraId);
-
   Future<List<Compra>> listarCompras();
-
   Future<List<DetalleCompra>> listarDetallesDeCompra(int compraId);
-
   Future<Compra> confirmarCompra(int compraId);
-
   Future<Compra> marcarComoRecibida(int compraId);
-
+  Future<Compra> marcarComoPagada(int compraId);
   Future<Compra> anularCompra(int compraId);
 }

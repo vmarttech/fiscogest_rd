@@ -9,6 +9,7 @@ class Compra {
     this.fechaConfirmacion,
     this.fechaVencimiento,
     this.fechaRecepcion,
+    this.fechaPago,
     required this.ncf,
     required this.formaPago,
     required this.diasCredito,
@@ -33,6 +34,7 @@ class Compra {
   final DateTime? fechaConfirmacion;
   final DateTime? fechaVencimiento;
   final DateTime? fechaRecepcion;
+  final DateTime? fechaPago;
   final String ncf;
   final String formaPago;
   final int diasCredito;
@@ -50,15 +52,18 @@ class Compra {
   final DateTime? actualizadoEn;
 
   bool get esConfirmada => estado == EstadoCompra.confirmada;
+
   bool get esCredito {
     final fp = formaPago.toLowerCase();
     final cp = condicionPago.toLowerCase();
     return fp == 'credito' || fp == 'crédito' || cp == 'credito' || cp == 'crédito';
   }
+
   DateTime? get fechaVencimientoCalculada {
     if (diasCredito <= 0) return fechaVencimiento;
     return fechaVencimiento ?? fechaEmision.add(Duration(days: diasCredito));
   }
+
   bool get estaVencida {
     if (!esConfirmada) return false;
     final vencimiento = fechaVencimientoCalculada;
@@ -74,6 +79,7 @@ class Compra {
     DateTime? fechaConfirmacion,
     DateTime? fechaVencimiento,
     DateTime? fechaRecepcion,
+    DateTime? fechaPago,
     String? ncf,
     String? formaPago,
     int? diasCredito,
@@ -98,6 +104,7 @@ class Compra {
       fechaConfirmacion: fechaConfirmacion ?? this.fechaConfirmacion,
       fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
       fechaRecepcion: fechaRecepcion ?? this.fechaRecepcion,
+      fechaPago: fechaPago ?? this.fechaPago,
       ncf: ncf ?? this.ncf,
       formaPago: formaPago ?? this.formaPago,
       diasCredito: diasCredito ?? this.diasCredito,
