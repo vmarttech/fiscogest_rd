@@ -115,9 +115,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'detalle/:compraId',
             name: DetalleCompraPage.routeName,
             builder: (context, state) {
-              final idCrudo = state.pathParameters['compraId']!;
-              final soloDigitos = idCrudo.replaceAll(RegExp(r'[^0-9]'), '');
-              final compraId = int.tryParse(soloDigitos) ?? 0;
+              int compraId = 0;
+              final idDesdePath = state.pathParameters['compraId'];
+              if (idDesdePath != null && idDesdePath.isNotEmpty) {
+                final soloDigitos = idDesdePath.replaceAll(RegExp(r'[^0-9]'), '');
+                compraId = int.tryParse(soloDigitos) ?? 0;
+              }
+              if (compraId == 0 && state.extra != null) {
+                final extra = state.extra;
+                if (extra is int) {
+                  compraId = extra;
+                } else if (extra is String) {
+                  final soloDigitos = extra.replaceAll(RegExp(r'[^0-9]'), '');
+                  compraId = int.tryParse(soloDigitos) ?? 0;
+                }
+              }
               return AppShell(child: DetalleCompraPage(compraId: compraId));
             },
           ),

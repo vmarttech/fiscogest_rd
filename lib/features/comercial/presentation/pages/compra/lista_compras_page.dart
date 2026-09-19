@@ -14,7 +14,6 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detall
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
-/// Filtros del listado de compras
 class _FiltrosCompras {
   const _FiltrosCompras({
     this.textoBusqueda = '',
@@ -26,9 +25,8 @@ class _FiltrosCompras {
     this.fechaDesde,
     this.fechaHasta,
   });
-
   final String textoBusqueda;
-  final bool? soloCredito; // null = todos, true = crédito, false = contado
+  final bool? soloCredito;
   final EstadoCompra? estado;
   final String? tipoComprobante;
   final double? montoMin;
@@ -83,12 +81,12 @@ class ListaComprasPage extends ConsumerWidget {
   static const String routeName = 'lista-compras';
 
   String _limpiarId(dynamic id) => id.toString().replaceAll(RegExp(r'[^0-9]'), '');
+
   String _formatearFecha(DateTime fecha) =>
       '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
 
   List<Compra> _aplicarFiltros(List<Compra> compras, _FiltrosCompras f) {
     return compras.where((c) {
-      // Texto (proveedor, NCF, número)
       if (f.textoBusqueda.isNotEmpty) {
         final q = f.textoBusqueda.toLowerCase();
         final match = c.nombreProveedor.toLowerCase().contains(q) ||
@@ -97,28 +95,18 @@ class ListaComprasPage extends ConsumerWidget {
             c.id.toString().contains(q);
         if (!match) return false;
       }
-
-      // Contado / Crédito
       if (f.soloCredito != null) {
         if (f.soloCredito! && !c.esCredito) return false;
         if (!f.soloCredito! && c.esCredito) return false;
       }
-
-      // Estado
       if (f.estado != null && c.estado != f.estado) return false;
-
-      // Tipo de comprobante
       if (f.tipoComprobante != null &&
           f.tipoComprobante!.isNotEmpty &&
           c.tipoComprobante != f.tipoComprobante) {
         return false;
       }
-
-      // Rango de monto
       if (f.montoMin != null && c.totalCompra < f.montoMin!) return false;
       if (f.montoMax != null && c.totalCompra > f.montoMax!) return false;
-
-      // Rango de fecha
       if (f.fechaDesde != null) {
         final d = DateTime(c.fechaEmision.year, c.fechaEmision.month, c.fechaEmision.day);
         final desde = DateTime(f.fechaDesde!.year, f.fechaDesde!.month, f.fechaDesde!.day);
@@ -129,7 +117,6 @@ class ListaComprasPage extends ConsumerWidget {
         final hasta = DateTime(f.fechaHasta!.year, f.fechaHasta!.month, f.fechaHasta!.day);
         if (d.isAfter(hasta)) return false;
       }
-
       return true;
     }).toList();
   }
@@ -177,7 +164,6 @@ class ListaComprasPage extends ConsumerWidget {
       final montoMaxCtrl = TextEditingController(
         text: actual.montoMax?.toStringAsFixed(0) ?? '',
       );
-
       EstadoCompra? estadoSel = actual.estado;
       bool? creditoSel = actual.soloCredito;
       String? tipoSel = actual.tipoComprobante;
@@ -210,8 +196,6 @@ class ListaComprasPage extends ConsumerWidget {
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
-
-                      // Búsqueda
                       TextField(
                         controller: textoCtrl,
                         decoration: const InputDecoration(
@@ -222,8 +206,6 @@ class ListaComprasPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-
-                      // Contado / Crédito
                       const Text('Condición de pago', style: TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 6),
                       SegmentedButton<bool?>(
@@ -238,8 +220,6 @@ class ListaComprasPage extends ConsumerWidget {
                         },
                       ),
                       const SizedBox(height: 12),
-
-                      // Estado
                       DropdownButtonFormField<EstadoCompra?>(
                         initialValue: estadoSel,
                         decoration: const InputDecoration(
@@ -259,8 +239,6 @@ class ListaComprasPage extends ConsumerWidget {
                         onChanged: (v) => setModalState(() => estadoSel = v),
                       ),
                       const SizedBox(height: 12),
-
-                      // Tipo de comprobante
                       DropdownButtonFormField<String?>(
                         initialValue: tipoSel,
                         decoration: const InputDecoration(
@@ -278,8 +256,6 @@ class ListaComprasPage extends ConsumerWidget {
                         onChanged: (v) => setModalState(() => tipoSel = v),
                       ),
                       const SizedBox(height: 12),
-
-                      // Rango de monto
                       Row(
                         children: [
                           Expanded(
@@ -310,8 +286,6 @@ class ListaComprasPage extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-
-                      // Fechas
                       Row(
                         children: [
                           Expanded(
@@ -356,8 +330,6 @@ class ListaComprasPage extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 20),
-
-                      // Botones
                       Row(
                         children: [
                           Expanded(
@@ -431,7 +403,7 @@ class ListaComprasPage extends ConsumerWidget {
         bottom: true,
         child: comprasAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
+          error: (Object error, StackTrace _) => Center(
             child: Padding(
               padding: AppLayout.pantallaPadding,
               child: Column(
@@ -449,9 +421,8 @@ class ListaComprasPage extends ConsumerWidget {
               ),
             ),
           ),
-          data: (todas) {
+          data: (List<Compra> todas) {
             final compras = _aplicarFiltros(todas, filtros);
-
             if (todas.isEmpty) {
               return const Center(
                 child: Padding(
@@ -475,7 +446,6 @@ class ListaComprasPage extends ConsumerWidget {
                 ),
               );
             }
-
             if (compras.isEmpty) {
               return Center(
                 child: Padding(
@@ -502,10 +472,8 @@ class ListaComprasPage extends ConsumerWidget {
                 ),
               );
             }
-
             return Column(
               children: [
-                // Chip de filtros activos
                 if (filtros.tieneFiltrosActivos)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -558,7 +526,7 @@ class ListaComprasPage extends ConsumerWidget {
                             ),
                           );
                         }
-                        final (color, texto) = switch (compra.estado) {
+                        final (Color color, String texto) = switch (compra.estado) {
                           EstadoCompra.borrador => (Colors.orange, 'Borrador'),
                           EstadoCompra.registrada => (Colors.blue, 'Registrada'),
                           EstadoCompra.confirmada => (Colors.green, 'Confirmada'),
@@ -619,29 +587,36 @@ class ListaComprasPage extends ConsumerWidget {
                             ],
                           ),
                         );
-                        if (ok != true || !context.mounted) return;
+                        if (ok != true) return;
+                        if (!context.mounted) return;
                         try {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Confirmando compra...')),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Confirmando compra...')),
+                            );
+                          }
                           await confirmarCompra(compra.id);
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Compra confirmada ✅'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Compra confirmada ✅'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
                           ref.invalidate(listadoComprasProvider);
                           ref.invalidate(productoControllerProvider);
                         } catch (e) {
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error: $e'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         }
                       }
 
@@ -676,21 +651,25 @@ class ListaComprasPage extends ConsumerWidget {
                             detalles: nuevosDetalles,
                           );
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Compra duplicada como borrador ✅'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Compra duplicada como borrador ✅'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
                           ref.invalidate(listadoComprasProvider);
                         } catch (e) {
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error al duplicar: $e'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error al duplicar: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         }
                       }
 
@@ -758,29 +737,36 @@ class ListaComprasPage extends ConsumerWidget {
                             ],
                           ),
                         );
-                        if (ok != true || !context.mounted) return;
+                        if (ok != true) return;
+                        if (!context.mounted) return;
                         try {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Anulando compra...')),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Anulando compra...')),
+                            );
+                          }
                           await anularCompra(compra.id);
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Compra anulada ✅'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Compra anulada ✅'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
                           ref.invalidate(listadoComprasProvider);
                           ref.invalidate(productoControllerProvider);
                         } catch (e) {
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error: $e'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         }
                       }
 
@@ -825,13 +811,15 @@ class ListaComprasPage extends ConsumerWidget {
                                           verDetalle();
                                           break;
                                         case 'editar':
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Edición de borradores: próximamente',
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Edición de borradores: próximamente',
+                                                ),
                                               ),
-                                            ),
-                                          );
+                                            );
+                                          }
                                           break;
                                         case 'duplicar':
                                           await duplicar();
