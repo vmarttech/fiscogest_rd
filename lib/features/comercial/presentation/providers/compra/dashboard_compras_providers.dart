@@ -1,9 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' as repo;
 
-/// Modelo simple para los KPIs del dashboard
 class DashboardComprasKpis {
   const DashboardComprasKpis({
     required this.comprasEsteMes,
@@ -18,7 +18,6 @@ class DashboardComprasKpis {
   final double vencido;
 }
 
-/// Actividad reciente (últimas compras)
 class ActividadRecienteItem {
   const ActividadRecienteItem({
     required this.compraId,
@@ -37,93 +36,105 @@ class ActividadRecienteItem {
 
 final dashboardComprasKpisProvider =
     FutureProvider.autoDispose<DashboardComprasKpis>((ref) async {
-  final compraRepo = ref.watch(repo.compraRepositoryProvider);
-  final cuentasDao = ref.watch(repo.cuentasPagarDaoProvider);
+  try {
+    final compraRepo = ref.watch(repo.compraRepositoryProvider);
+    final cuentasDao = ref.watch(repo.cuentasPagarDaoProvider);
 
-  final ahora = DateTime.now();
-  final inicioMes = DateTime(ahora.year, ahora.month, 1);
+    final ahora = DateTime.now();
+    final inicioMes = DateTime(ahora.year, ahora.month, 1);
 
-  final compras = await compraRepo.listarCompras();
-  final cuentasConProveedor = await cuentasDao.listarCuentasPorPagar();
+    final compras = await compraRepo.listarCompras();
+    debugPrint('[KPI] compras cargadas: ${compras.length}');
 
-  // Solo compras del mes actual que no estén en borrador ni anuladas
-  final comprasMes = compras.where((Compra c) {
-    final fecha = c.fechaEmision;
-    final mismoMes = fecha.year == ahora.year && fecha.month == ahora.month;
-    final valida =
-        c.estado != EstadoCompra.borrador && c.estado != EstadoCompra.anulada;
-    return mismoMes && valida && !fecha.isBefore(inicioMes);
-  }).toList();
+    final cuentasConProveedor = await cuentasDao.listarCuentasPorPagar();
+    debugPrint('[KPI] cuentas por pagar: ${cuentasConProveedor.length}');
 
-  final double totalMes = comprasMes.fold<double>(
-    0,
-    (double sum, Compra c) => sum + c.totalCompra,
-  );
+    final comprasMes = compras.where((Compra c) {
+      final fecha = c.fechaEmision;
+      final mismoMes = fecha.year == ahora.year && fecha.month == ahora.month;
+      final valida =
+          c.estado != EstadoCompra.borrador && c.estado != EstadoCompra.anulada;
+      return mismoMes && valida && !fecha.isBefore(inicioMes);
+    }).toList();
 
-  final double aCreditoMes = comprasMes
-      .where((Compra c) => c.esCredito)
-      .fold<double>(0, (double sum, Compra c) => sum + c.totalCompra);
+    final double totalMes = comprasMes.fold<double>(
+      0,
+      (sum, c) => sum + c.totalCompra,
+    );
 
-  // Cuentas pendientes / parciales → por pagar
-  // Cuentas vencidas (por estado o por fecha) → vencido
-  // saldo pendiente = monto - suma de abonos
-  double porPagar = 0;
-  double vencido = 0;
+    final double aCreditoMes = comprasMes
+        .where((c) => c.esCredito)
+        .fold<double>(0, (sum, c) => sum + c.totalCompra);
 
-  for (final item in cuentasConProveedor) {
-    final cuenta = item.cuenta;
-    final estado = cuenta.estado;
+    double porPagar = 0;
+    double vencido = 0;
 
-    // Ignorar cuentas ya pagadas
-    if (estado == PagarEstado.pagado) continue;
+    for (final item in cuentasConProveedor) {
+      try {
+        final cuenta = item.cuenta;
+        final estado = cuenta.estado;
 
-    // Calcular saldo real a partir de los abonos registrados
-    final pagos = await cuentasDao.listarPagosPorCuenta(cuenta.id);
-    final totalAbonado =
-        pagos.fold<double>(0, (double s, p) => s + p.monto);
-    final saldo = cuenta.monto - totalAbonado;
+        if (estado == PagarEstado.pagado) continue;
 
-    // Si no queda nada pendiente, no lo contamos
-    if (saldo <= 0) continue;
+        final pagos = await cuentasDao.listarPagosPorCuenta(cuenta.id);
+        final totalAbonado =
+            pagos.fold<double>(0, (s, p) => s + p.monto);
+        final saldo = cuenta.monto - totalAbonado;
 
-    final DateTime fechaVenc = cuenta.fechaVencimiento;
-    final bool estaVencida = estado == PagarEstado.vencido ||
-        (ahora.isAfter(fechaVenc));
+        if (saldo <= 0) continue;
 
-    if (estaVencida) {
-      vencido += saldo;
-    } else {
-      porPagar += saldo;
+        final fechaVenc = cuenta.fechaVencimiento;
+        final bool estaVencida = estado == PagarEstado.vencido ||
+            ahora.isAfter(fechaVenc);
+
+        if (estaVencida) {
+          vencido += saldo;
+        } else {
+          porPagar += saldo;
+        }
+      } catch (e, st) {
+        debugPrint('[KPI] cuenta omitida: $e\n$st');
+      }
     }
-  }
 
-  return DashboardComprasKpis(
-    comprasEsteMes: totalMes,
-    aCreditoEsteMes: aCreditoMes,
-    porPagar: porPagar,
-    vencido: vencido,
-  );
+    return DashboardComprasKpis(
+      comprasEsteMes: totalMes,
+      aCreditoEsteMes: aCreditoMes,
+      porPagar: porPagar,
+      vencido: vencido,
+    );
+  } catch (e, st) {
+    debugPrint('[KPI] ERROR FATAL: $e\n$st');
+    rethrow;
+  }
 });
 
 final actividadRecienteComprasProvider =
     FutureProvider.autoDispose<List<ActividadRecienteItem>>((ref) async {
-  final compraRepo = ref.watch(repo.compraRepositoryProvider);
-  final compras = await compraRepo.listarCompras();
+  try {
+    final compraRepo = ref.watch(repo.compraRepositoryProvider);
+    final compras = await compraRepo.listarCompras();
+    debugPrint('[Actividad] compras: ${compras.length}');
 
-  final recientes = compras
-      .where((Compra c) =>
-          c.estado != EstadoCompra.borrador &&
-          c.estado != EstadoCompra.anulada)
-      .toList()
-    ..sort((a, b) => b.fechaEmision.compareTo(a.fechaEmision));
+    final recientes = compras
+        .where((c) =>
+            c.estado != EstadoCompra.borrador &&
+            c.estado != EstadoCompra.anulada)
+        .toList()
+      ..sort((a, b) => b.fechaEmision.compareTo(a.fechaEmision));
 
-  return recientes.take(8).map((Compra c) {
-    return ActividadRecienteItem(
-      compraId: c.id,
-      fecha: c.fechaEmision,
-      proveedorNombre: c.nombreProveedor,
-      total: c.totalCompra,
-      estado: c.estado,
-    );
-  }).toList();
+    return recientes.take(8).map((c) {
+      return ActividadRecienteItem(
+        compraId: c.id,
+        fecha: c.fechaEmision,
+        proveedorNombre:
+            c.nombreProveedor.isEmpty ? 'Sin nombre' : c.nombreProveedor,
+        total: c.totalCompra,
+        estado: c.estado,
+      );
+    }).toList();
+  } catch (e, st) {
+    debugPrint('[Actividad] ERROR FATAL: $e\n$st');
+    rethrow;
+  }
 });

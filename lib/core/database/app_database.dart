@@ -46,6 +46,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart
 // NUEVAS: Tablas Compras - Etapa 4.1
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
+
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -100,10 +101,12 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => _instance;
   AppDatabase._internal() : super(_openConnection());
   static final AppDatabase _instance = AppDatabase._internal();
+
   // ✅ GETTER DAO - CONECTADO
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
+
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 24;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -283,6 +286,36 @@ class AppDatabase extends _$AppDatabase {
         try {
           await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN condiciones_nota TEXT');
         } catch (_) {}
+      }
+      // ✅ VERSIÓN 24: tipo_comprobante, condicion_pago + estado INTEGER → TEXT
+      if (from < 24) {
+        try {
+          await m.database.customStatement(
+            "ALTER TABLE compras_table ADD COLUMN tipo_comprobante TEXT NOT NULL DEFAULT '01'",
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            "ALTER TABLE compras_table ADD COLUMN condicion_pago TEXT NOT NULL DEFAULT 'contado'",
+          );
+        } catch (_) {}
+
+        // Convertir estado INTEGER legacy → nombres del enum EstadoCompra
+        await m.database.customStatement('''
+          UPDATE compras_table
+          SET estado = CASE CAST(estado AS INTEGER)
+            WHEN 0 THEN 'borrador'
+            WHEN 1 THEN 'confirmada'
+            WHEN 2 THEN 'registrada'
+            WHEN 3 THEN 'recibida'
+            WHEN 4 THEN 'pagada'
+            WHEN 5 THEN 'vencida'
+            WHEN 6 THEN 'anulada'
+            ELSE COALESCE(estado, 'borrador')
+          END
+          WHERE typeof(estado) = 'integer'
+             OR (typeof(estado) = 'text' AND estado GLOB '[0-9]*');
+        ''');
       }
     },
   );

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
@@ -14,8 +15,15 @@ final calcularTotalesCompraUseCaseProvider = Provider<CalcularTotalesCompraUseCa
 });
 
 final listadoComprasProvider = FutureProvider.autoDispose<List<Compra>>((Ref ref) async {
-  final ICompraRepository repoCompra = ref.watch(repo.compraRepositoryProvider);
-  return repoCompra.listarCompras();
+  try {
+    final ICompraRepository repoCompra = ref.watch(repo.compraRepositoryProvider);
+    final list = await repoCompra.listarCompras();
+    debugPrint('[ListaCompras] ok: ${list.length}');
+    return list;
+  } catch (e, st) {
+    debugPrint('[ListaCompras] ERROR: $e\n$st');
+    rethrow;
+  }
 });
 
 final compraPorIdProvider = FutureProvider.autoDispose.family<Compra?, int>((Ref ref, int id) async {

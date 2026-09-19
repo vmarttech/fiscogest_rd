@@ -13,7 +13,6 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 
 class DashboardComprasPage extends ConsumerWidget {
   const DashboardComprasPage({super.key});
-
   static const String routeName = 'dashboard-compras';
 
   @override
@@ -76,9 +75,7 @@ class DashboardComprasPage extends ConsumerWidget {
                 child: Text('Error cargando KPIs: $e'),
               ),
             ),
-
             const SizedBox(height: AppSpacing.l),
-
             // ========== Accesos rápidos ==========
             AppSection(
               title: 'Accesos rápidos',
@@ -116,9 +113,7 @@ class DashboardComprasPage extends ConsumerWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: AppSpacing.l),
-
             // ========== Actividad reciente ==========
             Text(
               'Actividad reciente',
@@ -127,7 +122,6 @@ class DashboardComprasPage extends ConsumerWidget {
                   ),
             ),
             const SizedBox(height: AppSpacing.s),
-
             actividadAsync.when(
               data: (items) {
                 if (items.isEmpty) {
@@ -144,31 +138,34 @@ class DashboardComprasPage extends ConsumerWidget {
                   children: items.map((item) {
                     final fechaStr = _formatearFechaRelativa(item.fecha);
                     return AppCard(
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor:
-                              AppColors.primary.withValues(alpha: 0.1),
-                          child: const Icon(
-                            Icons.shopping_bag_outlined,
-                            color: AppColors.primary,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                AppColors.primary.withValues(alpha: 0.1),
+                            child: const Icon(
+                              Icons.shopping_bag_outlined,
+                              color: AppColors.primary,
+                            ),
                           ),
-                        ),
-                        title: Text(
-                          item.proveedorNombre,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle:
-                            Text('$fechaStr · ${_estadoLabel(item.estado)}'),
-                        trailing: Text(
-                          currency.format(item.total),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                          title: Text(
+                            item.proveedorNombre,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
+                          subtitle:
+                              Text('$fechaStr · ${_estadoLabel(item.estado)}'),
+                          trailing: Text(
+                            currency.format(item.total),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          onTap: () {
+                            context.push('/compras/detalle/${item.compraId}');
+                          },
                         ),
-                        onTap: () {
-                          context.push('/compras/detalle/${item.compraId}');
-                        },
                       ),
                     );
                   }).toList(),
@@ -217,7 +214,6 @@ class DashboardComprasPage extends ConsumerWidget {
 }
 
 // ---------- Widgets privados ----------
-
 class _KpisGrid extends StatelessWidget {
   const _KpisGrid({
     required this.comprasEsteMes,

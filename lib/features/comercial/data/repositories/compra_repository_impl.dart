@@ -142,7 +142,12 @@ class CompraRepositoryImpl implements ICompraRepository {
     final fila = await (db.select(
       db.comprasTable,
     )..where((t) => t.id.equals(compraId))).getSingleOrNull();
-    return fila == null ? null : _filaToCompra(fila);
+    if (fila == null) return null;
+    try {
+      return _filaToCompra(fila);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
@@ -152,7 +157,18 @@ class CompraRepositoryImpl implements ICompraRepository {
     )..orderBy([
         (t) => OrderingTerm.desc(t.fechaEmision),
       ])).get();
-    return filas.map((ComprasTableData f) => _filaToCompra(f)).toList();
+
+    final resultado = <Compra>[];
+    for (final f in filas) {
+      try {
+        resultado.add(_filaToCompra(f));
+      } catch (e, st) {
+        // Fila corrupta / enum inválido / null inesperado → se omite
+        // ignore: avoid_print
+        print('Compra id=${f.id} omitida por error de mapeo: $e\n$st');
+      }
+    }
+    return resultado;
   }
 
   @override
@@ -226,9 +242,6 @@ class CompraRepositoryImpl implements ICompraRepository {
         );
       }
 
-      // Solo se permite anular compras que ya impactaron el sistema
-      // (confirmada o recibida). El caller (use case) debe haber llamado
-      // previamente a ConfirmarCompraServices.revertirActualizaciones.
       final compraAnulada = compra.copyWith(
         estado: EstadoCompra.anulada,
         actualizadoEn: DateTime.now(),

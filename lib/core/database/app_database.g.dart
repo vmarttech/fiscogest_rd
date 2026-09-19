@@ -14790,7 +14790,8 @@ class $CuentasPagarTableTable extends CuentasPagarTable
         aliasedName,
         false,
         type: DriftSqlType.string,
-        requiredDuringInsert: true,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('compra'),
       ).withConverter<TipoGasto>($CuentasPagarTableTable.$convertertipoGasto);
   @override
   List<GeneratedColumn> get $columns => [
@@ -14922,8 +14923,8 @@ class $CuentasPagarTableTable extends CuentasPagarTable
 
   static TypeConverter<PagarEstado, String> $converterestado =
       const PagarEstadoConverter();
-  static JsonTypeConverter2<TipoGasto, String, String> $convertertipoGasto =
-      const EnumNameConverter<TipoGasto>(TipoGasto.values);
+  static TypeConverter<TipoGasto, String> $convertertipoGasto =
+      const TipoGastoConverter();
 }
 
 class CuentaPagarData extends DataClass implements Insertable<CuentaPagarData> {
@@ -14993,9 +14994,7 @@ class CuentaPagarData extends DataClass implements Insertable<CuentaPagarData> {
       fechaEmision: serializer.fromJson<DateTime>(json['fechaEmision']),
       fechaVencimiento: serializer.fromJson<DateTime>(json['fechaVencimiento']),
       estado: serializer.fromJson<PagarEstado>(json['estado']),
-      tipoGasto: $CuentasPagarTableTable.$convertertipoGasto.fromJson(
-        serializer.fromJson<String>(json['tipoGasto']),
-      ),
+      tipoGasto: serializer.fromJson<TipoGasto>(json['tipoGasto']),
     );
   }
   @override
@@ -15009,9 +15008,7 @@ class CuentaPagarData extends DataClass implements Insertable<CuentaPagarData> {
       'fechaEmision': serializer.toJson<DateTime>(fechaEmision),
       'fechaVencimiento': serializer.toJson<DateTime>(fechaVencimiento),
       'estado': serializer.toJson<PagarEstado>(estado),
-      'tipoGasto': serializer.toJson<String>(
-        $CuentasPagarTableTable.$convertertipoGasto.toJson(tipoGasto),
-      ),
+      'tipoGasto': serializer.toJson<TipoGasto>(tipoGasto),
     };
   }
 
@@ -15120,13 +15117,12 @@ class CuentasPagarTableCompanion extends UpdateCompanion<CuentaPagarData> {
     required DateTime fechaEmision,
     required DateTime fechaVencimiento,
     this.estado = const Value.absent(),
-    required TipoGasto tipoGasto,
+    this.tipoGasto = const Value.absent(),
   }) : proveedorId = Value(proveedorId),
        concepto = Value(concepto),
        monto = Value(monto),
        fechaEmision = Value(fechaEmision),
-       fechaVencimiento = Value(fechaVencimiento),
-       tipoGasto = Value(tipoGasto);
+       fechaVencimiento = Value(fechaVencimiento);
   static Insertable<CuentaPagarData> custom({
     Expression<int>? id,
     Expression<int>? proveedorId,
@@ -18256,7 +18252,8 @@ class $ComprasTableTable extends ComprasTable
         aliasedName,
         false,
         type: DriftSqlType.string,
-        requiredDuringInsert: true,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('borrador'),
       ).withConverter<EstadoCompra>($ComprasTableTable.$converterestado);
   static const VerificationMeta _observacionesMeta = const VerificationMeta(
     'observaciones',
@@ -18634,8 +18631,8 @@ class $ComprasTableTable extends ComprasTable
     return $ComprasTableTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<EstadoCompra, String, String> $converterestado =
-      const EnumNameConverter<EstadoCompra>(EstadoCompra.values);
+  static TypeConverter<EstadoCompra, String> $converterestado =
+      const EstadoCompraConverter();
 }
 
 class ComprasTableData extends DataClass
@@ -18797,9 +18794,7 @@ class ComprasTableData extends DataClass
       totalCompra: serializer.fromJson<double>(json['totalCompra']),
       proveedorId: serializer.fromJson<int>(json['proveedorId']),
       nombreProveedor: serializer.fromJson<String>(json['nombreProveedor']),
-      estado: $ComprasTableTable.$converterestado.fromJson(
-        serializer.fromJson<String>(json['estado']),
-      ),
+      estado: serializer.fromJson<EstadoCompra>(json['estado']),
       observaciones: serializer.fromJson<String?>(json['observaciones']),
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
@@ -18827,9 +18822,7 @@ class ComprasTableData extends DataClass
       'totalCompra': serializer.toJson<double>(totalCompra),
       'proveedorId': serializer.toJson<int>(proveedorId),
       'nombreProveedor': serializer.toJson<String>(nombreProveedor),
-      'estado': serializer.toJson<String>(
-        $ComprasTableTable.$converterestado.toJson(estado),
-      ),
+      'estado': serializer.toJson<EstadoCompra>(estado),
       'observaciones': serializer.toJson<String?>(observaciones),
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
@@ -19102,7 +19095,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     required double totalCompra,
     required int proveedorId,
     required String nombreProveedor,
-    required EstadoCompra estado,
+    this.estado = const Value.absent(),
     this.observaciones = const Value.absent(),
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
@@ -19117,7 +19110,6 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
        totalCompra = Value(totalCompra),
        proveedorId = Value(proveedorId),
        nombreProveedor = Value(nombreProveedor),
-       estado = Value(estado),
        creadoEn = Value(creadoEn);
   static Insertable<ComprasTableData> custom({
     Expression<int>? id,
@@ -31807,7 +31799,7 @@ typedef $$CuentasPagarTableTableCreateCompanionBuilder =
       required DateTime fechaEmision,
       required DateTime fechaVencimiento,
       Value<PagarEstado> estado,
-      required TipoGasto tipoGasto,
+      Value<TipoGasto> tipoGasto,
     });
 typedef $$CuentasPagarTableTableUpdateCompanionBuilder =
     CuentasPagarTableCompanion Function({
@@ -32191,7 +32183,7 @@ class $$CuentasPagarTableTableTableManager
                 required DateTime fechaEmision,
                 required DateTime fechaVencimiento,
                 Value<PagarEstado> estado = const Value.absent(),
-                required TipoGasto tipoGasto,
+                Value<TipoGasto> tipoGasto = const Value.absent(),
               }) => CuentasPagarTableCompanion.insert(
                 id: id,
                 proveedorId: proveedorId,
@@ -34193,7 +34185,7 @@ typedef $$ComprasTableTableCreateCompanionBuilder =
       required double totalCompra,
       required int proveedorId,
       required String nombreProveedor,
-      required EstadoCompra estado,
+      Value<EstadoCompra> estado,
       Value<String?> observaciones,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
@@ -34751,7 +34743,7 @@ class $$ComprasTableTableTableManager
                 required double totalCompra,
                 required int proveedorId,
                 required String nombreProveedor,
-                required EstadoCompra estado,
+                Value<EstadoCompra> estado = const Value.absent(),
                 Value<String?> observaciones = const Value.absent(),
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),

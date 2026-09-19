@@ -7,13 +7,31 @@ class PagarEstadoConverter extends TypeConverter<PagarEstado, String> {
 
   @override
   PagarEstado fromSql(String value) {
-    return PagarEstado.values.byName(value.toLowerCase());
+    final normalizado = value.toLowerCase().trim();
+    for (final e in PagarEstado.values) {
+      if (e.name.toLowerCase() == normalizado) return e;
+    }
+    return PagarEstado.pendiente;
   }
 
   @override
-  String toSql(PagarEstado value) {
-    return value.name;
+  String toSql(PagarEstado value) => value.name;
+}
+
+class TipoGastoConverter extends TypeConverter<TipoGasto, String> {
+  const TipoGastoConverter();
+
+  @override
+  TipoGasto fromSql(String value) {
+    final normalizado = value.toLowerCase().trim();
+    for (final e in TipoGasto.values) {
+      if (e.name.toLowerCase() == normalizado) return e;
+    }
+    return TipoGasto.compra;
   }
+
+  @override
+  String toSql(TipoGasto value) => value.name;
 }
 
 @DataClassName('CuentaPagarData')
@@ -30,5 +48,8 @@ class CuentasPagarTable extends Table {
       .named('estado')
       .withDefault(const Constant('pendiente'))
       .map(const PagarEstadoConverter())();
-  TextColumn get tipoGasto => textEnum<TipoGasto>().named('tipo_gasto')();
+  TextColumn get tipoGasto => text()
+      .named('tipo_gasto')
+      .map(const TipoGastoConverter())
+      .withDefault(const Constant('compra'))();
 }
