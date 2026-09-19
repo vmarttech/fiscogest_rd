@@ -17,14 +17,19 @@ class ConfirmarCompraUseCase {
   final Future<void> Function(Compra) ejecutarActualizaciones;
   final Future<void> Function(Compra) registrarMovimientoKardex;
   final Future<void> Function(Compra) calcularCostoAdquisicion;
-  final Future<void> Function(int) actualizarSaldoProveedor;
+  final Future<void> Function(Compra) actualizarSaldoProveedor;
   final CuentasPagarDao cuentasPagarDao;
 
   Future<Compra> call(final int compraId) async {
     final compra = await compraRepository.obtenerCompraPorId(compraId);
     if (compra == null) throw StateError('Compra no encontrada');
-    if (compra.estado != EstadoCompra.borrador) {
-      throw StateError('Solo se puede confirmar compras en estado Borrador');
+
+    // ✅ Permitir desde Borrador O desde Registrada
+    if (compra.estado != EstadoCompra.borrador &&
+        compra.estado != EstadoCompra.registrada) {
+      throw StateError(
+        'Solo se puede confirmar compras en estado Borrador o Registrada',
+      );
     }
 
     final fechaVencimientoFinal = compra.fechaVencimientoCalculada;
@@ -45,7 +50,7 @@ class ConfirmarCompraUseCase {
     await calcularCostoAdquisicion(compraConfirmada);
     await registrarMovimientoKardex(compraConfirmada);
     await ejecutarActualizaciones(compraConfirmada);
-    await actualizarSaldoProveedor(compra.proveedorId);
+    await actualizarSaldoProveedor(compraConfirmada);
 
     return compraConfirmada;
   }

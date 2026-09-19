@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_rep
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/calcular_totales_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_services.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/confirmar_compra_usecase.dart';
+import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/marcar_como_recibida_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/registrar_compra_usecase.dart';
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/anular_compra_usecase.dart';
 
@@ -48,12 +49,26 @@ final confirmarCompraUseCaseProvider = Provider.autoDispose<ConfirmarCompraUseCa
     ejecutarActualizaciones: svc.ejecutarActualizaciones,
     registrarMovimientoKardex: svc.registrarMovimientoKardex,
     calcularCostoAdquisicion: svc.calcularCostoAdquisicion,
-    actualizarSaldoProveedor: (int compraId) async {
-      final Compra? compra = await ref.watch(compraPorIdProvider(compraId).future);
-      if (compra == null) throw StateError('Compra no encontrada: $compraId');
+    actualizarSaldoProveedor: (Compra compra) async {
       await svc.actualizarSaldoProveedor(compra);
     },
   );
+});
+
+final marcarComoRecibidaUseCaseProvider = Provider.autoDispose<MarcarComoRecibidaUseCase>((Ref ref) {
+  return MarcarComoRecibidaUseCase(
+    compraRepository: ref.watch(repo.compraRepositoryProvider),
+  );
+});
+
+final marcarComoRecibidaProvider = Provider.autoDispose<Future<Compra> Function(int)>((Ref ref) {
+  final useCase = ref.watch(marcarComoRecibidaUseCaseProvider);
+  return (int compraId) async {
+    final resultado = await useCase(compraId);
+    ref.invalidate(listadoComprasProvider);
+    ref.invalidate(compraPorIdProvider(compraId));
+    return resultado;
+  };
 });
 
 final anularCompraUseCaseProvider = Provider.autoDispose<AnularCompraUseCase>((Ref ref) {
@@ -65,7 +80,6 @@ final anularCompraUseCaseProvider = Provider.autoDispose<AnularCompraUseCase>((R
   );
 });
 
-/// Helper listo para usar desde la UI
 final anularCompraProvider = Provider.autoDispose<Future<Compra> Function(int)>((Ref ref) {
   final useCase = ref.watch(anularCompraUseCaseProvider);
   return (int compraId) async {

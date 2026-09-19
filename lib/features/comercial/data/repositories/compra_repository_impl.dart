@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
@@ -139,9 +140,8 @@ class CompraRepositoryImpl implements ICompraRepository {
 
   @override
   Future<Compra?> obtenerCompraPorId(int compraId) async {
-    final fila = await (db.select(
-      db.comprasTable,
-    )..where((t) => t.id.equals(compraId))).getSingleOrNull();
+    final fila = await (db.select(db.comprasTable)
+      ..where((t) => t.id.equals(compraId))).getSingleOrNull();
     if (fila == null) return null;
     try {
       return _filaToCompra(fila);
@@ -152,18 +152,14 @@ class CompraRepositoryImpl implements ICompraRepository {
 
   @override
   Future<List<Compra>> listarCompras() async {
-    final filas = await (db.select(
-      db.comprasTable,
-    )..orderBy([
-        (t) => OrderingTerm.desc(t.fechaEmision),
-      ])).get();
+    final filas = await (db.select(db.comprasTable)
+      ..orderBy([(t) => OrderingTerm.desc(t.fechaEmision)])).get();
     final resultado = <Compra>[];
     for (final f in filas) {
       try {
         resultado.add(_filaToCompra(f));
       } catch (e, st) {
-        // ignore: avoid_print
-        print('Compra id=${f.id} omitida por error de mapeo: $e\n$st');
+        debugPrint('Compra id=${f.id} omitida por error de mapeo: $e\n$st');
       }
     }
     return resultado;
@@ -171,9 +167,8 @@ class CompraRepositoryImpl implements ICompraRepository {
 
   @override
   Future<List<DetalleCompra>> listarDetallesDeCompra(int compraId) async {
-    final filas = await (db.select(
-      db.detalleCompraTable,
-    )..where((t) => t.compraId.equals(compraId))).get();
+    final filas = await (db.select(db.detalleCompraTable)
+      ..where((t) => t.compraId.equals(compraId))).get();
     return filas.map((DetalleCompraTableData f) => _filaToDetalle(f)).toList();
   }
 
@@ -183,15 +178,10 @@ class CompraRepositoryImpl implements ICompraRepository {
     required List<DetalleCompra> detalles,
   }) async {
     await db.transaction(() async {
-      await db.into(db.comprasTable).insert(
-            _compraToCompanion(compra),
-          );
+      await db.into(db.comprasTable).insert(_compraToCompanion(compra));
       await db.batch((batch) {
         for (final detalle in detalles) {
-          batch.insert(
-            db.detalleCompraTable,
-            _detalleToCompanion(detalle),
-          );
+          batch.insert(db.detalleCompraTable, _detalleToCompanion(detalle));
         }
       });
     });
@@ -202,25 +192,48 @@ class CompraRepositoryImpl implements ICompraRepository {
   Future<Compra> confirmarCompra(int compraId) async {
     return await db.transaction(() async {
       final compra = await obtenerCompraPorId(compraId);
-      if (compra == null) {
-        throw StateError('Compra no encontrada: $compraId');
-      }
-      if (compra.estado != EstadoCompra.borrador) {
+      if (compra == null) throw StateError('Compra no encontrada: $compraId');
+
+      if (compra.estado != EstadoCompra.borrador &&
+          compra.estado != EstadoCompra.registrada) {
         throw StateError(
-          'Solo se puede confirmar compras en estado Borrador',
+          'Solo se puede confirmar compras en estado Borrador o Registrada',
         );
       }
+
       final compraConfirmada = compra.copyWith(
         estado: EstadoCompra.confirmada,
         fechaConfirmacion: DateTime.now(),
         actualizadoEn: DateTime.now(),
       );
       await (db.update(db.comprasTable)
-            ..where((t) => t.id.equals(compraId)))
-          .write(
-        _compraToCompanion(compraConfirmada),
-      );
+        ..where((t) => t.id.equals(compraId)))
+          .write(_compraToCompanion(compraConfirmada));
       return compraConfirmada;
+    });
+  }
+
+  @override
+  Future<Compra> marcarComoRecibida(int compraId) async {
+    return await db.transaction(() async {
+      final compra = await obtenerCompraPorId(compraId);
+      if (compra == null) throw StateError('Compra no encontrada: $compraId');
+
+      if (compra.estado != EstadoCompra.confirmada) {
+        throw StateError(
+          'Solo se puede marcar como Recibida una compra en estado Confirmada',
+        );
+      }
+
+      final compraRecibida = compra.copyWith(
+        estado: EstadoCompra.recibida,
+        fechaRecepcion: DateTime.now(),
+        actualizadoEn: DateTime.now(),
+      );
+      await (db.update(db.comprasTable)
+        ..where((t) => t.id.equals(compraId)))
+          .write(_compraToCompanion(compraRecibida));
+      return compraRecibida;
     });
   }
 
@@ -228,26 +241,22 @@ class CompraRepositoryImpl implements ICompraRepository {
   Future<Compra> anularCompra(int compraId) async {
     return await db.transaction(() async {
       final compra = await obtenerCompraPorId(compraId);
-      if (compra == null) {
-        throw StateError('Compra no encontrada: $compraId');
-      }
+      if (compra == null) throw StateError('Compra no encontrada: $compraId');
+
       if (compra.estado == EstadoCompra.anulada) {
         throw StateError('La compra ya se encuentra anulada');
       }
       if (compra.estado == EstadoCompra.borrador) {
-        throw StateError(
-          'No se anulan borradores — elimine directamente',
-        );
+        throw StateError('No se anulan borradores — elimine directamente');
       }
+
       final compraAnulada = compra.copyWith(
         estado: EstadoCompra.anulada,
         actualizadoEn: DateTime.now(),
       );
       await (db.update(db.comprasTable)
-            ..where((t) => t.id.equals(compraId)))
-          .write(
-        _compraToCompanion(compraAnulada),
-      );
+        ..where((t) => t.id.equals(compraId)))
+          .write(_compraToCompanion(compraAnulada));
       return compraAnulada;
     });
   }
