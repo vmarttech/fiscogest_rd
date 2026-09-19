@@ -90,7 +90,7 @@ Compra _filaToCompra(ComprasTableData fila) {
 
 DetalleCompraTableCompanion _detalleToCompanion(DetalleCompra detalle) {
   return DetalleCompraTableCompanion(
-    id: Value(detalle.id),
+    id: Value(detalle.id.toString()),
     compraId: Value(detalle.compraId),
     productoId: Value(detalle.productoId),
     nombreProducto: Value(detalle.nombreProducto),
@@ -157,13 +157,11 @@ class CompraRepositoryImpl implements ICompraRepository {
     )..orderBy([
         (t) => OrderingTerm.desc(t.fechaEmision),
       ])).get();
-
     final resultado = <Compra>[];
     for (final f in filas) {
       try {
         resultado.add(_filaToCompra(f));
       } catch (e, st) {
-        // Fila corrupta / enum inválido / null inesperado → se omite
         // ignore: avoid_print
         print('Compra id=${f.id} omitida por error de mapeo: $e\n$st');
       }
@@ -241,7 +239,6 @@ class CompraRepositoryImpl implements ICompraRepository {
           'No se anulan borradores — elimine directamente',
         );
       }
-
       final compraAnulada = compra.copyWith(
         estado: EstadoCompra.anulada,
         actualizadoEn: DateTime.now(),

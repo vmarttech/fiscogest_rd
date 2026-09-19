@@ -50,18 +50,15 @@ class Compra {
   final DateTime? actualizadoEn;
 
   bool get esConfirmada => estado == EstadoCompra.confirmada;
-
   bool get esCredito {
     final fp = formaPago.toLowerCase();
     final cp = condicionPago.toLowerCase();
     return fp == 'credito' || fp == 'crédito' || cp == 'credito' || cp == 'crédito';
   }
-
   DateTime? get fechaVencimientoCalculada {
     if (diasCredito <= 0) return fechaVencimiento;
     return fechaVencimiento ?? fechaEmision.add(Duration(days: diasCredito));
   }
-
   bool get estaVencida {
     if (!esConfirmada) return false;
     final vencimiento = fechaVencimientoCalculada;

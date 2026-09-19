@@ -23,4 +23,7 @@ abstract class AppSizes {
   static const double iconMd = 20;
   static const double iconLg = 24;
   static const double iconXl = 32;
+
+  // Accesos rápidos
+  static const double accesoRapidoWidth = 110;
 }

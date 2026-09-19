@@ -6,23 +6,30 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_section.dart';
+import 'package:fiscogest_rd/core/ui/app_sizes.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/dashboard_compras_providers.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
 class DashboardComprasPage extends ConsumerWidget {
   const DashboardComprasPage({super.key});
+
   static const String routeName = 'dashboard-compras';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kpisAsync = ref.watch(dashboardComprasKpisProvider);
     final actividadAsync = ref.watch(actividadRecienteComprasProvider);
-    final currency =
-        NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$ ', decimalDigits: 0);
 
-    // Badge de alertas = hay monto vencido
+    final currency = NumberFormat.currency(
+      locale: 'es_DO',
+      symbol: 'RD\$ ',
+      decimalDigits: 0,
+    );
+
     final alertas = kpisAsync.maybeWhen(
       data: (k) => k.vencido > 0 ? 1 : 0,
       orElse: () => 0,
@@ -33,10 +40,13 @@ class DashboardComprasPage extends ConsumerWidget {
       actions: [
         IconButton(
           tooltip: 'Notificaciones',
-          onPressed: () => context.push('/ventas/pagar'),
+          onPressed: () => context.goNamed(ListaCuentasPagarPage.routeName),
           icon: Badge(
             isLabelVisible: alertas > 0,
-            label: Text('$alertas'),
+            label: Text(
+              '$alertas',
+              style: AppTypography.labelSmall.copyWith(color: AppColors.white),
+            ),
             child: const Icon(Icons.notifications_outlined),
           ),
         ),
@@ -50,6 +60,7 @@ class DashboardComprasPage extends ConsumerWidget {
         ),
       ],
       body: RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: () async {
           ref.invalidate(dashboardComprasKpisProvider);
           ref.invalidate(actividadRecienteComprasProvider);
@@ -57,7 +68,6 @@ class DashboardComprasPage extends ConsumerWidget {
         child: ListView(
           padding: AppLayout.pantallaPadding,
           children: [
-            // ========== KPIs ==========
             kpisAsync.when(
               data: (kpis) => _KpisGrid(
                 comprasEsteMes: currency.format(kpis.comprasEsteMes),
@@ -67,16 +77,17 @@ class DashboardComprasPage extends ConsumerWidget {
                 hayVencido: kpis.vencido > 0,
               ),
               loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                padding: AppSpacing.vXl,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => Padding(
-                padding: const EdgeInsets.all(AppSpacing.m),
-                child: Text('Error cargando KPIs: $e'),
+              error: (e, _) => AppCard(
+                child: Text(
+                  'Error cargando KPIs: $e',
+                  style: AppTypography.error,
+                ),
               ),
             ),
-            const SizedBox(height: AppSpacing.l),
-            // ========== Accesos rápidos ==========
+            AppLayout.vL,
             AppSection(
               title: 'Accesos rápidos',
               children: [
@@ -93,43 +104,37 @@ class DashboardComprasPage extends ConsumerWidget {
                     _AccesoRapido(
                       icon: Icons.list_alt,
                       label: 'Compras',
-                      color: Colors.indigo,
+                      color: AppColors.info,
                       onTap: () => context.push('/compras/lista'),
                     ),
                     _AccesoRapido(
                       icon: Icons.account_balance_wallet,
                       label: 'Cuentas por pagar',
-                      color: Colors.orange,
-                      onTap: () => context.push('/ventas/pagar'),
+                      color: AppColors.warning,
+                      onTap: () => context.goNamed(ListaCuentasPagarPage.routeName),
                       badge: alertas > 0 ? alertas : null,
                     ),
                     _AccesoRapido(
                       icon: Icons.request_quote_outlined,
                       label: 'Cuentas por cobrar',
-                      color: Colors.teal,
+                      color: AppColors.secondary,
                       onTap: () => context.push('/ventas/cobrar'),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.l),
-            // ========== Actividad reciente ==========
-            Text(
-              'Actividad reciente',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: AppSpacing.s),
+            AppLayout.vL,
+            const Text('Actividad reciente', style: AppTypography.h4),
+            AppLayout.vS,
             actividadAsync.when(
               data: (items) {
                 if (items.isEmpty) {
-                  return const AppCard(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSpacing.l),
-                      child: Center(
-                        child: Text('No hay compras registradas aún'),
+                  return AppCard(
+                    child: Center(
+                      child: Text(
+                        'No hay compras registradas aún',
+                        style: AppTypography.bodyMediumSecondary,
                       ),
                     ),
                   );
@@ -137,34 +142,41 @@ class DashboardComprasPage extends ConsumerWidget {
                 return Column(
                   children: items.map((item) {
                     final fechaStr = _formatearFechaRelativa(item.fecha);
-                    return AppCard(
-                      child: Material(
-                        color: Colors.transparent,
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor:
-                                AppColors.primary.withValues(alpha: 0.1),
-                            child: const Icon(
-                              Icons.shopping_bag_outlined,
-                              color: AppColors.primary,
+                    return Padding(
+                      padding: AppSpacing.bS,
+                      child: AppCard(
+                        padding: EdgeInsets.zero,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: ListTile(
+                            contentPadding: AppSpacing.hM,
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  AppColors.primary.withValues(alpha: 0.1),
+                              child: const Icon(
+                                Icons.shopping_bag_outlined,
+                                color: AppColors.primary,
+                                size: AppSizes.iconMd,
+                              ),
                             ),
-                          ),
-                          title: Text(
-                            item.proveedorNombre,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          subtitle:
-                              Text('$fechaStr · ${_estadoLabel(item.estado)}'),
-                          trailing: Text(
-                            currency.format(item.total),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                            title: Text(
+                              item.proveedorNombre,
+                              style: AppTypography.bodyMediumSemiBold,
                             ),
+                            subtitle: Text(
+                              '$fechaStr · ${_estadoLabel(item.estado)}',
+                              style: AppTypography.bodySmall,
+                            ),
+                            trailing: Text(
+                              currency.format(item.total),
+                              style: AppTypography.bodyMediumBold,
+                            ),
+                            onTap: () {
+                              context.push(
+                                '/compras/detalle/${item.compraId}',
+                              );
+                            },
                           ),
-                          onTap: () {
-                            context.push('/compras/detalle/${item.compraId}');
-                          },
                         ),
                       ),
                     );
@@ -172,10 +184,10 @@ class DashboardComprasPage extends ConsumerWidget {
                 );
               },
               loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.l),
+                padding: AppSpacing.vL,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => Text('Error: $e'),
+              error: (e, _) => Text('Error: $e', style: AppTypography.error),
             ),
           ],
         ),
@@ -188,6 +200,7 @@ class DashboardComprasPage extends ConsumerWidget {
     final hoy = DateTime(ahora.year, ahora.month, ahora.day);
     final ayer = hoy.subtract(const Duration(days: 1));
     final f = DateTime(fecha.year, fecha.month, fecha.day);
+
     if (f == hoy) return 'Hoy';
     if (f == ayer) return 'Ayer';
     return DateFormat('d MMM', 'es').format(fecha);
@@ -213,7 +226,6 @@ class DashboardComprasPage extends ConsumerWidget {
   }
 }
 
-// ---------- Widgets privados ----------
 class _KpisGrid extends StatelessWidget {
   const _KpisGrid({
     required this.comprasEsteMes,
@@ -249,19 +261,19 @@ class _KpisGrid extends StatelessWidget {
           titulo: 'A crédito',
           valor: aCredito,
           icon: Icons.credit_card,
-          color: Colors.purple,
+          color: AppColors.secondary,
         ),
         _KpiCard(
           titulo: 'Por pagar',
           valor: porPagar,
           icon: Icons.pending_actions,
-          color: Colors.orange,
+          color: AppColors.warning,
         ),
         _KpiCard(
           titulo: 'Vencido',
           valor: vencido,
           icon: Icons.warning_amber_rounded,
-          color: Colors.red,
+          color: AppColors.error,
           badge: hayVencido,
         ),
       ],
@@ -287,43 +299,35 @@ class _KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.m),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Badge(
-                  isLabelVisible: badge,
-                  smallSize: 8,
-                  child: Icon(icon, size: 18, color: color),
-                ),
-                const SizedBox(width: AppSpacing.s),
-                Expanded(
-                  child: Text(
-                    titulo,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              valor,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: color.withValues(alpha: 0.9),
+      padding: AppSpacing.allM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Badge(
+                isLabelVisible: badge,
+                smallSize: 8,
+                child: Icon(icon, size: AppSizes.iconSm, color: color),
               ),
-            ),
-          ],
-        ),
+              AppLayout.hS,
+              Expanded(
+                child: Text(
+                  titulo,
+                  style: AppTypography.labelSmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            valor,
+            style: AppTypography.h4Bold.copyWith(color: color),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
@@ -346,36 +350,33 @@ class _AccesoRapido extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return AppCard(
+      padding: AppSpacing.vM.add(AppSpacing.hS),
+      color: color.withValues(alpha: 0.08),
+      borderColor: color.withValues(alpha: 0.2),
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 110,
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.m,
-          horizontal: AppSpacing.s,
-        ),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
+      child: SizedBox(
+        width: AppSizes.accesoRapidoWidth,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Badge(
               isLabelVisible: badge != null && badge! > 0,
-              label: badge != null ? Text('$badge') : null,
-              child: Icon(icon, color: color, size: 28),
+              label: badge != null
+                  ? Text(
+                      '$badge',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.white,
+                      ),
+                    )
+                  : null,
+              child: Icon(icon, color: color, size: AppSizes.iconLg),
             ),
-            const SizedBox(height: AppSpacing.s),
+            AppLayout.vS,
             Text(
               label,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: color.withValues(alpha: 0.9),
-              ),
+              style: AppTypography.labelSmallSemiBold.copyWith(color: color),
             ),
           ],
         ),

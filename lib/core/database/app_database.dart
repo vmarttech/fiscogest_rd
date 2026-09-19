@@ -6,9 +6,7 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod/riverpod.dart';
-// Importar migración
 import 'package:fiscogest_rd/core/database/migrations/migracion_002_agregar_campos_productos.dart';
-// Tablas existentes
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_table.dart';
@@ -22,10 +20,8 @@ import 'package:fiscogest_rd/features/inventario/data/database/tables/kardex_tab
 import 'package:fiscogest_rd/features/ajustes_inventario/data/datasources/ajuste_inventario_database.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/data/database/tables/conteo_fisico_table.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/data/database/tables/diferencia_conteo_table.dart';
-// NUEVAS: Tablas base Fase 4
 import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dart';
 import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_table.dart';
-// NUEVAS: Tablas Fase 4 - Módulo Comercial
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_detalle_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cotizaciones_table.dart';
@@ -43,15 +39,12 @@ import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/kardex_comercial_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
-// NUEVAS: Tablas Compras - Etapa 4.1
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
-
 part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
-    // Tablas existentes
     ClientesTable,
     ConfiguracionTable,
     ProductosTable,
@@ -65,34 +58,24 @@ part 'app_database.g.dart';
     ConteosFisicos,
     DiferenciasConteo,
     ExistenciasTable,
-    // NUEVAS: Tablas base
     ProveedoresTable,
     UsuariosTable,
-    // NUEVAS: Fase 4 - Ventas
     VentasTable,
     VentasDetalleTable,
-    // NUEVAS: Fase 4 - Cotizaciones
     CotizacionesTable,
     CotizacionesDetalleTable,
-    // NUEVAS: Fase 4 - Apartados
     ApartadosTable,
     ApartadosDetalleTable,
-    // NUEVAS: Fase 4 - Devoluciones
     DevolucionesTable,
     DevolucionesDetalleTable,
-    // NUEVAS: Fase 4 - Cuentas por Cobrar
     CuentasCobrarTable,
     CobrosTable,
-    // NUEVAS: Fase 4 - Cuentas por Pagar
     CuentasPagarTable,
     PagosProveedorTable,
-    // NUEVAS: Fase 4 - Configuración comercial
     DescuentosTable,
     OfertasTable,
-    // NUEVAS: Fase 4 - Integración en cascada
     KardexComercialTable,
     CajaMovimientosTable,
-    // NUEVAS: Etapa 4.1 - COMPRAS
     ComprasTable,
     DetalleCompraTable,
   ],
@@ -102,11 +85,10 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase._internal() : super(_openConnection());
   static final AppDatabase _instance = AppDatabase._internal();
 
-  // ✅ GETTER DAO - CONECTADO
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
 
   @override
-  int get schemaVersion => 24;
+  int get schemaVersion => 26;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -237,7 +219,6 @@ class AppDatabase extends _$AppDatabase {
           await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN numero_cotizacion TEXT');
         } catch (_) {}
       }
-      // ✅ VERSIÓN 20: Nuevos campos en Compras y DetalleCompra
       if (from < 20) {
         try {
           await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN fecha_vencimiento TEXT');
@@ -267,15 +248,12 @@ class AppDatabase extends _$AppDatabase {
           await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN total_linea REAL');
         } catch (_) {}
       }
-      // ✅ VERSIÓN 21: Tabla de pagos a proveedores
       if (from < 21) {
         await m.createTable(pagosProveedorTable);
       }
-      // ✅ VERSIÓN 22: Unificar nombres y agregar campos faltantes en Productos
       if (from < 22) {
         await migrar002AgregarCamposProductos(m);
       }
-      // ✅ VERSIÓN 23: Campos Ficha Completa de Proveedor
       if (from < 23) {
         try {
           await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN whatsapp TEXT');
@@ -287,7 +265,6 @@ class AppDatabase extends _$AppDatabase {
           await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN condiciones_nota TEXT');
         } catch (_) {}
       }
-      // ✅ VERSIÓN 24: tipo_comprobante, condicion_pago + estado INTEGER → TEXT
       if (from < 24) {
         try {
           await m.database.customStatement(
@@ -299,8 +276,6 @@ class AppDatabase extends _$AppDatabase {
             "ALTER TABLE compras_table ADD COLUMN condicion_pago TEXT NOT NULL DEFAULT 'contado'",
           );
         } catch (_) {}
-
-        // Convertir estado INTEGER legacy → nombres del enum EstadoCompra
         await m.database.customStatement('''
           UPDATE compras_table
           SET estado = CASE CAST(estado AS INTEGER)
@@ -316,6 +291,40 @@ class AppDatabase extends _$AppDatabase {
           WHERE typeof(estado) = 'integer'
              OR (typeof(estado) = 'text' AND estado GLOB '[0-9]*');
         ''');
+      }
+      if (from < 25) {
+        try {
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN flete_unitario REAL DEFAULT 0.0',
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN seguro_unitario REAL DEFAULT 0.0',
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN aranceles_unitario REAL DEFAULT 0.0',
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN gastos_unitario REAL DEFAULT 0.0',
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN costo_adquisicion REAL',
+          );
+        } catch (_) {}
+      }
+      if (from < 26) {
+        try {
+          await m.database.customStatement(
+            "ALTER TABLE compras_table ADD COLUMN estado TEXT NOT NULL DEFAULT 'borrador'",
+          );
+        } catch (_) {}
       }
     },
   );

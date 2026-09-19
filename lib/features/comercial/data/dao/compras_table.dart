@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dar
 
 class EstadoCompraConverter extends TypeConverter<EstadoCompra, String> {
   const EstadoCompraConverter();
-
   @override
   EstadoCompra fromSql(String value) {
     final normalizado = value.toLowerCase().trim();
@@ -13,7 +12,6 @@ class EstadoCompraConverter extends TypeConverter<EstadoCompra, String> {
     }
     return EstadoCompra.borrador;
   }
-
   @override
   String toSql(EstadoCompra value) => value.name;
 }

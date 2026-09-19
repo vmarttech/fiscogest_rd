@@ -19329,16 +19329,12 @@ class $DetalleCompraTableTable extends DetalleCompraTable
   $DetalleCompraTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
     aliasedName,
     false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _compraIdMeta = const VerificationMeta(
     'compraId',
@@ -19557,6 +19553,8 @@ class $DetalleCompraTableTable extends DetalleCompraTable
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('compra_id')) {
       context.handle(
@@ -19697,13 +19695,13 @@ class $DetalleCompraTableTable extends DetalleCompraTable
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => const {};
   @override
   DetalleCompraTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DetalleCompraTableData(
       id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
       compraId: attachedDatabase.typeMapping.read(
@@ -19781,7 +19779,7 @@ class $DetalleCompraTableTable extends DetalleCompraTable
 
 class DetalleCompraTableData extends DataClass
     implements Insertable<DetalleCompraTableData> {
-  final int id;
+  final String id;
   final int compraId;
   final int productoId;
   final String nombreProducto;
@@ -19820,7 +19818,7 @@ class DetalleCompraTableData extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+    map['id'] = Variable<String>(id);
     map['compra_id'] = Variable<int>(compraId);
     map['producto_id'] = Variable<int>(productoId);
     map['nombre_producto'] = Variable<String>(nombreProducto);
@@ -19920,7 +19918,7 @@ class DetalleCompraTableData extends DataClass
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DetalleCompraTableData(
-      id: serializer.fromJson<int>(json['id']),
+      id: serializer.fromJson<String>(json['id']),
       compraId: serializer.fromJson<int>(json['compraId']),
       productoId: serializer.fromJson<int>(json['productoId']),
       nombreProducto: serializer.fromJson<String>(json['nombreProducto']),
@@ -19951,7 +19949,7 @@ class DetalleCompraTableData extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<String>(id),
       'compraId': serializer.toJson<int>(compraId),
       'productoId': serializer.toJson<int>(productoId),
       'nombreProducto': serializer.toJson<String>(nombreProducto),
@@ -19972,7 +19970,7 @@ class DetalleCompraTableData extends DataClass
   }
 
   DetalleCompraTableData copyWith({
-    int? id,
+    String? id,
     int? compraId,
     int? productoId,
     String? nombreProducto,
@@ -20147,7 +20145,7 @@ class DetalleCompraTableData extends DataClass
 
 class DetalleCompraTableCompanion
     extends UpdateCompanion<DetalleCompraTableData> {
-  final Value<int> id;
+  final Value<String> id;
   final Value<int> compraId;
   final Value<int> productoId;
   final Value<String> nombreProducto;
@@ -20164,6 +20162,7 @@ class DetalleCompraTableCompanion
   final Value<double?> itbisLinea;
   final Value<double?> totalLinea;
   final Value<double?> costoAdquisicion;
+  final Value<int> rowid;
   const DetalleCompraTableCompanion({
     this.id = const Value.absent(),
     this.compraId = const Value.absent(),
@@ -20182,9 +20181,10 @@ class DetalleCompraTableCompanion
     this.itbisLinea = const Value.absent(),
     this.totalLinea = const Value.absent(),
     this.costoAdquisicion = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   DetalleCompraTableCompanion.insert({
-    this.id = const Value.absent(),
+    required String id,
     required int compraId,
     required int productoId,
     required String nombreProducto,
@@ -20201,11 +20201,13 @@ class DetalleCompraTableCompanion
     this.itbisLinea = const Value.absent(),
     this.totalLinea = const Value.absent(),
     this.costoAdquisicion = const Value.absent(),
-  }) : compraId = Value(compraId),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       compraId = Value(compraId),
        productoId = Value(productoId),
        nombreProducto = Value(nombreProducto);
   static Insertable<DetalleCompraTableData> custom({
-    Expression<int>? id,
+    Expression<String>? id,
     Expression<int>? compraId,
     Expression<int>? productoId,
     Expression<String>? nombreProducto,
@@ -20222,6 +20224,7 @@ class DetalleCompraTableCompanion
     Expression<double>? itbisLinea,
     Expression<double>? totalLinea,
     Expression<double>? costoAdquisicion,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -20244,11 +20247,12 @@ class DetalleCompraTableCompanion
       if (itbisLinea != null) 'itbis_linea': itbisLinea,
       if (totalLinea != null) 'total_linea': totalLinea,
       if (costoAdquisicion != null) 'costo_adquisicion': costoAdquisicion,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   DetalleCompraTableCompanion copyWith({
-    Value<int>? id,
+    Value<String>? id,
     Value<int>? compraId,
     Value<int>? productoId,
     Value<String>? nombreProducto,
@@ -20265,6 +20269,7 @@ class DetalleCompraTableCompanion
     Value<double?>? itbisLinea,
     Value<double?>? totalLinea,
     Value<double?>? costoAdquisicion,
+    Value<int>? rowid,
   }) {
     return DetalleCompraTableCompanion(
       id: id ?? this.id,
@@ -20284,6 +20289,7 @@ class DetalleCompraTableCompanion
       itbisLinea: itbisLinea ?? this.itbisLinea,
       totalLinea: totalLinea ?? this.totalLinea,
       costoAdquisicion: costoAdquisicion ?? this.costoAdquisicion,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -20291,7 +20297,7 @@ class DetalleCompraTableCompanion
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (compraId.present) {
       map['compra_id'] = Variable<int>(compraId.value);
@@ -20343,6 +20349,9 @@ class DetalleCompraTableCompanion
     if (costoAdquisicion.present) {
       map['costo_adquisicion'] = Variable<double>(costoAdquisicion.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -20365,7 +20374,8 @@ class DetalleCompraTableCompanion
           ..write('baseImponibleLinea: $baseImponibleLinea, ')
           ..write('itbisLinea: $itbisLinea, ')
           ..write('totalLinea: $totalLinea, ')
-          ..write('costoAdquisicion: $costoAdquisicion')
+          ..write('costoAdquisicion: $costoAdquisicion, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -34840,7 +34850,7 @@ typedef $$ComprasTableTableProcessedTableManager =
     >;
 typedef $$DetalleCompraTableTableCreateCompanionBuilder =
     DetalleCompraTableCompanion Function({
-      Value<int> id,
+      required String id,
       required int compraId,
       required int productoId,
       required String nombreProducto,
@@ -34857,10 +34867,11 @@ typedef $$DetalleCompraTableTableCreateCompanionBuilder =
       Value<double?> itbisLinea,
       Value<double?> totalLinea,
       Value<double?> costoAdquisicion,
+      Value<int> rowid,
     });
 typedef $$DetalleCompraTableTableUpdateCompanionBuilder =
     DetalleCompraTableCompanion Function({
-      Value<int> id,
+      Value<String> id,
       Value<int> compraId,
       Value<int> productoId,
       Value<String> nombreProducto,
@@ -34877,6 +34888,7 @@ typedef $$DetalleCompraTableTableUpdateCompanionBuilder =
       Value<double?> itbisLinea,
       Value<double?> totalLinea,
       Value<double?> costoAdquisicion,
+      Value<int> rowid,
     });
 
 class $$DetalleCompraTableTableFilterComposer
@@ -34888,7 +34900,7 @@ class $$DetalleCompraTableTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
@@ -34983,7 +34995,7 @@ class $$DetalleCompraTableTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
@@ -35078,7 +35090,7 @@ class $$DetalleCompraTableTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<int> get compraId =>
@@ -35198,7 +35210,7 @@ class $$DetalleCompraTableTableTableManager
               ),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                Value<String> id = const Value.absent(),
                 Value<int> compraId = const Value.absent(),
                 Value<int> productoId = const Value.absent(),
                 Value<String> nombreProducto = const Value.absent(),
@@ -35215,6 +35227,7 @@ class $$DetalleCompraTableTableTableManager
                 Value<double?> itbisLinea = const Value.absent(),
                 Value<double?> totalLinea = const Value.absent(),
                 Value<double?> costoAdquisicion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => DetalleCompraTableCompanion(
                 id: id,
                 compraId: compraId,
@@ -35233,10 +35246,11 @@ class $$DetalleCompraTableTableTableManager
                 itbisLinea: itbisLinea,
                 totalLinea: totalLinea,
                 costoAdquisicion: costoAdquisicion,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                required String id,
                 required int compraId,
                 required int productoId,
                 required String nombreProducto,
@@ -35253,6 +35267,7 @@ class $$DetalleCompraTableTableTableManager
                 Value<double?> itbisLinea = const Value.absent(),
                 Value<double?> totalLinea = const Value.absent(),
                 Value<double?> costoAdquisicion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => DetalleCompraTableCompanion.insert(
                 id: id,
                 compraId: compraId,
@@ -35271,6 +35286,7 @@ class $$DetalleCompraTableTableTableManager
                 itbisLinea: itbisLinea,
                 totalLinea: totalLinea,
                 costoAdquisicion: costoAdquisicion,
+                rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

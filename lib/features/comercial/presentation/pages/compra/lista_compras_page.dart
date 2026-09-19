@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_sizes.dart';
+
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
@@ -25,6 +31,7 @@ class _FiltrosCompras {
     this.fechaDesde,
     this.fechaHasta,
   });
+
   final String textoBusqueda;
   final bool? soloCredito;
   final EstadoCompra? estado;
@@ -78,6 +85,7 @@ final _filtrosComprasProvider = StateProvider.autoDispose<_FiltrosCompras>((ref)
 
 class ListaComprasPage extends ConsumerWidget {
   const ListaComprasPage({super.key});
+
   static const String routeName = 'lista-compras';
 
   String _limpiarId(dynamic id) => id.toString().replaceAll(RegExp(r'[^0-9]'), '');
@@ -137,17 +145,15 @@ class ListaComprasPage extends ConsumerWidget {
           children: [
             TextSpan(
               text: '$etiqueta: ',
-              style: TextStyle(
-                fontSize: 12,
-                color: destacado ? Colors.red.shade700 : Colors.grey.shade600,
+              style: AppTypography.labelSmall.copyWith(
+                color: destacado ? AppColors.error : AppColors.textSecondary,
               ),
             ),
             TextSpan(
               text: valor,
-              style: TextStyle(
-                fontSize: 12,
+              style: AppTypography.labelSmall.copyWith(
                 fontWeight: destacado ? FontWeight.bold : FontWeight.w500,
-                color: destacado ? Colors.red.shade700 : null,
+                color: destacado ? AppColors.error : null,
               ),
             ),
           ],
@@ -179,198 +185,198 @@ class ListaComprasPage extends ConsumerWidget {
         builder: (ctx) {
           return StatefulBuilder(
             builder: (ctx, setModalState) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                  top: 16,
-                  bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'Filtros de compras',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: textoCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Buscar (proveedor, NCF, nº)',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
-                          isDense: true,
+              return SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: AppSpacing.l,
+                    right: AppSpacing.l,
+                    top: AppSpacing.m,
+                    bottom: MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.l,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text('Filtros de compras', style: AppTypography.h4Bold),
+                        const SizedBox(height: AppSpacing.m),
+                        TextField(
+                          controller: textoCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Buscar (proveedor, NCF, nº)',
+                            prefixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text('Condición de pago', style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
-                      SegmentedButton<bool?>(
-                        segments: const [
-                          ButtonSegment(value: null, label: Text('Todos')),
-                          ButtonSegment(value: false, label: Text('Contado')),
-                          ButtonSegment(value: true, label: Text('Crédito')),
-                        ],
-                        selected: {creditoSel},
-                        onSelectionChanged: (s) {
-                          setModalState(() => creditoSel = s.first);
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<EstadoCompra?>(
-                        initialValue: estadoSel,
-                        decoration: const InputDecoration(
-                          labelText: 'Estado',
-                          border: OutlineInputBorder(),
-                          isDense: true,
+                        const SizedBox(height: AppSpacing.s),
+                        const Text('Condición de pago', style: AppTypography.bodyMediumSemiBold),
+                        const SizedBox(height: AppSpacing.xs),
+                        SegmentedButton<bool?>(
+                          segments: const [
+                            ButtonSegment(value: null, label: Text('Todos')),
+                            ButtonSegment(value: false, label: Text('Contado')),
+                            ButtonSegment(value: true, label: Text('Crédito')),
+                          ],
+                          selected: {creditoSel},
+                          onSelectionChanged: (s) {
+                            setModalState(() => creditoSel = s.first);
+                          },
                         ),
-                        items: [
-                          const DropdownMenuItem(value: null, child: Text('Todos')),
-                          ...EstadoCompra.values.map(
-                            (e) => DropdownMenuItem(
-                              value: e,
-                              child: Text(e.name[0].toUpperCase() + e.name.substring(1)),
-                            ),
+                        const SizedBox(height: AppSpacing.s),
+                        DropdownButtonFormField<EstadoCompra?>(
+                          initialValue: estadoSel,
+                          decoration: const InputDecoration(
+                            labelText: 'Estado',
+                            border: OutlineInputBorder(),
+                            isDense: true,
                           ),
-                        ],
-                        onChanged: (v) => setModalState(() => estadoSel = v),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String?>(
-                        initialValue: tipoSel,
-                        decoration: const InputDecoration(
-                          labelText: 'Tipo de comprobante',
-                          border: OutlineInputBorder(),
-                          isDense: true,
+                          items: [
+                            const DropdownMenuItem(value: null, child: Text('Todos')),
+                            ...EstadoCompra.values.map(
+                              (e) => DropdownMenuItem(
+                                value: e,
+                                child: Text(e.name[0].toUpperCase() + e.name.substring(1)),
+                              ),
+                            ),
+                          ],
+                          onChanged: (v) => setModalState(() => estadoSel = v),
                         ),
-                        items: const [
-                          DropdownMenuItem(value: null, child: Text('Todos')),
-                          DropdownMenuItem(value: '01', child: Text('01 - Factura')),
-                          DropdownMenuItem(value: '02', child: Text('02 - Nota de crédito')),
-                          DropdownMenuItem(value: '03', child: Text('03 - Nota de débito')),
-                          DropdownMenuItem(value: '04', child: Text('04 - Nota de entrega')),
-                        ],
-                        onChanged: (v) => setModalState(() => tipoSel = v),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: montoMinCtrl,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Monto mín.',
-                                border: OutlineInputBorder(),
-                                isDense: true,
-                                prefixText: 'RD\$ ',
+                        const SizedBox(height: AppSpacing.s),
+                        DropdownButtonFormField<String?>(
+                          initialValue: tipoSel,
+                          decoration: const InputDecoration(
+                            labelText: 'Tipo de comprobante',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: null, child: Text('Todos')),
+                            DropdownMenuItem(value: '01', child: Text('01 - Factura')),
+                            DropdownMenuItem(value: '02', child: Text('02 - Nota de crédito')),
+                            DropdownMenuItem(value: '03', child: Text('03 - Nota de débito')),
+                            DropdownMenuItem(value: '04', child: Text('04 - Nota de entrega')),
+                          ],
+                          onChanged: (v) => setModalState(() => tipoSel = v),
+                        ),
+                        const SizedBox(height: AppSpacing.s),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: montoMinCtrl,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Monto mín.',
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  prefixText: 'RD\$ ',
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: montoMaxCtrl,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Monto máx.',
-                                border: OutlineInputBorder(),
-                                isDense: true,
-                                prefixText: 'RD\$ ',
+                            const SizedBox(width: AppSpacing.s),
+                            Expanded(
+                              child: TextField(
+                                controller: montoMaxCtrl,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Monto máx.',
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  prefixText: 'RD\$ ',
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              icon: const Icon(Icons.calendar_today, size: 16),
-                              label: Text(
-                                desde == null ? 'Desde' : _formatearFecha(desde!),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.s),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.calendar_today, size: AppSizes.iconSm),
+                                label: Text(
+                                  desde == null ? 'Desde' : _formatearFecha(desde!),
+                                ),
+                                onPressed: () async {
+                                  final picked = await showDatePicker(
+                                    context: ctx,
+                                    initialDate: desde ?? DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                                  );
+                                  if (picked != null) {
+                                    setModalState(() => desde = picked);
+                                  }
+                                },
                               ),
-                              onPressed: () async {
-                                final picked = await showDatePicker(
-                                  context: ctx,
-                                  initialDate: desde ?? DateTime.now(),
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                                );
-                                if (picked != null) {
-                                  setModalState(() => desde = picked);
-                                }
-                              },
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              icon: const Icon(Icons.calendar_today, size: 16),
-                              label: Text(
-                                hasta == null ? 'Hasta' : _formatearFecha(hasta!),
+                            const SizedBox(width: AppSpacing.s),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.calendar_today, size: AppSizes.iconSm),
+                                label: Text(
+                                  hasta == null ? 'Hasta' : _formatearFecha(hasta!),
+                                ),
+                                onPressed: () async {
+                                  final picked = await showDatePicker(
+                                    context: ctx,
+                                    initialDate: hasta ?? DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                                  );
+                                  if (picked != null) {
+                                    setModalState(() => hasta = picked);
+                                  }
+                                },
                               ),
-                              onPressed: () async {
-                                final picked = await showDatePicker(
-                                  context: ctx,
-                                  initialDate: hasta ?? DateTime.now(),
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                                );
-                                if (picked != null) {
-                                  setModalState(() => hasta = picked);
-                                }
-                              },
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                                ref.read(_filtrosComprasProvider.notifier).state =
-                                    const _FiltrosCompras();
-                                Navigator.pop(ctx);
-                              },
-                              child: const Text('Limpiar'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF3B82F6),
-                                foregroundColor: Colors.white,
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.l),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  ref.read(_filtrosComprasProvider.notifier).state =
+                                      const _FiltrosCompras();
+                                  Navigator.pop(ctx);
+                                },
+                                child: const Text('Limpiar'),
                               ),
-                              onPressed: () {
-                                final min = double.tryParse(montoMinCtrl.text.trim());
-                                final max = double.tryParse(montoMaxCtrl.text.trim());
-                                ref.read(_filtrosComprasProvider.notifier).state =
-                                    _FiltrosCompras(
-                                  textoBusqueda: textoCtrl.text.trim(),
-                                  soloCredito: creditoSel,
-                                  estado: estadoSel,
-                                  tipoComprobante: tipoSel,
-                                  montoMin: min,
-                                  montoMax: max,
-                                  fechaDesde: desde,
-                                  fechaHasta: hasta,
-                                );
-                                Navigator.pop(ctx);
-                              },
-                              child: const Text('Aplicar'),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(width: AppSpacing.s),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: AppColors.white,
+                                ),
+                                onPressed: () {
+                                  final min = double.tryParse(montoMinCtrl.text.trim());
+                                  final max = double.tryParse(montoMaxCtrl.text.trim());
+                                  ref.read(_filtrosComprasProvider.notifier).state =
+                                      _FiltrosCompras(
+                                    textoBusqueda: textoCtrl.text.trim(),
+                                    soloCredito: creditoSel,
+                                    estado: estadoSel,
+                                    tipoComprobante: tipoSel,
+                                    montoMin: min,
+                                    montoMax: max,
+                                    fechaDesde: desde,
+                                    fechaHasta: hasta,
+                                  );
+                                  Navigator.pop(ctx);
+                                },
+                                child: const Text('Aplicar'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -395,9 +401,9 @@ class ListaComprasPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'nueva_compra',
         onPressed: () => context.goNamed(RegistrarCompraPage.routeName),
-        backgroundColor: const Color(0xFF3B82F6),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Nueva Compra', style: TextStyle(color: Colors.white)),
+        backgroundColor: AppColors.primary,
+        icon: const Icon(Icons.add, color: AppColors.white),
+        label: const Text('Nueva Compra', style: TextStyle(color: AppColors.white)),
       ),
       body: SafeArea(
         bottom: true,
@@ -409,43 +415,43 @@ class ListaComprasPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Error al cargar compras',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text('$error', textAlign: TextAlign.center),
+                  const Icon(Icons.error_outline, size: AppSizes.iconXl, color: AppColors.error),
+                  const SizedBox(height: AppSpacing.m),
+                  const Text('Error al cargar compras', style: AppTypography.h4Bold),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text('$error', textAlign: TextAlign.center, style: AppTypography.bodySmall),
                 ],
               ),
             ),
           ),
           data: (List<Compra> todas) {
             final compras = _aplicarFiltros(todas, filtros);
+
             if (todas.isEmpty) {
-              return const Center(
+              return Center(
                 child: Padding(
                   padding: AppLayout.pantallaPadding,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.shopping_cart_outlined, size: 48, color: Colors.grey),
-                      SizedBox(height: 16),
+                      const Icon(Icons.shopping_cart_outlined, size: AppSizes.iconXl, color: AppColors.grey200),
+                      const SizedBox(height: AppSpacing.m),
                       Text(
                         'No hay compras registradas.',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
                       ),
-                      SizedBox(height: 8),
-                      Text(
+                      const SizedBox(height: AppSpacing.xs),
+                      const Text(
                         'Presiona el botón "+" para registrar tu primera compra.',
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
+                        style: AppTypography.bodySmall,
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
               );
             }
+
             if (compras.isEmpty) {
               return Center(
                 child: Padding(
@@ -453,13 +459,13 @@ class ListaComprasPage extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.filter_alt_off, size: 48, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      const Text(
+                      const Icon(Icons.filter_alt_off, size: AppSizes.iconXl, color: AppColors.grey200),
+                      const SizedBox(height: AppSpacing.m),
+                      Text(
                         'Ninguna compra coincide con los filtros.',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.s),
                       TextButton(
                         onPressed: () {
                           ref.read(_filtrosComprasProvider.notifier).state =
@@ -472,21 +478,22 @@ class ListaComprasPage extends ConsumerWidget {
                 ),
               );
             }
+
             return Column(
               children: [
                 if (filtros.tieneFiltrosActivos)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.m, AppSpacing.s, AppSpacing.m, 0),
                     child: Row(
                       children: [
                         Expanded(
                           child: Text(
                             '${compras.length} de ${todas.length} compras',
-                            style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                            style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
                           ),
                         ),
                         TextButton.icon(
-                          icon: const Icon(Icons.clear, size: 16),
+                          icon: const Icon(Icons.clear, size: AppSizes.iconSm),
                           label: const Text('Limpiar'),
                           onPressed: () {
                             ref.read(_filtrosComprasProvider.notifier).state =
@@ -511,43 +518,38 @@ class ListaComprasPage extends ConsumerWidget {
                             (compra.estado == EstadoCompra.registrada ||
                                 compra.estado == EstadoCompra.confirmada)) {
                           return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade100,
+                              color: AppColors.error.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Vencida',
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: AppColors.error,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           );
                         }
                         final (Color color, String texto) = switch (compra.estado) {
-                          EstadoCompra.borrador => (Colors.orange, 'Borrador'),
-                          EstadoCompra.registrada => (Colors.blue, 'Registrada'),
-                          EstadoCompra.confirmada => (Colors.green, 'Confirmada'),
-                          EstadoCompra.recibida => (Colors.teal, 'Recibida'),
-                          EstadoCompra.pagada => (Colors.purple, 'Pagada'),
-                          EstadoCompra.anulada => (Colors.red.shade700, 'Anulada'),
-                          _ => (Colors.grey, 'Desconocida'),
+                          EstadoCompra.borrador => (AppColors.warning, 'Borrador'),
+                          EstadoCompra.registrada => (AppColors.primary, 'Registrada'),
+                          EstadoCompra.confirmada => (AppColors.success, 'Confirmada'),
+                          EstadoCompra.recibida => (AppColors.secondary, 'Recibida'),
+                          EstadoCompra.pagada => (AppColors.primaryDark, 'Pagada'),
+                          EstadoCompra.anulada => (AppColors.error, 'Anulada'),
+                          _ => (AppColors.grey500, 'Desconocida'),
                         };
                         return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
                           decoration: BoxDecoration(
                             color: color.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             texto,
-                            style: TextStyle(
-                              color: color,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: AppTypography.labelSmall.copyWith(color: color),
                           ),
                         );
                       }
@@ -578,8 +580,8 @@ class ListaComprasPage extends ConsumerWidget {
                               ),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green.shade700,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppColors.success,
+                                  foregroundColor: AppColors.white,
                                 ),
                                 onPressed: () => Navigator.pop(ctx, true),
                                 child: const Text('Sí, Confirmar'),
@@ -601,7 +603,7 @@ class ListaComprasPage extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Compra confirmada ✅'),
-                                backgroundColor: Colors.green,
+                                backgroundColor: AppColors.success,
                               ),
                             );
                           }
@@ -613,7 +615,7 @@ class ListaComprasPage extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Error: $e'),
-                                backgroundColor: Colors.red,
+                                backgroundColor: AppColors.error,
                               ),
                             );
                           }
@@ -655,7 +657,7 @@ class ListaComprasPage extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Compra duplicada como borrador ✅'),
-                                backgroundColor: Colors.green,
+                                backgroundColor: AppColors.success,
                               ),
                             );
                           }
@@ -666,7 +668,7 @@ class ListaComprasPage extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Error al duplicar: $e'),
-                                backgroundColor: Colors.red,
+                                backgroundColor: AppColors.error,
                               ),
                             );
                           }
@@ -728,8 +730,8 @@ class ListaComprasPage extends ConsumerWidget {
                               ),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red.shade700,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppColors.error,
+                                  foregroundColor: AppColors.white,
                                 ),
                                 onPressed: () => Navigator.pop(ctx, true),
                                 child: const Text('Sí, Anular'),
@@ -751,7 +753,7 @@ class ListaComprasPage extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Compra anulada ✅'),
-                                backgroundColor: Colors.green,
+                                backgroundColor: AppColors.success,
                               ),
                             );
                           }
@@ -763,194 +765,180 @@ class ListaComprasPage extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Error: $e'),
-                                backgroundColor: Colors.red,
+                                backgroundColor: AppColors.error,
                               ),
                             );
                           }
                         }
                       }
 
-                      return Card(
-                        elevation: vencida ? 2 : 1,
-                        color: vencida ? Colors.red.shade50 : null,
-                        child: Padding(
-                          padding: AppSpacing.allM,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          compra.numeroComprobante.isNotEmpty
-                                              ? compra.numeroComprobante
-                                              : 'Compra #${compra.id}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          compra.nombreProveedor,
-                                          style: const TextStyle(fontSize: 13),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  buildEstadoTag(),
-                                  PopupMenuButton<String>(
-                                    icon: const Icon(Icons.more_vert, size: 20),
-                                    onSelected: (value) async {
-                                      switch (value) {
-                                        case 'ver':
-                                          verDetalle();
-                                          break;
-                                        case 'editar':
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Edición de borradores: próximamente',
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                          break;
-                                        case 'duplicar':
-                                          await duplicar();
-                                          break;
-                                        case 'imprimir':
-                                          await imprimir();
-                                          break;
-                                        case 'confirmar':
-                                          await confirmar();
-                                          break;
-                                        case 'anular':
-                                          await anular();
-                                          break;
-                                      }
-                                    },
-                                    itemBuilder: (ctx) => [
-                                      const PopupMenuItem(
-                                        value: 'ver',
-                                        child: ListTile(
-                                          leading: Icon(Icons.visibility, size: 20),
-                                          title: Text('Ver'),
-                                          dense: true,
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
+                      return AppCard(
+                        padding: AppSpacing.allM,
+                        color: vencida ? AppColors.error.withValues(alpha: 0.05) : null,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        compra.numeroComprobante.isNotEmpty
+                                            ? compra.numeroComprobante
+                                            : 'Compra #${compra.id}',
+                                        style: AppTypography.bodyMediumBold.copyWith(fontSize: 15),
                                       ),
-                                      if (compra.estado == EstadoCompra.borrador)
-                                        const PopupMenuItem(
-                                          value: 'editar',
-                                          child: ListTile(
-                                            leading: Icon(Icons.edit, size: 20),
-                                            title: Text('Editar'),
-                                            dense: true,
-                                            contentPadding: EdgeInsets.zero,
-                                          ),
-                                        ),
-                                      const PopupMenuItem(
-                                        value: 'duplicar',
-                                        child: ListTile(
-                                          leading: Icon(Icons.copy, size: 20),
-                                          title: Text('Duplicar'),
-                                          dense: true,
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'imprimir',
-                                        child: ListTile(
-                                          leading: Icon(Icons.print, size: 20),
-                                          title: Text('Imprimir'),
-                                          dense: true,
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                      ),
-                                      if (compra.estado == EstadoCompra.borrador)
-                                        const PopupMenuItem(
-                                          value: 'confirmar',
-                                          child: ListTile(
-                                            leading: Icon(
-                                              Icons.check_circle,
-                                              size: 20,
-                                              color: Colors.green,
-                                            ),
-                                            title: Text('Confirmar'),
-                                            dense: true,
-                                            contentPadding: EdgeInsets.zero,
-                                          ),
-                                        ),
-                                      if (compra.estado != EstadoCompra.anulada &&
-                                          compra.estado != EstadoCompra.borrador)
-                                        const PopupMenuItem(
-                                          value: 'anular',
-                                          child: ListTile(
-                                            leading: Icon(
-                                              Icons.cancel,
-                                              size: 20,
-                                              color: Colors.red,
-                                            ),
-                                            title: Text('Anular'),
-                                            dense: true,
-                                            contentPadding: EdgeInsets.zero,
-                                          ),
-                                        ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Text(compra.nombreProveedor, style: AppTypography.bodySmall),
                                     ],
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 12,
-                                runSpacing: 6,
-                                children: [
-                                  infoItem('Fecha', _formatearFecha(compra.fechaEmision)),
-                                  if (compra.ncf.isNotEmpty) infoItem('NCF', compra.ncf),
-                                  infoItem('Tipo', compra.tipoComprobante),
+                                ),
+                                buildEstadoTag(),
+                                PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert, size: AppSizes.iconMd),
+                                  onSelected: (value) async {
+                                    switch (value) {
+                                      case 'ver':
+                                        verDetalle();
+                                        break;
+                                      case 'editar':
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Edición de borradores: próximamente',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                        break;
+                                      case 'duplicar':
+                                        await duplicar();
+                                        break;
+                                      case 'imprimir':
+                                        await imprimir();
+                                        break;
+                                      case 'confirmar':
+                                        await confirmar();
+                                        break;
+                                      case 'anular':
+                                        await anular();
+                                        break;
+                                    }
+                                  },
+                                  itemBuilder: (ctx) => [
+                                    const PopupMenuItem(
+                                      value: 'ver',
+                                      child: ListTile(
+                                        leading: Icon(Icons.visibility, size: AppSizes.iconMd),
+                                        title: Text('Ver'),
+                                        dense: true,
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
+                                    ),
+                                    if (compra.estado == EstadoCompra.borrador)
+                                      const PopupMenuItem(
+                                        value: 'editar',
+                                        child: ListTile(
+                                          leading: Icon(Icons.edit, size: AppSizes.iconMd),
+                                          title: Text('Editar'),
+                                          dense: true,
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                    const PopupMenuItem(
+                                      value: 'duplicar',
+                                      child: ListTile(
+                                        leading: Icon(Icons.copy, size: AppSizes.iconMd),
+                                        title: Text('Duplicar'),
+                                        dense: true,
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'imprimir',
+                                      child: ListTile(
+                                        leading: Icon(Icons.print, size: AppSizes.iconMd),
+                                        title: Text('Imprimir'),
+                                        dense: true,
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
+                                    ),
+                                    if (compra.estado == EstadoCompra.borrador)
+                                      const PopupMenuItem(
+                                        value: 'confirmar',
+                                        child: ListTile(
+                                          leading: Icon(
+                                            Icons.check_circle,
+                                            size: AppSizes.iconMd,
+                                            color: AppColors.success,
+                                          ),
+                                          title: Text('Confirmar'),
+                                          dense: true,
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                    if (compra.estado != EstadoCompra.anulada &&
+                                        compra.estado != EstadoCompra.borrador)
+                                      const PopupMenuItem(
+                                        value: 'anular',
+                                        child: ListTile(
+                                          leading: Icon(
+                                            Icons.cancel,
+                                            size: AppSizes.iconMd,
+                                            color: AppColors.error,
+                                          ),
+                                          title: Text('Anular'),
+                                          dense: true,
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.s),
+                            Wrap(
+                              spacing: AppSpacing.m,
+                              runSpacing: AppSpacing.s,
+                              children: [
+                                infoItem('Fecha', _formatearFecha(compra.fechaEmision)),
+                                if (compra.ncf.isNotEmpty) infoItem('NCF', compra.ncf),
+                                infoItem('Tipo', compra.tipoComprobante),
+                                infoItem(
+                                  'Pago',
+                                  compra.esCredito ? 'Crédito' : 'Contado',
+                                ),
+                                if (compra.esCredito)
                                   infoItem(
-                                    'Pago',
-                                    compra.esCredito ? 'Crédito' : 'Contado',
+                                    compra.diasCredito > 0 ? 'Plazo' : 'Vence',
+                                    compra.fechaVencimientoCalculada != null
+                                        ? _formatearFecha(compra.fechaVencimientoCalculada!)
+                                        : '${compra.diasCredito} días',
+                                    destacado: vencida,
                                   ),
-                                  if (compra.esCredito)
-                                    infoItem(
-                                      compra.diasCredito > 0 ? 'Plazo' : 'Vence',
-                                      compra.fechaVencimientoCalculada != null
-                                          ? _formatearFecha(
-                                              compra.fechaVencimientoCalculada!,
-                                            )
-                                          : '${compra.diasCredito} días',
-                                      destacado: vencida,
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Total: RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.s),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Total: RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
+                                  style: AppTypography.bodyMediumBold.copyWith(fontSize: 15),
+                                ),
+                                if (!esPequena)
+                                  TextButton.icon(
+                                    icon: const Icon(Icons.visibility, size: AppSizes.iconSm),
+                                    label: const Text('Ver'),
+                                    onPressed: verDetalle,
                                   ),
-                                  if (!esPequena)
-                                    TextButton.icon(
-                                      icon: const Icon(Icons.visibility, size: 16),
-                                      label: const Text('Ver'),
-                                      onPressed: verDetalle,
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ],
                         ),
                       );
                     },

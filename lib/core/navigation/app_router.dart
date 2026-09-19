@@ -35,6 +35,9 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/lista_
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/detalle_cuenta_pagar_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/registrar_abono_page.dart';
 import 'package:fiscogest_rd/features/presentaciones/presentation/pages/presentaciones_page.dart';
 import 'package:fiscogest_rd/features/categorias/presentation/pages/categorias_page.dart';
 import 'package:fiscogest_rd/features/marcas/presentation/pages/marcas_page.dart';
@@ -142,6 +145,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               final productoId = int.tryParse(soloDigitos) ?? 0;
               return AppShell(
                 child: HistorialCostosPage(productoId: productoId),
+              );
+            },
+          ),
+          // === CUENTAS POR PAGAR ===
+          GoRoute(
+            path: 'cuentas-pagar',
+            name: ListaCuentasPagarPage.routeName,
+            builder: (_, __) => const AppShell(child: ListaCuentasPagarPage()),
+          ),
+          GoRoute(
+            path: 'cuentas-pagar/detalle/:cuentaId',
+            name: DetalleCuentaPagarPage.routeName,
+            builder: (context, state) {
+              final idCrudo = state.pathParameters['cuentaId'] ?? '0';
+              final soloDigitos = idCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+              final cuentaId = int.tryParse(soloDigitos) ?? 0;
+              return AppShell(
+                child: DetalleCuentaPagarPage(cuentaId: cuentaId),
+              );
+            },
+          ),
+          GoRoute(
+            path: 'cuentas-pagar/registrar-abono/:cuentaId',
+            name: RegistrarAbonoPage.routeName,
+            builder: (context, state) {
+              final idCrudo = state.pathParameters['cuentaId'] ?? '0';
+              final soloDigitos = idCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+              final cuentaId = int.tryParse(soloDigitos) ?? 0;
+              return AppShell(
+                child: RegistrarAbonoPage(cuentaId: cuentaId),
               );
             },
           ),

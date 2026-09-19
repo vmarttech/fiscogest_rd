@@ -11,12 +11,15 @@ class AppCard extends StatelessWidget {
     this.onTap,
     this.color,
     this.elevation,
+    this.borderColor,
   });
+
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
   final Color? color;
   final double? elevation;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +28,9 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? AppColors.surface,
         borderRadius: AppRadius.allM,
+        border: borderColor != null
+            ? Border.all(color: borderColor!)
+            : null,
         boxShadow: elevation != null
             ? [
                 BoxShadow(
