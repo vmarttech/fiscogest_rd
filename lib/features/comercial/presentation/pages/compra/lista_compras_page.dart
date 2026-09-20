@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_sizes.dart';
-
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
@@ -204,7 +201,7 @@ class ListaComprasPage extends ConsumerWidget {
                         TextField(
                           controller: textoCtrl,
                           decoration: const InputDecoration(
-                            labelText: 'Buscar (proveedor, NCF, nº)',
+                            labelText: 'Buscar (proveedor, NCF, n°)',
                             prefixIcon: Icon(Icons.search),
                             border: OutlineInputBorder(),
                             isDense: true,
@@ -386,568 +383,601 @@ class ListaComprasPage extends ConsumerWidget {
       );
     }
 
-    return AppScaffold(
-      title: 'Compras',
-      actions: [
-        IconButton(
-          icon: Badge(
-            isLabelVisible: filtros.tieneFiltrosActivos,
-            child: const Icon(Icons.filter_list),
-          ),
-          tooltip: 'Filtros',
-          onPressed: mostrarFiltros,
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.pop(),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Badge(
+                      isLabelVisible: filtros.tieneFiltrosActivos,
+                      child: const Icon(Icons.filter_list),
+                    ),
+                    tooltip: 'Filtros',
+                    onPressed: mostrarFiltros,
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: comprasAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (Object error, StackTrace _) => Center(
+                  child: Padding(
+                    padding: AppLayout.pantallaPadding,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, size: AppSizes.iconXl, color: AppColors.error),
+                        const SizedBox(height: AppSpacing.m),
+                        const Text('Error al cargar compras', style: AppTypography.h4Bold),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text('$error', textAlign: TextAlign.center, style: AppTypography.bodySmall),
+                      ],
+                    ),
+                  ),
+                ),
+                data: (List<Compra> todas) {
+                  final compras = _aplicarFiltros(todas, filtros);
+                  if (todas.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: AppLayout.pantallaPadding,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.shopping_cart_outlined, size: AppSizes.iconXl, color: AppColors.grey200),
+                            const SizedBox(height: AppSpacing.m),
+                            Text(
+                              'No hay compras registradas.',
+                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            const Text(
+                              'Presiona el botón "+" para registrar tu primera compra.',
+                              style: AppTypography.bodySmall,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  if (compras.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: AppLayout.pantallaPadding,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.filter_alt_off, size: AppSizes.iconXl, color: AppColors.grey200),
+                            const SizedBox(height: AppSpacing.m),
+                            Text(
+                              'Ninguna compra coincide con los filtros.',
+                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                            ),
+                            const SizedBox(height: AppSpacing.s),
+                            TextButton(
+                              onPressed: () {
+                                ref.read(_filtrosComprasProvider.notifier).state =
+                                    const _FiltrosCompras();
+                              },
+                              child: const Text('Limpiar filtros'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: [
+                      if (filtros.tieneFiltrosActivos)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(AppSpacing.m, AppSpacing.s, AppSpacing.m, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${compras.length} de ${todas.length} compras',
+                                  style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
+                                ),
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.clear, size: AppSizes.iconSm),
+                                label: const Text('Limpiar'),
+                                onPressed: () {
+                                  ref.read(_filtrosComprasProvider.notifier).state =
+                                      const _FiltrosCompras();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      Expanded(
+                        child: ListView.separated(
+                          padding: AppLayout.pantallaPadding,
+                          itemCount: compras.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
+                          itemBuilder: (context, index) {
+                            final compra = compras[index];
+                            final idLimpio = _limpiarId(compra.id);
+                            final vencida = compra.estaVencida;
+
+                            Widget buildEstadoTag() {
+                              if (vencida &&
+                                  (compra.estado == EstadoCompra.registrada ||
+                                      compra.estado == EstadoCompra.confirmada)) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.error.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    'Vencida',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.error,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              }
+                              Color color;
+                              String texto;
+                              switch (compra.estado) {
+                                case EstadoCompra.borrador:
+                                  color = AppColors.warning;
+                                  texto = 'Borrador';
+                                  break;
+                                case EstadoCompra.registrada:
+                                  color = AppColors.primary;
+                                  texto = 'Registrada';
+                                  break;
+                                case EstadoCompra.confirmada:
+                                  color = AppColors.success;
+                                  texto = 'Confirmada';
+                                  break;
+                                case EstadoCompra.recibida:
+                                  color = AppColors.secondary;
+                                  texto = 'Recibida';
+                                  break;
+                                case EstadoCompra.pagada:
+                                  color = AppColors.primaryDark;
+                                  texto = 'Pagada';
+                                  break;
+                                case EstadoCompra.anulada:
+                                  color = AppColors.error;
+                                  texto = 'Anulada';
+                                  break;
+                                default:
+                                  color = AppColors.grey500;
+                                  texto = 'Desconocida';
+                              }
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
+                                decoration: BoxDecoration(
+                                  color: color.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  texto,
+                                  style: AppTypography.labelSmall.copyWith(color: color),
+                                ),
+                              );
+                            }
+
+                            void verDetalle() {
+                              if (idLimpio.isNotEmpty) {
+                                context.goNamed(
+                                  DetalleCompraPage.routeName,
+                                  pathParameters: {'compraId': idLimpio},
+                                );
+                              }
+                            }
+
+                            Future<void> confirmar() async {
+                              final ok = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Confirmar Compra'),
+                                  content: const Text(
+                                    '¿Confirmar esta compra?\n\n'
+                                    'Se actualizará inventario, Kardex, costos de producto '
+                                    'y el saldo del proveedor.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, false),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.success,
+                                        foregroundColor: AppColors.white,
+                                      ),
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      child: const Text('Sí, Confirmar'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (ok != true) return;
+                              if (!context.mounted) return;
+                              try {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Confirmando compra...')),
+                                  );
+                                }
+                                await confirmarCompra(compra.id);
+                                if (!context.mounted) return;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Compra confirmada ✅'),
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                  );
+                                }
+                                ref.invalidate(listadoComprasProvider);
+                                ref.invalidate(productoControllerProvider);
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: AppColors.error,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+
+                            Future<void> duplicar() async {
+                              try {
+                                final repo = ref.read(compraRepositoryProvider);
+                                final detalles = await repo.listarDetallesDeCompra(compra.id);
+                                final ahora = DateTime.now();
+                                final nuevoId = ahora.millisecondsSinceEpoch;
+                                final nuevaCompra = compra.copyWith(
+                                  id: nuevoId,
+                                  numeroComprobante: '${compra.numeroComprobante}-COPIA',
+                                  estado: EstadoCompra.borrador,
+                                  fechaEmision: ahora,
+                                  fechaConfirmacion: null,
+                                  creadoEn: ahora,
+                                  actualizadoEn: null,
+                                  observaciones: 'Duplicado de #${compra.id}',
+                                );
+                                final nuevosDetalles = <DetalleCompra>[];
+                                for (var i = 0; i < detalles.length; i++) {
+                                  final d = detalles[i];
+                                  nuevosDetalles.add(
+                                    d.copyWith(
+                                      id: nuevoId * 1000 + i,
+                                      compraId: nuevoId,
+                                    ),
+                                  );
+                                }
+                                await repo.registrarCompra(
+                                  compra: nuevaCompra,
+                                  detalles: nuevosDetalles,
+                                );
+                                if (!context.mounted) return;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Compra duplicada como borrador ✅'),
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                  );
+                                }
+                                ref.invalidate(listadoComprasProvider);
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error al duplicar: $e'),
+                                      backgroundColor: AppColors.error,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+
+                            Future<void> imprimir() async {
+                              final buffer = StringBuffer();
+                              buffer.writeln('══════════════════════════════════');
+                              buffer.writeln('       COMPROBANTE DE COMPRA');
+                              buffer.writeln('══════════════════════════════════');
+                              buffer.writeln(
+                                'N°: ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : compra.id}',
+                              );
+                              buffer.writeln('Fecha: ${_formatearFecha(compra.fechaEmision)}');
+                              buffer.writeln('Proveedor: ${compra.nombreProveedor}');
+                              if (compra.ncf.isNotEmpty) buffer.writeln('NCF: ${compra.ncf}');
+                              buffer.writeln('Tipo: ${compra.tipoComprobante}');
+                              buffer.writeln(
+                                'Pago: ${compra.esCredito ? 'Crédito (${compra.diasCredito} días)' : 'Contado'}',
+                              );
+                              buffer.writeln('Estado: ${compra.estado.name}');
+                              buffer.writeln('──────────────────────────────────');
+                              buffer.writeln(
+                                'Subtotal:  RD\$ ${compra.subtotalSinImpuestos.toStringAsFixed(2)}',
+                              );
+                              buffer.writeln(
+                                'Descuento: RD\$ ${compra.montoDescuentoGlobal.toStringAsFixed(2)}',
+                              );
+                              buffer.writeln(
+                                'ITBIS:     RD\$ ${compra.montoImpuesto.toStringAsFixed(2)}',
+                              );
+                              buffer.writeln(
+                                'TOTAL:     RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
+                              );
+                              buffer.writeln('══════════════════════════════════');
+                              buffer.writeln('FiscoGest RD');
+                              await Share.share(
+                                buffer.toString(),
+                                subject:
+                                    'Compra ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : '#${compra.id}'}',
+                              );
+                            }
+
+                            Future<void> anular() async {
+                              final ok = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Anular Compra'),
+                                  content: const Text(
+                                    '¿Anular esta compra?\n\n'
+                                    'Se revertirá el impacto en inventario, costos y saldo del proveedor.\n'
+                                    'Si tiene abonos registrados no se podrá anular la cuenta por pagar.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, false),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.error,
+                                        foregroundColor: AppColors.white,
+                                      ),
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      child: const Text('Sí, Anular'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (ok != true) return;
+                              if (!context.mounted) return;
+                              try {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Anulando compra...')),
+                                  );
+                                }
+                                await anularCompra(compra.id);
+                                if (!context.mounted) return;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Compra anulada ✅'),
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                  );
+                                }
+                                ref.invalidate(listadoComprasProvider);
+                                ref.invalidate(productoControllerProvider);
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: AppColors.error,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+
+                            return AppCard(
+                              padding: AppSpacing.allM,
+                              color: vencida ? AppColors.error.withValues(alpha: 0.05) : null,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              compra.numeroComprobante.isNotEmpty
+                                                  ? compra.numeroComprobante
+                                                  : 'Compra #${compra.id}',
+                                              style: AppTypography.bodyMediumBold.copyWith(fontSize: 15),
+                                            ),
+                                            const SizedBox(height: AppSpacing.xs),
+                                            Text(compra.nombreProveedor, style: AppTypography.bodySmall),
+                                          ],
+                                        ),
+                                      ),
+                                      buildEstadoTag(),
+                                      PopupMenuButton<String>(
+                                        icon: const Icon(Icons.more_vert, size: AppSizes.iconMd),
+                                        onSelected: (value) async {
+                                          switch (value) {
+                                            case 'ver':
+                                              verDetalle();
+                                              break;
+                                            case 'editar':
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Edición de borradores: próximamente',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                              break;
+                                            case 'duplicar':
+                                              await duplicar();
+                                              break;
+                                            case 'imprimir':
+                                              await imprimir();
+                                              break;
+                                            case 'confirmar':
+                                              await confirmar();
+                                              break;
+                                            case 'anular':
+                                              await anular();
+                                              break;
+                                          }
+                                        },
+                                        itemBuilder: (ctx) => [
+                                          const PopupMenuItem(
+                                            value: 'ver',
+                                            child: ListTile(
+                                              leading: Icon(Icons.visibility, size: AppSizes.iconMd),
+                                              title: Text('Ver'),
+                                              dense: true,
+                                              contentPadding: EdgeInsets.zero,
+                                            ),
+                                          ),
+                                          if (compra.estado == EstadoCompra.borrador)
+                                            const PopupMenuItem(
+                                              value: 'editar',
+                                              child: ListTile(
+                                                leading: Icon(Icons.edit, size: AppSizes.iconMd),
+                                                title: Text('Editar'),
+                                                dense: true,
+                                                contentPadding: EdgeInsets.zero,
+                                              ),
+                                            ),
+                                          const PopupMenuItem(
+                                            value: 'duplicar',
+                                            child: ListTile(
+                                              leading: Icon(Icons.copy, size: AppSizes.iconMd),
+                                              title: Text('Duplicar'),
+                                              dense: true,
+                                              contentPadding: EdgeInsets.zero,
+                                            ),
+                                          ),
+                                          const PopupMenuItem(
+                                            value: 'imprimir',
+                                            child: ListTile(
+                                              leading: Icon(Icons.print, size: AppSizes.iconMd),
+                                              title: Text('Imprimir'),
+                                              dense: true,
+                                              contentPadding: EdgeInsets.zero,
+                                            ),
+                                          ),
+                                          if (compra.estado == EstadoCompra.borrador)
+                                            const PopupMenuItem(
+                                              value: 'confirmar',
+                                              child: ListTile(
+                                                leading: Icon(
+                                                  Icons.check_circle,
+                                                  size: AppSizes.iconMd,
+                                                  color: AppColors.success,
+                                                ),
+                                                title: Text('Confirmar'),
+                                                dense: true,
+                                                contentPadding: EdgeInsets.zero,
+                                              ),
+                                            ),
+                                          if (compra.estado != EstadoCompra.anulada &&
+                                              compra.estado != EstadoCompra.borrador)
+                                            const PopupMenuItem(
+                                              value: 'anular',
+                                              child: ListTile(
+                                                leading: Icon(
+                                                  Icons.cancel,
+                                                  size: AppSizes.iconMd,
+                                                  color: AppColors.error,
+                                                ),
+                                                title: Text('Anular'),
+                                                dense: true,
+                                                contentPadding: EdgeInsets.zero,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: AppSpacing.s),
+                                  Wrap(
+                                    spacing: AppSpacing.m,
+                                    runSpacing: AppSpacing.s,
+                                    children: [
+                                      infoItem('Fecha', _formatearFecha(compra.fechaEmision)),
+                                      if (compra.ncf.isNotEmpty) infoItem('NCF', compra.ncf),
+                                      infoItem('Tipo', compra.tipoComprobante),
+                                      infoItem(
+                                        'Pago',
+                                        compra.esCredito ? 'Crédito' : 'Contado',
+                                      ),
+                                      if (compra.esCredito)
+                                        infoItem(
+                                          compra.diasCredito > 0 ? 'Plazo' : 'Vence',
+                                          compra.fechaVencimientoCalculada != null
+                                              ? _formatearFecha(compra.fechaVencimientoCalculada!)
+                                              : '${compra.diasCredito} días',
+                                          destacado: vencida,
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: AppSpacing.s),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Total: RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
+                                        style: AppTypography.bodyMediumBold.copyWith(fontSize: 15),
+                                      ),
+                                      if (!esPequena)
+                                        TextButton.icon(
+                                          icon: const Icon(Icons.visibility, size: AppSizes.iconSm),
+                                          label: const Text('Ver'),
+                                          onPressed: verDetalle,
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'nueva_compra',
         onPressed: () => context.goNamed(RegistrarCompraPage.routeName),
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.white),
         label: const Text('Nueva Compra', style: TextStyle(color: AppColors.white)),
-      ),
-      body: SafeArea(
-        bottom: true,
-        child: comprasAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (Object error, StackTrace _) => Center(
-            child: Padding(
-              padding: AppLayout.pantallaPadding,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: AppSizes.iconXl, color: AppColors.error),
-                  const SizedBox(height: AppSpacing.m),
-                  const Text('Error al cargar compras', style: AppTypography.h4Bold),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text('$error', textAlign: TextAlign.center, style: AppTypography.bodySmall),
-                ],
-              ),
-            ),
-          ),
-          data: (List<Compra> todas) {
-            final compras = _aplicarFiltros(todas, filtros);
-
-            if (todas.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: AppLayout.pantallaPadding,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.shopping_cart_outlined, size: AppSizes.iconXl, color: AppColors.grey200),
-                      const SizedBox(height: AppSpacing.m),
-                      Text(
-                        'No hay compras registradas.',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      const Text(
-                        'Presiona el botón "+" para registrar tu primera compra.',
-                        style: AppTypography.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            if (compras.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: AppLayout.pantallaPadding,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.filter_alt_off, size: AppSizes.iconXl, color: AppColors.grey200),
-                      const SizedBox(height: AppSpacing.m),
-                      Text(
-                        'Ninguna compra coincide con los filtros.',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                      ),
-                      const SizedBox(height: AppSpacing.s),
-                      TextButton(
-                        onPressed: () {
-                          ref.read(_filtrosComprasProvider.notifier).state =
-                              const _FiltrosCompras();
-                        },
-                        child: const Text('Limpiar filtros'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            return Column(
-              children: [
-                if (filtros.tieneFiltrosActivos)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.m, AppSpacing.s, AppSpacing.m, 0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${compras.length} de ${todas.length} compras',
-                            style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
-                          ),
-                        ),
-                        TextButton.icon(
-                          icon: const Icon(Icons.clear, size: AppSizes.iconSm),
-                          label: const Text('Limpiar'),
-                          onPressed: () {
-                            ref.read(_filtrosComprasProvider.notifier).state =
-                                const _FiltrosCompras();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                Expanded(
-                  child: ListView.separated(
-                    padding: AppLayout.pantallaPadding,
-                    itemCount: compras.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
-                    itemBuilder: (context, index) {
-                      final compra = compras[index];
-                      final idLimpio = _limpiarId(compra.id);
-                      final vencida = compra.estaVencida;
-
-                      Widget buildEstadoTag() {
-                        if (vencida &&
-                            (compra.estado == EstadoCompra.registrada ||
-                                compra.estado == EstadoCompra.confirmada)) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
-                            decoration: BoxDecoration(
-                              color: AppColors.error.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              'Vencida',
-                              style: AppTypography.labelSmall.copyWith(
-                                color: AppColors.error,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        }
-                        final (Color color, String texto) = switch (compra.estado) {
-                          EstadoCompra.borrador => (AppColors.warning, 'Borrador'),
-                          EstadoCompra.registrada => (AppColors.primary, 'Registrada'),
-                          EstadoCompra.confirmada => (AppColors.success, 'Confirmada'),
-                          EstadoCompra.recibida => (AppColors.secondary, 'Recibida'),
-                          EstadoCompra.pagada => (AppColors.primaryDark, 'Pagada'),
-                          EstadoCompra.anulada => (AppColors.error, 'Anulada'),
-                          _ => (AppColors.grey500, 'Desconocida'),
-                        };
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            texto,
-                            style: AppTypography.labelSmall.copyWith(color: color),
-                          ),
-                        );
-                      }
-
-                      void verDetalle() {
-                        if (idLimpio.isNotEmpty) {
-                          context.goNamed(
-                            DetalleCompraPage.routeName,
-                            pathParameters: {'compraId': idLimpio},
-                          );
-                        }
-                      }
-
-                      Future<void> confirmar() async {
-                        final ok = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Confirmar Compra'),
-                            content: const Text(
-                              '¿Confirmar esta compra?\n\n'
-                              'Se actualizará inventario, Kardex, costos de producto '
-                              'y el saldo del proveedor.',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text('Cancelar'),
-                              ),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.success,
-                                  foregroundColor: AppColors.white,
-                                ),
-                                onPressed: () => Navigator.pop(ctx, true),
-                                child: const Text('Sí, Confirmar'),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (ok != true) return;
-                        if (!context.mounted) return;
-                        try {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Confirmando compra...')),
-                            );
-                          }
-                          await confirmarCompra(compra.id);
-                          if (!context.mounted) return;
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Compra confirmada ✅'),
-                                backgroundColor: AppColors.success,
-                              ),
-                            );
-                          }
-                          ref.invalidate(listadoComprasProvider);
-                          ref.invalidate(productoControllerProvider);
-                        } catch (e) {
-                          if (!context.mounted) return;
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Error: $e'),
-                                backgroundColor: AppColors.error,
-                              ),
-                            );
-                          }
-                        }
-                      }
-
-                      Future<void> duplicar() async {
-                        try {
-                          final repo = ref.read(compraRepositoryProvider);
-                          final detalles = await repo.listarDetallesDeCompra(compra.id);
-                          final ahora = DateTime.now();
-                          final nuevoId = ahora.millisecondsSinceEpoch;
-                          final nuevaCompra = compra.copyWith(
-                            id: nuevoId,
-                            numeroComprobante: '${compra.numeroComprobante}-COPIA',
-                            estado: EstadoCompra.borrador,
-                            fechaEmision: ahora,
-                            fechaConfirmacion: null,
-                            creadoEn: ahora,
-                            actualizadoEn: null,
-                            observaciones: 'Duplicado de #${compra.id}',
-                          );
-                          final nuevosDetalles = <DetalleCompra>[];
-                          for (var i = 0; i < detalles.length; i++) {
-                            final d = detalles[i];
-                            nuevosDetalles.add(
-                              d.copyWith(
-                                id: nuevoId * 1000 + i,
-                                compraId: nuevoId,
-                              ),
-                            );
-                          }
-                          await repo.registrarCompra(
-                            compra: nuevaCompra,
-                            detalles: nuevosDetalles,
-                          );
-                          if (!context.mounted) return;
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Compra duplicada como borrador ✅'),
-                                backgroundColor: AppColors.success,
-                              ),
-                            );
-                          }
-                          ref.invalidate(listadoComprasProvider);
-                        } catch (e) {
-                          if (!context.mounted) return;
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Error al duplicar: $e'),
-                                backgroundColor: AppColors.error,
-                              ),
-                            );
-                          }
-                        }
-                      }
-
-                      Future<void> imprimir() async {
-                        final buffer = StringBuffer();
-                        buffer.writeln('══════════════════════════════════');
-                        buffer.writeln('       COMPROBANTE DE COMPRA');
-                        buffer.writeln('══════════════════════════════════');
-                        buffer.writeln(
-                          'Nº: ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : compra.id}',
-                        );
-                        buffer.writeln('Fecha: ${_formatearFecha(compra.fechaEmision)}');
-                        buffer.writeln('Proveedor: ${compra.nombreProveedor}');
-                        if (compra.ncf.isNotEmpty) buffer.writeln('NCF: ${compra.ncf}');
-                        buffer.writeln('Tipo: ${compra.tipoComprobante}');
-                        buffer.writeln(
-                          'Pago: ${compra.esCredito ? 'Crédito (${compra.diasCredito} días)' : 'Contado'}',
-                        );
-                        buffer.writeln('Estado: ${compra.estado.name}');
-                        buffer.writeln('──────────────────────────────────');
-                        buffer.writeln(
-                          'Subtotal:  RD\$ ${compra.subtotalSinImpuestos.toStringAsFixed(2)}',
-                        );
-                        buffer.writeln(
-                          'Descuento: RD\$ ${compra.montoDescuentoGlobal.toStringAsFixed(2)}',
-                        );
-                        buffer.writeln(
-                          'ITBIS:     RD\$ ${compra.montoImpuesto.toStringAsFixed(2)}',
-                        );
-                        buffer.writeln(
-                          'TOTAL:     RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
-                        );
-                        buffer.writeln('══════════════════════════════════');
-                        buffer.writeln('FiscoGest RD');
-                        await Share.share(
-                          buffer.toString(),
-                          subject:
-                              'Compra ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : '#${compra.id}'}',
-                        );
-                      }
-
-                      Future<void> anular() async {
-                        final ok = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Anular Compra'),
-                            content: const Text(
-                              '¿Anular esta compra?\n\n'
-                              'Se revertirá el impacto en inventario, costos y saldo del proveedor.\n'
-                              'Si tiene abonos registrados no se podrá anular la cuenta por pagar.',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text('Cancelar'),
-                              ),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.error,
-                                  foregroundColor: AppColors.white,
-                                ),
-                                onPressed: () => Navigator.pop(ctx, true),
-                                child: const Text('Sí, Anular'),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (ok != true) return;
-                        if (!context.mounted) return;
-                        try {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Anulando compra...')),
-                            );
-                          }
-                          await anularCompra(compra.id);
-                          if (!context.mounted) return;
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Compra anulada ✅'),
-                                backgroundColor: AppColors.success,
-                              ),
-                            );
-                          }
-                          ref.invalidate(listadoComprasProvider);
-                          ref.invalidate(productoControllerProvider);
-                        } catch (e) {
-                          if (!context.mounted) return;
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Error: $e'),
-                                backgroundColor: AppColors.error,
-                              ),
-                            );
-                          }
-                        }
-                      }
-
-                      return AppCard(
-                        padding: AppSpacing.allM,
-                        color: vencida ? AppColors.error.withValues(alpha: 0.05) : null,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        compra.numeroComprobante.isNotEmpty
-                                            ? compra.numeroComprobante
-                                            : 'Compra #${compra.id}',
-                                        style: AppTypography.bodyMediumBold.copyWith(fontSize: 15),
-                                      ),
-                                      const SizedBox(height: AppSpacing.xs),
-                                      Text(compra.nombreProveedor, style: AppTypography.bodySmall),
-                                    ],
-                                  ),
-                                ),
-                                buildEstadoTag(),
-                                PopupMenuButton<String>(
-                                  icon: const Icon(Icons.more_vert, size: AppSizes.iconMd),
-                                  onSelected: (value) async {
-                                    switch (value) {
-                                      case 'ver':
-                                        verDetalle();
-                                        break;
-                                      case 'editar':
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Edición de borradores: próximamente',
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                        break;
-                                      case 'duplicar':
-                                        await duplicar();
-                                        break;
-                                      case 'imprimir':
-                                        await imprimir();
-                                        break;
-                                      case 'confirmar':
-                                        await confirmar();
-                                        break;
-                                      case 'anular':
-                                        await anular();
-                                        break;
-                                    }
-                                  },
-                                  itemBuilder: (ctx) => [
-                                    const PopupMenuItem(
-                                      value: 'ver',
-                                      child: ListTile(
-                                        leading: Icon(Icons.visibility, size: AppSizes.iconMd),
-                                        title: Text('Ver'),
-                                        dense: true,
-                                        contentPadding: EdgeInsets.zero,
-                                      ),
-                                    ),
-                                    if (compra.estado == EstadoCompra.borrador)
-                                      const PopupMenuItem(
-                                        value: 'editar',
-                                        child: ListTile(
-                                          leading: Icon(Icons.edit, size: AppSizes.iconMd),
-                                          title: Text('Editar'),
-                                          dense: true,
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                      ),
-                                    const PopupMenuItem(
-                                      value: 'duplicar',
-                                      child: ListTile(
-                                        leading: Icon(Icons.copy, size: AppSizes.iconMd),
-                                        title: Text('Duplicar'),
-                                        dense: true,
-                                        contentPadding: EdgeInsets.zero,
-                                      ),
-                                    ),
-                                    const PopupMenuItem(
-                                      value: 'imprimir',
-                                      child: ListTile(
-                                        leading: Icon(Icons.print, size: AppSizes.iconMd),
-                                        title: Text('Imprimir'),
-                                        dense: true,
-                                        contentPadding: EdgeInsets.zero,
-                                      ),
-                                    ),
-                                    if (compra.estado == EstadoCompra.borrador)
-                                      const PopupMenuItem(
-                                        value: 'confirmar',
-                                        child: ListTile(
-                                          leading: Icon(
-                                            Icons.check_circle,
-                                            size: AppSizes.iconMd,
-                                            color: AppColors.success,
-                                          ),
-                                          title: Text('Confirmar'),
-                                          dense: true,
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                      ),
-                                    if (compra.estado != EstadoCompra.anulada &&
-                                        compra.estado != EstadoCompra.borrador)
-                                      const PopupMenuItem(
-                                        value: 'anular',
-                                        child: ListTile(
-                                          leading: Icon(
-                                            Icons.cancel,
-                                            size: AppSizes.iconMd,
-                                            color: AppColors.error,
-                                          ),
-                                          title: Text('Anular'),
-                                          dense: true,
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppSpacing.s),
-                            Wrap(
-                              spacing: AppSpacing.m,
-                              runSpacing: AppSpacing.s,
-                              children: [
-                                infoItem('Fecha', _formatearFecha(compra.fechaEmision)),
-                                if (compra.ncf.isNotEmpty) infoItem('NCF', compra.ncf),
-                                infoItem('Tipo', compra.tipoComprobante),
-                                infoItem(
-                                  'Pago',
-                                  compra.esCredito ? 'Crédito' : 'Contado',
-                                ),
-                                if (compra.esCredito)
-                                  infoItem(
-                                    compra.diasCredito > 0 ? 'Plazo' : 'Vence',
-                                    compra.fechaVencimientoCalculada != null
-                                        ? _formatearFecha(compra.fechaVencimientoCalculada!)
-                                        : '${compra.diasCredito} días',
-                                    destacado: vencida,
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: AppSpacing.s),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Total: RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
-                                  style: AppTypography.bodyMediumBold.copyWith(fontSize: 15),
-                                ),
-                                if (!esPequena)
-                                  TextButton.icon(
-                                    icon: const Icon(Icons.visibility, size: AppSizes.iconSm),
-                                    label: const Text('Ver'),
-                                    onPressed: verDetalle,
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
       ),
     );
   }

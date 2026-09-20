@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.child});
+
   final Widget child;
 
   String _obtenerTituloPantalla(String rutaActual) {
@@ -15,22 +16,48 @@ class AppShell extends StatelessWidget {
       '/' => 'Dashboard',
       '/sales' => 'Facturación y NC',
       '/ventas' => 'Ventas',
+      '/ventas/cotizaciones/nueva' => 'Nueva Cotización',
+      '/ventas/cotizaciones/historial' => 'Historial de Cotizaciones',
+      '/ventas/apartados' => 'Apartados',
+      '/ventas/devoluciones' => 'Devoluciones',
+      '/ventas/descuentos' => 'Descuentos',
+      '/ventas/ofertas' => 'Ofertas',
       '/ventas/cobrar' => 'Cuentas por Cobrar',
       '/ventas/pagar' => 'Cuentas por Pagar',
       '/compras' => 'Compras',
+      '/compras/lista' => 'Lista de Compras',
+      '/compras/registrar' => 'Registrar Compra',
+      '/compras/detalle' => 'Detalle de Compra',
+      '/compras/cuentas-pagar' => 'Cuentas por Pagar',
+      '/compras/recepcion' => 'Recepción de Compra',
       '/inventario' => 'Inventario',
       '/kardex' => 'Kárdex',
-      '/unidades' => 'Unidades de Medida',
-      '/marcas' => 'Marcas',
-      '/categorias' => 'Categorías',
+      '/productos/nuevo' => 'Nuevo Producto',
+      '/inventario/entrada' => 'Entrada de Producto',
+      '/inventario/salida' => 'Salida de Producto',
       '/inventario-fisico' => 'Inventario Físico',
-      '/customers' => 'Clientes',
-      '/suppliers' => 'Proveedores',
+      '/inventario-fisico/listar' => 'Lista de Conteos',
+      '/diferencias-conteo-fisico' => 'Diferencias de Conteo',
+      '/lista-ajustes' => 'Lista de Ajustes',
+      '/registrar-ajuste' => 'Registrar Ajuste',
+      '/ajustes-inventario' => 'Ajustes de Inventario',
+      '/ajustes-inventario/nuevo' => 'Nuevo Ajuste',
+      '/clientes' => 'Clientes',
+      '/clientes/gestion' => 'Gestión de Cliente',
+      '/proveedores' => 'Proveedores',
+      '/transferencias/registrar' => 'Registrar Transferencia',
+      '/presentaciones' => 'Presentaciones',
+      '/categorias' => 'Categorías',
+      '/marcas' => 'Marcas',
+      '/unidades' => 'Unidades de Medida',
       '/reports' => 'Reportes 606/607',
-      '/compras/registrar' => 'Registrar Compra',
-      '/taxes' => 'Impuestos',
+      '/impuestos' => 'Impuestos',
       '/import-export' => 'Importar / Exportar',
-      '/settings' => 'Configuración',
+      '/configuracion' => 'Configuración',
+      _ when rutaActual.startsWith('/ventas/cotizaciones/') => 'Cotización',
+      _ when rutaActual.startsWith('/compras/') => 'Compras',
+      _ when rutaActual.startsWith('/inventario-fisico/') => 'Inventario Físico',
+      _ when rutaActual.startsWith('/clientes/') => 'Gestión de Cliente',
       _ => 'FiscoGest RD',
     };
   }
@@ -49,11 +76,14 @@ class AppShell extends StatelessWidget {
           backgroundColor: const Color(0xFF0F172A),
           title: Text(
             tituloPantalla,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
           ),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-        drawer: _buildMenu(navWidth, currentPath, context),
+        drawer: _buildMenu(navWidth, currentPath, context, tituloPantalla),
         body: child,
       );
     }
@@ -64,7 +94,7 @@ class AppShell extends StatelessWidget {
         children: [
           SizedBox(
             width: navWidth,
-            child: _buildMenu(navWidth, currentPath, context),
+            child: _buildMenu(navWidth, currentPath, context, tituloPantalla),
           ),
           Expanded(child: child),
         ],
@@ -72,7 +102,12 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  Widget _buildMenu(double width, String currentPath, BuildContext context) {
+  Widget _buildMenu(
+    double width,
+    String currentPath,
+    BuildContext context,
+    String tituloPantalla,
+  ) {
     return Container(
       width: width,
       color: const Color(0xFF0F172A),
@@ -94,13 +129,19 @@ class AppShell extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'FiscoGest RD',
-                        style: AppTypography.h3.copyWith(color: Colors.white),
+                        tituloPantalla,
+                        style: AppTypography.h3.copyWith(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                       Text(
                         'Versión 3.0 Pro',
                         style: AppTypography.labelSmall.copyWith(
                           color: AppColors.textSecondary,
+                          fontSize: 11,
                         ),
                       ),
                     ],
@@ -117,97 +158,19 @@ class AppShell extends StatelessWidget {
                 right: AppSpacing.xs,
               ),
               children: [
-                _buildNavItem(
-                  context,
-                  '/',
-                  'Dashboard',
-                  Icons.dashboard_outlined,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/sales',
-                  'Facturación y NC',
-                  Icons.point_of_sale_outlined,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/ventas',
-                  'Ventas',
-                  Icons.point_of_sale,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/compras',
-                  'Compras',
-                  Icons.shopping_cart_outlined,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/inventario',
-                  'Inventario',
-                  Icons.inventory_2_outlined,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/kardex',
-                  'Kárdex',
-                  Icons.receipt_long_outlined,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/inventario-fisico',
-                  'Inventario Físico',
-                  Icons.inventory_2,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/customers',
-                  'Clientes',
-                  Icons.people_outline,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/suppliers',
-                  'Proveedores',
-                  Icons.business_outlined,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/reports',
-                  'Reportes 606/607',
-                  Icons.assessment_outlined,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/taxes',
-                  'Impuestos',
-                  Icons.calculate_outlined,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/import-export',
-                  'Importar / Exportar',
-                  Icons.import_export,
-                  currentPath,
-                ),
-                _buildNavItem(
-                  context,
-                  '/settings',
-                  'Configuración',
-                  Icons.settings_outlined,
-                  currentPath,
-                ),
+                _buildNavItem(context, '/', 'Dashboard', Icons.dashboard_outlined, currentPath),
+                _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
+                _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
+                _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
+                _buildNavItem(context, '/inventario', 'Inventario', Icons.inventory_2_outlined, currentPath),
+                _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
+                _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.inventory_2, currentPath),
+                _buildNavItem(context, '/clientes', 'Clientes', Icons.people_outline, currentPath),
+                _buildNavItem(context, '/proveedores', 'Proveedores', Icons.business_outlined, currentPath),
+                _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
+                _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
+                _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
+                _buildNavItem(context, '/configuracion', 'Configuración', Icons.settings_outlined, currentPath),
               ],
             ),
           ),
@@ -223,11 +186,12 @@ class AppShell extends StatelessWidget {
     IconData icon,
     String currentPath,
   ) {
-    final isSelected = currentPath == routePath;
+    final esSeleccionado = currentPath == routePath || currentPath.startsWith('$routePath/');
+
     return Padding(
       padding: AppSpacing.vXs,
       child: Material(
-        color: isSelected ? const Color(0xFF1E293B) : Colors.transparent,
+        color: esSeleccionado ? const Color(0xFF1E293B) : Colors.transparent,
         borderRadius: AppRadius.allM,
         child: InkWell(
           borderRadius: AppRadius.allM,
@@ -238,7 +202,7 @@ class AppShell extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  color: esSeleccionado ? Colors.white : AppColors.textSecondary,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
@@ -248,12 +212,8 @@ class AppShell extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: AppTypography.labelMedium.copyWith(
-                      color: isSelected
-                          ? Colors.white
-                          : AppColors.textSecondary,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+                      color: esSeleccionado ? Colors.white : AppColors.textSecondary,
+                      fontWeight: esSeleccionado ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 ),

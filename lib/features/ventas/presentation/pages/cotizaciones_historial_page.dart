@@ -60,7 +60,7 @@ class _CotizacionesHistorialPageState
               );
             }
             return ListView.builder(
-              padding: EdgeInsets.only(
+              padding: const EdgeInsets.only(
                 left: AppSpacing.m,
                 right: AppSpacing.m,
                 top: AppSpacing.m,

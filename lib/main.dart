@@ -20,12 +20,14 @@ import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/
 class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   _InventarioRepositoryAdapter(this._db);
   final AppDatabase _db;
+
   @override
   Future<void> actualizarStock(int productoId, double nuevoStock) async {
     await (_db.update(_db.productosTable)
           ..where((fila) => fila.id.equals(productoId)))
         .write(ProductosTableCompanion(stock: Value(nuevoStock)));
   }
+
   @override
   Future<void> actualizarProducto(Producto producto) async {
     if (producto.id == null) return;
@@ -46,6 +48,7 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
       ),
     );
   }
+
   @override
   Future<void> crearProducto(Producto producto) async {
     await _db
@@ -65,10 +68,12 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
           ),
         );
   }
+
   @override
   Future<void> eliminarProducto(int id) async {
     await (_db.delete(_db.productosTable)..where((t) => t.id.equals(id))).go();
   }
+
   @override
   Future<Producto?> obtenerProductoPorCodigo(String codigo) async {
     final row = await (_db.select(
@@ -89,6 +94,7 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
       activo: row.activo == 1,
     );
   }
+
   @override
   Future<Producto?> obtenerProductoPorId(int id) async {
     final row = await (_db.select(
@@ -109,6 +115,7 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
       activo: row.activo == 1,
     );
   }
+
   @override
   Future<List<Producto>> listarProductos() async {
     final results = await _db.select(_db.productosTable).get();
@@ -131,6 +138,68 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
         .toList();
   }
 }
+
+String _obtenerTituloVentana(String rutaActual) {
+  return switch (rutaActual) {
+    '/' => 'Dashboard - FiscoGest RD',
+    '/sales' => 'Facturación y NC - FiscoGest RD',
+    '/ventas' => 'Ventas - FiscoGest RD',
+    '/ventas/cotizaciones/nueva' => 'Nueva Cotización - FiscoGest RD',
+    '/ventas/cotizaciones/historial' => 'Historial de Cotizaciones - FiscoGest RD',
+    '/ventas/apartados' => 'Apartados - FiscoGest RD',
+    '/ventas/devoluciones' => 'Devoluciones - FiscoGest RD',
+    '/ventas/descuentos' => 'Descuentos - FiscoGest RD',
+    '/ventas/ofertas' => 'Ofertas - FiscoGest RD',
+    '/ventas/cobrar' => 'Cuentas por Cobrar - FiscoGest RD',
+    '/ventas/pagar' => 'Cuentas por Pagar - FiscoGest RD',
+    '/compras' => 'Compras - FiscoGest RD',
+    '/compras/lista' => 'Lista de Compras - FiscoGest RD',
+    '/compras/registrar' => 'Registrar Compra - FiscoGest RD',
+    '/compras/detalle' => 'Detalle de Compra - FiscoGest RD',
+    '/compras/cuentas-pagar' => 'Cuentas por Pagar - FiscoGest RD',
+    '/compras/recepcion' => 'Recepción de Compra - FiscoGest RD',
+    '/inventario' => 'Inventario - FiscoGest RD',
+    '/kardex' => 'Kárdex - FiscoGest RD',
+    '/productos/nuevo' => 'Nuevo Producto - FiscoGest RD',
+    '/inventario/entrada' => 'Entrada de Producto - FiscoGest RD',
+    '/inventario/salida' => 'Salida de Producto - FiscoGest RD',
+    '/inventario-fisico' => 'Inventario Físico - FiscoGest RD',
+    '/inventario-fisico/listar' => 'Lista de Conteos - FiscoGest RD',
+    '/diferencias-conteo-fisico' => 'Diferencias de Conteo - FiscoGest RD',
+    '/lista-ajustes' => 'Lista de Ajustes - FiscoGest RD',
+    '/registrar-ajuste' => 'Registrar Ajuste - FiscoGest RD',
+    '/ajustes-inventario' => 'Ajustes de Inventario - FiscoGest RD',
+    '/ajustes-inventario/nuevo' => 'Nuevo Ajuste - FiscoGest RD',
+    '/clientes' => 'Clientes - FiscoGest RD',
+    '/clientes/gestion' => 'Gestión de Cliente - FiscoGest RD',
+    '/proveedores' => 'Proveedores - FiscoGest RD',
+    '/transferencias/registrar' => 'Registrar Transferencia - FiscoGest RD',
+    '/presentaciones' => 'Presentaciones - FiscoGest RD',
+    '/categorias' => 'Categorías - FiscoGest RD',
+    '/marcas' => 'Marcas - FiscoGest RD',
+    '/unidades' => 'Unidades de Medida - FiscoGest RD',
+    '/reports' => 'Reportes 606/607 - FiscoGest RD',
+    '/impuestos' => 'Impuestos - FiscoGest RD',
+    '/import-export' => 'Importar / Exportar - FiscoGest RD',
+    '/configuracion' => 'Configuración - FiscoGest RD',
+    _ when rutaActual.startsWith('/ventas/cotizaciones/') => 'Cotización - FiscoGest RD',
+    _ when rutaActual.startsWith('/compras/') => 'Compras - FiscoGest RD',
+    _ when rutaActual.startsWith('/inventario-fisico/') => 'Inventario Físico - FiscoGest RD',
+    _ when rutaActual.startsWith('/clientes/') => 'Gestión de Cliente - FiscoGest RD',
+    _ => 'FiscoGest RD',
+  };
+}
+
+// Provider con protección: si no hay rutas, devuelve ruta vacía segura
+final rutaActualProvider = Provider<String>((ref) {
+  final router = ref.watch(appRouterProvider);
+  try {
+    final uri = router.state.uri;
+    return uri.path;
+  } catch (e) {
+    return '/';
+  }
+});
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -167,10 +236,14 @@ void main() async {
 
 class FiscoGestApp extends ConsumerWidget {
   const FiscoGestApp({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rutaActual = ref.watch(rutaActualProvider);
+    final tituloVentana = _obtenerTituloVentana(rutaActual);
+
     return MaterialApp.router(
-      title: 'FiscoGest RD 3.0',
+      title: tituloVentana,
       debugShowCheckedModeBanner: false,
       routerConfig: ref.watch(appRouterProvider),
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blueGrey),
