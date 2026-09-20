@@ -15,8 +15,8 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
-  static const String routeName = '/ventas/cotizaciones/nueva';
   const NuevaVentaBorradorPage({super.key});
+  static const String routeName = '/ventas/cotizaciones/nueva';
 
   @override
   ConsumerState<NuevaVentaBorradorPage> createState() =>
@@ -103,13 +103,11 @@ class _NuevaVentaBorradorPageState
     try {
       final notificador = ref.read(ventaBorradorProvider.notifier);
       final repositorio = ref.read(ventasRepositoryProvider);
-
       final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(
         esCredito: _esCredito,
       );
       notificador.establecerNumeroCotizacion(numeroCotizacion);
       notificador.establecerEstadoDocumento(EstadoDocumento.cotizado);
-
       final numeroGuardado = await notificador.guardar();
       if (numeroGuardado == null) {
         if (mounted) {
@@ -122,9 +120,7 @@ class _NuevaVentaBorradorPageState
         }
         return;
       }
-
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -135,7 +131,6 @@ class _NuevaVentaBorradorPageState
           duration: const Duration(seconds: 3),
         ),
       );
-
       ref.invalidate(listaCotizacionesProvider);
       _limpiarFormulario();
     } catch (e) {

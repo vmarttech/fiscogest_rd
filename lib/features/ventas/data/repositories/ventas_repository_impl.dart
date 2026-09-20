@@ -15,43 +15,66 @@ class VentasRepositoryImpl implements IVentasRepository {
   VentasRepositoryImpl(this._ventasDao, [CuentasCobrarDao? _]);
   final VentasDao _ventasDao;
 
-  Venta _mapearDesdeDatos(
-    VentasTableData ventaData,
-    String? nombreCliente, {
-    bool esCotizacion = false,
-  }) {
-    EstadoDocumento parsearEstado(String valor) => switch(valor) {
-      'borrador' => EstadoDocumento.borrador,
-      'cotizado' => EstadoDocumento.cotizado,
-      'enCredito' => EstadoDocumento.enCredito,
-      'aprobado' => EstadoDocumento.aprobado,
-      'anulado' => EstadoDocumento.anulado,
-      'facturado' => EstadoDocumento.facturado,
-      _ => EstadoDocumento.borrador,
-    };
-    final estadoDoc = parsearEstado(ventaData.estadoDocumento);
+  EstadoDocumento _parsearEstado(String valor) => switch(valor) {
+    'borrador' => EstadoDocumento.borrador,
+    'cotizado' => EstadoDocumento.cotizado,
+    'enCredito' => EstadoDocumento.enCredito,
+    'aprobado' => EstadoDocumento.aprobado,
+    'anulado' => EstadoDocumento.anulado,
+    'facturado' => EstadoDocumento.facturado,
+    _ => EstadoDocumento.borrador,
+  };
+
+  Venta _mapearDesdeVentaConCliente(VentaConCliente registro, {bool esCotizacion = false}) {
+    final datos = registro.venta;
     return Venta(
-      id: ventaData.id,
-      numeroCotizacion: ventaData.numeroCotizacion,
-      numeroFactura: ventaData.numeroFactura,
-      clienteId: ventaData.clienteId,
-      nombreCliente: nombreCliente,
-      fecha: ventaData.fecha,
+      id: datos.id,
+      numeroCotizacion: datos.numeroCotizacion,
+      numeroFactura: datos.numeroFactura,
+      clienteId: datos.clienteId,
+      nombreCliente: registro.nombreCliente ?? datos.nombreCliente,
+      fecha: datos.fecha,
       detalles: const [],
-      montoSubtotal: ventaData.montoSubtotal,
-      descuentoGlobal: ventaData.descuentoGlobal,
-      itbis: ventaData.itbis,
-      montoTotal: ventaData.montoTotal,
-      formaPago: ventaData.formaPago,
-      costoEnvio: ventaData.costoEnvio,
-      abonoInicial: ventaData.abonoInicial,
-      vencimiento: ventaData.vencimiento,
-      estadoDocumento: estadoDoc,
-      usuarioId: ventaData.usuarioId,
-      fechaRegistro: ventaData.fechaRegistro,
-      descuentoId: ventaData.descuentoId,
-      descuentoNombre: ventaData.descuentoNombre,
-      montoDescuento: ventaData.montoDescuento,
+      montoSubtotal: datos.montoSubtotal,
+      descuentoGlobal: datos.descuentoGlobal,
+      itbis: datos.itbis,
+      montoTotal: datos.montoTotal,
+      formaPago: datos.formaPago,
+      costoEnvio: datos.costoEnvio,
+      abonoInicial: datos.abonoInicial,
+      vencimiento: datos.vencimiento,
+      estadoDocumento: _parsearEstado(datos.estadoDocumento),
+      usuarioId: datos.usuarioId,
+      fechaRegistro: datos.fechaRegistro,
+      descuentoId: datos.descuentoId,
+      descuentoNombre: datos.descuentoNombre,
+      montoDescuento: datos.montoDescuento,
+    );
+  }
+
+  Venta _mapearDesdeVentasTableData(VentasTableData datos, {String? nombreCliente, bool esCotizacion = false}) {
+    return Venta(
+      id: datos.id,
+      numeroCotizacion: datos.numeroCotizacion,
+      numeroFactura: datos.numeroFactura,
+      clienteId: datos.clienteId,
+      nombreCliente: nombreCliente ?? datos.nombreCliente,
+      fecha: datos.fecha,
+      detalles: const [],
+      montoSubtotal: datos.montoSubtotal,
+      descuentoGlobal: datos.descuentoGlobal,
+      itbis: datos.itbis,
+      montoTotal: datos.montoTotal,
+      formaPago: datos.formaPago,
+      costoEnvio: datos.costoEnvio,
+      abonoInicial: datos.abonoInicial,
+      vencimiento: datos.vencimiento,
+      estadoDocumento: _parsearEstado(datos.estadoDocumento),
+      usuarioId: datos.usuarioId,
+      fechaRegistro: datos.fechaRegistro,
+      descuentoId: datos.descuentoId,
+      descuentoNombre: datos.descuentoNombre,
+      montoDescuento: datos.montoDescuento,
     );
   }
 
@@ -68,9 +91,7 @@ class VentasRepositoryImpl implements IVentasRepository {
       clienteId: clienteId,
       usuarioId: usuarioId,
     );
-    return resultados
-        .map((e) => _mapearDesdeDatos(e.venta, e.nombreCliente))
-        .toList();
+    return resultados.map((r) => _mapearDesdeVentaConCliente(r)).toList();
   }
 
   @override
@@ -86,29 +107,21 @@ class VentasRepositoryImpl implements IVentasRepository {
       clienteId: clienteId,
       usuarioId: usuarioId,
     );
-    return resultados
-        .map(
-          (e) => _mapearDesdeDatos(
-            e.venta,
-            e.nombreCliente,
-            esCotizacion: true,
-          ),
-        )
-        .toList();
+    return resultados.map((r) => _mapearDesdeVentaConCliente(r, esCotizacion: true)).toList();
   }
 
   @override
   Future<Venta?> obtenerVentaPorId(int ventaId) async {
-    final e = await _ventasDao.obtenerVentaPorId(ventaId);
-    if (e == null) return null;
-    return _mapearDesdeDatos(e, null);
+    final registro = await _ventasDao.obtenerVentaPorId(ventaId);
+    if (registro == null) return null;
+    return _mapearDesdeVentasTableData(registro);
   }
 
   @override
   Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId) async {
-    final e = await _ventasDao.obtenerVentaPorId(cotizacionId);
-    if (e == null) return null;
-    return _mapearDesdeDatos(e, null, esCotizacion: true);
+    final registro = await _ventasDao.obtenerVentaPorId(cotizacionId);
+    if (registro == null) return null;
+    return _mapearDesdeVentasTableData(registro, esCotizacion: true);
   }
 
   @override
@@ -117,9 +130,8 @@ class VentasRepositoryImpl implements IVentasRepository {
       soloCredito: esCredito,
     );
     final siguiente = ultimo + 1;
-    final prefijo = esCredito ? 'CR' : 'C';
-    final numeroStr = siguiente.toString().padLeft(6, '0');
-    return '$prefijo-$numeroStr';
+    final digitos = siguiente.toString().padLeft(6, '0');
+    return esCredito ? 'CR-$digitos' : 'C-$digitos';
   }
 
   @override
@@ -133,18 +145,19 @@ class VentasRepositoryImpl implements IVentasRepository {
         estadoDocumento: Value(nuevoEstado.name),
       ),
     );
-    final actualizada = await _ventasDao.obtenerVentaPorId(ventaId);
-    return _mapearDesdeDatos(actualizada!, null);
+    final registro = await _ventasDao.obtenerVentaPorId(ventaId);
+    return _mapearDesdeVentasTableData(registro!);
   }
 
   @override
   Future<Venta> registrarVenta(Venta venta) async {
-    final ventaId = await _ventasDao.insertarVenta(
+    final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
-        clienteId: Value(venta.clienteId),
-        fecha: Value(venta.fecha),
         numeroCotizacion: Value(venta.numeroCotizacion),
         numeroFactura: Value(venta.numeroFactura),
+        clienteId: Value(venta.clienteId),
+        nombreCliente: Value(venta.nombreCliente),
+        fecha: Value(venta.fecha),
         montoSubtotal: Value(venta.montoSubtotal),
         descuentoGlobal: Value(venta.descuentoGlobal),
         itbis: Value(venta.itbis),
@@ -161,18 +174,19 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoDescuento: Value(venta.montoDescuento),
       ),
     );
-    final guardada = await _ventasDao.obtenerVentaPorId(ventaId);
-    return _mapearDesdeDatos(guardada!, null);
+    final registro = await _ventasDao.obtenerVentaPorId(id);
+    return _mapearDesdeVentasTableData(registro!);
   }
 
   @override
   Future<Venta> registrarVentaBorrador(Venta cotizacion) async {
-    final ventaId = await _ventasDao.insertarVenta(
+    final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
-        clienteId: Value(cotizacion.clienteId),
-        fecha: Value(cotizacion.fecha),
         numeroCotizacion: Value(cotizacion.numeroCotizacion),
         numeroFactura: Value(cotizacion.numeroFactura),
+        clienteId: Value(cotizacion.clienteId),
+        nombreCliente: Value(cotizacion.nombreCliente),
+        fecha: Value(cotizacion.fecha),
         montoSubtotal: Value(cotizacion.montoSubtotal),
         descuentoGlobal: Value(cotizacion.descuentoGlobal),
         itbis: Value(cotizacion.itbis),
@@ -181,7 +195,7 @@ class VentasRepositoryImpl implements IVentasRepository {
         costoEnvio: Value(cotizacion.costoEnvio),
         abonoInicial: Value(cotizacion.abonoInicial),
         vencimiento: Value(cotizacion.vencimiento),
-        estadoDocumento: Value(cotizacion.estadoDocumento.name),
+        estadoDocumento: Value(EstadoDocumento.cotizado.name),
         usuarioId: Value(cotizacion.usuarioId),
         fechaRegistro: Value(cotizacion.fechaRegistro),
         descuentoId: Value(cotizacion.descuentoId),
@@ -189,8 +203,8 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );
-    final guardada = await _ventasDao.obtenerVentaPorId(ventaId);
-    return _mapearDesdeDatos(guardada!, cotizacion.nombreCliente, esCotizacion: true);
+    final registro = await _ventasDao.obtenerVentaPorId(id);
+    return _mapearDesdeVentasTableData(registro!, esCotizacion: true);
   }
 
   @override
@@ -198,10 +212,11 @@ class VentasRepositoryImpl implements IVentasRepository {
     await _ventasDao.actualizarVenta(
       cotizacion.id!,
       VentasTableCompanion(
-        clienteId: Value(cotizacion.clienteId),
-        fecha: Value(cotizacion.fecha),
         numeroCotizacion: Value(cotizacion.numeroCotizacion),
         numeroFactura: Value(cotizacion.numeroFactura),
+        clienteId: Value(cotizacion.clienteId),
+        nombreCliente: Value(cotizacion.nombreCliente),
+        fecha: Value(cotizacion.fecha),
         montoSubtotal: Value(cotizacion.montoSubtotal),
         descuentoGlobal: Value(cotizacion.descuentoGlobal),
         itbis: Value(cotizacion.itbis),
@@ -218,20 +233,20 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );
-    final actualizada = await _ventasDao.obtenerVentaPorId(cotizacion.id!);
-    return _mapearDesdeDatos(actualizada!, cotizacion.nombreCliente, esCotizacion: true);
+    final registro = await _ventasDao.obtenerVentaPorId(cotizacion.id!);
+    return _mapearDesdeVentasTableData(registro!, esCotizacion: true);
   }
 
   @override
   Future<Venta> confirmarVentaBorrador(int cotizacionId) async {
     await _ventasDao.actualizarVenta(
       cotizacionId,
-      const VentasTableCompanion(
-        estadoDocumento: Value('facturado'),
+      VentasTableCompanion(
+        estadoDocumento: Value(EstadoDocumento.facturado.name),
       ),
     );
-    final confirmada = await _ventasDao.obtenerVentaPorId(cotizacionId);
-    return _mapearDesdeDatos(confirmada!, null);
+    final registro = await _ventasDao.obtenerVentaPorId(cotizacionId);
+    return _mapearDesdeVentasTableData(registro!);
   }
 
   @override
@@ -239,58 +254,30 @@ class VentasRepositoryImpl implements IVentasRepository {
     await _ventasDao.actualizarVenta(
       ventaId,
       VentasTableCompanion(
-        estadoDocumento: const Value('aprobado'),
+        estadoDocumento: Value(EstadoDocumento.enCredito.name),
         abonoInicial: Value(montoAbono),
       ),
     );
-    final actualizada = await _ventasDao.obtenerVentaPorId(ventaId);
-    return _mapearDesdeDatos(actualizada!, null);
+    final registro = await _ventasDao.obtenerVentaPorId(ventaId);
+    return _mapearDesdeVentasTableData(registro!);
   }
 
   @override
-  Future<Apartado> registrarApartado(Apartado apartado) async {
-    throw UnimplementedError();
-  }
-
+  Future<Apartado> registrarApartado(Apartado apartado) async => throw UnimplementedError();
   @override
-  Future<Devolucion> registrarDevolucion(Devolucion devolucion) async {
-    throw UnimplementedError();
-  }
-
+  Future<Devolucion> registrarDevolucion(Devolucion devolucion) async => throw UnimplementedError();
   @override
-  Future<Pago> registrarPago(Pago pago) async {
-    throw UnimplementedError();
-  }
-
+  Future<Pago> registrarPago(Pago pago) async => throw UnimplementedError();
   @override
-  Future<double> consultarSaldoCliente(int clienteId) async {
-    throw UnimplementedError();
-  }
-
+  Future<double> consultarSaldoCliente(int clienteId) async => throw UnimplementedError();
   @override
-  Future<List<Descuento>> obtenerDescuentosActivos() async {
-    throw UnimplementedError();
-  }
-
+  Future<List<Descuento>> obtenerDescuentosActivos() async => throw UnimplementedError();
   @override
-  Future<List<Oferta>> obtenerOfertasActivas() async {
-    throw UnimplementedError();
-  }
-
+  Future<List<Oferta>> obtenerOfertasActivas() async => throw UnimplementedError();
   @override
-  Future<bool> aplicarDescuento(int ofertaId, double montoCompra) async {
-    throw UnimplementedError();
-  }
-
+  Future<bool> aplicarDescuento(int ofertaId, double montoCompra) async => throw UnimplementedError();
   @override
-  Future<bool> validarOferta(int ofertaId, double montoCompra) async {
-    final ofertas = await obtenerOfertasActivas();
-    final existe = ofertas.any((oferta) => oferta.id == ofertaId);
-    return existe;
-  }
-
+  Future<bool> validarOferta(int ofertaId, double montoCompra) async => throw UnimplementedError();
   @override
-  Future<void> actualizarEnCascada(int ventaId) async {
-    throw UnimplementedError();
-  }
+  Future<void> actualizarEnCascada(int ventaId) async => throw UnimplementedError();
 }
