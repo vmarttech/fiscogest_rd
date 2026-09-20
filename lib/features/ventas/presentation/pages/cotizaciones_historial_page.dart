@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 
@@ -24,35 +21,49 @@ class _CotizacionesHistorialPageState
     final cotizacionesAsync = ref.watch(listaCotizacionesProvider);
 
     return AppScaffold(
+      title: 'HISTORIAL DE COTIZACIONES',
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => context.pop(),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.m),
+          padding: AppSpacing.allM,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Historial de Cotizaciones', style: AppTypography.h3),
-              const SizedBox(height: AppSpacing.m),
+              AppLayout.vM,
               Expanded(
                 child: cotizacionesAsync.when(
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Center(
                     child: Text(
                       'Error al cargar cotizaciones: $e',
-                      style: const TextStyle(color: AppColors.error),
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
                     ),
                   ),
                   data: (lista) {
                     if (lista.isEmpty) {
                       return const Center(
-                        child: Text(
-                          'No hay cotizaciones generadas aún.\n'
-                          'Cree una desde "Nueva Cotización".',
-                          textAlign: TextAlign.center,
-                          style: AppTypography.bodyMedium,
+                        child: Padding(
+                          padding: AppSpacing.allM,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'No hay cotizaciones generadas aún.\n'
+                                'Cree una desde "Nueva Cotización".',
+                                textAlign: TextAlign.center,
+                                style: AppTypography.bodyMedium,
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }
                     return ListView.builder(
+                      padding: EdgeInsets.zero,
                       itemCount: lista.length,
                       itemBuilder: (context, i) {
                         final cot = lista[i];
@@ -71,9 +82,8 @@ class _CotizacionesHistorialPageState
 
   Widget _buildTarjetaCotizacion(Venta cot) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.s),
+      padding: AppSpacing.bS,
       child: AppCard(
-        padding: const EdgeInsets.all(AppSpacing.m),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -90,13 +100,13 @@ class _CotizacionesHistorialPageState
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.xs),
+            AppLayout.vXs,
             Text('Cliente: ${cot.nombreCliente}', style: AppTypography.bodyMedium),
             Text(
               'Total: RD\$ ${cot.total.toStringAsFixed(2)}',
-              style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+              style: AppTypography.bodyMediumBold,
             ),
-            const SizedBox(height: AppSpacing.m),
+            AppLayout.vM,
             Wrap(
               spacing: AppSpacing.s,
               runSpacing: AppSpacing.xs,
@@ -121,7 +131,7 @@ class _CotizacionesHistorialPageState
                   label: const Text('Convertir a Venta'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.success,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.white,
                   ),
                   onPressed: () => _convertirEnVenta(cot),
                 ),
@@ -135,19 +145,28 @@ class _CotizacionesHistorialPageState
 
   void _imprimirCotizacion(Venta cot) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Imprimiendo cotización N° ${cot.numero}...')),
+      SnackBar(
+        content: Text('Imprimiendo cotización N° ${cot.numero}...'),
+        backgroundColor: AppColors.info,
+      ),
     );
   }
 
   void _exportarPDF(Venta cot) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Generando PDF de ${cot.numero}...')),
+      SnackBar(
+        content: Text('Generando PDF de ${cot.numero}...'),
+        backgroundColor: AppColors.info,
+      ),
     );
   }
 
   void _enviarPorCorreo(Venta cot) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Enviando ${cot.numero} por correo...')),
+      SnackBar(
+        content: Text('Enviando ${cot.numero} por correo...'),
+        backgroundColor: AppColors.info,
+      ),
     );
   }
 
@@ -155,32 +174,39 @@ class _CotizacionesHistorialPageState
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Convertir a Venta'),
+        title: const Text('Convertir a Venta', style: AppTypography.h4),
         content: Text(
           '¿Convertir la cotización N° ${cot.numero} en venta?\n\n'
           'Se descontará inventario y generará el documento.',
+          style: AppTypography.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(foregroundColor: AppColors.grey600),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: AppColors.white,
+            ),
             child: const Text('Confirmar'),
           ),
         ],
       ),
     );
     if (confirmar != true) return;
-
     if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('✅ ${cot.numero} convertida en Venta.'),
         backgroundColor: AppColors.success,
       ),
     );
+
     ref.invalidate(listaCotizacionesProvider);
   }
 }
