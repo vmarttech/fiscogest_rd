@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_card.dart';
-import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
@@ -58,7 +53,10 @@ class _NuevaVentaBorradorPageState
         .agregarProducto(producto, cantidad);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✅ ${producto.nombre} agregado')),
+        SnackBar(
+          content: Text('✅ ${producto.nombre} agregado'),
+          backgroundColor: AppColors.success,
+        ),
       );
     }
   }
@@ -113,7 +111,9 @@ class _NuevaVentaBorradorPageState
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Agregue productos antes de generar la cotización'),
+              content: Text(
+                'Agregue productos antes de generar la cotización',
+              ),
               backgroundColor: AppColors.error,
             ),
           );
@@ -151,41 +151,53 @@ class _NuevaVentaBorradorPageState
   @override
   Widget build(BuildContext context) {
     final estado = ref.watch(ventaBorradorProvider);
-    final anchoPantalla = MediaQuery.of(context).size.width;
-    final pantallaPequena = anchoPantalla < 720;
     final puedeGenerar = estado.detalles.isNotEmpty && estado.montoTotal > 0;
+    final tituloPantalla =
+        _modoCotizacion ? 'NUEVA COTIZACIÓN' : 'NUEVA VENTA';
 
     return AppScaffold(
-      body: SafeArea(
-        bottom: true,
-        child: Padding(
-          padding: AppLayout.pantallaPadding,
-          child: SingleChildScrollView(
-            child: pantallaPequena
-                ? _buildUnaColumna(estado, puedeGenerar)
-                : _buildDosColumnas(estado, puedeGenerar),
+      title: tituloPantalla,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => context.pop(),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final pantallaAncha = constraints.maxWidth >= 720;
+                return pantallaAncha
+                    ? _buildDosColumnas(estado, puedeGenerar)
+                    : _buildUnaColumna(estado, puedeGenerar);
+              },
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildUnaColumna(VentaBorradorState estado, bool puedeGenerar) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildCabecera(),
-        const SizedBox(height: AppSpacing.m),
-        _buildTipoVenta(),
-        const SizedBox(height: AppSpacing.m),
-        _buildCliente(estado),
-        const SizedBox(height: AppSpacing.m),
-        _buildProductos(),
-        const SizedBox(height: AppSpacing.m),
-        _buildResumen(estado),
-        const SizedBox(height: AppSpacing.l),
-        _buildBotonera(puedeGenerar),
-      ],
+    return SingleChildScrollView(
+      padding: AppSpacing.allM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSeccionVencimiento(),
+          AppLayout.vM,
+          _buildSeccionTipoVenta(),
+          AppLayout.vM,
+          _buildSeccionCliente(estado),
+          AppLayout.vM,
+          _buildSeccionProductos(),
+          AppLayout.vM,
+          _buildSeccionResumen(estado),
+          AppLayout.vL,
+          _buildBotonera(puedeGenerar),
+        ],
+      ),
     );
   }
 
@@ -199,26 +211,26 @@ class _NuevaVentaBorradorPageState
             padding: AppSpacing.allM,
             child: Column(
               children: [
-                _buildCabecera(),
-                const SizedBox(height: AppSpacing.m),
-                _buildTipoVenta(),
-                const SizedBox(height: AppSpacing.m),
-                _buildCliente(estado),
-                const SizedBox(height: AppSpacing.m),
-                _buildProductos(),
+                _buildSeccionVencimiento(),
+                AppLayout.vM,
+                _buildSeccionTipoVenta(),
+                AppLayout.vM,
+                _buildSeccionCliente(estado),
+                AppLayout.vM,
+                _buildSeccionProductos(),
               ],
             ),
           ),
         ),
-        const SizedBox(width: AppSpacing.m),
+        AppLayout.hM,
         Expanded(
           flex: 5,
           child: SingleChildScrollView(
             padding: AppSpacing.allM,
             child: Column(
               children: [
-                _buildResumen(estado),
-                const SizedBox(height: AppSpacing.l),
+                _buildSeccionResumen(estado),
+                AppLayout.vL,
                 _buildBotonera(puedeGenerar),
               ],
             ),
@@ -228,41 +240,39 @@ class _NuevaVentaBorradorPageState
     );
   }
 
-  Widget _buildCabecera() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          _modoCotizacion ? 'NUEVA COTIZACIÓN' : 'NUEVA VENTA',
-          style: AppTypography.h4,
-        ),
-        const SizedBox(height: AppSpacing.s),
-        AppCard(
-          padding: AppSpacing.allM,
-          child: ListTile(
-            title: const Text(
-              'Vencimiento',
-              style: AppTypography.bodyMedium,
-            ),
-            subtitle: Text(
-              _fechaVencimientoSeleccionada != null
-                  ? '${_fechaVencimientoSeleccionada!.day}/${_fechaVencimientoSeleccionada!.month}/${_fechaVencimientoSeleccionada!.year}'
-                  : 'Seleccione fecha (opcional)',
-              style: AppTypography.bodySmall,
-            ),
-            trailing: const Icon(Icons.calendar_today, size: 20),
-            onTap: _seleccionarVencimiento,
+  Widget _buildSeccionVencimiento() {
+    return AppCard(
+      onTap: _seleccionarVencimiento,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Vencimiento', style: AppTypography.labelMedium),
+          AppLayout.vXs,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _fechaVencimientoSeleccionada != null
+                    ? '${_fechaVencimientoSeleccionada!.day}/${_fechaVencimientoSeleccionada!.month}/${_fechaVencimientoSeleccionada!.year}'
+                    : 'Seleccione fecha (opcional)',
+                style: AppTypography.bodyMediumSecondary,
+              ),
+              const Icon(
+                Icons.calendar_today,
+                size: 20,
+                color: AppColors.primary,
+              ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildTipoVenta() {
+  Widget _buildSeccionTipoVenta() {
     return AppCard(
-      padding: AppSpacing.allM,
       child: SwitchListTile(
-        title: const Text('Venta a Crédito', style: AppTypography.bodyMedium),
+        title: const Text('Venta a Crédito', style: AppTypography.labelMedium),
         subtitle: Text(
           _esCredito
               ? 'Genera cotización con prefijo CR'
@@ -279,7 +289,7 @@ class _NuevaVentaBorradorPageState
     );
   }
 
-  Widget _buildCliente(VentaBorradorState estado) {
+  Widget _buildSeccionCliente(VentaBorradorState estado) {
     final nombreCliente = estado.clienteNombre?.isNotEmpty == true
         ? estado.clienteNombre!
         : 'Consumidor Final';
@@ -287,9 +297,8 @@ class _NuevaVentaBorradorPageState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Cliente', style: AppTypography.h4),
-        const SizedBox(height: AppSpacing.s),
+        AppLayout.vS,
         AppCard(
-          padding: AppSpacing.allM,
           child: Row(
             children: [
               const Icon(
@@ -297,7 +306,7 @@ class _NuevaVentaBorradorPageState
                 size: 20,
                 color: AppColors.primary,
               ),
-              const SizedBox(width: 12),
+              AppLayout.hM,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,6 +314,12 @@ class _NuevaVentaBorradorPageState
                     Text(nombreCliente, style: AppTypography.bodyMedium),
                     TextButton(
                       onPressed: _seleccionarCliente,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(88, 36),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: AppColors.primary,
+                      ),
                       child: const Text('Cambiar cliente'),
                     ),
                   ],
@@ -317,48 +332,42 @@ class _NuevaVentaBorradorPageState
     );
   }
 
-  Widget _buildProductos() {
+  Widget _buildSeccionProductos() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Productos', style: AppTypography.h4),
-        const SizedBox(height: AppSpacing.s),
+        AppLayout.vS,
         PanelProductos(alAgregar: _agregarProductoACotizacion),
       ],
     );
   }
 
-  Widget _buildResumen(VentaBorradorState estado) {
+  Widget _buildSeccionResumen(VentaBorradorState estado) {
     return AppCard(
-      padding: AppSpacing.allM,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text('Resumen', style: AppTypography.h4),
-          const SizedBox(height: AppSpacing.m),
-          _buildFilaResumen('Subtotal', estado.subtotal),
-          _buildFilaResumen('ITBIS (18%)', estado.itbis),
-          _buildFilaResumen('Descuento', estado.montoDescuento),
-          const Divider(),
-          _buildFilaResumen('TOTAL', estado.montoTotal, esTotal: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilaResumen(String etiqueta, double monto, {bool esTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            etiqueta,
-            style: esTotal ? AppTypography.h4 : AppTypography.bodyMedium,
+          AppLayout.vM,
+          AppLayout.filaDato(
+            etiqueta: 'Subtotal',
+            valor: 'RD\$ ${estado.subtotal.toStringAsFixed(2)}',
           ),
-          Text(
-            'RD\$ ${monto.toStringAsFixed(2)}',
-            style: esTotal ? AppTypography.h4 : AppTypography.bodyMedium,
+          AppLayout.filaDato(
+            etiqueta: 'ITBIS (18%)',
+            valor: 'RD\$ ${estado.itbis.toStringAsFixed(2)}',
+          ),
+          AppLayout.filaDato(
+            etiqueta: 'Descuento',
+            valor: 'RD\$ ${estado.montoDescuento.toStringAsFixed(2)}',
+          ),
+          const Divider(height: AppSpacing.l),
+          AppLayout.filaDato(
+            etiqueta: 'TOTAL',
+            valor: 'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
+            estiloEtiqueta: AppTypography.h4,
+            estiloValor: AppTypography.h4,
           ),
         ],
       ),
@@ -368,26 +377,21 @@ class _NuevaVentaBorradorPageState
   Widget _buildBotonera(bool puedeGenerar) {
     return Column(
       children: [
-        ElevatedButton(
-          onPressed: puedeGenerar && !_guardando ? _guardarCotizacion : null,
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 48),
-          ),
-          child: _guardando
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  _modoCotizacion ? 'GENERAR COTIZACIÓN' : 'GUARDAR VENTA',
-                ),
+        AppButton(
+          text: _modoCotizacion ? 'GENERAR COTIZACIÓN' : 'GUARDAR VENTA',
+          onPressed: puedeGenerar ? _guardarCotizacion : null,
+          isLoading: _guardando,
+          isDisabled: !puedeGenerar,
+          width: double.infinity,
         ),
-        const SizedBox(height: AppSpacing.m),
+        AppLayout.vM,
         TextButton.icon(
-          icon: const Icon(Icons.history),
+          icon: const Icon(Icons.history, size: 18),
           label: const Text('Ver Historial de Cotizaciones'),
           onPressed: () => context.push('/ventas/cotizaciones/historial'),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.primary,
+          ),
         ),
       ],
     );
