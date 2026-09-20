@@ -27,60 +27,61 @@ class _CotizacionesHistorialPageState
         onPressed: () => context.pop(),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: AppSpacing.allM,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Historial de Cotizaciones', style: AppTypography.h3),
-              AppLayout.vM,
-              Expanded(
-                child: cotizacionesAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(
+        bottom: true,
+        maintainBottomViewPadding: true,
+        child: cotizacionesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Padding(
+              padding: AppSpacing.allM,
+              child: Text(
+                'Error al cargar cotizaciones: $e',
+                style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          data: (lista) {
+            if (lista.isEmpty) {
+              return const SingleChildScrollView(
+                padding: AppSpacing.allM,
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Center(
+                  child: Padding(
+                    padding: AppSpacing.allM,
                     child: Text(
-                      'Error al cargar cotizaciones: $e',
-                      style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                      'No hay cotizaciones generadas aún.\n'
+                      'Cree una desde "Nueva Cotización".',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.bodyMedium,
                     ),
                   ),
-                  data: (lista) {
-                    if (lista.isEmpty) {
-                      return const Center(
-                        child: Padding(
-                          padding: AppSpacing.allM,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'No hay cotizaciones generadas aún.\n'
-                                'Cree una desde "Nueva Cotización".',
-                                textAlign: TextAlign.center,
-                                style: AppTypography.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                    return ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: lista.length,
-                      itemBuilder: (context, i) {
-                        final cot = lista[i];
-                        return _buildTarjetaCotizacion(cot);
-                      },
-                    );
-                  },
                 ),
+              );
+            }
+            return ListView.builder(
+              padding: EdgeInsets.only(
+                left: AppSpacing.m,
+                right: AppSpacing.m,
+                top: AppSpacing.m,
+                bottom: AppSpacing.m + 32,
               ),
-            ],
-          ),
+              physics: const AlwaysScrollableScrollPhysics(),
+              shrinkWrap: false,
+              itemCount: lista.length,
+              itemBuilder: (context, i) {
+                final cot = lista[i];
+                return _buildTarjetaCotizacion(cot);
+              },
+            );
+          },
         ),
       ),
     );
   }
 
   Widget _buildTarjetaCotizacion(Venta cot) {
+    final numero = cot.numeroCotizacion;
     return Padding(
       padding: AppSpacing.bS,
       child: AppCard(
@@ -90,9 +91,11 @@ class _CotizacionesHistorialPageState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Cotización N° ${cot.numero}',
-                  style: AppTypography.h4,
+                Expanded(
+                  child: Text(
+                    'Cotización N° $numero',
+                    style: AppTypography.h4,
+                  ),
                 ),
                 Text(
                   '${cot.fecha.day}/${cot.fecha.month}/${cot.fecha.year}',
@@ -103,7 +106,7 @@ class _CotizacionesHistorialPageState
             AppLayout.vXs,
             Text('Cliente: ${cot.nombreCliente}', style: AppTypography.bodyMedium),
             Text(
-              'Total: RD\$ ${cot.total.toStringAsFixed(2)}',
+              'Total: RD\$ ${cot.montoTotal.toStringAsFixed(2)}',
               style: AppTypography.bodyMediumBold,
             ),
             AppLayout.vM,
@@ -114,17 +117,17 @@ class _CotizacionesHistorialPageState
                 OutlinedButton.icon(
                   icon: const Icon(Icons.print, size: 16),
                   label: const Text('Imprimir'),
-                  onPressed: () => _imprimirCotizacion(cot),
+                  onPressed: () => _imprimirCotizacion(numero),
                 ),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.picture_as_pdf, size: 16),
                   label: const Text('PDF'),
-                  onPressed: () => _exportarPDF(cot),
+                  onPressed: () => _exportarPDF(numero),
                 ),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.email, size: 16),
                   label: const Text('Correo'),
-                  onPressed: () => _enviarPorCorreo(cot),
+                  onPressed: () => _enviarPorCorreo(numero),
                 ),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.shopping_cart_checkout, size: 16),
@@ -133,7 +136,7 @@ class _CotizacionesHistorialPageState
                     backgroundColor: AppColors.success,
                     foregroundColor: AppColors.white,
                   ),
-                  onPressed: () => _convertirEnVenta(cot),
+                  onPressed: () => _convertirEnVenta(numero),
                 ),
               ],
             ),
@@ -143,40 +146,40 @@ class _CotizacionesHistorialPageState
     );
   }
 
-  void _imprimirCotizacion(Venta cot) {
+  void _imprimirCotizacion(String numero) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Imprimiendo cotización N° ${cot.numero}...'),
+        content: Text('Imprimiendo cotización N° $numero...'),
         backgroundColor: AppColors.info,
       ),
     );
   }
 
-  void _exportarPDF(Venta cot) {
+  void _exportarPDF(String numero) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Generando PDF de ${cot.numero}...'),
+        content: Text('Generando PDF de $numero...'),
         backgroundColor: AppColors.info,
       ),
     );
   }
 
-  void _enviarPorCorreo(Venta cot) {
+  void _enviarPorCorreo(String numero) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Enviando ${cot.numero} por correo...'),
+        content: Text('Enviando $numero por correo...'),
         backgroundColor: AppColors.info,
       ),
     );
   }
 
-  Future<void> _convertirEnVenta(Venta cot) async {
+  Future<void> _convertirEnVenta(String numero) async {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Convertir a Venta', style: AppTypography.h4),
         content: Text(
-          '¿Convertir la cotización N° ${cot.numero} en venta?\n\n'
+          '¿Convertir la cotización N° $numero en venta?\n\n'
           'Se descontará inventario y generará el documento.',
           style: AppTypography.bodyMedium,
         ),
@@ -202,7 +205,7 @@ class _CotizacionesHistorialPageState
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('✅ ${cot.numero} convertida en Venta.'),
+        content: Text('✅ $numero convertida en Venta.'),
         backgroundColor: AppColors.success,
       ),
     );

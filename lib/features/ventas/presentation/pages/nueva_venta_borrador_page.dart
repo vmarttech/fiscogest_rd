@@ -161,20 +161,25 @@ class _NuevaVentaBorradorPageState
         icon: const Icon(Icons.arrow_back),
         onPressed: () => context.pop(),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final pantallaAncha = constraints.maxWidth >= 720;
-                return pantallaAncha
-                    ? _buildDosColumnas(estado, puedeGenerar)
-                    : _buildUnaColumna(estado, puedeGenerar);
-              },
+      // ✅ PROTECCIÓN CONTRA BARRA INFERIOR
+      body: SafeArea(
+        bottom: true,
+        maintainBottomViewPadding: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final pantallaAncha = constraints.maxWidth >= 720;
+                  return pantallaAncha
+                      ? _buildDosColumnas(estado, puedeGenerar)
+                      : _buildUnaColumna(estado, puedeGenerar);
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -182,6 +187,7 @@ class _NuevaVentaBorradorPageState
   Widget _buildUnaColumna(VentaBorradorState estado, bool puedeGenerar) {
     return SingleChildScrollView(
       padding: AppSpacing.allM,
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -209,6 +215,7 @@ class _NuevaVentaBorradorPageState
           flex: 5,
           child: SingleChildScrollView(
             padding: AppSpacing.allM,
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
                 _buildSeccionVencimiento(),
@@ -227,6 +234,7 @@ class _NuevaVentaBorradorPageState
           flex: 5,
           child: SingleChildScrollView(
             padding: AppSpacing.allM,
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
                 _buildSeccionResumen(estado),
@@ -393,6 +401,8 @@ class _NuevaVentaBorradorPageState
             foregroundColor: AppColors.primary,
           ),
         ),
+        // ✅ ESPACIO GARANTIZADO — EVITA QUE QUEDE TAPADO
+        const SizedBox(height: 48),
       ],
     );
   }
