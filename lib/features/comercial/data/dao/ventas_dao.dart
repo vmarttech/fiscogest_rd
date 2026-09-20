@@ -1,11 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
-
 typedef VentaConCliente = ({VentasTableData venta, String? nombreCliente});
 
 class VentasDao {
   VentasDao(this._db);
-
   final AppDatabase _db;
 
   Future<int> insertarVenta(final VentasTableCompanion venta) async {
@@ -20,7 +18,6 @@ class VentasDao {
   }) async {
     final query = _db.select(_db.ventasTable)
       ..orderBy([(final t) => OrderingTerm.desc(t.fechaRegistro)]);
-
     if (desde != null) {
       query.where((final t) => t.fechaRegistro.isBiggerOrEqualValue(desde));
     }
@@ -33,7 +30,6 @@ class VentasDao {
     if (usuarioId != null) {
       query.where((final t) => t.usuarioId.equals(usuarioId));
     }
-
     final filas = await query.get();
     return filas.map((final v) => (venta: v, nombreCliente: null)).toList();
   }
@@ -47,7 +43,6 @@ class VentasDao {
     final query = _db.select(_db.ventasTable)
       ..where((final t) => t.estadoDocumento.equals('cotizado'))
       ..orderBy([(final t) => OrderingTerm.desc(t.fechaRegistro)]);
-
     if (desde != null) {
       query.where((final t) => t.fechaRegistro.isBiggerOrEqualValue(desde));
     }
@@ -60,7 +55,6 @@ class VentasDao {
     if (usuarioId != null) {
       query.where((final t) => t.usuarioId.equals(usuarioId));
     }
-
     final filas = await query.get();
     return filas.map((final v) => (venta: v, nombreCliente: null)).toList();
   }
@@ -80,16 +74,20 @@ class VentasDao {
           .replace(venta);
   }
 
-  Future<int> obtenerUltimoCorrelativoCotizacion() async {
-    final filas = await (_db.select(_db.ventasTable)
-      ..where((final t) => t.numeroCotizacion.isNotNull())
-      ..orderBy([(final t) => OrderingTerm.desc(t.numeroCotizacion)])
-      ..limit(1)).get();
-
+  Future<int> obtenerUltimoCorrelativoCotizacion({bool? soloCredito}) async {
+    final query = _db.select(_db.ventasTable)
+      ..where((final t) => t.numeroCotizacion.isNotNull());
+    if (soloCredito == true) {
+      query.where((final t) => t.numeroCotizacion.like('CR-%'));
+    } else if (soloCredito == false) {
+      query.where((final t) => t.numeroCotizacion.like('C-%'));
+    }
+    query.orderBy([(final t) => OrderingTerm.desc(t.numeroCotizacion)]);
+    query.limit(1);
+    final filas = await query.get();
     if (filas.isEmpty) return 0;
     final ultimo = filas.first.numeroCotizacion;
-    if (!ultimo.startsWith('COT-')) return 0;
-    final soloNumero = ultimo.replaceFirst('COT-', '');
+    final soloNumero = ultimo.replaceAll(RegExp(r'[^0-9]'), '');
     return int.tryParse(soloNumero) ?? 0;
   }
 }

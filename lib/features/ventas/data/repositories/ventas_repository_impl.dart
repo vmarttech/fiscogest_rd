@@ -113,12 +113,13 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<String> siguienteNumeroCotizacion({bool esCredito = false}) async {
-    const ceros = '00000';
-    final ultimo = await _ventasDao.obtenerUltimoCorrelativoCotizacion();
+    final ultimo = await _ventasDao.obtenerUltimoCorrelativoCotizacion(
+      soloCredito: esCredito,
+    );
     final siguiente = ultimo + 1;
-    final numeroStr = siguiente.toString();
     final prefijo = esCredito ? 'CR' : 'C';
-    return '$prefijo${ceros.substring(numeroStr.length)}$numeroStr';
+    final numeroStr = siguiente.toString().padLeft(6, '0');
+    return '$prefijo-$numeroStr';
   }
 
   @override
@@ -189,7 +190,7 @@ class VentasRepositoryImpl implements IVentasRepository {
       ),
     );
     final guardada = await _ventasDao.obtenerVentaPorId(ventaId);
-    return _mapearDesdeDatos(guardada!, null, esCotizacion: true);
+    return _mapearDesdeDatos(guardada!, cotizacion.nombreCliente, esCotizacion: true);
   }
 
   @override
@@ -218,7 +219,7 @@ class VentasRepositoryImpl implements IVentasRepository {
       ),
     );
     final actualizada = await _ventasDao.obtenerVentaPorId(cotizacion.id!);
-    return _mapearDesdeDatos(actualizada!, null, esCotizacion: true);
+    return _mapearDesdeDatos(actualizada!, cotizacion.nombreCliente, esCotizacion: true);
   }
 
   @override

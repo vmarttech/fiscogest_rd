@@ -1,70 +1,116 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
-class PanelProductos extends ConsumerWidget {
+typedef AgregarProductoCallback = Future<void> Function(Producto producto, double cantidad);
+
+class PanelProductos extends ConsumerStatefulWidget {
   const PanelProductos({
     super.key,
-    required this.controlador,
-    this.alBuscar,
-    this.alAgregar,
+    required this.alAgregar,
   });
 
-  final TextEditingController controlador;
-  final Future<void> Function(String)? alBuscar;
-  final Future<void> Function(String)? alAgregar;
+  final AgregarProductoCallback alAgregar;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Agregar Producto',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controlador,
-              decoration: InputDecoration(
-                hintText: 'Buscar por nombre...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.add_circle, color: Colors.blue),
-                  onPressed: () async {
-                    final valor = controlador.text.trim();
-                    if (valor.isNotEmpty && alBuscar != null) {
-                      await alBuscar!(valor);
-                    } else {
-                      if (alAgregar != null) {
-                        await alAgregar!('');
-                      }
-                      if (context.mounted) {
-                        ref.read(ventasNavegacionProvider.notifier)
-                          ..cambiarCategoria(CategoriaProducto.productos)
-                          ..cambiarVista(VistaActual.inventario);
-                      }
-                    }
-                  },
-                ),
-                border: const OutlineInputBorder(),
-              ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (valor) async {
-                final texto = valor.trim();
-                if (texto.isNotEmpty && alBuscar != null) {
-                  await alBuscar!(texto);
-                }
-              },
-            ),
-          ],
+  ConsumerState<PanelProductos> createState() => _PanelProductosState();
+}
+
+class _PanelProductosState extends ConsumerState<PanelProductos> {
+  final TextEditingController _buscador = TextEditingController();
+  List<Producto> _resultados = [];
+  String _ultimoTexto = '';
+
+  @override
+  void dispose() {
+    _buscador.dispose();
+    super.dispose();
+  }
+
+  void _buscar(String texto) {
+    final limpio = texto.trim().toLowerCase();
+    if (limpio == _ultimoTexto) return;
+    _ultimoTexto = limpio;
+
+    final todos = ref.read(productoControllerProvider);
+    setState(() {
+      _resultados = todos.maybeWhen(
+        data: (lista) => lista
+            .where((p) => p.activo && p.nombre.toLowerCase().contains(limpio))
+            .toList(),
+        orElse: () => <Producto>[],
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final productosAsync = ref.watch(productoControllerProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _buscador,
+          decoration: const InputDecoration(
+            hintText: 'Buscar producto por nombre...',
+            prefixIcon: Icon(Icons.search),
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          ),
+          onChanged: _buscar,
         ),
-      ),
+        const SizedBox(height: AppSpacing.s),
+        productosAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Text(
+            'Error al cargar productos: $e',
+            style: const TextStyle(color: AppColors.error),
+          ),
+          data: (_) {
+            final lista = _resultados;
+            if (_buscador.text.trim().isEmpty) {
+              return const Text(
+                'Escriba para buscar productos del inventario',
+                style: AppTypography.bodySmall,
+              );
+            }
+            if (lista.isEmpty) {
+              return const Text(
+                'No se encontraron productos',
+                style: AppTypography.bodySmall,
+              );
+            }
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: lista.length,
+              itemBuilder: (context, i) {
+                final prod = lista[i];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+                  child: ListTile(
+                    title: Text(prod.nombre),
+                    subtitle: Text(
+                      'Precio: RD\$ ${prod.precioVenta.toStringAsFixed(2)}'
+                      '${prod.stock != null ? ' • Stock: ${prod.stock}' : ''}',
+                      style: AppTypography.bodySmall,
+                    ),
+                    trailing: ElevatedButton(
+                      onPressed: () => widget.alAgregar(prod, 1.0),
+                      child: const Text('Agregar'),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 }

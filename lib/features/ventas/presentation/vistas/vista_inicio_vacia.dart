@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
@@ -27,6 +28,7 @@ class VistaInicioVacia extends ConsumerStatefulWidget {
 class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
   String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
+
   bool _guardando = false;
   bool _mostrarFormularioCredito = false;
   RegistrarVentaState? _estadoPasoCredito;
@@ -78,8 +80,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           .read(registrarVentaProvider.notifier)
           .establecerCondicionesCredito(abonoRecibido, fechaVence);
       final estadoConCredito = ref.read(registrarVentaProvider);
-
       final modo = ref.read(ventasNavegacionProvider).modoOperacion;
+
       if (modo == ModoOperacion.apartado) {
         await ref
             .read(apartadoNotifierProvider.notifier)
@@ -132,6 +134,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final valido = ref
         .read(registrarVentaProvider.notifier)
         .validarAntesDeGuardar();
+
     if (!valido) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +145,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       }
       return;
     }
+
     if (!mounted) return;
+
     final esPantallaPequenaDialog = MediaQuery.of(context).size.width < 600;
     const formasPago = [
       'Efectivo',
@@ -151,6 +156,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       'Transferencia',
       'Cheque',
     ];
+
     final formaSeleccionada = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -180,10 +186,13 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         ),
       ),
     );
+
     if (formaSeleccionada == null || !mounted) return;
+
     ref
         .read(registrarVentaProvider.notifier)
         .cambiarFormaPago(formaSeleccionada);
+
     final estadoFinal = ref.read(registrarVentaProvider);
 
     if (formaSeleccionada == 'crédito') {
@@ -265,12 +274,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final estado = ref.watch(registrarVentaProvider);
     final esConsumidorFinal =
         estado.clienteId == 0 || estado.clienteNombre == 'Consumidor Final';
+
     final colorPrimario = switch (modo) {
       ModoOperacion.venta => AppColors.primary,
       ModoOperacion.cotizacion => AppColors.info,
       ModoOperacion.apartado => AppColors.success,
       ModoOperacion.cobrar => AppColors.warning,
     };
+
     final nombreCliente = estado.clienteNombre?.isNotEmpty == true
         ? estado.clienteNombre!
         : 'Consumidor Final';
@@ -282,6 +293,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final subtotalConDescuentoLinea = estado.subtotal - descuentoPorLinea;
     final baseGravable = (subtotalConDescuentoLinea - estado.montoDescuento)
         .clamp(0.0, double.infinity);
+
     final anchoPantalla = MediaQuery.of(context).size.width;
     final esPantallaPequena = anchoPantalla < 600;
     final paddingLateral = esPantallaPequena ? 16.0 : 24.0;
@@ -423,7 +435,31 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 children: [
                   botonModo(ModoOperacion.venta, 'VENTA'),
                   SizedBox(width: espaciadoBotones),
-                  botonModo(ModoOperacion.cotizacion, 'COTIZACIÓN'),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: _guardando
+                          ? null
+                          : () => context.push('/ventas/cotizaciones/nueva'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: AppColors.info,
+                        side: const BorderSide(color: AppColors.info),
+                        padding: EdgeInsets.symmetric(
+                          vertical: esPantallaPequena ? 8 : 12,
+                        ),
+                        minimumSize: const Size(60, 44),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        textStyle: TextStyle(
+                          fontSize: esPantallaPequena ? 11 : 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      child: const Text('COTIZACIÓN'),
+                    ),
+                  ),
                   SizedBox(width: espaciadoBotones),
                   botonModo(ModoOperacion.apartado, 'APARTADO'),
                 ],

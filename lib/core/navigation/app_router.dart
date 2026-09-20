@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/lista
 import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/cotizaciones_historial_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
@@ -67,6 +68,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const AppShell(child: NuevaVentaBorradorPage()),
           ),
           GoRoute(
+            path: 'cotizaciones/nueva',
+            builder: (_, __) => const AppShell(child: NuevaVentaBorradorPage()),
+          ),
+          GoRoute(
+            path: 'cotizaciones/historial',
+            name: CotizacionesHistorialPage.routeName,
+            builder: (_, __) => const AppShell(child: CotizacionesHistorialPage()),
+          ),
+          GoRoute(
             path: 'apartados',
             name: ApartadosPage.routeName,
             builder: (_, __) => const AppShell(child: ApartadosPage()),
@@ -98,7 +108,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      // ========== MÓDULO COMPRAS ==========
       GoRoute(
         path: '/compras',
         name: DashboardComprasPage.routeName,
@@ -148,7 +157,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               );
             },
           ),
-          // === CUENTAS POR PAGAR ===
           GoRoute(
             path: 'cuentas-pagar',
             name: ListaCuentasPagarPage.routeName,

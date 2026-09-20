@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
-import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
+  static const String routeName = '/ventas/cotizaciones/nueva';
   const NuevaVentaBorradorPage({super.key});
-  static const String routeName = 'nueva-venta-borrador';
+
   @override
   ConsumerState<NuevaVentaBorradorPage> createState() =>
       _NuevaVentaBorradorPageState();
@@ -26,10 +27,13 @@ class _NuevaVentaBorradorPageState
     extends ConsumerState<NuevaVentaBorradorPage> {
   final TextEditingController _buscadorController = TextEditingController();
   DateTime? _fechaVencimientoSeleccionada;
-  String? _numeroCotizacionGuardada;
-  int? _ventaIdGenerado;
   bool _esCredito = false;
   bool _guardando = false;
+
+  bool get _modoCotizacion {
+    final ubicacion = GoRouterState.of(context).uri.path;
+    return ubicacion.contains('cotizacion');
+  }
 
   @override
   void initState() {
@@ -43,6 +47,20 @@ class _NuevaVentaBorradorPageState
   void dispose() {
     _buscadorController.dispose();
     super.dispose();
+  }
+
+  Future<void> _agregarProductoACotizacion(
+    Producto producto,
+    double cantidad,
+  ) async {
+    ref
+        .read(ventaBorradorProvider.notifier)
+        .agregarProducto(producto, cantidad);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('✅ ${producto.nombre} agregado')),
+      );
+    }
   }
 
   Future<void> _seleccionarCliente() async {
@@ -70,61 +88,56 @@ class _NuevaVentaBorradorPageState
     }
   }
 
-  Future<void> _irACobrar() async {
-    if (_ventaIdGenerado == null || !mounted || _numeroCotizacionGuardada == null) return;
-    final estado = ref.read(ventaBorradorProvider);
-    await Navigator.pushNamed(
-      context,
-      CobroVentaPage.routeName,
-      arguments: {
-        'ventaId': _ventaIdGenerado!,
-        'montoTotal': estado.montoTotal,
-        'esCredito': _esCredito,
-        'numeroCotizacion': _numeroCotizacionGuardada!,
-      },
-    );
+  void _limpiarFormulario() {
+    ref.read(ventaBorradorProvider.notifier).vaciar();
+    _buscadorController.clear();
+    setState(() {
+      _fechaVencimientoSeleccionada = null;
+      _esCredito = false;
+    });
+    ref.read(ventaBorradorProvider.notifier).establecerConsumidorFinal();
   }
 
   Future<void> _guardarCotizacion() async {
-    final notificador = ref.read(ventaBorradorProvider.notifier);
-    final repositorio = ref.read(ventasRepositoryProvider);
-    if (!notificador.validarAntesDeGuardar()) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Agregue productos para cotizar'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-      return;
-    }
     setState(() => _guardando = true);
     try {
-      final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(esCredito: _esCredito);
+      final notificador = ref.read(ventaBorradorProvider.notifier);
+      final repositorio = ref.read(ventasRepositoryProvider);
+
+      final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(
+        esCredito: _esCredito,
+      );
       notificador.establecerNumeroCotizacion(numeroCotizacion);
       notificador.establecerEstadoDocumento(EstadoDocumento.cotizado);
-      final numeroGuardado = notificador.guardar();
+
+      final numeroGuardado = await notificador.guardar();
+      if (numeroGuardado == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Agregue productos antes de generar la cotización'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+        return;
+      }
+
       if (!mounted) return;
-      setState(() {
-        _numeroCotizacionGuardada = numeroGuardado;
-        _ventaIdGenerado = int.tryParse(numeroGuardado?.replaceAll(RegExp(r'[^0-9]'), '') ?? '0');
-      });
-      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '✅ Cotización N° $numeroGuardado generada.\nPuede proceder a cobrar.',
+            '✅ Cotización N° $numeroGuardado generada.\n'
+            'Consúltela en el Historial de Cotizaciones.',
           ),
           backgroundColor: AppColors.success,
-          duration: const Duration(seconds: 4),
+          duration: const Duration(seconds: 3),
         ),
       );
-      notificador.vaciar();
-      setState(() {
-        _fechaVencimientoSeleccionada = null;
-        _esCredito = false;
-      });
+
+      ref.invalidate(listaCotizacionesProvider);
+      _limpiarFormulario();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -138,71 +151,6 @@ class _NuevaVentaBorradorPageState
         setState(() => _guardando = false);
       }
     }
-    return;
-  }
-
-  Future<void> _imprimir() async {
-    if (_numeroCotizacionGuardada == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Guarde la cotización antes de imprimir'),
-          ),
-        );
-      }
-      return;
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Imprimiendo cotización N° $_numeroCotizacionGuardada...',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _exportarPDF() async {
-    if (_numeroCotizacionGuardada == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Guarde la cotización antes de exportar'),
-          ),
-        );
-      }
-      return;
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Generando PDF de cotización N° $_numeroCotizacionGuardada...',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _enviarPorCorreo() async {
-    if (_numeroCotizacionGuardada == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Guarde la cotización antes de enviar')),
-        );
-      }
-      return;
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Enviando cotización N° $_numeroCotizacionGuardada por correo...',
-          ),
-        ),
-      );
-    }
   }
 
   @override
@@ -210,6 +158,8 @@ class _NuevaVentaBorradorPageState
     final estado = ref.watch(ventaBorradorProvider);
     final anchoPantalla = MediaQuery.of(context).size.width;
     final pantallaPequena = anchoPantalla < 720;
+    final puedeGenerar = estado.detalles.isNotEmpty && estado.montoTotal > 0;
+
     return AppScaffold(
       body: SafeArea(
         bottom: true,
@@ -217,15 +167,15 @@ class _NuevaVentaBorradorPageState
           padding: AppLayout.pantallaPadding,
           child: SingleChildScrollView(
             child: pantallaPequena
-                ? _buildUnaColumna(estado)
-                : _buildDosColumnas(estado),
+                ? _buildUnaColumna(estado, puedeGenerar)
+                : _buildDosColumnas(estado, puedeGenerar),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildUnaColumna(VentaBorradorState estado) {
+  Widget _buildUnaColumna(VentaBorradorState estado, bool puedeGenerar) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -239,12 +189,12 @@ class _NuevaVentaBorradorPageState
         const SizedBox(height: AppSpacing.m),
         _buildResumen(estado),
         const SizedBox(height: AppSpacing.l),
-        _buildBotonera(estado),
+        _buildBotonera(puedeGenerar),
       ],
     );
   }
 
-  Widget _buildDosColumnas(VentaBorradorState estado) {
+  Widget _buildDosColumnas(VentaBorradorState estado, bool puedeGenerar) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,7 +224,7 @@ class _NuevaVentaBorradorPageState
               children: [
                 _buildResumen(estado),
                 const SizedBox(height: AppSpacing.l),
-                _buildBotonera(estado),
+                _buildBotonera(puedeGenerar),
               ],
             ),
           ),
@@ -287,27 +237,26 @@ class _NuevaVentaBorradorPageState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('NUEVA COTIZACIÓN', style: AppTypography.h4),
+        Text(
+          _modoCotizacion ? 'NUEVA COTIZACIÓN' : 'NUEVA VENTA',
+          style: AppTypography.h4,
+        ),
         const SizedBox(height: AppSpacing.s),
         AppCard(
           padding: AppSpacing.allM,
-          child: Column(
-            children: [
-              ListTile(
-                title: const Text(
-                  'Vencimiento',
-                  style: AppTypography.bodyMedium,
-                ),
-                subtitle: Text(
-                  _fechaVencimientoSeleccionada != null
-                      ? '${_fechaVencimientoSeleccionada!.day}/${_fechaVencimientoSeleccionada!.month}/${_fechaVencimientoSeleccionada!.year}'
-                      : 'Seleccione fecha (opcional)',
-                  style: AppTypography.bodySmall,
-                ),
-                trailing: const Icon(Icons.calendar_today, size: 20),
-                onTap: _seleccionarVencimiento,
-              ),
-            ],
+          child: ListTile(
+            title: const Text(
+              'Vencimiento',
+              style: AppTypography.bodyMedium,
+            ),
+            subtitle: Text(
+              _fechaVencimientoSeleccionada != null
+                  ? '${_fechaVencimientoSeleccionada!.day}/${_fechaVencimientoSeleccionada!.month}/${_fechaVencimientoSeleccionada!.year}'
+                  : 'Seleccione fecha (opcional)',
+              style: AppTypography.bodySmall,
+            ),
+            trailing: const Icon(Icons.calendar_today, size: 20),
+            onTap: _seleccionarVencimiento,
           ),
         ),
       ],
@@ -320,7 +269,9 @@ class _NuevaVentaBorradorPageState
       child: SwitchListTile(
         title: const Text('Venta a Crédito', style: AppTypography.bodyMedium),
         subtitle: Text(
-          _esCredito ? 'Genera cotización con prefijo CR' : 'Genera cotización con prefijo C',
+          _esCredito
+              ? 'Genera cotización con prefijo CR'
+              : 'Genera cotización con prefijo C',
           style: AppTypography.bodySmall,
         ),
         value: _esCredito,
@@ -356,19 +307,13 @@ class _NuevaVentaBorradorPageState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(nombreCliente, style: AppTypography.labelMedium),
-                    const Text(
-                      'Predeterminado',
-                      style: AppTypography.bodySmall,
+                    Text(nombreCliente, style: AppTypography.bodyMedium),
+                    TextButton(
+                      onPressed: _seleccionarCliente,
+                      child: const Text('Cambiar cliente'),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 12),
-              AppButton(
-                text: 'Cambiar',
-                onPressed: _seleccionarCliente,
-                height: 36,
               ),
             ],
           ),
@@ -383,125 +328,71 @@ class _NuevaVentaBorradorPageState
       children: [
         const Text('Productos', style: AppTypography.h4),
         const SizedBox(height: AppSpacing.s),
-        PanelProductos(
-          controlador: _buscadorController,
-          alAgregar: null,
-        ),
+        PanelProductos(alAgregar: _agregarProductoACotizacion),
       ],
     );
   }
 
   Widget _buildResumen(VentaBorradorState estado) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Resumen', style: AppTypography.h4),
-        const SizedBox(height: AppSpacing.s),
-        AppCard(
-          padding: AppSpacing.allM,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Subtotal:', style: AppTypography.bodyMedium),
-                  Text(
-                    'RD\$ ${estado.subtotal.toStringAsFixed(2)}',
-                    style: AppTypography.bodyMedium,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('ITBIS:', style: AppTypography.bodyMedium),
-                  Text(
-                    'RD\$ ${estado.itbis.toStringAsFixed(2)}',
-                    style: AppTypography.bodyMedium,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Descuento:', style: AppTypography.bodyMedium),
-                  Text(
-                    'RD\$ ${(estado.descuento ?? 0.0).toStringAsFixed(2)}',
-                    style: AppTypography.bodyMedium,
-                  ),
-                ],
-              ),
-              const Divider(height: AppSpacing.l),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('TOTAL:', style: AppTypography.h4Bold),
-                  Text(
-                    'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
-                    style: AppTypography.h4PrimaryBold,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
+    return AppCard(
+      padding: AppSpacing.allM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('Resumen', style: AppTypography.h4),
+          const SizedBox(height: AppSpacing.m),
+          _buildFilaResumen('Subtotal', estado.subtotal),
+          _buildFilaResumen('ITBIS (18%)', estado.itbis),
+          _buildFilaResumen('Descuento', estado.montoDescuento),
+          const Divider(),
+          _buildFilaResumen('TOTAL', estado.montoTotal, esTotal: true),
+        ],
+      ),
     );
   }
 
-  Widget _buildBotonera(VentaBorradorState estado) {
-    final mostrarBotonCobro = _ventaIdGenerado != null &&
-        estado.estadoDocumento == EstadoDocumento.cotizado;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (mostrarBotonCobro) ...[
-          AppButton(
-            text: 'IR A COBRAR / FACTURAR',
-            onPressed: _irACobrar,
-            icon: Icons.payment,
+  Widget _buildFilaResumen(String etiqueta, double monto, {bool esTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            etiqueta,
+            style: esTotal ? AppTypography.h4 : AppTypography.bodyMedium,
           ),
-          const SizedBox(height: AppSpacing.m),
+          Text(
+            'RD\$ ${monto.toStringAsFixed(2)}',
+            style: esTotal ? AppTypography.h4 : AppTypography.bodyMedium,
+          ),
         ],
-        AppButton(
-          text: _guardando ? 'Generando...' : 'GENERAR COTIZACIÓN',
-          onPressed: _guardando ? null : _guardarCotizacion,
-          isLoading: _guardando,
-          icon: Icons.save,
+      ),
+    );
+  }
+
+  Widget _buildBotonera(bool puedeGenerar) {
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: puedeGenerar && !_guardando ? _guardarCotizacion : null,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+          ),
+          child: _guardando
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(
+                  _modoCotizacion ? 'GENERAR COTIZACIÓN' : 'GUARDAR VENTA',
+                ),
         ),
         const SizedBox(height: AppSpacing.m),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.print, size: 18),
-                label: const Text('Imprimir'),
-                onPressed: _imprimir,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.s),
-            Expanded(
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.picture_as_pdf, size: 18),
-                label: const Text('PDF'),
-                onPressed: _exportarPDF,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.m),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.email, size: 18),
-                label: const Text('Enviar'),
-                onPressed: _enviarPorCorreo,
-              ),
-            ),
-          ],
+        TextButton.icon(
+          icon: const Icon(Icons.history),
+          label: const Text('Ver Historial de Cotizaciones'),
+          onPressed: () => context.push('/ventas/cotizaciones/historial'),
         ),
       ],
     );

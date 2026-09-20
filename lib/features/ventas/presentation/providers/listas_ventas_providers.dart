@@ -43,7 +43,13 @@ VentaBorradorState _ventaABorradorState(Venta v) {
     montoTotal: v.total,
     tipoPago: v.tipoPago,
     esCredito: v.esCredito,
-    detalles: v.detalles,
+    detalles: v.detalles.map((det) => <String, dynamic>{
+      'productoId': det.productoId,
+      'productoNombre': det.nombreProducto,
+      'cantidad': det.cantidad,
+      'precioUnitario': det.precioUnitario,
+      'subtotal': det.subtotal,
+    }).toList(),
     estadoDocumento: v.estadoDocumento,
   );
 }

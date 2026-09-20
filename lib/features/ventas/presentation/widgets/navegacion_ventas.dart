@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 
@@ -35,12 +36,7 @@ class NavegacionVentas extends ConsumerWidget {
             title: const Text('Cotizaciones'),
             onTap: () {
               Navigator.pop(context);
-              ref
-                  .read(ventasNavegacionProvider.notifier)
-                  .establecerModoOperacion(ModoOperacion.cotizacion);
-              ref
-                  .read(ventasNavegacionProvider.notifier)
-                  .cambiarVista(VistaActual.inicio);
+              context.push('/ventas/cotizaciones/nueva');
             },
           ),
           ListTile(

@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 
 @immutable
 class VentaBorradorState {
@@ -23,6 +26,8 @@ class VentaBorradorState {
     this.esCredito = false,
     this.detalles = const [],
     this.estadoDocumento = EstadoDocumento.borrador,
+    this.modoCotizacion = false,
+    this.usuarioId = 1,
   });
 
   final int? id;
@@ -41,8 +46,10 @@ class VentaBorradorState {
   final double montoTotal;
   final String tipoPago;
   final bool esCredito;
-  final List<dynamic> detalles;
+  final List<Map<String, dynamic>> detalles;
   final EstadoDocumento estadoDocumento;
+  final bool modoCotizacion;
+  final int usuarioId;
 
   VentaBorradorState copyWith({
     int? id,
@@ -61,8 +68,10 @@ class VentaBorradorState {
     double? montoTotal,
     String? tipoPago,
     bool? esCredito,
-    List<dynamic>? detalles,
+    List<Map<String, dynamic>>? detalles,
     EstadoDocumento? estadoDocumento,
+    bool? modoCotizacion,
+    int? usuarioId,
   }) {
     return VentaBorradorState(
       id: id ?? this.id,
@@ -83,24 +92,36 @@ class VentaBorradorState {
       esCredito: esCredito ?? this.esCredito,
       detalles: detalles ?? this.detalles,
       estadoDocumento: estadoDocumento ?? this.estadoDocumento,
+      modoCotizacion: modoCotizacion ?? this.modoCotizacion,
+      usuarioId: usuarioId ?? this.usuarioId,
     );
   }
 }
 
 class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
-  VentaBorradorNotifier()
-    : super(
-        VentaBorradorState(
-          numero: '',
-          fecha: DateTime.now(),
-          subtotal: 0.0,
-          itbis: 0.0,
-          costoEnvio: 0.0,
-          descuento: 0.0,
-          montoDescuento: 0.0,
-          montoTotal: 0.0,
-        ),
-      );
+  VentaBorradorNotifier(this._ref)
+      : super(
+          VentaBorradorState(
+            numero: '',
+            fecha: DateTime.now(),
+            subtotal: 0.0,
+            itbis: 0.0,
+            costoEnvio: 0.0,
+            descuento: 0.0,
+            montoDescuento: 0.0,
+            montoTotal: 0.0,
+          ),
+        );
+
+  final Ref _ref;
+
+  void establecerModoCotizacion() {
+    state = state.copyWith(modoCotizacion: true);
+  }
+
+  void establecerModoVenta() {
+    state = state.copyWith(modoCotizacion: false);
+  }
 
   void seleccionarCliente(int id, String nombre) {
     state = state.copyWith(clienteId: id, clienteNombre: nombre);
@@ -122,23 +143,70 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     state = state.copyWith(estadoDocumento: estado);
   }
 
+  void agregarProducto(Producto producto, double cantidad) {
+    final nuevosDetalles = List<Map<String, dynamic>>.from(state.detalles);
+    final precioUnitario = producto.precioVenta;
+    final indice = nuevosDetalles.indexWhere(
+      (item) => item['productoId'] == producto.id,
+    );
+
+    if (indice >= 0) {
+      nuevosDetalles[indice]['cantidad'] =
+          (nuevosDetalles[indice]['cantidad'] as double) + cantidad;
+      nuevosDetalles[indice]['subtotal'] =
+          (nuevosDetalles[indice]['cantidad'] as double) * precioUnitario;
+    } else {
+      nuevosDetalles.add({
+        'productoId': producto.id,
+        'productoNombre': producto.nombre,
+        'cantidad': cantidad,
+        'precioUnitario': precioUnitario,
+        'subtotal': cantidad * precioUnitario,
+      });
+    }
+
+    final nuevoSubtotal = nuevosDetalles.fold<double>(
+      0.0,
+      (sum, item) => sum + (item['subtotal'] as double),
+    );
+
+    _recalcularTotal(nuevoSubtotal: nuevoSubtotal, detalles: nuevosDetalles);
+  }
+
+  void quitarProducto(int productoId) {
+    final nuevosDetalles = state.detalles
+        .where((item) => item['productoId'] != productoId)
+        .toList();
+
+    final nuevoSubtotal = nuevosDetalles.fold<double>(
+      0.0,
+      (sum, item) => sum + (item['subtotal'] as double),
+    );
+
+    _recalcularTotal(nuevoSubtotal: nuevoSubtotal, detalles: nuevosDetalles);
+  }
+
   void _recalcularTotal({
     double? nuevoSubtotal,
     double? nuevoItbis,
     double? nuevoEnvio,
     double? nuevoDescuento,
+    List<Map<String, dynamic>>? detalles,
   }) {
     final subt = nuevoSubtotal ?? state.subtotal;
-    final itb = nuevoItbis ?? state.itbis;
+    const tasaItbis = 0.18;
+    final itb = nuevoItbis ?? subt * tasaItbis;
     final env = nuevoEnvio ?? state.costoEnvio;
     final desc = nuevoDescuento ?? state.montoDescuento;
     final total = subt + itb + env - desc;
+
     state = state.copyWith(
       subtotal: subt,
       itbis: itb,
       costoEnvio: env,
       montoDescuento: desc,
       montoTotal: total,
+      detalles: detalles,
     );
   }
 
@@ -152,6 +220,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final nuevoItbis = baseImponible * tasaItbis;
     final subtMasItbis = baseImponible + nuevoItbis;
     final nuevoTotal = subtMasItbis + state.costoEnvio;
+
     state = state.copyWith(
       descuento: valor,
       montoDescuento: valor,
@@ -166,6 +235,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final nuevoItbis = baseImponible * tasaItbis;
     final subtMasItbis = baseImponible + nuevoItbis;
     final nuevoTotal = subtMasItbis + state.costoEnvio;
+
     state = state.copyWith(
       descuento: 0.0,
       descuentoId: null,
@@ -190,28 +260,59 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       esCredito: false,
       detalles: const [],
       estadoDocumento: EstadoDocumento.borrador,
+      modoCotizacion: false,
     );
   }
 
   bool validarAntesDeGuardar() {
     final bool tieneCliente = state.clienteId != null &&
-        state.clienteId! > 0 &&
+        state.clienteId! >= 0 &&
         (state.clienteNombre?.trim().isNotEmpty ?? false);
-    final bool esConsumidorFinal = state.clienteId == 0 &&
-        state.clienteNombre == 'Consumidor Final';
-    if (!tieneCliente && !esConsumidorFinal) return false;
-    if (state.numero.trim().isEmpty) return false;
-    if (state.montoTotal <= 0) return false;
+    final bool tieneProductos = state.detalles.isNotEmpty && state.montoTotal > 0;
+    final bool numeroGenerado = state.numero.trim().isNotEmpty;
+
+    if (!tieneCliente) return false;
+    if (!tieneProductos) return false;
+    if (!numeroGenerado) return false;
     return true;
   }
 
-  String? guardar() {
+  Future<String?> guardar() async {
     if (!validarAntesDeGuardar()) return null;
-    return state.numero.trim().isNotEmpty ? state.numero : null;
+
+    final repositorio = _ref.read(ventasRepositoryProvider);
+
+    final venta = Venta(
+      id: state.id,
+      numeroCotizacion: state.numero,
+      numeroFactura: null,
+      clienteId: state.clienteId ?? 0,
+      nombreCliente: state.clienteNombre,
+      fecha: state.fecha,
+      vencimiento: state.vencimiento,
+      detalles: const [],
+      montoSubtotal: state.subtotal,
+      descuentoGlobal: state.descuento ?? 0.0,
+      itbis: state.itbis,
+      montoTotal: state.montoTotal,
+      formaPago: state.tipoPago,
+      costoEnvio: state.costoEnvio,
+      abonoInicial: 0.0,
+      estadoDocumento: state.estadoDocumento,
+      usuarioId: state.usuarioId,
+      fechaRegistro: DateTime.now(),
+      descuentoId: state.descuentoId,
+      descuentoNombre: state.descuentoNombre,
+      montoDescuento: state.montoDescuento,
+    );
+
+    final guardada = await repositorio.registrarVentaBorrador(venta);
+    state = state.copyWith(id: guardada.id);
+    return state.numero.trim();
   }
 }
 
 final ventaBorradorProvider =
     StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>((ref) {
-  return VentaBorradorNotifier();
+  return VentaBorradorNotifier(ref);
 });
