@@ -11,9 +11,11 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/dashboard_compras_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+
 class DashboardComprasPage extends ConsumerWidget {
   const DashboardComprasPage({super.key});
   static const String routeName = 'dashboard-compras';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kpisAsync = ref.watch(dashboardComprasKpisProvider);
@@ -28,30 +30,9 @@ class DashboardComprasPage extends ConsumerWidget {
       data: (k) => k.vencido > 0 ? 1 : 0,
       orElse: () => 0,
     );
+
     return AppScaffold(
       title: 'Compras',
-      actions: [
-        IconButton(
-          tooltip: 'Cuentas por pagar',
-          onPressed: () => context.goNamed(ListaCuentasPagarPage.routeName),
-          icon: Badge(
-            isLabelVisible: alertas > 0,
-            label: Text(
-              '$alertas',
-              style: AppTypography.labelSmall.copyWith(color: AppColors.white),
-            ),
-            child: const Icon(Icons.notifications_outlined),
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          tooltip: 'Actualizar',
-          onPressed: () {
-            ref.invalidate(dashboardComprasKpisProvider);
-            ref.invalidate(actividadRecienteComprasProvider);
-          },
-        ),
-      ],
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
@@ -253,6 +234,7 @@ class DashboardComprasPage extends ConsumerWidget {
       ),
     );
   }
+
   String _formatearFechaRelativa(DateTime fecha) {
     final ahora = DateTime.now();
     final hoy = DateTime(ahora.year, ahora.month, ahora.day);
@@ -262,6 +244,7 @@ class DashboardComprasPage extends ConsumerWidget {
     if (f == ayer) return 'Ayer';
     return DateFormat('d MMM', 'es').format(fecha);
   }
+
   String _estadoLabel(EstadoCompra estado) {
     return switch (estado) {
       EstadoCompra.confirmada => 'Confirmada',
@@ -274,6 +257,7 @@ class DashboardComprasPage extends ConsumerWidget {
     };
   }
 }
+
 class _KpisGrid extends StatelessWidget {
   const _KpisGrid({
     required this.comprasEsteMes,
@@ -283,12 +267,14 @@ class _KpisGrid extends StatelessWidget {
     required this.isMobile,
     this.hayVencido = false,
   });
+
   final String comprasEsteMes;
   final String aCredito;
   final String porPagar;
   final String vencido;
   final bool hayVencido;
   final bool isMobile;
+
   @override
   Widget build(BuildContext context) {
     final cards = [
@@ -318,6 +304,7 @@ class _KpisGrid extends StatelessWidget {
         badge: hayVencido,
       ),
     ];
+
     if (isMobile) {
       return Column(
         children: cards
@@ -328,6 +315,7 @@ class _KpisGrid extends StatelessWidget {
             .toList(),
       );
     }
+
     return Row(
       children: cards
           .map((c) => Expanded(
@@ -340,6 +328,7 @@ class _KpisGrid extends StatelessWidget {
     );
   }
 }
+
 class _KpiData {
   const _KpiData({
     required this.titulo,
@@ -348,15 +337,19 @@ class _KpiData {
     required this.color,
     this.badge = false,
   });
+
   final String titulo;
   final String valor;
   final IconData icon;
   final Color color;
   final bool badge;
 }
+
 class _KpiCard extends StatelessWidget {
   const _KpiCard({required this.data});
+
   final _KpiData data;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -409,6 +402,7 @@ class _KpiCard extends StatelessWidget {
     );
   }
 }
+
 class _AccesoRapido extends StatelessWidget {
   const _AccesoRapido({
     required this.icon,
@@ -417,11 +411,13 @@ class _AccesoRapido extends StatelessWidget {
     required this.onTap,
     this.badge,
   });
+
   final IconData icon;
   final String label;
   final Color color;
   final VoidCallback onTap;
   final int? badge;
+
   @override
   Widget build(BuildContext context) {
     return Material(

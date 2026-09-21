@@ -3,13 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/lista_precios.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/lista_precios_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 
 class EditarPreciosProductoPage extends ConsumerStatefulWidget {
   const EditarPreciosProductoPage({super.key, required this.producto});
-
   final Producto producto;
-
   @override
   ConsumerState<EditarPreciosProductoPage> createState() =>
       _EditarPreciosProductoPageState();
@@ -99,6 +98,7 @@ class _EditarPreciosProductoPageState
   Widget build(BuildContext context) {
     final int productoId = _productoId;
     final datosPrecios = ref.watch(listaPreciosPorProductoProvider(productoId));
+
     ref.listen(listaPreciosPorProductoProvider(productoId), (anterior, actual) {
       actual.whenData((datos) {
         if (datos != null) {
@@ -107,8 +107,8 @@ class _EditarPreciosProductoPageState
       });
     });
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Precios de Venta')),
+    return AppScaffold(
+      title: 'Precios de Venta',
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/caja_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart' as venta_providers;
@@ -109,11 +110,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     final numeroCotizacionPantalla = args?['numeroCotizacion'] as String? ?? 'N/A';
     final montoTotalPantalla = (args?['montoTotal'] as double?) ?? 0.0;
     final titulo = esCreditoPantalla ? 'Venta a Crédito' : 'Cobro de Venta';
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(titulo),
-        leading: const BackButton(),
-      ),
+
+    return AppScaffold(
+      title: titulo,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
