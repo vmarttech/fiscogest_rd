@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/item_carrito.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
 class _DatosDescuento {
   const _DatosDescuento({required this.valor, required this.esPorcentaje});
@@ -21,6 +21,7 @@ class _CampoDescuento extends StatefulWidget {
     required this.onAplicar,
     required this.anchoCampo,
   });
+
   final double montoActual;
   final void Function(_DatosDescuento) onAplicar;
   final double anchoCampo;
@@ -70,8 +71,8 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
           _advertenciaMostrada = true;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('⚠️ El descuento máximo permitido es 35%. Requiere autorización para más.'),
-              backgroundColor: Colors.orange,
+              content: Text('El descuento máximo permitido es 35%. Requiere autorización para más.'),
+              backgroundColor: AppColors.warning,
               duration: Duration(seconds: 3),
             ),
           );
@@ -124,19 +125,29 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
         controller: _controlador,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         textAlign: TextAlign.right,
-        style: const TextStyle(fontSize: 15),
+        style: AppTypography.bodyMedium.copyWith(fontSize: 14),
         decoration: InputDecoration(
           labelText: _esPorcentaje ? 'Desc %' : 'Desc RD\$',
-          labelStyle: const TextStyle(fontSize: 13),
+          labelStyle: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
           hintText: '0,00',
-          hintStyle: const TextStyle(fontSize: 15),
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          ),
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
           suffixIcon: PopupMenuButton<bool>(
             onSelected: _cambiarTipo,
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 50, maxWidth: 56),
+            constraints: const BoxConstraints(minWidth: 48, maxWidth: 52),
             position: PopupMenuPosition.under,
             itemBuilder: (ctx) => [
               const PopupMenuItem(
@@ -145,9 +156,9 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.attach_money, size: 16),
+                    Icon(Icons.attach_money, size: 16, color: AppColors.primary),
                     SizedBox(width: 4),
-                    Text('RD\$', style: TextStyle(fontSize: 13)),
+                    Text('RD\$', style: AppTypography.labelMedium),
                   ],
                 ),
               ),
@@ -157,9 +168,9 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.percent, size: 16),
+                    Icon(Icons.percent, size: 16, color: AppColors.primary),
                     SizedBox(width: 4),
-                    Text('%', style: TextStyle(fontSize: 13)),
+                    Text('%', style: AppTypography.labelMedium),
                   ],
                 ),
               ),
@@ -169,9 +180,8 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
               width: 36,
               child: Text(
                 _esPorcentaje ? '%' : 'RD\$',
-                style: const TextStyle(
+                style: AppTypography.labelSmall.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
                   color: AppColors.primary,
                 ),
               ),
@@ -213,7 +223,7 @@ class PanelCarrito extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
         ),
@@ -229,84 +239,93 @@ class PanelCarrito extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final anchoPantalla = MediaQuery.of(context).size.width;
-    final esPantallaPequena = anchoPantalla < 600;
-    final paddingHorizontal = esPantallaPequena ? AppSpacing.s : AppSpacing.m;
-    final paddingVerticalVacio = esPantallaPequena ? 24.0 : 48.0;
-    final tamanoIconoVacio = esPantallaPequena ? 36.0 : 48.0;
-    final anchoCampoDescuento = esPantallaPequena ? anchoPantalla * 0.38 : 130.0;
-    final fontSizeDescuento = esPantallaPequena ? 10.0 : 12.0;
-    final paddingCantidadArticulos = esPantallaPequena
-        ? const EdgeInsets.symmetric(horizontal: 8, vertical: 2)
-        : const EdgeInsets.symmetric(horizontal: 10, vertical: 2);
-
-    final estado = ref.read(registrarVentaProvider);
+    final isMobile = AppBreakpoints.isMobile(context);
+    final estado = ref.watch(registrarVentaProvider);
     final hayDescuentoGeneral = estado.montoDescuento > 0;
+    final anchoCampoDescuento = isMobile ? MediaQuery.of(context).size.width * 0.38 : 130.0;
 
-    return AppCard(
-      padding: EdgeInsets.symmetric(
-        vertical: esPantallaPequena ? AppSpacing.xs : AppSpacing.s,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadius.allL,
+        border: Border.all(color: AppColors.border),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 12 : 16,
+          vertical: isMobile ? 10 : 14,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: esPantallaPequena ? AppSpacing.xs : AppSpacing.s),
+            // Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.shopping_bag_outlined,
-                      size: esPantallaPequena ? 18 : 20,
-                      color: AppColors.primary,
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Carrito de Venta',
+                    style: AppTypography.labelLarge.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
-                    SizedBox(width: esPantallaPequena ? 6 : 8),
-                    Text(
-                      'Carrito de Venta',
-                      style: esPantallaPequena
-                          ? AppTypography.labelMedium
-                          : AppTypography.labelLarge,
-                    ),
-                  ],
+                  ),
                 ),
                 Container(
-                  padding: paddingCantidadArticulos,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '${estado.detalles.length} art.',
-                    style: AppTypography.labelSmall,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: esPantallaPequena ? AppSpacing.xs : AppSpacing.s),
+
+            const SizedBox(height: 12),
+
+            // Contenido
             if (estado.detalles.isEmpty)
               Padding(
-                padding: EdgeInsets.symmetric(vertical: paddingVerticalVacio),
+                padding: EdgeInsets.symmetric(vertical: isMobile ? 28 : 40),
                 child: Column(
                   children: [
                     Icon(
                       Icons.shopping_cart_outlined,
-                      size: tamanoIconoVacio,
-                      color: AppColors.grey400,
+                      size: isMobile ? 40 : 48,
+                      color: AppColors.grey300,
                     ),
-                    SizedBox(height: esPantallaPequena ? 6 : 8),
+                    const SizedBox(height: 10),
                     Text(
                       'La venta está vacía',
-                      style: esPantallaPequena
-                          ? AppTypography.labelMedium
-                          : AppTypography.bodyMedium,
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                    SizedBox(height: esPantallaPequena ? 2 : 4),
-                    const Text(
+                    const SizedBox(height: 4),
+                    Text(
                       'Busca un producto para comenzar',
-                      style: AppTypography.labelSmall,
+                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -317,7 +336,7 @@ class PanelCarrito extends ConsumerWidget {
                   final indice = entrada.key;
                   final detalle = entrada.value;
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: ItemCarrito(
                       detalle: detalle,
                       indice: indice,
@@ -327,12 +346,14 @@ class PanelCarrito extends ConsumerWidget {
                   );
                 }).toList(),
               ),
-            SizedBox(height: esPantallaPequena ? AppSpacing.xs : AppSpacing.s),
-            const Divider(height: 1, thickness: 0.5),
-            SizedBox(height: esPantallaPequena ? AppSpacing.xs : AppSpacing.s),
+
+            const SizedBox(height: 8),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+
+            // Descuento general
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _CampoDescuento(
                   montoActual: estado.montoDescuento,
@@ -341,12 +362,10 @@ class PanelCarrito extends ConsumerWidget {
                 ),
               ],
             ),
+
             if (hayDescuentoGeneral)
               Padding(
-                padding: EdgeInsets.only(
-                  top: esPantallaPequena ? 2 : 4,
-                  right: esPantallaPequena ? 2 : 4,
-                ),
+                padding: const EdgeInsets.only(top: 6),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Text(
@@ -354,12 +373,10 @@ class PanelCarrito extends ConsumerWidget {
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.success,
                       fontWeight: FontWeight.w600,
-                      fontSize: fontSizeDescuento,
                     ),
                   ),
                 ),
               ),
-            SizedBox(height: esPantallaPequena ? AppSpacing.xs : AppSpacing.s),
           ],
         ),
       ),

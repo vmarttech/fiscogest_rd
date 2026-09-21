@@ -10,61 +10,49 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
-import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' as repo;
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/registrar_abono_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/detalle_cuenta_pagar_page.dart';
-
 class FichaProveedorPage extends ConsumerStatefulWidget {
   const FichaProveedorPage({
     super.key,
     required this.proveedorId,
   });
-
   static String ruta = '/ficha-proveedor';
   final int proveedorId;
-
   @override
   ConsumerState<FichaProveedorPage> createState() => _FichaProveedorPageState();
 }
-
 class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
     with SingleTickerProviderStateMixin {
   Proveedor? _proveedor;
   bool _cargando = true;
   double _saldoPendiente = 0.0;
   double _limiteCredito = 0.0;
-
   List<_ItemHistorialCompra> _historialCompras = [];
   List<_ItemCuentaPendiente> _cuentasPendientes = [];
   List<_ItemPago> _pagosRealizados = [];
-
   late TabController _tabController;
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _cargarDatos();
   }
-
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-
   Future<void> _cargarDatos() async {
     setState(() => _cargando = true);
     final db = ref.read(appDatabaseProvider);
-
-    // 1. Datos del proveedor
     final filas = await db.select(db.proveedoresTable).get();
     final fila = filas.where((p) => p.id == widget.proveedorId).firstOrNull;
-
     if (fila == null) {
       setState(() {
         _proveedor = null;
@@ -72,7 +60,6 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       });
       return;
     }
-
     final proveedor = Proveedor(
       id: fila.id,
       nombreEmpresa: fila.nombreEmpresa,
@@ -92,8 +79,6 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       fechaCreacion: fila.fechaCreacion,
       fechaActualizacion: fila.fechaActualizacion,
     );
-
-    // 2. Historial de compras
     final compras = await (db.select(db.comprasTable)
           ..where((c) => c.proveedorId.equals(widget.proveedorId))
           ..orderBy([
@@ -103,7 +88,6 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                 )
           ]))
         .get();
-
     final historial = compras
         .map((c) => _ItemHistorialCompra(
               id: c.id,
@@ -117,22 +101,17 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                   c.condicionPago.toLowerCase().contains('credito'),
             ))
         .toList();
-
-    // 3. Cuentas por pagar + saldo real (monto - abonos)
     final cuentasDao = ref.read(repo.cuentasPagarDaoProvider);
     final cuentas = await (db.select(db.cuentasPagarTable)
           ..where((cp) => cp.proveedorId.equals(widget.proveedorId)))
         .get();
-
     double saldoTotal = 0.0;
     final pendientes = <_ItemCuentaPendiente>[];
-
     for (final cta in cuentas) {
       final pagos = await cuentasDao.listarPagosPorCuenta(cta.id);
       final totalAbonado =
           pagos.fold<double>(0.0, (s, p) => s + p.monto);
       final saldo = cta.monto - totalAbonado;
-
       if (saldo > 0.01) {
         saldoTotal += saldo;
         pendientes.add(_ItemCuentaPendiente(
@@ -147,8 +126,6 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
         ));
       }
     }
-
-    // 4. Pagos realizados
     final todosPagos = await (db.select(db.pagosProveedorTable)
           ..where((p) => p.proveedorId.equals(widget.proveedorId))
           ..orderBy([
@@ -158,7 +135,6 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                 )
           ]))
         .get();
-
     final pagos = todosPagos
         .map((p) => _ItemPago(
               id: p.id,
@@ -169,7 +145,6 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
               nota: p.nota,
             ))
         .toList();
-
     setState(() {
       _proveedor = proveedor;
       _limiteCredito = proveedor.limiteCredito;
@@ -180,37 +155,30 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       _cargando = false;
     });
   }
-
   String _formatearMonto(double valor) {
     return NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$').format(valor);
   }
-
   String _formatearFecha(DateTime f) =>
       DateFormat('dd/MM/yyyy').format(f);
-
   void _irADetalleCompra(int compraId) {
     context.goNamed(
       DetalleCompraPage.routeName,
       pathParameters: {'compraId': compraId.toString()},
     );
   }
-
   void _irARegistrarAbono(int cuentaId) {
-    // Ajusta el nombre de ruta si es diferente en tu router
     try {
       context.goNamed(
         RegistrarAbonoPage.routeName,
         pathParameters: {'cuentaId': cuentaId.toString()},
       );
     } catch (_) {
-      // Fallback por si la ruta usa query o arguments
       context.pushNamed(
         RegistrarAbonoPage.routeName,
         extra: {'cuentaId': cuentaId, 'proveedorId': widget.proveedorId},
       );
     }
   }
-
   void _irADetalleCuenta(int cuentaId) {
     try {
       context.goNamed(
@@ -224,28 +192,24 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ficha del Proveedor'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        bottom: _proveedor == null
-            ? null
-            : TabBar(
-                controller: _tabController,
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white70,
-                indicatorColor: Colors.white,
-                tabs: const [
-                  Tab(text: 'Datos'),
-                  Tab(text: 'Compras'),
-                  Tab(text: 'Cuentas / Pagos'),
-                ],
-              ),
-      ),
+    return AppScaffold(
+      title: 'Ficha del Proveedor',
+      backgroundColor: AppColors.primary,
+      bottom: _proveedor == null
+          ? null
+          : TabBar(
+              controller: _tabController,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              indicatorColor: Colors.white,
+              tabs: const [
+                Tab(text: 'Datos'),
+                Tab(text: 'Compras'),
+                Tab(text: 'Cuentas / Pagos'),
+              ],
+            ),
       body: SafeArea(
         bottom: true,
         child: _cargando
@@ -263,10 +227,6 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // TAB 1: Datos generales + crédito
-  // ---------------------------------------------------------------------------
   Widget _buildTabDatos() {
     final p = _proveedor!;
     return SingleChildScrollView(
@@ -417,17 +377,12 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // TAB 2: Historial de compras (navegable a detalle)
-  // ---------------------------------------------------------------------------
   Widget _buildTabCompras() {
     if (_historialCompras.isEmpty) {
       return const Center(
         child: Text('Sin compras registradas'),
       );
     }
-
     return ListView.separated(
       padding: AppLayout.pantallaPadding,
       itemCount: _historialCompras.length,
@@ -459,17 +414,12 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       },
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // TAB 3: Cuentas pendientes + Pagos (navegable a abono / detalle)
-  // ---------------------------------------------------------------------------
   Widget _buildTabCuentasYPagos() {
     return SingleChildScrollView(
       padding: AppLayout.pantallaPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Cuentas pendientes
           Text(
             'Cuentas pendientes',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -488,7 +438,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
           else
             ..._cuentasPendientes.map((cta) {
               final vencida = DateTime.now().isAfter(cta.fechaVencimiento) &&
-                  cta.estado != PagarEstado.pagado.name;
+                  cta.estado != 'pagado';
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 color: vencida ? Colors.red.shade50 : null,
@@ -547,10 +497,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                 ),
               );
             }),
-
           const SizedBox(height: AppSpacing.l),
-
-          // Pagos realizados
           Text(
             'Pagos realizados',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -581,15 +528,12 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                 ),
               );
             }),
-
           const SizedBox(height: AppSpacing.xl),
         ],
       ),
     );
   }
 }
-
-// Modelos internos simples para la UI
 class _ItemHistorialCompra {
   const _ItemHistorialCompra({
     required this.id,
@@ -606,7 +550,6 @@ class _ItemHistorialCompra {
   final String estado;
   final bool esCredito;
 }
-
 class _ItemCuentaPendiente {
   const _ItemCuentaPendiente({
     required this.id,
@@ -627,7 +570,6 @@ class _ItemCuentaPendiente {
   final double pendiente;
   final String estado;
 }
-
 class _ItemPago {
   const _ItemPago({
     required this.id,

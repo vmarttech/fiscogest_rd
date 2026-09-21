@@ -11,29 +11,23 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/dashboard_compras_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
-
 class DashboardComprasPage extends ConsumerWidget {
   const DashboardComprasPage({super.key});
-
   static const String routeName = 'dashboard-compras';
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kpisAsync = ref.watch(dashboardComprasKpisProvider);
     final actividadAsync = ref.watch(actividadRecienteComprasProvider);
     final isMobile = AppBreakpoints.isMobile(context);
-
     final currency = NumberFormat.currency(
       locale: 'es_DO',
       symbol: 'RD\$ ',
       decimalDigits: 0,
     );
-
     final alertas = kpisAsync.maybeWhen(
       data: (k) => k.vencido > 0 ? 1 : 0,
       orElse: () => 0,
     );
-
     return AppScaffold(
       title: 'Compras',
       actions: [
@@ -67,22 +61,6 @@ class DashboardComprasPage extends ConsumerWidget {
         child: ListView(
           padding: EdgeInsets.all(isMobile ? 16 : 24),
           children: [
-            // ─── HEADER ───
-            Text(
-              'Dashboard de Compras',
-              style: AppTypography.h2.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Resumen de compras, pagos y actividad reciente',
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 24),
-
-            // ─── KPIs ───
             kpisAsync.when(
               data: (kpis) => _KpisGrid(
                 comprasEsteMes: currency.format(kpis.comprasEsteMes),
@@ -103,10 +81,7 @@ class DashboardComprasPage extends ConsumerWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 28),
-
-            // ─── ACCESOS RÁPIDOS ───
             Text(
               'Accesos rápidos',
               style: AppTypography.h4.copyWith(fontWeight: FontWeight.w600),
@@ -143,10 +118,7 @@ class DashboardComprasPage extends ConsumerWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 28),
-
-            // ─── ACTIVIDAD RECIENTE ───
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -164,7 +136,6 @@ class DashboardComprasPage extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-
             actividadAsync.when(
               data: (items) {
                 if (items.isEmpty) {
@@ -188,7 +159,6 @@ class DashboardComprasPage extends ConsumerWidget {
                     ),
                   );
                 }
-
                 return Container(
                   decoration: BoxDecoration(
                     color: AppColors.white,
@@ -201,7 +171,6 @@ class DashboardComprasPage extends ConsumerWidget {
                       final item = entry.value;
                       final fechaStr = _formatearFechaRelativa(item.fecha);
                       final isLast = index == items.length - 1;
-
                       return Column(
                         children: [
                           Material(
@@ -284,18 +253,15 @@ class DashboardComprasPage extends ConsumerWidget {
       ),
     );
   }
-
   String _formatearFechaRelativa(DateTime fecha) {
     final ahora = DateTime.now();
     final hoy = DateTime(ahora.year, ahora.month, ahora.day);
     final ayer = hoy.subtract(const Duration(days: 1));
     final f = DateTime(fecha.year, fecha.month, fecha.day);
-
     if (f == hoy) return 'Hoy';
     if (f == ayer) return 'Ayer';
     return DateFormat('d MMM', 'es').format(fecha);
   }
-
   String _estadoLabel(EstadoCompra estado) {
     return switch (estado) {
       EstadoCompra.confirmada => 'Confirmada',
@@ -308,8 +274,6 @@ class DashboardComprasPage extends ConsumerWidget {
     };
   }
 }
-
-// ─────────────────────────────────────────────
 class _KpisGrid extends StatelessWidget {
   const _KpisGrid({
     required this.comprasEsteMes,
@@ -319,14 +283,12 @@ class _KpisGrid extends StatelessWidget {
     required this.isMobile,
     this.hayVencido = false,
   });
-
   final String comprasEsteMes;
   final String aCredito;
   final String porPagar;
   final String vencido;
   final bool hayVencido;
   final bool isMobile;
-
   @override
   Widget build(BuildContext context) {
     final cards = [
@@ -356,7 +318,6 @@ class _KpisGrid extends StatelessWidget {
         badge: hayVencido,
       ),
     ];
-
     if (isMobile) {
       return Column(
         children: cards
@@ -367,7 +328,6 @@ class _KpisGrid extends StatelessWidget {
             .toList(),
       );
     }
-
     return Row(
       children: cards
           .map((c) => Expanded(
@@ -380,9 +340,7 @@ class _KpisGrid extends StatelessWidget {
     );
   }
 }
-
 class _KpiData {
-
   const _KpiData({
     required this.titulo,
     required this.valor,
@@ -396,12 +354,9 @@ class _KpiData {
   final Color color;
   final bool badge;
 }
-
 class _KpiCard extends StatelessWidget {
-
   const _KpiCard({required this.data});
   final _KpiData data;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -454,7 +409,6 @@ class _KpiCard extends StatelessWidget {
     );
   }
 }
-
 class _AccesoRapido extends StatelessWidget {
   const _AccesoRapido({
     required this.icon,
@@ -463,13 +417,11 @@ class _AccesoRapido extends StatelessWidget {
     required this.onTap,
     this.badge,
   });
-
   final IconData icon;
   final String label;
   final Color color;
   final VoidCallback onTap;
   final int? badge;
-
   @override
   Widget build(BuildContext context) {
     return Material(

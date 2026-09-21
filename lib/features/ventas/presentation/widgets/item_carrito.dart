@@ -4,8 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/status_chip.dart';
 
 String _formatearMonto(double monto) {
   return 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(monto)}';
@@ -18,6 +19,7 @@ class ItemCarrito extends ConsumerWidget {
     required this.indice,
     required this.alEliminar,
   });
+
   final DetalleVenta detalle;
   final int indice;
   final VoidCallback alEliminar;
@@ -26,25 +28,39 @@ class ItemCarrito extends ConsumerWidget {
     final controlador = TextEditingController(
       text: detalle.cantidad.toString(),
     );
+
     showDialog<dynamic>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cantidad'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Cantidad',
+          style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
+        ),
         content: TextField(
           controller: controlador,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(hintText: 'Cantidad'),
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Cantidad',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            isDense: true,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondary)),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
             onPressed: () {
               final nuevaCantidad =
-                  double.tryParse(controlador.text) ??
-                  detalle.cantidad.toDouble();
+                  double.tryParse(controlador.text) ?? detalle.cantidad.toDouble();
               if (nuevaCantidad > 0) {
                 ref
                     .read(registrarVentaProvider.notifier)
@@ -64,30 +80,37 @@ class ItemCarrito extends ConsumerWidget {
     final tieneMonto = detalle.montoDescuento > 0;
     final notifier = ref.read(registrarVentaProvider.notifier);
     final error = notifier.puedeAplicarDescuentoLinea(detalle);
+
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
         ),
       );
       return;
     }
+
     final controlador = TextEditingController(
       text: tienePorcentaje
           ? detalle.descuentoPorcentaje.toStringAsFixed(2)
           : tieneMonto
-          ? detalle.montoDescuento.toStringAsFixed(2)
-          : '',
+              ? detalle.montoDescuento.toStringAsFixed(2)
+              : '',
     );
     bool esPorcentaje = tienePorcentaje;
+
     showDialog<dynamic>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Descuento de línea'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            'Descuento de línea',
+            style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -97,8 +120,12 @@ class ItemCarrito extends ConsumerWidget {
                     child: ChoiceChip(
                       label: const Text('RD\$'),
                       selected: !esPorcentaje,
-                      onSelected: (_) =>
-                          setDialogState(() => esPorcentaje = false),
+                      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(
+                        color: !esPorcentaje ? AppColors.primary : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      onSelected: (_) => setDialogState(() => esPorcentaje = false),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -106,8 +133,12 @@ class ItemCarrito extends ConsumerWidget {
                     child: ChoiceChip(
                       label: const Text('%'),
                       selected: esPorcentaje,
-                      onSelected: (_) =>
-                          setDialogState(() => esPorcentaje = true),
+                      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(
+                        color: esPorcentaje ? AppColors.primary : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      onSelected: (_) => setDialogState(() => esPorcentaje = true),
                     ),
                   ),
                 ],
@@ -115,12 +146,12 @@ class ItemCarrito extends ConsumerWidget {
               const SizedBox(height: 16),
               TextField(
                 controller: controlador,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
                   hintText: '0.00',
                   suffixText: esPorcentaje ? '%' : '',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  isDense: true,
                 ),
               ),
             ],
@@ -133,28 +164,29 @@ class ItemCarrito extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(err),
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: AppColors.error,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 }
                 Navigator.pop(ctx);
               },
-              child: const Text('Sin descuento'),
+              child: const Text('Sin descuento', style: TextStyle(color: AppColors.textSecondary)),
             ),
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
               onPressed: () {
                 final valor = double.tryParse(controlador.text) ?? 0.0;
-                final err = notifier.aplicarDescuentoLinea(
-                  indice,
-                  valor,
-                  esPorcentaje,
-                );
+                final err = notifier.aplicarDescuentoLinea(indice, valor, esPorcentaje);
                 if (err != null && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(err),
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: AppColors.error,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -175,26 +207,14 @@ class ItemCarrito extends ConsumerWidget {
     final tieneOferta = detalle.ofertaId != null;
     final tieneDescuento =
         detalle.descuentoPorcentaje > 0 || detalle.montoDescuento > 0;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: LayoutBuilder(
-        builder: (context, restricciones) {
-          if (restricciones.maxWidth < 420) {
-            return _construirModoCompacto(
-              context,
-              ref,
-              tieneOferta,
-              tieneDescuento,
-            );
-          }
-          return _construirModoCompleto(
-            context,
-            ref,
-            tieneOferta,
-              tieneDescuento,
-          );
-        },
-      ),
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 420) {
+          return _construirModoCompacto(context, ref, tieneOferta, tieneDescuento);
+        }
+        return _construirModoCompleto(context, ref, tieneOferta, tieneDescuento);
+      },
     );
   }
 
@@ -205,14 +225,11 @@ class ItemCarrito extends ConsumerWidget {
     bool tieneDescuento,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s,
-        vertical: AppSpacing.xs,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(AppRadius.s),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+        color: AppColors.white,
+        borderRadius: AppRadius.allM,
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -229,97 +246,56 @@ class ItemCarrito extends ConsumerWidget {
                       child: Text(
                         detalle.nombreProducto ?? '',
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: AppTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
-                    if (tieneOferta)
-                      Container(
-                        margin: const EdgeInsets.only(left: 8),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'OFERTA',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange.shade700,
-                          ),
-                        ),
-                      ),
-                    if (tieneDescuento)
-                      Container(
-                        margin: const EdgeInsets.only(left: 8),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade100,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'DESC',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade700,
-                          ),
-                        ),
-                      ),
+                    if (tieneOferta) ...[
+                      const SizedBox(width: 6),
+                      const StatusChip(label: 'OFERTA', type: StatusChipType.warning, dense: true),
+                    ],
+                    if (tieneDescuento) ...[
+                      const SizedBox(width: 6),
+                      const StatusChip(label: 'DESC', type: StatusChipType.success, dense: true),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Text(
-                  'Cant: ${detalle.cantidad} • RD\$ ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  'Cant: ${detalle.cantidad}  ·  ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}',
+                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                 ),
                 if (tieneOferta && detalle.precioOriginal != null)
-                  Text(
-                    'Precio original: RD\$ ${_formatearMonto(detalle.precioOriginal!)} → Oferta: RD\$ ${_formatearMonto(detalle.precioUnitario)}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange.shade700,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      'Original: ${_formatearMonto(detalle.precioOriginal!)} → Oferta: ${_formatearMonto(detalle.precioUnitario)}',
+                      style: AppTypography.labelSmall.copyWith(color: AppColors.warning),
                     ),
                   ),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.xs),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit, size: 18, color: Colors.blueGrey),
-                tooltip: 'Editar cantidad',
-                onPressed: () => _abrirEditarCantidad(context, ref),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              ),
-              IconButton(
-                icon: const Icon(Icons.percent, size: 18, color: Colors.green),
-                tooltip: 'Descuento de línea',
-                onPressed: () => _abrirDescuentoLinea(context, ref),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  size: 18,
-                  color: Colors.red,
-                ),
-                tooltip: 'Eliminar',
-                onPressed: alEliminar,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              ),
-            ],
+          const SizedBox(width: 8),
+          _ActionButton(
+            icon: Icons.edit_outlined,
+            color: AppColors.primary,
+            tooltip: 'Editar cantidad',
+            onTap: () => _abrirEditarCantidad(context, ref),
+          ),
+          _ActionButton(
+            icon: Icons.percent,
+            color: AppColors.success,
+            tooltip: 'Descuento de línea',
+            onTap: () => _abrirDescuentoLinea(context, ref),
+          ),
+          _ActionButton(
+            icon: Icons.delete_outline,
+            color: AppColors.error,
+            tooltip: 'Eliminar',
+            onTap: alEliminar,
           ),
         ],
       ),
@@ -333,11 +309,11 @@ class ItemCarrito extends ConsumerWidget {
     bool tieneDescuento,
   ) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.s),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(AppRadius.s),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+        color: AppColors.white,
+        borderRadius: AppRadius.allM,
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,94 +324,87 @@ class ItemCarrito extends ConsumerWidget {
                 child: Text(
                   detalle.nombreProducto ?? '',
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-              if (tieneOferta)
-                Container(
-                  margin: const EdgeInsets.only(left: 6),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 1,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'OFERTA',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange.shade700,
-                    ),
-                  ),
-                ),
-              if (tieneDescuento)
-                Container(
-                  margin: const EdgeInsets.only(left: 6),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 1,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade100,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'DESC',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade700,
-                    ),
-                  ),
-                ),
+              if (tieneOferta) ...[
+                const SizedBox(width: 6),
+                const StatusChip(label: 'OFERTA', type: StatusChipType.warning, dense: true),
+              ],
+              if (tieneDescuento) ...[
+                const SizedBox(width: 6),
+                const StatusChip(label: 'DESC', type: StatusChipType.success, dense: true),
+              ],
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            'Cant: ${detalle.cantidad} • RD\$ ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}',
-            style: Theme.of(context).textTheme.bodySmall,
+            'Cant: ${detalle.cantidad}  ·  ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}',
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
           ),
           if (tieneOferta && detalle.precioOriginal != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text(
-                'Precio original: RD\$ ${_formatearMonto(detalle.precioOriginal!)} → Oferta: RD\$ ${_formatearMonto(detalle.precioUnitario)}',
-                style: TextStyle(fontSize: 11, color: Colors.orange.shade700),
+                'Original: ${_formatearMonto(detalle.precioOriginal!)} → Oferta: ${_formatearMonto(detalle.precioUnitario)}',
+                style: AppTypography.labelSmall.copyWith(color: AppColors.warning),
               ),
             ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: 10),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              IconButton(
-                icon: const Icon(Icons.edit, size: 18, color: Colors.blueGrey),
+              _ActionButton(
+                icon: Icons.edit_outlined,
+                color: AppColors.primary,
                 tooltip: 'Editar cantidad',
-                onPressed: () => _abrirEditarCantidad(context, ref),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onTap: () => _abrirEditarCantidad(context, ref),
               ),
-              IconButton(
-                icon: const Icon(Icons.percent, size: 18, color: Colors.green),
+              _ActionButton(
+                icon: Icons.percent,
+                color: AppColors.success,
                 tooltip: 'Descuento de línea',
-                onPressed: () => _abrirDescuentoLinea(context, ref),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onTap: () => _abrirDescuentoLinea(context, ref),
               ),
-              IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  size: 18,
-                  color: Colors.red,
-                ),
+              _ActionButton(
+                icon: Icons.delete_outline,
+                color: AppColors.error,
                 tooltip: 'Eliminar',
-                onPressed: alEliminar,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onTap: alEliminar,
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+
+  const _ActionButton({
+    required this.icon,
+    required this.color,
+    required this.tooltip,
+    required this.onTap,
+  });
+  final IconData icon;
+  final Color color;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(icon, size: 18, color: color),
+      tooltip: tooltip,
+      onPressed: onTap,
+      padding: const EdgeInsets.all(6),
+      constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+      visualDensity: VisualDensity.compact,
     );
   }
 }

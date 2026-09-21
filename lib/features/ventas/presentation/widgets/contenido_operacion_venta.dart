@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historia
 
 class ContenidoOperacionVenta extends ConsumerStatefulWidget {
   const ContenidoOperacionVenta({super.key});
+
   @override
   ConsumerState<ContenidoOperacionVenta> createState() =>
       _ContenidoOperacionVentaState();

@@ -1,46 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
-
 class ListaAjustesPage extends ConsumerStatefulWidget {
   const ListaAjustesPage({super.key});
   static const String routeName = 'lista-ajustes';
   @override
   ConsumerState<ListaAjustesPage> createState() => _ListaAjustesPageState();
 }
-
 class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
   @override
   Widget build(BuildContext context) {
     final listaAsync = ref.watch(ajusteInventarioListaProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lista de Ajustes'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+    return AppScaffold(
+      title: 'Lista de Ajustes',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          tooltip: 'Nuevo Ajuste',
+          onPressed: () => context.pushNamed(RegistrarAjustePage.routeName),
         ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: AppColors.darkSurface,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.add, color: AppColors.white),
-              tooltip: 'Nuevo Ajuste',
-              onPressed: () => context.pushNamed(RegistrarAjustePage.routeName),
-            ),
-          ),
-        ],
-      ),
+      ],
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(ajusteInventarioListaProvider.future),
         child: listaAsync.when(

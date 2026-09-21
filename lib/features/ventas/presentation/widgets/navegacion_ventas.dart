@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+// Sistema de diseño
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+// Enums y providers
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 
@@ -9,18 +16,47 @@ class NavegacionVentas extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isMobile = AppBreakpoints.isMobile(context);
+    final anchoDrawer = isMobile ? 200.0 : 220.0;
+
     return Container(
-      width: 220,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      width: anchoDrawer,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        border: const Border(
+          right: BorderSide(color: AppColors.border, width: 0.5),
+        ),
+      ),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            child: Text('Menú Ventas', style: TextStyle(fontSize: 18)),
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.border, width: 0.5),
+              ),
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? AppSpacing.s : AppSpacing.m,
+              vertical: isMobile ? AppSpacing.s : AppSpacing.m,
+            ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Menú Ventas',
+                style: AppTypography.labelLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  fontSize: isMobile ? 15 : 18,
+                ),
+              ),
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.add_shopping_cart),
-            title: const Text('Registrar Venta'),
+          _buildListTile(
+            context,
+            icon: Icons.add_shopping_cart,
+            title: 'Registrar Venta',
+            isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
               ref
@@ -31,17 +67,21 @@ class NavegacionVentas extends ConsumerWidget {
                   .cambiarVista(VistaActual.inicio);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.description),
-            title: const Text('Cotizaciones'),
+          _buildListTile(
+            context,
+            icon: Icons.description,
+            title: 'Cotizaciones',
+            isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
               context.push('/ventas/cotizaciones/nueva');
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.bookmark),
-            title: const Text('Apartados'),
+          _buildListTile(
+            context,
+            icon: Icons.bookmark,
+            title: 'Apartados',
+            isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
               ref
@@ -52,9 +92,11 @@ class NavegacionVentas extends ConsumerWidget {
                   .cambiarVista(VistaActual.inicio);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.undo),
-            title: const Text('Devoluciones'),
+          _buildListTile(
+            context,
+            icon: Icons.undo,
+            title: 'Devoluciones',
+            isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
               ref
@@ -62,9 +104,11 @@ class NavegacionVentas extends ConsumerWidget {
                   .cambiarVista(VistaActual.inventario);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.payment),
-            title: const Text('Cobrar'),
+          _buildListTile(
+            context,
+            icon: Icons.payment,
+            title: 'Cobrar',
+            isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
               ref
@@ -72,37 +116,105 @@ class NavegacionVentas extends ConsumerWidget {
                   .cambiarVista(VistaActual.inventario);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.money_off),
-            title: const Text('Pagar'),
+          _buildListTile(
+            context,
+            icon: Icons.money_off,
+            title: 'Pagar',
+            isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Pagar — Próximamente')),
+                SnackBar(
+                  content: Text(
+                    'Pagar — Próximamente',
+                    style: AppTypography.bodyMedium.copyWith(color: AppColors.white),
+                  ),
+                  backgroundColor: AppColors.primary,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 3),
+                ),
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.discount),
-            title: const Text('Descuentos'),
+          _buildListTile(
+            context,
+            icon: Icons.discount,
+            title: 'Descuentos',
+            isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Descuentos — Próximamente')),
+                SnackBar(
+                  content: Text(
+                    'Descuentos — Próximamente',
+                    style: AppTypography.bodyMedium.copyWith(color: AppColors.white),
+                  ),
+                  backgroundColor: AppColors.primary,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 3),
+                ),
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.local_offer),
-            title: const Text('Ofertas'),
+          _buildListTile(
+            context,
+            icon: Icons.local_offer,
+            title: 'Ofertas',
+            isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ofertas — Próximamente')),
+                SnackBar(
+                  content: Text(
+                    'Ofertas — Próximamente',
+                    style: AppTypography.bodyMedium.copyWith(color: AppColors.white),
+                  ),
+                  backgroundColor: AppColors.primary,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 3),
+                ),
               );
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildListTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required bool isMobile,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? AppSpacing.xs : AppSpacing.s,
+        vertical: AppSpacing.xs,
+      ),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          size: isMobile ? 18 : 20,
+          color: AppColors.primary,
+        ),
+        title: Text(
+          title,
+          style: AppTypography.bodyMedium.copyWith(
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+            fontSize: isMobile ? 13 : 14,
+          ),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
+        onTap: onTap,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: isMobile ? AppSpacing.s : AppSpacing.m,
+          vertical: isMobile ? 2 : AppSpacing.xs,
+        ),
+        hoverColor: AppColors.primary.withValues(alpha: 0.08),
+        minLeadingWidth: isMobile ? 28 : 32,
       ),
     );
   }
