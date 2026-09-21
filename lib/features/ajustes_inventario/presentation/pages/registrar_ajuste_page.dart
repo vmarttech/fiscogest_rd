@@ -7,6 +7,9 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
@@ -16,6 +19,7 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 class RegistrarAjustePage extends ConsumerStatefulWidget {
   const RegistrarAjustePage({super.key});
   static const String routeName = 'registrar-ajuste';
+
   @override
   ConsumerState<RegistrarAjustePage> createState() =>
       _RegistrarAjustePageState();
@@ -60,185 +64,168 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(context);
     final productosAsync = ref.watch(productoControllerProvider);
+
     return AppScaffold(
-      appBar: AppBar(
-        title: const Text('Registrar Ajuste'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
+      // ✅ Barra superior UNIFORME — igual a todas las pantallas
+      title: 'Registrar Ajuste',
+      subtitle: 'Conteo físico, mermas y correcciones de stock',
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => context.pop(),
       ),
-      padding: AppSpacing.allM,
-      body: productosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-        data: (todos) => SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Producto',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: AppSpacing.s),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppTextField(
-                        controller: _codigoCtrl,
-                        hint: 'Seleccione o escriba el codigo',
-                        onChanged: (val) {
-                          setState(() => _productoSeleccionado = null);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s),
-                    IconButton(
-                      icon: const Icon(Icons.search, color: Colors.blue),
-                      onPressed: () => _abrirBuscador(todos),
-                    ),
-                  ],
-                ),
-                if (_productoSeleccionado != null)
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 6,
-                      bottom: AppSpacing.m,
-                    ),
-                    child: Text(
-                      '✅ ${_productoSeleccionado!.nombre} | Stock actual: ${_productoSeleccionado!.stock ?? 0.0}',
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+      actions: const [],
+      body: SafeArea(
+        bottom: true,
+        child: productosAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+          error: (e, _) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error))),
+          data: (todos) => SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              isMobile ? 16 : 24,
+              isMobile ? 16 : 20,
+              isMobile ? 16 : 24,
+              24,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Producto',
+                    style: AppTypography.labelLarge,
                   ),
-                const SizedBox(height: AppSpacing.m),
-                const Text(
-                  'Tipo de Ajuste',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: AppSpacing.s),
-                AppDropdown<String>(
-                  initialValue: _tipoSeleccionado,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'entrada',
-                      child: Text('Entrada (+)'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'salida',
-                      child: Text('Salida (-)'),
-                    ),
-                  ],
-                  onChanged: (v) => setState(() => _tipoSeleccionado = v!),
-                ),
-                const SizedBox(height: AppSpacing.m),
-                const Text(
-                  'Cantidad',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: AppSpacing.s),
-                AppTextField(
-                  controller: _cantidadCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  hint: 'Ej: 5.5',
-                ),
-                const SizedBox(height: AppSpacing.m),
-                const Text(
-                  'Motivo',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: AppSpacing.s),
-                AppTextField(
-                  controller: _motivoCtrl,
-                  hint: 'Ej: Conteo fisico / Perdida',
-                ),
-                const SizedBox(height: AppSpacing.m),
-                const Text(
-                  'Observaciones',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: AppSpacing.s),
-                AppTextField(
-                  controller: _observacionesCtrl,
-                  hint: 'Comentarios adicionales (opcional)',
-                ),
-                const SizedBox(height: AppSpacing.l),
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    text: 'Guardar Ajuste',
-                    onPressed: () async {
-                      if (!_formKey.currentState!.validate()) return;
-                      final codigo = _codigoCtrl.text.trim();
-                      final producto =
-                          _productoSeleccionado ??
-                          todos.firstWhere(
-                            (p) => p.codigo == codigo,
-                            orElse: () =>
-                                throw Exception('Producto no encontrado'),
-                          );
-                      final cant = double.tryParse(_cantidadCtrl.text) ?? 0.0;
-                      if (cant <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('La cantidad debe ser mayor a cero'),
-                          ),
-                        );
-                        return;
-                      }
-                      final stockActual = producto.stock ?? 0.0;
-                      if (_tipoSeleccionado == 'salida' && cant > stockActual) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Stock insuficiente. Disponible: $stockActual',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-                      final usuarioId = ref.read(usuarioAutenticadoProvider);
-                      if (usuarioId == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Usuario no autenticado'),
-                          ),
-                        );
-                        return;
-                      }
-                      final ajuste = AjusteInventario(
-                        productoId: producto.id!,
-                        codigoBusqueda: codigo,
-                        cantidad: cant,
-                        tipoAjuste: _tipoSeleccionado,
-                        motivo: _motivoCtrl.text,
-                        observaciones: _observacionesCtrl.text.trim(),
-                        usuarioId: usuarioId,
-                        fechaCreacion: DateTime.now(),
-                      );
-                      final exito = await ref
-                          .read(ajusteInventarioProvider)
-                          .registrar(ajuste);
-                      if (!exito || !context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            '✅ Ajuste guardado — stock actualizado',
-                          ),
+                  const SizedBox(height: AppSpacing.s),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          controller: _codigoCtrl,
+                          hint: 'Seleccione o escriba el código',
+                          onChanged: (val) {
+                            setState(() => _productoSeleccionado = null);
+                          },
                         ),
-                      );
-                      context.pop();
-                    },
+                      ),
+                      const SizedBox(width: AppSpacing.s),
+                      IconButton(
+                        icon: const Icon(Icons.search, color: AppColors.primary),
+                        onPressed: () => _abrirBuscador(todos),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  if (_productoSeleccionado != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, bottom: AppSpacing.m),
+                      child: Text(
+                        '✅ ${_productoSeleccionado!.nombre} | Stock actual: ${_productoSeleccionado!.stock ?? 0.0}',
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.success, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  const SizedBox(height: AppSpacing.m),
+                  const Text(
+                    'Tipo de Ajuste',
+                    style: AppTypography.labelLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.s),
+                  AppDropdown<String>(
+                    initialValue: _tipoSeleccionado,
+                    items: const [
+                      DropdownMenuItem(value: 'entrada', child: Text('Entrada (+)')),
+                      DropdownMenuItem(value: 'salida', child: Text('Salida (-)')),
+                    ],
+                    onChanged: (v) => setState(() => _tipoSeleccionado = v!),
+                  ),
+                  const SizedBox(height: AppSpacing.m),
+                  const Text(
+                    'Cantidad',
+                    style: AppTypography.labelLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.s),
+                  AppTextField(
+                    controller: _cantidadCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    hint: 'Ej: 5.5',
+                  ),
+                  const SizedBox(height: AppSpacing.m),
+                  const Text(
+                    'Motivo',
+                    style: AppTypography.labelLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.s),
+                  AppTextField(
+                    controller: _motivoCtrl,
+                    hint: 'Ej: Conteo físico / Pérdida',
+                  ),
+                  const SizedBox(height: AppSpacing.m),
+                  const Text(
+                    'Observaciones',
+                    style: AppTypography.labelLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.s),
+                  AppTextField(
+                    controller: _observacionesCtrl,
+                    hint: 'Comentarios adicionales (opcional)',
+                  ),
+                  const SizedBox(height: AppSpacing.l),
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppButton(
+                      text: 'Guardar Ajuste',
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) return;
+                        final codigo = _codigoCtrl.text.trim();
+                        final producto = _productoSeleccionado ??
+                            todos.firstWhere(
+                              (p) => p.codigo == codigo,
+                              orElse: () => throw Exception('Producto no encontrado'),
+                            );
+                        final cant = double.tryParse(_cantidadCtrl.text) ?? 0.0;
+                        if (cant <= 0) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('La cantidad debe ser mayor a cero')),
+                          );
+                          return;
+                        }
+                        final stockActual = producto.stock ?? 0.0;
+                        if (_tipoSeleccionado == 'salida' && cant > stockActual) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Stock insuficiente. Disponible: $stockActual'),
+                            ),
+                          );
+                          return;
+                        }
+                        final usuarioId = ref.read(usuarioAutenticadoProvider);
+                        if (usuarioId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Usuario no autenticado')),
+                          );
+                          return;
+                        }
+                        final ajuste = AjusteInventario(
+                          productoId: producto.id!,
+                          codigoBusqueda: codigo,
+                          cantidad: cant,
+                          tipoAjuste: _tipoSeleccionado,
+                          motivo: _motivoCtrl.text,
+                          observaciones: _observacionesCtrl.text.trim(),
+                          usuarioId: usuarioId,
+                          fechaCreacion: DateTime.now(),
+                        );
+                        final exito = await ref.read(ajusteInventarioProvider).registrar(ajuste);
+                        if (!exito || !context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('✅ Ajuste guardado — stock actualizado')),
+                        );
+                        context.pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -248,10 +235,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
 }
 
 class _DialogoBusqueda extends StatefulWidget {
-  const _DialogoBusqueda({
-    required this.productos,
-    required this.onSeleccionar,
-  });
+  const _DialogoBusqueda({required this.productos, required this.onSeleccionar});
   final List<Producto> productos;
   final void Function(Producto) onSeleccionar;
 
@@ -279,8 +263,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
     setState(() {
       final t = texto.toLowerCase();
       _resultados = widget.productos.where((p) {
-        return p.codigo.toLowerCase().contains(t) ||
-            p.nombre.toLowerCase().contains(t);
+        return p.codigo.toLowerCase().contains(t) || p.nombre.toLowerCase().contains(t);
       }).toList();
     });
   }
@@ -296,19 +279,14 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
           children: [
             AppTextField(
               controller: _buscarCtrl,
-              hint: 'Buscar por codigo o nombre...',
+              hint: 'Buscar por código o nombre...',
               prefixIcon: Icons.search,
               onChanged: _filtrar,
             ),
             const SizedBox(height: AppSpacing.s),
             Flexible(
               child: _resultados.isEmpty
-                  ? const Center(
-                      child: Padding(
-                        padding: AppSpacing.allM,
-                        child: Text('Sin resultados'),
-                      ),
-                    )
+                  ? const Center(child: Padding(padding: AppSpacing.allM, child: Text('Sin resultados')))
                   : ListView.builder(
                       shrinkWrap: true,
                       itemCount: _resultados.length,
@@ -316,9 +294,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                         final p = _resultados[i];
                         return ListTile(
                           title: Text('${p.codigo} • ${p.nombre}'),
-                          subtitle: Text(
-                            'Stock: ${p.stock ?? 0.0} | Compra: ${p.precioCompra} | Venta: ${p.precioVenta}',
-                          ),
+                          subtitle: Text('Stock: ${p.stock ?? 0.0} | Compra: ${p.precioCompra} | Venta: ${p.precioVenta}'),
                           onTap: () => widget.onSeleccionar(p),
                         );
                       },
@@ -328,10 +304,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
       ],
     );
   }

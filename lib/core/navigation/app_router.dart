@@ -20,8 +20,10 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart
 import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_page.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_gestion_page.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/pages/nuevo_cliente_page.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/pages/proveedores_page.dart';
 import 'package:fiscogest_rd/features/reports/presentation/pages/reports_page.dart';
 import 'package:fiscogest_rd/features/impuestos/presentation/pages/impuestos_page.dart';
@@ -208,10 +210,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RegistrarEntradaPage.routeName,
         builder: (context, state) {
           final productoIdCrudo = state.pathParameters['productoId'] ?? '0';
-          final soloDigitosProd = productoIdCrudo.replaceAll(
-            RegExp(r'[^0-9]'),
-            '',
-          );
+          final soloDigitosProd = productoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
           final productoId = int.tryParse(soloDigitosProd) ?? 0;
           final nombreProducto = Uri.decodeComponent(
             state.pathParameters['nombreProducto'] ?? '',
@@ -229,10 +228,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RegistrarSalidaPage.routeName,
         builder: (context, state) {
           final productoIdCrudo = state.pathParameters['productoId'] ?? '0';
-          final soloDigitosProd = productoIdCrudo.replaceAll(
-            RegExp(r'[^0-9]'),
-            '',
-          );
+          final soloDigitosProd = productoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
           final productoId = int.tryParse(soloDigitosProd) ?? 0;
           final nombreProducto = Uri.decodeComponent(
             state.pathParameters['nombreProducto'] ?? '',
@@ -260,10 +256,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: DiferenciasConteoPage.routeName,
         builder: (context, state) {
           final conteoIdCrudo = state.pathParameters['conteoId'] ?? '0';
-          final soloDigitosConteo = conteoIdCrudo.replaceAll(
-            RegExp(r'[^0-9]'),
-            '',
-          );
+          final soloDigitosConteo = conteoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
           final conteoId = int.tryParse(soloDigitosConteo) ?? 0;
           return AppShell(child: DiferenciasConteoPage(conteoId: conteoId));
         },
@@ -282,6 +275,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/clientes',
         name: ClientesGestionPage.routeName,
         builder: (_, __) => const AppShell(child: ClientesGestionPage()),
+        routes: [
+          GoRoute(
+            path: 'nuevo',
+            name: NuevoClientePage.routeName,
+            builder: (_, __) => const AppShell(child: NuevoClientePage()),
+          ),
+          GoRoute(
+            path: 'editar',
+            name: NuevoClientePage.editRouteName,
+            builder: (context, state) => AppShell(
+              child: NuevoClientePage(cliente: state.extra as ClienteCompleto?),
+            ),
+          ),
+        ],
       ),
       GoRoute(path: '/customers', redirect: (_, __) => '/clientes'),
       GoRoute(path: '/clients', redirect: (_, __) => '/clientes'),
@@ -301,10 +308,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RegistrarRecepcionPage.routeName,
         builder: (context, state) {
           final idCompraCrudo = state.pathParameters['compraId']!;
-          final compraIdLimpio = idCompraCrudo.replaceAll(
-            RegExp(r'[^0-9]'),
-            '',
-          );
+          final compraIdLimpio = idCompraCrudo.replaceAll(RegExp(r'[^0-9]'), '');
           final compraId = int.tryParse(compraIdLimpio) ?? 0;
           final idProvCrudo = state.pathParameters['proveedorId']!;
           final provIdLimpio = idProvCrudo.replaceAll(RegExp(r'[^0-9]'), '');
