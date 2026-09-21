@@ -71,30 +71,30 @@ class AppShell extends StatelessWidget {
 
     if (isMobile) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF4F6F9),
+        backgroundColor: AppColors.pageBackground,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: AppColors.sidebarBackground,
           title: Text(
             tituloPantalla,
-            style: const TextStyle(
-              color: Colors.white,
+            style: AppTypography.h4.copyWith(
+              color: AppColors.white,
               fontSize: 16,
             ),
           ),
-          iconTheme: const IconThemeData(color: Colors.white),
+          iconTheme: const IconThemeData(color: AppColors.white),
         ),
-        drawer: _buildMenu(navWidth, currentPath, context, tituloPantalla),
+        drawer: _buildMenu(navWidth, currentPath, context),
         body: child,
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+      backgroundColor: AppColors.pageBackground,
       body: Row(
         children: [
           SizedBox(
             width: navWidth,
-            child: _buildMenu(navWidth, currentPath, context, tituloPantalla),
+            child: _buildMenu(navWidth, currentPath, context),
           ),
           Expanded(child: child),
         ],
@@ -102,26 +102,30 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  Widget _buildMenu(
-    double width,
-    String currentPath,
-    BuildContext context,
-    String tituloPantalla,
-  ) {
+  Widget _buildMenu(double width, String currentPath, BuildContext context) {
     return Container(
       width: width,
-      color: const Color(0xFF0F172A),
+      color: AppColors.sidebarBackground,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ─── LOGO + NOMBRE APP (fijo) ───
           Padding(
             padding: AppSpacing.allL,
             child: Row(
               children: [
-                const Icon(
-                  Icons.receipt_long,
-                  color: Colors.blueAccent,
-                  size: 28,
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.inventory_2_rounded,
+                    color: AppColors.primaryLight,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -129,18 +133,18 @@ class AppShell extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        tituloPantalla,
-                        style: AppTypography.h3.copyWith(
-                          color: Colors.white,
-                          fontSize: 18,
+                        'FiscoGest RD',
+                        style: AppTypography.h4.copyWith(
+                          color: AppColors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                         overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
                       ),
                       Text(
-                        'Versión 3.0 Pro',
+                        'v3.0 Pro',
                         style: AppTypography.labelSmall.copyWith(
-                          color: AppColors.textSecondary,
+                          color: AppColors.grey400,
                           fontSize: 11,
                         ),
                       ),
@@ -150,23 +154,38 @@ class AppShell extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(color: Color(0xFF1E293B), height: 1),
+          const Divider(color: AppColors.divider, height: 1),
+
+          // ─── MENÚ AGRUPADO ───
           Expanded(
             child: ListView(
-              padding: AppSpacing.vM.copyWith(
-                left: AppSpacing.xs,
-                right: AppSpacing.xs,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
               children: [
+                _buildSectionTitle('OPERACIONES'),
                 _buildNavItem(context, '/', 'Dashboard', Icons.dashboard_outlined, currentPath),
                 _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
                 _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
                 _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
-                _buildNavItem(context, '/inventario', 'Inventario', Icons.inventory_2_outlined, currentPath),
+
+                const SizedBox(height: 16),
+                _buildSectionTitle('INVENTARIO'),
+                _buildNavItem(context, '/inventario', 'Productos', Icons.inventory_2_outlined, currentPath),
                 _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
-                _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.inventory_2, currentPath),
+                _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.fact_check_outlined, currentPath),
+                _buildNavItem(context, '/lista-ajustes', 'Ajustes', Icons.tune_outlined, currentPath),
+                _buildNavItem(context, '/transferencias/registrar', 'Transferencias', Icons.swap_horiz_outlined, currentPath),
+
+                const SizedBox(height: 16),
+                _buildSectionTitle('MAESTROS'),
                 _buildNavItem(context, '/clientes', 'Clientes', Icons.people_outline, currentPath),
                 _buildNavItem(context, '/proveedores', 'Proveedores', Icons.business_outlined, currentPath),
+                _buildNavItem(context, '/categorias', 'Categorías', Icons.category_outlined, currentPath),
+                _buildNavItem(context, '/marcas', 'Marcas', Icons.branding_watermark_outlined, currentPath),
+                _buildNavItem(context, '/unidades', 'Unidades', Icons.straighten_outlined, currentPath),
+                _buildNavItem(context, '/presentaciones', 'Presentaciones', Icons.view_module_outlined, currentPath),
+
+                const SizedBox(height: 16),
+                _buildSectionTitle('ADMINISTRACIÓN'),
                 _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
                 _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
                 _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
@@ -175,6 +194,21 @@ class AppShell extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
+      child: Text(
+        title,
+        style: AppTypography.labelSmall.copyWith(
+          color: AppColors.grey400,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.8,
+          fontSize: 10,
+        ),
       ),
     );
   }
@@ -189,20 +223,25 @@ class AppShell extends StatelessWidget {
     final esSeleccionado = currentPath == routePath || currentPath.startsWith('$routePath/');
 
     return Padding(
-      padding: AppSpacing.vXs,
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Material(
-        color: esSeleccionado ? const Color(0xFF1E293B) : Colors.transparent,
+        color: esSeleccionado ? AppColors.primary.withValues(alpha: 0.18) : Colors.transparent,
         borderRadius: AppRadius.allM,
         child: InkWell(
           borderRadius: AppRadius.allM,
-          onTap: () => context.go(routePath),
+          onTap: () {
+            if (AppBreakpoints.isMobile(context)) {
+              Navigator.of(context).pop(); // cierra drawer
+            }
+            context.go(routePath);
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
                 Icon(
                   icon,
-                  color: esSeleccionado ? Colors.white : AppColors.textSecondary,
+                  color: esSeleccionado ? AppColors.primaryLight : AppColors.grey400,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
@@ -212,11 +251,21 @@ class AppShell extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: AppTypography.labelMedium.copyWith(
-                      color: esSeleccionado ? Colors.white : AppColors.textSecondary,
-                      fontWeight: esSeleccionado ? FontWeight.bold : FontWeight.normal,
+                      color: esSeleccionado ? AppColors.white : AppColors.grey400,
+                      fontWeight: esSeleccionado ? FontWeight.w600 : FontWeight.normal,
+                      fontSize: 13.5,
                     ),
                   ),
                 ),
+                if (esSeleccionado)
+                  Container(
+                    width: 4,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
               ],
             ),
           ),
