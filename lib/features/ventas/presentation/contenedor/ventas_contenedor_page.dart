@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_va
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inventario.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_detalle.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/widgets/historial_ventas.dart';
+
 class VentasContenedorPage extends ConsumerStatefulWidget {
   const VentasContenedorPage({
     super.key,
@@ -18,10 +19,12 @@ class VentasContenedorPage extends ConsumerStatefulWidget {
   });
   static const String nombreRuta = 'ventas-contenedor';
   final ModoOperacion modoInicial;
+
   @override
   ConsumerState<VentasContenedorPage> createState() =>
       _VentasContenedorPageState();
 }
+
 class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
   @override
   void initState() {
@@ -32,6 +35,7 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
           .establecerModoOperacion(widget.modoInicial);
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final vistaActual = ref.watch(
@@ -40,37 +44,33 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final modoOperacion = ref.watch(
       ventasNavegacionProvider.select((e) => e.modoOperacion),
     );
+
     final String tituloDinamico = switch (modoOperacion) {
       ModoOperacion.venta => 'Gestión de Ventas',
       ModoOperacion.cotizacion => 'Gestión de Cotizaciones',
       ModoOperacion.apartado => 'Gestión de Apartados',
-      ModoOperacion.cobrar => 'Cuentas por Cobrar',
+      ModoOperacion.cobrar => 'Gestión de Ventas',
     };
+
     final String subtitulo = switch (modoOperacion) {
       ModoOperacion.venta => 'Facturación y operaciones de venta',
       ModoOperacion.cotizacion => 'Cotizaciones y presupuestos',
       ModoOperacion.apartado => 'Apartados y reservas',
-      ModoOperacion.cobrar => 'Gestión de cuentas por cobrar',
+      ModoOperacion.cobrar => 'Facturación y operaciones de venta',
     };
+
     final Widget vistaActiva = switch (vistaActual) {
       VistaActual.inicio => const VistaInicioVacia(),
       VistaActual.inventario => const VistaInventario(),
       VistaActual.detalle => const VistaDetalle(),
       VistaActual.historial => const HistorialVentas(),
     };
+
     final isMobile = AppBreakpoints.isMobile(context);
+
     return AppScaffold(
       title: tituloDinamico,
       subtitle: isMobile ? null : subtitulo,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.restore_from_trash_outlined),
-          tooltip: 'Limpiar operación actual',
-          onPressed: () {
-            // TODO: conectar con la lógica de limpiar operación
-          },
-        ),
-      ],
       body: Column(
         children: [
           if (!isMobile)
@@ -105,12 +105,13 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
       ),
     );
   }
+
   String _modoLabel(ModoOperacion modo) {
     return switch (modo) {
       ModoOperacion.venta => 'Modo Venta',
       ModoOperacion.cotizacion => 'Modo Cotización',
       ModoOperacion.apartado => 'Modo Apartado',
-      ModoOperacion.cobrar => 'Modo Cobrar',
+      ModoOperacion.cobrar => 'Modo Venta',
     };
   }
 }

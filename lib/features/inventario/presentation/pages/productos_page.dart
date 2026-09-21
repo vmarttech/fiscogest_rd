@@ -6,13 +6,9 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_producto_page.dart';
-import 'package:fiscogest_rd/features/categorias/presentation/pages/categorias_page.dart';
-import 'package:fiscogest_rd/features/marcas/presentation/pages/marcas_page.dart';
-import 'package:fiscogest_rd/features/unidades/presentation/pages/unidades_page.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_sizes.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
@@ -23,9 +19,7 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 
 class ProductosPage extends ConsumerStatefulWidget {
   const ProductosPage({super.key});
-
   static const String routeName = 'inventario';
-
   @override
   ConsumerState<ProductosPage> createState() => _ProductosPageState();
 }
@@ -34,67 +28,17 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   int _vistaActual = 0;
   String _filtroProductos = '';
   String _filtroKardex = '';
-  String _filtroEstado = 'todos'; // todos | en_stock | bajo | agotado
+  String _filtroEstado = 'todos';
 
   bool _puedeVerCostos() => true;
   bool _puedeEliminar() => true;
 
-  void _abrirMenuOpciones(BuildContext context) async {
-    final seleccionado = await showMenu<int>(
-      context: context,
-      position: const RelativeRect.fromLTRB(200, 500, 16, 0),
-      color: AppColors.sidebarBackground,
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      items: [
-        _buildMenuItem(0, Icons.add_box_outlined, 'Nuevo Producto', AppColors.primaryLight),
-        _buildMenuItem(1, Icons.receipt_long_outlined, 'Kárdex', AppColors.success),
-        _buildMenuItem(2, Icons.category_outlined, 'Categorías', AppColors.warning),
-        _buildMenuItem(3, Icons.branding_watermark_outlined, 'Marcas', AppColors.info),
-        _buildMenuItem(4, Icons.straighten_outlined, 'Unidades', AppColors.secondaryLight),
-        const PopupMenuDivider(),
-        _buildMenuItem(5, Icons.tune_outlined, 'Ajustes de Inventario', AppColors.grey400),
-      ],
-    );
-
-    if (seleccionado == null || !context.mounted) return;
-
-    switch (seleccionado) {
-      case 0:
-        unawaited(context.pushNamed(NuevoProductoPage.routeName));
-        break;
-      case 1:
-        setState(() => _vistaActual = 1);
-        break;
-      case 2:
-        unawaited(context.pushNamed(CategoriasPage.routeName));
-        break;
-      case 3:
-        unawaited(context.pushNamed(MarcasPage.routeName));
-        break;
-      case 4:
-        unawaited(context.pushNamed(UnidadesPage.routeName));
-        break;
-      case 5:
-        unawaited(context.pushNamed('lista-ajustes'));
-        break;
-    }
+  void _irANuevoProducto() {
+    unawaited(context.pushNamed(NuevoProductoPage.routeName));
   }
 
-  PopupMenuItem<int> _buildMenuItem(int value, IconData icon, String text, Color color) {
-    return PopupMenuItem(
-      value: value,
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: AppSpacing.s),
-          Text(
-            text,
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.white, fontSize: 13),
-          ),
-        ],
-      ),
-    );
+  void _editarProducto(Producto producto) {
+    unawaited(context.pushNamed(NuevoProductoPage.routeName, extra: producto));
   }
 
   Future<void> _confirmarEliminar(Producto producto) async {
@@ -117,7 +61,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         ],
       ),
     );
-
     if (confirmado == true && producto.id != null) {
       await ref.read(productoControllerProvider.notifier).eliminar(producto.id!);
       if (mounted) {
@@ -128,42 +71,42 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     }
   }
 
-  void _editarProducto(Producto producto) {
-    unawaited(context.pushNamed(NuevoProductoPage.routeName, extra: producto));
-  }
-
   Widget _construirVistaActual() {
     return switch (_vistaActual) {
       0 => _buildSeccionProductos(),
       1 => _buildSeccionKardex(),
-      2 => const CategoriasPage(),
-      3 => const MarcasPage(),
-      4 => const UnidadesPage(),
       _ => const SizedBox.shrink(),
     };
   }
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(context);
     return AppScaffold(
+      title: 'Inventario',
+      subtitle: 'Gestión de productos y existencias',
+      // ✅ Barra superior UNIFICADA — igual a todas las demás pantallas
+      actions: [
+        if (!isMobile)
+          AppButton(
+            text: 'Nuevo Producto',
+            icon: Icons.add,
+            onPressed: _irANuevoProducto,
+          ),
+      ],
+      // ✅ FAB SOLO en móvil — sin duplicidad
+      floatingActionButton: isMobile
+          ? FloatingActionButton(
+              onPressed: _irANuevoProducto,
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+              elevation: 4,
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: SafeArea(
         bottom: true,
-        child: Stack(
-          children: [
-            _construirVistaActual(),
-            Positioned(
-              bottom: AppSpacing.m + MediaQuery.of(context).padding.bottom,
-              right: AppSpacing.m,
-              child: FloatingActionButton.extended(
-                onPressed: () => _abrirMenuOpciones(context),
-                icon: const Icon(Icons.menu, size: AppSizes.iconMd),
-                label: const Text('Opciones', style: TextStyle(fontSize: 12)),
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.white,
-              ),
-            ),
-          ],
-        ),
+        child: _construirVistaActual(),
       ),
     );
   }
@@ -179,47 +122,14 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         isMobile ? 16 : 24,
-        MediaQuery.of(context).padding.top + 12,
+        isMobile ? 16 : 20,
         isMobile ? 16 : 24,
         16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Inventario',
-                      style: AppTypography.h2.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Gestión de productos y existencias',
-                      style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              if (!isMobile)
-                AppButton(
-                  text: 'Nuevo Producto',
-                  icon: Icons.add,
-                  onPressed: () => unawaited(context.pushNamed(NuevoProductoPage.routeName)),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          // Filtros
+          // Buscador + Filtros
           Row(
             children: [
               Expanded(
@@ -259,10 +169,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               ],
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Lista
           Expanded(
             child: ref.watch(productoControllerProvider).when(
               loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
@@ -274,7 +181,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                   final matchTexto = p.codigo.toLowerCase().contains(_filtroProductos.toLowerCase()) ||
                       p.nombre.toLowerCase().contains(_filtroProductos.toLowerCase());
                   if (!matchTexto) return false;
-
                   final stock = p.stock ?? 0;
                   return switch (_filtroEstado) {
                     'en_stock' => stock > 10,
@@ -295,6 +201,13 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                           Text(
                             'No se encontraron productos',
                             style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            isMobile
+                                ? 'Presiona el botón + para registrar el primero'
+                                : 'Usa "Nuevo Producto" en la barra superior para registrar el primero',
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -317,7 +230,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                   );
                 }
 
-                // Desktop: tabla densa
                 return _buildTablaDesktop(filtrados, puedeVerCostos, puedeEliminar);
               },
             ),
@@ -340,7 +252,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       ),
       child: Column(
         children: [
-          // Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
@@ -364,7 +275,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               ],
             ),
           ),
-          // Filas
           Expanded(
             child: ListView.separated(
               itemCount: productos.length,
@@ -373,7 +283,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 final p = productos[i];
                 final stock = p.stock ?? 0;
                 final (statusText, statusColor) = _getStatus(stock);
-
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Row(
@@ -492,11 +401,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   // ─────────────────────────────────────────────
   Widget _buildSeccionKardex() {
     final isMobile = AppBreakpoints.isMobile(context);
-
     return Padding(
       padding: EdgeInsets.fromLTRB(
         isMobile ? 16 : 24,
-        MediaQuery.of(context).padding.top + 12,
+        isMobile ? 16 : 20,
         isMobile ? 16 : 24,
         16,
       ),
@@ -585,9 +493,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
 // ─────────────────────────────────────────────
 // WIDGETS AUXILIARES
 // ─────────────────────────────────────────────
-
 class _FilterChip extends StatelessWidget {
-
   const _FilterChip({
     required this.label,
     required this.selected,
@@ -602,7 +508,6 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activeColor = color ?? AppColors.primary;
-
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -628,7 +533,6 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _ProductoCardMobile extends StatelessWidget {
-
   const _ProductoCardMobile({
     required this.producto,
     required this.puedeVerCostos,
