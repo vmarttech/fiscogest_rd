@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
@@ -26,7 +27,6 @@ class _FiltrosCompras {
     this.fechaDesde,
     this.fechaHasta,
   });
-
   final String textoBusqueda;
   final bool? soloCredito;
   final EstadoCompra? estado;
@@ -80,11 +80,9 @@ final _filtrosComprasProvider = StateProvider.autoDispose<_FiltrosCompras>((ref)
 
 class ListaComprasPage extends ConsumerWidget {
   const ListaComprasPage({super.key});
-
   static const String routeName = 'lista-compras';
 
   String _limpiarId(dynamic id) => id.toString().replaceAll(RegExp(r'[^0-9]'), '');
-
   String _formatearFecha(DateTime fecha) =>
       '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year}';
 
@@ -362,52 +360,27 @@ class ListaComprasPage extends ConsumerWidget {
       );
     }
 
-    return Scaffold(
+    return AppScaffold(
+      title: 'Lista de Compras',
+      subtitle: 'Historial y gestión de compras',
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => context.pop(),
+      ),
+      actions: [
+        IconButton(
+          icon: Badge(
+            isLabelVisible: filtros.tieneFiltrosActivos,
+            child: const Icon(Icons.filter_list),
+          ),
+          tooltip: 'Filtros',
+          onPressed: mostrarFiltros,
+        ),
+      ],
       backgroundColor: AppColors.pageBackground,
       body: SafeArea(
         child: Column(
           children: [
-            // ─── HEADER ───
-            Padding(
-              padding: EdgeInsets.fromLTRB(isMobile ? 12 : 24, 12, isMobile ? 12 : 24, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => context.pop(),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Lista de Compras',
-                          style: AppTypography.h3.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          'Historial y gestión de compras',
-                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: Badge(
-                      isLabelVisible: filtros.tieneFiltrosActivos,
-                      child: const Icon(Icons.filter_list),
-                    ),
-                    tooltip: 'Filtros',
-                    onPressed: mostrarFiltros,
-                  ),
-                ],
-              ),
-            ),
-
-            // ─── CONTENIDO ───
             Expanded(
               child: comprasAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
@@ -428,7 +401,6 @@ class ListaComprasPage extends ConsumerWidget {
                 ),
                 data: (todas) {
                   final compras = _aplicarFiltros(todas, filtros);
-
                   if (todas.isEmpty) {
                     return Center(
                       child: Column(
@@ -442,14 +414,13 @@ class ListaComprasPage extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Presiona “Nueva Compra” para comenzar',
+                            'Presiona "Nueva Compra" para comenzar',
                             style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                           ),
                         ],
                       ),
                     );
                   }
-
                   if (compras.isEmpty) {
                     return Center(
                       child: Column(
@@ -472,7 +443,6 @@ class ListaComprasPage extends ConsumerWidget {
                       ),
                     );
                   }
-
                   return Column(
                     children: [
                       if (filtros.tieneFiltrosActivos)
@@ -823,7 +793,6 @@ class ListaComprasPage extends ConsumerWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-
   const _InfoChip({
     required this.label,
     required this.value,
