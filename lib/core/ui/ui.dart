@@ -19,3 +19,8 @@ export 'app_radius.dart';
 export 'app_sizes.dart';
 export 'app_section.dart';
 export 'app_form.dart';
+
+// Componentes institucionales
+export 'status_chip.dart';
+export 'kpi_card.dart';
+export 'section_header.dart';

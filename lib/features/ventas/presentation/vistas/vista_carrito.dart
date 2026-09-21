@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
@@ -18,41 +20,17 @@ class VistaCarrito extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ✅ PATRÓN RESPONSIVO
-    final anchoPantalla = MediaQuery.of(context).size.width;
-    final esPantallaPequena = anchoPantalla < 600;
-
-    final paddingSuperior = esPantallaPequena
-        ? const EdgeInsets.fromLTRB(12, 12, 12, 6)
-        : const EdgeInsets.fromLTRB(16, 16, 16, 8);
-    final paddingLista = esPantallaPequena
-        ? const EdgeInsets.symmetric(horizontal: 12, vertical: 6)
-        : const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
-    final paddingInferior = esPantallaPequena
-        ? const EdgeInsets.all(12)
-        : const EdgeInsets.all(16);
-    final paddingBotonPago = esPantallaPequena
-        ? const EdgeInsets.symmetric(vertical: 12)
-        : const EdgeInsets.symmetric(vertical: 16);
-    final fontSizeBotonPago = esPantallaPequena ? 13.0 : 16.0;
-    final tamanoIconoBotonPago = esPantallaPequena ? 18.0 : 22.0;
-    final fontSizeTitulo = esPantallaPequena
-        ? AppTypography.labelLarge
-        : AppTypography.h4;
-    final tamanoIconoVaciar = esPantallaPequena ? 16.0 : 18.0;
-    final espaciadoDespuesDivisor = esPantallaPequena ? 4.0 : 8.0;
-    final espaciadoAntesTotal = esPantallaPequena ? 12.0 : 20.0;
-
+    final isMobile = AppBreakpoints.isMobile(context);
     final venta = ref.watch(registrarVentaProvider);
     final modo = ref.watch(
       ventasNavegacionProvider.select((e) => e.modoOperacion),
     );
 
     final titulo = switch (modo) {
-      ModoOperacion.venta => 'CARRITO DE VENTA',
-      ModoOperacion.cotizacion => 'CARRITO DE COTIZACIÓN',
-      ModoOperacion.apartado => 'CARRITO DE APARTADO',
-      ModoOperacion.cobrar => 'CUENTAS POR COBRAR',
+      ModoOperacion.venta => 'Carrito de Venta',
+      ModoOperacion.cotizacion => 'Carrito de Cotización',
+      ModoOperacion.apartado => 'Carrito de Apartado',
+      ModoOperacion.cobrar => 'Cuentas por Cobrar',
     };
 
     final colorPrincipal = switch (modo) {
@@ -63,103 +41,152 @@ class VistaCarrito extends ConsumerWidget {
     };
 
     if (venta.detalles.isEmpty) {
-      return const _CarritoVacio();
+      return _CarritoVacio(colorPrincipal: colorPrincipal);
     }
 
     return Column(
       children: [
-        Padding(
-          padding: paddingSuperior, // ✅ AHORA ADAPTATIVO
+        // ─── HEADER ───
+        Container(
+          padding: EdgeInsets.fromLTRB(isMobile ? 16 : 20, 14, isMobile ? 12 : 16, 12),
+          decoration: const BoxDecoration(
+            color: AppColors.white,
+            border: Border(bottom: BorderSide(color: AppColors.border)),
+          ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                titulo,
-                style: fontSizeTitulo.copyWith(
-                  color: colorPrincipal,
-                  fontWeight: FontWeight.bold,
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: colorPrincipal.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.shopping_cart_rounded, color: colorPrincipal, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      titulo,
+                      style: AppTypography.h4.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        fontSize: isMobile ? 15 : 16,
+                      ),
+                    ),
+                    Text(
+                      '${venta.detalles.length} ${venta.detalles.length == 1 ? 'artículo' : 'artículos'}',
+                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                    ),
+                  ],
                 ),
               ),
               TextButton.icon(
-                onPressed: () =>
-                    ref.read(registrarVentaProvider.notifier).vaciarVenta(),
-                icon: Icon(
-                  Icons.delete_outline,
-                  size: tamanoIconoVaciar,
-                ), // ✅ AHORA ADAPTATIVO
-                label: const Text('Vaciar'),
-                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                onPressed: () => ref.read(registrarVentaProvider.notifier).vaciarVenta(),
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: Text(isMobile ? '' : 'Vaciar'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12),
+                ),
               ),
             ],
           ),
         ),
-        const Divider(height: 1),
+
+        // ─── LISTA DE PRODUCTOS ───
         Expanded(
-          child: ListView.builder(
-            padding: paddingLista, // ✅ AHORA ADAPTATIVO
+          child: ListView.separated(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 12 : 16,
+              vertical: 12,
+            ),
             itemCount: venta.detalles.length,
-            itemBuilder: (context, i) =>
-                _FilaProducto(linea: venta.detalles[i], indice: i),
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (context, i) => _FilaProducto(
+              linea: venta.detalles[i],
+              indice: i,
+              colorPrincipal: colorPrincipal,
+            ),
           ),
         ),
-        const Divider(height: 1),
+
+        // ─── RESUMEN + BOTÓN ───
         Container(
           width: double.infinity,
-          padding: paddingInferior, // ✅ AHORA ADAPTATIVO
-          color: AppColors.surface,
+          padding: EdgeInsets.fromLTRB(
+            isMobile ? 16 : 20,
+            16,
+            isMobile ? 16 : 20,
+            isMobile ? 16 : 20,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            border: const Border(top: BorderSide(color: AppColors.border)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _FilaTotal(
-                etiqueta: 'Subtotal',
-                valor: formatearMonto(venta.subtotal),
-              ),
-              SizedBox(height: espaciadoDespuesDivisor), // ✅ AHORA ADAPTATIVO
+              _FilaTotal(etiqueta: 'Subtotal', valor: formatearMonto(venta.subtotal)),
+              const SizedBox(height: 6),
               _FilaTotal(etiqueta: 'ITBIS', valor: formatearMonto(venta.itbis)),
               if (venta.montoDescuento > 0) ...[
-                SizedBox(height: espaciadoDespuesDivisor), // ✅ AHORA ADAPTATIVO
+                const SizedBox(height: 6),
                 _FilaTotal(
                   etiqueta: 'Descuento',
                   valor: '- ${formatearMonto(venta.montoDescuento)}',
+                  color: AppColors.success,
                 ),
               ],
-              SizedBox(
-                height: espaciadoDespuesDivisor * 2,
-              ), // ✅ AHORA ADAPTATIVO
-              const Divider(),
-              SizedBox(height: espaciadoDespuesDivisor), // ✅ AHORA ADAPTATIVO
+              const SizedBox(height: 10),
+              const Divider(height: 1),
+              const SizedBox(height: 10),
               _FilaTotal(
                 etiqueta: 'TOTAL',
                 valor: formatearMonto(venta.total),
                 resaltado: true,
+                colorPrincipal: colorPrincipal,
               ),
-              SizedBox(height: espaciadoAntesTotal), // ✅ AHORA ADAPTATIVO
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                height: isMobile ? 48 : 52,
+                child: ElevatedButton(
                   onPressed: () {
-                    ref
-                        .read(ventasNavegacionProvider.notifier)
-                        .cambiarVista(VistaActual.inicio);
+                    ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorPrincipal,
-                    foregroundColor: Colors.white,
-                    padding: paddingBotonPago, // ✅ AHORA ADAPTATIVO
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  icon: Icon(
-                    Icons.payment,
-                    size: tamanoIconoBotonPago,
-                  ), // ✅ AHORA ADAPTATIVO
-                  label: Text(
-                    'SELECCIONAR FORMA DE PAGO',
-                    style: TextStyle(
-                      fontSize: fontSizeBotonPago, // ✅ AHORA ADAPTATIVO
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.payment_rounded, size: 20),
+                      const SizedBox(width: 10),
+                      Text(
+                        'SELECCIONAR FORMA DE PAGO',
+                        style: TextStyle(
+                          fontSize: isMobile ? 13 : 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -171,65 +198,69 @@ class VistaCarrito extends ConsumerWidget {
   }
 }
 
+// ─────────────────────────────────────────────
+// CARRITO VACÍO
+// ─────────────────────────────────────────────
 class _CarritoVacio extends ConsumerWidget {
-  const _CarritoVacio();
+
+  const _CarritoVacio({required this.colorPrincipal});
+  final Color colorPrincipal;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ✅ PATRÓN RESPONSIVO
-    final anchoPantalla = MediaQuery.of(context).size.width;
-    final esPantallaPequena = anchoPantalla < 600;
-
-    final paddingContenedor = esPantallaPequena
-        ? const EdgeInsets.all(20)
-        : const EdgeInsets.all(32);
-    final tamanoIcono = esPantallaPequena ? 48.0 : 72.0;
-    final espaciadoDespuesIcono = esPantallaPequena ? 12.0 : 16.0;
-    final espaciadoEntreTextos = esPantallaPequena ? 6.0 : 8.0;
-    final espaciadoAntesBoton = esPantallaPequena ? 20.0 : 32.0;
-    final paddingBoton = esPantallaPequena
-        ? const EdgeInsets.symmetric(horizontal: 16, vertical: 10)
-        : const EdgeInsets.symmetric(horizontal: 24, vertical: 12);
-    final estiloTitulo = esPantallaPequena
-        ? AppTypography.labelMedium
-        : AppTypography.labelLarge;
-    final estiloSubtitulo = esPantallaPequena
-        ? AppTypography.labelSmall
-        : AppTypography.bodyMedium;
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return Center(
       child: SingleChildScrollView(
-        padding: paddingContenedor, // ✅ AHORA ADAPTATIVO
+        padding: EdgeInsets.all(isMobile ? 24 : 40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.shopping_cart_outlined,
-              size: tamanoIcono, // ✅ AHORA ADAPTATIVO
-              color: AppColors.grey400,
+            Container(
+              width: isMobile ? 80 : 96,
+              height: isMobile ? 80 : 96,
+              decoration: BoxDecoration(
+                color: colorPrincipal.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.shopping_cart_outlined,
+                size: isMobile ? 40 : 48,
+                color: colorPrincipal.withValues(alpha: 0.6),
+              ),
             ),
-            SizedBox(height: espaciadoDespuesIcono), // ✅ AHORA ADAPTATIVO
+            const SizedBox(height: 20),
             Text(
-              'No hay productos agregados',
-              style: estiloTitulo, // ✅ AHORA ADAPTATIVO
+              'Carrito vacío',
+              style: AppTypography.h3.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Busca y agrega productos desde el catálogo\npara comenzar la operación',
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: espaciadoEntreTextos), // ✅ AHORA ADAPTATIVO
-            Text(
-              'Busca y agrega productos desde el catálogo',
-              style: estiloSubtitulo, // ✅ AHORA ADAPTATIVO
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: espaciadoAntesBoton), // ✅ AHORA ADAPTATIVO
+            const SizedBox(height: 28),
             FilledButton.icon(
               onPressed: () => ref
                   .read(ventasNavegacionProvider.notifier)
                   .cambiarVista(VistaActual.inventario),
-              icon: const Icon(Icons.add_circle_outline),
+              icon: const Icon(Icons.add_circle_outline, size: 20),
               label: const Text('AGREGAR PRODUCTOS'),
               style: FilledButton.styleFrom(
-                padding: paddingBoton,
-              ), // ✅ AHORA ADAPTATIVO
+                backgroundColor: colorPrincipal,
+                foregroundColor: AppColors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 20 : 28,
+                  vertical: isMobile ? 12 : 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ],
         ),
@@ -238,174 +269,189 @@ class _CarritoVacio extends ConsumerWidget {
   }
 }
 
+// ─────────────────────────────────────────────
+// FILA DE PRODUCTO
+// ─────────────────────────────────────────────
 class _FilaProducto extends ConsumerWidget {
-  const _FilaProducto({required this.linea, required this.indice});
+  const _FilaProducto({
+    required this.linea,
+    required this.indice,
+    required this.colorPrincipal,
+  });
+
   final DetalleVenta linea;
   final int indice;
+  final Color colorPrincipal;
+
+  String formatearMonto(double valor) =>
+      'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ✅ PATRÓN RESPONSIVO
-    final anchoPantalla = MediaQuery.of(context).size.width;
-    final esPantallaPequena = anchoPantalla < 600;
-
-    final margenTarjeta = esPantallaPequena
-        ? const EdgeInsets.symmetric(vertical: 4)
-        : const EdgeInsets.symmetric(vertical: 6);
-    final paddingTarjeta = esPantallaPequena
-        ? const EdgeInsets.all(8)
-        : const EdgeInsets.all(12);
-    final tamanoIconosCantidad = esPantallaPequena ? 18.0 : 20.0;
-    final tamanoIconoEliminar = esPantallaPequena ? 16.0 : 18.0;
-    final anchoCantidad = esPantallaPequena ? 24.0 : 28.0;
-    final anchoBotonEliminar = esPantallaPequena ? 24.0 : 28.0;
-    final minSizeBotones = esPantallaPequena ? 32.0 : 36.0;
-    final espaciadoEntreCantidadYPrecio = esPantallaPequena ? 4.0 : 8.0;
-    final espaciadoAntesEliminar = esPantallaPequena ? 2.0 : 4.0;
-    final estiloNombre = esPantallaPequena
-        ? AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)
-        : AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600);
-    final estiloPrecioUnit = esPantallaPequena
-        ? AppTypography.labelSmall.copyWith(color: AppColors.textSecondary)
-        : AppTypography.bodySmall.copyWith(color: AppColors.textSecondary);
-    final estiloSubtotal = esPantallaPequena
-        ? AppTypography.bodyMedium.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-          )
-        : AppTypography.labelMedium.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-          );
-
+    final isMobile = AppBreakpoints.isMobile(context);
     final subtotalMostrar = linea.subtotalLinea ?? linea.subtotal;
 
-    return Card(
-      elevation: 1,
-      margin: margenTarjeta, // ✅ AHORA ADAPTATIVO
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: paddingTarjeta, // ✅ AHORA ADAPTATIVO
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              flex: 5,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    linea.nombreProducto ?? 'Producto',
-                    style: estiloNombre, // ✅ AHORA ADAPTATIVO
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${formatearMonto(linea.precioUnitario)} c/u',
-                    style: estiloPrecioUnit, // ✅ AHORA ADAPTATIVO
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
+    return Container(
+      padding: EdgeInsets.all(isMobile ? 12 : 14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadius.allL,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Nombre + precio unitario
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  onPressed: () => ref
-                      .read(registrarVentaProvider.notifier)
-                      .cambiarCantidad(indice, linea.cantidad - 1),
-                  icon: Icon(
-                    Icons.remove_circle_outline,
-                    size: tamanoIconosCantidad, // ✅ AHORA ADAPTATIVO
-                    color: AppColors.primary,
+                Text(
+                  linea.nombreProducto ?? 'Producto',
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    fontSize: isMobile ? 13.5 : 14,
                   ),
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(
-                    minWidth: minSizeBotones, // ✅ AHORA ADAPTATIVO
-                    minHeight: minSizeBotones,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${formatearMonto(linea.precioUnitario)} c/u',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
+              ],
+            ),
+          ),
+
+          // Controles de cantidad
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.grey50,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _CantidadButton(
+                  icon: Icons.remove,
+                  onTap: () => ref
+                      .read(registrarVentaProvider.notifier)
+                      .cambiarCantidad(indice, linea.cantidad - 1),
+                  color: colorPrincipal,
+                ),
                 SizedBox(
-                  width: anchoCantidad, // ✅ AHORA ADAPTATIVO
+                  width: isMobile ? 28 : 32,
                   child: Text(
                     '${linea.cantidad}',
                     textAlign: TextAlign.center,
                     style: AppTypography.labelMedium.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () => ref
+                _CantidadButton(
+                  icon: Icons.add,
+                  onTap: () => ref
                       .read(registrarVentaProvider.notifier)
                       .cambiarCantidad(indice, linea.cantidad + 1),
-                  icon: Icon(
-                    Icons.add_circle_outline,
-                    size: tamanoIconosCantidad, // ✅ AHORA ADAPTATIVO
-                    color: AppColors.primary,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(
-                    minWidth: minSizeBotones, // ✅ AHORA ADAPTATIVO
-                    minHeight: minSizeBotones,
-                  ),
+                  color: colorPrincipal,
                 ),
               ],
             ),
-            SizedBox(
-              width: espaciadoEntreCantidadYPrecio,
-            ), // ✅ AHORA ADAPTATIVO
-            Expanded(
-              flex: 2,
-              child: Text(
-                formatearMonto(subtotalMostrar),
-                textAlign: TextAlign.right,
-                style: estiloSubtotal, // ✅ AHORA ADAPTATIVO
+          ),
+
+          const SizedBox(width: 12),
+
+          // Subtotal
+          SizedBox(
+            width: isMobile ? 72 : 88,
+            child: Text(
+              formatearMonto(subtotalMostrar),
+              textAlign: TextAlign.right,
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorPrincipal,
+                fontSize: isMobile ? 13 : 14,
               ),
             ),
-            SizedBox(width: espaciadoAntesEliminar), // ✅ AHORA ADAPTATIVO
-            SizedBox(
-              width: anchoBotonEliminar, // ✅ AHORA ADAPTATIVO
-              height: anchoBotonEliminar,
-              child: IconButton(
-                onPressed: () => ref
-                    .read(registrarVentaProvider.notifier)
-                    .eliminarProducto(indice),
-                icon: Icon(
-                  Icons.close,
-                  size: tamanoIconoEliminar, // ✅ AHORA ADAPTATIVO
-                  color: AppColors.error,
-                ),
-                padding: EdgeInsets.zero,
-              ),
-            ),
-          ],
+          ),
+
+          // Eliminar
+          IconButton(
+            onPressed: () => ref
+                .read(registrarVentaProvider.notifier)
+                .eliminarProducto(indice),
+            icon: const Icon(Icons.close_rounded, size: 18),
+            color: AppColors.error,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Eliminar',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CantidadButton extends StatelessWidget {
+
+  const _CantidadButton({
+    required this.icon,
+    required this.onTap,
+    required this.color,
+  });
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          width: 34,
+          height: 34,
+          child: Icon(icon, size: 18, color: color),
         ),
       ),
     );
   }
-
-  String formatearMonto(double valor) =>
-      'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
 }
 
+// ─────────────────────────────────────────────
+// FILA DE TOTAL
+// ─────────────────────────────────────────────
 class _FilaTotal extends StatelessWidget {
   const _FilaTotal({
     required this.etiqueta,
     required this.valor,
     this.resaltado = false,
+    this.color,
+    this.colorPrincipal,
   });
+
   final String etiqueta;
   final String valor;
   final bool resaltado;
+  final Color? color;
+  final Color? colorPrincipal;
 
   @override
   Widget build(BuildContext context) {
-    // ✅ PATRÓN RESPONSIVO
-    final anchoPantalla = MediaQuery.of(context).size.width;
-    final esPantallaPequena = anchoPantalla < 600;
-
-    final fontSizeResaltado = esPantallaPequena ? 15.0 : 18.0;
-    final fontSizeNormal = esPantallaPequena ? 12.0 : 14.0;
+    final isMobile = AppBreakpoints.isMobile(context);
+    final effectiveColor = color ??
+        (resaltado
+            ? (colorPrincipal ?? AppColors.primary)
+            : AppColors.textSecondary);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -414,20 +460,18 @@ class _FilaTotal extends StatelessWidget {
           etiqueta,
           style: AppTypography.bodyMedium.copyWith(
             fontWeight: resaltado ? FontWeight.bold : FontWeight.normal,
-            fontSize: resaltado
-                ? fontSizeResaltado
-                : fontSizeNormal, // ✅ AHORA ADAPTATIVO
-            color: resaltado ? AppColors.primary : AppColors.textSecondary,
+            fontSize: resaltado ? (isMobile ? 15 : 16) : (isMobile ? 13 : 14),
+            color: effectiveColor,
           ),
         ),
         Text(
           valor,
           style: AppTypography.bodyMedium.copyWith(
-            fontWeight: resaltado ? FontWeight.bold : FontWeight.w500,
-            fontSize: resaltado
-                ? fontSizeResaltado
-                : fontSizeNormal, // ✅ AHORA ADAPTATIVO
-            color: resaltado ? AppColors.primary : null,
+            fontWeight: resaltado ? FontWeight.bold : FontWeight.w600,
+            fontSize: resaltado ? (isMobile ? 16 : 18) : (isMobile ? 13 : 14),
+            color: resaltado
+                ? (colorPrincipal ?? AppColors.primary)
+                : AppColors.textPrimary,
           ),
         ),
       ],
