@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/convertir_cotizacion_provider.dart';
@@ -23,62 +21,99 @@ class HistorialVentasBorrador extends ConsumerWidget {
   }
 
   String _etiquetaEstado(EstadoDocumento estado) => switch (estado) {
-    EstadoDocumento.borrador => 'Borrador',
-    EstadoDocumento.cotizado => 'Vigente',
-    EstadoDocumento.enCredito => 'En aprobación',
-    EstadoDocumento.aprobado => 'Aprobado',
-    EstadoDocumento.anulado => 'Rechazado',
-    EstadoDocumento.facturado => 'Convertida',
-  };
+        EstadoDocumento.borrador => 'Borrador',
+        EstadoDocumento.cotizado => 'Vigente',
+        EstadoDocumento.enCredito => 'En aprobación',
+        EstadoDocumento.aprobado => 'Aprobado',
+        EstadoDocumento.anulado => 'Rechazado',
+        EstadoDocumento.facturado => 'Facturada',
+      };
 
   Color _colorEstado(EstadoDocumento estado) => switch (estado) {
-    EstadoDocumento.borrador => AppColors.textSecondary,
-    EstadoDocumento.cotizado => AppColors.primary,
-    EstadoDocumento.enCredito => const Color(0xFFE65100),
-    EstadoDocumento.aprobado => AppColors.success,
-    EstadoDocumento.anulado => AppColors.error,
-    EstadoDocumento.facturado => AppColors.success,
-  };
+        EstadoDocumento.borrador => AppColors.textSecondary,
+        EstadoDocumento.cotizado => AppColors.primary,
+        EstadoDocumento.enCredito => const Color(0xFFE65100),
+        EstadoDocumento.aprobado => AppColors.success,
+        EstadoDocumento.anulado => AppColors.error,
+        EstadoDocumento.facturado => AppColors.success,
+      };
 
   Color _colorFondoEstado(EstadoDocumento estado) => switch (estado) {
-    EstadoDocumento.borrador => AppColors.textSecondary.withValues(alpha: 0.1),
-    EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.1),
-    EstadoDocumento.enCredito => const Color(0xFFE65100).withValues(alpha: 0.1),
-    EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.1),
-    EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.1),
-    EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.1),
-  };
+        EstadoDocumento.borrador =>
+          AppColors.textSecondary.withValues(alpha: 0.12),
+        EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
+        EstadoDocumento.enCredito =>
+          const Color(0xFFE65100).withValues(alpha: 0.12),
+        EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
+        EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
+        EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
+      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ventasBorradorAsync = ref.watch(listaVentasBorradorProvider);
+    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
+    final padding = esPantallaPequena ? 12.0 : 16.0;
 
     return Padding(
-      padding: AppSpacing.allM,
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Cotizaciones', style: AppTypography.h4),
-              AppButton(
-                text: 'Nueva Cotización',
-                onPressed: () {
-                  context.goNamed(NuevaVentaBorradorPage.routeName);
-                },
-                icon: Icons.add,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cotizaciones',
+                      style: AppTypography.h4.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: esPantallaPequena ? 16 : 18,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Lista y estado de cotizaciones',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: esPantallaPequena ? 12 : 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: esPantallaPequena ? 40 : 44,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(
+                    esPantallaPequena ? 'Nueva' : 'Nueva Cotización',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: esPantallaPequena ? 13 : 14,
+                    ),
+                  ),
+                  onPressed: () {
+                    context.goNamed(NuevaVentaBorradorPage.routeName);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: esPantallaPequena ? 12 : 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Lista de cotizaciones y su estado',
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.m),
+          SizedBox(height: esPantallaPequena ? 12 : 16),
           Expanded(
             child: ventasBorradorAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -91,11 +126,12 @@ class HistorialVentasBorrador extends ConsumerWidget {
                       size: 48,
                       color: AppColors.error,
                     ),
-                    const SizedBox(height: AppSpacing.m),
+                    const SizedBox(height: 12),
                     Text(
                       'Error al cargar cotizaciones: $e',
                       style: AppTypography.bodyMedium.copyWith(
                         color: AppColors.error,
+                        fontSize: esPantallaPequena ? 13 : 14,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -108,23 +144,26 @@ class HistorialVentasBorrador extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.description_outlined,
-                          size: 64,
-                          color: Color(0x409E9E9E),
+                          size: esPantallaPequena ? 48 : 56,
+                          color: AppColors.grey300,
                         ),
-                        const SizedBox(height: AppSpacing.m),
+                        const SizedBox(height: 12),
                         Text(
                           'No hay cotizaciones registradas',
                           style: AppTypography.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textSecondary,
+                            fontSize: esPantallaPequena ? 14 : 15,
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.xs),
+                        const SizedBox(height: 4),
                         Text(
                           'Las cotizaciones que registres aparecerán aquí',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.textSecondary,
+                            fontSize: esPantallaPequena ? 12 : 13,
                           ),
                         ),
                       ],
@@ -133,7 +172,8 @@ class HistorialVentasBorrador extends ConsumerWidget {
                 }
                 return ListView.separated(
                   itemCount: cotizaciones.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1),
+                  separatorBuilder: (_, __) =>
+                      SizedBox(height: esPantallaPequena ? 8 : 10),
                   itemBuilder: (_, int i) {
                     final VentaBorradorState c = cotizaciones[i];
                     return _TarjetaCotizacion(
@@ -143,6 +183,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
                       colorFondoEstado: _colorFondoEstado(c.estadoDocumento),
                       fechaEmision: _formatearFecha(c.fecha),
                       fechaVencimiento: _formatearFecha(c.vencimiento),
+                      esPantallaPequena: esPantallaPequena,
                     );
                   },
                 );
@@ -163,6 +204,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
     required this.colorFondoEstado,
     required this.fechaEmision,
     required this.fechaVencimiento,
+    required this.esPantallaPequena,
   });
 
   final VentaBorradorState cotizacion;
@@ -171,17 +213,31 @@ class _TarjetaCotizacion extends ConsumerWidget {
   final Color colorFondoEstado;
   final String fechaEmision;
   final String fechaVencimiento;
+  final bool esPantallaPequena;
 
   Future<void> _enviarAprobacion(WidgetRef ref, BuildContext context) async {
     if (cotizacion.id == null) return;
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Enviar a Aprobación'),
-        content: Text('¿Enviar la Cotización N° ${cotizacion.numero} a aprobación de crédito?'),
+        content: Text(
+          '¿Enviar la Cotización N° ${cotizacion.numero} a aprobación de crédito?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Enviar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+            ),
+            child: const Text('Enviar'),
+          ),
         ],
       ),
     );
@@ -191,14 +247,24 @@ class _TarjetaCotizacion extends ConsumerWidget {
       await servicio.enviarAprobacion(cotizacion.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cotización ${cotizacion.numero} enviada a aprobación'), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text(
+              'Cotización ${cotizacion.numero} enviada a aprobación',
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         ref.invalidate(listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -209,11 +275,24 @@ class _TarjetaCotizacion extends ConsumerWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Convertir a Venta'),
-        content: Text('¿Convertir la Cotización N° ${cotizacion.numero} en una Venta?'),
+        content: Text(
+          '¿Convertir la Cotización N° ${cotizacion.numero} en una Venta?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Convertir')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: AppColors.white,
+            ),
+            child: const Text('Convertir'),
+          ),
         ],
       ),
     );
@@ -223,14 +302,24 @@ class _TarjetaCotizacion extends ConsumerWidget {
       await repo.confirmarVentaBorrador(cotizacion.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cotización N° ${cotizacion.numero} convertida a Venta'), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text(
+              'Cotización N° ${cotizacion.numero} convertida a Venta',
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         ref.invalidate(listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -239,59 +328,160 @@ class _TarjetaCotizacion extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final estado = cotizacion.estadoDocumento;
-    final puedeEnviarAprobacion = estado == EstadoDocumento.cotizado && cotizacion.id != null;
-    final puedeConvertir = estado == EstadoDocumento.aprobado && cotizacion.id != null;
+    final puedeEnviarAprobacion =
+        estado == EstadoDocumento.cotizado && cotizacion.id != null;
+    final puedeConvertir =
+        estado == EstadoDocumento.aprobado && cotizacion.id != null;
     final convertida = estado == EstadoDocumento.facturado;
+    final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
+    final tamanoTotal = esPantallaPequena ? 16.0 : 18.0;
+    final tamanoEtiqueta = esPantallaPequena ? 11.0 : 12.0;
 
-    return Padding(
-      padding: AppSpacing.vS,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: EdgeInsets.all(esPantallaPequena ? 12 : 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          // Fila 1: N° + badge
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'N° ${cotizacion.numero}',
+                  style: AppTypography.labelMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: esPantallaPequena ? 14 : 15,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: colorFondoEstado,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  etiquetaEstado,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: colorTextoEstado,
+                    fontWeight: FontWeight.w600,
+                    fontSize: tamanoEtiqueta,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Fila 2: fechas + total
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Cotización N° ${cotizacion.numero}',
-                      style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600),
+                      'Emitida: $fechaEmision',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: tamanoEtiqueta,
+                      ),
                     ),
-                    const SizedBox(width: AppSpacing.s),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
-                      decoration: BoxDecoration(color: colorFondoEstado, borderRadius: BorderRadius.circular(4)),
-                      child: Text(etiquetaEstado, style: AppTypography.labelSmall.copyWith(color: colorTextoEstado)),
+                    Text(
+                      'Vence: $fechaVencimiento',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: tamanoEtiqueta,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text('Emitida: $fechaEmision', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-                Text('Vence: $fechaVencimiento', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
+              ),
               Text(
                 'RD\$ ${cotizacion.montoTotal.toStringAsFixed(2)}',
-                style: AppTypography.h4.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              if (puedeEnviarAprobacion)
-                AppButton(text: 'Enviar a aprobación', onPressed: () => _enviarAprobacion(ref, context), height: 36)
-              else if (puedeConvertir)
-                AppButton(text: 'Convertir a Venta', onPressed: () => _convertirAVenta(ref, context), height: 36)
-              else if (convertida)
-                TextButton.icon(
-                  onPressed: null,
-                  icon: const Icon(Icons.check_circle, size: 16, color: AppColors.success),
-                  label: Text('Venta generada', style: AppTypography.labelSmall.copyWith(color: AppColors.success)),
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: tamanoTotal,
                 ),
+              ),
             ],
           ),
+          // Acciones según estado
+          if (puedeEnviarAprobacion || puedeConvertir || convertida) ...[
+            const SizedBox(height: 10),
+            const Divider(height: 1),
+            const SizedBox(height: 8),
+            if (puedeEnviarAprobacion)
+              SizedBox(
+                width: double.infinity,
+                height: esPantallaPequena ? 40 : 44,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.send_outlined, size: 18),
+                  label: Text(
+                    'Enviar a aprobación',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: tamanoCuerpo,
+                    ),
+                  ),
+                  onPressed: () => _enviarAprobacion(ref, context),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              )
+            else if (puedeConvertir)
+              SizedBox(
+                width: double.infinity,
+                height: esPantallaPequena ? 40 : 44,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.shopping_cart_checkout, size: 18),
+                  label: Text(
+                    'Convertir a Venta',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: tamanoCuerpo,
+                    ),
+                  ),
+                  onPressed: () => _convertirAVenta(ref, context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              )
+            else if (convertida)
+              Row(
+                children: [
+                  const Icon(Icons.check_circle,
+                      size: 16, color: AppColors.success),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Venta generada',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.success,
+                      fontWeight: FontWeight.w600,
+                      fontSize: tamanoEtiqueta,
+                    ),
+                  ),
+                ],
+              ),
+          ],
         ],
       ),
     );
