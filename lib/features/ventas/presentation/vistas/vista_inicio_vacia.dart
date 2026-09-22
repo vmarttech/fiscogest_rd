@@ -5,8 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
@@ -38,9 +39,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(registrarVentaProvider.notifier)
-          .establecerConsumidorFinal();
+      ref.read(registrarVentaProvider.notifier).establecerConsumidorFinal();
     });
   }
 
@@ -51,13 +50,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   }
 
   Future<void> _cambiarCliente() async {
-    final ClienteEntity? cliente = await SeleccionarClienteDialog.mostrar(
-      context,
-    );
+    final ClienteEntity? cliente = await SeleccionarClienteDialog.mostrar(context);
     if (cliente != null && mounted) {
-      ref
-          .read(registrarVentaProvider.notifier)
-          .seleccionarCliente(cliente.id ?? 0, cliente.nombre);
+      ref.read(registrarVentaProvider.notifier).seleccionarCliente(cliente.id ?? 0, cliente.nombre);
     }
   }
 
@@ -76,20 +71,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     try {
       final abonoRecibido = resultadoCredito.abonoInicial?.monto ?? 0.0;
       final fechaVence = resultadoCredito.cuenta.fechaVencimiento;
-      ref
-          .read(registrarVentaProvider.notifier)
-          .establecerCondicionesCredito(abonoRecibido, fechaVence);
+      ref.read(registrarVentaProvider.notifier).establecerCondicionesCredito(abonoRecibido, fechaVence);
       final estadoConCredito = ref.read(registrarVentaProvider);
       final modo = ref.read(ventasNavegacionProvider).modoOperacion;
 
       if (modo == ModoOperacion.apartado) {
-        await ref
-            .read(apartadoNotifierProvider.notifier)
-            .crearApartadoDesdeVenta(estadoConCredito);
+        await ref.read(apartadoNotifierProvider.notifier).crearApartadoDesdeVenta(estadoConCredito);
       } else {
-        final ventaGuardada = await ref
-            .read(registrarVentaUseCaseProvider)
-            .ejecutar(estadoConCredito);
+        final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoConCredito);
         if (!mounted) return;
         if (ventaGuardada.id == null) {
           throw Exception('El repositorio no devolvió ID de venta');
@@ -103,22 +92,22 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           SnackBar(
             content: Text(
               modo == ModoOperacion.apartado
-                  ? '✅ Apartado registrado — Crédito vinculado.\n💰 Abono inicial: ${_formatearMonto(abonoRecibido)}\n📄 Saldo pendiente: ${_formatearMonto(saldoPendiente)}\n📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}'
-                  : '✅ Venta registrada.\n💰 Abono inicial: ${_formatearMonto(abonoRecibido)}\n📄 Saldo pendiente: ${_formatearMonto(saldoPendiente)}\n📅 Vence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}',
+                  ? 'Apartado registrado — Crédito vinculado.\nAbono inicial: ${_formatearMonto(abonoRecibido)}\nSaldo pendiente: ${_formatearMonto(saldoPendiente)}\nVence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}'
+                  : 'Venta registrada.\nAbono inicial: ${_formatearMonto(abonoRecibido)}\nSaldo pendiente: ${_formatearMonto(saldoPendiente)}\nVence: ${DateFormat('dd/MM/yyyy').format(fechaVence)}',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
             duration: const Duration(seconds: 5),
           ),
         );
         Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e, stackTrace) {
-      if (kDebugMode) debugPrint('❌ Error crédito: $e\n$stackTrace');
+      if (kDebugMode) debugPrint('Error crédito: $e\n$stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ ${e.toString().replaceAll("Exception: ", "")}'),
-            backgroundColor: Colors.red,
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 6),
           ),
         );
@@ -131,16 +120,12 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   Future<void> _cobrar() async {
     final estado = ref.read(registrarVentaProvider);
     final modo = ref.read(ventasNavegacionProvider).modoOperacion;
-    final valido = ref
-        .read(registrarVentaProvider.notifier)
-        .validarAntesDeGuardar();
+    final valido = ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
 
     if (!valido) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('⚠️ Agregue productos y seleccione forma de pago'),
-          ),
+          const SnackBar(content: Text('Agregue productos y seleccione forma de pago')),
         );
       }
       return;
@@ -148,20 +133,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
     if (!mounted) return;
 
-    final esPantallaPequenaDialog = MediaQuery.of(context).size.width < 600;
-    const formasPago = [
-      'Efectivo',
-      'Tarjeta',
-      'Crédito',
-      'Transferencia',
-      'Cheque',
-    ];
-
+    const formasPago = ['Efectivo', 'Tarjeta', 'Crédito', 'Transferencia', 'Cheque'];
     final formaSeleccionada = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           modo == ModoOperacion.apartado ? 'Forma de Reserva' : 'Forma de Pago',
+          style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -169,8 +148,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           children: [
             Text(
               'Total: ${_formatearMonto(estado.total)}',
-              style: TextStyle(
-                fontSize: esPantallaPequenaDialog ? 14 : 18,
+              style: AppTypography.h3.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
               ),
@@ -179,6 +157,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
             ...formasPago.map(
               (forma) => ListTile(
                 title: Text(forma),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 onTap: () => Navigator.pop(context, forma.toLowerCase()),
               ),
             ),
@@ -189,10 +168,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
     if (formaSeleccionada == null || !mounted) return;
 
-    ref
-        .read(registrarVentaProvider.notifier)
-        .cambiarFormaPago(formaSeleccionada);
-
+    ref.read(registrarVentaProvider.notifier).cambiarFormaPago(formaSeleccionada);
     final estadoFinal = ref.read(registrarVentaProvider);
 
     if (formaSeleccionada == 'crédito') {
@@ -211,18 +187,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '✅ Apartado #$idApartado registrado — Stock reservado — ${_formatearMonto(estadoFinal.total)}',
-            ),
-            backgroundColor: Colors.green,
+            content: Text('Apartado #$idApartado registrado — Stock reservado — ${_formatearMonto(estadoFinal.total)}'),
+            backgroundColor: AppColors.success,
             duration: const Duration(seconds: 4),
           ),
         );
       }
     } else {
-      final ventaGuardada = await ref
-          .read(registrarVentaUseCaseProvider)
-          .ejecutar(estadoFinal);
+      final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoFinal);
       if (!mounted) return;
       if (ventaGuardada.id == null) {
         throw Exception('El repositorio no devolvió ID de venta');
@@ -231,10 +203,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '✅ Venta #${ventaGuardada.numero} registrada — ${_formatearMonto(ventaGuardada.total)}',
-            ),
-            backgroundColor: Colors.green,
+            content: Text('Venta #${ventaGuardada.numero} registrada — ${_formatearMonto(ventaGuardada.total)}'),
+            backgroundColor: AppColors.success,
             duration: const Duration(seconds: 4),
           ),
         );
@@ -248,8 +218,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       final precioConCantidad = linea.subtotalLinea ?? linea.subtotal;
       double despuesDesc = precioConCantidad;
       if (linea.descuentoPorcentaje > 0) {
-        despuesDesc =
-            precioConCantidad * (100 - linea.descuentoPorcentaje) / 100;
+        despuesDesc = precioConCantidad * (100 - linea.descuentoPorcentaje) / 100;
       } else if (linea.montoDescuento > 0) {
         despuesDesc = precioConCantidad - linea.montoDescuento;
       }
@@ -268,18 +237,16 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
   @override
   Widget build(BuildContext context) {
-    final modo = ref.watch(
-      ventasNavegacionProvider.select((e) => e.modoOperacion),
-    );
+    final modo = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
     final estado = ref.watch(registrarVentaProvider);
-    final esConsumidorFinal =
-        estado.clienteId == 0 || estado.clienteNombre == 'Consumidor Final';
+    final esConsumidorFinal = estado.clienteId == 0 || estado.clienteNombre == 'Consumidor Final';
+    final isMobile = AppBreakpoints.isMobile(context);
 
     final colorPrimario = switch (modo) {
       ModoOperacion.venta => AppColors.primary,
       ModoOperacion.cotizacion => AppColors.info,
-      ModoOperacion.apartado => AppColors.success,
-      ModoOperacion.cobrar => AppColors.warning,
+      ModoOperacion.apartado => AppColors.warning,
+      ModoOperacion.cobrar => AppColors.error,
     };
 
     final nombreCliente = estado.clienteNombre?.isNotEmpty == true
@@ -291,111 +258,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final tieneDescuentoGeneral = estado.montoDescuento > 0;
     final descuentoPorLinea = _calcularDescuentoPorLinea(estado);
     final subtotalConDescuentoLinea = estado.subtotal - descuentoPorLinea;
-    final baseGravable = (subtotalConDescuentoLinea - estado.montoDescuento)
-        .clamp(0.0, double.infinity);
-
-    final anchoPantalla = MediaQuery.of(context).size.width;
-    final esPantallaPequena = anchoPantalla < 600;
-    final paddingLateral = esPantallaPequena ? 16.0 : 24.0;
-    const anchoMaximoContenido = 900.0;
-    final espaciadoBotones = esPantallaPequena ? 4.0 : 8.0;
-    final anchoColumnaValores = esPantallaPequena
-        ? anchoPantalla * 0.35
-        : 160.0;
-    final espaciadoEtiquetaValor = esPantallaPequena ? 8.0 : 16.0;
-    final paddingVacioVertical = esPantallaPequena ? 24.0 : 48.0;
-    final tamanoIconoVacio = esPantallaPequena ? 40.0 : 56.0;
-    final fontSizeMontoBoton = esPantallaPequena ? 14.0 : 18.0;
-    final espaciadoCliente = esPantallaPequena ? 6.0 : 8.0;
-    final espaciadoBotonesCliente = esPantallaPequena ? 8.0 : 12.0;
-    final tamanoTextoEtiqueta = esPantallaPequena ? 13.0 : 14.0;
-
-    Widget botonModo(ModoOperacion m, String etiqueta) {
-      final activo = modo == m;
-      return Expanded(
-        child: FilledButton(
-          onPressed: _guardando
-              ? null
-              : () => ref
-                    .read(ventasNavegacionProvider.notifier)
-                    .establecerModoOperacion(m),
-          style: FilledButton.styleFrom(
-            backgroundColor: activo ? colorPrimario : Colors.transparent,
-            foregroundColor: activo ? Colors.white : colorPrimario,
-            side: activo ? null : BorderSide(color: colorPrimario),
-            padding: EdgeInsets.symmetric(vertical: esPantallaPequena ? 8 : 12),
-            minimumSize: const Size(60, 44),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            textStyle: TextStyle(
-              fontSize: esPantallaPequena ? 11 : 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          child: Text(etiqueta),
-        ),
-      );
-    }
-
-    Widget filaTotal(
-      String etiqueta,
-      String valor, {
-      bool esDestacado = false,
-      Color? colorTexto,
-    }) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              etiqueta,
-              style: esDestacado
-                  ? AppTypography.labelLarge.copyWith(
-                      fontSize: tamanoTextoEtiqueta,
-                      fontWeight: FontWeight.bold,
-                      color: colorTexto,
-                    )
-                  : AppTypography.labelMedium.copyWith(
-                      fontSize: tamanoTextoEtiqueta,
-                      color: colorTexto,
-                    ),
-            ),
-            SizedBox(width: espaciadoEtiquetaValor),
-            SizedBox(
-              width: anchoColumnaValores,
-              child: Text(
-                valor,
-                textAlign: TextAlign.right,
-                style: esDestacado
-                    ? AppTypography.labelLarge.copyWith(
-                        fontSize: tamanoTextoEtiqueta,
-                        fontWeight: FontWeight.bold,
-                        color: colorTexto,
-                      )
-                    : AppTypography.labelMedium.copyWith(
-                        fontSize: tamanoTextoEtiqueta,
-                        color: colorTexto,
-                      ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final baseGravable = (subtotalConDescuentoLinea - estado.montoDescuento).clamp(0.0, double.infinity);
 
     if (_mostrarFormularioCredito && _estadoPasoCredito != null) {
       return Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: anchoMaximoContenido),
+          constraints: const BoxConstraints(maxWidth: 900),
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: paddingLateral,
-              vertical: AppSpacing.m,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -407,7 +277,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                     label: const Text('Volver'),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.m),
+                const SizedBox(height: 12),
                 FormularioCreditoVista(
                   estadoVenta: _estadoPasoCredito!,
                   onVolver: _cerrarFormularioCredito,
@@ -422,257 +292,252 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: anchoMaximoContenido),
+        constraints: const BoxConstraints(maxWidth: 900),
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: paddingLateral,
-            vertical: AppSpacing.m,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  botonModo(ModoOperacion.venta, 'VENTA'),
-                  SizedBox(width: espaciadoBotones),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: _guardando
+              // ─── PESTAÑAS DE MODO ───
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.grey100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    _ModoTab(
+                      label: 'VENTA',
+                      active: modo == ModoOperacion.venta,
+                      color: AppColors.primary,
+                      onTap: _guardando
                           ? null
-                          : () => context.push('/ventas/cotizaciones/nueva'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: AppColors.info,
-                        side: const BorderSide(color: AppColors.info),
-                        padding: EdgeInsets.symmetric(
-                          vertical: esPantallaPequena ? 8 : 12,
-                        ),
-                        minimumSize: const Size(60, 44),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        textStyle: TextStyle(
-                          fontSize: esPantallaPequena ? 11 : 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      child: const Text('COTIZACIÓN'),
+                          : () => ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.venta),
                     ),
-                  ),
-                  SizedBox(width: espaciadoBotones),
-                  botonModo(ModoOperacion.apartado, 'APARTADO'),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.m),
-              Align(
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: esPantallaPequena ? anchoPantalla * 0.75 : 450,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppTextField(
-                        controller: _buscarController,
-                        hint: 'Buscar producto, código o escanear...',
-                        prefixIcon: Icons.search,
-                        onChanged: (texto) => ref
-                            .read(registrarVentaProvider.notifier)
-                            .buscarProducto(texto),
-                      ),
-                      if (tieneResultados)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          constraints: const BoxConstraints(maxHeight: 280),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: AppColors.grey200),
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            itemCount: estado.resultadosBusqueda.length,
-                            itemBuilder: (context, i) {
-                              final prod = estado.resultadosBusqueda[i];
-                              return ListTile(
-                                dense: true,
-                                title: Text(
-                                  prod.nombreProducto ?? 'Producto',
-                                  style: TextStyle(fontSize: tamanoTextoEtiqueta),
-                                ),
-                                subtitle: Text(
-                                  _formatearMonto(prod.precioUnitario),
-                                  style: TextStyle(fontSize: tamanoTextoEtiqueta - 1),
-                                ),
-                                onTap: () {
-                                  _seleccionarProducto(prod);
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
+                    _ModoTab(
+                      label: 'COTIZACIÓN',
+                      active: false,
+                      color: AppColors.info,
+                      onTap: _guardando ? null : () => context.push('/ventas/cotizaciones/nueva'),
+                    ),
+                    _ModoTab(
+                      label: 'APARTADO',
+                      active: modo == ModoOperacion.apartado,
+                      color: AppColors.warning,
+                      onTap: _guardando
+                          ? null
+                          : () => ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.apartado),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.m),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.person_outline,
-                    size: 18,
-                    color: AppColors.primary,
-                  ),
-                  SizedBox(width: espaciadoCliente),
-                  Expanded(
-                    child: Text(
-                      nombreCliente,
-                      style: AppTypography.labelMedium.copyWith(fontSize: tamanoTextoEtiqueta),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SizedBox(width: espaciadoBotonesCliente),
-                  ElevatedButton(
-                    onPressed: _guardando ? null : _cambiarCliente,
-                    child: const Text('Cambiar'),
-                  ),
-                ],
+
+              const SizedBox(height: 20),
+
+              // ─── BUSCADOR ───
+              AppTextField(
+                controller: _buscarController,
+                hint: 'Buscar producto, código o escanear...',
+                prefixIcon: Icons.search,
+                onChanged: (texto) => ref.read(registrarVentaProvider.notifier).buscarProducto(texto),
               ),
-              const SizedBox(height: AppSpacing.m),
-              const Divider(height: 1),
-              const SizedBox(height: AppSpacing.m),
+
+              if (tieneResultados)
+                Container(
+                  margin: const EdgeInsets.only(top: 6),
+                  constraints: const BoxConstraints(maxHeight: 280),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    border: Border.all(color: AppColors.border),
+                    borderRadius: AppRadius.allM,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: estado.resultadosBusqueda.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.border),
+                    itemBuilder: (context, i) {
+                      final prod = estado.resultadosBusqueda[i];
+                      return ListTile(
+                        dense: true,
+                        title: Text(
+                          prod.nombreProducto ?? 'Producto',
+                          style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                        subtitle: Text(
+                          _formatearMonto(prod.precioUnitario),
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.primary),
+                        ),
+                        onTap: () => _seleccionarProducto(prod),
+                      );
+                    },
+                  ),
+                ),
+
+              const SizedBox(height: 16),
+
+              // ─── CLIENTE ───
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: AppRadius.allM,
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline, size: 20, color: colorPrimario),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        nombreCliente,
+                        style: AppTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _guardando ? null : _cambiarCliente,
+                      style: TextButton.styleFrom(
+                        foregroundColor: colorPrimario,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      child: const Text('Cambiar'),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // ─── CARRITO / VACÍO ───
               if (!tieneProductos)
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: paddingVacioVertical),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: isMobile ? 40 : 56),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: AppRadius.allL,
+                    border: Border.all(color: AppColors.border),
+                  ),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.point_of_sale_outlined,
-                        size: tamanoIconoVacio,
-                        color: AppColors.grey400,
+                        size: isMobile ? 48 : 56,
+                        color: AppColors.grey300,
                       ),
-                      const SizedBox(height: AppSpacing.m),
+                      const SizedBox(height: 14),
                       Text(
-                        modo == ModoOperacion.apartado
-                            ? 'El apartado está vacío'
-                            : 'La venta está vacía',
-                        style: esPantallaPequena
-                            ? AppTypography.labelMedium.copyWith(fontSize: tamanoTextoEtiqueta)
-                            : AppTypography.labelLarge,
+                        modo == ModoOperacion.apartado ? 'El apartado está vacío' : 'La venta está vacía',
+                        style: AppTypography.h4.copyWith(fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(height: AppSpacing.s),
+                      const SizedBox(height: 6),
                       Text(
                         'Busca un producto para comenzar',
-                        style: esPantallaPequena
-                            ? AppTypography.labelSmall.copyWith(fontSize: tamanoTextoEtiqueta - 1)
-                            : AppTypography.bodyMedium,
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
                 )
               else
                 const PanelCarrito(),
-              const SizedBox(height: AppSpacing.xl),
+
+              const SizedBox(height: 24),
+
+              // ─── TOTALES ───
               if (tieneProductos)
                 Align(
                   alignment: Alignment.centerRight,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       if (estado.costoEnvio > 0)
-                        filaTotal(
-                          'Envío / Delivery:',
-                          _formatearMonto(estado.costoEnvio),
-                        ),
+                        _FilaResumen(label: 'Envío / Delivery', value: _formatearMonto(estado.costoEnvio)),
                       if (!esConsumidorFinal) ...[
-                        filaTotal(
-                          'Subtotal:',
-                          _formatearMonto(estado.subtotal),
-                        ),
+                        _FilaResumen(label: 'Subtotal', value: _formatearMonto(estado.subtotal)),
                         if (descuentoPorLinea > 0.001)
-                          filaTotal(
-                            'Descuento por línea:',
-                            '- ${_formatearMonto(descuentoPorLinea)}',
-                            colorTexto: Colors.red.shade700,
+                          _FilaResumen(
+                            label: 'Descuento por línea',
+                            value: '- ${_formatearMonto(descuentoPorLinea)}',
+                            color: AppColors.error,
                           ),
                         if (tieneDescuentoGeneral)
-                          filaTotal(
-                            'Descuento general:',
-                            '- ${_formatearMonto(estado.montoDescuento)}',
-                            colorTexto: Colors.red.shade700,
+                          _FilaResumen(
+                            label: 'Descuento general',
+                            value: '- ${_formatearMonto(estado.montoDescuento)}',
+                            color: AppColors.error,
                           ),
-                        filaTotal(
-                          'Base Gravable:',
-                          _formatearMonto(baseGravable),
-                        ),
-                        filaTotal(
-                          'ITBIS (18%):',
-                          _formatearMonto(estado.itbis),
-                        ),
+                        _FilaResumen(label: 'Base Gravable', value: _formatearMonto(baseGravable)),
+                        _FilaResumen(label: 'ITBIS (18%)', value: _formatearMonto(estado.itbis)),
                       ],
                       const SizedBox(height: 8),
-                      filaTotal(
-                        'TOTAL:',
-                        montoTotal,
-                        esDestacado: true,
-                        colorTexto: colorPrimario,
+                      _FilaResumen(
+                        label: 'TOTAL',
+                        value: montoTotal,
+                        destacado: true,
+                        color: colorPrimario,
                       ),
                     ],
                   ),
                 ),
-              const SizedBox(height: AppSpacing.xl),
+
+              const SizedBox(height: 24),
+
+              // ─── BOTÓN COBRAR ───
               Align(
                 alignment: Alignment.centerRight,
                 child: SizedBox(
-                  width: esPantallaPequena ? double.infinity : 260,
+                  width: isMobile ? double.infinity : 280,
+                  height: isMobile ? 56 : 64,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: esPantallaPequena ? 16 : 24,
-                        vertical: esPantallaPequena ? 12 : 16,
-                      ),
                       backgroundColor: colorPrimario,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      minimumSize: Size(0, esPantallaPequena ? 60 : 72),
+                      foregroundColor: AppColors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      disabledBackgroundColor: AppColors.grey300,
                     ),
                     onPressed: tieneProductos && !_guardando ? _cobrar : null,
                     child: _guardando
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                          )
                         : Column(
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 tieneProductos
-                                    ? (modo == ModoOperacion.apartado
-                                          ? 'RESERVAR'
-                                          : 'COBRAR')
+                                    ? (modo == ModoOperacion.apartado ? 'RESERVAR' : 'COBRAR')
                                     : 'AGREGUE PRODUCTOS',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: esPantallaPequena ? 12 : 14,
+                                  fontSize: 13,
+                                  letterSpacing: 0.4,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                montoTotal,
-                                style: TextStyle(
-                                  fontSize: fontSizeMontoBoton,
-                                  fontWeight: FontWeight.bold,
+                              if (tieneProductos) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  montoTotal,
+                                  style: TextStyle(
+                                    fontSize: isMobile ? 15 : 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                   ),
@@ -681,6 +546,94 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+class _ModoTab extends StatelessWidget {
+
+  const _ModoTab({
+    required this.label,
+    required this.active,
+    required this.color,
+    this.onTap,
+  });
+  final String label;
+  final bool active;
+  final Color color;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: active ? color : Colors.transparent,
+        borderRadius: BorderRadius.circular(9),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(9),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: AppTypography.labelMedium.copyWith(
+                color: active ? AppColors.white : color,
+                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilaResumen extends StatelessWidget {
+
+  const _FilaResumen({
+    required this.label,
+    required this.value,
+    this.destacado = false,
+    this.color,
+  });
+  final String label;
+  final String value;
+  final bool destacado;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$label:',
+            style: AppTypography.bodyMedium.copyWith(
+              fontWeight: destacado ? FontWeight.bold : FontWeight.normal,
+              color: color ?? AppColors.textSecondary,
+              fontSize: destacado ? 15 : 13.5,
+            ),
+          ),
+          const SizedBox(width: 16),
+          SizedBox(
+            width: 130,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color ?? AppColors.textPrimary,
+                fontSize: destacado ? 16 : 13.5,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

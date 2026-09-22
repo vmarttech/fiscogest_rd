@@ -6,7 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
-import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
@@ -89,121 +89,65 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
 
   Widget _buildModoNormal() {
     final estado = ref.watch(registrarVentaProvider);
-    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
-    final tamanoTexto = esPantallaPequena ? 13.0 : 14.0;
+    final isMobile = AppBreakpoints.isMobile(context);
 
-    return AppCard(
-      child: Padding(
-        padding: AppSpacing.allM,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Datos de la Venta',
-              style: AppTypography.labelLarge.copyWith(
-                fontSize: esPantallaPequena ? 15.0 : 16.0,
-                fontWeight: FontWeight.bold,
-              ),
+    return Container(
+      padding: AppSpacing.allM,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadius.allL,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Datos de la Venta',
+            style: AppTypography.h4.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+              fontSize: isMobile ? 15 : 16,
             ),
-            const SizedBox(height: AppSpacing.m),
-            InkWell(
-              onTap: widget.alSeleccionarCliente,
-              borderRadius: AppRadius.allM,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.s,
-                  horizontal: AppSpacing.xs,
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.person, color: AppColors.primary),
-                    const SizedBox(width: AppSpacing.m),
-                    Expanded(
-                      child: Text(
-                        'Cliente',
-                        style: AppTypography.labelMedium.copyWith(fontSize: tamanoTexto),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          (estado.clienteNombre?.isNotEmpty ?? false)
-                              ? estado.clienteNombre ?? 'Seleccionar'
-                              : 'Seleccionar',
-                          style: AppTypography.labelMedium.copyWith(
-                            fontSize: tamanoTexto,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+          ),
+          const SizedBox(height: 16),
+
+          // Cliente
+          _SelectorRow(
+            icon: Icons.person_outline,
+            label: 'Cliente',
+            value: (estado.clienteNombre?.isNotEmpty ?? false)
+                ? estado.clienteNombre!
+                : 'Seleccionar',
+            onTap: widget.alSeleccionarCliente,
+          ),
+
+          const SizedBox(height: 8),
+
+          // Forma de pago
+          _SelectorRow(
+            icon: Icons.payment_outlined,
+            label: 'Forma de Pago',
+            value: estado.tipoPago.isNotEmpty
+                ? '${estado.tipoPago[0].toUpperCase()}${estado.tipoPago.substring(1)}${estado.esCredito ? ' (Crédito)' : ''}'
+                : 'Seleccionar',
+            onTap: widget.alSeleccionarFormaPago,
+            valueColor: estado.tipoPago.isNotEmpty
+                ? AppColors.textPrimary
+                : AppColors.textSecondary,
+          ),
+
+          const SizedBox(height: 20),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: AppButton(
+              text: 'COBRAR',
+              onPressed: _abrirModoCobro,
             ),
-            const SizedBox(height: AppSpacing.s),
-            InkWell(
-              onTap: widget.alSeleccionarFormaPago,
-              borderRadius: AppRadius.allM,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.s,
-                  horizontal: AppSpacing.xs,
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.payment, color: AppColors.primary),
-                    const SizedBox(width: AppSpacing.m),
-                    Expanded(
-                      child: Text(
-                        'Forma de Pago',
-                        style: AppTypography.labelMedium.copyWith(fontSize: tamanoTexto),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          estado.tipoPago.isNotEmpty
-                              ? '${estado.tipoPago[0].toUpperCase()}${estado.tipoPago.substring(1)}${estado.esCredito ? ' (Crédito)' : ''}'
-                              : 'Seleccionar',
-                          style: AppTypography.labelMedium.copyWith(
-                            fontSize: tamanoTexto,
-                            fontWeight: FontWeight.w500,
-                            color: estado.tipoPago.isNotEmpty
-                                ? AppColors.textPrimary
-                                : AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.m),
-            SizedBox(
-              width: double.infinity,
-              child: AppButton(
-                text: 'COBRAR',
-                onPressed: _abrirModoCobro,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -211,27 +155,93 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
   Widget _buildModoCobro() {
     final estado = ref.read(registrarVentaProvider);
     final clienteId = estado.clienteId ?? 0;
-    return AppCard(
-      child: Padding(
-        padding: AppSpacing.allM,
-        child: CobrarPage(
-          clienteIdFiltro: clienteId,
-          onVolver: _cerrarModo,
-          onIrACredito: _abrirModoCredito,
-        ),
+
+    return Container(
+      padding: AppSpacing.allM,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadius.allL,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: CobrarPage(
+        clienteIdFiltro: clienteId,
+        onVolver: _cerrarModo,
+        onIrACredito: _abrirModoCredito,
       ),
     );
   }
 
   Widget _buildModoCredito() {
     if (_datosVenta == null) return const SizedBox.shrink();
-    return AppCard(
-      child: Padding(
-        padding: AppSpacing.allM,
-        child: FormularioCreditoVista(
-          estadoVenta: _datosVenta!,
-          onVolver: _cerrarModo,
-          onConfirmado: _onCreditoConfirmado,
+
+    return Container(
+      padding: AppSpacing.allM,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadius.allL,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: FormularioCreditoVista(
+        estadoVenta: _datosVenta!,
+        onVolver: _cerrarModo,
+        onConfirmado: _onCreditoConfirmado,
+      ),
+    );
+  }
+}
+
+class _SelectorRow extends StatelessWidget {
+
+  const _SelectorRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onTap,
+    this.valueColor,
+  });
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.grey50,
+      borderRadius: AppRadius.allM,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.allM,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Row(
+            children: [
+              Icon(icon, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              Text(
+                value,
+                style: AppTypography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: valueColor ?? AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
         ),
       ),
     );
