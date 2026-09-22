@@ -50,9 +50,12 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   }
 
   Future<void> _cambiarCliente() async {
-    final ClienteEntity? cliente = await SeleccionarClienteDialog.mostrar(context);
+    final ClienteEntity? cliente =
+        await SeleccionarClienteDialog.mostrar(context);
     if (cliente != null && mounted) {
-      ref.read(registrarVentaProvider.notifier).seleccionarCliente(cliente.id ?? 0, cliente.nombre);
+      ref
+          .read(registrarVentaProvider.notifier)
+          .seleccionarCliente(cliente.id ?? 0, cliente.nombre);
     }
   }
 
@@ -71,14 +74,20 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     try {
       final abonoRecibido = resultadoCredito.abonoInicial?.monto ?? 0.0;
       final fechaVence = resultadoCredito.cuenta.fechaVencimiento;
-      ref.read(registrarVentaProvider.notifier).establecerCondicionesCredito(abonoRecibido, fechaVence);
+      ref
+          .read(registrarVentaProvider.notifier)
+          .establecerCondicionesCredito(abonoRecibido, fechaVence);
       final estadoConCredito = ref.read(registrarVentaProvider);
       final modo = ref.read(ventasNavegacionProvider).modoOperacion;
 
       if (modo == ModoOperacion.apartado) {
-        await ref.read(apartadoNotifierProvider.notifier).crearApartadoDesdeVenta(estadoConCredito);
+        await ref
+            .read(apartadoNotifierProvider.notifier)
+            .crearApartadoDesdeVenta(estadoConCredito);
       } else {
-        final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoConCredito);
+        final ventaGuardada = await ref
+            .read(registrarVentaUseCaseProvider)
+            .ejecutar(estadoConCredito);
         if (!mounted) return;
         if (ventaGuardada.id == null) {
           throw Exception('El repositorio no devolvió ID de venta');
@@ -117,15 +126,18 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     }
   }
 
-  Future<void> _cobrar() async {
+  Future<void> _reservarApartado() async {
     final estado = ref.read(registrarVentaProvider);
-    final modo = ref.read(ventasNavegacionProvider).modoOperacion;
-    final valido = ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
+    final valido =
+        ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
 
     if (!valido) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Agregue productos y seleccione forma de pago')),
+          const SnackBar(
+            content: Text('Agregue productos y seleccione forma de pago'),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
       return;
@@ -133,13 +145,19 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
     if (!mounted) return;
 
-    const formasPago = ['Efectivo', 'Tarjeta', 'Crédito', 'Transferencia', 'Cheque'];
+    const formasPago = [
+      'Efectivo',
+      'Tarjeta',
+      'Crédito',
+      'Transferencia',
+      'Cheque',
+    ];
     final formaSeleccionada = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          modo == ModoOperacion.apartado ? 'Forma de Reserva' : 'Forma de Pago',
+          'Forma de Reserva',
           style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Column(
@@ -150,14 +168,16 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
               'Total: ${_formatearMonto(estado.total)}',
               style: AppTypography.h3.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.warning,
               ),
             ),
             const SizedBox(height: 16),
             ...formasPago.map(
               (forma) => ListTile(
                 title: Text(forma),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 onTap: () => Navigator.pop(context, forma.toLowerCase()),
               ),
             ),
@@ -168,7 +188,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
     if (formaSeleccionada == null || !mounted) return;
 
-    ref.read(registrarVentaProvider.notifier).cambiarFormaPago(formaSeleccionada);
+    ref
+        .read(registrarVentaProvider.notifier)
+        .cambiarFormaPago(formaSeleccionada);
     final estadoFinal = ref.read(registrarVentaProvider);
 
     if (formaSeleccionada == 'crédito') {
@@ -179,36 +201,21 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       return;
     }
 
-    if (modo == ModoOperacion.apartado) {
-      final idApartado = await ref
-          .read(apartadoNotifierProvider.notifier)
-          .crearApartadoDesdeVenta(estadoFinal);
-      if (mounted) {
-        ref.read(registrarVentaProvider.notifier).vaciarVenta();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Apartado #$idApartado registrado — Stock reservado — ${_formatearMonto(estadoFinal.total)}'),
-            backgroundColor: AppColors.success,
-            duration: const Duration(seconds: 4),
+    final idApartado = await ref
+        .read(apartadoNotifierProvider.notifier)
+        .crearApartadoDesdeVenta(estadoFinal);
+    if (mounted) {
+      ref.read(registrarVentaProvider.notifier).vaciarVenta();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Apartado #$idApartado registrado — Stock reservado — ${_formatearMonto(estadoFinal.total)}',
           ),
-        );
-      }
-    } else {
-      final ventaGuardada = await ref.read(registrarVentaUseCaseProvider).ejecutar(estadoFinal);
-      if (!mounted) return;
-      if (ventaGuardada.id == null) {
-        throw Exception('El repositorio no devolvió ID de venta');
-      }
-      if (mounted) {
-        ref.read(registrarVentaProvider.notifier).vaciarVenta();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Venta #${ventaGuardada.numero} registrada — ${_formatearMonto(ventaGuardada.total)}'),
-            backgroundColor: AppColors.success,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
+          backgroundColor: AppColors.success,
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -218,7 +225,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       final precioConCantidad = linea.subtotalLinea ?? linea.subtotal;
       double despuesDesc = precioConCantidad;
       if (linea.descuentoPorcentaje > 0) {
-        despuesDesc = precioConCantidad * (100 - linea.descuentoPorcentaje) / 100;
+        despuesDesc =
+            precioConCantidad * (100 - linea.descuentoPorcentaje) / 100;
       } else if (linea.montoDescuento > 0) {
         despuesDesc = precioConCantidad - linea.montoDescuento;
       }
@@ -237,17 +245,13 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
   @override
   Widget build(BuildContext context) {
-    final modo = ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
+    final modo =
+        ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
     final estado = ref.watch(registrarVentaProvider);
-    final esConsumidorFinal = estado.clienteId == 0 || estado.clienteNombre == 'Consumidor Final';
+    final esConsumidorFinal =
+        estado.clienteId == 0 || estado.clienteNombre == 'Consumidor Final';
     final isMobile = AppBreakpoints.isMobile(context);
-
-    final colorPrimario = switch (modo) {
-      ModoOperacion.venta => AppColors.primary,
-      ModoOperacion.cotizacion => AppColors.info,
-      ModoOperacion.apartado => AppColors.warning,
-      ModoOperacion.cobrar => AppColors.error,
-    };
+    final esApartado = modo == ModoOperacion.apartado;
 
     final nombreCliente = estado.clienteNombre?.isNotEmpty == true
         ? estado.clienteNombre!
@@ -258,14 +262,19 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final tieneDescuentoGeneral = estado.montoDescuento > 0;
     final descuentoPorLinea = _calcularDescuentoPorLinea(estado);
     final subtotalConDescuentoLinea = estado.subtotal - descuentoPorLinea;
-    final baseGravable = (subtotalConDescuentoLinea - estado.montoDescuento).clamp(0.0, double.infinity);
+    final baseGravable =
+        (subtotalConDescuentoLinea - estado.montoDescuento)
+            .clamp(0.0, double.infinity);
 
     if (_mostrarFormularioCredito && _estadoPasoCredito != null) {
       return Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 900),
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : 24,
+              vertical: 16,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -294,11 +303,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 900),
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 16 : 24,
+            vertical: 16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ─── PESTAÑAS DE MODO ───
+              // ─── PESTAÑAS: solo COTIZACIÓN + APARTADO ───
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
@@ -308,26 +320,29 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 child: Row(
                   children: [
                     _ModoTab(
-                      label: 'VENTA',
-                      active: modo == ModoOperacion.venta,
-                      color: AppColors.primary,
+                      label: 'COTIZACIÓN',
+                      active: !esApartado,
+                      color: AppColors.info,
                       onTap: _guardando
                           ? null
-                          : () => ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.venta),
-                    ),
-                    _ModoTab(
-                      label: 'COTIZACIÓN',
-                      active: false,
-                      color: AppColors.info,
-                      onTap: _guardando ? null : () => context.push('/ventas/cotizaciones/nueva'),
+                          : () {
+                              ref
+                                  .read(ventasNavegacionProvider.notifier)
+                                  .establecerModoOperacion(
+                                    ModoOperacion.cotizacion,
+                                  );
+                              context.push('/ventas/cotizaciones/nueva');
+                            },
                     ),
                     _ModoTab(
                       label: 'APARTADO',
-                      active: modo == ModoOperacion.apartado,
+                      active: esApartado,
                       color: AppColors.warning,
                       onTap: _guardando
                           ? null
-                          : () => ref.read(ventasNavegacionProvider.notifier).establecerModoOperacion(ModoOperacion.apartado),
+                          : () => ref
+                              .read(ventasNavegacionProvider.notifier)
+                              .establecerModoOperacion(ModoOperacion.apartado),
                     ),
                   ],
                 ),
@@ -335,225 +350,319 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
               const SizedBox(height: 20),
 
-              // ─── BUSCADOR ───
-              AppTextField(
-                controller: _buscarController,
-                hint: 'Buscar producto, código o escanear...',
-                prefixIcon: Icons.search,
-                onChanged: (texto) => ref.read(registrarVentaProvider.notifier).buscarProducto(texto),
-              ),
+              // ─── SI NO ES APARTADO → entrada a Cotización (único POS) ───
+              if (!esApartado) ...[
+                _buildEntradaCotizacion(isMobile),
+              ] else ...[
+                // ─── FLUJO APARTADO (sin cambios de lógica) ───
+                AppTextField(
+                  controller: _buscarController,
+                  hint: 'Buscar producto, código o escanear...',
+                  prefixIcon: Icons.search,
+                  onChanged: (texto) => ref
+                      .read(registrarVentaProvider.notifier)
+                      .buscarProducto(texto),
+                ),
 
-              if (tieneResultados)
+                if (tieneResultados)
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    constraints: const BoxConstraints(maxHeight: 280),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: AppRadius.allM,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: estado.resultadosBusqueda.length,
+                      separatorBuilder: (_, __) =>
+                          const Divider(height: 1, color: AppColors.border),
+                      itemBuilder: (context, i) {
+                        final prod = estado.resultadosBusqueda[i];
+                        return ListTile(
+                          dense: true,
+                          title: Text(
+                            prod.nombreProducto ?? 'Producto',
+                            style: AppTypography.bodyMedium
+                                .copyWith(fontWeight: FontWeight.w500),
+                          ),
+                          subtitle: Text(
+                            _formatearMonto(prod.precioUnitario),
+                            style: AppTypography.bodySmall
+                                .copyWith(color: AppColors.primary),
+                          ),
+                          onTap: () => _seleccionarProducto(prod),
+                        );
+                      },
+                    ),
+                  ),
+
+                const SizedBox(height: 16),
+
                 Container(
-                  margin: const EdgeInsets.only(top: 6),
-                  constraints: const BoxConstraints(maxHeight: 280),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: AppColors.white,
-                    border: Border.all(color: AppColors.border),
                     borderRadius: AppRadius.allM,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    itemCount: estado.resultadosBusqueda.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.border),
-                    itemBuilder: (context, i) {
-                      final prod = estado.resultadosBusqueda[i];
-                      return ListTile(
-                        dense: true,
-                        title: Text(
-                          prod.nombreProducto ?? 'Producto',
-                          style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500),
-                        ),
-                        subtitle: Text(
-                          _formatearMonto(prod.precioUnitario),
-                          style: AppTypography.bodySmall.copyWith(color: AppColors.primary),
-                        ),
-                        onTap: () => _seleccionarProducto(prod),
-                      );
-                    },
-                  ),
-                ),
-
-              const SizedBox(height: 16),
-
-              // ─── CLIENTE ───
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: AppRadius.allM,
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.person_outline, size: 20, color: colorPrimario),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        nombreCliente,
-                        style: AppTypography.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: _guardando ? null : _cambiarCliente,
-                      style: TextButton.styleFrom(
-                        foregroundColor: colorPrimario,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      child: const Text('Cambiar'),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ─── CARRITO / VACÍO ───
-              if (!tieneProductos)
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: isMobile ? 40 : 56),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: AppRadius.allL,
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: Column(
+                  child: Row(
                     children: [
-                      Icon(
-                        Icons.point_of_sale_outlined,
-                        size: isMobile ? 48 : 56,
-                        color: AppColors.grey300,
+                      const Icon(Icons.person_outline,
+                          size: 20, color: AppColors.warning),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          nombreCliente,
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      const SizedBox(height: 14),
-                      Text(
-                        modo == ModoOperacion.apartado ? 'El apartado está vacío' : 'La venta está vacía',
-                        style: AppTypography.h4.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Busca un producto para comenzar',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                      TextButton(
+                        onPressed: _guardando ? null : _cambiarCliente,
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.warning,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                        ),
+                        child: const Text('Cambiar'),
                       ),
                     ],
                   ),
-                )
-              else
-                const PanelCarrito(),
+                ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
-              // ─── TOTALES ───
-              if (tieneProductos)
+                if (!tieneProductos)
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      vertical: isMobile ? 40 : 56,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: AppRadius.allL,
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.bookmark_border,
+                          size: isMobile ? 48 : 56,
+                          color: AppColors.grey300,
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'El apartado está vacío',
+                          style: AppTypography.h4
+                              .copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Busca un producto para comenzar',
+                          style: AppTypography.bodyMedium
+                              .copyWith(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  const PanelCarrito(),
+
+                const SizedBox(height: 24),
+
+                if (tieneProductos)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (estado.costoEnvio > 0)
+                          _FilaResumen(
+                            label: 'Envío / Delivery',
+                            value: _formatearMonto(estado.costoEnvio),
+                          ),
+                        if (!esConsumidorFinal) ...[
+                          _FilaResumen(
+                            label: 'Subtotal',
+                            value: _formatearMonto(estado.subtotal),
+                          ),
+                          if (descuentoPorLinea > 0.001)
+                            _FilaResumen(
+                              label: 'Descuento por línea',
+                              value: '- ${_formatearMonto(descuentoPorLinea)}',
+                              color: AppColors.error,
+                            ),
+                          if (tieneDescuentoGeneral)
+                            _FilaResumen(
+                              label: 'Descuento general',
+                              value:
+                                  '- ${_formatearMonto(estado.montoDescuento)}',
+                              color: AppColors.error,
+                            ),
+                          _FilaResumen(
+                            label: 'Base Gravable',
+                            value: _formatearMonto(baseGravable),
+                          ),
+                          _FilaResumen(
+                            label: 'ITBIS (18%)',
+                            value: _formatearMonto(estado.itbis),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        _FilaResumen(
+                          label: 'TOTAL',
+                          value: montoTotal,
+                          destacado: true,
+                          color: AppColors.warning,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 24),
+
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (estado.costoEnvio > 0)
-                        _FilaResumen(label: 'Envío / Delivery', value: _formatearMonto(estado.costoEnvio)),
-                      if (!esConsumidorFinal) ...[
-                        _FilaResumen(label: 'Subtotal', value: _formatearMonto(estado.subtotal)),
-                        if (descuentoPorLinea > 0.001)
-                          _FilaResumen(
-                            label: 'Descuento por línea',
-                            value: '- ${_formatearMonto(descuentoPorLinea)}',
-                            color: AppColors.error,
-                          ),
-                        if (tieneDescuentoGeneral)
-                          _FilaResumen(
-                            label: 'Descuento general',
-                            value: '- ${_formatearMonto(estado.montoDescuento)}',
-                            color: AppColors.error,
-                          ),
-                        _FilaResumen(label: 'Base Gravable', value: _formatearMonto(baseGravable)),
-                        _FilaResumen(label: 'ITBIS (18%)', value: _formatearMonto(estado.itbis)),
-                      ],
-                      const SizedBox(height: 8),
-                      _FilaResumen(
-                        label: 'TOTAL',
-                        value: montoTotal,
-                        destacado: true,
-                        color: colorPrimario,
+                  child: SizedBox(
+                    width: isMobile ? double.infinity : 280,
+                    height: isMobile ? 56 : 64,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.warning,
+                        foregroundColor: AppColors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        disabledBackgroundColor: AppColors.grey300,
                       ),
-                    ],
-                  ),
-                ),
-
-              const SizedBox(height: 24),
-
-              // ─── BOTÓN COBRAR ───
-              Align(
-                alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: isMobile ? double.infinity : 280,
-                  height: isMobile ? 56 : 64,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorPrimario,
-                      foregroundColor: AppColors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      disabledBackgroundColor: AppColors.grey300,
-                    ),
-                    onPressed: tieneProductos && !_guardando ? _cobrar : null,
-                    child: _guardando
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                tieneProductos
-                                    ? (modo == ModoOperacion.apartado ? 'RESERVAR' : 'COBRAR')
-                                    : 'AGREGUE PRODUCTOS',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  letterSpacing: 0.4,
-                                ),
+                      onPressed:
+                          tieneProductos && !_guardando ? _reservarApartado : null,
+                      child: _guardando
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
                               ),
-                              if (tieneProductos) ...[
-                                const SizedBox(height: 2),
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
                                 Text(
-                                  montoTotal,
-                                  style: TextStyle(
-                                    fontSize: isMobile ? 15 : 17,
+                                  tieneProductos
+                                      ? 'RESERVAR'
+                                      : 'AGREGUE PRODUCTOS',
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    letterSpacing: 0.4,
                                   ),
                                 ),
+                                if (tieneProductos) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    montoTotal,
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 15 : 17,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
+                            ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
       ),
     );
   }
+
+  /// Entrada al único punto de venta: Cotización
+  Widget _buildEntradaCotizacion(bool isMobile) {
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Icon(
+          Icons.point_of_sale,
+          size: isMobile ? 56 : 64,
+          color: AppColors.info.withValues(alpha: 0.7),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Punto de venta',
+          style: AppTypography.h3.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: isMobile ? 18 : 20,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Todo se gestiona por Cotización:\n'
+          'Cotizar → Crédito (si aplica) → Caja factura',
+          textAlign: TextAlign.center,
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+            fontSize: isMobile ? 13 : 14,
+          ),
+        ),
+        const SizedBox(height: 28),
+        SizedBox(
+          width: isMobile ? double.infinity : 320,
+          height: isMobile ? 52 : 56,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.description_outlined, size: 22),
+            label: const Text(
+              'NUEVA COTIZACIÓN',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                letterSpacing: 0.3,
+              ),
+            ),
+            onPressed: () => context.push('/ventas/cotizaciones/nueva'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.info,
+              foregroundColor: AppColors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          icon: const Icon(Icons.history, size: 18),
+          label: const Text('Historial de Cotizaciones'),
+          onPressed: () => context.push('/ventas/cotizaciones/historial'),
+          style: TextButton.styleFrom(foregroundColor: AppColors.info),
+        ),
+      ],
+    );
+  }
 }
 
-// ─────────────────────────────────────────────
 class _ModoTab extends StatelessWidget {
-
   const _ModoTab({
     required this.label,
     required this.active,
@@ -593,7 +702,6 @@ class _ModoTab extends StatelessWidget {
 }
 
 class _FilaResumen extends StatelessWidget {
-
   const _FilaResumen({
     required this.label,
     required this.value,
