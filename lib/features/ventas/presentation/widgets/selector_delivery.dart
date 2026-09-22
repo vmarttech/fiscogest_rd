@@ -4,25 +4,34 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 
+/// [onAsignarCosto] si se pasa, se usa ese callback (ej. cotización).
+/// Si es null, escribe en registrarVentaProvider (flujo legacy / apartado).
 class SelectorDeliveryDialog extends ConsumerStatefulWidget {
   const SelectorDeliveryDialog({
     super.key,
     required this.costoActual,
+    this.onAsignarCosto,
   });
+
   final double costoActual;
+  final void Function(double monto)? onAsignarCosto;
 
   @override
-  ConsumerState<SelectorDeliveryDialog> createState() => _SelectorDeliveryDialogState();
+  ConsumerState<SelectorDeliveryDialog> createState() =>
+      _SelectorDeliveryDialogState();
 }
 
-class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog> {
+class _SelectorDeliveryDialogState
+    extends ConsumerState<SelectorDeliveryDialog> {
   late final TextEditingController _montoController;
   String? _opcionSeleccionada;
 
-  // ✅ Reemplazado NumberFormat.currency por formateador sin símbolo
-  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
-  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
+  static final NumberFormat _formatoNumero =
+      NumberFormat('#,##0.00', 'es_DO');
+  String _formatearMonto(double valor) =>
+      'RD\$${_formatoNumero.format(valor)}';
 
   static const List<Map<String, dynamic>> _opciones = [
     {'nombre': 'Santo Domingo', 'monto': 50.0},
@@ -35,7 +44,9 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
   void initState() {
     super.initState();
     _montoController = TextEditingController(
-      text: widget.costoActual > 0 ? widget.costoActual.toStringAsFixed(2) : '',
+      text: widget.costoActual > 0
+          ? widget.costoActual.toStringAsFixed(2)
+          : '',
     );
   }
 
@@ -53,9 +64,13 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
   }
 
   void _confirmar() {
-    final montoTexto = _montoController.text.trim();
+    final montoTexto = _montoController.text.trim().replaceAll(',', '.');
     final monto = double.tryParse(montoTexto) ?? 0.0;
-    ref.read(registrarVentaProvider.notifier).asignarCostoEnvio(monto);
+    if (widget.onAsignarCosto != null) {
+      widget.onAsignarCosto!(monto);
+    } else {
+      ref.read(registrarVentaProvider.notifier).asignarCostoEnvio(monto);
+    }
     Navigator.pop(context);
   }
 
@@ -63,7 +78,8 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
   Widget build(BuildContext context) {
     final anchoPantalla = MediaQuery.of(context).size.width;
     final esPantallaPequena = anchoPantalla < 600;
-    final anchoMaximoDialog = esPantallaPequena ? anchoPantalla * 0.92 : 400.0;
+    final anchoMaximoDialog =
+        esPantallaPequena ? anchoPantalla * 0.92 : 400.0;
     final paddingDialogo = esPantallaPequena ? 12.0 : 16.0;
     final tamanoIcono = esPantallaPequena ? 20.0 : 24.0;
     final tamanoTitulo = esPantallaPequena ? 16.0 : 18.0;
@@ -71,11 +87,14 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
 
     return AlertDialog(
       titlePadding: EdgeInsets.all(paddingDialogo),
-      contentPadding: EdgeInsets.symmetric(horizontal: paddingDialogo, vertical: 8),
-      actionsPadding: EdgeInsets.symmetric(horizontal: paddingDialogo, vertical: 12),
+      contentPadding:
+          EdgeInsets.symmetric(horizontal: paddingDialogo, vertical: 8),
+      actionsPadding:
+          EdgeInsets.symmetric(horizontal: paddingDialogo, vertical: 12),
       title: Row(
         children: [
-          Icon(Icons.delivery_dining, color: AppColors.primary, size: tamanoIcono),
+          Icon(Icons.delivery_dining,
+              color: AppColors.primary, size: tamanoIcono),
           SizedBox(width: espaciadoIconoTitulo),
           Expanded(
             child: Text(
@@ -112,7 +131,6 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
                   ),
                 ),
                 subtitle: Text(
-                  // ✅ Cambiado: usa la nueva función con RD$ al principio
                   _formatearMonto(monto),
                   style: AppTypography.labelSmall,
                 ),
@@ -124,12 +142,14 @@ class _SelectorDeliveryDialogState extends ConsumerState<SelectorDeliveryDialog>
             const Divider(height: 16),
             TextField(
               controller: _montoController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(
                 labelText: 'Monto personalizado (RD\$)',
                 labelStyle: AppTypography.labelMedium,
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
               style: AppTypography.labelMedium,
               onChanged: (_) {

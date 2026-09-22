@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_delivery.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -24,11 +25,6 @@ class _NuevaVentaBorradorPageState
   DateTime? _fechaVencimientoSeleccionada;
   bool _esCredito = false;
   bool _guardando = false;
-
-  bool get _modoCotizacion {
-    final ubicacion = GoRouterState.of(context).uri.path;
-    return ubicacion.contains('cotizacion');
-  }
 
   @override
   void initState() {
@@ -86,6 +82,19 @@ class _NuevaVentaBorradorPageState
       setState(() => _fechaVencimientoSeleccionada = fecha);
       ref.read(ventaBorradorProvider.notifier).establecerVencimiento(fecha);
     }
+  }
+
+  Future<void> _abrirDelivery() async {
+    final costoActual = ref.read(ventaBorradorProvider).costoEnvio;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => SelectorDeliveryDialog(
+        costoActual: costoActual,
+        onAsignarCosto: (monto) {
+          ref.read(ventaBorradorProvider.notifier).asignarCostoEnvio(monto);
+        },
+      ),
+    );
   }
 
   void _limpiarFormulario() {
@@ -157,13 +166,11 @@ class _NuevaVentaBorradorPageState
   Widget build(BuildContext context) {
     final estado = ref.watch(ventaBorradorProvider);
     final puedeGenerar = estado.detalles.isNotEmpty && estado.montoTotal > 0;
-    final tituloPantalla =
-        _modoCotizacion ? 'NUEVA COTIZACIÓN' : 'NUEVA VENTA';
     final esPantallaPequena = MediaQuery.of(context).size.width < 600;
     final esPantallaAncha = MediaQuery.of(context).size.width >= 720;
 
     return AppScaffold(
-      title: tituloPantalla,
+      title: 'NUEVA COTIZACIÓN',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => context.pop(),
@@ -201,6 +208,8 @@ class _NuevaVentaBorradorPageState
           SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildSeccionCliente(estado, esPantallaPequena),
           SizedBox(height: esPantallaPequena ? 12 : 16),
+          _buildSeccionDelivery(estado, esPantallaPequena),
+          SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildSeccionProductos(esPantallaPequena),
           SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildListaItemsCarrito(estado, esPantallaPequena),
@@ -234,6 +243,8 @@ class _NuevaVentaBorradorPageState
                 const SizedBox(height: 16),
                 _buildSeccionCliente(estado, false),
                 const SizedBox(height: 16),
+                _buildSeccionDelivery(estado, false),
+                const SizedBox(height: 16),
                 _buildSeccionProductos(false),
                 const SizedBox(height: 16),
                 _buildListaItemsCarrito(estado, false),
@@ -263,7 +274,6 @@ class _NuevaVentaBorradorPageState
   Widget _buildSeccionTipoYVencimiento(bool esPantallaPequena) {
     final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
     final tamanoEtiqueta = esPantallaPequena ? 11.0 : 12.0;
-
     return Row(
       children: [
         Expanded(
@@ -397,7 +407,6 @@ class _NuevaVentaBorradorPageState
         ? estado.clienteNombre!
         : 'Consumidor Final';
     final tamanoCuerpo = esPantallaPequena ? 14.0 : 15.0;
-
     return Material(
       color: AppColors.white,
       borderRadius: BorderRadius.circular(12),
@@ -462,6 +471,77 @@ class _NuevaVentaBorradorPageState
                 ),
               ),
               const SizedBox(width: 4),
+              const Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: AppColors.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeccionDelivery(
+    VentaBorradorState estado,
+    bool esPantallaPequena,
+  ) {
+    final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
+    final tieneEnvio = estado.costoEnvio > 0;
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: _abrirDelivery,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: esPantallaPequena ? 14 : 16,
+            vertical: esPantallaPequena ? 12 : 14,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: tieneEnvio
+                  ? AppColors.primary.withValues(alpha: 0.5)
+                  : AppColors.border,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.delivery_dining,
+                size: 22,
+                color: tieneEnvio ? AppColors.primary : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Envío / Delivery',
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: tamanoCuerpo,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      tieneEnvio
+                          ? 'RD\$ ${estado.costoEnvio.toStringAsFixed(2)}'
+                          : 'Sin envío (tocar para elegir)',
+                      style: AppTypography.bodySmall.copyWith(
+                        fontSize: esPantallaPequena ? 11 : 12,
+                        color: tieneEnvio
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const Icon(
                 Icons.chevron_right,
                 size: 20,
@@ -719,6 +799,12 @@ class _NuevaVentaBorradorPageState
             'RD\$ ${estado.itbis.toStringAsFixed(2)}',
             tamanoCuerpo,
           ),
+          if (estado.costoEnvio > 0)
+            _filaResumen(
+              'Envío / Delivery',
+              'RD\$ ${estado.costoEnvio.toStringAsFixed(2)}',
+              tamanoCuerpo,
+            ),
           if (estado.montoDescuento > 0)
             _filaResumen(
               'Descuento',
@@ -892,9 +978,7 @@ class _NuevaVentaBorradorPageState
                           const Icon(Icons.description_outlined, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            _modoCotizacion
-                                ? 'GENERAR COTIZACIÓN'
-                                : 'GUARDAR VENTA',
+                            'GENERAR COTIZACIÓN',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: tamanoBoton,

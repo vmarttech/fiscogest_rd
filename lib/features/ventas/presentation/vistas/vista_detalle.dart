@@ -1,6 +1,5 @@
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
@@ -31,37 +30,65 @@ class _MostrarDetalleVenta extends ConsumerWidget {
   const _MostrarDetalleVenta({required this.venta});
   final Venta venta;
 
-  String _formatearFecha(DateTime fecha) => 'Hoy · ${DateFormat.Hm().format(fecha)}';
-  String _formatearMonto(double valor) => 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
+  String _formatearFecha(DateTime fecha) {
+    return '${fecha.day.toString().padLeft(2, '0')}/'
+        '${fecha.month.toString().padLeft(2, '0')}/'
+        '${fecha.year} · ${DateFormat.Hm().format(fecha)}';
+  }
+
+  String _formatearMonto(double valor) =>
+      'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
 
   String _etiquetaEstado(EstadoDocumento estado) => switch (estado) {
-    EstadoDocumento.cotizado => 'Vigente',
-    EstadoDocumento.enCredito => 'En aprobación',
-    EstadoDocumento.aprobado => 'Aprobado',
-    EstadoDocumento.anulado => 'Rechazado',
-    EstadoDocumento.facturado => 'Convertida',
-    _ => 'Borrador',
-  };
+        EstadoDocumento.cotizado => 'Vigente',
+        EstadoDocumento.enCredito => 'En aprobación',
+        EstadoDocumento.aprobado => 'Aprobado',
+        EstadoDocumento.anulado => 'Rechazado',
+        EstadoDocumento.facturado => 'Facturada',
+        _ => 'Borrador',
+      };
 
   Color _colorEstado(EstadoDocumento estado) => switch (estado) {
-    EstadoDocumento.cotizado => AppColors.primary,
-    EstadoDocumento.enCredito => const Color(0xFFE65100),
-    EstadoDocumento.aprobado => AppColors.success,
-    EstadoDocumento.anulado => AppColors.error,
-    EstadoDocumento.facturado => AppColors.success,
-    _ => AppColors.textSecondary,
-  };
+        EstadoDocumento.cotizado => AppColors.primary,
+        EstadoDocumento.enCredito => const Color(0xFFE65100),
+        EstadoDocumento.aprobado => AppColors.success,
+        EstadoDocumento.anulado => AppColors.error,
+        EstadoDocumento.facturado => AppColors.success,
+        _ => AppColors.textSecondary,
+      };
+
+  Color _colorFondoEstado(EstadoDocumento estado) => switch (estado) {
+        EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
+        EstadoDocumento.enCredito =>
+          const Color(0xFFE65100).withValues(alpha: 0.12),
+        EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
+        EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
+        EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
+        _ => AppColors.textSecondary.withValues(alpha: 0.12),
+      };
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
       final servicio = ref.read(ventaBorradorServicioProvider);
       final resultado = await servicio.generarImpresion(venta);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(resultado), backgroundColor: AppColors.success));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(resultado),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al imprimir: $e'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al imprimir: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -71,11 +98,23 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       final servicio = ref.read(ventaBorradorServicioProvider);
       final ruta = await servicio.exportarPDF(venta);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Archivo generado: $ruta'), backgroundColor: AppColors.success));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Archivo generado: $ruta'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al generar archivo: $e'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al generar archivo: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -86,7 +125,13 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       await servicio.enviarPorCorreo(venta, '');
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al enviar: $e'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al enviar: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -95,11 +140,24 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Enviar a Aprobación'),
-        content: Text('¿Enviar la Cotización N° ${venta.numero} a aprobación de crédito?'),
+        content: Text(
+          '¿Enviar la Cotización N° ${venta.numero} a aprobación de crédito?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Enviar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+            ),
+            child: const Text('Enviar'),
+          ),
         ],
       ),
     );
@@ -109,13 +167,23 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       await servicio.enviarAprobacion(venta.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cotización ${venta.numero} enviada a aprobación'), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text('Cotización ${venta.numero} enviada a aprobación'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         ref.invalidate(listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -124,11 +192,24 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Aprobar Crédito'),
-        content: Text('¿Aprobar la cotización N° ${venta.numero}? Pasará a Venta.'),
+        content: Text(
+          '¿Aprobar la cotización N° ${venta.numero}?\nPasará a estado Aprobado.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.success), onPressed: () => Navigator.pop(context, true), child: const Text('Aprobar', style: TextStyle(color: Colors.white))),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Aprobar'),
+          ),
         ],
       ),
     );
@@ -138,13 +219,26 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       await servicio.aprobarCredito(venta.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Cotización ${venta.numero} aprobada. Ya puede ser convertida a Venta.'), backgroundColor: AppColors.success, duration: const Duration(seconds: 4)),
+          SnackBar(
+            content: Text(
+              'Cotización ${venta.numero} aprobada. Ya puede ir a Caja.',
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
         );
         ref.invalidate(listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -153,11 +247,24 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Rechazar Crédito'),
-        content: Text('¿Rechazar la cotización N° ${venta.numero}? Quedará anulada.'),
+        content: Text(
+          '¿Rechazar la cotización N° ${venta.numero}? Quedará anulada.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.error), onPressed: () => Navigator.pop(context, true), child: const Text('Rechazar', style: TextStyle(color: Colors.white))),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Rechazar'),
+          ),
         ],
       ),
     );
@@ -167,13 +274,23 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       await servicio.rechazarCredito(venta.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cotización ${venta.numero} rechazada y anulada'), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text('Cotización ${venta.numero} rechazada y anulada'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         ref.invalidate(listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -183,11 +300,24 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     final bool? confirmar = await showDialog<bool>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Convertir Cotización'),
-        content: Text('¿Desea convertir la cotización ${venta.numero} en una venta?'),
+        content: Text(
+          '¿Desea convertir la cotización ${venta.numero} en una venta?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirmar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirmar'),
+          ),
         ],
       ),
     );
@@ -197,14 +327,26 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       final resultado = await casoUso.call(venta.id!);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cotización convertida: ${resultado.numero}'), backgroundColor: AppColors.success),
+          SnackBar(
+            content: Text('Cotización convertida: ${resultado.numero}'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
-        ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+        ref
+            .read(ventasNavegacionProvider.notifier)
+            .cambiarVista(VistaActual.inicio);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al convertir: $e'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al convertir: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -212,126 +354,585 @@ class _MostrarDetalleVenta extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final estado = venta.estadoDocumento;
-    final puedeEnviarAprobacion = estado == EstadoDocumento.cotizado && venta.id != null;
-    final puedeAprobarRechazar = estado == EstadoDocumento.enCredito && venta.id != null;
-    final puedeConvertir = estado == EstadoDocumento.aprobado && venta.id != null;
+    final puedeEnviarAprobacion =
+        estado == EstadoDocumento.cotizado && venta.id != null;
+    final puedeAprobarRechazar =
+        estado == EstadoDocumento.enCredito && venta.id != null;
+    final puedeConvertir =
+        estado == EstadoDocumento.aprobado && venta.id != null;
+    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
+    final padding = esPantallaPequena ? 12.0 : 16.0;
+    final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
+    final tamanoTotal = esPantallaPequena ? 20.0 : 22.0;
+    final tamanoEtiqueta = esPantallaPequena ? 11.0 : 12.0;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
-                onPressed: () {
-                  ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
-                  ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
-                },
-              ),
-              Expanded(
-                child: Column(
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(padding, padding, padding, 8),
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── CABECERA POS ──
+                Row(
                   children: [
-                    Text('Cotización #${venta.numero}', style: AppTypography.h4.copyWith(fontSize: 18)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(_formatearFecha(venta.fecha), style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(color: _colorEstado(estado).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
-                          child: Text(_etiquetaEstado(estado), style: TextStyle(fontSize: 12, color: _colorEstado(estado), fontWeight: FontWeight.w500)),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.textSecondary,
+                      ),
+                      onPressed: () {
+                        ref
+                            .read(ventaCargadaDesdeHistorialProvider.notifier)
+                            .limpiarVenta();
+                        ref
+                            .read(ventasNavegacionProvider.notifier)
+                            .cambiarVista(VistaActual.inicio);
+                      },
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            'N° ${venta.numero}',
+                            style: AppTypography.h4.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: esPantallaPequena ? 16 : 18,
+                              color: AppColors.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                _formatearFecha(venta.fecha),
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: tamanoEtiqueta,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _colorFondoEstado(estado),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  _etiquetaEstado(estado),
+                                  style: TextStyle(
+                                    fontSize: tamanoEtiqueta,
+                                    color: _colorEstado(estado),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 48),
+                  ],
+                ),
+
+                SizedBox(height: esPantallaPequena ? 16 : 20),
+
+                // ── CLIENTE ──
+                _seccionCard(
+                  esPantallaPequena: esPantallaPequena,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ],
+                        child: const Icon(
+                          Icons.person_outline,
+                          size: 20,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Cliente',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: tamanoEtiqueta,
+                              ),
+                            ),
+                            Text(
+                              venta.nombreCliente ?? 'Consumidor final',
+                              style: AppTypography.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: tamanoCuerpo,
+                                color: AppColors.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (venta.tipoPago.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.grey50,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Text(
+                            venta.tipoPago,
+                            style: AppTypography.labelSmall.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: tamanoEtiqueta,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: esPantallaPequena ? 12 : 14),
+
+                // ── PRODUCTOS ──
+                Text(
+                  'Productos',
+                  style: AppTypography.labelMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: esPantallaPequena ? 13 : 14,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _seccionCard(
+                  esPantallaPequena: esPantallaPequena,
+                  child: Column(
+                    children: [
+                      ...venta.detalles.asMap().entries.map((entrada) {
+                        final linea = entrada.value;
+                        final esUltimo =
+                            entrada.key == venta.detalles.length - 1;
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: esPantallaPequena ? 8 : 10,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          linea.nombreProducto ?? 'Producto',
+                                          style:
+                                              AppTypography.bodyMedium.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: tamanoCuerpo,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Cant: ${linea.cantidad}  ×  ${_formatearMonto(linea.precioUnitario)}',
+                                          style:
+                                              AppTypography.bodySmall.copyWith(
+                                            fontSize: tamanoEtiqueta,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _formatearMonto(
+                                      linea.subtotalLinea ?? linea.subtotal,
+                                    ),
+                                    style: AppTypography.bodyMedium.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: tamanoCuerpo,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (!esUltimo)
+                              const Divider(height: 1, indent: 0, endIndent: 0),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: esPantallaPequena ? 12 : 14),
+
+                // ── RESUMEN ──
+                _seccionCard(
+                  esPantallaPequena: esPantallaPequena,
+                  child: Column(
+                    children: [
+                      _FilaResumen(
+                        'Subtotal',
+                        _formatearMonto(venta.subtotal),
+                        fontSize: tamanoCuerpo,
+                      ),
+                      _FilaResumen(
+                        'ITBIS (18%)',
+                        _formatearMonto(venta.itbis),
+                        fontSize: tamanoCuerpo,
+                      ),
+                      if (venta.montoDescuento > 0)
+                        _FilaResumen(
+                          'Descuento',
+                          '- ${_formatearMonto(venta.montoDescuento)}',
+                          fontSize: tamanoCuerpo,
+                          colorValor: AppColors.error,
+                        ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Divider(height: 1),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'TOTAL',
+                            style: AppTypography.h4.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: esPantallaPequena ? 15 : 16,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            _formatearMonto(venta.total),
+                            style: AppTypography.h3.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: tamanoTotal,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: esPantallaPequena ? 12 : 14),
+
+                // ── ACCIONES SECUNDARIAS ──
+                Text(
+                  'Documentos',
+                  style: AppTypography.labelMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: esPantallaPequena ? 13 : 14,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _chipAccion(
+                      icon: Icons.print_outlined,
+                      label: 'Imprimir',
+                      onTap: () => _imprimir(context, ref),
+                      esPantallaPequena: esPantallaPequena,
+                    ),
+                    _chipAccion(
+                      icon: Icons.picture_as_pdf_outlined,
+                      label: 'PDF',
+                      onTap: () => _exportarPDF(context, ref),
+                      esPantallaPequena: esPantallaPequena,
+                    ),
+                    _chipAccion(
+                      icon: Icons.email_outlined,
+                      label: 'Enviar',
+                      onTap: () => _enviarPorCorreo(context, ref),
+                      esPantallaPequena: esPantallaPequena,
+                    ),
+                    _chipAccion(
+                      icon: Icons.receipt_long_outlined,
+                      label: 'Devolución',
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Vaya a Facturación → Nota de Crédito / Devolución.',
+                            ),
+                            backgroundColor: AppColors.info,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      esPantallaPequena: esPantallaPequena,
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+
+        // ── BARRA FIJA DE ACCIONES SEGÚN ESTADO ──
+        if (puedeEnviarAprobacion || puedeAprobarRechazar || puedeConvertir)
+          _barraAccionesEstado(
+            context: context,
+            ref: ref,
+            puedeEnviarAprobacion: puedeEnviarAprobacion,
+            puedeAprobarRechazar: puedeAprobarRechazar,
+            puedeConvertir: puedeConvertir,
+            esPantallaPequena: esPantallaPequena,
+          ),
+      ],
+    );
+  }
+
+  Widget _seccionCard({
+    required bool esPantallaPequena,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(esPantallaPequena ? 12 : 14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _chipAccion({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required bool esPantallaPequena,
+  }) {
+    return Material(
+      color: AppColors.grey50,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: esPantallaPequena ? 10 : 12,
+            vertical: esPantallaPequena ? 8 : 9,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: AppColors.primary),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: AppTypography.labelSmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: esPantallaPequena ? 12 : 13,
+                  color: AppColors.primary,
+                ),
               ),
-              const SizedBox(width: 48),
             ],
           ),
-          const Divider(height: 32),
-          const Text('Productos', style: AppTypography.labelLarge),
-          const SizedBox(height: 12),
-          ...venta.detalles.map((item) {
-            final linea = item;
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  Expanded(flex: 5, child: Text('${linea.cantidad} × ${linea.nombreProducto}', style: AppTypography.bodyMedium)),
-                  Expanded(flex: 2, child: Text(_formatearMonto(linea.precioUnitario), textAlign: TextAlign.right, style: AppTypography.bodySmall)),
-                  Expanded(flex: 2, child: Text(_formatearMonto(linea.subtotalLinea ?? linea.subtotal), textAlign: TextAlign.right, style: AppTypography.labelMedium)),
-                ],
-              ),
-            );
-          }),
-          const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 8),
-          _FilaResumen('Subtotal', _formatearMonto(venta.subtotal)),
-          _FilaResumen('ITBIS', _formatearMonto(venta.itbis)),
-          const SizedBox(height: 4),
-          const Divider(),
-          _FilaResumen('TOTAL', _formatearMonto(venta.total), esResaltado: true),
-          const SizedBox(height: 24),
-          const Text('Pago', style: AppTypography.labelLarge),
-          const SizedBox(height: 8),
-          Row(children: [const Icon(Icons.payment, size: 18), const SizedBox(width: 8), Text(venta.tipoPago, style: AppTypography.bodyMedium)]),
-          const SizedBox(height: 16),
-          const Text('Cliente', style: AppTypography.labelLarge),
-          const SizedBox(height: 8),
-          Row(children: [const Icon(Icons.person_outline, size: 18), const SizedBox(width: 8), Text(venta.nombreCliente ?? 'Consumidor final', style: AppTypography.bodyMedium)]),
-          const SizedBox(height: 32),
-          const Text('Acciones', style: AppTypography.labelLarge),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              TextButton.icon(onPressed: () => _imprimir(context, ref), icon: const Icon(Icons.print, size: 18), label: const Text('Imprimir')),
-              TextButton.icon(onPressed: () => _exportarPDF(context, ref), icon: const Icon(Icons.picture_as_pdf, size: 18), label: const Text('PDF')),
-              TextButton.icon(onPressed: () => _enviarPorCorreo(context, ref), icon: const Icon(Icons.email_outlined, size: 18), label: const Text('Enviar')),
-              if (puedeEnviarAprobacion)
-                AppButton(text: 'ENVIAR A APROBACIÓN', onPressed: () => _enviarAprobacion(context, ref), icon: Icons.send, height: 40),
-              if (puedeAprobarRechazar) ...[
-                AppButton(text: 'APROBAR', onPressed: () => _aprobarCredito(context, ref), icon: Icons.check_circle, height: 40),
-                OutlinedButton.icon(onPressed: () => _rechazarCredito(context, ref), icon: const Icon(Icons.cancel), label: const Text('Rechazar'), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10))),
-              ],
-              if (puedeConvertir)
-                TextButton.icon(onPressed: () => _convertirCotizacion(context, ref), icon: const Icon(Icons.swap_horiz, size: 18), label: const Text('Convertir a Venta')),
-              TextButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vaya a Facturación → Nota de Crédito / Devolución.'), backgroundColor: AppColors.success));
-                },
-                icon: const Icon(Icons.receipt_long, size: 18),
-                label: const Text('Devolución'),
-              ),
-            ],
+        ),
+      ),
+    );
+  }
+
+  Widget _barraAccionesEstado({
+    required BuildContext context,
+    required WidgetRef ref,
+    required bool puedeEnviarAprobacion,
+    required bool puedeAprobarRechazar,
+    required bool puedeConvertir,
+    required bool esPantallaPequena,
+  }) {
+    final altura = esPantallaPequena ? 48.0 : 52.0;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(
+        esPantallaPequena ? 12 : 16,
+        10,
+        esPantallaPequena ? 12 : 16,
+        esPantallaPequena ? 12 : 14,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: const Border(
+          top: BorderSide(color: AppColors.border, width: 1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
           ),
         ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: puedeAprobarRechazar
+            ? Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: altura,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _rechazarCredito(context, ref),
+                        icon: const Icon(Icons.cancel_outlined, size: 18),
+                        label: Text(
+                          'Rechazar',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: esPantallaPequena ? 13 : 14,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.error,
+                          side: const BorderSide(color: AppColors.error),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: SizedBox(
+                      height: altura,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _aprobarCredito(context, ref),
+                        icon: const Icon(Icons.check_circle_outline, size: 18),
+                        label: Text(
+                          'APROBAR CRÉDITO',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: esPantallaPequena ? 13 : 14,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.success,
+                          foregroundColor: AppColors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : SizedBox(
+                width: double.infinity,
+                height: altura,
+                child: ElevatedButton.icon(
+                  onPressed: puedeEnviarAprobacion
+                      ? () => _enviarAprobacion(context, ref)
+                      : puedeConvertir
+                          ? () => _convertirCotizacion(context, ref)
+                          : null,
+                  icon: Icon(
+                    puedeEnviarAprobacion
+                        ? Icons.send_outlined
+                        : Icons.shopping_cart_checkout,
+                    size: 18,
+                  ),
+                  label: Text(
+                    puedeEnviarAprobacion
+                        ? 'ENVIAR A APROBACIÓN'
+                        : 'CONVERTIR A VENTA',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: esPantallaPequena ? 13 : 14,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: puedeConvertir
+                        ? AppColors.success
+                        : AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
 }
 
 class _FilaResumen extends StatelessWidget {
-  const _FilaResumen(this.etiqueta, this.valor, {this.esResaltado = false});
+  const _FilaResumen(
+    this.etiqueta,
+    this.valor, {
+    this.fontSize = 14,
+    this.colorValor,
+  });
+
   final String etiqueta;
   final String valor;
-  final bool esResaltado;
+  final double fontSize;
+  final Color? colorValor;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(etiqueta, style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary, fontWeight: esResaltado ? FontWeight.bold : FontWeight.normal)),
-          Text(valor, style: AppTypography.bodyMedium.copyWith(fontWeight: esResaltado ? FontWeight.bold : FontWeight.normal, fontSize: esResaltado ? 16 : 14, color: esResaltado ? AppColors.primary : null)),
+          Text(
+            etiqueta,
+            style: AppTypography.bodyMedium.copyWith(
+              fontSize: fontSize,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Text(
+            valor,
+            style: AppTypography.bodyMedium.copyWith(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w500,
+              color: colorValor ?? AppColors.textPrimary,
+            ),
+          ),
         ],
       ),
     );
