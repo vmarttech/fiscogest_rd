@@ -4,7 +4,7 @@ abstract class ICajaRepository {
     required double monto,
     required String tipo,
     required String descripcion,
+    String formaPago = 'efectivo',
   });
-
   Future<double?> obtenerSaldoActual();
 }

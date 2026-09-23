@@ -15,6 +15,8 @@ class AppShell extends StatelessWidget {
       '/' => 'Dashboard',
       '/sales' => 'Facturación y NC',
       '/ventas' => 'Ventas',
+      '/ventas/cobro' => 'Caja',
+      '/ventas/cobro/operacion' => 'Cobrar cotización',
       '/ventas/cotizaciones/nueva' => 'Nueva Cotización',
       '/ventas/cotizaciones/historial' => 'Historial de Cotizaciones',
       '/ventas/apartados' => 'Apartados',
@@ -166,6 +168,7 @@ class AppShell extends StatelessWidget {
                   _buildNavItem(context, '/', 'Dashboard', Icons.dashboard_outlined, currentPath),
                   _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
                   _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
+                  _buildNavItem(context, '/ventas/cobro', 'Caja', Icons.payments_outlined, currentPath),
                   _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
 
                   const SizedBox(height: 18),

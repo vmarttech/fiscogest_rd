@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
+
 typedef VentaConCliente = ({VentasTableData venta, String? nombreCliente});
 
 class VentasDao {
@@ -31,7 +32,9 @@ class VentasDao {
       query.where((final t) => t.usuarioId.equals(usuarioId));
     }
     final filas = await query.get();
-    return filas.map((final v) => (venta: v, nombreCliente: null)).toList();
+    return filas
+        .map((final v) => (venta: v, nombreCliente: v.nombreCliente))
+        .toList();
   }
 
   Future<List<VentaConCliente>> listarCotizaciones({
@@ -56,7 +59,65 @@ class VentasDao {
       query.where((final t) => t.usuarioId.equals(usuarioId));
     }
     final filas = await query.get();
-    return filas.map((final v) => (venta: v, nombreCliente: null)).toList();
+    return filas
+        .map((final v) => (venta: v, nombreCliente: v.nombreCliente))
+        .toList();
+  }
+
+  /// Cotizaciones listas para cobrar en Caja:
+  /// - Contado: estado cotizado
+  /// - Crédito: estado aprobado
+  Future<List<VentaConCliente>> listarPendientesCobro({
+    final DateTime? desde,
+    final DateTime? hasta,
+  }) async {
+    final query = _db.select(_db.ventasTable)
+      ..where(
+        (final t) =>
+            t.estadoDocumento.equals('cotizado') |
+            t.estadoDocumento.equals('aprobado'),
+      )
+      ..orderBy([(final t) => OrderingTerm.desc(t.fechaRegistro)]);
+    if (desde != null) {
+      query.where((final t) => t.fechaRegistro.isBiggerOrEqualValue(desde));
+    }
+    if (hasta != null) {
+      query.where((final t) => t.fechaRegistro.isSmallerOrEqualValue(hasta));
+    }
+    final filas = await query.get();
+    return filas
+        .map((final v) => (venta: v, nombreCliente: v.nombreCliente))
+        .toList();
+  }
+
+  Future<VentasTableData?> buscarPorNumeroCotizacion(
+    final String numero,
+  ) async {
+    final limpio = numero.trim().toUpperCase();
+    if (limpio.isEmpty) return null;
+    return await (_db.select(_db.ventasTable)
+          ..where((final t) => t.numeroCotizacion.equals(limpio)))
+        .getSingleOrNull();
+  }
+
+  Future<List<VentaConCliente>> buscarPorNombreCliente(
+    final String texto,
+  ) async {
+    final limpio = texto.trim();
+    if (limpio.isEmpty) return [];
+    final query = _db.select(_db.ventasTable)
+      ..where(
+        (final t) =>
+            t.nombreCliente.like('%$limpio%') &
+            (t.estadoDocumento.equals('cotizado') |
+                t.estadoDocumento.equals('aprobado')),
+      )
+      ..orderBy([(final t) => OrderingTerm.desc(t.fechaRegistro)])
+      ..limit(30);
+    final filas = await query.get();
+    return filas
+        .map((final v) => (venta: v, nombreCliente: v.nombreCliente))
+        .toList();
   }
 
   Future<VentasTableData?> obtenerVentaPorId(final int ventaId) async {
@@ -69,9 +130,10 @@ class VentasDao {
     final int ventaId,
     final VentasTableCompanion venta,
   ) async {
-    return await (_db.update(_db.ventasTable)
-      ..where((final t) => t.id.equals(ventaId)))
-          .replace(venta);
+    final filas = await (_db.update(_db.ventasTable)
+          ..where((final t) => t.id.equals(ventaId)))
+        .write(venta);
+    return filas > 0;
   }
 
   Future<int> obtenerUltimoCorrelativoCotizacion({bool? soloCredito}) async {
@@ -89,5 +151,51 @@ class VentasDao {
     final ultimo = filas.first.numeroCotizacion;
     final soloNumero = ultimo.replaceAll(RegExp(r'[^0-9]'), '');
     return int.tryParse(soloNumero) ?? 0;
+  }
+
+  Future<int> obtenerUltimoCorrelativoFactura() async {
+    final query = _db.select(_db.ventasTable)
+      ..where((final t) => t.numeroFactura.isNotNull());
+    query.orderBy([(final t) => OrderingTerm.desc(t.numeroFactura)]);
+    query.limit(1);
+    final filas = await query.get();
+    if (filas.isEmpty) return 0;
+    final ultimo = filas.first.numeroFactura ?? '';
+    final soloNumero = ultimo.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(soloNumero) ?? 0;
+  }
+
+  Future<int> insertarDetalle({
+    required int ventaId,
+    required int productoId,
+    required double cantidad,
+    required double precioUnitario,
+    required double subtotal,
+    double descuentoLinea = 0.0,
+    double impuesto = 0.0,
+  }) async {
+    return await _db.into(_db.ventasDetalleTable).insert(
+      VentasDetalleTableCompanion.insert(
+        ventaId: ventaId,
+        productoId: productoId,
+        cantidad: cantidad,
+        precioUnitario: precioUnitario,
+        subtotal: subtotal,
+        descuentoLinea: Value(descuentoLinea),
+        impuesto: impuesto,
+      ),
+    );
+  }
+
+  Future<List<VentaDetalleData>> listarDetalles(int ventaId) async {
+    return await (_db.select(_db.ventasDetalleTable)
+          ..where((t) => t.ventaId.equals(ventaId)))
+        .get();
+  }
+
+  Future<int> eliminarDetallesDeVenta(int ventaId) async {
+    return await (_db.delete(_db.ventasDetalleTable)
+          ..where((t) => t.ventaId.equals(ventaId)))
+        .go();
   }
 }

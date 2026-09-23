@@ -10,16 +10,24 @@ class FacturaServiceImpl implements IFacturaService {
   String generarTextoFactura(Venta venta) {
     final formatoFecha = DateFormat('dd/MM/yyyy HH:mm');
     final formatoNumero = NumberFormat('#,##0.00', 'es_DO');
-
     String formatearMonto(double valor) => 'RD\$${formatoNumero.format(valor)}';
 
     final factura = StringBuffer();
+
     factura.writeln('========================================');
     factura.writeln('           FISCOGEST RD');
     factura.writeln('         FACTURA DE VENTA');
     factura.writeln('========================================');
     factura.writeln('');
-    factura.writeln('Número: ${venta.numero}');
+
+    // Número fiscal principal (DGII) + referencia cotización
+    if (venta.numeroFactura != null && venta.numeroFactura!.isNotEmpty) {
+      factura.writeln('N° Factura: ${venta.numeroFactura}');
+      factura.writeln('Ref. Cotización: ${venta.numeroCotizacion}');
+    } else {
+      factura.writeln('Cotización: ${venta.numeroCotizacion}');
+    }
+
     factura.writeln('Fecha:  ${formatoFecha.format(venta.fecha)}');
     factura.writeln('Cliente ID: ${venta.clienteId}');
     if (venta.nombreCliente != null) {
@@ -28,9 +36,11 @@ class FacturaServiceImpl implements IFacturaService {
     factura.writeln('Forma de Pago: ${venta.tipoPago.toUpperCase()}');
     factura.writeln(venta.esCredito ? 'Crédito: SÍ' : 'Crédito: NO');
     factura.writeln('');
+
     factura.writeln('----------------------------------------');
     factura.writeln('DETALLE DE PRODUCTOS');
     factura.writeln('----------------------------------------');
+
     for (var i = 0; i < venta.detalles.length; i++) {
       final detalle = venta.detalles[i];
       factura.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}');
@@ -51,6 +61,7 @@ class FacturaServiceImpl implements IFacturaService {
       factura.writeln('   Subtotal: ${formatearMonto(subtotalLinea)}');
       factura.writeln('');
     }
+
     factura.writeln('----------------------------------------');
     factura.writeln(
       'Subtotal:          ${formatearMonto(venta.subtotal)}',
@@ -63,6 +74,7 @@ class FacturaServiceImpl implements IFacturaService {
     factura.writeln('');
     factura.writeln('       ¡GRACIAS POR SU COMPRA!');
     factura.writeln('========================================');
+
     return factura.toString();
   }
 

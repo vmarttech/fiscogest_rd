@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 
 @immutable
@@ -143,13 +144,20 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     state = state.copyWith(estadoDocumento: estado);
   }
 
+  /// Contado o Crédito — afecta formaPago guardada y prefijo del número.
+  void establecerFormaPago({required bool esCredito}) {
+    state = state.copyWith(
+      esCredito: esCredito,
+      tipoPago: esCredito ? 'Credito' : 'Contado',
+    );
+  }
+
   void agregarProducto(Producto producto, double cantidad) {
     final nuevosDetalles = List<Map<String, dynamic>>.from(state.detalles);
     final precioUnitario = producto.precioVenta;
     final indice = nuevosDetalles.indexWhere(
       (item) => item['productoId'] == producto.id,
     );
-
     if (indice >= 0) {
       nuevosDetalles[indice]['cantidad'] =
           (nuevosDetalles[indice]['cantidad'] as double) + cantidad;
@@ -164,12 +172,10 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
         'subtotal': cantidad * precioUnitario,
       });
     }
-
     final nuevoSubtotal = nuevosDetalles.fold<double>(
       0.0,
       (sum, item) => sum + (item['subtotal'] as double),
     );
-
     _recalcularTotal(nuevoSubtotal: nuevoSubtotal, detalles: nuevosDetalles);
   }
 
@@ -177,12 +183,10 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final nuevosDetalles = state.detalles
         .where((item) => item['productoId'] != productoId)
         .toList();
-
     final nuevoSubtotal = nuevosDetalles.fold<double>(
       0.0,
       (sum, item) => sum + (item['subtotal'] as double),
     );
-
     _recalcularTotal(nuevoSubtotal: nuevoSubtotal, detalles: nuevosDetalles);
   }
 
@@ -199,7 +203,6 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final env = nuevoEnvio ?? state.costoEnvio;
     final desc = nuevoDescuento ?? state.montoDescuento;
     final total = subt + itb + env - desc;
-
     state = state.copyWith(
       subtotal: subt,
       itbis: itb,
@@ -220,7 +223,6 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final nuevoItbis = baseImponible * tasaItbis;
     final subtMasItbis = baseImponible + nuevoItbis;
     final nuevoTotal = subtMasItbis + state.costoEnvio;
-
     state = state.copyWith(
       descuento: valor,
       montoDescuento: valor,
@@ -235,7 +237,6 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final nuevoItbis = baseImponible * tasaItbis;
     final subtMasItbis = baseImponible + nuevoItbis;
     final nuevoTotal = subtMasItbis + state.costoEnvio;
-
     state = state.copyWith(
       descuento: 0.0,
       descuentoId: null,
@@ -268,9 +269,9 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final bool tieneCliente = state.clienteId != null &&
         state.clienteId! >= 0 &&
         (state.clienteNombre?.trim().isNotEmpty ?? false);
-    final bool tieneProductos = state.detalles.isNotEmpty && state.montoTotal > 0;
+    final bool tieneProductos =
+        state.detalles.isNotEmpty && state.montoTotal > 0;
     final bool numeroGenerado = state.numero.trim().isNotEmpty;
-
     if (!tieneCliente) return false;
     if (!tieneProductos) return false;
     if (!numeroGenerado) return false;
@@ -279,9 +280,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
 
   Future<String?> guardar() async {
     if (!validarAntesDeGuardar()) return null;
-
     final repositorio = _ref.read(ventasRepositoryProvider);
-
     final venta = Venta(
       id: state.id,
       numeroCotizacion: state.numero,
@@ -290,7 +289,21 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       nombreCliente: state.clienteNombre,
       fecha: state.fecha,
       vencimiento: state.vencimiento,
-      detalles: const [],
+      detalles: state.detalles.map((m) {
+        final cant = (m['cantidad'] as num?)?.toDouble() ?? 0.0;
+        final precio = (m['precioUnitario'] as num?)?.toDouble() ?? 0.0;
+        final sub = (m['subtotal'] as num?)?.toDouble() ?? (cant * precio);
+        final pid = m['productoId'];
+        final productoId = pid is int ? pid : int.tryParse('$pid') ?? 0;
+        return DetalleVenta(
+          productoId: productoId,
+          cantidad: cant.round().clamp(1, 999999),
+          precioUnitario: precio,
+          subtotal: sub,
+          nombreProducto: m['productoNombre'] as String?,
+          subtotalLinea: sub,
+        );
+      }).toList(),
       montoSubtotal: state.subtotal,
       descuentoGlobal: state.descuento ?? 0.0,
       itbis: state.itbis,
@@ -305,7 +318,6 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       descuentoNombre: state.descuentoNombre,
       montoDescuento: state.montoDescuento,
     );
-
     final guardada = await repositorio.registrarVentaBorrador(venta);
     state = state.copyWith(id: guardada.id);
     return state.numero.trim();

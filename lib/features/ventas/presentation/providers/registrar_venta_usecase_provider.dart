@@ -82,3 +82,16 @@ final registrarVentaConInventarioUseCaseProvider =
       );
       return RegistrarVentaConInventarioUseCase(servicio);
     });
+
+final ventaInventarioServiceProvider = Provider<IVentaInventarioService>((ref) {
+  final repositorio = ref.read(ventasRepositoryProvider);
+  final kardexRepo = ref.read(kardexRepositoryProvider);
+  final inventarioServ = ref.read(inventarioServiceProvider);
+  final productosDaoInst = ref.read(productosDaoProvider);
+  return VentaInventarioServiceImpl(
+    ventasRepository: repositorio,
+    kardexRepository: kardexRepo,
+    inventarioService: inventarioServ,
+    productosDao: productosDaoInst,
+  );
+});

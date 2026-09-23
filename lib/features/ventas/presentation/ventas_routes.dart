@@ -4,6 +4,8 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borr
 import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
@@ -14,6 +16,7 @@ class VentasRoute {
     required this.name,
     required this.builder,
   });
+
   final String path;
   final String name;
   final WidgetBuilder builder;
@@ -44,6 +47,16 @@ final List<VentasRoute> ventasRoutes = [
     path: '/ventas/cobrar',
     name: CobrarPage.routeName,
     builder: (_) => const CobrarPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/cobro',
+    name: CajaInicioPage.routeName,
+    builder: (_) => const CajaInicioPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/cobro/operacion',
+    name: CobroVentaPage.routeName,
+    builder: (_) => const CobroVentaPage(),
   ),
   VentasRoute(
     path: '/ventas/pagar',

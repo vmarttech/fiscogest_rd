@@ -6,7 +6,6 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/convertir_cotizacion_provider.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
 
 class HistorialVentasBorrador extends ConsumerWidget {
   const HistorialVentasBorrador({super.key});
@@ -96,7 +95,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
                     ),
                   ),
                   onPressed: () {
-                    context.goNamed(NuevaVentaBorradorPage.routeName);
+                    context.push('/ventas/cotizaciones/nueva');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -270,15 +269,23 @@ class _TarjetaCotizacion extends ConsumerWidget {
     }
   }
 
-  Future<void> _convertirAVenta(WidgetRef ref, BuildContext context) async {
+  /// Solo navega a Caja. No factura aquí.
+  Future<void> _irACaja(WidgetRef ref, BuildContext context) async {
     if (cotizacion.id == null) return;
+
+    final esCredito = cotizacion.esCredito ||
+        cotizacion.tipoPago.toLowerCase().contains('credito') ||
+        cotizacion.tipoPago.toLowerCase().contains('crédito') ||
+        cotizacion.numero.startsWith('CR-');
+
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Convertir a Venta'),
+        title: const Text('Ir a Caja'),
         content: Text(
-          '¿Convertir la Cotización N° ${cotizacion.numero} en una Venta?',
+          '¿Cobrar la Cotización N° ${cotizacion.numero} en Caja?\n\n'
+          'Allí se generará el número de factura fiscal.',
         ),
         actions: [
           TextButton(
@@ -291,38 +298,23 @@ class _TarjetaCotizacion extends ConsumerWidget {
               backgroundColor: AppColors.success,
               foregroundColor: AppColors.white,
             ),
-            child: const Text('Convertir'),
+            child: const Text('Ir a Caja'),
           ),
         ],
       ),
     );
     if (confirmar != true || !context.mounted) return;
-    try {
-      final repo = ref.read(ventasRepositoryProvider);
-      await repo.confirmarVentaBorrador(cotizacion.id!);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Cotización N° ${cotizacion.numero} convertida a Venta',
-            ),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        ref.invalidate(listaVentasBorradorProvider);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
+
+    context.push(
+      '/ventas/cobro/operacion',
+      extra: <String, dynamic>{
+        'ventaId': cotizacion.id,
+        'montoTotal': cotizacion.montoTotal,
+        'esCredito': esCredito,
+        'numeroCotizacion': cotizacion.numero,
+        'nombreCliente': cotizacion.clienteNombre,
+      },
+    );
   }
 
   @override
@@ -330,7 +322,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
     final estado = cotizacion.estadoDocumento;
     final puedeEnviarAprobacion =
         estado == EstadoDocumento.cotizado && cotizacion.id != null;
-    final puedeConvertir =
+    final puedeIrACaja =
         estado == EstadoDocumento.aprobado && cotizacion.id != null;
     final convertida = estado == EstadoDocumento.facturado;
     final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
@@ -347,7 +339,6 @@ class _TarjetaCotizacion extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Fila 1: N° + badge
           Row(
             children: [
               Expanded(
@@ -378,7 +369,6 @@ class _TarjetaCotizacion extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          // Fila 2: fechas + total
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -413,8 +403,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
               ),
             ],
           ),
-          // Acciones según estado
-          if (puedeEnviarAprobacion || puedeConvertir || convertida) ...[
+          if (puedeEnviarAprobacion || puedeIrACaja || convertida) ...[
             const SizedBox(height: 10),
             const Divider(height: 1),
             const SizedBox(height: 8),
@@ -441,20 +430,20 @@ class _TarjetaCotizacion extends ConsumerWidget {
                   ),
                 ),
               )
-            else if (puedeConvertir)
+            else if (puedeIrACaja)
               SizedBox(
                 width: double.infinity,
                 height: esPantallaPequena ? 40 : 44,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.shopping_cart_checkout, size: 18),
+                  icon: const Icon(Icons.point_of_sale, size: 18),
                   label: Text(
-                    'Convertir a Venta',
+                    'Ir a Caja / Cobrar',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: tamanoCuerpo,
                     ),
                   ),
-                  onPressed: () => _convertirAVenta(ref, context),
+                  onPressed: () => _irACaja(ref, context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.success,
                     foregroundColor: AppColors.white,
@@ -468,8 +457,11 @@ class _TarjetaCotizacion extends ConsumerWidget {
             else if (convertida)
               Row(
                 children: [
-                  const Icon(Icons.check_circle,
-                      size: 16, color: AppColors.success),
+                  const Icon(
+                    Icons.check_circle,
+                    size: 16,
+                    color: AppColors.success,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Venta generada',

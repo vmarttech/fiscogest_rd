@@ -310,46 +310,6 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ─── PESTAÑAS: solo COTIZACIÓN + APARTADO ───
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.grey100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    _ModoTab(
-                      label: 'COTIZACIÓN',
-                      active: !esApartado,
-                      color: AppColors.info,
-                      onTap: _guardando
-                          ? null
-                          : () {
-                              ref
-                                  .read(ventasNavegacionProvider.notifier)
-                                  .establecerModoOperacion(
-                                    ModoOperacion.cotizacion,
-                                  );
-                              context.push('/ventas/cotizaciones/nueva');
-                            },
-                    ),
-                    _ModoTab(
-                      label: 'APARTADO',
-                      active: esApartado,
-                      color: AppColors.warning,
-                      onTap: _guardando
-                          ? null
-                          : () => ref
-                              .read(ventasNavegacionProvider.notifier)
-                              .establecerModoOperacion(ModoOperacion.apartado),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
               // ─── SI NO ES APARTADO → entrada a Cotización (único POS) ───
               if (!esApartado) ...[
                 _buildEntradaCotizacion(isMobile),
@@ -658,45 +618,6 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           style: TextButton.styleFrom(foregroundColor: AppColors.info),
         ),
       ],
-    );
-  }
-}
-
-class _ModoTab extends StatelessWidget {
-  const _ModoTab({
-    required this.label,
-    required this.active,
-    required this.color,
-    this.onTap,
-  });
-  final String label;
-  final bool active;
-  final Color color;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: active ? color : Colors.transparent,
-        borderRadius: BorderRadius.circular(9),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(9),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            alignment: Alignment.center,
-            child: Text(
-              label,
-              style: AppTypography.labelMedium.copyWith(
-                color: active ? AppColors.white : color,
-                fontWeight: FontWeight.w600,
-                fontSize: 12.5,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

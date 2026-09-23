@@ -17,12 +17,38 @@ class CajaRepositoryImpl implements ICajaRepository {
     return 0.0;
   }
 
+  FormaPago _parseFormaPago(String valor) {
+    final v = valor.toLowerCase().trim();
+    if (v.contains('tarjeta')) return FormaPago.tarjeta;
+    if (v.contains('transfer')) return FormaPago.transferencia;
+    if (v.contains('credito') || v.contains('crédito')) return FormaPago.credito;
+    if (v.contains('cheque')) return FormaPago.cheque;
+    return FormaPago.efectivo;
+  }
+
+  ReferenciaTipo _parseReferenciaTipo(String referencia, String descripcion) {
+    final r = referencia.toUpperCase();
+    final d = descripcion.toLowerCase();
+    if (r.startsWith('B03') || d.contains('factura') || d.contains('cobro')) {
+      return ReferenciaTipo.cobro;
+    }
+    if (r.startsWith('C-') || r.startsWith('CR-') || d.contains('venta')) {
+      return ReferenciaTipo.venta;
+    }
+    if (d.contains('compra')) return ReferenciaTipo.compra;
+    if (d.contains('apartado')) return ReferenciaTipo.apartado;
+    if (d.contains('devol')) return ReferenciaTipo.devolucion;
+    if (d.contains('pago')) return ReferenciaTipo.pago;
+    return ReferenciaTipo.compra;
+  }
+
   @override
   Future<void> registrarMovimiento({
     required String referencia,
     required double monto,
     required String tipo,
     required String descripcion,
+    String formaPago = 'efectivo',
   }) async {
     final saldoAnterior = await obtenerSaldoActual() ?? 0.0;
     late double saldoNuevo;
@@ -37,10 +63,12 @@ class CajaRepositoryImpl implements ICajaRepository {
     await cajaMovimientosDao.registrarMovimiento(
       CajaMovimientosTableCompanion(
         tipo: Value(tipoMovimiento),
-        referenciaTipo: const Value(ReferenciaTipo.compra),
-        referenciaId: Value(int.tryParse(referencia.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0),
+        referenciaTipo: Value(_parseReferenciaTipo(referencia, descripcion)),
+        referenciaId: Value(
+          int.tryParse(referencia.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
+        ),
         monto: Value(monto),
-        formaPago: const Value(FormaPago.efectivo),
+        formaPago: Value(_parseFormaPago(formaPago)),
         saldoAnterior: Value(saldoAnterior),
         saldoNuevo: Value(saldoNuevo),
       ),

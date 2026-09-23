@@ -1,37 +1,53 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_delivery.dart';
 
 class BarraNavegacionInferior extends ConsumerWidget {
   const BarraNavegacionInferior({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vistaActual = ref.watch(ventasNavegacionProvider.select((e) => e.vistaActual));
+    final vistaActual =
+        ref.watch(ventasNavegacionProvider.select((e) => e.vistaActual));
+    final modo =
+        ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
 
-    void navegarA(VistaActual destino) {
-      ref.read(ventasNavegacionProvider.notifier).cambiarVista(destino);
+    void irInicio() {
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .establecerModoOperacion(ModoOperacion.cotizacion);
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .cambiarVista(VistaActual.inicio);
     }
 
-    Future<void> abrirSelectorDelivery() async {
-      final costoActual = ref.read(registrarVentaProvider).costoEnvio;
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) => SelectorDeliveryDialog(costoActual: costoActual),
-      );
+    void irApartado() {
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .establecerModoOperacion(ModoOperacion.apartado);
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .cambiarVista(VistaActual.inicio);
     }
 
-    Widget botonNavegacion(VistaActual vista, IconData icono, String etiqueta, {VoidCallback? onTapPersonalizado}) {
-      final activo = vistaActual == vista;
+    void irHistorial() {
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .cambiarVista(VistaActual.historial);
+    }
+
+    Widget boton({
+      required bool activo,
+      required IconData icono,
+      required String etiqueta,
+      required VoidCallback onTap,
+    }) {
       return Expanded(
         child: InkWell(
-          onTap: onTapPersonalizado ?? () => navegarA(vista),
+          onTap: onTap,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.s),
             decoration: BoxDecoration(
@@ -41,7 +57,9 @@ class BarraNavegacionInferior extends ConsumerWidget {
                   width: 2.5,
                 ),
               ),
-              color: activo ? AppColors.primary.withValues(alpha: 0.08) : Colors.transparent,
+              color: activo
+                  ? AppColors.primary.withValues(alpha: 0.08)
+                  : Colors.transparent,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -56,8 +74,10 @@ class BarraNavegacionInferior extends ConsumerWidget {
                   etiqueta,
                   style: TextStyle(
                     fontSize: 11,
-                    color: activo ? AppColors.primary : AppColors.textSecondary,
-                    fontWeight: activo ? FontWeight.w600 : FontWeight.normal,
+                    color:
+                        activo ? AppColors.primary : AppColors.textSecondary,
+                    fontWeight:
+                        activo ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ],
@@ -66,6 +86,13 @@ class BarraNavegacionInferior extends ConsumerWidget {
         ),
       );
     }
+
+    final enInicio = vistaActual == VistaActual.inicio;
+    final activoInicio =
+        enInicio && modo != ModoOperacion.apartado;
+    final activoApartado =
+        enInicio && modo == ModoOperacion.apartado;
+    final activoHistorial = vistaActual == VistaActual.historial;
 
     return Container(
       decoration: const BoxDecoration(
@@ -77,9 +104,24 @@ class BarraNavegacionInferior extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            botonNavegacion(VistaActual.inicio, Icons.point_of_sale, 'Inicio'),
-            botonNavegacion(VistaActual.inventario, Icons.delivery_dining, 'Delivery', onTapPersonalizado: abrirSelectorDelivery),
-            botonNavegacion(VistaActual.historial, Icons.history, 'Historial'),
+            boton(
+              activo: activoInicio,
+              icono: Icons.point_of_sale,
+              etiqueta: 'Inicio',
+              onTap: irInicio,
+            ),
+            boton(
+              activo: activoApartado,
+              icono: Icons.inventory_2_outlined,
+              etiqueta: 'Apartado',
+              onTap: irApartado,
+            ),
+            boton(
+              activo: activoHistorial,
+              icono: Icons.history,
+              etiqueta: 'Historial',
+              onTap: irHistorial,
+            ),
           ],
         ),
       ),

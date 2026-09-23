@@ -5,6 +5,8 @@ import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
@@ -99,12 +101,57 @@ class _NuevaVentaBorradorPageState
 
   void _limpiarFormulario() {
     ref.read(ventaBorradorProvider.notifier).vaciar();
-    _buscadorController.clear();
-    setState(() {
-      _fechaVencimientoSeleccionada = null;
-      _esCredito = false;
-    });
     ref.read(ventaBorradorProvider.notifier).establecerConsumidorFinal();
+    _buscadorController.clear();
+    if (mounted) {
+      setState(() {
+        _fechaVencimientoSeleccionada = null;
+        _esCredito = false;
+        _guardando = false;
+      });
+    }
+  }
+
+  void _cambiarEsCredito(bool valor) {
+    setState(() => _esCredito = valor);
+    ref
+        .read(ventaBorradorProvider.notifier)
+        .establecerFormaPago(esCredito: valor);
+  }
+
+  RegistrarVentaState _mapearBorradorARegistrarVenta(
+    VentaBorradorState estado,
+  ) {
+    final detalles = estado.detalles.map((m) {
+      final cant = (m['cantidad'] as num?)?.toDouble() ?? 0.0;
+      final precio = (m['precioUnitario'] as num?)?.toDouble() ?? 0.0;
+      final sub = (m['subtotal'] as num?)?.toDouble() ?? (cant * precio);
+      final pid = m['productoId'];
+      final productoId = pid is int ? pid : int.tryParse('$pid') ?? 0;
+      return DetalleVenta(
+        productoId: productoId,
+        cantidad: cant.round().clamp(1, 999999),
+        precioUnitario: precio,
+        subtotal: sub,
+        nombreProducto: m['productoNombre'] as String?,
+        subtotalLinea: sub,
+      );
+    }).toList();
+    return RegistrarVentaState(
+      clienteId: estado.clienteId,
+      clienteNombre: estado.clienteNombre,
+      tipoPago: estado.esCredito ? 'Crédito' : estado.tipoPago,
+      esCredito: estado.esCredito,
+      detalles: detalles,
+      subtotal: estado.subtotal,
+      itbis: estado.itbis,
+      costoEnvio: estado.costoEnvio,
+      total: estado.montoTotal,
+      montoDescuento: estado.montoDescuento,
+      descuentoId: estado.descuentoId,
+      descuentoNombre: estado.descuentoNombre,
+      vencimiento: estado.vencimiento,
+    );
   }
 
   Future<void> _guardarCotizacion() async {
@@ -112,11 +159,50 @@ class _NuevaVentaBorradorPageState
     try {
       final notificador = ref.read(ventaBorradorProvider.notifier);
       final repositorio = ref.read(ventasRepositoryProvider);
+      notificador.establecerFormaPago(esCredito: _esCredito);
+
+      double abonoDesdeFormulario = 0.0;
+      DateTime? vencimientoCredito;
+
+      // Crédito → mismo formulario que Apartado (antes de guardar)
+      if (_esCredito) {
+        final estadoBorrador = ref.read(ventaBorradorProvider);
+        if (estadoBorrador.detalles.isEmpty || estadoBorrador.montoTotal <= 0) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Agregue productos antes de generar la cotización'),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          return;
+        }
+        final estadoParaCredito = _mapearBorradorARegistrarVenta(estadoBorrador);
+        if (!mounted) return;
+        final resultado = await FormularioCreditoDialog.navegar(
+          context,
+          estadoParaCredito,
+        );
+        if (resultado == null) {
+          // Usuario canceló el formulario de crédito
+          return;
+        }
+        abonoDesdeFormulario = resultado.abonoInicial?.monto ?? 0.0;
+        vencimientoCredito = resultado.cuenta.fechaVencimiento;
+        notificador.establecerVencimiento(vencimientoCredito);
+      }
+
       final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(
         esCredito: _esCredito,
       );
       notificador.establecerNumeroCotizacion(numeroCotizacion);
-      notificador.establecerEstadoDocumento(EstadoDocumento.cotizado);
+      // Contado → cotizado (listo para Caja)
+      // Crédito → enCredito (pendiente de aprobación)
+      notificador.establecerEstadoDocumento(
+        _esCredito ? EstadoDocumento.enCredito : EstadoDocumento.cotizado,
+      );
       final numeroGuardado = await notificador.guardar();
       if (numeroGuardado == null) {
         if (mounted) {
@@ -132,16 +218,37 @@ class _NuevaVentaBorradorPageState
         }
         return;
       }
+
+      // Si hay id y abono de crédito, actualizar abonoInicial en BD
+      final idGuardado = ref.read(ventaBorradorProvider).id;
+      if (_esCredito && idGuardado != null && abonoDesdeFormulario > 0) {
+        await repositorio.registrarVentaConAbono(
+          idGuardado,
+          abonoDesdeFormulario,
+          'Abono inicial cotización crédito',
+          formaPago: 'Credito',
+        );
+        // registrarVentaConAbono facturaba: solo queremos abono en cotización.
+        // Revertimos a enCredito sin factura si el método facturó.
+        await repositorio.cambiarEstadoDocumento(
+          idGuardado,
+          EstadoDocumento.enCredito,
+        );
+      }
+
       if (!mounted) return;
+      final mensaje = _esCredito
+          ? 'Cotización N° $numeroGuardado en crédito.\n'
+              'Abono: RD\$ ${abonoDesdeFormulario.toStringAsFixed(2)}\n'
+              'Pendiente de aprobación → luego Caja.'
+          : 'Cotización N° $numeroGuardado generada.\n'
+              'Lista para cobrar en Caja.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Cotización N° $numeroGuardado generada.\n'
-            'Consúltela en el Historial de Cotizaciones.',
-          ),
+          content: Text(mensaje),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 4),
         ),
       );
       ref.invalidate(listaCotizacionesProvider);
@@ -281,7 +388,7 @@ class _NuevaVentaBorradorPageState
             color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
             child: InkWell(
-              onTap: () => setState(() => _esCredito = !_esCredito),
+              onTap: () => _cambiarEsCredito(!_esCredito),
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -330,7 +437,7 @@ class _NuevaVentaBorradorPageState
                     ),
                     Switch.adaptive(
                       value: _esCredito,
-                      onChanged: (v) => setState(() => _esCredito = v),
+                      onChanged: _cambiarEsCredito,
                       activeTrackColor: AppColors.warning,
                     ),
                   ],

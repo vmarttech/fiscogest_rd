@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_naveg
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class VistaDetalle extends ConsumerWidget {
@@ -66,6 +67,13 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
         _ => AppColors.textSecondary.withValues(alpha: 0.12),
       };
+
+  bool get _esCredito {
+    if (venta.esCredito) return true;
+    final pago = venta.formaPago.toLowerCase();
+    if (pago.contains('credito') || pago.contains('crédito')) return true;
+    return venta.numeroCotizacion.startsWith('CR-');
+  }
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
@@ -295,15 +303,18 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     }
   }
 
-  Future<void> _convertirCotizacion(BuildContext context, WidgetRef ref) async {
-    if (!venta.numero.startsWith('C')) return;
-    final bool? confirmar = await showDialog<bool>(
+  /// Solo navega a Caja. La factura se genera exclusivamente allí.
+  Future<void> _irACaja(BuildContext context, WidgetRef ref) async {
+    if (venta.id == null) return;
+
+    final confirmar = await showDialog<bool>(
       context: context,
-      builder: (BuildContext ctx) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Convertir Cotización'),
+        title: const Text('Ir a Caja'),
         content: Text(
-          '¿Desea convertir la cotización ${venta.numero} en una venta?',
+          '¿Cobrar la cotización N° ${venta.numero} en Caja?\n\n'
+          'Allí se generará el número de factura fiscal.',
         ),
         actions: [
           TextButton(
@@ -316,39 +327,27 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               backgroundColor: AppColors.success,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Confirmar'),
+            child: const Text('Ir a Caja'),
           ),
         ],
       ),
     );
     if (confirmar != true || !context.mounted) return;
-    try {
-      final casoUso = ref.read(convertirCotizacionAVentaProvider);
-      final resultado = await casoUso.call(venta.id!);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Cotización convertida: ${resultado.numero}'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
-        ref
-            .read(ventasNavegacionProvider.notifier)
-            .cambiarVista(VistaActual.inicio);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al convertir: $e'),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
+
+    ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
+    ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+
+    if (!context.mounted) return;
+    context.push(
+      '/ventas/cobro/operacion',
+      extra: <String, dynamic>{
+        'ventaId': venta.id,
+        'montoTotal': venta.montoTotal,
+        'esCredito': _esCredito,
+        'numeroCotizacion': venta.numeroCotizacion,
+        'nombreCliente': venta.nombreCliente,
+      },
+    );
   }
 
   @override
@@ -358,7 +357,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         estado == EstadoDocumento.cotizado && venta.id != null;
     final puedeAprobarRechazar =
         estado == EstadoDocumento.enCredito && venta.id != null;
-    final puedeConvertir =
+    final puedeIrACaja =
         estado == EstadoDocumento.aprobado && venta.id != null;
     final esPantallaPequena = MediaQuery.of(context).size.width < 600;
     final padding = esPantallaPequena ? 12.0 : 16.0;
@@ -375,7 +374,6 @@ class _MostrarDetalleVenta extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── CABECERA POS ──
                 Row(
                   children: [
                     IconButton(
@@ -442,10 +440,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     const SizedBox(width: 48),
                   ],
                 ),
-
                 SizedBox(height: esPantallaPequena ? 16 : 20),
-
-                // ── CLIENTE ──
                 _seccionCard(
                   esPantallaPequena: esPantallaPequena,
                   child: Row(
@@ -510,10 +505,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     ],
                   ),
                 ),
-
                 SizedBox(height: esPantallaPequena ? 12 : 14),
-
-                // ── PRODUCTOS ──
                 Text(
                   'Productos',
                   style: AppTypography.labelMedium.copyWith(
@@ -590,10 +582,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     ],
                   ),
                 ),
-
                 SizedBox(height: esPantallaPequena ? 12 : 14),
-
-                // ── RESUMEN ──
                 _seccionCard(
                   esPantallaPequena: esPantallaPequena,
                   child: Column(
@@ -643,10 +632,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     ],
                   ),
                 ),
-
                 SizedBox(height: esPantallaPequena ? 12 : 14),
-
-                // ── ACCIONES SECUNDARIAS ──
                 Text(
                   'Documentos',
                   style: AppTypography.labelMedium.copyWith(
@@ -696,21 +682,18 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
               ],
             ),
           ),
         ),
-
-        // ── BARRA FIJA DE ACCIONES SEGÚN ESTADO ──
-        if (puedeEnviarAprobacion || puedeAprobarRechazar || puedeConvertir)
+        if (puedeEnviarAprobacion || puedeAprobarRechazar || puedeIrACaja)
           _barraAccionesEstado(
             context: context,
             ref: ref,
             puedeEnviarAprobacion: puedeEnviarAprobacion,
             puedeAprobarRechazar: puedeAprobarRechazar,
-            puedeConvertir: puedeConvertir,
+            puedeIrACaja: puedeIrACaja,
             esPantallaPequena: esPantallaPequena,
           ),
       ],
@@ -775,7 +758,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     required WidgetRef ref,
     required bool puedeEnviarAprobacion,
     required bool puedeAprobarRechazar,
-    required bool puedeConvertir,
+    required bool puedeIrACaja,
     required bool esPantallaPequena,
   }) {
     final altura = esPantallaPequena ? 48.0 : 52.0;
@@ -863,28 +846,27 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                 child: ElevatedButton.icon(
                   onPressed: puedeEnviarAprobacion
                       ? () => _enviarAprobacion(context, ref)
-                      : puedeConvertir
-                          ? () => _convertirCotizacion(context, ref)
+                      : puedeIrACaja
+                          ? () => _irACaja(context, ref)
                           : null,
                   icon: Icon(
                     puedeEnviarAprobacion
                         ? Icons.send_outlined
-                        : Icons.shopping_cart_checkout,
+                        : Icons.point_of_sale,
                     size: 18,
                   ),
                   label: Text(
                     puedeEnviarAprobacion
                         ? 'ENVIAR A APROBACIÓN'
-                        : 'CONVERTIR A VENTA',
+                        : 'IR A CAJA / COBRAR',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: esPantallaPequena ? 13 : 14,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: puedeConvertir
-                        ? AppColors.success
-                        : AppColors.primary,
+                    backgroundColor:
+                        puedeIrACaja ? AppColors.success : AppColors.primary,
                     foregroundColor: AppColors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

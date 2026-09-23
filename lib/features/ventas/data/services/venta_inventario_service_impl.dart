@@ -65,4 +65,51 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
 
     return ventaRegistrada;
   }
+
+  @override
+  Future<void> aplicarSalidaInventario(Venta venta) async {
+    if (venta.id == null) {
+      throw Exception('La venta no tiene id');
+    }
+    if (venta.detalles.isEmpty) {
+      throw Exception(
+        'La venta no tiene líneas de detalle. No se puede descontar inventario.',
+      );
+    }
+    final refDoc = (venta.numeroFactura != null && venta.numeroFactura!.isNotEmpty)
+        ? 'Factura ${venta.numeroFactura}'
+        : 'Venta #${venta.numeroCotizacion}';
+    for (final detalle in venta.detalles) {
+      final producto = await productosDao.obtenerPorId(detalle.productoId);
+      final nombre = (detalle.nombreProducto != null &&
+              detalle.nombreProducto!.trim().isNotEmpty)
+          ? detalle.nombreProducto!.trim()
+          : (producto?.nombre ?? 'Producto ${detalle.productoId}');
+      final saldoAnterior =
+          await kardexRepository.obtenerSaldoActual(detalle.productoId);
+      final cant = detalle.cantidad.toDouble();
+      if (saldoAnterior < cant) {
+        throw Exception(
+          'Stock insuficiente: $nombre, disponible=$saldoAnterior, vendiendo=$cant',
+        );
+      }
+      final costoUnitario = producto?.precioCompra ?? 0.0;
+      final saldoNuevo = saldoAnterior - cant;
+      final movimientoKardex = Kardex(
+        productoId: detalle.productoId,
+        tipoMovimiento: TipoMovimiento.salida,
+        cantidad: cant,
+        saldoAnterior: saldoAnterior,
+        saldoNuevo: saldoNuevo,
+        costoUnitario: costoUnitario,
+        totalMovimiento: costoUnitario * cant,
+        fechaMovimiento: venta.fecha,
+        documentoReferencia: refDoc,
+        observacion: 'Salida por cobro Caja — $nombre',
+        usuarioId: venta.usuarioId,
+      );
+      await kardexRepository.registrarMovimiento(movimientoKardex);
+      await inventarioService.restarStock(detalle.productoId, cant);
+    }
+  }
 }

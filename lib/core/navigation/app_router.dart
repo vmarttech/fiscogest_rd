@@ -17,6 +17,8 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/cotizaciones_his
 import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
@@ -67,16 +69,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'registrar',
-            builder: (_, __) => const AppShell(child: NuevaVentaBorradorPage()),
+            builder: (_, __) =>
+                const AppShell(child: NuevaVentaBorradorPage()),
           ),
           GoRoute(
             path: 'cotizaciones/nueva',
-            builder: (_, __) => const AppShell(child: NuevaVentaBorradorPage()),
+            builder: (_, __) =>
+                const AppShell(child: NuevaVentaBorradorPage()),
           ),
           GoRoute(
             path: 'cotizaciones/historial',
             name: CotizacionesHistorialPage.routeName,
-            builder: (_, __) => const AppShell(child: CotizacionesHistorialPage()),
+            builder: (_, __) =>
+                const AppShell(child: CotizacionesHistorialPage()),
           ),
           GoRoute(
             path: 'apartados',
@@ -92,6 +97,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'cobrar',
             name: CobrarPage.routeName,
             builder: (_, __) => const AppShell(child: CobrarPage()),
+          ),
+          GoRoute(
+            path: 'cobro',
+            name: CajaInicioPage.routeName,
+            builder: (_, __) => const AppShell(child: CajaInicioPage()),
+            routes: [
+              GoRoute(
+                path: 'operacion',
+                name: CobroVentaPage.routeName,
+                builder: (_, __) => const AppShell(child: CobroVentaPage()),
+              ),
+            ],
           ),
           GoRoute(
             path: 'pagar',
@@ -132,7 +149,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               int compraId = 0;
               final idDesdePath = state.pathParameters['compraId'];
               if (idDesdePath != null && idDesdePath.isNotEmpty) {
-                final soloDigitos = idDesdePath.replaceAll(RegExp(r'[^0-9]'), '');
+                final soloDigitos =
+                    idDesdePath.replaceAll(RegExp(r'[^0-9]'), '');
                 compraId = int.tryParse(soloDigitos) ?? 0;
               }
               if (compraId == 0 && state.extra != null) {
@@ -140,7 +158,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 if (extra is int) {
                   compraId = extra;
                 } else if (extra is String) {
-                  final soloDigitos = extra.replaceAll(RegExp(r'[^0-9]'), '');
+                  final soloDigitos =
+                      extra.replaceAll(RegExp(r'[^0-9]'), '');
                   compraId = int.tryParse(soloDigitos) ?? 0;
                 }
               }
@@ -162,7 +181,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'cuentas-pagar',
             name: ListaCuentasPagarPage.routeName,
-            builder: (_, __) => const AppShell(child: ListaCuentasPagarPage()),
+            builder: (_, __) =>
+                const AppShell(child: ListaCuentasPagarPage()),
           ),
           GoRoute(
             path: 'cuentas-pagar/detalle/:cuentaId',
@@ -210,7 +230,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RegistrarEntradaPage.routeName,
         builder: (context, state) {
           final productoIdCrudo = state.pathParameters['productoId'] ?? '0';
-          final soloDigitosProd = productoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+          final soloDigitosProd =
+              productoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
           final productoId = int.tryParse(soloDigitosProd) ?? 0;
           final nombreProducto = Uri.decodeComponent(
             state.pathParameters['nombreProducto'] ?? '',
@@ -228,7 +249,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RegistrarSalidaPage.routeName,
         builder: (context, state) {
           final productoIdCrudo = state.pathParameters['productoId'] ?? '0';
-          final soloDigitosProd = productoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+          final soloDigitosProd =
+              productoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
           final productoId = int.tryParse(soloDigitosProd) ?? 0;
           final nombreProducto = Uri.decodeComponent(
             state.pathParameters['nombreProducto'] ?? '',
@@ -256,7 +278,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: DiferenciasConteoPage.routeName,
         builder: (context, state) {
           final conteoIdCrudo = state.pathParameters['conteoId'] ?? '0';
-          final soloDigitosConteo = conteoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+          final soloDigitosConteo =
+              conteoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
           final conteoId = int.tryParse(soloDigitosConteo) ?? 0;
           return AppShell(child: DiferenciasConteoPage(conteoId: conteoId));
         },
@@ -308,7 +331,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RegistrarRecepcionPage.routeName,
         builder: (context, state) {
           final idCompraCrudo = state.pathParameters['compraId']!;
-          final compraIdLimpio = idCompraCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+          final compraIdLimpio =
+              idCompraCrudo.replaceAll(RegExp(r'[^0-9]'), '');
           final compraId = int.tryParse(compraIdLimpio) ?? 0;
           final idProvCrudo = state.pathParameters['proveedorId']!;
           final provIdLimpio = idProvCrudo.replaceAll(RegExp(r'[^0-9]'), '');
@@ -324,7 +348,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/transferencias/registrar',
         name: RegistrarTransferenciaPage.routeName,
-        builder: (_, __) => const AppShell(child: RegistrarTransferenciaPage()),
+        builder: (_, __) =>
+            const AppShell(child: RegistrarTransferenciaPage()),
       ),
       GoRoute(
         path: '/presentaciones',

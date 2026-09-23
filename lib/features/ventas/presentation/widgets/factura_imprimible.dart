@@ -9,6 +9,7 @@ class FacturaImprimible extends StatelessWidget {
     required this.venta,
     required this.onCerrar,
   });
+
   final Venta venta;
   final VoidCallback onCerrar;
 
@@ -34,6 +35,9 @@ class FacturaImprimible extends StatelessWidget {
     final esCredito = venta.esCredito;
     final descuentoTotal = _descuentoTotal;
     final baseGravable = _baseGravable;
+    final tieneNumeroFactura =
+        venta.numeroFactura != null && venta.numeroFactura!.isNotEmpty;
+
     return Dialog(
       insetPadding: const EdgeInsets.all(16),
       child: SingleChildScrollView(
@@ -69,10 +73,23 @@ class FacturaImprimible extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            Text(
-              'Número: ${venta.numero}',
-              style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
-            ),
+
+            // Número fiscal principal (DGII) + referencia cotización
+            if (tieneNumeroFactura) ...[
+              Text(
+                'N° Factura: ${venta.numeroFactura}',
+                style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+              ),
+              Text(
+                'Ref. Cotización: ${venta.numeroCotizacion}',
+                style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+              ),
+            ] else
+              Text(
+                'Cotización: ${venta.numeroCotizacion}',
+                style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
+              ),
+
             Text(
               'Fecha:   ${_formatearFecha(venta.fecha)}',
               style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
@@ -241,7 +258,15 @@ class FacturaImprimible extends StatelessWidget {
     buffer.writeln('           FISCOGEST RD');
     buffer.writeln('         FACTURA DE VENTA');
     buffer.writeln('========================================');
-    buffer.writeln('Número: ${venta.numero}');
+
+    // Número fiscal principal (DGII) + referencia cotización
+    if (venta.numeroFactura != null && venta.numeroFactura!.isNotEmpty) {
+      buffer.writeln('N° Factura: ${venta.numeroFactura}');
+      buffer.writeln('Ref. Cotización: ${venta.numeroCotizacion}');
+    } else {
+      buffer.writeln('Cotización: ${venta.numeroCotizacion}');
+    }
+
     buffer.writeln('Fecha:   ${_formatearFecha(venta.fecha)}');
     buffer.writeln('Cliente ID: ${venta.clienteId}');
     if (venta.nombreCliente != null) {
