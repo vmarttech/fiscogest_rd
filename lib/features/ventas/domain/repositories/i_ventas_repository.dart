@@ -41,6 +41,7 @@ abstract class IVentasRepository {
   Future<Venta> actualizarVentaBorrador(Venta cotizacion);
 
   Future<Venta> confirmarVentaBorrador(int cotizacionId, {String? formaPago});
+  Future<Venta> emitirNcfFiscal(int ventaId, String ncf, {String? formaPago});
 
   /// Solo abono (cotización crédito). NO asigna factura ni cambia a facturado.
   Future<Venta> actualizarAbonoInicial(int ventaId, double montoAbono);

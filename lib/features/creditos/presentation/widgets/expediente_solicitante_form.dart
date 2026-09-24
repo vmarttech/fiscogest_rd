@@ -92,6 +92,32 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
   }
 
   @override
+  void didUpdateWidget(covariant ExpedienteSolicitanteForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.inicial == widget.inicial) return;
+    final e = widget.inicial;
+    _nombre.text = e.nombreCompleto;
+    _cedula.text = e.cedula;
+    _estadoCivil.text = e.estadoCivil;
+    _telefono.text = e.telefono;
+    _celular.text = e.celular;
+    _email.text = e.email;
+    _direccion.text = e.direccion;
+    _sector.text = e.sector;
+    _ciudad.text = e.ciudad;
+    _tiempoRes.text = e.tiempoResidencia;
+    _empresa.text = e.empresa;
+    _cargo.text = e.cargo;
+    _telTrabajo.text = e.telefonoTrabajo;
+    _ingreso.text =
+        e.ingresoMensual > 0 ? e.ingresoMensual.toStringAsFixed(2) : '';
+    _tiempoLab.text = e.tiempoLaborando;
+    _vivienda.text = e.tipoVivienda;
+    _dependientes.text = '${e.dependientes}';
+    _notas.text = e.notasAnalista;
+  }
+
+  @override
   void dispose() {
     for (final c in [
       _nombre, _cedula, _estadoCivil, _telefono, _celular, _email,

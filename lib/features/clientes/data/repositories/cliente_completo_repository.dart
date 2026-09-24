@@ -26,9 +26,10 @@ class ClienteCompletoRepository {
   }
 
   Future<void> agregarCliente(ClienteCompleto cliente) async {
+    final codigoUnico = 'CLI-${DateTime.now().millisecondsSinceEpoch}';
     await _dao.insertarOActualizar(
       ClientesTableCompanion.insert(
-        codigo: '',
+        codigo: codigoUnico,
         nombre: cliente.nombre,
         direccion: cliente.direccion,
         telefono: cliente.telefono,
@@ -47,7 +48,6 @@ class ClienteCompletoRepository {
     await _dao.insertarOActualizar(
       ClientesTableCompanion(
         id: Value(identificador),
-        codigo: const Value(''),
         nombre: Value(cliente.nombre),
         direccion: Value(cliente.direccion),
         telefono: Value(cliente.telefono),

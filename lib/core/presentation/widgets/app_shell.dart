@@ -14,6 +14,11 @@ class AppShell extends StatelessWidget {
     return switch (rutaActual) {
       '/' => 'Dashboard',
       '/sales' => 'Facturación y NC',
+      '/sales/emitir-factura' => 'Emitir factura',
+      '/sales/emitir-nc' => 'Emitir nota de crédito',
+      '/sales/historial' => 'Historial de facturas',
+      '/sales/secuencias-ncf' => 'Secuencias NCF',
+
       '/ventas' => 'Ventas',
       '/ventas/cobro' => 'Caja',
       '/creditos' => 'Crédito',

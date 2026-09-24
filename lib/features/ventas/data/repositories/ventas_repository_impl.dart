@@ -350,7 +350,14 @@ class VentasRepositoryImpl implements IVentasRepository {
   /// Solo Caja: asigna numeroFactura fiscal y estado FACTURADO.
   @override
   Future<Venta> confirmarVentaBorrador(int cotizacionId, {String? formaPago}) async {
-    final numeroFactura = await siguienteNumeroFactura();
+    final actual = await _ventasDao.obtenerVentaPorId(cotizacionId);
+    final ya = (actual?.numeroFactura ?? '').trim();
+    if (ya.isEmpty) {
+      throw StateError(
+        'Debe emitir NCF en Facturación antes de cobrar en Caja',
+      );
+    }
+    final numeroFactura = ya;
     await _ventasDao.actualizarVenta(
       cotizacionId,
       VentasTableCompanion(
@@ -384,13 +391,45 @@ class VentasRepositoryImpl implements IVentasRepository {
     String referencia, {
     String? formaPago,
   }) async {
-    final numeroFactura = await siguienteNumeroFactura();
+    final actual = await _ventasDao.obtenerVentaPorId(ventaId);
+    final ya = (actual?.numeroFactura ?? '').trim();
+    if (ya.isEmpty) {
+      throw StateError(
+        'Debe emitir NCF en Facturación antes de cobrar en Caja',
+      );
+    }
+    final numeroFactura = ya;
     await _ventasDao.actualizarVenta(
       ventaId,
       VentasTableCompanion(
         estadoDocumento: Value(EstadoDocumento.facturado.name),
         numeroFactura: Value(numeroFactura),
         abonoInicial: Value(montoAbono),
+        formaPago: formaPago != null ? Value(formaPago) : const Value.absent(),
+      ),
+    );
+    final registro = await _ventasDao.obtenerVentaPorId(ventaId);
+    return _mapearDesdeVentasTableData(registro!);
+  }
+
+
+  /// Facturación: asigna NCF (B01/B02…) ya generado y marca FACTURADO.
+  /// No genera secuencia interna B03; el NCF viene de SecuenciasNcfDao.
+  @override
+  Future<Venta> emitirNcfFiscal(int ventaId, String ncf, {String? formaPago}) async {
+    final actual = await _ventasDao.obtenerVentaPorId(ventaId);
+    if (actual == null) {
+      throw StateError('Documento $ventaId no encontrado');
+    }
+    final ya = (actual.numeroFactura ?? '').trim();
+    if (ya.isNotEmpty) {
+      throw StateError('Ya tiene NCF: $ya');
+    }
+    await _ventasDao.actualizarVenta(
+      ventaId,
+      VentasTableCompanion(
+        estadoDocumento: Value(EstadoDocumento.facturado.name),
+        numeroFactura: Value(ncf),
         formaPago: formaPago != null ? Value(formaPago) : const Value.absent(),
       ),
     );

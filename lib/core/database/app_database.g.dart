@@ -3,6 +3,524 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
+class $SecuenciasNcfTableTable extends SecuenciasNcfTable
+    with TableInfo<$SecuenciasNcfTableTable, SecuenciasNcfTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SecuenciasNcfTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
+  @override
+  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
+    'tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _prefijoMeta = const VerificationMeta(
+    'prefijo',
+  );
+  @override
+  late final GeneratedColumn<String> prefijo = GeneratedColumn<String>(
+    'prefijo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _secuenciaActualMeta = const VerificationMeta(
+    'secuenciaActual',
+  );
+  @override
+  late final GeneratedColumn<int> secuenciaActual = GeneratedColumn<int>(
+    'secuencia_actual',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _secuenciaDesdeMeta = const VerificationMeta(
+    'secuenciaDesde',
+  );
+  @override
+  late final GeneratedColumn<int> secuenciaDesde = GeneratedColumn<int>(
+    'secuencia_desde',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _secuenciaHastaMeta = const VerificationMeta(
+    'secuenciaHasta',
+  );
+  @override
+  late final GeneratedColumn<int> secuenciaHasta = GeneratedColumn<int>(
+    'secuencia_hasta',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(99999999),
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tipo,
+    prefijo,
+    secuenciaActual,
+    secuenciaDesde,
+    secuenciaHasta,
+    activo,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'secuencias_ncf_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SecuenciasNcfTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tipo')) {
+      context.handle(
+        _tipoMeta,
+        tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tipoMeta);
+    }
+    if (data.containsKey('prefijo')) {
+      context.handle(
+        _prefijoMeta,
+        prefijo.isAcceptableOrUnknown(data['prefijo']!, _prefijoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_prefijoMeta);
+    }
+    if (data.containsKey('secuencia_actual')) {
+      context.handle(
+        _secuenciaActualMeta,
+        secuenciaActual.isAcceptableOrUnknown(
+          data['secuencia_actual']!,
+          _secuenciaActualMeta,
+        ),
+      );
+    }
+    if (data.containsKey('secuencia_desde')) {
+      context.handle(
+        _secuenciaDesdeMeta,
+        secuenciaDesde.isAcceptableOrUnknown(
+          data['secuencia_desde']!,
+          _secuenciaDesdeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('secuencia_hasta')) {
+      context.handle(
+        _secuenciaHastaMeta,
+        secuenciaHasta.isAcceptableOrUnknown(
+          data['secuencia_hasta']!,
+          _secuenciaHastaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SecuenciasNcfTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SecuenciasNcfTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      tipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo'],
+      )!,
+      prefijo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prefijo'],
+      )!,
+      secuenciaActual: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}secuencia_actual'],
+      )!,
+      secuenciaDesde: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}secuencia_desde'],
+      )!,
+      secuenciaHasta: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}secuencia_hasta'],
+      )!,
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      )!,
+    );
+  }
+
+  @override
+  $SecuenciasNcfTableTable createAlias(String alias) {
+    return $SecuenciasNcfTableTable(attachedDatabase, alias);
+  }
+}
+
+class SecuenciasNcfTableData extends DataClass
+    implements Insertable<SecuenciasNcfTableData> {
+  final int id;
+
+  /// B01, B02, B04, ...
+  final String tipo;
+
+  /// Prefijo impreso en el NCF (normalmente igual al tipo).
+  final String prefijo;
+  final int secuenciaActual;
+  final int secuenciaDesde;
+  final int secuenciaHasta;
+  final bool activo;
+  final DateTime actualizadoEn;
+  const SecuenciasNcfTableData({
+    required this.id,
+    required this.tipo,
+    required this.prefijo,
+    required this.secuenciaActual,
+    required this.secuenciaDesde,
+    required this.secuenciaHasta,
+    required this.activo,
+    required this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['tipo'] = Variable<String>(tipo);
+    map['prefijo'] = Variable<String>(prefijo);
+    map['secuencia_actual'] = Variable<int>(secuenciaActual);
+    map['secuencia_desde'] = Variable<int>(secuenciaDesde);
+    map['secuencia_hasta'] = Variable<int>(secuenciaHasta);
+    map['activo'] = Variable<bool>(activo);
+    map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    return map;
+  }
+
+  SecuenciasNcfTableCompanion toCompanion(bool nullToAbsent) {
+    return SecuenciasNcfTableCompanion(
+      id: Value(id),
+      tipo: Value(tipo),
+      prefijo: Value(prefijo),
+      secuenciaActual: Value(secuenciaActual),
+      secuenciaDesde: Value(secuenciaDesde),
+      secuenciaHasta: Value(secuenciaHasta),
+      activo: Value(activo),
+      actualizadoEn: Value(actualizadoEn),
+    );
+  }
+
+  factory SecuenciasNcfTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SecuenciasNcfTableData(
+      id: serializer.fromJson<int>(json['id']),
+      tipo: serializer.fromJson<String>(json['tipo']),
+      prefijo: serializer.fromJson<String>(json['prefijo']),
+      secuenciaActual: serializer.fromJson<int>(json['secuenciaActual']),
+      secuenciaDesde: serializer.fromJson<int>(json['secuenciaDesde']),
+      secuenciaHasta: serializer.fromJson<int>(json['secuenciaHasta']),
+      activo: serializer.fromJson<bool>(json['activo']),
+      actualizadoEn: serializer.fromJson<DateTime>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'tipo': serializer.toJson<String>(tipo),
+      'prefijo': serializer.toJson<String>(prefijo),
+      'secuenciaActual': serializer.toJson<int>(secuenciaActual),
+      'secuenciaDesde': serializer.toJson<int>(secuenciaDesde),
+      'secuenciaHasta': serializer.toJson<int>(secuenciaHasta),
+      'activo': serializer.toJson<bool>(activo),
+      'actualizadoEn': serializer.toJson<DateTime>(actualizadoEn),
+    };
+  }
+
+  SecuenciasNcfTableData copyWith({
+    int? id,
+    String? tipo,
+    String? prefijo,
+    int? secuenciaActual,
+    int? secuenciaDesde,
+    int? secuenciaHasta,
+    bool? activo,
+    DateTime? actualizadoEn,
+  }) => SecuenciasNcfTableData(
+    id: id ?? this.id,
+    tipo: tipo ?? this.tipo,
+    prefijo: prefijo ?? this.prefijo,
+    secuenciaActual: secuenciaActual ?? this.secuenciaActual,
+    secuenciaDesde: secuenciaDesde ?? this.secuenciaDesde,
+    secuenciaHasta: secuenciaHasta ?? this.secuenciaHasta,
+    activo: activo ?? this.activo,
+    actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+  );
+  SecuenciasNcfTableData copyWithCompanion(SecuenciasNcfTableCompanion data) {
+    return SecuenciasNcfTableData(
+      id: data.id.present ? data.id.value : this.id,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      prefijo: data.prefijo.present ? data.prefijo.value : this.prefijo,
+      secuenciaActual: data.secuenciaActual.present
+          ? data.secuenciaActual.value
+          : this.secuenciaActual,
+      secuenciaDesde: data.secuenciaDesde.present
+          ? data.secuenciaDesde.value
+          : this.secuenciaDesde,
+      secuenciaHasta: data.secuenciaHasta.present
+          ? data.secuenciaHasta.value
+          : this.secuenciaHasta,
+      activo: data.activo.present ? data.activo.value : this.activo,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SecuenciasNcfTableData(')
+          ..write('id: $id, ')
+          ..write('tipo: $tipo, ')
+          ..write('prefijo: $prefijo, ')
+          ..write('secuenciaActual: $secuenciaActual, ')
+          ..write('secuenciaDesde: $secuenciaDesde, ')
+          ..write('secuenciaHasta: $secuenciaHasta, ')
+          ..write('activo: $activo, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tipo,
+    prefijo,
+    secuenciaActual,
+    secuenciaDesde,
+    secuenciaHasta,
+    activo,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SecuenciasNcfTableData &&
+          other.id == this.id &&
+          other.tipo == this.tipo &&
+          other.prefijo == this.prefijo &&
+          other.secuenciaActual == this.secuenciaActual &&
+          other.secuenciaDesde == this.secuenciaDesde &&
+          other.secuenciaHasta == this.secuenciaHasta &&
+          other.activo == this.activo &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class SecuenciasNcfTableCompanion
+    extends UpdateCompanion<SecuenciasNcfTableData> {
+  final Value<int> id;
+  final Value<String> tipo;
+  final Value<String> prefijo;
+  final Value<int> secuenciaActual;
+  final Value<int> secuenciaDesde;
+  final Value<int> secuenciaHasta;
+  final Value<bool> activo;
+  final Value<DateTime> actualizadoEn;
+  const SecuenciasNcfTableCompanion({
+    this.id = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.prefijo = const Value.absent(),
+    this.secuenciaActual = const Value.absent(),
+    this.secuenciaDesde = const Value.absent(),
+    this.secuenciaHasta = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  SecuenciasNcfTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String tipo,
+    required String prefijo,
+    this.secuenciaActual = const Value.absent(),
+    this.secuenciaDesde = const Value.absent(),
+    this.secuenciaHasta = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  }) : tipo = Value(tipo),
+       prefijo = Value(prefijo);
+  static Insertable<SecuenciasNcfTableData> custom({
+    Expression<int>? id,
+    Expression<String>? tipo,
+    Expression<String>? prefijo,
+    Expression<int>? secuenciaActual,
+    Expression<int>? secuenciaDesde,
+    Expression<int>? secuenciaHasta,
+    Expression<bool>? activo,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tipo != null) 'tipo': tipo,
+      if (prefijo != null) 'prefijo': prefijo,
+      if (secuenciaActual != null) 'secuencia_actual': secuenciaActual,
+      if (secuenciaDesde != null) 'secuencia_desde': secuenciaDesde,
+      if (secuenciaHasta != null) 'secuencia_hasta': secuenciaHasta,
+      if (activo != null) 'activo': activo,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  SecuenciasNcfTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? tipo,
+    Value<String>? prefijo,
+    Value<int>? secuenciaActual,
+    Value<int>? secuenciaDesde,
+    Value<int>? secuenciaHasta,
+    Value<bool>? activo,
+    Value<DateTime>? actualizadoEn,
+  }) {
+    return SecuenciasNcfTableCompanion(
+      id: id ?? this.id,
+      tipo: tipo ?? this.tipo,
+      prefijo: prefijo ?? this.prefijo,
+      secuenciaActual: secuenciaActual ?? this.secuenciaActual,
+      secuenciaDesde: secuenciaDesde ?? this.secuenciaDesde,
+      secuenciaHasta: secuenciaHasta ?? this.secuenciaHasta,
+      activo: activo ?? this.activo,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(tipo.value);
+    }
+    if (prefijo.present) {
+      map['prefijo'] = Variable<String>(prefijo.value);
+    }
+    if (secuenciaActual.present) {
+      map['secuencia_actual'] = Variable<int>(secuenciaActual.value);
+    }
+    if (secuenciaDesde.present) {
+      map['secuencia_desde'] = Variable<int>(secuenciaDesde.value);
+    }
+    if (secuenciaHasta.present) {
+      map['secuencia_hasta'] = Variable<int>(secuenciaHasta.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SecuenciasNcfTableCompanion(')
+          ..write('id: $id, ')
+          ..write('tipo: $tipo, ')
+          ..write('prefijo: $prefijo, ')
+          ..write('secuenciaActual: $secuenciaActual, ')
+          ..write('secuenciaDesde: $secuenciaDesde, ')
+          ..write('secuenciaHasta: $secuenciaHasta, ')
+          ..write('activo: $activo, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ClientesTableTable extends ClientesTable
     with TableInfo<$ClientesTableTable, ClientesTableData> {
   @override
@@ -23383,6 +23901,8 @@ class DetalleCompraTableCompanion
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $SecuenciasNcfTableTable secuenciasNcfTable =
+      $SecuenciasNcfTableTable(this);
   late final $ClientesTableTable clientesTable = $ClientesTableTable(this);
   late final $ConfiguracionTableTable configuracionTable =
       $ConfiguracionTableTable(this);
@@ -23450,6 +23970,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    secuenciasNcfTable,
     clientesTable,
     configuracionTable,
     productosTable,
@@ -23548,6 +24069,278 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ]);
 }
 
+typedef $$SecuenciasNcfTableTableCreateCompanionBuilder =
+    SecuenciasNcfTableCompanion Function({
+      Value<int> id,
+      required String tipo,
+      required String prefijo,
+      Value<int> secuenciaActual,
+      Value<int> secuenciaDesde,
+      Value<int> secuenciaHasta,
+      Value<bool> activo,
+      Value<DateTime> actualizadoEn,
+    });
+typedef $$SecuenciasNcfTableTableUpdateCompanionBuilder =
+    SecuenciasNcfTableCompanion Function({
+      Value<int> id,
+      Value<String> tipo,
+      Value<String> prefijo,
+      Value<int> secuenciaActual,
+      Value<int> secuenciaDesde,
+      Value<int> secuenciaHasta,
+      Value<bool> activo,
+      Value<DateTime> actualizadoEn,
+    });
+
+class $$SecuenciasNcfTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SecuenciasNcfTableTable> {
+  $$SecuenciasNcfTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get prefijo => $composableBuilder(
+    column: $table.prefijo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get secuenciaActual => $composableBuilder(
+    column: $table.secuenciaActual,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get secuenciaDesde => $composableBuilder(
+    column: $table.secuenciaDesde,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get secuenciaHasta => $composableBuilder(
+    column: $table.secuenciaHasta,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SecuenciasNcfTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SecuenciasNcfTableTable> {
+  $$SecuenciasNcfTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get prefijo => $composableBuilder(
+    column: $table.prefijo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get secuenciaActual => $composableBuilder(
+    column: $table.secuenciaActual,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get secuenciaDesde => $composableBuilder(
+    column: $table.secuenciaDesde,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get secuenciaHasta => $composableBuilder(
+    column: $table.secuenciaHasta,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SecuenciasNcfTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SecuenciasNcfTableTable> {
+  $$SecuenciasNcfTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<String> get prefijo =>
+      $composableBuilder(column: $table.prefijo, builder: (column) => column);
+
+  GeneratedColumn<int> get secuenciaActual => $composableBuilder(
+    column: $table.secuenciaActual,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get secuenciaDesde => $composableBuilder(
+    column: $table.secuenciaDesde,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get secuenciaHasta => $composableBuilder(
+    column: $table.secuenciaHasta,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$SecuenciasNcfTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SecuenciasNcfTableTable,
+          SecuenciasNcfTableData,
+          $$SecuenciasNcfTableTableFilterComposer,
+          $$SecuenciasNcfTableTableOrderingComposer,
+          $$SecuenciasNcfTableTableAnnotationComposer,
+          $$SecuenciasNcfTableTableCreateCompanionBuilder,
+          $$SecuenciasNcfTableTableUpdateCompanionBuilder,
+          (
+            SecuenciasNcfTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $SecuenciasNcfTableTable,
+              SecuenciasNcfTableData
+            >,
+          ),
+          SecuenciasNcfTableData,
+          PrefetchHooks Function()
+        > {
+  $$SecuenciasNcfTableTableTableManager(
+    _$AppDatabase db,
+    $SecuenciasNcfTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SecuenciasNcfTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SecuenciasNcfTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SecuenciasNcfTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> tipo = const Value.absent(),
+                Value<String> prefijo = const Value.absent(),
+                Value<int> secuenciaActual = const Value.absent(),
+                Value<int> secuenciaDesde = const Value.absent(),
+                Value<int> secuenciaHasta = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<DateTime> actualizadoEn = const Value.absent(),
+              }) => SecuenciasNcfTableCompanion(
+                id: id,
+                tipo: tipo,
+                prefijo: prefijo,
+                secuenciaActual: secuenciaActual,
+                secuenciaDesde: secuenciaDesde,
+                secuenciaHasta: secuenciaHasta,
+                activo: activo,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String tipo,
+                required String prefijo,
+                Value<int> secuenciaActual = const Value.absent(),
+                Value<int> secuenciaDesde = const Value.absent(),
+                Value<int> secuenciaHasta = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<DateTime> actualizadoEn = const Value.absent(),
+              }) => SecuenciasNcfTableCompanion.insert(
+                id: id,
+                tipo: tipo,
+                prefijo: prefijo,
+                secuenciaActual: secuenciaActual,
+                secuenciaDesde: secuenciaDesde,
+                secuenciaHasta: secuenciaHasta,
+                activo: activo,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SecuenciasNcfTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SecuenciasNcfTableTable,
+      SecuenciasNcfTableData,
+      $$SecuenciasNcfTableTableFilterComposer,
+      $$SecuenciasNcfTableTableOrderingComposer,
+      $$SecuenciasNcfTableTableAnnotationComposer,
+      $$SecuenciasNcfTableTableCreateCompanionBuilder,
+      $$SecuenciasNcfTableTableUpdateCompanionBuilder,
+      (
+        SecuenciasNcfTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $SecuenciasNcfTableTable,
+          SecuenciasNcfTableData
+        >,
+      ),
+      SecuenciasNcfTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$ClientesTableTableCreateCompanionBuilder =
     ClientesTableCompanion Function({
       Value<int> id,
@@ -40293,6 +41086,8 @@ typedef $$DetalleCompraTableTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
+  $$SecuenciasNcfTableTableTableManager get secuenciasNcfTable =>
+      $$SecuenciasNcfTableTableTableManager(_db, _db.secuenciasNcfTable);
   $$ClientesTableTableTableManager get clientesTable =>
       $$ClientesTableTableTableManager(_db, _db.clientesTable);
   $$ConfiguracionTableTableTableManager get configuracionTable =>

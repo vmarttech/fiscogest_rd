@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
@@ -52,18 +53,54 @@ class _FormularioCreditoVistaState
   late DateTime _fechaPrimerVencimiento;
   bool _mostrarTablaCuotas = false;
   bool _guardando = false;
-  static const List<int> _opcionesPlazo = [1, 2, 3, 6];
-  static const List<int> _opcionesCuotas = [1, 2, 3, 6];
-  static const List<double> _opcionesTasa = [0.0, 0.03, 0.05, 0.08, 0.10];
-
+  bool _paramsAplicados = false;
+  List<int> _opcionesPlazo = const [1, 2, 3, 6];
+  List<int> _opcionesCuotas = const [1, 2, 3, 6];
   @override
   void initState() {
     super.initState();
     _abonoInicialController = TextEditingController(text: '0');
-    _tasaInteresController = TextEditingController(text: '0.05');
+    _tasaInteresController = TextEditingController(text: '0');
     _observacionesController = TextEditingController();
     _fechaPrimerVencimiento = DateTime.now().add(const Duration(days: 30));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _aplicarParametrosConfig();
+    });
   }
+
+  Future<void> _aplicarParametrosConfig() async {
+    if (_paramsAplicados || !mounted) return;
+    try {
+      final p = await ref.read(parametrosCreditoProvider.future);
+      if (!mounted) return;
+      final plazoMax = p.plazoMaxMeses < 1 ? 24 : p.plazoMaxMeses;
+      const base = [1, 2, 3, 6, 9, 12, 18, 24, 36];
+      final plazos = base.where((m) => m <= plazoMax).toList();
+      if (plazos.isEmpty) {
+        plazos.add(plazoMax);
+      } else if (plazoMax > plazos.last && !plazos.contains(plazoMax)) {
+        plazos.add(plazoMax);
+      }
+      var cuotasDef = p.cuotasDefault;
+      if (cuotasDef < 1) cuotasDef = 1;
+      if (cuotasDef > plazoMax) cuotasDef = plazoMax;
+      final gracia = p.diasGracia < 0 ? 0 : p.diasGracia;
+      setState(() {
+        _opcionesPlazo = plazos;
+        _opcionesCuotas = List<int>.from(plazos);
+        _plazoMeses = cuotasDef;
+        _numeroCuotas = cuotasDef;
+        _tasaInteresController.text = p.tasaMensualDefault.toString();
+        _fechaPrimerVencimiento = DateTime.now().add(
+          Duration(days: gracia > 0 ? gracia : 30),
+        );
+        _paramsAplicados = true;
+      });
+    } catch (_) {
+      _paramsAplicados = true;
+    }
+  }
+
 
   @override
   void dispose() {
@@ -82,7 +119,7 @@ class _FormularioCreditoVistaState
   double get _saldoFinanciado =>
       (_totalVenta - _abonoInicial).clamp(0.0, double.infinity);
   double get _tasaMensual =>
-      double.tryParse(_tasaInteresController.text) ?? 0.05;
+      double.tryParse(_tasaInteresController.text) ?? 0.0;
 
   ResumenCreditoCliente get _resumen =>
       CalculadoraCreditoService.generarResumenCliente(
@@ -576,12 +613,15 @@ class _FormularioCreditoVistaState
         ),
         _buildSelectorEtiqueta('Primer vencimiento'),
         _buildCampoFecha(),
-        _buildSelectorEtiqueta('Tasa mensual'),
-        _buildSelectorOpciones<double>(
-          _opcionesTasa,
-          _tasaMensual,
-          (t) => '${(t * 100).toStringAsFixed(0)}%',
-          (t) => setState(() => _tasaInteresController.text = t.toString()),
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.s),
+          child: Text(
+            'Tasa mensual (configuración): '
+            '${(_tasaMensual * 100).toStringAsFixed(2)}%',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
         ),
         AppTextField(
           controller: _observacionesController,

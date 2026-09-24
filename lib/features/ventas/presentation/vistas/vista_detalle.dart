@@ -355,8 +355,8 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     final estado = venta.estadoDocumento;
     final puedeEnviarAprobacion =
         estado == EstadoDocumento.cotizado && venta.id != null;
-    final puedeAprobarRechazar =
-        estado == EstadoDocumento.enCredito && venta.id != null;
+    // Aprobar/rechazar crédito SOLO en módulo Créditos (no ventas).
+    const puedeAprobarRechazar = false;
     final puedeIrACaja =
         estado == EstadoDocumento.aprobado && venta.id != null;
     final esPantallaPequena = MediaQuery.of(context).size.width < 600;

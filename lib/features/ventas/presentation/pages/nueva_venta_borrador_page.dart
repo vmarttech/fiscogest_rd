@@ -156,18 +156,34 @@ class _NuevaVentaBorradorPageState
     );
   }
 
-  Future<void> _guardarCotizacion() async {
+  Future<void> _guardarCotizacion({required bool esCredito}) async {
     setState(() => _guardando = true);
     try {
       final notificador = ref.read(ventaBorradorProvider.notifier);
       final repositorio = ref.read(ventasRepositoryProvider);
-      notificador.establecerFormaPago(esCredito: _esCredito);
+      notificador.establecerFormaPago(esCredito: esCredito);
+      setState(() => _esCredito = esCredito);
 
       const double abonoDesdeFormulario = 0.0;
 
       // Crédito → mismo formulario que Apartado (antes de guardar)
-      if (_esCredito) {
+      if (esCredito) {
         final estadoBorrador = ref.read(ventaBorradorProvider);
+        final clienteId = estadoBorrador.clienteId ?? 0;
+        if (clienteId <= 0) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Seleccione o registre un cliente para crédito',
+                ),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          return;
+        }
         if (estadoBorrador.detalles.isEmpty || estadoBorrador.montoTotal <= 0) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -192,13 +208,13 @@ class _NuevaVentaBorradorPageState
       }
 
       final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(
-        esCredito: _esCredito,
+        esCredito: esCredito,
       );
       notificador.establecerNumeroCotizacion(numeroCotizacion);
       // Contado → cotizado (listo para Caja)
       // Crédito → enCredito (pendiente de aprobación)
       notificador.establecerEstadoDocumento(
-        _esCredito ? EstadoDocumento.enCredito : EstadoDocumento.cotizado,
+        esCredito ? EstadoDocumento.enCredito : EstadoDocumento.cotizado,
       );
       final numeroGuardado = await notificador.guardar();
       if (numeroGuardado == null) {
@@ -1150,49 +1166,75 @@ class _NuevaVentaBorradorPageState
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            SizedBox(
-              height: alturaBoton,
-              child: ElevatedButton(
-                onPressed:
-                    puedeGenerar && !_guardando ? _guardarCotizacion : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.white,
-                  disabledBackgroundColor: AppColors.grey300,
-                  disabledForegroundColor: AppColors.grey500,
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: esPantallaPequena ? 16 : 24,
+            const SizedBox(width: 8),
+            Expanded(
+              child: SizedBox(
+                height: alturaBoton,
+                child: ElevatedButton(
+                  onPressed: puedeGenerar && !_guardando
+                      ? () => _guardarCotizacion(esCredito: false)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    disabledBackgroundColor: AppColors.grey300,
+                    disabledForegroundColor: AppColors.grey500,
+                    elevation: 0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: esPantallaPequena ? 8 : 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  child: _guardando
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : Text(
+                          'CONTADO (C)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: tamanoBoton,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: SizedBox(
+                height: alturaBoton,
+                child: ElevatedButton(
+                  onPressed: puedeGenerar && !_guardando
+                      ? () => _guardarCotizacion(esCredito: true)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.warning,
+                    foregroundColor: AppColors.white,
+                    disabledBackgroundColor: AppColors.grey300,
+                    disabledForegroundColor: AppColors.grey500,
+                    elevation: 0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: esPantallaPequena ? 8 : 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'CRÉDITO (CR)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: tamanoBoton,
+                    ),
                   ),
                 ),
-                child: _guardando
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.description_outlined, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'GENERAR COTIZACIÓN',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: tamanoBoton,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ],
-                      ),
               ),
             ),
           ],

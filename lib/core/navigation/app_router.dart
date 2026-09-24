@@ -10,7 +10,6 @@ import 'package:fiscogest_rd/features/inventario/presentation/pages/registrar_sa
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/registrar_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/diferencias_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/listar_conteos_page.dart';
-import 'package:fiscogest_rd/features/sales/presentation/pages/sales_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cotizaciones_historial_page.dart';
@@ -55,6 +54,11 @@ import 'package:fiscogest_rd/features/presentaciones/presentation/pages/presenta
 import 'package:fiscogest_rd/features/categorias/presentation/pages/categorias_page.dart';
 import 'package:fiscogest_rd/features/marcas/presentation/pages/marcas_page.dart';
 import 'package:fiscogest_rd/features/unidades/presentation/pages/unidades_page.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/pages/facturacion_inicio_page.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/pages/secuencias_ncf_page.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_factura_page.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/pages/historial_facturas_page.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_nc_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -67,8 +71,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/sales',
-        name: SalesPage.routeName,
-        builder: (_, __) => const AppShell(child: SalesPage()),
+        name: 'facturacion-inicio',
+        builder: (context, state) => const AppShell(child: FacturacionInicioPage()),
+        routes: [
+          GoRoute(
+            path: 'emitir-factura',
+            name: 'facturacion-emitir-factura',
+            builder: (context, state) => const AppShell(
+              child: EmitirFacturaPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'emitir-nc',
+            name: 'facturacion-emitir-nc',
+            builder: (context, state) => const AppShell(
+              child: EmitirNcPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'historial',
+            name: 'facturacion-historial',
+            builder: (context, state) => const AppShell(
+              child: HistorialFacturasPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'secuencias-ncf',
+            name: 'facturacion-secuencias-ncf',
+            builder: (context, state) => const AppShell(child: SecuenciasNcfPage()),
+          ),
+        ],
       ),
       GoRoute(
         path: '/ventas',
@@ -142,7 +174,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       
-      GoRoute(
+      
+      
+GoRoute(
         path: '/creditos',
         name: CreditoInicioPage.routeName,
         builder: (_, __) => const AppShell(child: CreditoInicioPage()),
