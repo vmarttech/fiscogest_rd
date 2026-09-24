@@ -1,20 +1,20 @@
+import 'package:drift/drift.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_dao.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_dao.dart';
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
-import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 
-/// Emite nota de crédito (B04) referenciando una factura existente.
 class EmitirNcService {
   EmitirNcService({
     required this.ventasRepo,
     required this.secuenciasDao,
+    required this.notasDao,
   });
 
   final VentasRepositoryImpl ventasRepo;
   final SecuenciasNcfDao secuenciasDao;
+  final NotasCreditoDao notasDao;
 
-  /// Valida factura origen y reserva B04.
-  /// Persistencia mínima: guarda NCF de NC en campo dedicado si existe;
-  /// si no, retorna el NCF para que la UI lo muestre (historial NC en F2).
   Future<EmitirNcResultado> emitir({
     required int facturaVentaId,
     required String motivo,
@@ -27,19 +27,26 @@ class EmitirNcService {
     if (ncfOrigen.isEmpty) {
       throw StateError('El documento no tiene NCF de factura');
     }
-    if (venta.estadoDocumento != EstadoDocumento.facturado &&
-        ncfOrigen.isEmpty) {
-      throw StateError('Solo se emite NC sobre facturas emitidas');
+    if (ncfOrigen.startsWith('B04')) {
+      throw StateError('No se puede emitir NC sobre otra NC');
     }
     if (motivo.trim().isEmpty) {
       throw StateError('Indique el motivo de la nota de crédito');
     }
 
     final ncfNc = await secuenciasDao.siguienteNcf('B04');
+    await notasDao.insertar(
+      NotasCreditoTableCompanion.insert(
+        ncf: ncfNc,
+        ncfFacturaOrigen: ncfOrigen,
+        ventaIdOrigen: facturaVentaId,
+        numeroCotizacion: Value(venta.numeroCotizacion),
+        nombreCliente: Value(venta.nombreCliente),
+        monto: Value(venta.montoTotal),
+        motivo: Value(motivo.trim()),
+      ),
+    );
 
-    // Marcamos referencia en numeroFactura solo si aún no hay NC guardada;
-    // no pisamos el NCF de la factura. La NC se registra como texto de
-    // seguimiento vía motivo + ncfNc (impreso/historial).
     return EmitirNcResultado(
       ncfNc: ncfNc,
       ncfFacturaOrigen: ncfOrigen,

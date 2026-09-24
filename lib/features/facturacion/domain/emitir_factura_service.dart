@@ -17,12 +17,15 @@ class EmitirFacturaService {
   }) {
     if (consumidorFinal) return 'B02';
     if (rncCliente.trim().isEmpty) return 'B02';
-    return 'B01';
+    final rnc = rncCliente.trim();
+    final esRnc = rnc.length == 9 && RegExp(r'^\d+$').hasMatch(rnc);
+    return esRnc ? 'B01' : 'B02';
   }
 
   Future<String> emitir({
     required int ventaId,
     required String tipoNcf,
+    String rncCliente = '',
   }) async {
     final venta = await ventasRepo.obtenerVentaPorId(ventaId);
     if (venta == null) {
@@ -38,6 +41,15 @@ class EmitirFacturaService {
     }
     if (tipoNcf != 'B01' && tipoNcf != 'B02') {
       throw StateError('Tipo NCF no soportado: $tipoNcf');
+    }
+    if (tipoNcf == 'B01') {
+      final rnc = rncCliente.trim();
+      final okRnc = rnc.length == 9 && RegExp(r'^\d+$').hasMatch(rnc);
+      if (!okRnc) {
+        throw StateError(
+          'B01 (crédito fiscal) requiere RNC de 9 dígitos del cliente',
+        );
+      }
     }
 
     final ncf = await secuenciasDao.siguienteNcf(tipoNcf);

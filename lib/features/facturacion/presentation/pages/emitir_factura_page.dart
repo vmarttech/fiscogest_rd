@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
-import 'package:fiscogest_rd/features/facturacion/domain/emitir_factura_service.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 
@@ -19,20 +21,47 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
   final _fmt = NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$');
   Venta? _seleccion;
   String _tipoNcf = 'B02';
-  bool _consumidorFinal = true;
+  String _rncCliente = '';
   bool _emitiendo = false;
+
+
+  Future<void> _seleccionar(Venta d) async {
+    setState(() {
+      _seleccion = d;
+      _tipoNcf = 'B02';
+      _rncCliente = '';
+    });
+    try {
+      final repo = ref.read(clienteCompletoRepositoryProvider);
+      final lista = await repo.obtenerClientes();
+      ClienteCompleto? cli;
+      for (final c in lista) {
+        if (c.id == d.clienteId) {
+          cli = c;
+          break;
+        }
+      }
+      final rnc = (cli?.rncCedula ?? '').trim();
+      final esRnc = rnc.length == 9 && RegExp(r'^\d+$').hasMatch(rnc);
+      if (mounted) {
+        setState(() {
+          _tipoNcf = esRnc ? 'B01' : 'B02';
+        });
+      }
+    } catch (_) {
+      // sin datos de cliente → B02
+    }
+  }
 
   Future<void> _emitir() async {
     final v = _seleccion;
     if (v == null || v.id == null) return;
     setState(() => _emitiendo = true);
     try {
-      final tipo = EmitirFacturaService.tipoNcfSugerido(
-        consumidorFinal: _consumidorFinal,
-      );
       final ncf = await ref.read(emitirFacturaServiceProvider).emitir(
             ventaId: v.id!,
-            tipoNcf: tipo,
+            tipoNcf: _tipoNcf,
+            rncCliente: _rncCliente,
           );
       ref.invalidate(documentosPendientesFacturaProvider);
       ref.invalidate(secuenciasNcfListProvider);
@@ -44,6 +73,41 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
           behavior: SnackBarBehavior.floating,
         ),
       );
+      final paraPdf = v.copyWith(
+        numeroFactura: ncf,
+        estadoDocumento: EstadoDocumento.facturado,
+      );
+      final imprimir = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Factura emitida'),
+          content: Text('NCF: $ncf\n¿Imprimir comprobante?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Después'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Imprimir'),
+            ),
+          ],
+        ),
+      );
+      if (imprimir == true && mounted) {
+        try {
+          await ComprobantePdf.imprimirFactura(paraPdf);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('No se pudo imprimir: $e'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        }
+      }
       setState(() {
         _seleccion = null;
         _emitiendo = false;
@@ -136,11 +200,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
                             venta: d,
                             fmt: _fmt,
                             seleccionado: _seleccion?.id == d.id,
-                            onTap: () => setState(() {
-                              _seleccion = d;
-                              _consumidorFinal = true;
-                              _tipoNcf = 'B02';
-                            }),
+                            onTap: () => _seleccionar(d),
                           ),
                           AppLayout.vS,
                         ],
@@ -163,19 +223,40 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
                                 '${_seleccion!.nombreCliente ?? 'Cliente #${_seleccion!.clienteId}'}',
                               ),
                               AppLayout.vS,
-                              SwitchListTile.adaptive(
-                                contentPadding: EdgeInsets.zero,
-                                title: const Text('Consumidor final (B02)'),
-                                subtitle: Text(
-                                  _consumidorFinal
-                                      ? 'Se emitirá B02'
-                                      : 'Se emitirá B01 (crédito fiscal)',
+                              Text(
+                                'Tipo de comprobante',
+                                style: AppTypography.labelLarge.copyWith(
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                value: _consumidorFinal,
-                                onChanged: (v) => setState(() {
-                                  _consumidorFinal = v;
-                                  _tipoNcf = v ? 'B02' : 'B01';
-                                }),
+                              ),
+                              AppLayout.vS,
+                              Wrap(
+                                spacing: 8,
+                                children: [
+                                  ChoiceChip(
+                                    label: const Text('B02 · Consumidor final'),
+                                    selected: _tipoNcf == 'B02',
+                                    onSelected: (_) => setState(() {
+                                      _tipoNcf = 'B02';
+                                    }),
+                                  ),
+                                  ChoiceChip(
+                                    label: const Text('B01 · Crédito fiscal'),
+                                    selected: _tipoNcf == 'B01',
+                                    onSelected: (_) => setState(() {
+                                      _tipoNcf = 'B01';
+                                    }),
+                                  ),
+                                ],
+                              ),
+                              AppLayout.vXs,
+                              Text(
+                                _tipoNcf == 'B01'
+                                    ? 'Requiere RNC del cliente (crédito fiscal).'
+                                    : 'Consumidor final / sin RNC.',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                               AppLayout.vS,
                               AppButton(

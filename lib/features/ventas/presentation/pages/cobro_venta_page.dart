@@ -318,6 +318,22 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     }
 
 
+    // NCF obligatorio (módulo Facturación y NC)
+    final ncfDoc = (doc?.numeroFactura ?? '').trim();
+    if (ncfDoc.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Emita el NCF en Facturación y NC antes de cobrar en Caja',
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
     setState(() => _procesando = true);
     try {
       final repositorio = ref.read(venta_providers.ventasRepositoryProvider);

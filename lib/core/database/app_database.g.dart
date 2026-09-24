@@ -3,6 +3,567 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
+class $NotasCreditoTableTable extends NotasCreditoTable
+    with TableInfo<$NotasCreditoTableTable, NotasCreditoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NotasCreditoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _ncfMeta = const VerificationMeta('ncf');
+  @override
+  late final GeneratedColumn<String> ncf = GeneratedColumn<String>(
+    'ncf',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ncfFacturaOrigenMeta = const VerificationMeta(
+    'ncfFacturaOrigen',
+  );
+  @override
+  late final GeneratedColumn<String> ncfFacturaOrigen = GeneratedColumn<String>(
+    'ncf_factura_origen',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ventaIdOrigenMeta = const VerificationMeta(
+    'ventaIdOrigen',
+  );
+  @override
+  late final GeneratedColumn<int> ventaIdOrigen = GeneratedColumn<int>(
+    'venta_id_origen',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _numeroCotizacionMeta = const VerificationMeta(
+    'numeroCotizacion',
+  );
+  @override
+  late final GeneratedColumn<String> numeroCotizacion = GeneratedColumn<String>(
+    'numero_cotizacion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _nombreClienteMeta = const VerificationMeta(
+    'nombreCliente',
+  );
+  @override
+  late final GeneratedColumn<String> nombreCliente = GeneratedColumn<String>(
+    'nombre_cliente',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _montoMeta = const VerificationMeta('monto');
+  @override
+  late final GeneratedColumn<double> monto = GeneratedColumn<double>(
+    'monto',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _motivoMeta = const VerificationMeta('motivo');
+  @override
+  late final GeneratedColumn<String> motivo = GeneratedColumn<String>(
+    'motivo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ncf,
+    ncfFacturaOrigen,
+    ventaIdOrigen,
+    numeroCotizacion,
+    nombreCliente,
+    monto,
+    motivo,
+    creadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'notas_credito_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NotasCreditoTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('ncf')) {
+      context.handle(
+        _ncfMeta,
+        ncf.isAcceptableOrUnknown(data['ncf']!, _ncfMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ncfMeta);
+    }
+    if (data.containsKey('ncf_factura_origen')) {
+      context.handle(
+        _ncfFacturaOrigenMeta,
+        ncfFacturaOrigen.isAcceptableOrUnknown(
+          data['ncf_factura_origen']!,
+          _ncfFacturaOrigenMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ncfFacturaOrigenMeta);
+    }
+    if (data.containsKey('venta_id_origen')) {
+      context.handle(
+        _ventaIdOrigenMeta,
+        ventaIdOrigen.isAcceptableOrUnknown(
+          data['venta_id_origen']!,
+          _ventaIdOrigenMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ventaIdOrigenMeta);
+    }
+    if (data.containsKey('numero_cotizacion')) {
+      context.handle(
+        _numeroCotizacionMeta,
+        numeroCotizacion.isAcceptableOrUnknown(
+          data['numero_cotizacion']!,
+          _numeroCotizacionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('nombre_cliente')) {
+      context.handle(
+        _nombreClienteMeta,
+        nombreCliente.isAcceptableOrUnknown(
+          data['nombre_cliente']!,
+          _nombreClienteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('monto')) {
+      context.handle(
+        _montoMeta,
+        monto.isAcceptableOrUnknown(data['monto']!, _montoMeta),
+      );
+    }
+    if (data.containsKey('motivo')) {
+      context.handle(
+        _motivoMeta,
+        motivo.isAcceptableOrUnknown(data['motivo']!, _motivoMeta),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  NotasCreditoTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NotasCreditoTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      ncf: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ncf'],
+      )!,
+      ncfFacturaOrigen: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ncf_factura_origen'],
+      )!,
+      ventaIdOrigen: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}venta_id_origen'],
+      )!,
+      numeroCotizacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}numero_cotizacion'],
+      )!,
+      nombreCliente: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre_cliente'],
+      ),
+      monto: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto'],
+      )!,
+      motivo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}motivo'],
+      )!,
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+    );
+  }
+
+  @override
+  $NotasCreditoTableTable createAlias(String alias) {
+    return $NotasCreditoTableTable(attachedDatabase, alias);
+  }
+}
+
+class NotasCreditoTableData extends DataClass
+    implements Insertable<NotasCreditoTableData> {
+  final int id;
+  final String ncf;
+  final String ncfFacturaOrigen;
+  final int ventaIdOrigen;
+  final String numeroCotizacion;
+  final String? nombreCliente;
+  final double monto;
+  final String motivo;
+  final DateTime creadoEn;
+  const NotasCreditoTableData({
+    required this.id,
+    required this.ncf,
+    required this.ncfFacturaOrigen,
+    required this.ventaIdOrigen,
+    required this.numeroCotizacion,
+    this.nombreCliente,
+    required this.monto,
+    required this.motivo,
+    required this.creadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['ncf'] = Variable<String>(ncf);
+    map['ncf_factura_origen'] = Variable<String>(ncfFacturaOrigen);
+    map['venta_id_origen'] = Variable<int>(ventaIdOrigen);
+    map['numero_cotizacion'] = Variable<String>(numeroCotizacion);
+    if (!nullToAbsent || nombreCliente != null) {
+      map['nombre_cliente'] = Variable<String>(nombreCliente);
+    }
+    map['monto'] = Variable<double>(monto);
+    map['motivo'] = Variable<String>(motivo);
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    return map;
+  }
+
+  NotasCreditoTableCompanion toCompanion(bool nullToAbsent) {
+    return NotasCreditoTableCompanion(
+      id: Value(id),
+      ncf: Value(ncf),
+      ncfFacturaOrigen: Value(ncfFacturaOrigen),
+      ventaIdOrigen: Value(ventaIdOrigen),
+      numeroCotizacion: Value(numeroCotizacion),
+      nombreCliente: nombreCliente == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nombreCliente),
+      monto: Value(monto),
+      motivo: Value(motivo),
+      creadoEn: Value(creadoEn),
+    );
+  }
+
+  factory NotasCreditoTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NotasCreditoTableData(
+      id: serializer.fromJson<int>(json['id']),
+      ncf: serializer.fromJson<String>(json['ncf']),
+      ncfFacturaOrigen: serializer.fromJson<String>(json['ncfFacturaOrigen']),
+      ventaIdOrigen: serializer.fromJson<int>(json['ventaIdOrigen']),
+      numeroCotizacion: serializer.fromJson<String>(json['numeroCotizacion']),
+      nombreCliente: serializer.fromJson<String?>(json['nombreCliente']),
+      monto: serializer.fromJson<double>(json['monto']),
+      motivo: serializer.fromJson<String>(json['motivo']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'ncf': serializer.toJson<String>(ncf),
+      'ncfFacturaOrigen': serializer.toJson<String>(ncfFacturaOrigen),
+      'ventaIdOrigen': serializer.toJson<int>(ventaIdOrigen),
+      'numeroCotizacion': serializer.toJson<String>(numeroCotizacion),
+      'nombreCliente': serializer.toJson<String?>(nombreCliente),
+      'monto': serializer.toJson<double>(monto),
+      'motivo': serializer.toJson<String>(motivo),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+    };
+  }
+
+  NotasCreditoTableData copyWith({
+    int? id,
+    String? ncf,
+    String? ncfFacturaOrigen,
+    int? ventaIdOrigen,
+    String? numeroCotizacion,
+    Value<String?> nombreCliente = const Value.absent(),
+    double? monto,
+    String? motivo,
+    DateTime? creadoEn,
+  }) => NotasCreditoTableData(
+    id: id ?? this.id,
+    ncf: ncf ?? this.ncf,
+    ncfFacturaOrigen: ncfFacturaOrigen ?? this.ncfFacturaOrigen,
+    ventaIdOrigen: ventaIdOrigen ?? this.ventaIdOrigen,
+    numeroCotizacion: numeroCotizacion ?? this.numeroCotizacion,
+    nombreCliente: nombreCliente.present
+        ? nombreCliente.value
+        : this.nombreCliente,
+    monto: monto ?? this.monto,
+    motivo: motivo ?? this.motivo,
+    creadoEn: creadoEn ?? this.creadoEn,
+  );
+  NotasCreditoTableData copyWithCompanion(NotasCreditoTableCompanion data) {
+    return NotasCreditoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      ncf: data.ncf.present ? data.ncf.value : this.ncf,
+      ncfFacturaOrigen: data.ncfFacturaOrigen.present
+          ? data.ncfFacturaOrigen.value
+          : this.ncfFacturaOrigen,
+      ventaIdOrigen: data.ventaIdOrigen.present
+          ? data.ventaIdOrigen.value
+          : this.ventaIdOrigen,
+      numeroCotizacion: data.numeroCotizacion.present
+          ? data.numeroCotizacion.value
+          : this.numeroCotizacion,
+      nombreCliente: data.nombreCliente.present
+          ? data.nombreCliente.value
+          : this.nombreCliente,
+      monto: data.monto.present ? data.monto.value : this.monto,
+      motivo: data.motivo.present ? data.motivo.value : this.motivo,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NotasCreditoTableData(')
+          ..write('id: $id, ')
+          ..write('ncf: $ncf, ')
+          ..write('ncfFacturaOrigen: $ncfFacturaOrigen, ')
+          ..write('ventaIdOrigen: $ventaIdOrigen, ')
+          ..write('numeroCotizacion: $numeroCotizacion, ')
+          ..write('nombreCliente: $nombreCliente, ')
+          ..write('monto: $monto, ')
+          ..write('motivo: $motivo, ')
+          ..write('creadoEn: $creadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ncf,
+    ncfFacturaOrigen,
+    ventaIdOrigen,
+    numeroCotizacion,
+    nombreCliente,
+    monto,
+    motivo,
+    creadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NotasCreditoTableData &&
+          other.id == this.id &&
+          other.ncf == this.ncf &&
+          other.ncfFacturaOrigen == this.ncfFacturaOrigen &&
+          other.ventaIdOrigen == this.ventaIdOrigen &&
+          other.numeroCotizacion == this.numeroCotizacion &&
+          other.nombreCliente == this.nombreCliente &&
+          other.monto == this.monto &&
+          other.motivo == this.motivo &&
+          other.creadoEn == this.creadoEn);
+}
+
+class NotasCreditoTableCompanion
+    extends UpdateCompanion<NotasCreditoTableData> {
+  final Value<int> id;
+  final Value<String> ncf;
+  final Value<String> ncfFacturaOrigen;
+  final Value<int> ventaIdOrigen;
+  final Value<String> numeroCotizacion;
+  final Value<String?> nombreCliente;
+  final Value<double> monto;
+  final Value<String> motivo;
+  final Value<DateTime> creadoEn;
+  const NotasCreditoTableCompanion({
+    this.id = const Value.absent(),
+    this.ncf = const Value.absent(),
+    this.ncfFacturaOrigen = const Value.absent(),
+    this.ventaIdOrigen = const Value.absent(),
+    this.numeroCotizacion = const Value.absent(),
+    this.nombreCliente = const Value.absent(),
+    this.monto = const Value.absent(),
+    this.motivo = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+  });
+  NotasCreditoTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String ncf,
+    required String ncfFacturaOrigen,
+    required int ventaIdOrigen,
+    this.numeroCotizacion = const Value.absent(),
+    this.nombreCliente = const Value.absent(),
+    this.monto = const Value.absent(),
+    this.motivo = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+  }) : ncf = Value(ncf),
+       ncfFacturaOrigen = Value(ncfFacturaOrigen),
+       ventaIdOrigen = Value(ventaIdOrigen);
+  static Insertable<NotasCreditoTableData> custom({
+    Expression<int>? id,
+    Expression<String>? ncf,
+    Expression<String>? ncfFacturaOrigen,
+    Expression<int>? ventaIdOrigen,
+    Expression<String>? numeroCotizacion,
+    Expression<String>? nombreCliente,
+    Expression<double>? monto,
+    Expression<String>? motivo,
+    Expression<DateTime>? creadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ncf != null) 'ncf': ncf,
+      if (ncfFacturaOrigen != null) 'ncf_factura_origen': ncfFacturaOrigen,
+      if (ventaIdOrigen != null) 'venta_id_origen': ventaIdOrigen,
+      if (numeroCotizacion != null) 'numero_cotizacion': numeroCotizacion,
+      if (nombreCliente != null) 'nombre_cliente': nombreCliente,
+      if (monto != null) 'monto': monto,
+      if (motivo != null) 'motivo': motivo,
+      if (creadoEn != null) 'creado_en': creadoEn,
+    });
+  }
+
+  NotasCreditoTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? ncf,
+    Value<String>? ncfFacturaOrigen,
+    Value<int>? ventaIdOrigen,
+    Value<String>? numeroCotizacion,
+    Value<String?>? nombreCliente,
+    Value<double>? monto,
+    Value<String>? motivo,
+    Value<DateTime>? creadoEn,
+  }) {
+    return NotasCreditoTableCompanion(
+      id: id ?? this.id,
+      ncf: ncf ?? this.ncf,
+      ncfFacturaOrigen: ncfFacturaOrigen ?? this.ncfFacturaOrigen,
+      ventaIdOrigen: ventaIdOrigen ?? this.ventaIdOrigen,
+      numeroCotizacion: numeroCotizacion ?? this.numeroCotizacion,
+      nombreCliente: nombreCliente ?? this.nombreCliente,
+      monto: monto ?? this.monto,
+      motivo: motivo ?? this.motivo,
+      creadoEn: creadoEn ?? this.creadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (ncf.present) {
+      map['ncf'] = Variable<String>(ncf.value);
+    }
+    if (ncfFacturaOrigen.present) {
+      map['ncf_factura_origen'] = Variable<String>(ncfFacturaOrigen.value);
+    }
+    if (ventaIdOrigen.present) {
+      map['venta_id_origen'] = Variable<int>(ventaIdOrigen.value);
+    }
+    if (numeroCotizacion.present) {
+      map['numero_cotizacion'] = Variable<String>(numeroCotizacion.value);
+    }
+    if (nombreCliente.present) {
+      map['nombre_cliente'] = Variable<String>(nombreCliente.value);
+    }
+    if (monto.present) {
+      map['monto'] = Variable<double>(monto.value);
+    }
+    if (motivo.present) {
+      map['motivo'] = Variable<String>(motivo.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NotasCreditoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('ncf: $ncf, ')
+          ..write('ncfFacturaOrigen: $ncfFacturaOrigen, ')
+          ..write('ventaIdOrigen: $ventaIdOrigen, ')
+          ..write('numeroCotizacion: $numeroCotizacion, ')
+          ..write('nombreCliente: $nombreCliente, ')
+          ..write('monto: $monto, ')
+          ..write('motivo: $motivo, ')
+          ..write('creadoEn: $creadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SecuenciasNcfTableTable extends SecuenciasNcfTable
     with TableInfo<$SecuenciasNcfTableTable, SecuenciasNcfTableData> {
   @override
@@ -23901,6 +24462,8 @@ class DetalleCompraTableCompanion
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $NotasCreditoTableTable notasCreditoTable =
+      $NotasCreditoTableTable(this);
   late final $SecuenciasNcfTableTable secuenciasNcfTable =
       $SecuenciasNcfTableTable(this);
   late final $ClientesTableTable clientesTable = $ClientesTableTable(this);
@@ -23970,6 +24533,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    notasCreditoTable,
     secuenciasNcfTable,
     clientesTable,
     configuracionTable,
@@ -24069,6 +24633,297 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ]);
 }
 
+typedef $$NotasCreditoTableTableCreateCompanionBuilder =
+    NotasCreditoTableCompanion Function({
+      Value<int> id,
+      required String ncf,
+      required String ncfFacturaOrigen,
+      required int ventaIdOrigen,
+      Value<String> numeroCotizacion,
+      Value<String?> nombreCliente,
+      Value<double> monto,
+      Value<String> motivo,
+      Value<DateTime> creadoEn,
+    });
+typedef $$NotasCreditoTableTableUpdateCompanionBuilder =
+    NotasCreditoTableCompanion Function({
+      Value<int> id,
+      Value<String> ncf,
+      Value<String> ncfFacturaOrigen,
+      Value<int> ventaIdOrigen,
+      Value<String> numeroCotizacion,
+      Value<String?> nombreCliente,
+      Value<double> monto,
+      Value<String> motivo,
+      Value<DateTime> creadoEn,
+    });
+
+class $$NotasCreditoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $NotasCreditoTableTable> {
+  $$NotasCreditoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ncf => $composableBuilder(
+    column: $table.ncf,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ncfFacturaOrigen => $composableBuilder(
+    column: $table.ncfFacturaOrigen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get ventaIdOrigen => $composableBuilder(
+    column: $table.ventaIdOrigen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get numeroCotizacion => $composableBuilder(
+    column: $table.numeroCotizacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get motivo => $composableBuilder(
+    column: $table.motivo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$NotasCreditoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $NotasCreditoTableTable> {
+  $$NotasCreditoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ncf => $composableBuilder(
+    column: $table.ncf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ncfFacturaOrigen => $composableBuilder(
+    column: $table.ncfFacturaOrigen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get ventaIdOrigen => $composableBuilder(
+    column: $table.ventaIdOrigen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get numeroCotizacion => $composableBuilder(
+    column: $table.numeroCotizacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get motivo => $composableBuilder(
+    column: $table.motivo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$NotasCreditoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NotasCreditoTableTable> {
+  $$NotasCreditoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ncf =>
+      $composableBuilder(column: $table.ncf, builder: (column) => column);
+
+  GeneratedColumn<String> get ncfFacturaOrigen => $composableBuilder(
+    column: $table.ncfFacturaOrigen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get ventaIdOrigen => $composableBuilder(
+    column: $table.ventaIdOrigen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get numeroCotizacion => $composableBuilder(
+    column: $table.numeroCotizacion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get monto =>
+      $composableBuilder(column: $table.monto, builder: (column) => column);
+
+  GeneratedColumn<String> get motivo =>
+      $composableBuilder(column: $table.motivo, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+}
+
+class $$NotasCreditoTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $NotasCreditoTableTable,
+          NotasCreditoTableData,
+          $$NotasCreditoTableTableFilterComposer,
+          $$NotasCreditoTableTableOrderingComposer,
+          $$NotasCreditoTableTableAnnotationComposer,
+          $$NotasCreditoTableTableCreateCompanionBuilder,
+          $$NotasCreditoTableTableUpdateCompanionBuilder,
+          (
+            NotasCreditoTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $NotasCreditoTableTable,
+              NotasCreditoTableData
+            >,
+          ),
+          NotasCreditoTableData,
+          PrefetchHooks Function()
+        > {
+  $$NotasCreditoTableTableTableManager(
+    _$AppDatabase db,
+    $NotasCreditoTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NotasCreditoTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NotasCreditoTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NotasCreditoTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> ncf = const Value.absent(),
+                Value<String> ncfFacturaOrigen = const Value.absent(),
+                Value<int> ventaIdOrigen = const Value.absent(),
+                Value<String> numeroCotizacion = const Value.absent(),
+                Value<String?> nombreCliente = const Value.absent(),
+                Value<double> monto = const Value.absent(),
+                Value<String> motivo = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+              }) => NotasCreditoTableCompanion(
+                id: id,
+                ncf: ncf,
+                ncfFacturaOrigen: ncfFacturaOrigen,
+                ventaIdOrigen: ventaIdOrigen,
+                numeroCotizacion: numeroCotizacion,
+                nombreCliente: nombreCliente,
+                monto: monto,
+                motivo: motivo,
+                creadoEn: creadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String ncf,
+                required String ncfFacturaOrigen,
+                required int ventaIdOrigen,
+                Value<String> numeroCotizacion = const Value.absent(),
+                Value<String?> nombreCliente = const Value.absent(),
+                Value<double> monto = const Value.absent(),
+                Value<String> motivo = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+              }) => NotasCreditoTableCompanion.insert(
+                id: id,
+                ncf: ncf,
+                ncfFacturaOrigen: ncfFacturaOrigen,
+                ventaIdOrigen: ventaIdOrigen,
+                numeroCotizacion: numeroCotizacion,
+                nombreCliente: nombreCliente,
+                monto: monto,
+                motivo: motivo,
+                creadoEn: creadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$NotasCreditoTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $NotasCreditoTableTable,
+      NotasCreditoTableData,
+      $$NotasCreditoTableTableFilterComposer,
+      $$NotasCreditoTableTableOrderingComposer,
+      $$NotasCreditoTableTableAnnotationComposer,
+      $$NotasCreditoTableTableCreateCompanionBuilder,
+      $$NotasCreditoTableTableUpdateCompanionBuilder,
+      (
+        NotasCreditoTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $NotasCreditoTableTable,
+          NotasCreditoTableData
+        >,
+      ),
+      NotasCreditoTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$SecuenciasNcfTableTableCreateCompanionBuilder =
     SecuenciasNcfTableCompanion Function({
       Value<int> id,
@@ -41086,6 +41941,8 @@ typedef $$DetalleCompraTableTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
+  $$NotasCreditoTableTableTableManager get notasCreditoTable =>
+      $$NotasCreditoTableTableTableManager(_db, _db.notasCreditoTable);
   $$SecuenciasNcfTableTableTableManager get secuenciasNcfTable =>
       $$SecuenciasNcfTableTableTableManager(_db, _db.secuenciasNcfTable);
   $$ClientesTableTableTableManager get clientesTable =>

@@ -12,7 +12,7 @@ class AppShell extends StatelessWidget {
 
   String _obtenerTituloPantalla(String rutaActual) {
     return switch (rutaActual) {
-      '/' => 'Dashboard',
+      '/' => 'Inicio',
       '/sales' => 'Facturación y NC',
       '/sales/emitir-factura' => 'Emitir factura',
       '/sales/emitir-nc' => 'Emitir nota de crédito',

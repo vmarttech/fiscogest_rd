@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
-import 'package:fiscogest_rd/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/productos_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/kardex_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_producto_page.dart';
@@ -59,15 +58,23 @@ import 'package:fiscogest_rd/features/facturacion/presentation/pages/secuencias_
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_factura_page.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/historial_facturas_page.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_nc_page.dart';
+import 'package:fiscogest_rd/core/presentation/pages/splash_page.dart';
+import 'package:fiscogest_rd/core/presentation/pages/inicio_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/splash',
     routes: [
+      
       GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashPage(),
+      ),
+GoRoute(
         path: '/',
-        name: DashboardPage.routeName,
-        builder: (_, __) => const AppShell(child: DashboardPage()),
+        name: 'inicio',
+        builder: (_, __) => const AppShell(child: InicioPage()),
       ),
       GoRoute(
         path: '/sales',

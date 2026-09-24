@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 
 final historialFacturasProvider =
     FutureProvider.autoDispose<List<Venta>>((ref) async {
@@ -166,6 +167,86 @@ class HistorialFacturasPage extends ConsumerWidget {
                           ),
                           AppLayout.vS,
                         ],
+
+                      AppLayout.vL,
+                      Text(
+                        'Notas de crédito',
+                        style: AppTypography.h4.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      AppLayout.vS,
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final ncs = ref.watch(notasCreditoListProvider);
+                          return ncs.when(
+                            loading: () => const SizedBox.shrink(),
+                            error: (e, _) => Text('$e'),
+                            data: (rows) {
+                              if (rows.isEmpty) {
+                                return Text(
+                                  'Sin notas de crédito.',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                );
+                              }
+                              return Column(
+                                children: [
+                                  for (final n in rows) ...[
+                                    AppCard(
+                                      borderColor: AppColors.border,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            n.ncf,
+                                            style: AppTypography.labelLarge
+                                                .copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Origen: ${n.ncfFacturaOrigen}',
+                                            style: AppTypography.bodySmall
+                                                .copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                          Text(
+                                            n.motivo,
+                                            style: AppTypography.bodySmall,
+                                          ),
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: TextButton.icon(
+                                              onPressed: () async {
+                                                await ComprobantePdf.imprimirNc(
+                                                  ncfNc: n.ncf,
+                                                  ncfOrigen: n.ncfFacturaOrigen,
+                                                  cliente:
+                                                      n.nombreCliente ?? '',
+                                                  monto: n.monto,
+                                                  motivo: n.motivo,
+                                                );
+                                              },
+                                              icon: const Icon(Icons.print,
+                                                  size: 18),
+                                              label: const Text('Imprimir NC'),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    AppLayout.vS,
+                                  ],
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

@@ -48,6 +48,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
             motivo: _motivo.text,
           );
       ref.invalidate(secuenciasNcfListProvider);
+      ref.invalidate(notasCreditoListProvider);
       if (!mounted) return;
       await showDialog<void>(
         context: context,

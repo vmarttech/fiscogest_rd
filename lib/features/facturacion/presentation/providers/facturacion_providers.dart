@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_dao.dart';
+import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_dao.dart';
 import 'package:fiscogest_rd/features/facturacion/domain/emitir_factura_service.dart';
 import 'package:fiscogest_rd/features/facturacion/domain/emitir_nc_service.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -41,5 +42,15 @@ final emitirNcServiceProvider = Provider<EmitirNcService>((ref) {
   return EmitirNcService(
     ventasRepo: ref.watch(ventasRepositoryProvider),
     secuenciasDao: ref.watch(secuenciasNcfDaoProvider),
+    notasDao: ref.watch(notasCreditoDaoProvider),
   );
+});
+
+final notasCreditoDaoProvider = Provider<NotasCreditoDao>((ref) {
+  final db = ref.watch(databaseProvider);
+  return NotasCreditoDao(db);
+});
+
+final notasCreditoListProvider = FutureProvider.autoDispose((ref) async {
+  return ref.watch(notasCreditoDaoProvider).listar();
 });

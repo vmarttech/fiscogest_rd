@@ -47,9 +47,11 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_table.dart';
+import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_table.dart';
 part 'app_database.g.dart';
 @DriftDatabase(
   tables: [
+  NotasCreditoTable,
   SecuenciasNcfTable,
     ClientesTable,
     ConfiguracionTable,
@@ -96,11 +98,14 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 32;
+  int get schemaVersion => 33;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 33) {
+        await m.createTable(notasCreditoTable);
+      }
       if (from < 32) {
         await m.createTable(secuenciasNcfTable);
       }
