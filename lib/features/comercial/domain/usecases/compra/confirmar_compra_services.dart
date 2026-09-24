@@ -46,6 +46,7 @@ class ConfirmarCompraServices {
       await productoRepo.actualizarProducto(producto.copyWith(
         costoPromedio: nuevoCostoPromedio,
         stock: stockAnterior + cantidadNueva,
+        precioCompra: costoUnitarioNuevo, // costoAdquisicion = unitario + gastos
       ));
     }
   }

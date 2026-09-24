@@ -10,18 +10,14 @@ import 'package:fiscogest_rd/features/caja/data/repositories/caja_repository_imp
 import 'package:fiscogest_rd/features/comercial/data/dao/apartados_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_dao.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/caja_sesiones_dao.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
 import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_repository_impl.dart';
 import 'package:fiscogest_rd/features/inventario/data/services/inventario_service_impl.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/compra_repository_impl.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/inventario_repository_impl.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/producto_repository_impl.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/proveedor_repository_impl.dart';
 import 'package:fiscogest_rd/features/comercial/domain/services/compra_eventos_listener.dart';
-import 'package:fiscogest_rd/features/inventario/domain/usecases/registrar_movimiento_kardex.dart';
 
 class RepositoryInjection {
   RepositoryInjection._({
@@ -60,6 +56,7 @@ class RepositoryInjection {
     final apartadosDao = ApartadosDao(db);
     final devolucionesDao = DevolucionesDao(db);
     final cajaMovimientosDao = CajaMovimientosDao(db);
+    final cajaSesionesDao = CajaSesionesDao(db);
     final productosDao = ProductosDao(db);
     final kardexDatasource = DriftKardexDatasource(db);
     final kardexRepo = KardexRepositoryImpl(kardexDatasource);
@@ -75,21 +72,11 @@ class RepositoryInjection {
     );
     final apartadoRepository = ApartadoRepositoryImpl(apartadosDao: apartadosDao);
     final devolucionRepository = DevolucionRepositoryImpl(devolucionesDao: devolucionesDao);
-    final cajaRepository = CajaRepositoryImpl(cajaMovimientosDao: cajaMovimientosDao);
-    final compraRepo = CompraRepositoryImpl(db);
-    final inventarioRepo = InventarioRepositoryImpl(db);
-    final productoRepo = ProductoRepositoryImpl(db);
-    final proveedorRepo = ProveedorRepositoryImpl();
-    final kardexUsecase = RegistrarMovimientoKardex(kardexRepo);
-
-    // ✅ Guardamos el listener en variable ESTÁTICA → NUNCA SE DESTRUYE
-    _compraEventosListener = CompraEventosListener(
-      compraRepo,
-      inventarioRepo,
-      productoRepo,
-      kardexUsecase,
-      proveedorRepo,
+    final cajaRepository = CajaRepositoryImpl(
+      cajaMovimientosDao: cajaMovimientosDao,
+      cajaSesionesDao: cajaSesionesDao,
     );
+    _compraEventosListener = CompraEventosListener();
 
     // ✅ Leemos la variable para eliminar advertencia de campo no usado
     assert(_compraEventosListener != null, 'Listener inicializado');

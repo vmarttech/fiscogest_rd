@@ -18,7 +18,15 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.d
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/credito_inicio_page.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/detalle_solicitud_credito_page.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/config_credito_page.dart';
+
+
 import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_historial_turno_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
@@ -108,6 +116,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: CobroVentaPage.routeName,
                 builder: (_, __) => const AppShell(child: CobroVentaPage()),
               ),
+              GoRoute(
+                path: 'historial-turno',
+                name: CajaHistorialTurnoPage.routeName,
+                builder: (_, __) =>
+                    const AppShell(child: CajaHistorialTurnoPage()),
+              ),
             ],
           ),
           GoRoute(
@@ -127,7 +141,45 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      
       GoRoute(
+        path: '/creditos',
+        name: CreditoInicioPage.routeName,
+        builder: (_, __) => const AppShell(child: CreditoInicioPage()),
+        routes: [
+          GoRoute(
+            path: 'config',
+            name: ConfigCreditoPage.routeName,
+            builder: (_, __) => const AppShell(child: ConfigCreditoPage()),
+          ),
+
+          GoRoute(
+            path: 'cuentas',
+            name: CuentasCobrarPage.routeName,
+            builder: (_, __) => const AppShell(child: CuentasCobrarPage()),
+          ),
+
+          GoRoute(
+            path: 'solicitudes',
+            name: SolicitudesCreditoPage.routeName,
+            builder: (_, __) =>
+                const AppShell(child: SolicitudesCreditoPage()),
+            routes: [
+              GoRoute(
+                path: ':ventaId',
+                name: DetalleSolicitudCreditoPage.routeName,
+                builder: (context, state) {
+                  final id = int.tryParse(state.pathParameters['ventaId'] ?? '') ?? 0;
+                  return AppShell(
+                    child: DetalleSolicitudCreditoPage(ventaId: id),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+GoRoute(
         path: '/compras',
         name: DashboardComprasPage.routeName,
         builder: (_, __) => const AppShell(child: DashboardComprasPage()),

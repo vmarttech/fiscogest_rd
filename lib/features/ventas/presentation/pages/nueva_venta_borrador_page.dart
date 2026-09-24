@@ -6,7 +6,7 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.da
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
-import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_dialog.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
@@ -26,6 +26,8 @@ class _NuevaVentaBorradorPageState
   final TextEditingController _buscadorController = TextEditingController();
   DateTime? _fechaVencimientoSeleccionada;
   bool _esCredito = false;
+  bool _modoFormularioCredito = false;
+  RegistrarVentaState? _estadoFormularioCredito;
   bool _guardando = false;
 
   @override
@@ -161,8 +163,7 @@ class _NuevaVentaBorradorPageState
       final repositorio = ref.read(ventasRepositoryProvider);
       notificador.establecerFormaPago(esCredito: _esCredito);
 
-      double abonoDesdeFormulario = 0.0;
-      DateTime? vencimientoCredito;
+      const double abonoDesdeFormulario = 0.0;
 
       // Crédito → mismo formulario que Apartado (antes de guardar)
       if (_esCredito) {
@@ -181,17 +182,13 @@ class _NuevaVentaBorradorPageState
         }
         final estadoParaCredito = _mapearBorradorARegistrarVenta(estadoBorrador);
         if (!mounted) return;
-        final resultado = await FormularioCreditoDialog.navegar(
-          context,
-          estadoParaCredito,
-        );
-        if (resultado == null) {
-          // Usuario canceló el formulario de crédito
-          return;
-        }
-        abonoDesdeFormulario = resultado.abonoInicial?.monto ?? 0.0;
-        vencimientoCredito = resultado.cuenta.fechaVencimiento;
-        notificador.establecerVencimiento(vencimientoCredito);
+        // Embebido (mismo patrón que Apartado / depto. Crédito)
+        setState(() {
+          _estadoFormularioCredito = estadoParaCredito;
+          _modoFormularioCredito = true;
+          _guardando = false;
+        });
+        return;
       }
 
       final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(
@@ -269,6 +266,91 @@ class _NuevaVentaBorradorPageState
     }
   }
 
+  void _cerrarFormularioCredito() {
+    setState(() {
+      _modoFormularioCredito = false;
+      _estadoFormularioCredito = null;
+    });
+  }
+
+  /// Tras CONFIRMAR en FormularioCreditoVista: guarda cotización crédito.
+  Future<void> _onCreditoConfirmado(ResultadoFormularioCredito resultado) async {
+    setState(() {
+      _modoFormularioCredito = false;
+      _estadoFormularioCredito = null;
+      _guardando = true;
+    });
+    final abonoDesdeFormulario = resultado.abonoInicial?.monto ?? 0.0;
+    final vencimientoCredito = resultado.cuenta.fechaVencimiento;
+    try {
+      final notificador = ref.read(ventaBorradorProvider.notifier);
+      final repositorio = ref.read(ventasRepositoryProvider);
+      notificador.establecerFormaPago(esCredito: true);
+      notificador.establecerVencimiento(vencimientoCredito);
+
+      final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(
+        esCredito: true,
+      );
+      notificador.establecerNumeroCotizacion(numeroCotizacion);
+      notificador.establecerEstadoDocumento(EstadoDocumento.enCredito);
+
+      final numeroGuardado = await notificador.guardar();
+      if (numeroGuardado == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Agregue productos antes de generar la cotización'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+
+      final idGuardado = ref.read(ventaBorradorProvider).id;
+      if (idGuardado != null && abonoDesdeFormulario > 0) {
+        await repositorio.registrarVentaConAbono(
+          idGuardado,
+          abonoDesdeFormulario,
+          'Abono inicial cotización crédito',
+          formaPago: 'Credito',
+        );
+        await repositorio.cambiarEstadoDocumento(
+          idGuardado,
+          EstadoDocumento.enCredito,
+        );
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Cotización N° $numeroGuardado en crédito.\n'
+            'Abono: RD\$ ${abonoDesdeFormulario.toStringAsFixed(2)}\n'
+            'Pendiente de aprobación → luego Caja.',
+          ),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      ref.invalidate(listaCotizacionesProvider);
+      _limpiarFormulario();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al generar cotización: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _guardando = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final estado = ref.watch(ventaBorradorProvider);
@@ -285,16 +367,33 @@ class _NuevaVentaBorradorPageState
       body: SafeArea(
         bottom: true,
         maintainBottomViewPadding: true,
-        child: Column(
-          children: [
-            Expanded(
-              child: esPantallaAncha
-                  ? _buildDosColumnas(estado, puedeGenerar, esPantallaPequena)
-                  : _buildUnaColumna(estado, puedeGenerar, esPantallaPequena),
-            ),
-            _buildBarraFijaPos(estado, puedeGenerar, esPantallaPequena),
-          ],
-        ),
+        child: _modoFormularioCredito && _estadoFormularioCredito != null
+            ? Container(
+                padding: AppSpacing.allM,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: AppRadius.allL,
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: FormularioCreditoVista(
+                  estadoVenta: _estadoFormularioCredito!,
+                  onVolver: _cerrarFormularioCredito,
+                  onConfirmado: _onCreditoConfirmado,
+                ),
+              )
+            : Column(
+                children: [
+                  Expanded(
+                    child: esPantallaAncha
+                        ? _buildDosColumnas(
+                            estado, puedeGenerar, esPantallaPequena)
+                        : _buildUnaColumna(
+                            estado, puedeGenerar, esPantallaPequena),
+                  ),
+                  _buildBarraFijaPos(
+                      estado, puedeGenerar, esPantallaPequena),
+                ],
+              ),
       ),
     );
   }

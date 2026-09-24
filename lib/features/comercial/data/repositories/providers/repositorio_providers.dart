@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/proveedores/domain/repositories/i_proveedo
 import 'package:fiscogest_rd/features/caja/domain/repositories/i_caja_repository.dart';
 import 'package:fiscogest_rd/features/caja/data/repositories/caja_repository_impl.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_dao.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/caja_sesiones_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_dao.dart';
 import 'package:fiscogest_rd/features/estadisticas/domain/repositories/i_estadisticas_repository.dart';
 import 'package:fiscogest_rd/features/estadisticas/data/repositories/estadisticas_repository_impl.dart';
@@ -77,6 +78,11 @@ final cuentasPagarDaoProvider = Provider<CuentasPagarDao>((ref) {
   return CuentasPagarDao(db);
 });
 
+final cajaSesionesDaoProvider = Provider<CajaSesionesDao>((ref) {
+  final db = ref.watch(databaseProvider);
+  return CajaSesionesDao(db);
+});
+
 final cajaMovimientosDaoProvider = Provider<CajaMovimientosDao>((ref) {
   final db = ref.watch(appDatabaseProvider);
   return CajaMovimientosDao(db);
@@ -84,7 +90,11 @@ final cajaMovimientosDaoProvider = Provider<CajaMovimientosDao>((ref) {
 
 final cajaRepositoryProvider = Provider<ICajaRepository>((ref) {
   final dao = ref.watch(cajaMovimientosDaoProvider);
-  return CajaRepositoryImpl(cajaMovimientosDao: dao);
+  final sesiones = ref.watch(cajaSesionesDaoProvider);
+  return CajaRepositoryImpl(
+    cajaMovimientosDao: dao,
+    cajaSesionesDao: sesiones,
+  );
 });
 
 final clienteDaoProvider = Provider<ClienteDao>((ref) {

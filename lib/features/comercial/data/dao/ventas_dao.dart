@@ -137,20 +137,38 @@ class VentasDao {
   }
 
   Future<int> obtenerUltimoCorrelativoCotizacion({bool? soloCredito}) async {
+    // Series independientes: C-… (contado) y CR-… (crédito).
+    // OJO: like('C-%') también matchea 'CR-%' → hay que excluir CR en contado.
     final query = _db.select(_db.ventasTable)
       ..where((final t) => t.numeroCotizacion.isNotNull());
+
     if (soloCredito == true) {
       query.where((final t) => t.numeroCotizacion.like('CR-%'));
     } else if (soloCredito == false) {
       query.where((final t) => t.numeroCotizacion.like('C-%'));
     }
-    query.orderBy([(final t) => OrderingTerm.desc(t.numeroCotizacion)]);
-    query.limit(1);
+
     final filas = await query.get();
-    if (filas.isEmpty) return 0;
-    final ultimo = filas.first.numeroCotizacion;
-    final soloNumero = ultimo.replaceAll(RegExp(r'[^0-9]'), '');
-    return int.tryParse(soloNumero) ?? 0;
+    var maxN = 0;
+    for (final fila in filas) {
+      final raw = fila.numeroCotizacion;
+      if (raw.isEmpty) continue;
+
+      if (soloCredito == true) {
+        if (!raw.startsWith('CR-')) continue;
+      } else if (soloCredito == false) {
+        // Contado: C- pero nunca CR-
+        if (!raw.startsWith('C-') || raw.startsWith('CR-')) continue;
+      }
+
+      final prefijoLen = raw.startsWith('CR-') ? 3 : 2; // 'CR-' | 'C-'
+      final digitos = raw.length > prefijoLen
+          ? raw.substring(prefijoLen).replaceAll(RegExp(r'[^0-9]'), '')
+          : '';
+      final n = int.tryParse(digitos) ?? 0;
+      if (n > maxN) maxN = n;
+    }
+    return maxN;
   }
 
   Future<int> obtenerUltimoCorrelativoFactura() async {

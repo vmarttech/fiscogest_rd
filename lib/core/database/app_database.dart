@@ -31,6 +31,10 @@ import 'package:fiscogest_rd/features/comercial/data/dao/apartados_detalle_table
 import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_detalle_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_table.dart';
+import 'package:fiscogest_rd/features/creditos/data/dao/parametros_credito_table.dart';
+import 'package:fiscogest_rd/features/creditos/data/dao/referencias_credito_table.dart';
+import 'package:fiscogest_rd/features/creditos/data/dao/solicitudes_credito_table.dart';
+
 import 'package:fiscogest_rd/features/comercial/data/dao/cobros_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/pagos_proveedor_table.dart';
@@ -38,6 +42,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/descuentos_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/kardex_comercial_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/caja_sesiones_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
@@ -68,6 +73,9 @@ part 'app_database.g.dart';
     DevolucionesTable,
     DevolucionesDetalleTable,
     CuentasCobrarTable,
+    ParametrosCreditoTable,
+    SolicitudesCreditoTable,
+    ReferenciasCreditoTable,
     CobrosTable,
     CuentasPagarTable,
     PagosProveedorTable,
@@ -75,6 +83,7 @@ part 'app_database.g.dart';
     OfertasTable,
     KardexComercialTable,
     CajaMovimientosTable,
+    CajaSesionesTable,
     ComprasTable,
     DetalleCompraTable,
   ],
@@ -85,11 +94,24 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 27;
+  int get schemaVersion => 30;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 30) {
+        await m.createTable(solicitudesCreditoTable);
+        await m.createTable(referenciasCreditoTable);
+      }
+
+      if (from < 29) {
+        await m.createTable(parametrosCreditoTable);
+      }
+
+      if (from < 28) {
+        await m.createTable(cajaSesionesTable);
+      }
+
       if (from < 2) {
         await m.createTable(entradasTable);
         await m.createTable(salidasTable);

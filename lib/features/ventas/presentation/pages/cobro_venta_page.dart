@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/caja_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/factura_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart'
     as venta_providers;
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
@@ -226,6 +227,23 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     ref.read(cajaProvider.notifier).establecerAbono(valor);
   }
 
+  Future<bool> _exigirCajaAbierta() async {
+    final sesion = await ref.read(cajaRepositoryProvider).obtenerSesionAbierta();
+    if (sesion == null || !sesion.estaAbierta) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('La caja está cerrada. Ábrala desde el menú Caja.'),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return false;
+    }
+    return true;
+  }
+
   Future<void> _cobrarYGenerarFactura() async {
     if (!mounted || _procesando) return;
     final cajaNotifier = ref.read(cajaProvider.notifier);
@@ -257,6 +275,49 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       return;
     }
 
+    if (!await _exigirCajaAbierta()) return;
+
+    // Crédito: solo cotizaciones aprobadas
+    final repoCheck = ref.read(venta_providers.ventasRepositoryProvider);
+    final doc = await repoCheck.obtenerVentaPorId(ventaId);
+    if (doc != null) {
+      final esCr = doc.numeroCotizacion.startsWith('CR-') ||
+          doc.estadoDocumento == EstadoDocumento.enCredito ||
+          (doc.formaPago.toLowerCase().contains('credito') ||
+              doc.formaPago.toLowerCase().contains('crédito'));
+      if (esCr && doc.estadoDocumento == EstadoDocumento.enCredito) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Pendiente de aprobación en Crédito. No se puede facturar aún.',
+              ),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+      if (esCr &&
+          doc.estadoDocumento != EstadoDocumento.aprobado &&
+          doc.estadoDocumento != EstadoDocumento.facturado) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Estado ${doc.estadoDocumento.name}: no listo para cobro a crédito',
+              ),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+
     setState(() => _procesando = true);
     try {
       final repositorio = ref.read(venta_providers.ventasRepositoryProvider);
@@ -285,8 +346,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       }
       if (ventaConDetalle.detalles.isEmpty) {
         throw Exception(
-          'La cotización no tiene líneas de detalle. '
-          'Genere una cotización nueva (con productos) y vuelva a cobrar.',
+          'La cotización ${ventaConDetalle.numeroCotizacion} no tiene productos '
+          'guardados en base de datos (ventas_detalle vacío). '
+          'Eso ocurre con cotizaciones creadas antes de persistir líneas. '
+          'Genere una cotización NUEVA con productos y cobre esa.',
         );
       }
       final inv = ref.read(ventaInventarioServiceProvider);
@@ -342,13 +405,98 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
               ],
             ),
             actions: [
+              TextButton.icon(
+                onPressed: () async {
+                  try {
+                    await ref
+                        .read(facturaServiceProvider)
+                        .imprimirPdf(ventaConDetalle);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Abriendo diálogo de impresión…',
+                        ),
+                        backgroundColor: AppColors.success,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error al imprimir: $e'),
+                        backgroundColor: AppColors.error,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.print_outlined, size: 18),
+                label: const Text('Imprimir'),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  try {
+                    final ruta = await ref
+                        .read(facturaServiceProvider)
+                        .exportarPDF(ventaConDetalle);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Archivo listo: $ruta'),
+                        backgroundColor: AppColors.success,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error PDF: $e'),
+                        backgroundColor: AppColors.error,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                label: const Text('PDF'),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  try {
+                    await ref
+                        .read(facturaServiceProvider)
+                        .enviarPorCorreo(ventaConDetalle, '');
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Elija correo u otra app para enviar'),
+                        backgroundColor: AppColors.info,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error al enviar: $e'),
+                        backgroundColor: AppColors.error,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.email_outlined, size: 18),
+                label: const Text('Correo'),
+              ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(ctx);
                   setState(() {
                     _modoBusqueda = true;
                     ventaId = 0;
-                    _detalles = [];
                     _abonoController.clear();
                     _referenciaController.clear();
                   });
@@ -360,7 +508,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                 ),
                 child: const Text('Aceptar'),
               ),
-            ],
+            ]
           );
         },
       );

@@ -36,6 +36,12 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<void> _guardarDetalles(int ventaId, List<DetalleVenta> detalles) async {
     await _ventasDao.eliminarDetallesDeVenta(ventaId);
     for (final d in detalles) {
+      if (d.productoId <= 0) {
+        throw Exception('Detalle inválido: productoId vacío');
+      }
+      if (d.cantidad <= 0) {
+        throw Exception('Detalle inválido: cantidad debe ser > 0');
+      }
       await _ventasDao.insertarDetalle(
         ventaId: ventaId,
         productoId: d.productoId,
@@ -291,9 +297,20 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );
+    if (cotizacion.detalles.isEmpty) {
+      throw Exception(
+        'No se puede guardar la cotización sin productos. Agregue líneas e intente de nuevo.',
+      );
+    }
     await _guardarDetalles(id, cotizacion.detalles);
     final registro = await _ventasDao.obtenerVentaPorId(id);
     final dets = _mapearDetalles(await _ventasDao.listarDetalles(id));
+    if (dets.isEmpty) {
+      throw Exception(
+        'La cotización se guardó pero no se persistieron los productos. '
+        'Revise la tabla ventas_detalle / permisos de BD.',
+      );
+    }
     return _mapearDesdeVentasTableData(
       registro!,
       esCotizacion: true,

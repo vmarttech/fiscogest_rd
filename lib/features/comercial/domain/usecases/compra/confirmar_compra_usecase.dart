@@ -47,10 +47,7 @@ class ConfirmarCompraUseCase {
       );
     }
 
-    await calcularCostoAdquisicion(compraConfirmada);
-    await registrarMovimientoKardex(compraConfirmada);
     await ejecutarActualizaciones(compraConfirmada);
-    await actualizarSaldoProveedor(compraConfirmada);
 
     return compraConfirmada;
   }

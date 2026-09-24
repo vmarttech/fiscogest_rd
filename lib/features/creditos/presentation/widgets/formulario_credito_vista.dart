@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_textfield.dart';
-import 'package:fiscogest_rd/core/ui/app_button.dart';
-import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuota.dart';
@@ -705,51 +700,60 @@ class _FormularioCreditoVistaState
   @override
   Widget build(BuildContext context) {
     final resumen = _resumen;
-    return SizedBox(
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Crédito / Financiamiento',
-                style: AppTypography.labelLarge.copyWith(
-                  color: AppColors.textPrimary,
+    final maxW = AppBreakpoints.isDesktop(context)
+        ? 1100
+        : (AppBreakpoints.isTablet(context) ? 900 : 720);
+
+    return AppLayout.centerConstrained(
+      maxWidth: maxW,
+      child: SingleChildScrollView(
+        padding: AppLayout.pantallaPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Crédito / Financiamiento',
+                  style: AppTypography.labelLarge.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                'Configure las condiciones de pago',
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.textSecondary,
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Configure las condiciones de pago',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.l),
-          _buildContenidoPrincipal(resumen),
-          const SizedBox(height: AppSpacing.l),
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  text: 'CANCELAR',
-                  onPressed: _guardando ? null : widget.onVolver,
+              ],
+            ),
+            const SizedBox(height: AppSpacing.l),
+            _buildContenidoPrincipal(resumen),
+            const SizedBox(height: AppSpacing.l),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    text: 'CANCELAR',
+                    onPressed: _guardando ? null : widget.onVolver,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.m),
-              Expanded(
-                child: AppButton(
-                  text: 'CONFIRMAR',
-                  onPressed: _guardando ? null : _confirmar,
-                  isLoading: _guardando,
+                const SizedBox(width: AppSpacing.m),
+                Expanded(
+                  child: AppButton(
+                    text: 'CONFIRMAR',
+                    onPressed: _guardando ? null : _confirmar,
+                    isLoading: _guardando,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            // Respiro inferior (evita overflow bajo botones / teclado)
+            const SizedBox(height: AppSpacing.l),
+          ],
+        ),
       ),
     );
   }

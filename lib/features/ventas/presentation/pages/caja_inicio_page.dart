@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:intl/intl.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:fiscogest_rd/features/caja/domain/repositories/i_caja_repository.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
 
-/// Hub de la estación de Caja (no es el POS del vendedor).
+/// Hub de la estación de Caja — responsive PC / tablet / móvil.
 class CajaInicioPage extends ConsumerStatefulWidget {
   const CajaInicioPage({super.key});
 
@@ -20,51 +20,279 @@ class CajaInicioPage extends ConsumerStatefulWidget {
 
 class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   double? _saldo;
-  bool _cargandoSaldo = true;
-  String? _errorSaldo;
+  CajaSesionResumen? _sesion;
+  bool _cargando = true;
+  String? _error;
+  bool _procesando = false;
+
+  static final _fmtFecha = DateFormat('dd/MM/yyyy HH:mm');
+  static final _fmtMonto = NumberFormat('#,##0.00', 'es_DO');
 
   @override
   void initState() {
     super.initState();
-    _cargarSaldo();
+    _refrescar();
   }
 
-  Future<void> _cargarSaldo() async {
+  Future<void> _refrescar() async {
     setState(() {
-      _cargandoSaldo = true;
-      _errorSaldo = null;
+      _cargando = true;
+      _error = null;
     });
     try {
-      final saldo =
-          await ref.read(cajaRepositoryProvider).obtenerSaldoActual();
+      final repo = ref.read(cajaRepositoryProvider);
+      final saldo = await repo.obtenerSaldoActual();
+      final sesion = await repo.obtenerSesionAbierta();
       if (!mounted) return;
       setState(() {
         _saldo = saldo ?? 0.0;
-        _cargandoSaldo = false;
+        _sesion = sesion;
+        _cargando = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorSaldo = '$e';
-        _cargandoSaldo = false;
-        _saldo = null;
+        _error = '$e';
+        _cargando = false;
       });
     }
   }
 
+  bool get _cajaAbierta => _sesion != null && _sesion!.estaAbierta;
+
   void _irACobrarCotizacion() {
+    if (!_cajaAbierta) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Debe abrir la caja antes de cobrar'),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     context.push(CobroVentaPage.pathOperacion);
   }
 
-  void _irACuentasPorCobrar() {
-    context.push('/ventas/cobrar');
+  void _irACuentasPorCobrar() => context.push('/ventas/cobrar');
+
+  void _irAHistorialTurno() =>
+      context.push('/ventas/cobro/historial-turno');
+
+  Future<void> _dialogoAbrirCaja() async {
+    final controller = TextEditingController(text: '0');
+    final ancho = MediaQuery.of(context).size.width;
+    final fondo = await showDialog<double>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
+          title: const Text('Abrir caja', style: AppTypography.h4),
+          content: SizedBox(
+            width: ancho >= AppBreakpoints.tablet ? 420 : null,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Indique el fondo inicial (efectivo en cajón).',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                AppLayout.vM,
+                TextField(
+                  controller: controller,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: 'Fondo inicial',
+                    prefixText: 'RD\$ ',
+                    border: OutlineInputBorder(),
+                  ),
+                  autofocus: true,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final v = double.tryParse(
+                      controller.text.trim().replaceAll(',', '.'),
+                    ) ??
+                    -1;
+                if (v < 0) return;
+                Navigator.pop(ctx, v);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.success,
+                foregroundColor: AppColors.white,
+              ),
+              child: const Text('Abrir'),
+            ),
+          ],
+        );
+      },
+    );
+    if (fondo == null || !mounted) return;
+
+    setState(() => _procesando = true);
+    try {
+      await ref.read(cajaRepositoryProvider).abrirSesion(fondoInicial: fondo);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Caja abierta. Fondo: RD\$ ${_fmtMonto.format(fondo)}',
+          ),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      await _refrescar();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$e'.replaceAll('Exception: ', '')),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _procesando = false);
+    }
+  }
+
+  Future<void> _dialogoCerrarCaja() async {
+    if (_sesion == null) return;
+    final teorico = _saldo ?? 0.0;
+    final controller =
+        TextEditingController(text: teorico.toStringAsFixed(2));
+    final obsController = TextEditingController();
+    final ancho = MediaQuery.of(context).size.width;
+
+    final result = await showDialog<({double contado, String? obs})>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
+          title: const Text('Cerrar caja', style: AppTypography.h4),
+          content: SizedBox(
+            width: ancho >= AppBreakpoints.tablet ? 420 : null,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Saldo teórico: RD\$ ${_fmtMonto.format(teorico)}',
+                    style: AppTypography.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  AppLayout.vM,
+                  TextField(
+                    controller: controller,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Efectivo contado en cajón',
+                      prefixText: 'RD\$ ',
+                      border: OutlineInputBorder(),
+                    ),
+                    autofocus: true,
+                  ),
+                  AppLayout.vM,
+                  TextField(
+                    controller: obsController,
+                    decoration: const InputDecoration(
+                      labelText: 'Observación (opcional)',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 2,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final v = double.tryParse(
+                      controller.text.trim().replaceAll(',', '.'),
+                    ) ??
+                    -1;
+                if (v < 0) return;
+                final obs = obsController.text.trim();
+                Navigator.pop(
+                  ctx,
+                  (contado: v, obs: obs.isEmpty ? null : obs),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.warning,
+                foregroundColor: AppColors.white,
+              ),
+              child: const Text('Cerrar turno'),
+            ),
+          ],
+        );
+      },
+    );
+    if (result == null || !mounted) return;
+
+    setState(() => _procesando = true);
+    try {
+      final ok = await ref.read(cajaRepositoryProvider).cerrarSesion(
+            sesionId: _sesion!.id,
+            saldoTeorico: teorico,
+            montoContado: result.contado,
+            observacion: result.obs,
+          );
+      if (!mounted) return;
+      final dif = result.contado - teorico;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? 'Caja cerrada. Diferencia: RD\$ ${_fmtMonto.format(dif)}'
+                : 'No se pudo cerrar la sesión',
+          ),
+          backgroundColor: ok ? AppColors.success : AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      await _refrescar();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$e'.replaceAll('Exception: ', '')),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _procesando = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
-    final padding = isMobile ? 16.0 : 24.0;
-    final tamanoSaldo = isMobile ? 28.0 : 34.0;
+    final mobile = AppBreakpoints.isMobile(context);
+    final desktop = AppBreakpoints.isDesktop(context);
+    final abierta = _cajaAbierta;
+    final maxW = desktop ? 1100 : (mobile ? 520 : 720);
 
     return AppScaffold(
       title: 'CAJA',
@@ -80,120 +308,67 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: _cargarSaldo,
+          onRefresh: _refrescar,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(padding, padding, padding, padding + 24),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ─── Estado / saldo ───
-                    Container(
-                      padding: EdgeInsets.all(isMobile ? 16 : 20),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Estación de caja',
-                            style: AppTypography.labelMedium.copyWith(
-                              color: AppColors.textSecondary,
-                              fontSize: isMobile ? 12 : 13,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Saldo registrado',
-                            style: AppTypography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: isMobile ? 14 : 15,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          if (_cargandoSaldo)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8),
-                              child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(strokeWidth: 2.5),
-                              ),
-                            )
-                          else if (_errorSaldo != null)
-                            Text(
-                              'No se pudo leer el saldo',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.error,
-                              ),
-                            )
-                          else
-                            Text(
-                              'RD\$ ${(_saldo ?? 0).toStringAsFixed(2)}',
-                              style: AppTypography.h3.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: tamanoSaldo,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Abrir / cerrar turno se agregará en una fase siguiente.',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
-                              fontSize: isMobile ? 12 : 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: isMobile ? 20 : 24),
-                    Text(
-                      'Operaciones',
-                      style: AppTypography.labelMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: isMobile ? 13 : 14,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // ─── Cobrar cotización ───
-                    _AccionCaja(
-                      icono: Icons.point_of_sale,
-                      titulo: 'Cobrar cotización',
-                      subtitulo:
-                          'Buscar por N° o cliente y generar factura fiscal',
-                      color: AppColors.success,
-                      isMobile: isMobile,
-                      onTap: _irACobrarCotizacion,
-                    ),
-                    const SizedBox(height: 10),
-                    // ─── CXC (no es caja, pero acceso útil) ───
-                    _AccionCaja(
-                      icono: Icons.account_balance_wallet_outlined,
-                      titulo: 'Cuentas por cobrar',
-                      subtitulo: 'Saldos y abonos de clientes',
-                      color: AppColors.info,
-                      isMobile: isMobile,
-                      onTap: _irACuentasPorCobrar,
-                    ),
-                    SizedBox(height: isMobile ? 28 : 32),
-                    Text(
-                      'El cobro de cotizaciones es la única vía que asigna '
-                      'N° de factura e impacta inventario.',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                        fontSize: isMobile ? 12 : 13,
-                      ),
-                    ),
+            padding: AppLayout.pantallaPadding.add(
+              const EdgeInsets.only(bottom: 24),
+            ),
+            child: AppLayout.centerConstrained(
+              maxWidth: maxW,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildEstadoTurno(mobile, abierta),
+                  AppLayout.vL,
+                  SectionHeader(
+                    title: 'Operaciones',
+                    subtitle: desktop
+                        ? 'Acciones de la estación de caja'
+                        : null,
+                  ),
+                  if (desktop)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: _accionCobrar(abierta, mobile)),
+                        AppLayout.hM,
+                        Expanded(child: _accionCxc(mobile)),
+                        AppLayout.hM,
+                        Expanded(child: _accionHistorial(abierta, mobile)),
+                      ],
+                    )
+                  else if (!mobile)
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(child: _accionCobrar(abierta, mobile)),
+                            AppLayout.hM,
+                            Expanded(child: _accionCxc(mobile)),
+                          ],
+                        ),
+                        AppLayout.vS,
+                        _accionHistorial(abierta, mobile),
+                      ],
+                    )
+                  else ...[
+                    _accionCobrar(abierta, mobile),
+                    AppLayout.vS,
+                    _accionCxc(mobile),
+                    AppLayout.vS,
+                    _accionHistorial(abierta, mobile),
                   ],
-                ),
+                  AppLayout.vXl,
+                  Text(
+                    'El cobro de cotizaciones asigna N° de factura e impacta '
+                    'inventario y movimientos de caja.',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -201,6 +376,136 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       ),
     );
   }
+
+  Widget _buildEstadoTurno(bool mobile, bool abierta) {
+    return AppCard(
+      borderColor: AppColors.border,
+      padding: EdgeInsets.all(mobile ? AppSpacing.m : AppSpacing.l),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              StatusChip(
+                label: abierta ? 'ABIERTA' : 'CERRADA',
+                type: abierta
+                    ? StatusChipType.success
+                    : StatusChipType.neutral,
+              ),
+              const Spacer(),
+              if (_procesando)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+            ],
+          ),
+          AppLayout.vM,
+          Text(
+            'Saldo registrado',
+            style: AppTypography.labelMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          AppLayout.vXs,
+          if (_cargando)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
+            )
+          else if (_error != null)
+            Text(
+              'Error: $_error',
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            )
+          else
+            Text(
+              'RD\$ ${_fmtMonto.format(_saldo ?? 0)}',
+              style: AppTypography.h2.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+                fontSize: mobile ? 28 : 36,
+              ),
+            ),
+          if (abierta && _sesion != null) ...[
+            AppLayout.vS,
+            Text(
+              'Fondo inicial: RD\$ ${_fmtMonto.format(_sesion!.fondoInicial)}'
+              '  ·  Apertura: ${_fmtFecha.format(_sesion!.fechaApertura)}'
+              '  ·  Sesión #${_sesion!.id}',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+          AppLayout.vM,
+          if (!abierta)
+            AppButton(
+              text: 'ABRIR CAJA',
+              icon: Icons.lock_open,
+              onPressed: _procesando ? null : _dialogoAbrirCaja,
+              isDisabled: _procesando,
+              width: double.infinity,
+              height: mobile ? 48 : AppSizes.buttonHeightMd,
+            )
+          else
+            SizedBox(
+              width: double.infinity,
+              height: mobile ? 48 : AppSizes.buttonHeightMd,
+              child: OutlinedButton.icon(
+                onPressed: _procesando ? null : _dialogoCerrarCaja,
+                icon: const Icon(Icons.lock_outline, size: 20),
+                label: Text(
+                  'CERRAR CAJA',
+                  style: AppTypography.button.copyWith(
+                    color: AppColors.warning,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.warning,
+                  side: const BorderSide(color: AppColors.warning, width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _accionCobrar(bool abierta, bool mobile) => _AccionCaja(
+        icono: Icons.point_of_sale,
+        titulo: 'Cobrar cotización',
+        subtitulo: abierta
+            ? 'Buscar por N° o cliente y generar factura'
+            : 'Requiere caja abierta',
+        color: abierta ? AppColors.success : AppColors.grey500,
+        onTap: _irACobrarCotizacion,
+        habilitado: abierta,
+      );
+
+  Widget _accionCxc(bool mobile) => _AccionCaja(
+        icono: Icons.account_balance_wallet_outlined,
+        titulo: 'Cuentas por cobrar',
+        subtitulo: 'Saldos y abonos de clientes',
+        color: AppColors.info,
+        onTap: _irACuentasPorCobrar,
+      );
+
+  Widget _accionHistorial(bool abierta, bool mobile) => _AccionCaja(
+        icono: Icons.receipt_long_outlined,
+        titulo: 'Historial del turno',
+        subtitulo: abierta
+            ? 'Movimientos desde la apertura'
+            : 'Movimientos desde hoy 00:00',
+        color: AppColors.primary,
+        onTap: _irAHistorialTurno,
+      );
 }
 
 class _AccionCaja extends StatelessWidget {
@@ -209,75 +514,67 @@ class _AccionCaja extends StatelessWidget {
     required this.titulo,
     required this.subtitulo,
     required this.color,
-    required this.isMobile,
     required this.onTap,
+    this.habilitado = true,
   });
 
   final IconData icono;
   final String titulo;
   final String subtitulo;
   final Color color;
-  final bool isMobile;
   final VoidCallback onTap;
+  final bool habilitado;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
+    final mobile = AppBreakpoints.isMobile(context);
+    return Opacity(
+      opacity: habilitado ? 1 : 0.55,
+      child: AppCard(
+        borderColor: AppColors.border,
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 14 : 16,
-            vertical: isMobile ? 14 : 16,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: isMobile ? 44 : 48,
-                height: isMobile ? 44 : 48,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icono, color: color, size: isMobile ? 22 : 24),
+        padding: EdgeInsets.symmetric(
+          horizontal: mobile ? 14 : 16,
+          vertical: mobile ? 14 : 18,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: mobile ? 44 : 52,
+              height: mobile ? 44 : 52,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: AppRadius.allM,
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      titulo,
-                      style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: isMobile ? 14 : 15,
-                      ),
+              child: Icon(icono, color: color, size: mobile ? 22 : 26),
+            ),
+            AppLayout.hM,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titulo,
+                    style: AppTypography.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitulo,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                        fontSize: isMobile ? 12 : 13,
-                      ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitulo,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Icon(
-                Icons.chevron_right,
-                color: AppColors.textSecondary,
-                size: isMobile ? 22 : 24,
-              ),
-            ],
-          ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.textSecondary,
+              size: mobile ? 22 : 24,
+            ),
+          ],
         ),
       ),
     );

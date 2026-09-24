@@ -6,6 +6,7 @@ library;
 
 export 'pagina_base.dart';
 export 'app_scaffold.dart';
+export 'app_breakpoints.dart';
 export 'app_layout.dart';
 export 'app_spacing.dart';
 export 'app_typography.dart';
