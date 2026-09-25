@@ -43,4 +43,15 @@ class ConfiguracionTable extends Table {
       text().withDefault(const Constant('C'))();
   TextColumn get prefijoCredito =>
       text().withDefault(const Constant('CR'))();
+
+  TextColumn get cajaFormaPagoDefault =>
+      text().withDefault(const Constant('efectivo'))();
+  BoolColumn get cajaPermitirTarjeta =>
+      boolean().withDefault(const Constant(true))();
+  BoolColumn get cajaPermitirTransferencia =>
+      boolean().withDefault(const Constant(true))();
+  BoolColumn get cajaPermitirCheque =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get cajaExigirSesion =>
+      boolean().withDefault(const Constant(false))();
 }

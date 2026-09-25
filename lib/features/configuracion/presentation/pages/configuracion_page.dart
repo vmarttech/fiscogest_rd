@@ -69,6 +69,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   );
   final _prefijoContadoController = TextEditingController(text: 'C');
   final _prefijoCreditoController = TextEditingController(text: 'CR');
+  String _cajaFormaPagoDefault = 'efectivo';
+  bool _cajaPermitirTarjeta = true;
+  bool _cajaPermitirTransferencia = true;
+  bool _cajaPermitirCheque = false;
+  bool _cajaExigirSesion = false;
 
   @override
   void dispose() {
@@ -105,6 +110,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     _pieController.text = cfg.docPiePagina;
     _prefijoContadoController.text = cfg.prefijoContado;
     _prefijoCreditoController.text = cfg.prefijoCredito;
+    _cajaFormaPagoDefault = cfg.cajaFormaPagoDefault;
+    _cajaPermitirTarjeta = cfg.cajaPermitirTarjeta;
+    _cajaPermitirTransferencia = cfg.cajaPermitirTransferencia;
+    _cajaPermitirCheque = cfg.cajaPermitirCheque;
+    _cajaExigirSesion = cfg.cajaExigirSesion;
     _datosCargados = true;
   }
 
@@ -202,6 +212,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       prefijoCredito: _prefijoCreditoController.text.trim().isEmpty
           ? 'CR'
           : _prefijoCreditoController.text.trim(),
+      cajaFormaPagoDefault: _cajaFormaPagoDefault,
+      cajaPermitirTarjeta: _cajaPermitirTarjeta,
+      cajaPermitirTransferencia: _cajaPermitirTransferencia,
+      cajaPermitirCheque: _cajaPermitirCheque,
+      cajaExigirSesion: _cajaExigirSesion,
     );
     try {
       await ref.read(configuracionControllerProvider.notifier).guardar(entity);
@@ -430,11 +445,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       case _SeccionConfig.ventas:
         return _seccionVentas();
       case _SeccionConfig.caja:
-        return _seccionPlaceholder(
-          'Caja',
-          'Formas de pago activas y políticas de apertura/cierre.',
-          'Próximamente: configuración de medios de pago.',
-        );
+        return _seccionCaja();
       case _SeccionConfig.credito:
         return _seccionEnlace(
           titulo: 'Crédito / Cuentas por cobrar',
@@ -461,15 +472,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           descripcion: 'Rangos B01 / B02 y numeración fiscal.',
           boton: 'Abrir secuencias NCF',
           onTap: () {
-            try {
-              context.pushNamed('secuencias-ncf');
-            } catch (_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Ruta secuencias-ncf no registrada.'),
-                ),
-              );
-            }
+            context.push('/sales/secuencias-ncf');
           },
         );
       case _SeccionConfig.impuestos:
@@ -856,6 +859,105 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   }
 
 
+
+  Widget _seccionCaja() {
+    Widget filaSwitch(String titulo, bool valor, ValueChanged<bool> onChanged) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(child: Text(titulo, style: AppTypography.labelMedium)),
+            Switch.adaptive(
+              value: valor,
+              activeThumbColor: AppColors.primary,
+              onChanged: onChanged,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            const Expanded(child: Text('Caja', style: AppTypography.h3)),
+            AppButton(
+              text: _guardando ? 'Guardando...' : 'Guardar',
+              icon: Icons.save_rounded,
+              onPressed: _guardando ? null : _guardarEmpresa,
+            ),
+          ],
+        ),
+        AppLayout.vS,
+        Text(
+          'Formas de pago y reglas al cobrar en caja.',
+          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+        ),
+        AppLayout.vL,
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Forma de pago por defecto', style: AppTypography.h4),
+              AppLayout.vM,
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final e in const [
+                    ('efectivo', 'Efectivo'),
+                    ('tarjeta', 'Tarjeta'),
+                    ('transferencia', 'Transferencia'),
+                  ])
+                    ChoiceChip(
+                      label: Text(e.$2),
+                      selected: _cajaFormaPagoDefault == e.$1,
+                      onSelected: (_) => setState(() => _cajaFormaPagoDefault = e.$1),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        AppLayout.vM,
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Métodos habilitados', style: AppTypography.h4),
+              AppLayout.vS,
+              filaSwitch('Tarjeta', _cajaPermitirTarjeta, (v) {
+                setState(() => _cajaPermitirTarjeta = v);
+              }),
+              filaSwitch('Transferencia', _cajaPermitirTransferencia, (v) {
+                setState(() => _cajaPermitirTransferencia = v);
+              }),
+              filaSwitch('Cheque', _cajaPermitirCheque, (v) {
+                setState(() => _cajaPermitirCheque = v);
+              }),
+            ],
+          ),
+        ),
+        AppLayout.vM,
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Sesión de caja', style: AppTypography.h4),
+              AppLayout.vS,
+              filaSwitch(
+                'Exigir sesión abierta para cobrar',
+                _cajaExigirSesion,
+                (v) => setState(() => _cajaExigirSesion = v),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _seccionVentas() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -943,25 +1045,6 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     );
   }
 
-  Widget _seccionPlaceholder(String titulo, String desc, String nota) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(titulo, style: AppTypography.h3),
-          AppLayout.vS,
-          Text(desc, style: AppTypography.bodyMedium),
-          AppLayout.vM,
-          Text(
-            nota,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _seccionEnlace({
     required String titulo,

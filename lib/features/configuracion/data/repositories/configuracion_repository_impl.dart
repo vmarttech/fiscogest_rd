@@ -34,6 +34,11 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
     docPiePagina: 'Gracias por su preferencia',
     prefijoContado: 'C',
     prefijoCredito: 'CR',
+    cajaFormaPagoDefault: 'efectivo',
+    cajaPermitirTarjeta: true,
+    cajaPermitirTransferencia: true,
+    cajaPermitirCheque: false,
+    cajaExigirSesion: false,
   );
 
   @override
@@ -66,6 +71,11 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
       docPiePagina: model.docPiePagina,
       prefijoContado: model.prefijoContado,
       prefijoCredito: model.prefijoCredito,
+      cajaFormaPagoDefault: model.cajaFormaPagoDefault,
+      cajaPermitirTarjeta: model.cajaPermitirTarjeta,
+      cajaPermitirTransferencia: model.cajaPermitirTransferencia,
+      cajaPermitirCheque: model.cajaPermitirCheque,
+      cajaExigirSesion: model.cajaExigirSesion,
     );
   }
 
@@ -99,6 +109,11 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
         docPiePagina: Value(c.docPiePagina),
         prefijoContado: Value(c.prefijoContado),
         prefijoCredito: Value(c.prefijoCredito),
+        cajaFormaPagoDefault: Value(c.cajaFormaPagoDefault),
+        cajaPermitirTarjeta: Value(c.cajaPermitirTarjeta),
+        cajaPermitirTransferencia: Value(c.cajaPermitirTransferencia),
+        cajaPermitirCheque: Value(c.cajaPermitirCheque),
+        cajaExigirSesion: Value(c.cajaExigirSesion),
       ),
     );
   }

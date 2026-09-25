@@ -118,6 +118,7 @@ Future<void> _cargarDocumento({
       _abonoController.text = montoTotal.toStringAsFixed(2);
       ref.read(cajaProvider.notifier).establecerAbono(montoTotal);
     }
+    _aplicarConfigCaja();
     if (mounted) setState(() {});
   }
 
@@ -583,6 +584,31 @@ Future<void> _cargarDocumento({
     } finally {
       if (mounted) setState(() => _procesando = false);
     }
+  }
+
+
+  void _aplicarConfigCaja() {
+    final cfg = ref.read(configuracionControllerProvider).valueOrNull;
+    if (cfg == null || !mounted) return;
+    final def = cfg.cajaFormaPagoDefault.toLowerCase();
+    FormaPago forma = FormaPago.efectivo;
+    if (def.contains('tarjeta')) {
+      forma = FormaPago.tarjeta;
+    } else if (def.contains('transfer')) {
+      forma = FormaPago.transferencia;
+    }
+    setState(() => _formaPago = forma);
+  }
+
+  List<FormaPago> _formasDisponibles({required bool esCredito}) {
+    final cfg = ref.read(configuracionControllerProvider).valueOrNull;
+    final list = <FormaPago>[FormaPago.efectivo];
+    if (cfg?.cajaPermitirTarjeta ?? true) list.add(FormaPago.tarjeta);
+    if (cfg?.cajaPermitirTransferencia ?? true) {
+      list.add(FormaPago.transferencia);
+    }
+    if (esCredito) list.add(FormaPago.credito);
+    return list;
   }
 
   @override
@@ -1065,31 +1091,32 @@ Future<void> _cargarDocumento({
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: FormaPago.values.map((forma) {
-                            final sel = _formaPago == forma;
-                            return ChoiceChip(
-                              label: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 2),
-                                child: Text(
-                                  forma.nombre,
-                                  style: TextStyle(
-                                    fontSize: tamanoCuerpo,
-                                    fontWeight:
-                                        sel ? FontWeight.w600 : FontWeight.w400,
-                                  ),
+                          children: _formasDisponibles(esCredito: esCredito)
+                            .map((forma) {
+                          final sel = _formaPago == forma;
+                          return ChoiceChip(
+                            label: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 4, vertical: 2),
+                              child: Text(
+                                forma.nombre,
+                                style: TextStyle(
+                                  fontSize: tamanoCuerpo,
+                                  fontWeight:
+                                      sel ? FontWeight.w600 : FontWeight.w400,
                                 ),
                               ),
-                              selected: sel,
-                              selectedColor:
-                                  AppColors.primary.withValues(alpha: 0.15),
-                              onSelected: (_) =>
-                                  setState(() => _formaPago = forma),
-                              side: sel
-                                  ? const BorderSide(color: AppColors.primary)
-                                  : const BorderSide(color: AppColors.border),
-                            );
-                          }).toList(),
+                            ),
+                            selected: sel,
+                            selectedColor:
+                                AppColors.primary.withValues(alpha: 0.15),
+                            onSelected: (_) =>
+                                setState(() => _formaPago = forma),
+                            side: sel
+                                ? const BorderSide(color: AppColors.primary)
+                                : const BorderSide(color: AppColors.border),
+                          );
+                        }).toList(),
                         ),
 
                         SizedBox(height: esPequena ? 16 : 20),

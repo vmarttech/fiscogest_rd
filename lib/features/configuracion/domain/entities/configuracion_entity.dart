@@ -25,6 +25,11 @@ class ConfiguracionEntity {
     this.docPiePagina = 'Gracias por su preferencia',
     this.prefijoContado = 'C',
     this.prefijoCredito = 'CR',
+    this.cajaFormaPagoDefault = 'efectivo',
+    this.cajaPermitirTarjeta = true,
+    this.cajaPermitirTransferencia = true,
+    this.cajaPermitirCheque = false,
+    this.cajaExigirSesion = false,
   });
 
   final String id;
@@ -53,6 +58,11 @@ class ConfiguracionEntity {
   final String docPiePagina;
   final String prefijoContado;
   final String prefijoCredito;
+  final String cajaFormaPagoDefault;
+  final bool cajaPermitirTarjeta;
+  final bool cajaPermitirTransferencia;
+  final bool cajaPermitirCheque;
+  final bool cajaExigirSesion;
 
   ConfiguracionEntity copyWith({
     String? id,
@@ -80,6 +90,11 @@ class ConfiguracionEntity {
     String? docPiePagina,
     String? prefijoContado,
     String? prefijoCredito,
+    String? cajaFormaPagoDefault,
+    bool? cajaPermitirTarjeta,
+    bool? cajaPermitirTransferencia,
+    bool? cajaPermitirCheque,
+    bool? cajaExigirSesion,
   }) {
     return ConfiguracionEntity(
       id: id ?? this.id,
@@ -108,6 +123,11 @@ class ConfiguracionEntity {
       docPiePagina: docPiePagina ?? this.docPiePagina,
       prefijoContado: prefijoContado ?? this.prefijoContado,
       prefijoCredito: prefijoCredito ?? this.prefijoCredito,
+      cajaFormaPagoDefault: cajaFormaPagoDefault ?? this.cajaFormaPagoDefault,
+      cajaPermitirTarjeta: cajaPermitirTarjeta ?? this.cajaPermitirTarjeta,
+      cajaPermitirTransferencia: cajaPermitirTransferencia ?? this.cajaPermitirTransferencia,
+      cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
+      cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
     );
   }
 }

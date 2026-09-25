@@ -1953,6 +1953,76 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     requiredDuringInsert: false,
     defaultValue: const Constant('CR'),
   );
+  static const VerificationMeta _cajaFormaPagoDefaultMeta =
+      const VerificationMeta('cajaFormaPagoDefault');
+  @override
+  late final GeneratedColumn<String> cajaFormaPagoDefault =
+      GeneratedColumn<String>(
+        'caja_forma_pago_default',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('efectivo'),
+      );
+  static const VerificationMeta _cajaPermitirTarjetaMeta =
+      const VerificationMeta('cajaPermitirTarjeta');
+  @override
+  late final GeneratedColumn<bool> cajaPermitirTarjeta = GeneratedColumn<bool>(
+    'caja_permitir_tarjeta',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("caja_permitir_tarjeta" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _cajaPermitirTransferenciaMeta =
+      const VerificationMeta('cajaPermitirTransferencia');
+  @override
+  late final GeneratedColumn<bool> cajaPermitirTransferencia =
+      GeneratedColumn<bool>(
+        'caja_permitir_transferencia',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("caja_permitir_transferencia" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
+  static const VerificationMeta _cajaPermitirChequeMeta =
+      const VerificationMeta('cajaPermitirCheque');
+  @override
+  late final GeneratedColumn<bool> cajaPermitirCheque = GeneratedColumn<bool>(
+    'caja_permitir_cheque',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("caja_permitir_cheque" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _cajaExigirSesionMeta = const VerificationMeta(
+    'cajaExigirSesion',
+  );
+  @override
+  late final GeneratedColumn<bool> cajaExigirSesion = GeneratedColumn<bool>(
+    'caja_exigir_sesion',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("caja_exigir_sesion" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1980,6 +2050,11 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     docPiePagina,
     prefijoContado,
     prefijoCredito,
+    cajaFormaPagoDefault,
+    cajaPermitirTarjeta,
+    cajaPermitirTransferencia,
+    cajaPermitirCheque,
+    cajaExigirSesion,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2191,6 +2266,51 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         ),
       );
     }
+    if (data.containsKey('caja_forma_pago_default')) {
+      context.handle(
+        _cajaFormaPagoDefaultMeta,
+        cajaFormaPagoDefault.isAcceptableOrUnknown(
+          data['caja_forma_pago_default']!,
+          _cajaFormaPagoDefaultMeta,
+        ),
+      );
+    }
+    if (data.containsKey('caja_permitir_tarjeta')) {
+      context.handle(
+        _cajaPermitirTarjetaMeta,
+        cajaPermitirTarjeta.isAcceptableOrUnknown(
+          data['caja_permitir_tarjeta']!,
+          _cajaPermitirTarjetaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('caja_permitir_transferencia')) {
+      context.handle(
+        _cajaPermitirTransferenciaMeta,
+        cajaPermitirTransferencia.isAcceptableOrUnknown(
+          data['caja_permitir_transferencia']!,
+          _cajaPermitirTransferenciaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('caja_permitir_cheque')) {
+      context.handle(
+        _cajaPermitirChequeMeta,
+        cajaPermitirCheque.isAcceptableOrUnknown(
+          data['caja_permitir_cheque']!,
+          _cajaPermitirChequeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('caja_exigir_sesion')) {
+      context.handle(
+        _cajaExigirSesionMeta,
+        cajaExigirSesion.isAcceptableOrUnknown(
+          data['caja_exigir_sesion']!,
+          _cajaExigirSesionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2300,6 +2420,26 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         DriftSqlType.string,
         data['${effectivePrefix}prefijo_credito'],
       )!,
+      cajaFormaPagoDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}caja_forma_pago_default'],
+      )!,
+      cajaPermitirTarjeta: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}caja_permitir_tarjeta'],
+      )!,
+      cajaPermitirTransferencia: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}caja_permitir_transferencia'],
+      )!,
+      cajaPermitirCheque: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}caja_permitir_cheque'],
+      )!,
+      cajaExigirSesion: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}caja_exigir_sesion'],
+      )!,
     );
   }
 
@@ -2336,6 +2476,11 @@ class ConfiguracionTableData extends DataClass
   final String docPiePagina;
   final String prefijoContado;
   final String prefijoCredito;
+  final String cajaFormaPagoDefault;
+  final bool cajaPermitirTarjeta;
+  final bool cajaPermitirTransferencia;
+  final bool cajaPermitirCheque;
+  final bool cajaExigirSesion;
   const ConfiguracionTableData({
     required this.id,
     required this.nombreNegocio,
@@ -2362,6 +2507,11 @@ class ConfiguracionTableData extends DataClass
     required this.docPiePagina,
     required this.prefijoContado,
     required this.prefijoCredito,
+    required this.cajaFormaPagoDefault,
+    required this.cajaPermitirTarjeta,
+    required this.cajaPermitirTransferencia,
+    required this.cajaPermitirCheque,
+    required this.cajaExigirSesion,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2391,6 +2541,13 @@ class ConfiguracionTableData extends DataClass
     map['doc_pie_pagina'] = Variable<String>(docPiePagina);
     map['prefijo_contado'] = Variable<String>(prefijoContado);
     map['prefijo_credito'] = Variable<String>(prefijoCredito);
+    map['caja_forma_pago_default'] = Variable<String>(cajaFormaPagoDefault);
+    map['caja_permitir_tarjeta'] = Variable<bool>(cajaPermitirTarjeta);
+    map['caja_permitir_transferencia'] = Variable<bool>(
+      cajaPermitirTransferencia,
+    );
+    map['caja_permitir_cheque'] = Variable<bool>(cajaPermitirCheque);
+    map['caja_exigir_sesion'] = Variable<bool>(cajaExigirSesion);
     return map;
   }
 
@@ -2421,6 +2578,11 @@ class ConfiguracionTableData extends DataClass
       docPiePagina: Value(docPiePagina),
       prefijoContado: Value(prefijoContado),
       prefijoCredito: Value(prefijoCredito),
+      cajaFormaPagoDefault: Value(cajaFormaPagoDefault),
+      cajaPermitirTarjeta: Value(cajaPermitirTarjeta),
+      cajaPermitirTransferencia: Value(cajaPermitirTransferencia),
+      cajaPermitirCheque: Value(cajaPermitirCheque),
+      cajaExigirSesion: Value(cajaExigirSesion),
     );
   }
 
@@ -2461,6 +2623,17 @@ class ConfiguracionTableData extends DataClass
       docPiePagina: serializer.fromJson<String>(json['docPiePagina']),
       prefijoContado: serializer.fromJson<String>(json['prefijoContado']),
       prefijoCredito: serializer.fromJson<String>(json['prefijoCredito']),
+      cajaFormaPagoDefault: serializer.fromJson<String>(
+        json['cajaFormaPagoDefault'],
+      ),
+      cajaPermitirTarjeta: serializer.fromJson<bool>(
+        json['cajaPermitirTarjeta'],
+      ),
+      cajaPermitirTransferencia: serializer.fromJson<bool>(
+        json['cajaPermitirTransferencia'],
+      ),
+      cajaPermitirCheque: serializer.fromJson<bool>(json['cajaPermitirCheque']),
+      cajaExigirSesion: serializer.fromJson<bool>(json['cajaExigirSesion']),
     );
   }
   @override
@@ -2494,6 +2667,13 @@ class ConfiguracionTableData extends DataClass
       'docPiePagina': serializer.toJson<String>(docPiePagina),
       'prefijoContado': serializer.toJson<String>(prefijoContado),
       'prefijoCredito': serializer.toJson<String>(prefijoCredito),
+      'cajaFormaPagoDefault': serializer.toJson<String>(cajaFormaPagoDefault),
+      'cajaPermitirTarjeta': serializer.toJson<bool>(cajaPermitirTarjeta),
+      'cajaPermitirTransferencia': serializer.toJson<bool>(
+        cajaPermitirTransferencia,
+      ),
+      'cajaPermitirCheque': serializer.toJson<bool>(cajaPermitirCheque),
+      'cajaExigirSesion': serializer.toJson<bool>(cajaExigirSesion),
     };
   }
 
@@ -2523,6 +2703,11 @@ class ConfiguracionTableData extends DataClass
     String? docPiePagina,
     String? prefijoContado,
     String? prefijoCredito,
+    String? cajaFormaPagoDefault,
+    bool? cajaPermitirTarjeta,
+    bool? cajaPermitirTransferencia,
+    bool? cajaPermitirCheque,
+    bool? cajaExigirSesion,
   }) => ConfiguracionTableData(
     id: id ?? this.id,
     nombreNegocio: nombreNegocio ?? this.nombreNegocio,
@@ -2550,6 +2735,12 @@ class ConfiguracionTableData extends DataClass
     docPiePagina: docPiePagina ?? this.docPiePagina,
     prefijoContado: prefijoContado ?? this.prefijoContado,
     prefijoCredito: prefijoCredito ?? this.prefijoCredito,
+    cajaFormaPagoDefault: cajaFormaPagoDefault ?? this.cajaFormaPagoDefault,
+    cajaPermitirTarjeta: cajaPermitirTarjeta ?? this.cajaPermitirTarjeta,
+    cajaPermitirTransferencia:
+        cajaPermitirTransferencia ?? this.cajaPermitirTransferencia,
+    cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
+    cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
   );
   ConfiguracionTableData copyWithCompanion(ConfiguracionTableCompanion data) {
     return ConfiguracionTableData(
@@ -2612,6 +2803,21 @@ class ConfiguracionTableData extends DataClass
       prefijoCredito: data.prefijoCredito.present
           ? data.prefijoCredito.value
           : this.prefijoCredito,
+      cajaFormaPagoDefault: data.cajaFormaPagoDefault.present
+          ? data.cajaFormaPagoDefault.value
+          : this.cajaFormaPagoDefault,
+      cajaPermitirTarjeta: data.cajaPermitirTarjeta.present
+          ? data.cajaPermitirTarjeta.value
+          : this.cajaPermitirTarjeta,
+      cajaPermitirTransferencia: data.cajaPermitirTransferencia.present
+          ? data.cajaPermitirTransferencia.value
+          : this.cajaPermitirTransferencia,
+      cajaPermitirCheque: data.cajaPermitirCheque.present
+          ? data.cajaPermitirCheque.value
+          : this.cajaPermitirCheque,
+      cajaExigirSesion: data.cajaExigirSesion.present
+          ? data.cajaExigirSesion.value
+          : this.cajaExigirSesion,
     );
   }
 
@@ -2642,7 +2848,12 @@ class ConfiguracionTableData extends DataClass
           ..write('docMostrarItbisDesglose: $docMostrarItbisDesglose, ')
           ..write('docPiePagina: $docPiePagina, ')
           ..write('prefijoContado: $prefijoContado, ')
-          ..write('prefijoCredito: $prefijoCredito')
+          ..write('prefijoCredito: $prefijoCredito, ')
+          ..write('cajaFormaPagoDefault: $cajaFormaPagoDefault, ')
+          ..write('cajaPermitirTarjeta: $cajaPermitirTarjeta, ')
+          ..write('cajaPermitirTransferencia: $cajaPermitirTransferencia, ')
+          ..write('cajaPermitirCheque: $cajaPermitirCheque, ')
+          ..write('cajaExigirSesion: $cajaExigirSesion')
           ..write(')'))
         .toString();
   }
@@ -2674,6 +2885,11 @@ class ConfiguracionTableData extends DataClass
     docPiePagina,
     prefijoContado,
     prefijoCredito,
+    cajaFormaPagoDefault,
+    cajaPermitirTarjeta,
+    cajaPermitirTransferencia,
+    cajaPermitirCheque,
+    cajaExigirSesion,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2703,7 +2919,12 @@ class ConfiguracionTableData extends DataClass
           other.docMostrarItbisDesglose == this.docMostrarItbisDesglose &&
           other.docPiePagina == this.docPiePagina &&
           other.prefijoContado == this.prefijoContado &&
-          other.prefijoCredito == this.prefijoCredito);
+          other.prefijoCredito == this.prefijoCredito &&
+          other.cajaFormaPagoDefault == this.cajaFormaPagoDefault &&
+          other.cajaPermitirTarjeta == this.cajaPermitirTarjeta &&
+          other.cajaPermitirTransferencia == this.cajaPermitirTransferencia &&
+          other.cajaPermitirCheque == this.cajaPermitirCheque &&
+          other.cajaExigirSesion == this.cajaExigirSesion);
 }
 
 class ConfiguracionTableCompanion
@@ -2733,6 +2954,11 @@ class ConfiguracionTableCompanion
   final Value<String> docPiePagina;
   final Value<String> prefijoContado;
   final Value<String> prefijoCredito;
+  final Value<String> cajaFormaPagoDefault;
+  final Value<bool> cajaPermitirTarjeta;
+  final Value<bool> cajaPermitirTransferencia;
+  final Value<bool> cajaPermitirCheque;
+  final Value<bool> cajaExigirSesion;
   const ConfiguracionTableCompanion({
     this.id = const Value.absent(),
     this.nombreNegocio = const Value.absent(),
@@ -2759,6 +2985,11 @@ class ConfiguracionTableCompanion
     this.docPiePagina = const Value.absent(),
     this.prefijoContado = const Value.absent(),
     this.prefijoCredito = const Value.absent(),
+    this.cajaFormaPagoDefault = const Value.absent(),
+    this.cajaPermitirTarjeta = const Value.absent(),
+    this.cajaPermitirTransferencia = const Value.absent(),
+    this.cajaPermitirCheque = const Value.absent(),
+    this.cajaExigirSesion = const Value.absent(),
   });
   ConfiguracionTableCompanion.insert({
     this.id = const Value.absent(),
@@ -2786,6 +3017,11 @@ class ConfiguracionTableCompanion
     this.docPiePagina = const Value.absent(),
     this.prefijoContado = const Value.absent(),
     this.prefijoCredito = const Value.absent(),
+    this.cajaFormaPagoDefault = const Value.absent(),
+    this.cajaPermitirTarjeta = const Value.absent(),
+    this.cajaPermitirTransferencia = const Value.absent(),
+    this.cajaPermitirCheque = const Value.absent(),
+    this.cajaExigirSesion = const Value.absent(),
   });
   static Insertable<ConfiguracionTableData> custom({
     Expression<int>? id,
@@ -2813,6 +3049,11 @@ class ConfiguracionTableCompanion
     Expression<String>? docPiePagina,
     Expression<String>? prefijoContado,
     Expression<String>? prefijoCredito,
+    Expression<String>? cajaFormaPagoDefault,
+    Expression<bool>? cajaPermitirTarjeta,
+    Expression<bool>? cajaPermitirTransferencia,
+    Expression<bool>? cajaPermitirCheque,
+    Expression<bool>? cajaExigirSesion,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2843,6 +3084,15 @@ class ConfiguracionTableCompanion
       if (docPiePagina != null) 'doc_pie_pagina': docPiePagina,
       if (prefijoContado != null) 'prefijo_contado': prefijoContado,
       if (prefijoCredito != null) 'prefijo_credito': prefijoCredito,
+      if (cajaFormaPagoDefault != null)
+        'caja_forma_pago_default': cajaFormaPagoDefault,
+      if (cajaPermitirTarjeta != null)
+        'caja_permitir_tarjeta': cajaPermitirTarjeta,
+      if (cajaPermitirTransferencia != null)
+        'caja_permitir_transferencia': cajaPermitirTransferencia,
+      if (cajaPermitirCheque != null)
+        'caja_permitir_cheque': cajaPermitirCheque,
+      if (cajaExigirSesion != null) 'caja_exigir_sesion': cajaExigirSesion,
     });
   }
 
@@ -2872,6 +3122,11 @@ class ConfiguracionTableCompanion
     Value<String>? docPiePagina,
     Value<String>? prefijoContado,
     Value<String>? prefijoCredito,
+    Value<String>? cajaFormaPagoDefault,
+    Value<bool>? cajaPermitirTarjeta,
+    Value<bool>? cajaPermitirTransferencia,
+    Value<bool>? cajaPermitirCheque,
+    Value<bool>? cajaExigirSesion,
   }) {
     return ConfiguracionTableCompanion(
       id: id ?? this.id,
@@ -2900,6 +3155,12 @@ class ConfiguracionTableCompanion
       docPiePagina: docPiePagina ?? this.docPiePagina,
       prefijoContado: prefijoContado ?? this.prefijoContado,
       prefijoCredito: prefijoCredito ?? this.prefijoCredito,
+      cajaFormaPagoDefault: cajaFormaPagoDefault ?? this.cajaFormaPagoDefault,
+      cajaPermitirTarjeta: cajaPermitirTarjeta ?? this.cajaPermitirTarjeta,
+      cajaPermitirTransferencia:
+          cajaPermitirTransferencia ?? this.cajaPermitirTransferencia,
+      cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
+      cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
     );
   }
 
@@ -2983,6 +3244,25 @@ class ConfiguracionTableCompanion
     if (prefijoCredito.present) {
       map['prefijo_credito'] = Variable<String>(prefijoCredito.value);
     }
+    if (cajaFormaPagoDefault.present) {
+      map['caja_forma_pago_default'] = Variable<String>(
+        cajaFormaPagoDefault.value,
+      );
+    }
+    if (cajaPermitirTarjeta.present) {
+      map['caja_permitir_tarjeta'] = Variable<bool>(cajaPermitirTarjeta.value);
+    }
+    if (cajaPermitirTransferencia.present) {
+      map['caja_permitir_transferencia'] = Variable<bool>(
+        cajaPermitirTransferencia.value,
+      );
+    }
+    if (cajaPermitirCheque.present) {
+      map['caja_permitir_cheque'] = Variable<bool>(cajaPermitirCheque.value);
+    }
+    if (cajaExigirSesion.present) {
+      map['caja_exigir_sesion'] = Variable<bool>(cajaExigirSesion.value);
+    }
     return map;
   }
 
@@ -3013,7 +3293,12 @@ class ConfiguracionTableCompanion
           ..write('docMostrarItbisDesglose: $docMostrarItbisDesglose, ')
           ..write('docPiePagina: $docPiePagina, ')
           ..write('prefijoContado: $prefijoContado, ')
-          ..write('prefijoCredito: $prefijoCredito')
+          ..write('prefijoCredito: $prefijoCredito, ')
+          ..write('cajaFormaPagoDefault: $cajaFormaPagoDefault, ')
+          ..write('cajaPermitirTarjeta: $cajaPermitirTarjeta, ')
+          ..write('cajaPermitirTransferencia: $cajaPermitirTransferencia, ')
+          ..write('cajaPermitirCheque: $cajaPermitirCheque, ')
+          ..write('cajaExigirSesion: $cajaExigirSesion')
           ..write(')'))
         .toString();
   }
@@ -26735,6 +27020,11 @@ typedef $$ConfiguracionTableTableCreateCompanionBuilder =
       Value<String> docPiePagina,
       Value<String> prefijoContado,
       Value<String> prefijoCredito,
+      Value<String> cajaFormaPagoDefault,
+      Value<bool> cajaPermitirTarjeta,
+      Value<bool> cajaPermitirTransferencia,
+      Value<bool> cajaPermitirCheque,
+      Value<bool> cajaExigirSesion,
     });
 typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
     ConfiguracionTableCompanion Function({
@@ -26763,6 +27053,11 @@ typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
       Value<String> docPiePagina,
       Value<String> prefijoContado,
       Value<String> prefijoCredito,
+      Value<String> cajaFormaPagoDefault,
+      Value<bool> cajaPermitirTarjeta,
+      Value<bool> cajaPermitirTransferencia,
+      Value<bool> cajaPermitirCheque,
+      Value<bool> cajaExigirSesion,
     });
 
 class $$ConfiguracionTableTableFilterComposer
@@ -26896,6 +27191,31 @@ class $$ConfiguracionTableTableFilterComposer
 
   ColumnFilters<String> get prefijoCredito => $composableBuilder(
     column: $table.prefijoCredito,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cajaFormaPagoDefault => $composableBuilder(
+    column: $table.cajaFormaPagoDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get cajaPermitirTarjeta => $composableBuilder(
+    column: $table.cajaPermitirTarjeta,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get cajaPermitirTransferencia => $composableBuilder(
+    column: $table.cajaPermitirTransferencia,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get cajaPermitirCheque => $composableBuilder(
+    column: $table.cajaPermitirCheque,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get cajaExigirSesion => $composableBuilder(
+    column: $table.cajaExigirSesion,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -27033,6 +27353,31 @@ class $$ConfiguracionTableTableOrderingComposer
     column: $table.prefijoCredito,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get cajaFormaPagoDefault => $composableBuilder(
+    column: $table.cajaFormaPagoDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get cajaPermitirTarjeta => $composableBuilder(
+    column: $table.cajaPermitirTarjeta,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get cajaPermitirTransferencia => $composableBuilder(
+    column: $table.cajaPermitirTransferencia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get cajaPermitirCheque => $composableBuilder(
+    column: $table.cajaPermitirCheque,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get cajaExigirSesion => $composableBuilder(
+    column: $table.cajaExigirSesion,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ConfiguracionTableTableAnnotationComposer
@@ -27152,6 +27497,31 @@ class $$ConfiguracionTableTableAnnotationComposer
     column: $table.prefijoCredito,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get cajaFormaPagoDefault => $composableBuilder(
+    column: $table.cajaFormaPagoDefault,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get cajaPermitirTarjeta => $composableBuilder(
+    column: $table.cajaPermitirTarjeta,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get cajaPermitirTransferencia => $composableBuilder(
+    column: $table.cajaPermitirTransferencia,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get cajaPermitirCheque => $composableBuilder(
+    column: $table.cajaPermitirCheque,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get cajaExigirSesion => $composableBuilder(
+    column: $table.cajaExigirSesion,
+    builder: (column) => column,
+  );
 }
 
 class $$ConfiguracionTableTableTableManager
@@ -27219,6 +27589,11 @@ class $$ConfiguracionTableTableTableManager
                 Value<String> docPiePagina = const Value.absent(),
                 Value<String> prefijoContado = const Value.absent(),
                 Value<String> prefijoCredito = const Value.absent(),
+                Value<String> cajaFormaPagoDefault = const Value.absent(),
+                Value<bool> cajaPermitirTarjeta = const Value.absent(),
+                Value<bool> cajaPermitirTransferencia = const Value.absent(),
+                Value<bool> cajaPermitirCheque = const Value.absent(),
+                Value<bool> cajaExigirSesion = const Value.absent(),
               }) => ConfiguracionTableCompanion(
                 id: id,
                 nombreNegocio: nombreNegocio,
@@ -27245,6 +27620,11 @@ class $$ConfiguracionTableTableTableManager
                 docPiePagina: docPiePagina,
                 prefijoContado: prefijoContado,
                 prefijoCredito: prefijoCredito,
+                cajaFormaPagoDefault: cajaFormaPagoDefault,
+                cajaPermitirTarjeta: cajaPermitirTarjeta,
+                cajaPermitirTransferencia: cajaPermitirTransferencia,
+                cajaPermitirCheque: cajaPermitirCheque,
+                cajaExigirSesion: cajaExigirSesion,
               ),
           createCompanionCallback:
               ({
@@ -27273,6 +27653,11 @@ class $$ConfiguracionTableTableTableManager
                 Value<String> docPiePagina = const Value.absent(),
                 Value<String> prefijoContado = const Value.absent(),
                 Value<String> prefijoCredito = const Value.absent(),
+                Value<String> cajaFormaPagoDefault = const Value.absent(),
+                Value<bool> cajaPermitirTarjeta = const Value.absent(),
+                Value<bool> cajaPermitirTransferencia = const Value.absent(),
+                Value<bool> cajaPermitirCheque = const Value.absent(),
+                Value<bool> cajaExigirSesion = const Value.absent(),
               }) => ConfiguracionTableCompanion.insert(
                 id: id,
                 nombreNegocio: nombreNegocio,
@@ -27299,6 +27684,11 @@ class $$ConfiguracionTableTableTableManager
                 docPiePagina: docPiePagina,
                 prefijoContado: prefijoContado,
                 prefijoCredito: prefijoCredito,
+                cajaFormaPagoDefault: cajaFormaPagoDefault,
+                cajaPermitirTarjeta: cajaPermitirTarjeta,
+                cajaPermitirTransferencia: cajaPermitirTransferencia,
+                cajaPermitirCheque: cajaPermitirCheque,
+                cajaExigirSesion: cajaExigirSesion,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
