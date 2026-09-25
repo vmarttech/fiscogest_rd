@@ -30,6 +30,7 @@ class ConfiguracionEntity {
     this.cajaPermitirTransferencia = true,
     this.cajaPermitirCheque = false,
     this.cajaExigirSesion = false,
+    this.modoSimplificado = false,
   });
 
   final String id;
@@ -63,6 +64,7 @@ class ConfiguracionEntity {
   final bool cajaPermitirTransferencia;
   final bool cajaPermitirCheque;
   final bool cajaExigirSesion;
+  final bool modoSimplificado;
 
   ConfiguracionEntity copyWith({
     String? id,
@@ -95,6 +97,7 @@ class ConfiguracionEntity {
     bool? cajaPermitirTransferencia,
     bool? cajaPermitirCheque,
     bool? cajaExigirSesion,
+    bool? modoSimplificado,
   }) {
     return ConfiguracionEntity(
       id: id ?? this.id,
@@ -128,6 +131,7 @@ class ConfiguracionEntity {
       cajaPermitirTransferencia: cajaPermitirTransferencia ?? this.cajaPermitirTransferencia,
       cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
       cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
+      modoSimplificado: modoSimplificado ?? this.modoSimplificado,
     );
   }
 }

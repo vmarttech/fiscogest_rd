@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -122,7 +123,8 @@ class VistaCarrito extends ConsumerWidget {
             children: [
               _FilaTotal(etiqueta: 'Subtotal', valor: formatearMonto(venta.subtotal)),
               const SizedBox(height: 6),
-              _FilaTotal(etiqueta: 'ITBIS', valor: formatearMonto(venta.itbis)),
+              if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
+                _FilaTotal(etiqueta: 'ITBIS', valor: formatearMonto(venta.itbis)),
               if (venta.montoDescuento > 0) ...[
                 const SizedBox(height: 6),
                 _FilaTotal(

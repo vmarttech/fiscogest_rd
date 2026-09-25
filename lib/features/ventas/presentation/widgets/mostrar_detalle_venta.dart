@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
@@ -318,6 +319,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
               child: Column(
                 children: [
                   FilaDetalle('Subtotal', _formatearMonto(venta.subtotal)),
+                  if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
                   FilaDetalle('ITBIS', _formatearMonto(venta.itbis)),
                   const Divider(),
                   FilaDetalle(

@@ -98,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 37;
+  int get schemaVersion => 38;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
@@ -445,6 +445,14 @@ class AppDatabase extends _$AppDatabase {
         try {
           await customStatement(
             'ALTER TABLE configuracion_table ADD COLUMN caja_exigir_sesion INTEGER NOT NULL DEFAULT 0',
+          );
+        } catch (_) {}
+      }
+
+      if (from < 38) {
+        try {
+          await customStatement(
+            'ALTER TABLE configuracion_table ADD COLUMN modo_simplificado INTEGER NOT NULL DEFAULT 0',
           );
         } catch (_) {}
       }

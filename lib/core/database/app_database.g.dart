@@ -2023,6 +2023,21 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _modoSimplificadoMeta = const VerificationMeta(
+    'modoSimplificado',
+  );
+  @override
+  late final GeneratedColumn<bool> modoSimplificado = GeneratedColumn<bool>(
+    'modo_simplificado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("modo_simplificado" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2055,6 +2070,7 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     cajaPermitirTransferencia,
     cajaPermitirCheque,
     cajaExigirSesion,
+    modoSimplificado,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2311,6 +2327,15 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         ),
       );
     }
+    if (data.containsKey('modo_simplificado')) {
+      context.handle(
+        _modoSimplificadoMeta,
+        modoSimplificado.isAcceptableOrUnknown(
+          data['modo_simplificado']!,
+          _modoSimplificadoMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2440,6 +2465,10 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         DriftSqlType.bool,
         data['${effectivePrefix}caja_exigir_sesion'],
       )!,
+      modoSimplificado: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}modo_simplificado'],
+      )!,
     );
   }
 
@@ -2481,6 +2510,7 @@ class ConfiguracionTableData extends DataClass
   final bool cajaPermitirTransferencia;
   final bool cajaPermitirCheque;
   final bool cajaExigirSesion;
+  final bool modoSimplificado;
   const ConfiguracionTableData({
     required this.id,
     required this.nombreNegocio,
@@ -2512,6 +2542,7 @@ class ConfiguracionTableData extends DataClass
     required this.cajaPermitirTransferencia,
     required this.cajaPermitirCheque,
     required this.cajaExigirSesion,
+    required this.modoSimplificado,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2548,6 +2579,7 @@ class ConfiguracionTableData extends DataClass
     );
     map['caja_permitir_cheque'] = Variable<bool>(cajaPermitirCheque);
     map['caja_exigir_sesion'] = Variable<bool>(cajaExigirSesion);
+    map['modo_simplificado'] = Variable<bool>(modoSimplificado);
     return map;
   }
 
@@ -2583,6 +2615,7 @@ class ConfiguracionTableData extends DataClass
       cajaPermitirTransferencia: Value(cajaPermitirTransferencia),
       cajaPermitirCheque: Value(cajaPermitirCheque),
       cajaExigirSesion: Value(cajaExigirSesion),
+      modoSimplificado: Value(modoSimplificado),
     );
   }
 
@@ -2634,6 +2667,7 @@ class ConfiguracionTableData extends DataClass
       ),
       cajaPermitirCheque: serializer.fromJson<bool>(json['cajaPermitirCheque']),
       cajaExigirSesion: serializer.fromJson<bool>(json['cajaExigirSesion']),
+      modoSimplificado: serializer.fromJson<bool>(json['modoSimplificado']),
     );
   }
   @override
@@ -2674,6 +2708,7 @@ class ConfiguracionTableData extends DataClass
       ),
       'cajaPermitirCheque': serializer.toJson<bool>(cajaPermitirCheque),
       'cajaExigirSesion': serializer.toJson<bool>(cajaExigirSesion),
+      'modoSimplificado': serializer.toJson<bool>(modoSimplificado),
     };
   }
 
@@ -2708,6 +2743,7 @@ class ConfiguracionTableData extends DataClass
     bool? cajaPermitirTransferencia,
     bool? cajaPermitirCheque,
     bool? cajaExigirSesion,
+    bool? modoSimplificado,
   }) => ConfiguracionTableData(
     id: id ?? this.id,
     nombreNegocio: nombreNegocio ?? this.nombreNegocio,
@@ -2741,6 +2777,7 @@ class ConfiguracionTableData extends DataClass
         cajaPermitirTransferencia ?? this.cajaPermitirTransferencia,
     cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
     cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
+    modoSimplificado: modoSimplificado ?? this.modoSimplificado,
   );
   ConfiguracionTableData copyWithCompanion(ConfiguracionTableCompanion data) {
     return ConfiguracionTableData(
@@ -2818,6 +2855,9 @@ class ConfiguracionTableData extends DataClass
       cajaExigirSesion: data.cajaExigirSesion.present
           ? data.cajaExigirSesion.value
           : this.cajaExigirSesion,
+      modoSimplificado: data.modoSimplificado.present
+          ? data.modoSimplificado.value
+          : this.modoSimplificado,
     );
   }
 
@@ -2853,7 +2893,8 @@ class ConfiguracionTableData extends DataClass
           ..write('cajaPermitirTarjeta: $cajaPermitirTarjeta, ')
           ..write('cajaPermitirTransferencia: $cajaPermitirTransferencia, ')
           ..write('cajaPermitirCheque: $cajaPermitirCheque, ')
-          ..write('cajaExigirSesion: $cajaExigirSesion')
+          ..write('cajaExigirSesion: $cajaExigirSesion, ')
+          ..write('modoSimplificado: $modoSimplificado')
           ..write(')'))
         .toString();
   }
@@ -2890,6 +2931,7 @@ class ConfiguracionTableData extends DataClass
     cajaPermitirTransferencia,
     cajaPermitirCheque,
     cajaExigirSesion,
+    modoSimplificado,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2924,7 +2966,8 @@ class ConfiguracionTableData extends DataClass
           other.cajaPermitirTarjeta == this.cajaPermitirTarjeta &&
           other.cajaPermitirTransferencia == this.cajaPermitirTransferencia &&
           other.cajaPermitirCheque == this.cajaPermitirCheque &&
-          other.cajaExigirSesion == this.cajaExigirSesion);
+          other.cajaExigirSesion == this.cajaExigirSesion &&
+          other.modoSimplificado == this.modoSimplificado);
 }
 
 class ConfiguracionTableCompanion
@@ -2959,6 +3002,7 @@ class ConfiguracionTableCompanion
   final Value<bool> cajaPermitirTransferencia;
   final Value<bool> cajaPermitirCheque;
   final Value<bool> cajaExigirSesion;
+  final Value<bool> modoSimplificado;
   const ConfiguracionTableCompanion({
     this.id = const Value.absent(),
     this.nombreNegocio = const Value.absent(),
@@ -2990,6 +3034,7 @@ class ConfiguracionTableCompanion
     this.cajaPermitirTransferencia = const Value.absent(),
     this.cajaPermitirCheque = const Value.absent(),
     this.cajaExigirSesion = const Value.absent(),
+    this.modoSimplificado = const Value.absent(),
   });
   ConfiguracionTableCompanion.insert({
     this.id = const Value.absent(),
@@ -3022,6 +3067,7 @@ class ConfiguracionTableCompanion
     this.cajaPermitirTransferencia = const Value.absent(),
     this.cajaPermitirCheque = const Value.absent(),
     this.cajaExigirSesion = const Value.absent(),
+    this.modoSimplificado = const Value.absent(),
   });
   static Insertable<ConfiguracionTableData> custom({
     Expression<int>? id,
@@ -3054,6 +3100,7 @@ class ConfiguracionTableCompanion
     Expression<bool>? cajaPermitirTransferencia,
     Expression<bool>? cajaPermitirCheque,
     Expression<bool>? cajaExigirSesion,
+    Expression<bool>? modoSimplificado,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3093,6 +3140,7 @@ class ConfiguracionTableCompanion
       if (cajaPermitirCheque != null)
         'caja_permitir_cheque': cajaPermitirCheque,
       if (cajaExigirSesion != null) 'caja_exigir_sesion': cajaExigirSesion,
+      if (modoSimplificado != null) 'modo_simplificado': modoSimplificado,
     });
   }
 
@@ -3127,6 +3175,7 @@ class ConfiguracionTableCompanion
     Value<bool>? cajaPermitirTransferencia,
     Value<bool>? cajaPermitirCheque,
     Value<bool>? cajaExigirSesion,
+    Value<bool>? modoSimplificado,
   }) {
     return ConfiguracionTableCompanion(
       id: id ?? this.id,
@@ -3161,6 +3210,7 @@ class ConfiguracionTableCompanion
           cajaPermitirTransferencia ?? this.cajaPermitirTransferencia,
       cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
       cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
+      modoSimplificado: modoSimplificado ?? this.modoSimplificado,
     );
   }
 
@@ -3263,6 +3313,9 @@ class ConfiguracionTableCompanion
     if (cajaExigirSesion.present) {
       map['caja_exigir_sesion'] = Variable<bool>(cajaExigirSesion.value);
     }
+    if (modoSimplificado.present) {
+      map['modo_simplificado'] = Variable<bool>(modoSimplificado.value);
+    }
     return map;
   }
 
@@ -3298,7 +3351,8 @@ class ConfiguracionTableCompanion
           ..write('cajaPermitirTarjeta: $cajaPermitirTarjeta, ')
           ..write('cajaPermitirTransferencia: $cajaPermitirTransferencia, ')
           ..write('cajaPermitirCheque: $cajaPermitirCheque, ')
-          ..write('cajaExigirSesion: $cajaExigirSesion')
+          ..write('cajaExigirSesion: $cajaExigirSesion, ')
+          ..write('modoSimplificado: $modoSimplificado')
           ..write(')'))
         .toString();
   }
@@ -27025,6 +27079,7 @@ typedef $$ConfiguracionTableTableCreateCompanionBuilder =
       Value<bool> cajaPermitirTransferencia,
       Value<bool> cajaPermitirCheque,
       Value<bool> cajaExigirSesion,
+      Value<bool> modoSimplificado,
     });
 typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
     ConfiguracionTableCompanion Function({
@@ -27058,6 +27113,7 @@ typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
       Value<bool> cajaPermitirTransferencia,
       Value<bool> cajaPermitirCheque,
       Value<bool> cajaExigirSesion,
+      Value<bool> modoSimplificado,
     });
 
 class $$ConfiguracionTableTableFilterComposer
@@ -27216,6 +27272,11 @@ class $$ConfiguracionTableTableFilterComposer
 
   ColumnFilters<bool> get cajaExigirSesion => $composableBuilder(
     column: $table.cajaExigirSesion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get modoSimplificado => $composableBuilder(
+    column: $table.modoSimplificado,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -27378,6 +27439,11 @@ class $$ConfiguracionTableTableOrderingComposer
     column: $table.cajaExigirSesion,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get modoSimplificado => $composableBuilder(
+    column: $table.modoSimplificado,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ConfiguracionTableTableAnnotationComposer
@@ -27522,6 +27588,11 @@ class $$ConfiguracionTableTableAnnotationComposer
     column: $table.cajaExigirSesion,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get modoSimplificado => $composableBuilder(
+    column: $table.modoSimplificado,
+    builder: (column) => column,
+  );
 }
 
 class $$ConfiguracionTableTableTableManager
@@ -27594,6 +27665,7 @@ class $$ConfiguracionTableTableTableManager
                 Value<bool> cajaPermitirTransferencia = const Value.absent(),
                 Value<bool> cajaPermitirCheque = const Value.absent(),
                 Value<bool> cajaExigirSesion = const Value.absent(),
+                Value<bool> modoSimplificado = const Value.absent(),
               }) => ConfiguracionTableCompanion(
                 id: id,
                 nombreNegocio: nombreNegocio,
@@ -27625,6 +27697,7 @@ class $$ConfiguracionTableTableTableManager
                 cajaPermitirTransferencia: cajaPermitirTransferencia,
                 cajaPermitirCheque: cajaPermitirCheque,
                 cajaExigirSesion: cajaExigirSesion,
+                modoSimplificado: modoSimplificado,
               ),
           createCompanionCallback:
               ({
@@ -27658,6 +27731,7 @@ class $$ConfiguracionTableTableTableManager
                 Value<bool> cajaPermitirTransferencia = const Value.absent(),
                 Value<bool> cajaPermitirCheque = const Value.absent(),
                 Value<bool> cajaExigirSesion = const Value.absent(),
+                Value<bool> modoSimplificado = const Value.absent(),
               }) => ConfiguracionTableCompanion.insert(
                 id: id,
                 nombreNegocio: nombreNegocio,
@@ -27689,6 +27763,7 @@ class $$ConfiguracionTableTableTableManager
                 cajaPermitirTransferencia: cajaPermitirTransferencia,
                 cajaPermitirCheque: cajaPermitirCheque,
                 cajaExigirSesion: cajaExigirSesion,
+                modoSimplificado: modoSimplificado,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

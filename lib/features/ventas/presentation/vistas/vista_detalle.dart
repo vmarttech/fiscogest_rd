@@ -620,11 +620,12 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                         _formatearMonto(venta.subtotal),
                         fontSize: tamanoCuerpo,
                       ),
-                      _FilaResumen(
-                        'ITBIS (18%)',
-                        _formatearMonto(venta.itbis),
-                        fontSize: tamanoCuerpo,
-                      ),
+                      if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
+                        _FilaResumen(
+                          'ITBIS (18%)',
+                          _formatearMonto(venta.itbis),
+                          fontSize: tamanoCuerpo,
+                        ),
                       if (venta.montoDescuento > 0)
                         _FilaResumen(
                           'Descuento',

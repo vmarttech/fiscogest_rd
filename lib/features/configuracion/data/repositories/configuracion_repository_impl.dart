@@ -39,6 +39,7 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
     cajaPermitirTransferencia: true,
     cajaPermitirCheque: false,
     cajaExigirSesion: false,
+    modoSimplificado: false,
   );
 
   @override
@@ -76,6 +77,7 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
       cajaPermitirTransferencia: model.cajaPermitirTransferencia,
       cajaPermitirCheque: model.cajaPermitirCheque,
       cajaExigirSesion: model.cajaExigirSesion,
+      modoSimplificado: model.modoSimplificado,
     );
   }
 
@@ -114,6 +116,7 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
         cajaPermitirTransferencia: Value(c.cajaPermitirTransferencia),
         cajaPermitirCheque: Value(c.cajaPermitirCheque),
         cajaExigirSesion: Value(c.cajaExigirSesion),
+        modoSimplificado: Value(c.modoSimplificado),
       ),
     );
   }

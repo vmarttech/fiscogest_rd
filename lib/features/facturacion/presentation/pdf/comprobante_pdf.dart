@@ -92,6 +92,10 @@ class ComprobantePdf {
 
   static Future<pw.Document> _buildDocumento(Venta v, {ConfiguracionEntity? empresa}) async {
     _empresa = empresa;
+    // Modo simplificado: no mostrar NCF ni desglose ITBIS aunque flags docs digan sí
+    if (empresa?.modoSimplificado == true) {
+      // los checks usan _empresa?.docMostrar* — se anulan abajo con helpers
+    }
     emisorNombre = (empresa?.nombreComercial.isNotEmpty == true)
         ? empresa!.nombreComercial
         : (empresa?.razonSocial.isNotEmpty == true)
@@ -246,7 +250,7 @@ class ComprobantePdf {
                   pw.SizedBox(height: 4),
                   pw.Text(tipoLabel, style: const pw.TextStyle(fontSize: 8)),
                   pw.SizedBox(height: 6),
-                  if (_empresa?.docMostrarNcf ?? true) ...[
+                  if ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarNcf ?? true)) ...[
                     pw.Text('NCF', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
                     pw.Text(
                       ncf,
@@ -438,7 +442,7 @@ class ComprobantePdf {
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.SizedBox(height: 6),
-              if (_empresa?.docMostrarItbisDesglose ?? true)
+              if ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarItbisDesglose ?? true))
                 pw.Text(
                   'ITBIS discriminado al 18%.',
                   style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
@@ -455,7 +459,7 @@ class ComprobantePdf {
           ),
           child: pw.Column(
             children: [
-              if (_empresa?.docMostrarItbisDesglose ?? true) ...[
+              if ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarItbisDesglose ?? true)) ...[
                 _totalRow('Subtotal', _money.format(subtotal)),
                 _totalRow('ITBIS (18%)', _money.format(itbis)),
                 pw.Divider(color: PdfColors.grey600),
@@ -517,7 +521,7 @@ class ComprobantePdf {
 
   static pw.Widget _footer(pw.Context ctx, String ncf) {
     final pie = (_empresa?.docPiePagina ?? '').trim();
-    final ncfTxt = (_empresa?.docMostrarNcf ?? true) ? 'NCF: $ncf · ' : '';
+    final ncfTxt = ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarNcf ?? true)) ? 'NCF: $ncf · ' : '';
     return pw.Column(
       children: [
         if (pie.isNotEmpty) ...[

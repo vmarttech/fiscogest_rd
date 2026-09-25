@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -476,10 +477,11 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                             label: 'Base Gravable',
                             value: _formatearMonto(baseGravable),
                           ),
-                          _FilaResumen(
-                            label: 'ITBIS (18%)',
-                            value: _formatearMonto(estado.itbis),
-                          ),
+                          if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
+                            _FilaResumen(
+                              label: 'ITBIS (18%)',
+                              value: _formatearMonto(estado.itbis),
+                            ),
                         ],
                         const SizedBox(height: 8),
                         _FilaResumen(

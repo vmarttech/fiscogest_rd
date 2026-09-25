@@ -1023,11 +1023,12 @@ class _NuevaVentaBorradorPageState
             'RD\$ ${estado.subtotal.toStringAsFixed(2)}',
             tamanoCuerpo,
           ),
-          _filaResumen(
-            'ITBIS (18%)',
-            'RD\$ ${estado.itbis.toStringAsFixed(2)}',
-            tamanoCuerpo,
-          ),
+          if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
+            _filaResumen(
+              'ITBIS (18%)',
+              'RD\$ ${estado.itbis.toStringAsFixed(2)}',
+              tamanoCuerpo,
+            ),
           if (estado.costoEnvio > 0)
             _filaResumen(
               'Envío / Delivery',

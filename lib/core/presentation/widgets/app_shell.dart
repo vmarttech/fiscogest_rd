@@ -77,6 +77,9 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final modoSimplificado =
+        ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ??
+            false;
     final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
     final nombreEmpresa = (cfg?.nombreComercial.trim().isNotEmpty == true)
         ? cfg!.nombreComercial.trim()
@@ -101,7 +104,7 @@ class AppShell extends ConsumerWidget {
           ),
           iconTheme: const IconThemeData(color: AppColors.white),
         ),
-        drawer: _buildMenu(navWidth, currentPath, context, nombreEmpresa),
+        drawer: _buildMenu(navWidth, currentPath, context, nombreEmpresa, modoSimplificado),
         body: child,
       );
     }
@@ -112,7 +115,7 @@ class AppShell extends ConsumerWidget {
         children: [
           SizedBox(
             width: navWidth,
-            child: _buildMenu(navWidth, currentPath, context, nombreEmpresa),
+            child: _buildMenu(navWidth, currentPath, context, nombreEmpresa, modoSimplificado),
           ),
           Expanded(child: child),
         ],
@@ -121,7 +124,7 @@ class AppShell extends ConsumerWidget {
   }
 
 
-  Widget _buildMenu(double width, String currentPath, BuildContext context, String nombreEmpresa) {
+  Widget _buildMenu(double width, String currentPath, BuildContext context, String nombreEmpresa, bool modoSimplificado) {
     return Material(
       color: AppColors.sidebarBackground,
       child: SizedBox(
@@ -206,6 +209,7 @@ class AppShell extends ConsumerWidget {
                     const SizedBox(height: 18),
                     _buildSectionTitle('SISTEMA'),
                     _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
+                    if (!modoSimplificado)
                     _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
                     _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
                     _buildNavItem(context, '/configuracion', 'Configuración', Icons.settings_outlined, currentPath),

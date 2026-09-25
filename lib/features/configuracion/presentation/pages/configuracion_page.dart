@@ -74,6 +74,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   bool _cajaPermitirTransferencia = true;
   bool _cajaPermitirCheque = false;
   bool _cajaExigirSesion = false;
+  bool _modoSimplificado = false;
 
   @override
   void dispose() {
@@ -115,6 +116,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     _cajaPermitirTransferencia = cfg.cajaPermitirTransferencia;
     _cajaPermitirCheque = cfg.cajaPermitirCheque;
     _cajaExigirSesion = cfg.cajaExigirSesion;
+    _modoSimplificado = cfg.modoSimplificado;
     _datosCargados = true;
   }
 
@@ -217,6 +219,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       cajaPermitirTransferencia: _cajaPermitirTransferencia,
       cajaPermitirCheque: _cajaPermitirCheque,
       cajaExigirSesion: _cajaExigirSesion,
+      modoSimplificado: _modoSimplificado,
     );
     try {
       await ref.read(configuracionControllerProvider.notifier).guardar(entity);
@@ -356,7 +359,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   }
 
   List<Widget> _itemsMenu() {
-    return _SeccionConfig.values.map((s) {
+    final secciones = _SeccionConfig.values.where((s) {
+      if (!_modoSimplificado) return true;
+      return s != _SeccionConfig.ncf && s != _SeccionConfig.impuestos;
+    });
+    return secciones.map((s) {
       final sel = s == _seccion;
       return Material(
         color: sel
@@ -439,7 +446,14 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   Widget _contenidoSeccion() {
     switch (_seccion) {
       case _SeccionConfig.empresa:
-        return _seccionEmpresa();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _seccionEmpresa(),
+            AppLayout.vL,
+            _seccionEmpresaModoSimplificadoCard(),
+          ],
+        );
       case _SeccionConfig.documentos:
         return _seccionDocumentos();
       case _SeccionConfig.ventas:
@@ -992,6 +1006,41 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _seccionEmpresaModoSimplificadoCard() {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Modo simplificado', style: AppTypography.h4),
+          AppLayout.vS,
+          Text(
+            'Oculta NCF e ITBIS en pantallas y documentos. '
+            'Ideal para operación interna o sin facturación fiscal.',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          AppLayout.vS,
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Activar modo simplificado',
+                  style: AppTypography.labelMedium,
+                ),
+              ),
+              Switch.adaptive(
+                value: _modoSimplificado,
+                activeThumbColor: AppColors.primary,
+                onChanged: (v) => setState(() => _modoSimplificado = v),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

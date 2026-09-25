@@ -1048,7 +1048,11 @@ Future<void> _cargarDocumento({
                         SizedBox(height: esPequena ? 16 : 20),
 
                         // === COMPROBANTE FISCAL (Caja) ===
-                        if (ventaId > 0) ...[
+                        if (ventaId > 0 &&
+                            (ref.watch(configuracionControllerProvider)
+                                    .valueOrNull
+                                    ?.modoSimplificado !=
+                                true)) ...[
                           Text(
                             'Comprobante fiscal',
                             style: AppTypography.labelLarge.copyWith(

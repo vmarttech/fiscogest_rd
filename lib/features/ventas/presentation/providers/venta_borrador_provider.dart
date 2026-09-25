@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -116,6 +117,16 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
 
   final Ref _ref;
 
+  /// 0 en modo simplificado; 18% en operación fiscal.
+  double get _tasaItbis {
+    final simp = _ref
+            .read(configuracionControllerProvider)
+            .valueOrNull
+            ?.modoSimplificado ??
+        false;
+    return simp ? 0.0 : 0.18;
+  }
+
   void establecerModoCotizacion() {
     state = state.copyWith(modoCotizacion: true);
   }
@@ -198,7 +209,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     List<Map<String, dynamic>>? detalles,
   }) {
     final subt = nuevoSubtotal ?? state.subtotal;
-    const tasaItbis = 0.18;
+    final tasaItbis = _tasaItbis;
     final itb = nuevoItbis ?? subt * tasaItbis;
     final env = nuevoEnvio ?? state.costoEnvio;
     final desc = nuevoDescuento ?? state.montoDescuento;
@@ -219,7 +230,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
 
   void aplicarDescuento(double valor) {
     final baseImponible = state.subtotal - valor;
-    const tasaItbis = 0.18;
+    final tasaItbis = _tasaItbis;
     final nuevoItbis = baseImponible * tasaItbis;
     final subtMasItbis = baseImponible + nuevoItbis;
     final nuevoTotal = subtMasItbis + state.costoEnvio;
@@ -233,7 +244,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
 
   void quitarDescuento() {
     final baseImponible = state.subtotal;
-    const tasaItbis = 0.18;
+    final tasaItbis = _tasaItbis;
     final nuevoItbis = baseImponible * tasaItbis;
     final subtMasItbis = baseImponible + nuevoItbis;
     final nuevoTotal = subtMasItbis + state.costoEnvio;
