@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
@@ -60,8 +61,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   bool get _cajaAbierta => _sesion != null && _sesion!.estaAbierta;
 
+  /// Política de Configuración → Caja (default: no exigir).
+  bool get _exigeSesionCaja {
+    final cfg = ref.read(configuracionControllerProvider).valueOrNull;
+    return cfg?.cajaExigirSesion ?? false;
+  }
+
+  /// Puede entrar a cobrar: caja abierta O política no exige sesión.
+  bool get _puedeCobrar => _cajaAbierta || !_exigeSesionCaja;
+
   void _irACobrarCotizacion() {
-    if (!_cajaAbierta) {
+    if (!_puedeCobrar) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Debe abrir la caja antes de cobrar'),
@@ -484,9 +494,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         subtitulo: abierta
             ? 'Buscar por N° o cliente y generar factura'
             : 'Requiere caja abierta',
-        color: abierta ? AppColors.success : AppColors.grey500,
+        color: _puedeCobrar ? AppColors.success : AppColors.grey500,
         onTap: _irACobrarCotizacion,
-        habilitado: abierta,
+        habilitado: _puedeCobrar,
       );
 
   Widget _accionCxc(bool mobile) => _AccionCaja(

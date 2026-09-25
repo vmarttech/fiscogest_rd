@@ -450,21 +450,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         return _seccionEnlace(
           titulo: 'Crédito / Cuentas por cobrar',
           descripcion:
-              'Plazos, abono mínimo e interés se gestionan en el módulo de crédito.',
+              'Tasa, cuotas, plazo máximo, días de gracia, mora y plantillas PDF.',
           boton: 'Abrir configuración de crédito',
-          onTap: () {
-            try {
-              context.pushNamed('credito-config');
-            } catch (_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Ruta config-credito no registrada. Revisa el router.',
-                  ),
-                ),
-              );
-            }
-          },
+          onTap: () => context.push('/creditos/config'),
         );
       case _SeccionConfig.ncf:
         return _seccionEnlace(
@@ -480,15 +468,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           titulo: 'Impuestos e ITBIS',
           descripcion: 'Configuración tributaria e ITBIS del sistema.',
           boton: 'Abrir impuestos',
-          onTap: () {
-            try {
-              context.pushNamed('impuestos');
-            } catch (_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ruta impuestos no registrada.')),
-              );
-            }
-          },
+          onTap: () => context.push('/impuestos'),
         );
       case _SeccionConfig.sistema:
         return _seccionSistema();

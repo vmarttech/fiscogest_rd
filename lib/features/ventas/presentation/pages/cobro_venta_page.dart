@@ -294,12 +294,22 @@ Future<void> _cargarDocumento({
   }
 
   Future<bool> _exigirCajaAbierta() async {
+    // Solo exige sesión si el switch está explícitamente ON.
+    // cfg null o false → permitir cobrar.
+    final cfg = ref.read(configuracionControllerProvider).valueOrNull
+        ?? ref.read(configuracionControllerProvider).asData?.value;
+    final exige = cfg?.cajaExigirSesion ?? false;
+    if (!exige) return true;
+
     final sesion = await ref.read(cajaRepositoryProvider).obtenerSesionAbierta();
     if (sesion == null || !sesion.estaAbierta) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('La caja está cerrada. Ábrala desde el menú Caja.'),
+            content: Text(
+              'La caja está cerrada. Ábrala desde el menú Caja '
+              '(o desactiva "Exigir sesión" en Configuración → Caja).',
+            ),
             backgroundColor: AppColors.warning,
             behavior: SnackBarBehavior.floating,
           ),
@@ -309,6 +319,7 @@ Future<void> _cargarDocumento({
     }
     return true;
   }
+
 
 
   Future<void> _cargarRncCliente(int clienteId) async {
