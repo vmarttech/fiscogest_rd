@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -5,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_factura_service.dart';
@@ -250,17 +250,12 @@ class FacturaServiceImpl implements IFacturaService {
 
   @override
   Future<void> imprimirPdf(Venta venta) async {
-    final bytes = await generarPdfBytes(venta);
-    final nro = venta.numeroFactura ?? venta.numeroCotizacion;
-    await Printing.layoutPdf(
-      onLayout: (_) async => bytes,
-      name: 'Factura_$nro',
-    );
+    await ComprobantePdf.imprimirFactura(venta, compartir: false);
   }
 
   @override
   Future<String> exportarPDF(Venta venta) async {
-    final bytes = await generarPdfBytes(venta);
+    final bytes = await ComprobantePdf.generarBytes(venta);
     final directorio = await getTemporaryDirectory();
     final ref = (venta.numeroFactura ?? venta.numeroCotizacion)
         .replaceAll('/', '_')

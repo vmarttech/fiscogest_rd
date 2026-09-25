@@ -18,7 +18,7 @@ class EmitirFacturaService {
     if (consumidorFinal) return 'B02';
     if (rncCliente.trim().isEmpty) return 'B02';
     final rnc = rncCliente.trim();
-    final esRnc = rnc.length == 9 && RegExp(r'^\d+$').hasMatch(rnc);
+    final esRnc = (rnc.length == 9 || rnc.length == 11) && RegExp(r'^\d+$').hasMatch(rnc);
     return esRnc ? 'B01' : 'B02';
   }
 
@@ -32,11 +32,17 @@ class EmitirFacturaService {
       throw StateError('Documento no encontrado');
     }
     final ncfActual = (venta.numeroFactura ?? '').trim();
-    if (ncfActual.isNotEmpty) {
-      throw StateError('Ya tiene NCF: $ncfActual');
+    // B03-… es correlativo interno de Caja (legado), no NCF DGII B01/B02
+    final yaFiscal = ncfActual.startsWith('B01') || ncfActual.startsWith('B02');
+    if (yaFiscal) {
+      throw StateError('Ya tiene NCF fiscal: $ncfActual');
     }
     final est = venta.estadoDocumento;
-    if (est != EstadoDocumento.cotizado && est != EstadoDocumento.aprobado) {
+    final okEstado = est == EstadoDocumento.cotizado ||
+        est == EstadoDocumento.aprobado ||
+        est == EstadoDocumento.facturado ||
+        est == EstadoDocumento.enCredito;
+    if (!okEstado) {
       throw StateError('Estado no válido para facturar: ${est.name}');
     }
     if (tipoNcf != 'B01' && tipoNcf != 'B02') {
@@ -44,10 +50,10 @@ class EmitirFacturaService {
     }
     if (tipoNcf == 'B01') {
       final rnc = rncCliente.trim();
-      final okRnc = rnc.length == 9 && RegExp(r'^\d+$').hasMatch(rnc);
+      final okRnc = (rnc.length == 9 || rnc.length == 11) && RegExp(r'^\d+$').hasMatch(rnc);
       if (!okRnc) {
         throw StateError(
-          'B01 (crédito fiscal) requiere RNC de 9 dígitos del cliente',
+          'B01 (crédito fiscal) requiere RNC (9) o cédula (11 dígitos) del cliente',
         );
       }
     }

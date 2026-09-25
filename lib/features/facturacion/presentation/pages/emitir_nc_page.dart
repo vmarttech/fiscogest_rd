@@ -58,7 +58,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
             'NC: ${r.ncfNc}\n'
             'Factura origen: ${r.ncfFacturaOrigen}\n'
             'Motivo: ${r.motivo}\n\n'
-            'Guarde este NCF. La anulación de stock/CXC se completará en una fase posterior.',
+            'Inventario devuelto y CxC anulada (si aplicaba). Guarde este NCF.',
           ),
           actions: [
             TextButton(
@@ -111,6 +111,22 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('Error: $e')),
           data: (docs) {
+            if (docs.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    'No hay facturas con NCF B01/B02.\n'
+                    'Primero emita el NCF en Facturación → Emitir factura\n'
+                    '(incluye ventas ya cobradas en Caja sin NCF fiscal).',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              );
+            }
             return Align(
               alignment: Alignment.topCenter,
               child: SingleChildScrollView(

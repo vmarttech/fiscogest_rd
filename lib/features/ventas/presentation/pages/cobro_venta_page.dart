@@ -1,5 +1,7 @@
+import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -9,11 +11,13 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/caja_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/factura_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart'
     as venta_providers;
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
+import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 
 class CobroVentaPage extends ConsumerStatefulWidget {
   const CobroVentaPage({super.key});
@@ -33,6 +37,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   final TextEditingController _busquedaController = TextEditingController();
 
   int ventaId = 0;
+  /// Comprobante fiscal en Caja (antes de cobrar).
+  String _tipoNcf = 'B02';
+  final TextEditingController _rncFiscalController = TextEditingController();
   double montoTotal = 0.0;
   bool esCredito = false;
   String numeroCotizacion = 'N/A';
@@ -75,8 +82,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       _cargarPendientes();
     }
   }
-
-  Future<void> _cargarDocumento({
+Future<void> _cargarDocumento({
     required int id,
     required double monto,
     required bool credito,
@@ -211,15 +217,74 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       numero: v.numeroCotizacion,
       cliente: v.nombreCliente,
     );
+    _cargarRncCliente(v.clienteId);
   }
 
   @override
   void dispose() {
+    _rncFiscalController.dispose();
     _abonoController.dispose();
     _referenciaController.dispose();
     _busquedaController.dispose();
     super.dispose();
   }
+
+
+  Future<void> _opcionesComprobantePdf(Venta ventaConDetalle) async {
+    final emp = ref.read(configuracionControllerProvider).valueOrNull;
+    final ncf = (ventaConDetalle.numeroFactura ?? '').trim();
+    if (ncf.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sin NCF fiscal: no se puede generar el PDF'),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    final accion = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Comprobante fiscal'),
+        content: Text('NCF: $ncf\n\nElija imprimir o enviar (WhatsApp, correo, etc.).'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'imprimir'),
+            child: const Text('Imprimir'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, 'enviar'),
+            icon: const Icon(Icons.share_outlined, size: 18),
+            label: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+    if (accion == null || !mounted) return;
+    try {
+      if (accion == 'enviar') {
+        await ComprobantePdf.imprimirFactura(ventaConDetalle, compartir: true, empresa: emp);
+      } else {
+        await ComprobantePdf.imprimirFactura(ventaConDetalle, compartir: false, empresa: emp);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('PDF: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
 
   void _onAbonoChanged(String texto) {
     final limpio = texto.trim().replaceAll(',', '.');
@@ -242,6 +307,59 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       return false;
     }
     return true;
+  }
+
+
+  Future<void> _cargarRncCliente(int clienteId) async {
+    try {
+      final repo = ref.read(clienteCompletoRepositoryProvider);
+      final lista = await repo.obtenerClientes();
+      ClienteCompleto? cli;
+      for (final c in lista) {
+        if (c.id == clienteId) {
+          cli = c;
+          break;
+        }
+      }
+      final rnc = (cli?.rncCedula ?? '').trim();
+      final soloDig = rnc.replaceAll(RegExp(r'[^0-9]'), '');
+      final esRnc = soloDig.length == 9 || soloDig.length == 11;
+      if (!mounted) return;
+      setState(() {
+        _rncFiscalController.text = rnc;
+        _tipoNcf = esRnc ? 'B01' : 'B02';
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _rncFiscalController.clear();
+          _tipoNcf = 'B02';
+        });
+      }
+    }
+  }
+
+  /// Emite NCF B01/B02 si aún no hay NCF fiscal (reemplaza B03 legado).
+  Future<void> _asegurarNcfFiscal(int ventaIdDoc) async {
+    final repo = ref.read(venta_providers.ventasRepositoryProvider);
+    final doc = await repo.obtenerVentaPorId(ventaIdDoc);
+    final actual = (doc?.numeroFactura ?? '').trim();
+    final yaFiscal = actual.startsWith('B01') || actual.startsWith('B02');
+    if (yaFiscal) return;
+
+    if (_tipoNcf == 'B01') {
+      final rnc = _rncFiscalController.text
+          .trim()
+          .replaceAll(RegExp(r'[^0-9]'), '');
+      if (rnc.length != 9 && rnc.length != 11) {
+        throw StateError(
+          'B01 (crédito fiscal) requiere RNC (9) o cédula (11 dígitos)',
+        );
+      }
+    }
+
+    final ncf = await ref.read(secuenciasNcfDaoProvider).siguienteNcf(_tipoNcf);
+    await repo.emitirNcfFiscal(ventaIdDoc, ncf);
   }
 
   Future<void> _cobrarYGenerarFactura() async {
@@ -318,24 +436,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     }
 
 
-    // NCF obligatorio (módulo Facturación y NC)
-    final ncfDoc = (doc?.numeroFactura ?? '').trim();
-    if (ncfDoc.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Emita el NCF en Facturación y NC antes de cobrar en Caja',
-            ),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      return;
-    }
+    // NCF fiscal se asigna en Caja (B01/B02) justo antes de cobrar
     setState(() => _procesando = true);
     try {
+      await _asegurarNcfFiscal(ventaId);
       final repositorio = ref.read(venta_providers.ventasRepositoryProvider);
       final Venta venta;
       final formaPagoNombre = _formaPago.nombre;
@@ -423,89 +527,27 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
             actions: [
               TextButton.icon(
                 onPressed: () async {
-                  try {
-                    await ref
-                        .read(facturaServiceProvider)
-                        .imprimirPdf(ventaConDetalle);
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Abriendo diálogo de impresión…',
-                        ),
-                        backgroundColor: AppColors.success,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  } catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error al imprimir: $e'),
-                        backgroundColor: AppColors.error,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
+                  Navigator.pop(ctx);
+                  await _opcionesComprobantePdf(ventaConDetalle);
                 },
                 icon: const Icon(Icons.print_outlined, size: 18),
                 label: const Text('Imprimir'),
               ),
               TextButton.icon(
                 onPressed: () async {
-                  try {
-                    final ruta = await ref
-                        .read(facturaServiceProvider)
-                        .exportarPDF(ventaConDetalle);
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Archivo listo: $ruta'),
-                        backgroundColor: AppColors.success,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  } catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error PDF: $e'),
-                        backgroundColor: AppColors.error,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
+                  Navigator.pop(ctx);
+                  await _opcionesComprobantePdf(ventaConDetalle);
                 },
                 icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
                 label: const Text('PDF'),
               ),
               TextButton.icon(
                 onPressed: () async {
-                  try {
-                    await ref
-                        .read(facturaServiceProvider)
-                        .enviarPorCorreo(ventaConDetalle, '');
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Elija correo u otra app para enviar'),
-                        backgroundColor: AppColors.info,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  } catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error al enviar: $e'),
-                        backgroundColor: AppColors.error,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
+                  Navigator.pop(ctx);
+                  await _opcionesComprobantePdf(ventaConDetalle);
                 },
-                icon: const Icon(Icons.email_outlined, size: 18),
-                label: const Text('Correo'),
+                icon: const Icon(Icons.share_outlined, size: 18),
+                label: const Text('Enviar'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -968,6 +1010,49 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
 
                         SizedBox(height: esPequena ? 16 : 20),
 
+                        // === COMPROBANTE FISCAL (Caja) ===
+                        if (ventaId > 0) ...[
+                          Text(
+                            'Comprobante fiscal',
+                            style: AppTypography.labelLarge.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              ChoiceChip(
+                                label: const Text('B02 · Consumidor final'),
+                                selected: _tipoNcf == 'B02',
+                                onSelected: (sel) {
+                                  if (sel) setState(() => _tipoNcf = 'B02');
+                                },
+                              ),
+                              ChoiceChip(
+                                label: const Text('B01 · Crédito fiscal'),
+                                selected: _tipoNcf == 'B01',
+                                onSelected: (sel) {
+                                  if (sel) setState(() => _tipoNcf = 'B01');
+                                },
+                              ),
+                            ],
+                          ),
+                          if (_tipoNcf == 'B01') ...[
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _rncFiscalController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'RNC (9) o cédula (11 dígitos)',
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+                        ],
                         // === FORMA DE PAGO ===
                         Text(
                           'Forma de pago',

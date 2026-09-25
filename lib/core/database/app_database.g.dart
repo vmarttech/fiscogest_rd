@@ -1658,7 +1658,20 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _razonSocialMeta = const VerificationMeta(
+    'razonSocial',
+  );
+  @override
+  late final GeneratedColumn<String> razonSocial = GeneratedColumn<String>(
+    'razon_social',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
   );
   static const VerificationMeta _rncCedulaMeta = const VerificationMeta(
     'rncCedula',
@@ -1669,7 +1682,54 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _direccionMeta = const VerificationMeta(
+    'direccion',
+  );
+  @override
+  late final GeneratedColumn<String> direccion = GeneratedColumn<String>(
+    'direccion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _telefonoMeta = const VerificationMeta(
+    'telefono',
+  );
+  @override
+  late final GeneratedColumn<String> telefono = GeneratedColumn<String>(
+    'telefono',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _correoMeta = const VerificationMeta('correo');
+  @override
+  late final GeneratedColumn<String> correo = GeneratedColumn<String>(
+    'correo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _logoUrlMeta = const VerificationMeta(
+    'logoUrl',
+  );
+  @override
+  late final GeneratedColumn<String> logoUrl = GeneratedColumn<String>(
+    'logo_url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
   );
   static const VerificationMeta _monedaMeta = const VerificationMeta('moneda');
   @override
@@ -1678,7 +1738,32 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('DOP'),
+  );
+  static const VerificationMeta _zonaHorariaMeta = const VerificationMeta(
+    'zonaHoraria',
+  );
+  @override
+  late final GeneratedColumn<String> zonaHoraria = GeneratedColumn<String>(
+    'zona_horaria',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('America/Santo_Domingo'),
+  );
+  static const VerificationMeta _formatoImpresionMeta = const VerificationMeta(
+    'formatoImpresion',
+  );
+  @override
+  late final GeneratedColumn<String> formatoImpresion = GeneratedColumn<String>(
+    'formato_impresion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Ticket 80mm'),
   );
   static const VerificationMeta _formatoFechaMeta = const VerificationMeta(
     'formatoFecha',
@@ -1689,7 +1774,8 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('DD/MM/YYYY'),
   );
   static const VerificationMeta _impuestoPorcentajeMeta =
       const VerificationMeta('impuestoPorcentaje');
@@ -1700,7 +1786,8 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         aliasedName,
         false,
         type: DriftSqlType.double,
-        requiredDuringInsert: true,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(18.0),
       );
   static const VerificationMeta _idiomaMeta = const VerificationMeta('idioma');
   @override
@@ -1709,17 +1796,164 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Español'),
+  );
+  static const VerificationMeta _docMostrarLogoMeta = const VerificationMeta(
+    'docMostrarLogo',
+  );
+  @override
+  late final GeneratedColumn<bool> docMostrarLogo = GeneratedColumn<bool>(
+    'doc_mostrar_logo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("doc_mostrar_logo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _docMostrarRncMeta = const VerificationMeta(
+    'docMostrarRnc',
+  );
+  @override
+  late final GeneratedColumn<bool> docMostrarRnc = GeneratedColumn<bool>(
+    'doc_mostrar_rnc',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("doc_mostrar_rnc" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _docMostrarDireccionMeta =
+      const VerificationMeta('docMostrarDireccion');
+  @override
+  late final GeneratedColumn<bool> docMostrarDireccion = GeneratedColumn<bool>(
+    'doc_mostrar_direccion',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("doc_mostrar_direccion" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _docMostrarTelefonoMeta =
+      const VerificationMeta('docMostrarTelefono');
+  @override
+  late final GeneratedColumn<bool> docMostrarTelefono = GeneratedColumn<bool>(
+    'doc_mostrar_telefono',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("doc_mostrar_telefono" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _docMostrarCorreoMeta = const VerificationMeta(
+    'docMostrarCorreo',
+  );
+  @override
+  late final GeneratedColumn<bool> docMostrarCorreo = GeneratedColumn<bool>(
+    'doc_mostrar_correo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("doc_mostrar_correo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _docMostrarNcfMeta = const VerificationMeta(
+    'docMostrarNcf',
+  );
+  @override
+  late final GeneratedColumn<bool> docMostrarNcf = GeneratedColumn<bool>(
+    'doc_mostrar_ncf',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("doc_mostrar_ncf" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _docMostrarClienteMeta = const VerificationMeta(
+    'docMostrarCliente',
+  );
+  @override
+  late final GeneratedColumn<bool> docMostrarCliente = GeneratedColumn<bool>(
+    'doc_mostrar_cliente',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("doc_mostrar_cliente" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _docMostrarItbisDesgloseMeta =
+      const VerificationMeta('docMostrarItbisDesglose');
+  @override
+  late final GeneratedColumn<bool> docMostrarItbisDesglose =
+      GeneratedColumn<bool>(
+        'doc_mostrar_itbis_desglose',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("doc_mostrar_itbis_desglose" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
+  static const VerificationMeta _docPiePaginaMeta = const VerificationMeta(
+    'docPiePagina',
+  );
+  @override
+  late final GeneratedColumn<String> docPiePagina = GeneratedColumn<String>(
+    'doc_pie_pagina',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Gracias por su preferencia'),
   );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     nombreNegocio,
+    razonSocial,
     rncCedula,
+    direccion,
+    telefono,
+    correo,
+    logoUrl,
     moneda,
+    zonaHoraria,
+    formatoImpresion,
     formatoFecha,
     impuestoPorcentaje,
     idioma,
+    docMostrarLogo,
+    docMostrarRnc,
+    docMostrarDireccion,
+    docMostrarTelefono,
+    docMostrarCorreo,
+    docMostrarNcf,
+    docMostrarCliente,
+    docMostrarItbisDesglose,
+    docPiePagina,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1744,24 +1978,69 @@ class $ConfiguracionTableTable extends ConfiguracionTable
           _nombreNegocioMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_nombreNegocioMeta);
+    }
+    if (data.containsKey('razon_social')) {
+      context.handle(
+        _razonSocialMeta,
+        razonSocial.isAcceptableOrUnknown(
+          data['razon_social']!,
+          _razonSocialMeta,
+        ),
+      );
     }
     if (data.containsKey('rnc_cedula')) {
       context.handle(
         _rncCedulaMeta,
         rncCedula.isAcceptableOrUnknown(data['rnc_cedula']!, _rncCedulaMeta),
       );
-    } else if (isInserting) {
-      context.missing(_rncCedulaMeta);
+    }
+    if (data.containsKey('direccion')) {
+      context.handle(
+        _direccionMeta,
+        direccion.isAcceptableOrUnknown(data['direccion']!, _direccionMeta),
+      );
+    }
+    if (data.containsKey('telefono')) {
+      context.handle(
+        _telefonoMeta,
+        telefono.isAcceptableOrUnknown(data['telefono']!, _telefonoMeta),
+      );
+    }
+    if (data.containsKey('correo')) {
+      context.handle(
+        _correoMeta,
+        correo.isAcceptableOrUnknown(data['correo']!, _correoMeta),
+      );
+    }
+    if (data.containsKey('logo_url')) {
+      context.handle(
+        _logoUrlMeta,
+        logoUrl.isAcceptableOrUnknown(data['logo_url']!, _logoUrlMeta),
+      );
     }
     if (data.containsKey('moneda')) {
       context.handle(
         _monedaMeta,
         moneda.isAcceptableOrUnknown(data['moneda']!, _monedaMeta),
       );
-    } else if (isInserting) {
-      context.missing(_monedaMeta);
+    }
+    if (data.containsKey('zona_horaria')) {
+      context.handle(
+        _zonaHorariaMeta,
+        zonaHoraria.isAcceptableOrUnknown(
+          data['zona_horaria']!,
+          _zonaHorariaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('formato_impresion')) {
+      context.handle(
+        _formatoImpresionMeta,
+        formatoImpresion.isAcceptableOrUnknown(
+          data['formato_impresion']!,
+          _formatoImpresionMeta,
+        ),
+      );
     }
     if (data.containsKey('formato_fecha')) {
       context.handle(
@@ -1771,8 +2050,6 @@ class $ConfiguracionTableTable extends ConfiguracionTable
           _formatoFechaMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_formatoFechaMeta);
     }
     if (data.containsKey('impuesto_porcentaje')) {
       context.handle(
@@ -1782,16 +2059,93 @@ class $ConfiguracionTableTable extends ConfiguracionTable
           _impuestoPorcentajeMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_impuestoPorcentajeMeta);
     }
     if (data.containsKey('idioma')) {
       context.handle(
         _idiomaMeta,
         idioma.isAcceptableOrUnknown(data['idioma']!, _idiomaMeta),
       );
-    } else if (isInserting) {
-      context.missing(_idiomaMeta);
+    }
+    if (data.containsKey('doc_mostrar_logo')) {
+      context.handle(
+        _docMostrarLogoMeta,
+        docMostrarLogo.isAcceptableOrUnknown(
+          data['doc_mostrar_logo']!,
+          _docMostrarLogoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doc_mostrar_rnc')) {
+      context.handle(
+        _docMostrarRncMeta,
+        docMostrarRnc.isAcceptableOrUnknown(
+          data['doc_mostrar_rnc']!,
+          _docMostrarRncMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doc_mostrar_direccion')) {
+      context.handle(
+        _docMostrarDireccionMeta,
+        docMostrarDireccion.isAcceptableOrUnknown(
+          data['doc_mostrar_direccion']!,
+          _docMostrarDireccionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doc_mostrar_telefono')) {
+      context.handle(
+        _docMostrarTelefonoMeta,
+        docMostrarTelefono.isAcceptableOrUnknown(
+          data['doc_mostrar_telefono']!,
+          _docMostrarTelefonoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doc_mostrar_correo')) {
+      context.handle(
+        _docMostrarCorreoMeta,
+        docMostrarCorreo.isAcceptableOrUnknown(
+          data['doc_mostrar_correo']!,
+          _docMostrarCorreoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doc_mostrar_ncf')) {
+      context.handle(
+        _docMostrarNcfMeta,
+        docMostrarNcf.isAcceptableOrUnknown(
+          data['doc_mostrar_ncf']!,
+          _docMostrarNcfMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doc_mostrar_cliente')) {
+      context.handle(
+        _docMostrarClienteMeta,
+        docMostrarCliente.isAcceptableOrUnknown(
+          data['doc_mostrar_cliente']!,
+          _docMostrarClienteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doc_mostrar_itbis_desglose')) {
+      context.handle(
+        _docMostrarItbisDesgloseMeta,
+        docMostrarItbisDesglose.isAcceptableOrUnknown(
+          data['doc_mostrar_itbis_desglose']!,
+          _docMostrarItbisDesgloseMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doc_pie_pagina')) {
+      context.handle(
+        _docPiePaginaMeta,
+        docPiePagina.isAcceptableOrUnknown(
+          data['doc_pie_pagina']!,
+          _docPiePaginaMeta,
+        ),
+      );
     }
     return context;
   }
@@ -1810,13 +2164,41 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         DriftSqlType.string,
         data['${effectivePrefix}nombre_negocio'],
       )!,
+      razonSocial: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}razon_social'],
+      )!,
       rncCedula: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}rnc_cedula'],
       )!,
+      direccion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}direccion'],
+      )!,
+      telefono: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}telefono'],
+      )!,
+      correo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}correo'],
+      )!,
+      logoUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}logo_url'],
+      )!,
       moneda: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}moneda'],
+      )!,
+      zonaHoraria: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}zona_horaria'],
+      )!,
+      formatoImpresion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}formato_impresion'],
       )!,
       formatoFecha: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1829,6 +2211,42 @@ class $ConfiguracionTableTable extends ConfiguracionTable
       idioma: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}idioma'],
+      )!,
+      docMostrarLogo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}doc_mostrar_logo'],
+      )!,
+      docMostrarRnc: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}doc_mostrar_rnc'],
+      )!,
+      docMostrarDireccion: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}doc_mostrar_direccion'],
+      )!,
+      docMostrarTelefono: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}doc_mostrar_telefono'],
+      )!,
+      docMostrarCorreo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}doc_mostrar_correo'],
+      )!,
+      docMostrarNcf: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}doc_mostrar_ncf'],
+      )!,
+      docMostrarCliente: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}doc_mostrar_cliente'],
+      )!,
+      docMostrarItbisDesglose: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}doc_mostrar_itbis_desglose'],
+      )!,
+      docPiePagina: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}doc_pie_pagina'],
       )!,
     );
   }
@@ -1843,30 +2261,78 @@ class ConfiguracionTableData extends DataClass
     implements Insertable<ConfiguracionTableData> {
   final int id;
   final String nombreNegocio;
+  final String razonSocial;
   final String rncCedula;
+  final String direccion;
+  final String telefono;
+  final String correo;
+  final String logoUrl;
   final String moneda;
+  final String zonaHoraria;
+  final String formatoImpresion;
   final String formatoFecha;
   final double impuestoPorcentaje;
   final String idioma;
+  final bool docMostrarLogo;
+  final bool docMostrarRnc;
+  final bool docMostrarDireccion;
+  final bool docMostrarTelefono;
+  final bool docMostrarCorreo;
+  final bool docMostrarNcf;
+  final bool docMostrarCliente;
+  final bool docMostrarItbisDesglose;
+  final String docPiePagina;
   const ConfiguracionTableData({
     required this.id,
     required this.nombreNegocio,
+    required this.razonSocial,
     required this.rncCedula,
+    required this.direccion,
+    required this.telefono,
+    required this.correo,
+    required this.logoUrl,
     required this.moneda,
+    required this.zonaHoraria,
+    required this.formatoImpresion,
     required this.formatoFecha,
     required this.impuestoPorcentaje,
     required this.idioma,
+    required this.docMostrarLogo,
+    required this.docMostrarRnc,
+    required this.docMostrarDireccion,
+    required this.docMostrarTelefono,
+    required this.docMostrarCorreo,
+    required this.docMostrarNcf,
+    required this.docMostrarCliente,
+    required this.docMostrarItbisDesglose,
+    required this.docPiePagina,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['nombre_negocio'] = Variable<String>(nombreNegocio);
+    map['razon_social'] = Variable<String>(razonSocial);
     map['rnc_cedula'] = Variable<String>(rncCedula);
+    map['direccion'] = Variable<String>(direccion);
+    map['telefono'] = Variable<String>(telefono);
+    map['correo'] = Variable<String>(correo);
+    map['logo_url'] = Variable<String>(logoUrl);
     map['moneda'] = Variable<String>(moneda);
+    map['zona_horaria'] = Variable<String>(zonaHoraria);
+    map['formato_impresion'] = Variable<String>(formatoImpresion);
     map['formato_fecha'] = Variable<String>(formatoFecha);
     map['impuesto_porcentaje'] = Variable<double>(impuestoPorcentaje);
     map['idioma'] = Variable<String>(idioma);
+    map['doc_mostrar_logo'] = Variable<bool>(docMostrarLogo);
+    map['doc_mostrar_rnc'] = Variable<bool>(docMostrarRnc);
+    map['doc_mostrar_direccion'] = Variable<bool>(docMostrarDireccion);
+    map['doc_mostrar_telefono'] = Variable<bool>(docMostrarTelefono);
+    map['doc_mostrar_correo'] = Variable<bool>(docMostrarCorreo);
+    map['doc_mostrar_ncf'] = Variable<bool>(docMostrarNcf);
+    map['doc_mostrar_cliente'] = Variable<bool>(docMostrarCliente);
+    map['doc_mostrar_itbis_desglose'] = Variable<bool>(docMostrarItbisDesglose);
+    map['doc_pie_pagina'] = Variable<String>(docPiePagina);
     return map;
   }
 
@@ -1874,11 +2340,27 @@ class ConfiguracionTableData extends DataClass
     return ConfiguracionTableCompanion(
       id: Value(id),
       nombreNegocio: Value(nombreNegocio),
+      razonSocial: Value(razonSocial),
       rncCedula: Value(rncCedula),
+      direccion: Value(direccion),
+      telefono: Value(telefono),
+      correo: Value(correo),
+      logoUrl: Value(logoUrl),
       moneda: Value(moneda),
+      zonaHoraria: Value(zonaHoraria),
+      formatoImpresion: Value(formatoImpresion),
       formatoFecha: Value(formatoFecha),
       impuestoPorcentaje: Value(impuestoPorcentaje),
       idioma: Value(idioma),
+      docMostrarLogo: Value(docMostrarLogo),
+      docMostrarRnc: Value(docMostrarRnc),
+      docMostrarDireccion: Value(docMostrarDireccion),
+      docMostrarTelefono: Value(docMostrarTelefono),
+      docMostrarCorreo: Value(docMostrarCorreo),
+      docMostrarNcf: Value(docMostrarNcf),
+      docMostrarCliente: Value(docMostrarCliente),
+      docMostrarItbisDesglose: Value(docMostrarItbisDesglose),
+      docPiePagina: Value(docPiePagina),
     );
   }
 
@@ -1890,13 +2372,33 @@ class ConfiguracionTableData extends DataClass
     return ConfiguracionTableData(
       id: serializer.fromJson<int>(json['id']),
       nombreNegocio: serializer.fromJson<String>(json['nombreNegocio']),
+      razonSocial: serializer.fromJson<String>(json['razonSocial']),
       rncCedula: serializer.fromJson<String>(json['rncCedula']),
+      direccion: serializer.fromJson<String>(json['direccion']),
+      telefono: serializer.fromJson<String>(json['telefono']),
+      correo: serializer.fromJson<String>(json['correo']),
+      logoUrl: serializer.fromJson<String>(json['logoUrl']),
       moneda: serializer.fromJson<String>(json['moneda']),
+      zonaHoraria: serializer.fromJson<String>(json['zonaHoraria']),
+      formatoImpresion: serializer.fromJson<String>(json['formatoImpresion']),
       formatoFecha: serializer.fromJson<String>(json['formatoFecha']),
       impuestoPorcentaje: serializer.fromJson<double>(
         json['impuestoPorcentaje'],
       ),
       idioma: serializer.fromJson<String>(json['idioma']),
+      docMostrarLogo: serializer.fromJson<bool>(json['docMostrarLogo']),
+      docMostrarRnc: serializer.fromJson<bool>(json['docMostrarRnc']),
+      docMostrarDireccion: serializer.fromJson<bool>(
+        json['docMostrarDireccion'],
+      ),
+      docMostrarTelefono: serializer.fromJson<bool>(json['docMostrarTelefono']),
+      docMostrarCorreo: serializer.fromJson<bool>(json['docMostrarCorreo']),
+      docMostrarNcf: serializer.fromJson<bool>(json['docMostrarNcf']),
+      docMostrarCliente: serializer.fromJson<bool>(json['docMostrarCliente']),
+      docMostrarItbisDesglose: serializer.fromJson<bool>(
+        json['docMostrarItbisDesglose'],
+      ),
+      docPiePagina: serializer.fromJson<String>(json['docPiePagina']),
     );
   }
   @override
@@ -1905,30 +2407,81 @@ class ConfiguracionTableData extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'nombreNegocio': serializer.toJson<String>(nombreNegocio),
+      'razonSocial': serializer.toJson<String>(razonSocial),
       'rncCedula': serializer.toJson<String>(rncCedula),
+      'direccion': serializer.toJson<String>(direccion),
+      'telefono': serializer.toJson<String>(telefono),
+      'correo': serializer.toJson<String>(correo),
+      'logoUrl': serializer.toJson<String>(logoUrl),
       'moneda': serializer.toJson<String>(moneda),
+      'zonaHoraria': serializer.toJson<String>(zonaHoraria),
+      'formatoImpresion': serializer.toJson<String>(formatoImpresion),
       'formatoFecha': serializer.toJson<String>(formatoFecha),
       'impuestoPorcentaje': serializer.toJson<double>(impuestoPorcentaje),
       'idioma': serializer.toJson<String>(idioma),
+      'docMostrarLogo': serializer.toJson<bool>(docMostrarLogo),
+      'docMostrarRnc': serializer.toJson<bool>(docMostrarRnc),
+      'docMostrarDireccion': serializer.toJson<bool>(docMostrarDireccion),
+      'docMostrarTelefono': serializer.toJson<bool>(docMostrarTelefono),
+      'docMostrarCorreo': serializer.toJson<bool>(docMostrarCorreo),
+      'docMostrarNcf': serializer.toJson<bool>(docMostrarNcf),
+      'docMostrarCliente': serializer.toJson<bool>(docMostrarCliente),
+      'docMostrarItbisDesglose': serializer.toJson<bool>(
+        docMostrarItbisDesglose,
+      ),
+      'docPiePagina': serializer.toJson<String>(docPiePagina),
     };
   }
 
   ConfiguracionTableData copyWith({
     int? id,
     String? nombreNegocio,
+    String? razonSocial,
     String? rncCedula,
+    String? direccion,
+    String? telefono,
+    String? correo,
+    String? logoUrl,
     String? moneda,
+    String? zonaHoraria,
+    String? formatoImpresion,
     String? formatoFecha,
     double? impuestoPorcentaje,
     String? idioma,
+    bool? docMostrarLogo,
+    bool? docMostrarRnc,
+    bool? docMostrarDireccion,
+    bool? docMostrarTelefono,
+    bool? docMostrarCorreo,
+    bool? docMostrarNcf,
+    bool? docMostrarCliente,
+    bool? docMostrarItbisDesglose,
+    String? docPiePagina,
   }) => ConfiguracionTableData(
     id: id ?? this.id,
     nombreNegocio: nombreNegocio ?? this.nombreNegocio,
+    razonSocial: razonSocial ?? this.razonSocial,
     rncCedula: rncCedula ?? this.rncCedula,
+    direccion: direccion ?? this.direccion,
+    telefono: telefono ?? this.telefono,
+    correo: correo ?? this.correo,
+    logoUrl: logoUrl ?? this.logoUrl,
     moneda: moneda ?? this.moneda,
+    zonaHoraria: zonaHoraria ?? this.zonaHoraria,
+    formatoImpresion: formatoImpresion ?? this.formatoImpresion,
     formatoFecha: formatoFecha ?? this.formatoFecha,
     impuestoPorcentaje: impuestoPorcentaje ?? this.impuestoPorcentaje,
     idioma: idioma ?? this.idioma,
+    docMostrarLogo: docMostrarLogo ?? this.docMostrarLogo,
+    docMostrarRnc: docMostrarRnc ?? this.docMostrarRnc,
+    docMostrarDireccion: docMostrarDireccion ?? this.docMostrarDireccion,
+    docMostrarTelefono: docMostrarTelefono ?? this.docMostrarTelefono,
+    docMostrarCorreo: docMostrarCorreo ?? this.docMostrarCorreo,
+    docMostrarNcf: docMostrarNcf ?? this.docMostrarNcf,
+    docMostrarCliente: docMostrarCliente ?? this.docMostrarCliente,
+    docMostrarItbisDesglose:
+        docMostrarItbisDesglose ?? this.docMostrarItbisDesglose,
+    docPiePagina: docPiePagina ?? this.docPiePagina,
   );
   ConfiguracionTableData copyWithCompanion(ConfiguracionTableCompanion data) {
     return ConfiguracionTableData(
@@ -1936,8 +2489,21 @@ class ConfiguracionTableData extends DataClass
       nombreNegocio: data.nombreNegocio.present
           ? data.nombreNegocio.value
           : this.nombreNegocio,
+      razonSocial: data.razonSocial.present
+          ? data.razonSocial.value
+          : this.razonSocial,
       rncCedula: data.rncCedula.present ? data.rncCedula.value : this.rncCedula,
+      direccion: data.direccion.present ? data.direccion.value : this.direccion,
+      telefono: data.telefono.present ? data.telefono.value : this.telefono,
+      correo: data.correo.present ? data.correo.value : this.correo,
+      logoUrl: data.logoUrl.present ? data.logoUrl.value : this.logoUrl,
       moneda: data.moneda.present ? data.moneda.value : this.moneda,
+      zonaHoraria: data.zonaHoraria.present
+          ? data.zonaHoraria.value
+          : this.zonaHoraria,
+      formatoImpresion: data.formatoImpresion.present
+          ? data.formatoImpresion.value
+          : this.formatoImpresion,
       formatoFecha: data.formatoFecha.present
           ? data.formatoFecha.value
           : this.formatoFecha,
@@ -1945,6 +2511,33 @@ class ConfiguracionTableData extends DataClass
           ? data.impuestoPorcentaje.value
           : this.impuestoPorcentaje,
       idioma: data.idioma.present ? data.idioma.value : this.idioma,
+      docMostrarLogo: data.docMostrarLogo.present
+          ? data.docMostrarLogo.value
+          : this.docMostrarLogo,
+      docMostrarRnc: data.docMostrarRnc.present
+          ? data.docMostrarRnc.value
+          : this.docMostrarRnc,
+      docMostrarDireccion: data.docMostrarDireccion.present
+          ? data.docMostrarDireccion.value
+          : this.docMostrarDireccion,
+      docMostrarTelefono: data.docMostrarTelefono.present
+          ? data.docMostrarTelefono.value
+          : this.docMostrarTelefono,
+      docMostrarCorreo: data.docMostrarCorreo.present
+          ? data.docMostrarCorreo.value
+          : this.docMostrarCorreo,
+      docMostrarNcf: data.docMostrarNcf.present
+          ? data.docMostrarNcf.value
+          : this.docMostrarNcf,
+      docMostrarCliente: data.docMostrarCliente.present
+          ? data.docMostrarCliente.value
+          : this.docMostrarCliente,
+      docMostrarItbisDesglose: data.docMostrarItbisDesglose.present
+          ? data.docMostrarItbisDesglose.value
+          : this.docMostrarItbisDesglose,
+      docPiePagina: data.docPiePagina.present
+          ? data.docPiePagina.value
+          : this.docPiePagina,
     );
   }
 
@@ -1953,107 +2546,266 @@ class ConfiguracionTableData extends DataClass
     return (StringBuffer('ConfiguracionTableData(')
           ..write('id: $id, ')
           ..write('nombreNegocio: $nombreNegocio, ')
+          ..write('razonSocial: $razonSocial, ')
           ..write('rncCedula: $rncCedula, ')
+          ..write('direccion: $direccion, ')
+          ..write('telefono: $telefono, ')
+          ..write('correo: $correo, ')
+          ..write('logoUrl: $logoUrl, ')
           ..write('moneda: $moneda, ')
+          ..write('zonaHoraria: $zonaHoraria, ')
+          ..write('formatoImpresion: $formatoImpresion, ')
           ..write('formatoFecha: $formatoFecha, ')
           ..write('impuestoPorcentaje: $impuestoPorcentaje, ')
-          ..write('idioma: $idioma')
+          ..write('idioma: $idioma, ')
+          ..write('docMostrarLogo: $docMostrarLogo, ')
+          ..write('docMostrarRnc: $docMostrarRnc, ')
+          ..write('docMostrarDireccion: $docMostrarDireccion, ')
+          ..write('docMostrarTelefono: $docMostrarTelefono, ')
+          ..write('docMostrarCorreo: $docMostrarCorreo, ')
+          ..write('docMostrarNcf: $docMostrarNcf, ')
+          ..write('docMostrarCliente: $docMostrarCliente, ')
+          ..write('docMostrarItbisDesglose: $docMostrarItbisDesglose, ')
+          ..write('docPiePagina: $docPiePagina')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     nombreNegocio,
+    razonSocial,
     rncCedula,
+    direccion,
+    telefono,
+    correo,
+    logoUrl,
     moneda,
+    zonaHoraria,
+    formatoImpresion,
     formatoFecha,
     impuestoPorcentaje,
     idioma,
-  );
+    docMostrarLogo,
+    docMostrarRnc,
+    docMostrarDireccion,
+    docMostrarTelefono,
+    docMostrarCorreo,
+    docMostrarNcf,
+    docMostrarCliente,
+    docMostrarItbisDesglose,
+    docPiePagina,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConfiguracionTableData &&
           other.id == this.id &&
           other.nombreNegocio == this.nombreNegocio &&
+          other.razonSocial == this.razonSocial &&
           other.rncCedula == this.rncCedula &&
+          other.direccion == this.direccion &&
+          other.telefono == this.telefono &&
+          other.correo == this.correo &&
+          other.logoUrl == this.logoUrl &&
           other.moneda == this.moneda &&
+          other.zonaHoraria == this.zonaHoraria &&
+          other.formatoImpresion == this.formatoImpresion &&
           other.formatoFecha == this.formatoFecha &&
           other.impuestoPorcentaje == this.impuestoPorcentaje &&
-          other.idioma == this.idioma);
+          other.idioma == this.idioma &&
+          other.docMostrarLogo == this.docMostrarLogo &&
+          other.docMostrarRnc == this.docMostrarRnc &&
+          other.docMostrarDireccion == this.docMostrarDireccion &&
+          other.docMostrarTelefono == this.docMostrarTelefono &&
+          other.docMostrarCorreo == this.docMostrarCorreo &&
+          other.docMostrarNcf == this.docMostrarNcf &&
+          other.docMostrarCliente == this.docMostrarCliente &&
+          other.docMostrarItbisDesglose == this.docMostrarItbisDesglose &&
+          other.docPiePagina == this.docPiePagina);
 }
 
 class ConfiguracionTableCompanion
     extends UpdateCompanion<ConfiguracionTableData> {
   final Value<int> id;
   final Value<String> nombreNegocio;
+  final Value<String> razonSocial;
   final Value<String> rncCedula;
+  final Value<String> direccion;
+  final Value<String> telefono;
+  final Value<String> correo;
+  final Value<String> logoUrl;
   final Value<String> moneda;
+  final Value<String> zonaHoraria;
+  final Value<String> formatoImpresion;
   final Value<String> formatoFecha;
   final Value<double> impuestoPorcentaje;
   final Value<String> idioma;
+  final Value<bool> docMostrarLogo;
+  final Value<bool> docMostrarRnc;
+  final Value<bool> docMostrarDireccion;
+  final Value<bool> docMostrarTelefono;
+  final Value<bool> docMostrarCorreo;
+  final Value<bool> docMostrarNcf;
+  final Value<bool> docMostrarCliente;
+  final Value<bool> docMostrarItbisDesglose;
+  final Value<String> docPiePagina;
   const ConfiguracionTableCompanion({
     this.id = const Value.absent(),
     this.nombreNegocio = const Value.absent(),
+    this.razonSocial = const Value.absent(),
     this.rncCedula = const Value.absent(),
+    this.direccion = const Value.absent(),
+    this.telefono = const Value.absent(),
+    this.correo = const Value.absent(),
+    this.logoUrl = const Value.absent(),
     this.moneda = const Value.absent(),
+    this.zonaHoraria = const Value.absent(),
+    this.formatoImpresion = const Value.absent(),
     this.formatoFecha = const Value.absent(),
     this.impuestoPorcentaje = const Value.absent(),
     this.idioma = const Value.absent(),
+    this.docMostrarLogo = const Value.absent(),
+    this.docMostrarRnc = const Value.absent(),
+    this.docMostrarDireccion = const Value.absent(),
+    this.docMostrarTelefono = const Value.absent(),
+    this.docMostrarCorreo = const Value.absent(),
+    this.docMostrarNcf = const Value.absent(),
+    this.docMostrarCliente = const Value.absent(),
+    this.docMostrarItbisDesglose = const Value.absent(),
+    this.docPiePagina = const Value.absent(),
   });
   ConfiguracionTableCompanion.insert({
     this.id = const Value.absent(),
-    required String nombreNegocio,
-    required String rncCedula,
-    required String moneda,
-    required String formatoFecha,
-    required double impuestoPorcentaje,
-    required String idioma,
-  }) : nombreNegocio = Value(nombreNegocio),
-       rncCedula = Value(rncCedula),
-       moneda = Value(moneda),
-       formatoFecha = Value(formatoFecha),
-       impuestoPorcentaje = Value(impuestoPorcentaje),
-       idioma = Value(idioma);
+    this.nombreNegocio = const Value.absent(),
+    this.razonSocial = const Value.absent(),
+    this.rncCedula = const Value.absent(),
+    this.direccion = const Value.absent(),
+    this.telefono = const Value.absent(),
+    this.correo = const Value.absent(),
+    this.logoUrl = const Value.absent(),
+    this.moneda = const Value.absent(),
+    this.zonaHoraria = const Value.absent(),
+    this.formatoImpresion = const Value.absent(),
+    this.formatoFecha = const Value.absent(),
+    this.impuestoPorcentaje = const Value.absent(),
+    this.idioma = const Value.absent(),
+    this.docMostrarLogo = const Value.absent(),
+    this.docMostrarRnc = const Value.absent(),
+    this.docMostrarDireccion = const Value.absent(),
+    this.docMostrarTelefono = const Value.absent(),
+    this.docMostrarCorreo = const Value.absent(),
+    this.docMostrarNcf = const Value.absent(),
+    this.docMostrarCliente = const Value.absent(),
+    this.docMostrarItbisDesglose = const Value.absent(),
+    this.docPiePagina = const Value.absent(),
+  });
   static Insertable<ConfiguracionTableData> custom({
     Expression<int>? id,
     Expression<String>? nombreNegocio,
+    Expression<String>? razonSocial,
     Expression<String>? rncCedula,
+    Expression<String>? direccion,
+    Expression<String>? telefono,
+    Expression<String>? correo,
+    Expression<String>? logoUrl,
     Expression<String>? moneda,
+    Expression<String>? zonaHoraria,
+    Expression<String>? formatoImpresion,
     Expression<String>? formatoFecha,
     Expression<double>? impuestoPorcentaje,
     Expression<String>? idioma,
+    Expression<bool>? docMostrarLogo,
+    Expression<bool>? docMostrarRnc,
+    Expression<bool>? docMostrarDireccion,
+    Expression<bool>? docMostrarTelefono,
+    Expression<bool>? docMostrarCorreo,
+    Expression<bool>? docMostrarNcf,
+    Expression<bool>? docMostrarCliente,
+    Expression<bool>? docMostrarItbisDesglose,
+    Expression<String>? docPiePagina,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (nombreNegocio != null) 'nombre_negocio': nombreNegocio,
+      if (razonSocial != null) 'razon_social': razonSocial,
       if (rncCedula != null) 'rnc_cedula': rncCedula,
+      if (direccion != null) 'direccion': direccion,
+      if (telefono != null) 'telefono': telefono,
+      if (correo != null) 'correo': correo,
+      if (logoUrl != null) 'logo_url': logoUrl,
       if (moneda != null) 'moneda': moneda,
+      if (zonaHoraria != null) 'zona_horaria': zonaHoraria,
+      if (formatoImpresion != null) 'formato_impresion': formatoImpresion,
       if (formatoFecha != null) 'formato_fecha': formatoFecha,
       if (impuestoPorcentaje != null) 'impuesto_porcentaje': impuestoPorcentaje,
       if (idioma != null) 'idioma': idioma,
+      if (docMostrarLogo != null) 'doc_mostrar_logo': docMostrarLogo,
+      if (docMostrarRnc != null) 'doc_mostrar_rnc': docMostrarRnc,
+      if (docMostrarDireccion != null)
+        'doc_mostrar_direccion': docMostrarDireccion,
+      if (docMostrarTelefono != null)
+        'doc_mostrar_telefono': docMostrarTelefono,
+      if (docMostrarCorreo != null) 'doc_mostrar_correo': docMostrarCorreo,
+      if (docMostrarNcf != null) 'doc_mostrar_ncf': docMostrarNcf,
+      if (docMostrarCliente != null) 'doc_mostrar_cliente': docMostrarCliente,
+      if (docMostrarItbisDesglose != null)
+        'doc_mostrar_itbis_desglose': docMostrarItbisDesglose,
+      if (docPiePagina != null) 'doc_pie_pagina': docPiePagina,
     });
   }
 
   ConfiguracionTableCompanion copyWith({
     Value<int>? id,
     Value<String>? nombreNegocio,
+    Value<String>? razonSocial,
     Value<String>? rncCedula,
+    Value<String>? direccion,
+    Value<String>? telefono,
+    Value<String>? correo,
+    Value<String>? logoUrl,
     Value<String>? moneda,
+    Value<String>? zonaHoraria,
+    Value<String>? formatoImpresion,
     Value<String>? formatoFecha,
     Value<double>? impuestoPorcentaje,
     Value<String>? idioma,
+    Value<bool>? docMostrarLogo,
+    Value<bool>? docMostrarRnc,
+    Value<bool>? docMostrarDireccion,
+    Value<bool>? docMostrarTelefono,
+    Value<bool>? docMostrarCorreo,
+    Value<bool>? docMostrarNcf,
+    Value<bool>? docMostrarCliente,
+    Value<bool>? docMostrarItbisDesglose,
+    Value<String>? docPiePagina,
   }) {
     return ConfiguracionTableCompanion(
       id: id ?? this.id,
       nombreNegocio: nombreNegocio ?? this.nombreNegocio,
+      razonSocial: razonSocial ?? this.razonSocial,
       rncCedula: rncCedula ?? this.rncCedula,
+      direccion: direccion ?? this.direccion,
+      telefono: telefono ?? this.telefono,
+      correo: correo ?? this.correo,
+      logoUrl: logoUrl ?? this.logoUrl,
       moneda: moneda ?? this.moneda,
+      zonaHoraria: zonaHoraria ?? this.zonaHoraria,
+      formatoImpresion: formatoImpresion ?? this.formatoImpresion,
       formatoFecha: formatoFecha ?? this.formatoFecha,
       impuestoPorcentaje: impuestoPorcentaje ?? this.impuestoPorcentaje,
       idioma: idioma ?? this.idioma,
+      docMostrarLogo: docMostrarLogo ?? this.docMostrarLogo,
+      docMostrarRnc: docMostrarRnc ?? this.docMostrarRnc,
+      docMostrarDireccion: docMostrarDireccion ?? this.docMostrarDireccion,
+      docMostrarTelefono: docMostrarTelefono ?? this.docMostrarTelefono,
+      docMostrarCorreo: docMostrarCorreo ?? this.docMostrarCorreo,
+      docMostrarNcf: docMostrarNcf ?? this.docMostrarNcf,
+      docMostrarCliente: docMostrarCliente ?? this.docMostrarCliente,
+      docMostrarItbisDesglose:
+          docMostrarItbisDesglose ?? this.docMostrarItbisDesglose,
+      docPiePagina: docPiePagina ?? this.docPiePagina,
     );
   }
 
@@ -2066,11 +2818,32 @@ class ConfiguracionTableCompanion
     if (nombreNegocio.present) {
       map['nombre_negocio'] = Variable<String>(nombreNegocio.value);
     }
+    if (razonSocial.present) {
+      map['razon_social'] = Variable<String>(razonSocial.value);
+    }
     if (rncCedula.present) {
       map['rnc_cedula'] = Variable<String>(rncCedula.value);
     }
+    if (direccion.present) {
+      map['direccion'] = Variable<String>(direccion.value);
+    }
+    if (telefono.present) {
+      map['telefono'] = Variable<String>(telefono.value);
+    }
+    if (correo.present) {
+      map['correo'] = Variable<String>(correo.value);
+    }
+    if (logoUrl.present) {
+      map['logo_url'] = Variable<String>(logoUrl.value);
+    }
     if (moneda.present) {
       map['moneda'] = Variable<String>(moneda.value);
+    }
+    if (zonaHoraria.present) {
+      map['zona_horaria'] = Variable<String>(zonaHoraria.value);
+    }
+    if (formatoImpresion.present) {
+      map['formato_impresion'] = Variable<String>(formatoImpresion.value);
     }
     if (formatoFecha.present) {
       map['formato_fecha'] = Variable<String>(formatoFecha.value);
@@ -2081,6 +2854,35 @@ class ConfiguracionTableCompanion
     if (idioma.present) {
       map['idioma'] = Variable<String>(idioma.value);
     }
+    if (docMostrarLogo.present) {
+      map['doc_mostrar_logo'] = Variable<bool>(docMostrarLogo.value);
+    }
+    if (docMostrarRnc.present) {
+      map['doc_mostrar_rnc'] = Variable<bool>(docMostrarRnc.value);
+    }
+    if (docMostrarDireccion.present) {
+      map['doc_mostrar_direccion'] = Variable<bool>(docMostrarDireccion.value);
+    }
+    if (docMostrarTelefono.present) {
+      map['doc_mostrar_telefono'] = Variable<bool>(docMostrarTelefono.value);
+    }
+    if (docMostrarCorreo.present) {
+      map['doc_mostrar_correo'] = Variable<bool>(docMostrarCorreo.value);
+    }
+    if (docMostrarNcf.present) {
+      map['doc_mostrar_ncf'] = Variable<bool>(docMostrarNcf.value);
+    }
+    if (docMostrarCliente.present) {
+      map['doc_mostrar_cliente'] = Variable<bool>(docMostrarCliente.value);
+    }
+    if (docMostrarItbisDesglose.present) {
+      map['doc_mostrar_itbis_desglose'] = Variable<bool>(
+        docMostrarItbisDesglose.value,
+      );
+    }
+    if (docPiePagina.present) {
+      map['doc_pie_pagina'] = Variable<String>(docPiePagina.value);
+    }
     return map;
   }
 
@@ -2089,11 +2891,27 @@ class ConfiguracionTableCompanion
     return (StringBuffer('ConfiguracionTableCompanion(')
           ..write('id: $id, ')
           ..write('nombreNegocio: $nombreNegocio, ')
+          ..write('razonSocial: $razonSocial, ')
           ..write('rncCedula: $rncCedula, ')
+          ..write('direccion: $direccion, ')
+          ..write('telefono: $telefono, ')
+          ..write('correo: $correo, ')
+          ..write('logoUrl: $logoUrl, ')
           ..write('moneda: $moneda, ')
+          ..write('zonaHoraria: $zonaHoraria, ')
+          ..write('formatoImpresion: $formatoImpresion, ')
           ..write('formatoFecha: $formatoFecha, ')
           ..write('impuestoPorcentaje: $impuestoPorcentaje, ')
-          ..write('idioma: $idioma')
+          ..write('idioma: $idioma, ')
+          ..write('docMostrarLogo: $docMostrarLogo, ')
+          ..write('docMostrarRnc: $docMostrarRnc, ')
+          ..write('docMostrarDireccion: $docMostrarDireccion, ')
+          ..write('docMostrarTelefono: $docMostrarTelefono, ')
+          ..write('docMostrarCorreo: $docMostrarCorreo, ')
+          ..write('docMostrarNcf: $docMostrarNcf, ')
+          ..write('docMostrarCliente: $docMostrarCliente, ')
+          ..write('docMostrarItbisDesglose: $docMostrarItbisDesglose, ')
+          ..write('docPiePagina: $docPiePagina')
           ..write(')'))
         .toString();
   }
@@ -25791,22 +26609,54 @@ typedef $$ClientesTableTableProcessedTableManager =
 typedef $$ConfiguracionTableTableCreateCompanionBuilder =
     ConfiguracionTableCompanion Function({
       Value<int> id,
-      required String nombreNegocio,
-      required String rncCedula,
-      required String moneda,
-      required String formatoFecha,
-      required double impuestoPorcentaje,
-      required String idioma,
+      Value<String> nombreNegocio,
+      Value<String> razonSocial,
+      Value<String> rncCedula,
+      Value<String> direccion,
+      Value<String> telefono,
+      Value<String> correo,
+      Value<String> logoUrl,
+      Value<String> moneda,
+      Value<String> zonaHoraria,
+      Value<String> formatoImpresion,
+      Value<String> formatoFecha,
+      Value<double> impuestoPorcentaje,
+      Value<String> idioma,
+      Value<bool> docMostrarLogo,
+      Value<bool> docMostrarRnc,
+      Value<bool> docMostrarDireccion,
+      Value<bool> docMostrarTelefono,
+      Value<bool> docMostrarCorreo,
+      Value<bool> docMostrarNcf,
+      Value<bool> docMostrarCliente,
+      Value<bool> docMostrarItbisDesglose,
+      Value<String> docPiePagina,
     });
 typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
     ConfiguracionTableCompanion Function({
       Value<int> id,
       Value<String> nombreNegocio,
+      Value<String> razonSocial,
       Value<String> rncCedula,
+      Value<String> direccion,
+      Value<String> telefono,
+      Value<String> correo,
+      Value<String> logoUrl,
       Value<String> moneda,
+      Value<String> zonaHoraria,
+      Value<String> formatoImpresion,
       Value<String> formatoFecha,
       Value<double> impuestoPorcentaje,
       Value<String> idioma,
+      Value<bool> docMostrarLogo,
+      Value<bool> docMostrarRnc,
+      Value<bool> docMostrarDireccion,
+      Value<bool> docMostrarTelefono,
+      Value<bool> docMostrarCorreo,
+      Value<bool> docMostrarNcf,
+      Value<bool> docMostrarCliente,
+      Value<bool> docMostrarItbisDesglose,
+      Value<String> docPiePagina,
     });
 
 class $$ConfiguracionTableTableFilterComposer
@@ -25828,13 +26678,48 @@ class $$ConfiguracionTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get razonSocial => $composableBuilder(
+    column: $table.razonSocial,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get rncCedula => $composableBuilder(
     column: $table.rncCedula,
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get direccion => $composableBuilder(
+    column: $table.direccion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get telefono => $composableBuilder(
+    column: $table.telefono,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get correo => $composableBuilder(
+    column: $table.correo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get logoUrl => $composableBuilder(
+    column: $table.logoUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get moneda => $composableBuilder(
     column: $table.moneda,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get zonaHoraria => $composableBuilder(
+    column: $table.zonaHoraria,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get formatoImpresion => $composableBuilder(
+    column: $table.formatoImpresion,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -25850,6 +26735,51 @@ class $$ConfiguracionTableTableFilterComposer
 
   ColumnFilters<String> get idioma => $composableBuilder(
     column: $table.idioma,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get docMostrarLogo => $composableBuilder(
+    column: $table.docMostrarLogo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get docMostrarRnc => $composableBuilder(
+    column: $table.docMostrarRnc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get docMostrarDireccion => $composableBuilder(
+    column: $table.docMostrarDireccion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get docMostrarTelefono => $composableBuilder(
+    column: $table.docMostrarTelefono,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get docMostrarCorreo => $composableBuilder(
+    column: $table.docMostrarCorreo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get docMostrarNcf => $composableBuilder(
+    column: $table.docMostrarNcf,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get docMostrarCliente => $composableBuilder(
+    column: $table.docMostrarCliente,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get docMostrarItbisDesglose => $composableBuilder(
+    column: $table.docMostrarItbisDesglose,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get docPiePagina => $composableBuilder(
+    column: $table.docPiePagina,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -25873,13 +26803,48 @@ class $$ConfiguracionTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get razonSocial => $composableBuilder(
+    column: $table.razonSocial,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get rncCedula => $composableBuilder(
     column: $table.rncCedula,
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get direccion => $composableBuilder(
+    column: $table.direccion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get telefono => $composableBuilder(
+    column: $table.telefono,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get correo => $composableBuilder(
+    column: $table.correo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get logoUrl => $composableBuilder(
+    column: $table.logoUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get moneda => $composableBuilder(
     column: $table.moneda,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get zonaHoraria => $composableBuilder(
+    column: $table.zonaHoraria,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get formatoImpresion => $composableBuilder(
+    column: $table.formatoImpresion,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -25895,6 +26860,51 @@ class $$ConfiguracionTableTableOrderingComposer
 
   ColumnOrderings<String> get idioma => $composableBuilder(
     column: $table.idioma,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get docMostrarLogo => $composableBuilder(
+    column: $table.docMostrarLogo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get docMostrarRnc => $composableBuilder(
+    column: $table.docMostrarRnc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get docMostrarDireccion => $composableBuilder(
+    column: $table.docMostrarDireccion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get docMostrarTelefono => $composableBuilder(
+    column: $table.docMostrarTelefono,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get docMostrarCorreo => $composableBuilder(
+    column: $table.docMostrarCorreo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get docMostrarNcf => $composableBuilder(
+    column: $table.docMostrarNcf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get docMostrarCliente => $composableBuilder(
+    column: $table.docMostrarCliente,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get docMostrarItbisDesglose => $composableBuilder(
+    column: $table.docMostrarItbisDesglose,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get docPiePagina => $composableBuilder(
+    column: $table.docPiePagina,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -25916,11 +26926,38 @@ class $$ConfiguracionTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get razonSocial => $composableBuilder(
+    column: $table.razonSocial,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get rncCedula =>
       $composableBuilder(column: $table.rncCedula, builder: (column) => column);
 
+  GeneratedColumn<String> get direccion =>
+      $composableBuilder(column: $table.direccion, builder: (column) => column);
+
+  GeneratedColumn<String> get telefono =>
+      $composableBuilder(column: $table.telefono, builder: (column) => column);
+
+  GeneratedColumn<String> get correo =>
+      $composableBuilder(column: $table.correo, builder: (column) => column);
+
+  GeneratedColumn<String> get logoUrl =>
+      $composableBuilder(column: $table.logoUrl, builder: (column) => column);
+
   GeneratedColumn<String> get moneda =>
       $composableBuilder(column: $table.moneda, builder: (column) => column);
+
+  GeneratedColumn<String> get zonaHoraria => $composableBuilder(
+    column: $table.zonaHoraria,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get formatoImpresion => $composableBuilder(
+    column: $table.formatoImpresion,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get formatoFecha => $composableBuilder(
     column: $table.formatoFecha,
@@ -25934,6 +26971,51 @@ class $$ConfiguracionTableTableAnnotationComposer
 
   GeneratedColumn<String> get idioma =>
       $composableBuilder(column: $table.idioma, builder: (column) => column);
+
+  GeneratedColumn<bool> get docMostrarLogo => $composableBuilder(
+    column: $table.docMostrarLogo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get docMostrarRnc => $composableBuilder(
+    column: $table.docMostrarRnc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get docMostrarDireccion => $composableBuilder(
+    column: $table.docMostrarDireccion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get docMostrarTelefono => $composableBuilder(
+    column: $table.docMostrarTelefono,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get docMostrarCorreo => $composableBuilder(
+    column: $table.docMostrarCorreo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get docMostrarNcf => $composableBuilder(
+    column: $table.docMostrarNcf,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get docMostrarCliente => $composableBuilder(
+    column: $table.docMostrarCliente,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get docMostrarItbisDesglose => $composableBuilder(
+    column: $table.docMostrarItbisDesglose,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get docPiePagina => $composableBuilder(
+    column: $table.docPiePagina,
+    builder: (column) => column,
+  );
 }
 
 class $$ConfiguracionTableTableTableManager
@@ -25978,37 +27060,101 @@ class $$ConfiguracionTableTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> nombreNegocio = const Value.absent(),
+                Value<String> razonSocial = const Value.absent(),
                 Value<String> rncCedula = const Value.absent(),
+                Value<String> direccion = const Value.absent(),
+                Value<String> telefono = const Value.absent(),
+                Value<String> correo = const Value.absent(),
+                Value<String> logoUrl = const Value.absent(),
                 Value<String> moneda = const Value.absent(),
+                Value<String> zonaHoraria = const Value.absent(),
+                Value<String> formatoImpresion = const Value.absent(),
                 Value<String> formatoFecha = const Value.absent(),
                 Value<double> impuestoPorcentaje = const Value.absent(),
                 Value<String> idioma = const Value.absent(),
+                Value<bool> docMostrarLogo = const Value.absent(),
+                Value<bool> docMostrarRnc = const Value.absent(),
+                Value<bool> docMostrarDireccion = const Value.absent(),
+                Value<bool> docMostrarTelefono = const Value.absent(),
+                Value<bool> docMostrarCorreo = const Value.absent(),
+                Value<bool> docMostrarNcf = const Value.absent(),
+                Value<bool> docMostrarCliente = const Value.absent(),
+                Value<bool> docMostrarItbisDesglose = const Value.absent(),
+                Value<String> docPiePagina = const Value.absent(),
               }) => ConfiguracionTableCompanion(
                 id: id,
                 nombreNegocio: nombreNegocio,
+                razonSocial: razonSocial,
                 rncCedula: rncCedula,
+                direccion: direccion,
+                telefono: telefono,
+                correo: correo,
+                logoUrl: logoUrl,
                 moneda: moneda,
+                zonaHoraria: zonaHoraria,
+                formatoImpresion: formatoImpresion,
                 formatoFecha: formatoFecha,
                 impuestoPorcentaje: impuestoPorcentaje,
                 idioma: idioma,
+                docMostrarLogo: docMostrarLogo,
+                docMostrarRnc: docMostrarRnc,
+                docMostrarDireccion: docMostrarDireccion,
+                docMostrarTelefono: docMostrarTelefono,
+                docMostrarCorreo: docMostrarCorreo,
+                docMostrarNcf: docMostrarNcf,
+                docMostrarCliente: docMostrarCliente,
+                docMostrarItbisDesglose: docMostrarItbisDesglose,
+                docPiePagina: docPiePagina,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String nombreNegocio,
-                required String rncCedula,
-                required String moneda,
-                required String formatoFecha,
-                required double impuestoPorcentaje,
-                required String idioma,
+                Value<String> nombreNegocio = const Value.absent(),
+                Value<String> razonSocial = const Value.absent(),
+                Value<String> rncCedula = const Value.absent(),
+                Value<String> direccion = const Value.absent(),
+                Value<String> telefono = const Value.absent(),
+                Value<String> correo = const Value.absent(),
+                Value<String> logoUrl = const Value.absent(),
+                Value<String> moneda = const Value.absent(),
+                Value<String> zonaHoraria = const Value.absent(),
+                Value<String> formatoImpresion = const Value.absent(),
+                Value<String> formatoFecha = const Value.absent(),
+                Value<double> impuestoPorcentaje = const Value.absent(),
+                Value<String> idioma = const Value.absent(),
+                Value<bool> docMostrarLogo = const Value.absent(),
+                Value<bool> docMostrarRnc = const Value.absent(),
+                Value<bool> docMostrarDireccion = const Value.absent(),
+                Value<bool> docMostrarTelefono = const Value.absent(),
+                Value<bool> docMostrarCorreo = const Value.absent(),
+                Value<bool> docMostrarNcf = const Value.absent(),
+                Value<bool> docMostrarCliente = const Value.absent(),
+                Value<bool> docMostrarItbisDesglose = const Value.absent(),
+                Value<String> docPiePagina = const Value.absent(),
               }) => ConfiguracionTableCompanion.insert(
                 id: id,
                 nombreNegocio: nombreNegocio,
+                razonSocial: razonSocial,
                 rncCedula: rncCedula,
+                direccion: direccion,
+                telefono: telefono,
+                correo: correo,
+                logoUrl: logoUrl,
                 moneda: moneda,
+                zonaHoraria: zonaHoraria,
+                formatoImpresion: formatoImpresion,
                 formatoFecha: formatoFecha,
                 impuestoPorcentaje: impuestoPorcentaje,
                 idioma: idioma,
+                docMostrarLogo: docMostrarLogo,
+                docMostrarRnc: docMostrarRnc,
+                docMostrarDireccion: docMostrarDireccion,
+                docMostrarTelefono: docMostrarTelefono,
+                docMostrarCorreo: docMostrarCorreo,
+                docMostrarNcf: docMostrarNcf,
+                docMostrarCliente: docMostrarCliente,
+                docMostrarItbisDesglose: docMostrarItbisDesglose,
+                docPiePagina: docPiePagina,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

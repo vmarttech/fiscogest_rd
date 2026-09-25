@@ -43,8 +43,16 @@ class VentasDao {
     final int? clienteId,
     final int? usuarioId,
   }) async {
+    // Incluye cotizado/aprobado/facturado/enCredito para Facturación (NCF)
+    // y listados que reutilizan este método. Caja sigue usando listarPendientesCobro.
     final query = _db.select(_db.ventasTable)
-      ..where((final t) => t.estadoDocumento.equals('cotizado'))
+      ..where(
+        (final t) =>
+            t.estadoDocumento.equals('cotizado') |
+            t.estadoDocumento.equals('aprobado') |
+            t.estadoDocumento.equals('facturado') |
+            t.estadoDocumento.equals('enCredito'),
+      )
       ..orderBy([(final t) => OrderingTerm.desc(t.fechaRegistro)]);
     if (desde != null) {
       query.where((final t) => t.fechaRegistro.isBiggerOrEqualValue(desde));

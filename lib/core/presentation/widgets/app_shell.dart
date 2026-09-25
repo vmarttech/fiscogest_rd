@@ -1,11 +1,13 @@
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
@@ -69,12 +71,17 @@ class AppShell extends StatelessWidget {
       _ when rutaActual.startsWith('/compras/') => 'Compras',
       _ when rutaActual.startsWith('/inventario-fisico/') => 'Inventario Físico',
       _ when rutaActual.startsWith('/clientes/') => 'Gestión de Cliente',
-      _ => 'FiscoGest RD',
+      _ => 'Mi negocio',
     };
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
+    final nombreEmpresa = (cfg?.nombreComercial.trim().isNotEmpty == true)
+        ? cfg!.nombreComercial.trim()
+        : 'Mi negocio';
+
     final isMobile = AppBreakpoints.isMobile(context);
     const navWidth = 280.0;
     final currentPath = GoRouterState.of(context).uri.path;
@@ -94,7 +101,7 @@ class AppShell extends StatelessWidget {
           ),
           iconTheme: const IconThemeData(color: AppColors.white),
         ),
-        drawer: _buildMenu(navWidth, currentPath, context),
+        drawer: _buildMenu(navWidth, currentPath, context, nombreEmpresa),
         body: child,
       );
     }
@@ -105,7 +112,7 @@ class AppShell extends StatelessWidget {
         children: [
           SizedBox(
             width: navWidth,
-            child: _buildMenu(navWidth, currentPath, context),
+            child: _buildMenu(navWidth, currentPath, context, nombreEmpresa),
           ),
           Expanded(child: child),
         ],
@@ -113,7 +120,7 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  Widget _buildMenu(double width, String currentPath, BuildContext context) {
+  Widget _buildMenu(double width, String currentPath, BuildContext context, String nombreEmpresa) {
     return Container(
       width: width,
       color: AppColors.sidebarBackground,
@@ -145,7 +152,7 @@ class AppShell extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'FiscoGest RD',
+                          nombreEmpresa,
                           style: AppTypography.h4.copyWith(
                             color: AppColors.white,
                             fontSize: 16,

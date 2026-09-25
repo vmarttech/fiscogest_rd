@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
@@ -145,7 +146,7 @@ class HistorialFacturasPage extends ConsumerWidget {
                                   child: TextButton.icon(
                                     onPressed: () async {
                                       try {
-                                        await ComprobantePdf.imprimirFactura(d);
+                                        await ComprobantePdf.imprimirFactura(d, empresa: ref.read(configuracionControllerProvider).valueOrNull);
                                       } catch (e) {
                                         if (context.mounted) {
                                           ScaffoldMessenger.of(context)

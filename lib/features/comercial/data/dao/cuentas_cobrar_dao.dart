@@ -210,4 +210,26 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
         ? filtradas.take(limite).toList()
         : filtradas.toList();
   }
+
+  Future<CuentaCobrarData?> obtenerCuentaPorVentaId(int ventaId) async {
+    return await (select(cuentasCobrarTable)
+          ..where((t) => t.ventaId.equals(ventaId)))
+        .getSingleOrNull();
+  }
+
+  /// NC: deja saldo 0 y estado pagado (cuenta saldada por nota de crédito).
+  Future<void> anularCuentaPorNotaCredito(int ventaId, {String? referencia}) async {
+    final cuenta = await obtenerCuentaPorVentaId(ventaId);
+    if (cuenta == null) return; // contado o sin CxC
+    if (cuenta.saldoPendiente <= 0.001) return;
+    await (update(cuentasCobrarTable)..where((t) => t.id.equals(cuenta.id)))
+        .write(
+      CuentasCobrarTableCompanion(
+        montoAbonado: Value(cuenta.montoOriginal),
+        saldoPendiente: const Value(0.0),
+        estado: const Value(CobrarEstado.pagado),
+      ),
+    );
+  }
+
 }

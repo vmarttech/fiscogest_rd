@@ -112,4 +112,49 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       await inventarioService.restarStock(detalle.productoId, cant);
     }
   }
+
+  @override
+  Future<void> aplicarEntradaInventarioPorNc(
+    Venta venta, {
+    required String ncfNc,
+  }) async {
+    if (venta.id == null) {
+      throw Exception('La venta no tiene id');
+    }
+    if (venta.detalles.isEmpty) {
+      throw Exception(
+        'La venta no tiene líneas de detalle. No se puede devolver inventario.',
+      );
+    }
+    final ncfFact = (venta.numeroFactura ?? venta.numeroCotizacion).trim();
+    final refDoc = 'NC $ncfNc / Factura $ncfFact';
+    for (final detalle in venta.detalles) {
+      final producto = await productosDao.obtenerPorId(detalle.productoId);
+      final nombre = (detalle.nombreProducto != null &&
+              detalle.nombreProducto!.trim().isNotEmpty)
+          ? detalle.nombreProducto!.trim()
+          : (producto?.nombre ?? 'Producto ${detalle.productoId}');
+      final saldoAnterior =
+          await kardexRepository.obtenerSaldoActual(detalle.productoId);
+      final cant = detalle.cantidad.toDouble();
+      final costoUnitario = producto?.precioCompra ?? 0.0;
+      final saldoNuevo = saldoAnterior + cant;
+      final movimientoKardex = Kardex(
+        productoId: detalle.productoId,
+        tipoMovimiento: TipoMovimiento.entrada,
+        cantidad: cant,
+        saldoAnterior: saldoAnterior,
+        saldoNuevo: saldoNuevo,
+        costoUnitario: costoUnitario,
+        totalMovimiento: costoUnitario * cant,
+        fechaMovimiento: DateTime.now(),
+        documentoReferencia: refDoc,
+        observacion: 'Entrada por nota de crédito — $nombre',
+        usuarioId: venta.usuarioId,
+      );
+      await kardexRepository.registrarMovimiento(movimientoKardex);
+      await inventarioService.sumarStock(detalle.productoId, cant);
+    }
+  }
+
 }

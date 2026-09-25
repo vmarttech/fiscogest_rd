@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -562,7 +563,9 @@ class ListaComprasPage extends ConsumerWidget {
                               final buffer = StringBuffer();
                               buffer.writeln('══════════════════════════════════');
                               buffer.writeln('       COMPROBANTE DE COMPRA');
+                              final nomNeg = ref.read(configuracionControllerProvider).valueOrNull?.nombreComercial ?? 'FiscoGest RD';
                               buffer.writeln('══════════════════════════════════');
+                              buffer.writeln(nomNeg);
                               buffer.writeln('N°: ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : compra.id}');
                               buffer.writeln('Fecha: ${_formatearFecha(compra.fechaEmision)}');
                               buffer.writeln('Proveedor: ${compra.nombreProveedor}');
@@ -576,7 +579,7 @@ class ListaComprasPage extends ConsumerWidget {
                               buffer.writeln('ITBIS:     RD\$ ${compra.montoImpuesto.toStringAsFixed(2)}');
                               buffer.writeln('TOTAL:     RD\$ ${compra.totalCompra.toStringAsFixed(2)}');
                               buffer.writeln('══════════════════════════════════');
-                              buffer.writeln('FiscoGest RD');
+                              buffer.writeln(ref.read(configuracionControllerProvider).valueOrNull?.nombreComercial ?? 'FiscoGest RD');
                               await Share.share(
                                 buffer.toString(),
                                 subject: 'Compra ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : '#${compra.id}'}',

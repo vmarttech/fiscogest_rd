@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -6,11 +7,12 @@ import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_venta
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_cargada_desde_historial_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_borrador_servicio_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/convertir_cotizacion_provider.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart' as venta_providers;
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
@@ -68,6 +70,19 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         _ => AppColors.textSecondary.withValues(alpha: 0.12),
       };
 
+  String get _ncf {
+    return (venta.numeroFactura ?? '').trim();
+  }
+
+  String get _tipoComprobante {
+    final n = _ncf;
+    if (n.startsWith('B01')) return 'Crédito fiscal (B01)';
+    if (n.startsWith('B02')) return 'Consumidor final (B02)';
+    if (n.startsWith('B04')) return 'Nota de crédito (B04)';
+    if (n.isEmpty) return 'Sin NCF';
+    return 'Comprobante: $n';
+  }
+
   bool get _esCredito {
     if (venta.esCredito) return true;
     final pago = venta.formaPago.toLowerCase();
@@ -77,17 +92,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
-      final servicio = ref.read(ventaBorradorServicioProvider);
-      final resultado = await servicio.generarImpresion(venta);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(resultado),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      await ComprobantePdf.imprimirFactura(venta, empresa: ref.read(configuracionControllerProvider).valueOrNull);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -103,12 +108,17 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
   Future<void> _exportarPDF(BuildContext context, WidgetRef ref) async {
     try {
-      final servicio = ref.read(ventaBorradorServicioProvider);
-      final ruta = await servicio.exportarPDF(venta);
+      // compartir: true → hoja del sistema (WhatsApp, Bluetooth, Guardar…)
+      Venta v = venta;
+      if (v.detalles.isEmpty && v.id != null) {
+        final repo = ref.read(venta_providers.ventasRepositoryProvider);
+        v = await repo.obtenerVentaPorId(v.id!) ?? v;
+      }
+      await ComprobantePdf.imprimirFactura(v, compartir: true, empresa: ref.read(configuracionControllerProvider).valueOrNull);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Archivo generado: $ruta'),
+          const SnackBar(
+            content: Text('Elige WhatsApp, Bluetooth o Guardar…'),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
           ),
@@ -181,7 +191,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        ref.invalidate(listaVentasBorradorProvider);
+        ref.invalidate(venta_providers.listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
@@ -236,7 +246,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
             duration: const Duration(seconds: 4),
           ),
         );
-        ref.invalidate(listaVentasBorradorProvider);
+        ref.invalidate(venta_providers.listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
@@ -288,7 +298,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        ref.invalidate(listaVentasBorradorProvider);
+        ref.invalidate(venta_providers.listaVentasBorradorProvider);
       }
     } catch (e) {
       if (context.mounted) {
@@ -479,6 +489,24 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
+                            if (_ncf.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'NCF: $_ncf',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: tamanoEtiqueta,
+                                ),
+                              ),
+                              Text(
+                                _tipoComprobante,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: tamanoEtiqueta,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

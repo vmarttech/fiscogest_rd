@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
@@ -42,7 +43,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
         }
       }
       final rnc = (cli?.rncCedula ?? '').trim();
-      final esRnc = rnc.length == 9 && RegExp(r'^\d+$').hasMatch(rnc);
+      final esRnc = (rnc.length == 9 || rnc.length == 11) && RegExp(r'^\d+$').hasMatch(rnc);
       if (mounted) {
         setState(() {
           _tipoNcf = esRnc ? 'B01' : 'B02';
@@ -96,7 +97,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
       );
       if (imprimir == true && mounted) {
         try {
-          await ComprobantePdf.imprimirFactura(paraPdf);
+          await ComprobantePdf.imprimirFactura(paraPdf, empresa: ref.read(configuracionControllerProvider).valueOrNull);
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

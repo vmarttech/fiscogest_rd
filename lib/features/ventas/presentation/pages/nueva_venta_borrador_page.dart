@@ -1172,10 +1172,11 @@ class _NuevaVentaBorradorPageState
                 height: alturaBoton,
                 child: ElevatedButton(
                   onPressed: puedeGenerar && !_guardando
-                      ? () => _guardarCotizacion(esCredito: false)
+                      ? () => _guardarCotizacion(esCredito: _esCredito)
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor:
+                        _esCredito ? AppColors.warning : AppColors.primary,
                     foregroundColor: AppColors.white,
                     disabledBackgroundColor: AppColors.grey300,
                     disabledForegroundColor: AppColors.grey500,
@@ -1197,43 +1198,14 @@ class _NuevaVentaBorradorPageState
                           ),
                         )
                       : Text(
-                          'CONTADO (C)',
+                          _esCredito
+                              ? 'Crear cotización (CR)'
+                              : 'Crear cotización (C)',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: tamanoBoton,
                           ),
                         ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: SizedBox(
-                height: alturaBoton,
-                child: ElevatedButton(
-                  onPressed: puedeGenerar && !_guardando
-                      ? () => _guardarCotizacion(esCredito: true)
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.warning,
-                    foregroundColor: AppColors.white,
-                    disabledBackgroundColor: AppColors.grey300,
-                    disabledForegroundColor: AppColors.grey500,
-                    elevation: 0,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: esPantallaPequena ? 8 : 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'CRÉDITO (CR)',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: tamanoBoton,
-                    ),
-                  ),
                 ),
               ),
             ),

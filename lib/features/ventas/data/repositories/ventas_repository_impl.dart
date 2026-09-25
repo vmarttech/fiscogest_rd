@@ -422,9 +422,11 @@ class VentasRepositoryImpl implements IVentasRepository {
       throw StateError('Documento $ventaId no encontrado');
     }
     final ya = (actual.numeroFactura ?? '').trim();
-    if (ya.isNotEmpty) {
-      throw StateError('Ya tiene NCF: $ya');
+    final yaFiscal = ya.startsWith('B01') || ya.startsWith('B02');
+    if (yaFiscal) {
+      throw StateError('Ya tiene NCF fiscal: $ya');
     }
+    // Si tenía B03-… u otro correlativo interno, se reemplaza por B01/B02
     await _ventasDao.actualizarVenta(
       ventaId,
       VentasTableCompanion(

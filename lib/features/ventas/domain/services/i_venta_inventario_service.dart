@@ -6,4 +6,10 @@ abstract class IVentaInventarioService {
   /// Venta ya existente (p. ej. cotización facturada en Caja).
   /// Solo kardex + restarStock. No inserta venta.
   Future<void> aplicarSalidaInventario(Venta venta);
+
+  /// Nota de crédito: devuelve stock (kardex entrada + sumarStock).
+  Future<void> aplicarEntradaInventarioPorNc(
+    Venta venta, {
+    required String ncfNc,
+  });
 }

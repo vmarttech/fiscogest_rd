@@ -1,52 +1,99 @@
+import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/interfaces/i_configuracion_repository.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_dao.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 
 class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
   ConfiguracionRepositoryImpl(this._configuracionDao);
   final ConfiguracionDao _configuracionDao;
 
+  static const _defaults = ConfiguracionEntity(
+    id: '1',
+    nombreComercial: 'FiscoGest RD',
+    razonSocial: '',
+    rnc: '',
+    direccion: '',
+    telefono: '',
+    correo: '',
+    logoUrl: '',
+    moneda: 'DOP',
+    zonaHoraria: 'America/Santo_Domingo',
+    formatoImpresion: 'Ticket 80mm',
+    formatoFecha: 'DD/MM/YYYY',
+    impuestoPorcentaje: 18.0,
+    idioma: 'Español',
+    docMostrarLogo: true,
+    docMostrarRnc: true,
+    docMostrarDireccion: true,
+    docMostrarTelefono: true,
+    docMostrarCorreo: true,
+    docMostrarNcf: true,
+    docMostrarCliente: true,
+    docMostrarItbisDesglose: true,
+    docPiePagina: 'Gracias por su preferencia',
+  );
+
   @override
   Future<ConfiguracionEntity> obtenerConfiguracion() async {
     final model = await _configuracionDao.obtenerConfiguracion();
-    if (model == null) {
-      return const ConfiguracionEntity(
-        id: '1',
-        nombreComercial: 'FiscoGest RD',
-        razonSocial: 'FiscoGest RD, S.R.L.',
-        rnc: '131-00000-1',
-        direccion: 'Av. Principal, Santo Domingo',
-        telefono: '809-000-0000',
-        correo: 'admin@fiscogest.rd',
-        logoUrl: '',
-        moneda: 'DOP (\$)',
-        zonaHoraria: 'America/Santo_Domingo',
-        formatoImpresion: 'Ticket 80mm',
-        formatoFecha: 'DD/MM/YYYY',
-        impuestoPorcentaje: 18.0,
-        idioma: 'Español',
-      );
-    }
+    if (model == null) return _defaults;
     return ConfiguracionEntity(
       id: model.id.toString(),
       nombreComercial: model.nombreNegocio,
-      razonSocial: 'FiscoGest RD, S.R.L.',
+      razonSocial: model.razonSocial,
       rnc: model.rncCedula,
-      direccion: 'Av. Principal, Santo Domingo',
-      telefono: '809-000-0000',
-      correo: 'admin@fiscogest.rd',
-      logoUrl: '',
+      direccion: model.direccion,
+      telefono: model.telefono,
+      correo: model.correo,
+      logoUrl: model.logoUrl,
       moneda: model.moneda,
-      zonaHoraria: 'America/Santo_Domingo',
-      formatoImpresion: 'Ticket 80mm',
+      zonaHoraria: model.zonaHoraria,
+      formatoImpresion: model.formatoImpresion,
       formatoFecha: model.formatoFecha,
       impuestoPorcentaje: model.impuestoPorcentaje,
       idioma: model.idioma,
+      docMostrarLogo: model.docMostrarLogo,
+      docMostrarRnc: model.docMostrarRnc,
+      docMostrarDireccion: model.docMostrarDireccion,
+      docMostrarTelefono: model.docMostrarTelefono,
+      docMostrarCorreo: model.docMostrarCorreo,
+      docMostrarNcf: model.docMostrarNcf,
+      docMostrarCliente: model.docMostrarCliente,
+      docMostrarItbisDesglose: model.docMostrarItbisDesglose,
+      docPiePagina: model.docPiePagina,
     );
   }
 
   @override
-  Future<void> guardarConfiguracion(ConfiguracionEntity configuracion) async {
-    // Implementación de persistencia local adaptada
+  Future<void> guardarConfiguracion(ConfiguracionEntity c) async {
+    final id = int.tryParse(c.id) ?? 1;
+    await _configuracionDao.guardarConfiguracion(
+      ConfiguracionTableCompanion(
+        id: Value(id),
+        nombreNegocio: Value(c.nombreComercial),
+        razonSocial: Value(c.razonSocial),
+        rncCedula: Value(c.rnc),
+        direccion: Value(c.direccion),
+        telefono: Value(c.telefono),
+        correo: Value(c.correo),
+        logoUrl: Value(c.logoUrl),
+        moneda: Value(c.moneda),
+        zonaHoraria: Value(c.zonaHoraria),
+        formatoImpresion: Value(c.formatoImpresion),
+        formatoFecha: Value(c.formatoFecha),
+        impuestoPorcentaje: Value(c.impuestoPorcentaje),
+        idioma: Value(c.idioma),
+        docMostrarLogo: Value(c.docMostrarLogo),
+        docMostrarRnc: Value(c.docMostrarRnc),
+        docMostrarDireccion: Value(c.docMostrarDireccion),
+        docMostrarTelefono: Value(c.docMostrarTelefono),
+        docMostrarCorreo: Value(c.docMostrarCorreo),
+        docMostrarNcf: Value(c.docMostrarNcf),
+        docMostrarCliente: Value(c.docMostrarCliente),
+        docMostrarItbisDesglose: Value(c.docMostrarItbisDesglose),
+        docPiePagina: Value(c.docPiePagina),
+      ),
+    );
   }
 }

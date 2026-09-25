@@ -98,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 33;
+  int get schemaVersion => 35;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
@@ -368,6 +368,46 @@ class AppDatabase extends _$AppDatabase {
           );
         } catch (_) {}
       }
+      if (from < 34) {
+        final cols = <String, String>{
+          'razon_social': "TEXT NOT NULL DEFAULT ''",
+          'direccion': "TEXT NOT NULL DEFAULT ''",
+          'telefono': "TEXT NOT NULL DEFAULT ''",
+          'correo': "TEXT NOT NULL DEFAULT ''",
+          'logo_url': "TEXT NOT NULL DEFAULT ''",
+          'zona_horaria': "TEXT NOT NULL DEFAULT 'America/Santo_Domingo'",
+          'formato_impresion': "TEXT NOT NULL DEFAULT 'Ticket 80mm'",
+        };
+        for (final e in cols.entries) {
+          try {
+            await customStatement(
+              'ALTER TABLE configuracion_table ADD COLUMN ${e.key} ${e.value}',
+            );
+          } catch (_) {}
+        }
+      }
+
+      if (from < 35) {
+        final cols = <String, String>{
+          'doc_mostrar_logo': 'INTEGER NOT NULL DEFAULT 1',
+          'doc_mostrar_rnc': 'INTEGER NOT NULL DEFAULT 1',
+          'doc_mostrar_direccion': 'INTEGER NOT NULL DEFAULT 1',
+          'doc_mostrar_telefono': 'INTEGER NOT NULL DEFAULT 1',
+          'doc_mostrar_correo': 'INTEGER NOT NULL DEFAULT 1',
+          'doc_mostrar_ncf': 'INTEGER NOT NULL DEFAULT 1',
+          'doc_mostrar_cliente': 'INTEGER NOT NULL DEFAULT 1',
+          'doc_mostrar_itbis_desglose': 'INTEGER NOT NULL DEFAULT 1',
+          'doc_pie_pagina': "TEXT NOT NULL DEFAULT 'Gracias por su preferencia'",
+        };
+        for (final e in cols.entries) {
+          try {
+            await customStatement(
+              'ALTER TABLE configuracion_table ADD COLUMN ${e.key} ${e.value}',
+            );
+          } catch (_) {}
+        }
+      }
+
     },
   );
 }
