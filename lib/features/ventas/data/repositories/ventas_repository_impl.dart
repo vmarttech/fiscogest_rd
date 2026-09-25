@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
@@ -13,24 +14,44 @@ import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_reposi
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 
 class VentasRepositoryImpl implements IVentasRepository {
-  VentasRepositoryImpl(this._ventasDao, [CuentasCobrarDao? _]);
-  final VentasDao _ventasDao;
+  VentasRepositoryImpl(
+    this._ventasDao, [
+    CuentasCobrarDao? _,
+    ProductosDao? productosDao,
+  ]) : _productosDao = productosDao;
 
-  List<DetalleVenta> _mapearDetalles(List<VentaDetalleData> filas) {
-    return filas
-        .map(
-          (d) => DetalleVenta(
-            id: d.id,
-            productoId: d.productoId,
-            cantidad: d.cantidad.round().clamp(1, 999999),
-            precioUnitario: d.precioUnitario,
-            subtotal: d.subtotal,
-            montoDescuento: d.descuentoLinea,
-            tasaImpuesto: d.impuesto,
-            subtotalLinea: d.subtotal,
-          ),
-        )
-        .toList();
+  final VentasDao _ventasDao;
+  final ProductosDao? _productosDao;
+
+  Future<List<DetalleVenta>> _mapearDetalles(
+    List<VentaDetalleData> filas,
+  ) async {
+    final out = <DetalleVenta>[];
+    for (final d in filas) {
+      String? nombre;
+      final dao = _productosDao;
+      if (dao != null && d.productoId > 0) {
+        try {
+          final p = await dao.obtenerPorId(d.productoId);
+          final n = p?.nombre.trim();
+          if (n != null && n.isNotEmpty) nombre = n;
+        } catch (_) {}
+      }
+      out.add(
+        DetalleVenta(
+          id: d.id,
+          productoId: d.productoId,
+          cantidad: d.cantidad.round().clamp(1, 999999),
+          precioUnitario: d.precioUnitario,
+          subtotal: d.subtotal,
+          nombreProducto: nombre,
+          montoDescuento: d.descuentoLinea,
+          tasaImpuesto: d.impuesto,
+          subtotalLinea: d.subtotal,
+        ),
+      );
+    }
+    return out;
   }
 
   Future<void> _guardarDetalles(int ventaId, List<DetalleVenta> detalles) async {
@@ -164,7 +185,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<Venta?> obtenerVentaPorId(int ventaId) async {
     final registro = await _ventasDao.obtenerVentaPorId(ventaId);
     if (registro == null) return null;
-    final dets = _mapearDetalles(await _ventasDao.listarDetalles(ventaId));
+    final dets = await _mapearDetalles(await _ventasDao.listarDetalles(ventaId));
     return _mapearDesdeVentasTableData(registro, detalles: dets);
   }
 
@@ -172,7 +193,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId) async {
     final registro = await _ventasDao.obtenerVentaPorId(cotizacionId);
     if (registro == null) return null;
-    final dets = _mapearDetalles(await _ventasDao.listarDetalles(cotizacionId));
+    final dets = await _mapearDetalles(await _ventasDao.listarDetalles(cotizacionId));
     return _mapearDesdeVentasTableData(
       registro,
       esCotizacion: true,
@@ -274,7 +295,7 @@ class VentasRepositoryImpl implements IVentasRepository {
     );
     await _guardarDetalles(id, venta.detalles);
     final registro = await _ventasDao.obtenerVentaPorId(id);
-    final dets = _mapearDetalles(await _ventasDao.listarDetalles(id));
+    final dets = await _mapearDetalles(await _ventasDao.listarDetalles(id));
     return _mapearDesdeVentasTableData(registro!, detalles: dets);
   }
 
@@ -310,7 +331,7 @@ class VentasRepositoryImpl implements IVentasRepository {
     }
     await _guardarDetalles(id, cotizacion.detalles);
     final registro = await _ventasDao.obtenerVentaPorId(id);
-    final dets = _mapearDetalles(await _ventasDao.listarDetalles(id));
+    final dets = await _mapearDetalles(await _ventasDao.listarDetalles(id));
     if (dets.isEmpty) {
       throw Exception(
         'La cotización se guardó pero no se persistieron los productos. '

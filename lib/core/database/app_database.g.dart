@@ -19353,6 +19353,520 @@ class CobrosTableCompanion extends UpdateCompanion<CobroData> {
   }
 }
 
+class $CuotasCuentaTableTable extends CuotasCuentaTable
+    with TableInfo<$CuotasCuentaTableTable, CuotaCuentaData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CuotasCuentaTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _cuentaCobrarIdMeta = const VerificationMeta(
+    'cuentaCobrarId',
+  );
+  @override
+  late final GeneratedColumn<int> cuentaCobrarId = GeneratedColumn<int>(
+    'cuenta_cobrar_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES cuentas_cobrar_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _numeroMeta = const VerificationMeta('numero');
+  @override
+  late final GeneratedColumn<int> numero = GeneratedColumn<int>(
+    'numero',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _montoMeta = const VerificationMeta('monto');
+  @override
+  late final GeneratedColumn<double> monto = GeneratedColumn<double>(
+    'monto',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _montoPagadoMeta = const VerificationMeta(
+    'montoPagado',
+  );
+  @override
+  late final GeneratedColumn<double> montoPagado = GeneratedColumn<double>(
+    'monto_pagado',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _fechaVencimientoMeta = const VerificationMeta(
+    'fechaVencimiento',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaVencimiento =
+      GeneratedColumn<DateTime>(
+        'fecha_vencimiento',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
+  @override
+  late final GeneratedColumn<String> estado = GeneratedColumn<String>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pendiente'),
+  );
+  static const VerificationMeta _fechaPagoMeta = const VerificationMeta(
+    'fechaPago',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaPago = GeneratedColumn<DateTime>(
+    'fecha_pago',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    cuentaCobrarId,
+    numero,
+    monto,
+    montoPagado,
+    fechaVencimiento,
+    estado,
+    fechaPago,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cuotas_cuenta_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CuotaCuentaData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('cuenta_cobrar_id')) {
+      context.handle(
+        _cuentaCobrarIdMeta,
+        cuentaCobrarId.isAcceptableOrUnknown(
+          data['cuenta_cobrar_id']!,
+          _cuentaCobrarIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_cuentaCobrarIdMeta);
+    }
+    if (data.containsKey('numero')) {
+      context.handle(
+        _numeroMeta,
+        numero.isAcceptableOrUnknown(data['numero']!, _numeroMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_numeroMeta);
+    }
+    if (data.containsKey('monto')) {
+      context.handle(
+        _montoMeta,
+        monto.isAcceptableOrUnknown(data['monto']!, _montoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_montoMeta);
+    }
+    if (data.containsKey('monto_pagado')) {
+      context.handle(
+        _montoPagadoMeta,
+        montoPagado.isAcceptableOrUnknown(
+          data['monto_pagado']!,
+          _montoPagadoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fecha_vencimiento')) {
+      context.handle(
+        _fechaVencimientoMeta,
+        fechaVencimiento.isAcceptableOrUnknown(
+          data['fecha_vencimiento']!,
+          _fechaVencimientoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaVencimientoMeta);
+    }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    }
+    if (data.containsKey('fecha_pago')) {
+      context.handle(
+        _fechaPagoMeta,
+        fechaPago.isAcceptableOrUnknown(data['fecha_pago']!, _fechaPagoMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CuotaCuentaData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CuotaCuentaData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      cuentaCobrarId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cuenta_cobrar_id'],
+      )!,
+      numero: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numero'],
+      )!,
+      monto: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto'],
+      )!,
+      montoPagado: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_pagado'],
+      )!,
+      fechaVencimiento: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_vencimiento'],
+      )!,
+      estado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}estado'],
+      )!,
+      fechaPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_pago'],
+      ),
+    );
+  }
+
+  @override
+  $CuotasCuentaTableTable createAlias(String alias) {
+    return $CuotasCuentaTableTable(attachedDatabase, alias);
+  }
+}
+
+class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
+  final int id;
+  final int cuentaCobrarId;
+  final int numero;
+  final double monto;
+  final double montoPagado;
+  final DateTime fechaVencimiento;
+
+  /// pendiente | parcial | pagada
+  final String estado;
+  final DateTime? fechaPago;
+  const CuotaCuentaData({
+    required this.id,
+    required this.cuentaCobrarId,
+    required this.numero,
+    required this.monto,
+    required this.montoPagado,
+    required this.fechaVencimiento,
+    required this.estado,
+    this.fechaPago,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['cuenta_cobrar_id'] = Variable<int>(cuentaCobrarId);
+    map['numero'] = Variable<int>(numero);
+    map['monto'] = Variable<double>(monto);
+    map['monto_pagado'] = Variable<double>(montoPagado);
+    map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento);
+    map['estado'] = Variable<String>(estado);
+    if (!nullToAbsent || fechaPago != null) {
+      map['fecha_pago'] = Variable<DateTime>(fechaPago);
+    }
+    return map;
+  }
+
+  CuotasCuentaTableCompanion toCompanion(bool nullToAbsent) {
+    return CuotasCuentaTableCompanion(
+      id: Value(id),
+      cuentaCobrarId: Value(cuentaCobrarId),
+      numero: Value(numero),
+      monto: Value(monto),
+      montoPagado: Value(montoPagado),
+      fechaVencimiento: Value(fechaVencimiento),
+      estado: Value(estado),
+      fechaPago: fechaPago == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaPago),
+    );
+  }
+
+  factory CuotaCuentaData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CuotaCuentaData(
+      id: serializer.fromJson<int>(json['id']),
+      cuentaCobrarId: serializer.fromJson<int>(json['cuentaCobrarId']),
+      numero: serializer.fromJson<int>(json['numero']),
+      monto: serializer.fromJson<double>(json['monto']),
+      montoPagado: serializer.fromJson<double>(json['montoPagado']),
+      fechaVencimiento: serializer.fromJson<DateTime>(json['fechaVencimiento']),
+      estado: serializer.fromJson<String>(json['estado']),
+      fechaPago: serializer.fromJson<DateTime?>(json['fechaPago']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'cuentaCobrarId': serializer.toJson<int>(cuentaCobrarId),
+      'numero': serializer.toJson<int>(numero),
+      'monto': serializer.toJson<double>(monto),
+      'montoPagado': serializer.toJson<double>(montoPagado),
+      'fechaVencimiento': serializer.toJson<DateTime>(fechaVencimiento),
+      'estado': serializer.toJson<String>(estado),
+      'fechaPago': serializer.toJson<DateTime?>(fechaPago),
+    };
+  }
+
+  CuotaCuentaData copyWith({
+    int? id,
+    int? cuentaCobrarId,
+    int? numero,
+    double? monto,
+    double? montoPagado,
+    DateTime? fechaVencimiento,
+    String? estado,
+    Value<DateTime?> fechaPago = const Value.absent(),
+  }) => CuotaCuentaData(
+    id: id ?? this.id,
+    cuentaCobrarId: cuentaCobrarId ?? this.cuentaCobrarId,
+    numero: numero ?? this.numero,
+    monto: monto ?? this.monto,
+    montoPagado: montoPagado ?? this.montoPagado,
+    fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
+    estado: estado ?? this.estado,
+    fechaPago: fechaPago.present ? fechaPago.value : this.fechaPago,
+  );
+  CuotaCuentaData copyWithCompanion(CuotasCuentaTableCompanion data) {
+    return CuotaCuentaData(
+      id: data.id.present ? data.id.value : this.id,
+      cuentaCobrarId: data.cuentaCobrarId.present
+          ? data.cuentaCobrarId.value
+          : this.cuentaCobrarId,
+      numero: data.numero.present ? data.numero.value : this.numero,
+      monto: data.monto.present ? data.monto.value : this.monto,
+      montoPagado: data.montoPagado.present
+          ? data.montoPagado.value
+          : this.montoPagado,
+      fechaVencimiento: data.fechaVencimiento.present
+          ? data.fechaVencimiento.value
+          : this.fechaVencimiento,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      fechaPago: data.fechaPago.present ? data.fechaPago.value : this.fechaPago,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CuotaCuentaData(')
+          ..write('id: $id, ')
+          ..write('cuentaCobrarId: $cuentaCobrarId, ')
+          ..write('numero: $numero, ')
+          ..write('monto: $monto, ')
+          ..write('montoPagado: $montoPagado, ')
+          ..write('fechaVencimiento: $fechaVencimiento, ')
+          ..write('estado: $estado, ')
+          ..write('fechaPago: $fechaPago')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    cuentaCobrarId,
+    numero,
+    monto,
+    montoPagado,
+    fechaVencimiento,
+    estado,
+    fechaPago,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CuotaCuentaData &&
+          other.id == this.id &&
+          other.cuentaCobrarId == this.cuentaCobrarId &&
+          other.numero == this.numero &&
+          other.monto == this.monto &&
+          other.montoPagado == this.montoPagado &&
+          other.fechaVencimiento == this.fechaVencimiento &&
+          other.estado == this.estado &&
+          other.fechaPago == this.fechaPago);
+}
+
+class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
+  final Value<int> id;
+  final Value<int> cuentaCobrarId;
+  final Value<int> numero;
+  final Value<double> monto;
+  final Value<double> montoPagado;
+  final Value<DateTime> fechaVencimiento;
+  final Value<String> estado;
+  final Value<DateTime?> fechaPago;
+  const CuotasCuentaTableCompanion({
+    this.id = const Value.absent(),
+    this.cuentaCobrarId = const Value.absent(),
+    this.numero = const Value.absent(),
+    this.monto = const Value.absent(),
+    this.montoPagado = const Value.absent(),
+    this.fechaVencimiento = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.fechaPago = const Value.absent(),
+  });
+  CuotasCuentaTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int cuentaCobrarId,
+    required int numero,
+    required double monto,
+    this.montoPagado = const Value.absent(),
+    required DateTime fechaVencimiento,
+    this.estado = const Value.absent(),
+    this.fechaPago = const Value.absent(),
+  }) : cuentaCobrarId = Value(cuentaCobrarId),
+       numero = Value(numero),
+       monto = Value(monto),
+       fechaVencimiento = Value(fechaVencimiento);
+  static Insertable<CuotaCuentaData> custom({
+    Expression<int>? id,
+    Expression<int>? cuentaCobrarId,
+    Expression<int>? numero,
+    Expression<double>? monto,
+    Expression<double>? montoPagado,
+    Expression<DateTime>? fechaVencimiento,
+    Expression<String>? estado,
+    Expression<DateTime>? fechaPago,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (cuentaCobrarId != null) 'cuenta_cobrar_id': cuentaCobrarId,
+      if (numero != null) 'numero': numero,
+      if (monto != null) 'monto': monto,
+      if (montoPagado != null) 'monto_pagado': montoPagado,
+      if (fechaVencimiento != null) 'fecha_vencimiento': fechaVencimiento,
+      if (estado != null) 'estado': estado,
+      if (fechaPago != null) 'fecha_pago': fechaPago,
+    });
+  }
+
+  CuotasCuentaTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? cuentaCobrarId,
+    Value<int>? numero,
+    Value<double>? monto,
+    Value<double>? montoPagado,
+    Value<DateTime>? fechaVencimiento,
+    Value<String>? estado,
+    Value<DateTime?>? fechaPago,
+  }) {
+    return CuotasCuentaTableCompanion(
+      id: id ?? this.id,
+      cuentaCobrarId: cuentaCobrarId ?? this.cuentaCobrarId,
+      numero: numero ?? this.numero,
+      monto: monto ?? this.monto,
+      montoPagado: montoPagado ?? this.montoPagado,
+      fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
+      estado: estado ?? this.estado,
+      fechaPago: fechaPago ?? this.fechaPago,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (cuentaCobrarId.present) {
+      map['cuenta_cobrar_id'] = Variable<int>(cuentaCobrarId.value);
+    }
+    if (numero.present) {
+      map['numero'] = Variable<int>(numero.value);
+    }
+    if (monto.present) {
+      map['monto'] = Variable<double>(monto.value);
+    }
+    if (montoPagado.present) {
+      map['monto_pagado'] = Variable<double>(montoPagado.value);
+    }
+    if (fechaVencimiento.present) {
+      map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<String>(estado.value);
+    }
+    if (fechaPago.present) {
+      map['fecha_pago'] = Variable<DateTime>(fechaPago.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CuotasCuentaTableCompanion(')
+          ..write('id: $id, ')
+          ..write('cuentaCobrarId: $cuentaCobrarId, ')
+          ..write('numero: $numero, ')
+          ..write('monto: $monto, ')
+          ..write('montoPagado: $montoPagado, ')
+          ..write('fechaVencimiento: $fechaVencimiento, ')
+          ..write('estado: $estado, ')
+          ..write('fechaPago: $fechaPago')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CuentasPagarTableTable extends CuentasPagarTable
     with TableInfo<$CuentasPagarTableTable, CuentaPagarData> {
   @override
@@ -25770,6 +26284,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ReferenciasCreditoTableTable referenciasCreditoTable =
       $ReferenciasCreditoTableTable(this);
   late final $CobrosTableTable cobrosTable = $CobrosTableTable(this);
+  late final $CuotasCuentaTableTable cuotasCuentaTable =
+      $CuotasCuentaTableTable(this);
   late final $CuentasPagarTableTable cuentasPagarTable =
       $CuentasPagarTableTable(this);
   late final $PagosProveedorTableTable pagosProveedorTable =
@@ -25822,6 +26338,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     solicitudesCreditoTable,
     referenciasCreditoTable,
     cobrosTable,
+    cuotasCuentaTable,
     cuentasPagarTable,
     pagosProveedorTable,
     descuentosTable,
@@ -25881,6 +26398,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('cobros_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'cuentas_cobrar_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('cuotas_cuenta_table', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -37472,6 +37996,30 @@ final class $$CuentasCobrarTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$CuotasCuentaTableTable, List<CuotaCuentaData>>
+  _cuotasCuentaTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.cuotasCuentaTable,
+        aliasName: $_aliasNameGenerator(
+          db.cuentasCobrarTable.id,
+          db.cuotasCuentaTable.cuentaCobrarId,
+        ),
+      );
+
+  $$CuotasCuentaTableTableProcessedTableManager get cuotasCuentaTableRefs {
+    final manager = $$CuotasCuentaTableTableTableManager(
+      $_db,
+      $_db.cuotasCuentaTable,
+    ).filter((f) => f.cuentaCobrarId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _cuotasCuentaTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CuentasCobrarTableTableFilterComposer
@@ -37576,6 +38124,31 @@ class $$CuentasCobrarTableTableFilterComposer
           }) => $$CobrosTableTableFilterComposer(
             $db: $db,
             $table: $db.cobrosTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> cuotasCuentaTableRefs(
+    Expression<bool> Function($$CuotasCuentaTableTableFilterComposer f) f,
+  ) {
+    final $$CuotasCuentaTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cuotasCuentaTable,
+      getReferencedColumn: (t) => t.cuentaCobrarId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CuotasCuentaTableTableFilterComposer(
+            $db: $db,
+            $table: $db.cuotasCuentaTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -37777,6 +38350,32 @@ class $$CuentasCobrarTableTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> cuotasCuentaTableRefs<T extends Object>(
+    Expression<T> Function($$CuotasCuentaTableTableAnnotationComposer a) f,
+  ) {
+    final $$CuotasCuentaTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.cuotasCuentaTable,
+          getReferencedColumn: (t) => t.cuentaCobrarId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CuotasCuentaTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.cuotasCuentaTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CuentasCobrarTableTableTableManager
@@ -37796,6 +38395,7 @@ class $$CuentasCobrarTableTableTableManager
             bool clienteId,
             bool ventaId,
             bool cobrosTableRefs,
+            bool cuotasCuentaTableRefs,
           })
         > {
   $$CuentasCobrarTableTableTableManager(
@@ -37863,11 +38463,17 @@ class $$CuentasCobrarTableTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({clienteId = false, ventaId = false, cobrosTableRefs = false}) {
+              ({
+                clienteId = false,
+                ventaId = false,
+                cobrosTableRefs = false,
+                cuotasCuentaTableRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (cobrosTableRefs) db.cobrosTable,
+                    if (cuotasCuentaTableRefs) db.cuotasCuentaTable,
                   ],
                   addJoins:
                       <
@@ -37941,6 +38547,27 @@ class $$CuentasCobrarTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (cuotasCuentaTableRefs)
+                        await $_getPrefetchedData<
+                          CuentaCobrarData,
+                          $CuentasCobrarTableTable,
+                          CuotaCuentaData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CuentasCobrarTableTableReferences
+                              ._cuotasCuentaTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CuentasCobrarTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).cuotasCuentaTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.cuentaCobrarId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -37965,6 +38592,7 @@ typedef $$CuentasCobrarTableTableProcessedTableManager =
         bool clienteId,
         bool ventaId,
         bool cobrosTableRefs,
+        bool cuotasCuentaTableRefs,
       })
     >;
 typedef $$ParametrosCreditoTableTableCreateCompanionBuilder =
@@ -39842,6 +40470,400 @@ typedef $$CobrosTableTableProcessedTableManager =
       $$CobrosTableTableUpdateCompanionBuilder,
       (CobroData, $$CobrosTableTableReferences),
       CobroData,
+      PrefetchHooks Function({bool cuentaCobrarId})
+    >;
+typedef $$CuotasCuentaTableTableCreateCompanionBuilder =
+    CuotasCuentaTableCompanion Function({
+      Value<int> id,
+      required int cuentaCobrarId,
+      required int numero,
+      required double monto,
+      Value<double> montoPagado,
+      required DateTime fechaVencimiento,
+      Value<String> estado,
+      Value<DateTime?> fechaPago,
+    });
+typedef $$CuotasCuentaTableTableUpdateCompanionBuilder =
+    CuotasCuentaTableCompanion Function({
+      Value<int> id,
+      Value<int> cuentaCobrarId,
+      Value<int> numero,
+      Value<double> monto,
+      Value<double> montoPagado,
+      Value<DateTime> fechaVencimiento,
+      Value<String> estado,
+      Value<DateTime?> fechaPago,
+    });
+
+final class $$CuotasCuentaTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CuotasCuentaTableTable,
+          CuotaCuentaData
+        > {
+  $$CuotasCuentaTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CuentasCobrarTableTable _cuentaCobrarIdTable(_$AppDatabase db) =>
+      db.cuentasCobrarTable.createAlias(
+        $_aliasNameGenerator(
+          db.cuotasCuentaTable.cuentaCobrarId,
+          db.cuentasCobrarTable.id,
+        ),
+      );
+
+  $$CuentasCobrarTableTableProcessedTableManager get cuentaCobrarId {
+    final $_column = $_itemColumn<int>('cuenta_cobrar_id')!;
+
+    final manager = $$CuentasCobrarTableTableTableManager(
+      $_db,
+      $_db.cuentasCobrarTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cuentaCobrarIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CuotasCuentaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $CuotasCuentaTableTable> {
+  $$CuotasCuentaTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numero => $composableBuilder(
+    column: $table.numero,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montoPagado => $composableBuilder(
+    column: $table.montoPagado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaPago => $composableBuilder(
+    column: $table.fechaPago,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CuentasCobrarTableTableFilterComposer get cuentaCobrarId {
+    final $$CuentasCobrarTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cuentaCobrarId,
+      referencedTable: $db.cuentasCobrarTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CuentasCobrarTableTableFilterComposer(
+            $db: $db,
+            $table: $db.cuentasCobrarTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CuotasCuentaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $CuotasCuentaTableTable> {
+  $$CuotasCuentaTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get numero => $composableBuilder(
+    column: $table.numero,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montoPagado => $composableBuilder(
+    column: $table.montoPagado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaPago => $composableBuilder(
+    column: $table.fechaPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CuentasCobrarTableTableOrderingComposer get cuentaCobrarId {
+    final $$CuentasCobrarTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cuentaCobrarId,
+      referencedTable: $db.cuentasCobrarTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CuentasCobrarTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.cuentasCobrarTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CuotasCuentaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CuotasCuentaTableTable> {
+  $$CuotasCuentaTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get numero =>
+      $composableBuilder(column: $table.numero, builder: (column) => column);
+
+  GeneratedColumn<double> get monto =>
+      $composableBuilder(column: $table.monto, builder: (column) => column);
+
+  GeneratedColumn<double> get montoPagado => $composableBuilder(
+    column: $table.montoPagado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fechaPago =>
+      $composableBuilder(column: $table.fechaPago, builder: (column) => column);
+
+  $$CuentasCobrarTableTableAnnotationComposer get cuentaCobrarId {
+    final $$CuentasCobrarTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.cuentaCobrarId,
+          referencedTable: $db.cuentasCobrarTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CuentasCobrarTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.cuentasCobrarTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CuotasCuentaTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CuotasCuentaTableTable,
+          CuotaCuentaData,
+          $$CuotasCuentaTableTableFilterComposer,
+          $$CuotasCuentaTableTableOrderingComposer,
+          $$CuotasCuentaTableTableAnnotationComposer,
+          $$CuotasCuentaTableTableCreateCompanionBuilder,
+          $$CuotasCuentaTableTableUpdateCompanionBuilder,
+          (CuotaCuentaData, $$CuotasCuentaTableTableReferences),
+          CuotaCuentaData,
+          PrefetchHooks Function({bool cuentaCobrarId})
+        > {
+  $$CuotasCuentaTableTableTableManager(
+    _$AppDatabase db,
+    $CuotasCuentaTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CuotasCuentaTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CuotasCuentaTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CuotasCuentaTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> cuentaCobrarId = const Value.absent(),
+                Value<int> numero = const Value.absent(),
+                Value<double> monto = const Value.absent(),
+                Value<double> montoPagado = const Value.absent(),
+                Value<DateTime> fechaVencimiento = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+                Value<DateTime?> fechaPago = const Value.absent(),
+              }) => CuotasCuentaTableCompanion(
+                id: id,
+                cuentaCobrarId: cuentaCobrarId,
+                numero: numero,
+                monto: monto,
+                montoPagado: montoPagado,
+                fechaVencimiento: fechaVencimiento,
+                estado: estado,
+                fechaPago: fechaPago,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int cuentaCobrarId,
+                required int numero,
+                required double monto,
+                Value<double> montoPagado = const Value.absent(),
+                required DateTime fechaVencimiento,
+                Value<String> estado = const Value.absent(),
+                Value<DateTime?> fechaPago = const Value.absent(),
+              }) => CuotasCuentaTableCompanion.insert(
+                id: id,
+                cuentaCobrarId: cuentaCobrarId,
+                numero: numero,
+                monto: monto,
+                montoPagado: montoPagado,
+                fechaVencimiento: fechaVencimiento,
+                estado: estado,
+                fechaPago: fechaPago,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CuotasCuentaTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({cuentaCobrarId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (cuentaCobrarId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.cuentaCobrarId,
+                                referencedTable:
+                                    $$CuotasCuentaTableTableReferences
+                                        ._cuentaCobrarIdTable(db),
+                                referencedColumn:
+                                    $$CuotasCuentaTableTableReferences
+                                        ._cuentaCobrarIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CuotasCuentaTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CuotasCuentaTableTable,
+      CuotaCuentaData,
+      $$CuotasCuentaTableTableFilterComposer,
+      $$CuotasCuentaTableTableOrderingComposer,
+      $$CuotasCuentaTableTableAnnotationComposer,
+      $$CuotasCuentaTableTableCreateCompanionBuilder,
+      $$CuotasCuentaTableTableUpdateCompanionBuilder,
+      (CuotaCuentaData, $$CuotasCuentaTableTableReferences),
+      CuotaCuentaData,
       PrefetchHooks Function({bool cuentaCobrarId})
     >;
 typedef $$CuentasPagarTableTableCreateCompanionBuilder =
@@ -43771,6 +44793,8 @@ class $AppDatabaseManager {
       );
   $$CobrosTableTableTableManager get cobrosTable =>
       $$CobrosTableTableTableManager(_db, _db.cobrosTable);
+  $$CuotasCuentaTableTableTableManager get cuotasCuentaTable =>
+      $$CuotasCuentaTableTableTableManager(_db, _db.cuotasCuentaTable);
   $$CuentasPagarTableTableTableManager get cuentasPagarTable =>
       $$CuentasPagarTableTableTableManager(_db, _db.cuentasPagarTable);
   $$PagosProveedorTableTableTableManager get pagosProveedorTable =>

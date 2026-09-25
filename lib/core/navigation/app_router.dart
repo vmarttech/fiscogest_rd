@@ -20,6 +20,7 @@ import 'package:fiscogest_rd/features/creditos/presentation/pages/credito_inicio
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/detalle_solicitud_credito_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/detalle_cuenta_cobrar_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/config_credito_page.dart';
 
 
@@ -198,6 +199,19 @@ GoRoute(
             path: 'cuentas',
             name: CuentasCobrarPage.routeName,
             builder: (_, __) => const AppShell(child: CuentasCobrarPage()),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: DetalleCuentaCobrarPage.routeName,
+                builder: (context, state) {
+                  final id =
+                      int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+                  return AppShell(
+                    child: DetalleCuentaCobrarPage(cuentaId: id),
+                  );
+                },
+              ),
+            ],
           ),
 
           GoRoute(

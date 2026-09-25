@@ -78,4 +78,11 @@ abstract class ICuentaPorCobrarRepository {
     required int diasAnticipacion,
     int? limite,
   });
+
+  /// Genera o regenera el plan de cuotas en BD.
+  Future<void> generarPlanCuotas({
+    required int cuentaId,
+    required int numeroCuotas,
+    DateTime? primerVencimiento,
+  });
 }

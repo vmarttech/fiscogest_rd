@@ -6,11 +6,29 @@ import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/estado_credito.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 
 final cuentasCobrarListaProvider =
     FutureProvider.autoDispose<List<CuentaPorCobrar>>((ref) async {
   final repo = ref.watch(cuentaPorCobrarRepositoryProvider);
-  return repo.listarCuentas();
+  final lista = await repo.listarCuentas();
+  // Enriquecer nombre de cliente (BD no lo denormaliza en CXC)
+  try {
+    final clientesRepo = ref.watch(clienteRepositoryProvider);
+    final out = <CuentaPorCobrar>[];
+    for (final c in lista) {
+      if (c.clienteNombre != null && c.clienteNombre!.isNotEmpty) {
+        out.add(c);
+        continue;
+      }
+      final cli = await clientesRepo.obtenerClientePorId(c.clienteId);
+      final nombre = cli?.nombre ?? 'Cliente #${c.clienteId}';
+      out.add(c.copyWith(clienteNombre: nombre));
+    }
+    return out;
+  } catch (_) {
+    return lista;
+  }
 });
 
 final creditoTotalesProvider =
@@ -130,64 +148,81 @@ class CuentasCobrarPage extends ConsumerWidget {
                       separatorBuilder: (_, __) => AppLayout.vS,
                       itemBuilder: (_, i) {
                         final c = lista[i];
-                        return AppCard(
-                          borderColor: AppColors.border,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      c.numero ?? 'CXC-${c.id}',
-                                      style: AppTypography.bodyMedium
-                                          .copyWith(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    Text(
-                                      c.clienteNombre ??
-                                          'Cliente #${c.clienteId}',
-                                      style: AppTypography.bodySmall
-                                          .copyWith(
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Vence: ${_fmtFecha.format(c.fechaVencimiento)}'
-                                      '${c.ventaId != null ? ' · Venta #${c.ventaId}' : ''}',
-                                      style: AppTypography.bodySmall
-                                          .copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              final id = c.id;
+                              if (id == null) return;
+                              context.push('/creditos/cuentas/$id');
+                            },
+                            child: AppCard(
+                              borderColor: AppColors.border,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                              child: Row(
                                 children: [
-                                  Text(
-                                    'RD\$ ${_fmt.format(c.saldoPendiente)}',
-                                    style: AppTypography.bodyMedium
-                                        .copyWith(
-                                      fontWeight: FontWeight.bold,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          c.numero ?? 'CXC-${c.id}',
+                                          style: AppTypography.bodyMedium
+                                              .copyWith(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        Text(
+                                          c.clienteNombre ??
+                                              'Cliente #${c.clienteId}',
+                                          style: AppTypography.bodySmall
+                                              .copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Vence: ${_fmtFecha.format(c.fechaVencimiento)}'
+                                          '${c.ventaId != null ? ' · Venta #${c.ventaId}' : ''}',
+                                          style: AppTypography.bodySmall
+                                              .copyWith(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  StatusChip(
-                                    label: c.estado.nombre.toUpperCase(),
-                                    type: _chipType(c.estado),
-                                    dense: true,
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'RD\$ ${_fmt.format(c.saldoPendiente)}',
+                                        style: AppTypography.bodyMedium
+                                            .copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      StatusChip(
+                                        label: c.estado.nombre.toUpperCase(),
+                                        type: _chipType(c.estado),
+                                        dense: true,
+                                      ),
+                                      const Icon(
+                                        Icons.chevron_right,
+                                        size: 18,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
                         );
                       },
@@ -201,6 +236,8 @@ class CuentasCobrarPage extends ConsumerWidget {
       ),
     );
   }
+
+
 }
 
 class _Kpi extends StatelessWidget {
@@ -235,3 +272,4 @@ class _Kpi extends StatelessWidget {
     );
   }
 }
+

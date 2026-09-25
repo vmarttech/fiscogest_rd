@@ -287,9 +287,59 @@ Future<void> _cargarDocumento({
   }
 
 
+
+  double? _parseMontoCobro(String raw) {
+    final s = raw.trim().replaceAll(' ', '').replaceAll(',', '.');
+    if (s.isEmpty) return null;
+    return double.tryParse(s);
+  }
+
+  /// null = OK. Mensaje = error.
+  String? _validarMontoCobro({
+    required String textoAbono,
+    required double montoTotal,
+    required bool esCredito,
+  }) {
+    final v = _parseMontoCobro(textoAbono);
+    if (v == null) {
+      return 'Monto inválido. Use números (ej. 1500.50)';
+    }
+    if (v < 0) return 'El monto no puede ser negativo';
+    if (v > 999999999) return 'Monto fuera de rango';
+
+    if (esCredito) {
+      final minimo = montoTotal * 0.30;
+      if (v <= 0) {
+        return 'El abono debe ser mayor a RD\$ 0';
+      }
+      if (v > montoTotal + 0.009) {
+        return 'El abono no puede exceder el total '
+            '(RD\$ ${montoTotal.toStringAsFixed(2)})';
+      }
+      if (v + 0.009 < minimo) {
+        return 'Abono mínimo 30%: RD\$ ${minimo.toStringAsFixed(2)}';
+      }
+    } else {
+      // Contado: debe cubrir el total (tolerancia 1 centavo)
+      if (v + 0.009 < montoTotal) {
+        return 'Debe cubrir el total: RD\$ ${montoTotal.toStringAsFixed(2)}';
+      }
+      if (v > montoTotal + 0.05) {
+        // opcional: permitir sobrante pequeño como cambio; bloquear exceso grande
+        // return 'Monto mayor al total. Ajuste a RD\$ ${montoTotal.toStringAsFixed(2)}';
+      }
+    }
+    return null;
+  }
+
   void _onAbonoChanged(String texto) {
-    final limpio = texto.trim().replaceAll(',', '.');
-    final valor = double.tryParse(limpio) ?? 0.0;
+    final limpio = texto.trim().replaceAll(' ', '').replaceAll(',', '.');
+    if (limpio.isEmpty) {
+      ref.read(cajaProvider.notifier).establecerAbono(0);
+      return;
+    }
+    final valor = double.tryParse(limpio);
+    if (valor == null || valor < 0) return; // no actualiza con basura
     ref.read(cajaProvider.notifier).establecerAbono(valor);
   }
 
@@ -376,6 +426,25 @@ Future<void> _cargarDocumento({
 
   Future<void> _cobrarYGenerarFactura() async {
     if (!mounted || _procesando) return;
+
+    final errMonto = _validarMontoCobro(
+      textoAbono: _abonoController.text,
+      montoTotal: montoTotal,
+      esCredito: esCredito,
+    );
+    if (errMonto != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errMonto),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    final montoParsed = _parseMontoCobro(_abonoController.text) ?? 0;
+    ref.read(cajaProvider.notifier).establecerAbono(montoParsed);
+
     final cajaNotifier = ref.read(cajaProvider.notifier);
     final estado = ref.read(cajaProvider);
 

@@ -61,6 +61,27 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   bool get _cajaAbierta => _sesion != null && _sesion!.estaAbierta;
 
+  /// Parsea monto (coma o punto). null si no es número.
+  double? _parseMonto(String raw) {
+    final s = raw
+        .trim()
+        .replaceAll(' ', '')
+        .replaceAll(',', '.');
+    if (s.isEmpty) return null;
+    return double.tryParse(s);
+  }
+
+  String? _validarMontoNoNegativo(String raw, {String label = 'Monto'}) {
+    final v = _parseMonto(raw);
+    if (v == null) {
+      return '$label inválido. Use números (ej. 1500.50)';
+    }
+    if (v < 0) return '$label no puede ser negativo';
+    if (v > 999999999) return '$label fuera de rango';
+    return null;
+  }
+
+
   /// Política de Configuración → Caja (default: no exigir).
   bool get _exigeSesionCaja {
     final cfg = ref.read(configuracionControllerProvider).valueOrNull;
@@ -132,12 +153,21 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                final v = double.tryParse(
-                      controller.text.trim().replaceAll(',', '.'),
-                    ) ??
-                    -1;
-                if (v < 0) return;
-                Navigator.pop(ctx, v);
+                final err = _validarMontoNoNegativo(
+                  controller.text,
+                  label: 'Fondo inicial',
+                );
+                if (err != null) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text(err),
+                      backgroundColor: AppColors.error,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pop(ctx, _parseMonto(controller.text));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.success,
@@ -189,76 +219,167 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
     final result = await showDialog<({double contado, String? obs})>(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-          title: const Text('Cerrar caja', style: AppTypography.h4),
-          content: SizedBox(
-            width: ancho >= AppBreakpoints.tablet ? 420 : null,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Saldo teórico: RD\$ ${_fmtMonto.format(teorico)}',
-                    style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            final double contado = double.tryParse(
+                  controller.text.trim().replaceAll(',', '.'),
+                ) ??
+                teorico;
+            final dif = contado - teorico;
+            final Color difColor;
+            final String difLabel;
+            if (dif.abs() < 0.005) {
+              difColor = AppColors.success;
+              difLabel = 'Cuadre exacto';
+            } else if (dif > 0) {
+              difColor = AppColors.primary;
+              difLabel = 'Sobrante';
+            } else {
+              difColor = AppColors.error;
+              difLabel = 'Faltante';
+            }
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
+              title: const Text('Arqueo y cierre de caja', style: AppTypography.h4),
+              content: SizedBox(
+                width: ancho >= AppBreakpoints.tablet ? 440 : null,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Sesión #${_sesion!.id} · Fondo inicial RD\$ ${_fmtMonto.format(_sesion!.fondoInicial)}',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      AppLayout.vM,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Saldo teórico',
+                              style: AppTypography.labelMedium,
+                            ),
+                            Text(
+                              'RD\$ ${_fmtMonto.format(teorico)}',
+                              style: AppTypography.h4.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      AppLayout.vM,
+                      TextField(
+                        controller: controller,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Efectivo contado en cajón',
+                          prefixText: 'RD\$ ',
+                          border: OutlineInputBorder(),
+                          helperText: 'Cuente billetes y monedas del cajón',
+                        ),
+                        autofocus: true,
+                        onChanged: (_) => setLocal(() {}),
+                      ),
+                      AppLayout.vM,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: difColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: difColor.withValues(alpha: 0.4)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              difLabel,
+                              style: AppTypography.labelMedium.copyWith(
+                                color: difColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              'RD\$ ${_fmtMonto.format(dif)}',
+                              style: AppTypography.h4.copyWith(
+                                color: difColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      AppLayout.vM,
+                      TextField(
+                        controller: obsController,
+                        decoration: const InputDecoration(
+                          labelText: 'Observación (opcional)',
+                          border: OutlineInputBorder(),
+                          hintText: 'Ej. faltante por cambio, billete roto…',
+                        ),
+                        maxLines: 2,
+                      ),
+                    ],
                   ),
-                  AppLayout.vM,
-                  TextField(
-                    controller: controller,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Efectivo contado en cajón',
-                      prefixText: 'RD\$ ',
-                      border: OutlineInputBorder(),
-                    ),
-                    autofocus: true,
-                  ),
-                  AppLayout.vM,
-                  TextField(
-                    controller: obsController,
-                    decoration: const InputDecoration(
-                      labelText: 'Observación (opcional)',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final v = double.tryParse(
-                      controller.text.trim().replaceAll(',', '.'),
-                    ) ??
-                    -1;
-                if (v < 0) return;
-                final obs = obsController.text.trim();
-                Navigator.pop(
-                  ctx,
-                  (contado: v, obs: obs.isEmpty ? null : obs),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.warning,
-                foregroundColor: AppColors.white,
-              ),
-              child: const Text('Cerrar turno'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final err = _validarMontoNoNegativo(
+                      controller.text,
+                      label: 'Efectivo contado',
+                    );
+                    if (err != null) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        SnackBar(
+                          content: Text(err),
+                          backgroundColor: AppColors.error,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      return;
+                    }
+                    final v = _parseMonto(controller.text)!;
+                    final obs = obsController.text.trim();
+                    Navigator.pop(
+                      ctx,
+                      (contado: v, obs: obs.isEmpty ? null : obs),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.warning,
+                    foregroundColor: AppColors.white,
+                  ),
+                  child: const Text('Confirmar cierre'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
+
+    controller.dispose();
+    obsController.dispose();
     if (result == null || !mounted) return;
 
     setState(() => _procesando = true);
@@ -271,14 +392,24 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           );
       if (!mounted) return;
       final dif = result.contado - teorico;
+      String msg;
+      if (!ok) {
+        msg = 'No se pudo cerrar la sesión';
+      } else if (dif.abs() < 0.005) {
+        msg = 'Caja cerrada. Cuadre exacto.';
+      } else if (dif > 0) {
+        msg =
+            'Caja cerrada. Sobrante: RD\$ ${_fmtMonto.format(dif)}';
+      } else {
+        msg =
+            'Caja cerrada. Faltante: RD\$ ${_fmtMonto.format(dif.abs())}';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            ok
-                ? 'Caja cerrada. Diferencia: RD\$ ${_fmtMonto.format(dif)}'
-                : 'No se pudo cerrar la sesión',
-          ),
-          backgroundColor: ok ? AppColors.success : AppColors.error,
+          content: Text(msg),
+          backgroundColor: ok
+              ? (dif.abs() < 0.005 ? AppColors.success : AppColors.warning)
+              : AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
       );

@@ -9,4 +9,6 @@ mixin _$CuentasCobrarDaoMixin on DatabaseAccessor<AppDatabase> {
   $CuentasCobrarTableTable get cuentasCobrarTable =>
       attachedDatabase.cuentasCobrarTable;
   $CobrosTableTable get cobrosTable => attachedDatabase.cobrosTable;
+  $CuotasCuentaTableTable get cuotasCuentaTable =>
+      attachedDatabase.cuotasCuentaTable;
 }

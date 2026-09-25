@@ -2,11 +2,12 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cobros_table.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/cuotas_cuenta_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
 part 'cuentas_cobrar_dao.g.dart';
 
-@DriftAccessor(tables: [CuentasCobrarTable, CobrosTable])
+@DriftAccessor(tables: [CuentasCobrarTable, CobrosTable, CuotasCuentaTable])
 class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     with _$CuentasCobrarDaoMixin {
   CuentasCobrarDao(super.db);
@@ -230,6 +231,93 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
         estado: const Value(CobrarEstado.pagado),
       ),
     );
+  }
+
+
+
+  // ----- Plan de cuotas -----
+  Future<void> eliminarCuotasDeCuenta(int cuentaId) async {
+    await (delete(cuotasCuentaTable)
+          ..where((t) => t.cuentaCobrarId.equals(cuentaId)))
+        .go();
+  }
+
+  Future<void> insertarCuota({
+    required int cuentaCobrarId,
+    required int numero,
+    required double monto,
+    required DateTime fechaVencimiento,
+  }) async {
+    await into(cuotasCuentaTable).insert(
+      CuotasCuentaTableCompanion.insert(
+        cuentaCobrarId: cuentaCobrarId,
+        numero: numero,
+        monto: monto,
+        fechaVencimiento: fechaVencimiento,
+      ),
+    );
+  }
+
+  /// Genera N cuotas iguales (última ajusta centavos). Intervalo 30 días.
+  Future<void> generarPlanCuotas({
+    required int cuentaCobrarId,
+    required double montoTotal,
+    required int numeroCuotas,
+    DateTime? primerVencimiento,
+  }) async {
+    if (numeroCuotas < 1) return;
+    await eliminarCuotasDeCuenta(cuentaCobrarId);
+    final n = numeroCuotas;
+    final base = (montoTotal / n * 100).floor() / 100.0;
+    var acumulado = 0.0;
+    final inicio = primerVencimiento ??
+        DateTime.now().add(const Duration(days: 30));
+    for (var i = 1; i <= n; i++) {
+      final monto = i == n
+          ? double.parse((montoTotal - acumulado).toStringAsFixed(2))
+          : base;
+      acumulado += monto;
+      await insertarCuota(
+        cuentaCobrarId: cuentaCobrarId,
+        numero: i,
+        monto: monto,
+        fechaVencimiento: DateTime(
+          inicio.year,
+          inicio.month + (i - 1),
+          inicio.day,
+        ),
+      );
+    }
+  }
+
+  Future<List<CuotaCuentaData>> listarCuotas(int cuentaId) {
+    return (select(cuotasCuentaTable)
+          ..where((t) => t.cuentaCobrarId.equals(cuentaId))
+          ..orderBy([(t) => OrderingTerm.asc(t.numero)]))
+        .get();
+  }
+
+  /// Aplica un pago a las cuotas pendientes en orden.
+  Future<void> aplicarPagoACuotas(int cuentaId, double montoPago) async {
+    var resto = montoPago;
+    final cuotas = await listarCuotas(cuentaId);
+    for (final c in cuotas) {
+      if (resto <= 0.001) break;
+      if (c.estado == 'pagada') continue;
+      final pendiente = (c.monto - c.montoPagado).clamp(0.0, double.infinity);
+      if (pendiente <= 0.001) continue;
+      final aplica = resto >= pendiente ? pendiente : resto;
+      final nuevoPagado = c.montoPagado + aplica;
+      final pagada = nuevoPagado + 0.001 >= c.monto;
+      await (update(cuotasCuentaTable)..where((t) => t.id.equals(c.id))).write(
+        CuotasCuentaTableCompanion(
+          montoPagado: Value(nuevoPagado),
+          estado: Value(pagada ? 'pagada' : 'parcial'),
+          fechaPago: pagada ? Value(DateTime.now()) : const Value.absent(),
+        ),
+      );
+      resto -= aplica;
+    }
   }
 
 }

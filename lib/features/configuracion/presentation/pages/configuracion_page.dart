@@ -140,7 +140,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   Future<void> _elegirLogo() async {
     try {
       String? sourcePath;
-      final result = await FilePicker.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
         allowMultiple: false,
       );

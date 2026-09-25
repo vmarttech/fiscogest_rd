@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
+import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/expediente_solicitante_form.dart';
@@ -207,27 +208,59 @@ class _DetalleSolicitudCreditoPageState
 
         // Registrar cuenta por cobrar (DAO comercial vía repo de créditos)
         final cuenta = _cuentaBorrador;
+        final nCuotas =
+            _numeroCuotas > 0 ? _numeroCuotas : (cuenta?.numeroCuotas ?? 1);
         if (cuenta != null) {
-          final conVenta = cuenta.copyWith(ventaId: v.id);
+          final conVenta = cuenta.copyWith(
+            ventaId: v.id,
+            numeroCuotas: nCuotas,
+            abonoInicial:
+                _abono > 0 ? _abono : cuenta.abonoInicial,
+            fechaVencimiento: _primerVencimiento ?? cuenta.fechaVencimiento,
+          );
           await ref.read(cuentaPorCobrarRepositoryProvider).registrarCredito(
                 cuenta: conVenta,
-                planPago: conVenta.planPago,
+                planPago: conVenta.planPago ??
+                    (nCuotas > 1
+                        ? PlanPago(
+                            tasaInteresMensual: _tasaMensual,
+                            numeroCuotas: nCuotas,
+                            montoPorCuota: (conVenta.totalOriginal -
+                                    conVenta.abonoInicial) /
+                                nCuotas,
+                            fechaPrimerVencimiento:
+                                _primerVencimiento ?? conVenta.fechaVencimiento,
+                            cuotas: const [],
+                          )
+                        : null),
                 abonoInicial: null,
               );
         } else {
-          // Sin formulario previo: cuenta mínima desde la cotización
           final minima = CuentaPorCobrar(
             clienteId: v.clienteId,
             clienteNombre: v.nombreCliente,
             ventaId: v.id,
             totalOriginal: v.montoTotal,
             abonoInicial: conCond.abonoInicial,
+            numeroCuotas: nCuotas,
+            tasaInteres: _tasaMensual,
             fechaCreacion: DateTime.now(),
-            fechaVencimiento:
-                conCond.vencimiento ?? DateTime.now().add(const Duration(days: 30)),
+            fechaVencimiento: conCond.vencimiento ??
+                DateTime.now().add(const Duration(days: 30)),
           );
           await ref.read(cuentaPorCobrarRepositoryProvider).registrarCredito(
                 cuenta: minima,
+                planPago: nCuotas > 1
+                    ? PlanPago(
+                        tasaInteresMensual: _tasaMensual,
+                        numeroCuotas: nCuotas,
+                        montoPorCuota:
+                            (minima.totalOriginal - minima.abonoInicial) /
+                                nCuotas,
+                        fechaPrimerVencimiento: minima.fechaVencimiento,
+                        cuotas: const [],
+                      )
+                    : null,
               );
         }
       }

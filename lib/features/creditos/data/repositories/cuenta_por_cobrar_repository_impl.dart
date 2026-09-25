@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dar
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/estado_credito.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
+import 'package:fiscogest_rd/features/creditos/domain/entities/cuota.dart';
 import 'package:fiscogest_rd/features/creditos/domain/repositories/i_cuenta_por_cobrar_repository.dart';
 
 /// Implementación sobre [CuentasCobrarDao] y [CobrosTable] (feature comercial).
@@ -111,7 +112,35 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     final row = await _dao.obtenerCuentaPorId(cuentaId);
     if (row == null) return null;
     final abonos = await listarAbonos(cuentaId);
-    return _mapear(row, abonos: abonos);
+    final cuotasRows = await _dao.listarCuotas(cuentaId);
+    final cuotas = [
+      for (final q in cuotasRows)
+        Cuota(
+          id: q.id,
+          numeroCuota: q.numero,
+          fechaVencimiento: q.fechaVencimiento,
+          montoCapital: q.monto,
+          montoInteres: 0,
+          montoTotal: q.monto,
+          saldoDespues: (q.monto - q.montoPagado).clamp(0.0, double.infinity),
+          pagada: q.estado == 'pagada',
+          fechaPago: q.fechaPago,
+        ),
+    ];
+    PlanPago? plan;
+    if (cuotas.isNotEmpty) {
+      plan = PlanPago(
+        tasaInteresMensual: 0,
+        numeroCuotas: cuotas.length,
+        montoPorCuota: cuotas.first.montoTotal,
+        fechaPrimerVencimiento: cuotas.first.fechaVencimiento,
+        cuotas: cuotas,
+      );
+    }
+    return _mapear(row, abonos: abonos).copyWith(
+      planPago: plan,
+      numeroCuotas: cuotas.isEmpty ? 1 : cuotas.length,
+    );
   }
 
   @override
@@ -229,5 +258,25 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       limite: limite,
     );
     return rows.map<CuentaPorCobrar>(_mapear).toList();
+  }
+
+  @override
+  Future<void> generarPlanCuotas({
+    required int cuentaId,
+    required int numeroCuotas,
+    DateTime? primerVencimiento,
+  }) async {
+    final row = await _dao.obtenerCuentaPorId(cuentaId);
+    if (row == null) throw Exception('Cuenta no encontrada');
+    final monto = row.saldoPendiente > 0.001
+        ? row.saldoPendiente
+        : row.montoOriginal;
+    final n = numeroCuotas < 1 ? 1 : numeroCuotas;
+    await _dao.generarPlanCuotas(
+      cuentaCobrarId: cuentaId,
+      montoTotal: monto,
+      numeroCuotas: n,
+      primerVencimiento: primerVencimiento ?? row.fechaVencimiento,
+    );
   }
 }

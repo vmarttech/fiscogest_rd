@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
@@ -29,7 +30,7 @@ final _cuentasCobrarDaoProvider = Provider<CuentasCobrarDao>((ref) {
 final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
   final ventasDao = ref.watch(_ventasDaoProvider);
   final cuentasCobrarDao = ref.watch(_cuentasCobrarDaoProvider);
-  return VentasRepositoryImpl(ventasDao, cuentasCobrarDao);
+  return VentasRepositoryImpl(ventasDao, cuentasCobrarDao, ProductosDao(ref.watch(databaseProvider)));
 });
 
 final confirmarVentaBorradorUseCaseProvider = Provider<ConfirmarVentaBorrador>((

@@ -1,6 +1,7 @@
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -12,6 +13,7 @@ final ventasRepositoryProvider = Provider<VentasRepositoryImpl>((ref) {
   return VentasRepositoryImpl(
     VentasDao(db),
     CuentasCobrarDao(db),
+    ProductosDao(db),
   );
 });
 
