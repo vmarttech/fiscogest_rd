@@ -98,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 35;
+  int get schemaVersion => 36;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
@@ -406,6 +406,19 @@ class AppDatabase extends _$AppDatabase {
             );
           } catch (_) {}
         }
+      }
+
+      if (from < 36) {
+        try {
+          await customStatement(
+            "ALTER TABLE configuracion_table ADD COLUMN prefijo_contado TEXT NOT NULL DEFAULT 'C'",
+          );
+        } catch (_) {}
+        try {
+          await customStatement(
+            "ALTER TABLE configuracion_table ADD COLUMN prefijo_credito TEXT NOT NULL DEFAULT 'CR'",
+          );
+        } catch (_) {}
       }
 
     },

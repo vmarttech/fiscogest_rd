@@ -32,6 +32,8 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
     docMostrarCliente: true,
     docMostrarItbisDesglose: true,
     docPiePagina: 'Gracias por su preferencia',
+    prefijoContado: 'C',
+    prefijoCredito: 'CR',
   );
 
   @override
@@ -62,6 +64,8 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
       docMostrarCliente: model.docMostrarCliente,
       docMostrarItbisDesglose: model.docMostrarItbisDesglose,
       docPiePagina: model.docPiePagina,
+      prefijoContado: model.prefijoContado,
+      prefijoCredito: model.prefijoCredito,
     );
   }
 
@@ -93,6 +97,8 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
         docMostrarCliente: Value(c.docMostrarCliente),
         docMostrarItbisDesglose: Value(c.docMostrarItbisDesglose),
         docPiePagina: Value(c.docPiePagina),
+        prefijoContado: Value(c.prefijoContado),
+        prefijoCredito: Value(c.prefijoCredito),
       ),
     );
   }

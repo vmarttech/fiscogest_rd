@@ -28,7 +28,11 @@ abstract class IVentasRepository {
 
   Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId);
 
-  Future<String> siguienteNumeroCotizacion({bool esCredito});
+  Future<String> siguienteNumeroCotizacion({
+    bool esCredito = false,
+    String prefijoContado = 'C',
+    String prefijoCredito = 'CR',
+  });
 
   Future<String> siguienteNumeroFactura();
 

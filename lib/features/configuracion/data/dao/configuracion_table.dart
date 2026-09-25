@@ -39,4 +39,8 @@ class ConfiguracionTable extends Table {
       boolean().withDefault(const Constant(true))();
   TextColumn get docPiePagina =>
       text().withDefault(const Constant('Gracias por su preferencia'))();
+  TextColumn get prefijoContado =>
+      text().withDefault(const Constant('C'))();
+  TextColumn get prefijoCredito =>
+      text().withDefault(const Constant('CR'))();
 }

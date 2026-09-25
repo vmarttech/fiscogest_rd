@@ -23,6 +23,8 @@ class ConfiguracionEntity {
     this.docMostrarCliente = true,
     this.docMostrarItbisDesglose = true,
     this.docPiePagina = 'Gracias por su preferencia',
+    this.prefijoContado = 'C',
+    this.prefijoCredito = 'CR',
   });
 
   final String id;
@@ -49,6 +51,8 @@ class ConfiguracionEntity {
   final bool docMostrarCliente;
   final bool docMostrarItbisDesglose;
   final String docPiePagina;
+  final String prefijoContado;
+  final String prefijoCredito;
 
   ConfiguracionEntity copyWith({
     String? id,
@@ -74,6 +78,8 @@ class ConfiguracionEntity {
     bool? docMostrarCliente,
     bool? docMostrarItbisDesglose,
     String? docPiePagina,
+    String? prefijoContado,
+    String? prefijoCredito,
   }) {
     return ConfiguracionEntity(
       id: id ?? this.id,
@@ -100,6 +106,8 @@ class ConfiguracionEntity {
       docMostrarItbisDesglose:
           docMostrarItbisDesglose ?? this.docMostrarItbisDesglose,
       docPiePagina: docPiePagina ?? this.docPiePagina,
+      prefijoContado: prefijoContado ?? this.prefijoContado,
+      prefijoCredito: prefijoCredito ?? this.prefijoCredito,
     );
   }
 }

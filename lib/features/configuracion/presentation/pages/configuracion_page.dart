@@ -67,6 +67,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   final _pieController = TextEditingController(
     text: 'Gracias por su preferencia',
   );
+  final _prefijoContadoController = TextEditingController(text: 'C');
+  final _prefijoCreditoController = TextEditingController(text: 'CR');
 
   @override
   void dispose() {
@@ -77,6 +79,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     _telefonoController.dispose();
     _correoController.dispose();
     _pieController.dispose();
+    _prefijoContadoController.dispose();
+    _prefijoCreditoController.dispose();
     super.dispose();
   }
 
@@ -99,6 +103,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     _docCliente = cfg.docMostrarCliente;
     _docItbisDesglose = cfg.docMostrarItbisDesglose;
     _pieController.text = cfg.docPiePagina;
+    _prefijoContadoController.text = cfg.prefijoContado;
+    _prefijoCreditoController.text = cfg.prefijoCredito;
     _datosCargados = true;
   }
 
@@ -159,7 +165,10 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
 
 
   Future<void> _guardarEmpresa() async {
-    if (!_formKey.currentState!.validate() || !_validarEmpresa()) return;
+    // Form solo existe en sección Empresa; en Ventas/Documentos no validar Form
+    final form = _formKey.currentState;
+    if (form != null && !form.validate()) return;
+    if (_seccion == _SeccionConfig.empresa && !_validarEmpresa()) return;
     setState(() => _guardando = true);
     final entity = ConfiguracionEntity(
       id: '1',
@@ -187,6 +196,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       docPiePagina: _pieController.text.trim().isEmpty
           ? 'Gracias por su preferencia'
           : _pieController.text.trim(),
+      prefijoContado: _prefijoContadoController.text.trim().isEmpty
+          ? 'C'
+          : _prefijoContadoController.text.trim(),
+      prefijoCredito: _prefijoCreditoController.text.trim().isEmpty
+          ? 'CR'
+          : _prefijoCreditoController.text.trim(),
     );
     try {
       await ref.read(configuracionControllerProvider.notifier).guardar(entity);
@@ -328,23 +343,38 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   List<Widget> _itemsMenu() {
     return _SeccionConfig.values.map((s) {
       final sel = s == _seccion;
-      return ListTile(
-        leading: Icon(
-          _iconoSeccion(s),
-          color: sel ? AppColors.primary : AppColors.grey600,
-          size: 22,
-        ),
-        title: Text(
-          _tituloSeccion(s),
-          style: AppTypography.labelMedium.copyWith(
-            color: sel ? AppColors.primary : AppColors.textPrimary,
-            fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+      return Material(
+        color: sel
+            ? AppColors.primary.withValues(alpha: 0.12)
+            : null,
+        type: sel ? MaterialType.canvas : MaterialType.transparency,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => setState(() => _seccion = s),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Icon(
+                  _iconoSeccion(s),
+                  color: sel ? AppColors.primary : AppColors.grey600,
+                  size: 22,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _tituloSeccion(s),
+                    style: AppTypography.labelMedium.copyWith(
+                      color: sel ? AppColors.primary : AppColors.textPrimary,
+                      fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        selected: sel,
-        selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        onTap: () => setState(() => _seccion = s),
       );
     }).toList();
   }
@@ -398,11 +428,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       case _SeccionConfig.documentos:
         return _seccionDocumentos();
       case _SeccionConfig.ventas:
-        return _seccionPlaceholder(
-          'Ventas',
-          'Prefijos Contado (C) / Crédito (CR), redondeo y defaults de cotización.',
-          'Próximamente: edición de prefijos y reglas de venta.',
-        );
+        return _seccionVentas();
       case _SeccionConfig.caja:
         return _seccionPlaceholder(
           'Caja',
@@ -617,12 +643,18 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       bool valor,
       ValueChanged<bool> onChanged,
     ) {
-      return SwitchListTile.adaptive(
-        contentPadding: EdgeInsets.zero,
-        title: Text(titulo, style: AppTypography.labelMedium),
-        value: valor,
-        activeThumbColor: AppColors.primary,
-        onChanged: onChanged,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(child: Text(titulo, style: AppTypography.labelMedium)),
+            Switch.adaptive(
+              value: valor,
+              activeThumbColor: AppColors.primary,
+              onChanged: onChanged,
+            ),
+          ],
+        ),
       );
     }
 
@@ -818,6 +850,64 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             }
             return Column(children: [form, AppLayout.vL, preview]);
           },
+        ),
+      ],
+    );
+  }
+
+
+  Widget _seccionVentas() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            const Expanded(
+              child: Text('Ventas y cotizaciones', style: AppTypography.h3),
+            ),
+            AppButton(
+              text: _guardando ? 'Guardando...' : 'Guardar',
+              icon: Icons.save_rounded,
+              onPressed: _guardando ? null : _guardarEmpresa,
+            ),
+          ],
+        ),
+        AppLayout.vS,
+        Text(
+          'Prefijos del número de cotización (Contado / Crédito).',
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        AppLayout.vL,
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Numeración', style: AppTypography.h4),
+              AppLayout.vM,
+              AppTextField(
+                label: 'Prefijo contado',
+                hint: 'C',
+                controller: _prefijoContadoController,
+                onChanged: (_) => setState(() {}),
+              ),
+              AppLayout.vM,
+              AppTextField(
+                label: 'Prefijo crédito',
+                hint: 'CR',
+                controller: _prefijoCreditoController,
+                onChanged: (_) => setState(() {}),
+              ),
+              AppLayout.vS,
+              Text(
+                'Ejemplo: ${_prefijoContadoController.text}-000001 · ${_prefijoCreditoController.text}-000001',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

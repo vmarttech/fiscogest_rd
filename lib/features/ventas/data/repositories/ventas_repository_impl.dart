@@ -210,13 +210,19 @@ class VentasRepositoryImpl implements IVentasRepository {
   }
 
   @override
-  Future<String> siguienteNumeroCotizacion({bool esCredito = false}) async {
+  Future<String> siguienteNumeroCotizacion({
+    bool esCredito = false,
+    String prefijoContado = 'C',
+    String prefijoCredito = 'CR',
+  }) async {
     final ultimo = await _ventasDao.obtenerUltimoCorrelativoCotizacion(
       soloCredito: esCredito,
     );
     final siguiente = ultimo + 1;
     final digitos = siguiente.toString().padLeft(6, '0');
-    return esCredito ? 'CR-$digitos' : 'C-$digitos';
+    final p = esCredito ? prefijoCredito.trim() : prefijoContado.trim();
+    final pref = p.isEmpty ? (esCredito ? 'CR' : 'C') : p;
+    return '$pref-$digitos';
   }
 
   @override

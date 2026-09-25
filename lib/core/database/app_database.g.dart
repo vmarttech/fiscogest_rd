@@ -1929,6 +1929,30 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     requiredDuringInsert: false,
     defaultValue: const Constant('Gracias por su preferencia'),
   );
+  static const VerificationMeta _prefijoContadoMeta = const VerificationMeta(
+    'prefijoContado',
+  );
+  @override
+  late final GeneratedColumn<String> prefijoContado = GeneratedColumn<String>(
+    'prefijo_contado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('C'),
+  );
+  static const VerificationMeta _prefijoCreditoMeta = const VerificationMeta(
+    'prefijoCredito',
+  );
+  @override
+  late final GeneratedColumn<String> prefijoCredito = GeneratedColumn<String>(
+    'prefijo_credito',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('CR'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1954,6 +1978,8 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     docMostrarCliente,
     docMostrarItbisDesglose,
     docPiePagina,
+    prefijoContado,
+    prefijoCredito,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2147,6 +2173,24 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         ),
       );
     }
+    if (data.containsKey('prefijo_contado')) {
+      context.handle(
+        _prefijoContadoMeta,
+        prefijoContado.isAcceptableOrUnknown(
+          data['prefijo_contado']!,
+          _prefijoContadoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('prefijo_credito')) {
+      context.handle(
+        _prefijoCreditoMeta,
+        prefijoCredito.isAcceptableOrUnknown(
+          data['prefijo_credito']!,
+          _prefijoCreditoMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2248,6 +2292,14 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         DriftSqlType.string,
         data['${effectivePrefix}doc_pie_pagina'],
       )!,
+      prefijoContado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prefijo_contado'],
+      )!,
+      prefijoCredito: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prefijo_credito'],
+      )!,
     );
   }
 
@@ -2282,6 +2334,8 @@ class ConfiguracionTableData extends DataClass
   final bool docMostrarCliente;
   final bool docMostrarItbisDesglose;
   final String docPiePagina;
+  final String prefijoContado;
+  final String prefijoCredito;
   const ConfiguracionTableData({
     required this.id,
     required this.nombreNegocio,
@@ -2306,6 +2360,8 @@ class ConfiguracionTableData extends DataClass
     required this.docMostrarCliente,
     required this.docMostrarItbisDesglose,
     required this.docPiePagina,
+    required this.prefijoContado,
+    required this.prefijoCredito,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2333,6 +2389,8 @@ class ConfiguracionTableData extends DataClass
     map['doc_mostrar_cliente'] = Variable<bool>(docMostrarCliente);
     map['doc_mostrar_itbis_desglose'] = Variable<bool>(docMostrarItbisDesglose);
     map['doc_pie_pagina'] = Variable<String>(docPiePagina);
+    map['prefijo_contado'] = Variable<String>(prefijoContado);
+    map['prefijo_credito'] = Variable<String>(prefijoCredito);
     return map;
   }
 
@@ -2361,6 +2419,8 @@ class ConfiguracionTableData extends DataClass
       docMostrarCliente: Value(docMostrarCliente),
       docMostrarItbisDesglose: Value(docMostrarItbisDesglose),
       docPiePagina: Value(docPiePagina),
+      prefijoContado: Value(prefijoContado),
+      prefijoCredito: Value(prefijoCredito),
     );
   }
 
@@ -2399,6 +2459,8 @@ class ConfiguracionTableData extends DataClass
         json['docMostrarItbisDesglose'],
       ),
       docPiePagina: serializer.fromJson<String>(json['docPiePagina']),
+      prefijoContado: serializer.fromJson<String>(json['prefijoContado']),
+      prefijoCredito: serializer.fromJson<String>(json['prefijoCredito']),
     );
   }
   @override
@@ -2430,6 +2492,8 @@ class ConfiguracionTableData extends DataClass
         docMostrarItbisDesglose,
       ),
       'docPiePagina': serializer.toJson<String>(docPiePagina),
+      'prefijoContado': serializer.toJson<String>(prefijoContado),
+      'prefijoCredito': serializer.toJson<String>(prefijoCredito),
     };
   }
 
@@ -2457,6 +2521,8 @@ class ConfiguracionTableData extends DataClass
     bool? docMostrarCliente,
     bool? docMostrarItbisDesglose,
     String? docPiePagina,
+    String? prefijoContado,
+    String? prefijoCredito,
   }) => ConfiguracionTableData(
     id: id ?? this.id,
     nombreNegocio: nombreNegocio ?? this.nombreNegocio,
@@ -2482,6 +2548,8 @@ class ConfiguracionTableData extends DataClass
     docMostrarItbisDesglose:
         docMostrarItbisDesglose ?? this.docMostrarItbisDesglose,
     docPiePagina: docPiePagina ?? this.docPiePagina,
+    prefijoContado: prefijoContado ?? this.prefijoContado,
+    prefijoCredito: prefijoCredito ?? this.prefijoCredito,
   );
   ConfiguracionTableData copyWithCompanion(ConfiguracionTableCompanion data) {
     return ConfiguracionTableData(
@@ -2538,6 +2606,12 @@ class ConfiguracionTableData extends DataClass
       docPiePagina: data.docPiePagina.present
           ? data.docPiePagina.value
           : this.docPiePagina,
+      prefijoContado: data.prefijoContado.present
+          ? data.prefijoContado.value
+          : this.prefijoContado,
+      prefijoCredito: data.prefijoCredito.present
+          ? data.prefijoCredito.value
+          : this.prefijoCredito,
     );
   }
 
@@ -2566,7 +2640,9 @@ class ConfiguracionTableData extends DataClass
           ..write('docMostrarNcf: $docMostrarNcf, ')
           ..write('docMostrarCliente: $docMostrarCliente, ')
           ..write('docMostrarItbisDesglose: $docMostrarItbisDesglose, ')
-          ..write('docPiePagina: $docPiePagina')
+          ..write('docPiePagina: $docPiePagina, ')
+          ..write('prefijoContado: $prefijoContado, ')
+          ..write('prefijoCredito: $prefijoCredito')
           ..write(')'))
         .toString();
   }
@@ -2596,6 +2672,8 @@ class ConfiguracionTableData extends DataClass
     docMostrarCliente,
     docMostrarItbisDesglose,
     docPiePagina,
+    prefijoContado,
+    prefijoCredito,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2623,7 +2701,9 @@ class ConfiguracionTableData extends DataClass
           other.docMostrarNcf == this.docMostrarNcf &&
           other.docMostrarCliente == this.docMostrarCliente &&
           other.docMostrarItbisDesglose == this.docMostrarItbisDesglose &&
-          other.docPiePagina == this.docPiePagina);
+          other.docPiePagina == this.docPiePagina &&
+          other.prefijoContado == this.prefijoContado &&
+          other.prefijoCredito == this.prefijoCredito);
 }
 
 class ConfiguracionTableCompanion
@@ -2651,6 +2731,8 @@ class ConfiguracionTableCompanion
   final Value<bool> docMostrarCliente;
   final Value<bool> docMostrarItbisDesglose;
   final Value<String> docPiePagina;
+  final Value<String> prefijoContado;
+  final Value<String> prefijoCredito;
   const ConfiguracionTableCompanion({
     this.id = const Value.absent(),
     this.nombreNegocio = const Value.absent(),
@@ -2675,6 +2757,8 @@ class ConfiguracionTableCompanion
     this.docMostrarCliente = const Value.absent(),
     this.docMostrarItbisDesglose = const Value.absent(),
     this.docPiePagina = const Value.absent(),
+    this.prefijoContado = const Value.absent(),
+    this.prefijoCredito = const Value.absent(),
   });
   ConfiguracionTableCompanion.insert({
     this.id = const Value.absent(),
@@ -2700,6 +2784,8 @@ class ConfiguracionTableCompanion
     this.docMostrarCliente = const Value.absent(),
     this.docMostrarItbisDesglose = const Value.absent(),
     this.docPiePagina = const Value.absent(),
+    this.prefijoContado = const Value.absent(),
+    this.prefijoCredito = const Value.absent(),
   });
   static Insertable<ConfiguracionTableData> custom({
     Expression<int>? id,
@@ -2725,6 +2811,8 @@ class ConfiguracionTableCompanion
     Expression<bool>? docMostrarCliente,
     Expression<bool>? docMostrarItbisDesglose,
     Expression<String>? docPiePagina,
+    Expression<String>? prefijoContado,
+    Expression<String>? prefijoCredito,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2753,6 +2841,8 @@ class ConfiguracionTableCompanion
       if (docMostrarItbisDesglose != null)
         'doc_mostrar_itbis_desglose': docMostrarItbisDesglose,
       if (docPiePagina != null) 'doc_pie_pagina': docPiePagina,
+      if (prefijoContado != null) 'prefijo_contado': prefijoContado,
+      if (prefijoCredito != null) 'prefijo_credito': prefijoCredito,
     });
   }
 
@@ -2780,6 +2870,8 @@ class ConfiguracionTableCompanion
     Value<bool>? docMostrarCliente,
     Value<bool>? docMostrarItbisDesglose,
     Value<String>? docPiePagina,
+    Value<String>? prefijoContado,
+    Value<String>? prefijoCredito,
   }) {
     return ConfiguracionTableCompanion(
       id: id ?? this.id,
@@ -2806,6 +2898,8 @@ class ConfiguracionTableCompanion
       docMostrarItbisDesglose:
           docMostrarItbisDesglose ?? this.docMostrarItbisDesglose,
       docPiePagina: docPiePagina ?? this.docPiePagina,
+      prefijoContado: prefijoContado ?? this.prefijoContado,
+      prefijoCredito: prefijoCredito ?? this.prefijoCredito,
     );
   }
 
@@ -2883,6 +2977,12 @@ class ConfiguracionTableCompanion
     if (docPiePagina.present) {
       map['doc_pie_pagina'] = Variable<String>(docPiePagina.value);
     }
+    if (prefijoContado.present) {
+      map['prefijo_contado'] = Variable<String>(prefijoContado.value);
+    }
+    if (prefijoCredito.present) {
+      map['prefijo_credito'] = Variable<String>(prefijoCredito.value);
+    }
     return map;
   }
 
@@ -2911,7 +3011,9 @@ class ConfiguracionTableCompanion
           ..write('docMostrarNcf: $docMostrarNcf, ')
           ..write('docMostrarCliente: $docMostrarCliente, ')
           ..write('docMostrarItbisDesglose: $docMostrarItbisDesglose, ')
-          ..write('docPiePagina: $docPiePagina')
+          ..write('docPiePagina: $docPiePagina, ')
+          ..write('prefijoContado: $prefijoContado, ')
+          ..write('prefijoCredito: $prefijoCredito')
           ..write(')'))
         .toString();
   }
@@ -26631,6 +26733,8 @@ typedef $$ConfiguracionTableTableCreateCompanionBuilder =
       Value<bool> docMostrarCliente,
       Value<bool> docMostrarItbisDesglose,
       Value<String> docPiePagina,
+      Value<String> prefijoContado,
+      Value<String> prefijoCredito,
     });
 typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
     ConfiguracionTableCompanion Function({
@@ -26657,6 +26761,8 @@ typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
       Value<bool> docMostrarCliente,
       Value<bool> docMostrarItbisDesglose,
       Value<String> docPiePagina,
+      Value<String> prefijoContado,
+      Value<String> prefijoCredito,
     });
 
 class $$ConfiguracionTableTableFilterComposer
@@ -26780,6 +26886,16 @@ class $$ConfiguracionTableTableFilterComposer
 
   ColumnFilters<String> get docPiePagina => $composableBuilder(
     column: $table.docPiePagina,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get prefijoContado => $composableBuilder(
+    column: $table.prefijoContado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get prefijoCredito => $composableBuilder(
+    column: $table.prefijoCredito,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -26907,6 +27023,16 @@ class $$ConfiguracionTableTableOrderingComposer
     column: $table.docPiePagina,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get prefijoContado => $composableBuilder(
+    column: $table.prefijoContado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get prefijoCredito => $composableBuilder(
+    column: $table.prefijoCredito,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ConfiguracionTableTableAnnotationComposer
@@ -27016,6 +27142,16 @@ class $$ConfiguracionTableTableAnnotationComposer
     column: $table.docPiePagina,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get prefijoContado => $composableBuilder(
+    column: $table.prefijoContado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get prefijoCredito => $composableBuilder(
+    column: $table.prefijoCredito,
+    builder: (column) => column,
+  );
 }
 
 class $$ConfiguracionTableTableTableManager
@@ -27081,6 +27217,8 @@ class $$ConfiguracionTableTableTableManager
                 Value<bool> docMostrarCliente = const Value.absent(),
                 Value<bool> docMostrarItbisDesglose = const Value.absent(),
                 Value<String> docPiePagina = const Value.absent(),
+                Value<String> prefijoContado = const Value.absent(),
+                Value<String> prefijoCredito = const Value.absent(),
               }) => ConfiguracionTableCompanion(
                 id: id,
                 nombreNegocio: nombreNegocio,
@@ -27105,6 +27243,8 @@ class $$ConfiguracionTableTableTableManager
                 docMostrarCliente: docMostrarCliente,
                 docMostrarItbisDesglose: docMostrarItbisDesglose,
                 docPiePagina: docPiePagina,
+                prefijoContado: prefijoContado,
+                prefijoCredito: prefijoCredito,
               ),
           createCompanionCallback:
               ({
@@ -27131,6 +27271,8 @@ class $$ConfiguracionTableTableTableManager
                 Value<bool> docMostrarCliente = const Value.absent(),
                 Value<bool> docMostrarItbisDesglose = const Value.absent(),
                 Value<String> docPiePagina = const Value.absent(),
+                Value<String> prefijoContado = const Value.absent(),
+                Value<String> prefijoCredito = const Value.absent(),
               }) => ConfiguracionTableCompanion.insert(
                 id: id,
                 nombreNegocio: nombreNegocio,
@@ -27155,6 +27297,8 @@ class $$ConfiguracionTableTableTableManager
                 docMostrarCliente: docMostrarCliente,
                 docMostrarItbisDesglose: docMostrarItbisDesglose,
                 docPiePagina: docPiePagina,
+                prefijoContado: prefijoContado,
+                prefijoCredito: prefijoCredito,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

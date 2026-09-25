@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
@@ -207,8 +208,11 @@ class _NuevaVentaBorradorPageState
         return;
       }
 
+      final cfgNum = ref.read(configuracionControllerProvider).valueOrNull;
       final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(
         esCredito: esCredito,
+        prefijoContado: cfgNum?.prefijoContado ?? 'C',
+        prefijoCredito: cfgNum?.prefijoCredito ?? 'CR',
       );
       notificador.establecerNumeroCotizacion(numeroCotizacion);
       // Contado → cotizado (listo para Caja)
@@ -304,8 +308,11 @@ class _NuevaVentaBorradorPageState
       notificador.establecerFormaPago(esCredito: true);
       notificador.establecerVencimiento(vencimientoCredito);
 
+      final cfgNum = ref.read(configuracionControllerProvider).valueOrNull;
       final numeroCotizacion = await repositorio.siguienteNumeroCotizacion(
         esCredito: true,
+        prefijoContado: cfgNum?.prefijoContado ?? 'C',
+        prefijoCredito: cfgNum?.prefijoCredito ?? 'CR',
       );
       notificador.establecerNumeroCotizacion(numeroCotizacion);
       notificador.establecerEstadoDocumento(EstadoDocumento.enCredito);

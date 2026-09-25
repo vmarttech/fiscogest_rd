@@ -120,159 +120,112 @@ class AppShell extends ConsumerWidget {
     );
   }
 
+
   Widget _buildMenu(double width, String currentPath, BuildContext context, String nombreEmpresa) {
-    return Container(
-      width: width,
+    return Material(
       color: AppColors.sidebarBackground,
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ─── HEADER (Logo + App) ───
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
+        width: width,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ─── HEADER (Logo + App) ───
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.inventory_2_rounded,
+                        color: AppColors.primaryLight,
+                        size: 22,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.inventory_2_rounded,
-                      color: AppColors.primaryLight,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          nombreEmpresa,
-                          style: AppTypography.h4.copyWith(
-                            color: AppColors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nombreEmpresa,
+                            style: AppTypography.h4.copyWith(
+                              color: AppColors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'Gestión Comercial',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.grey400,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(color: AppColors.divider, height: 1),
-
-            // ─── MENÚ CON SCROLL (nunca corta el último ítem) ───
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
-                children: [
-                  _buildSectionTitle('OPERACIONES'),
-                  _buildNavItem(context, '/', 'Dashboard', Icons.dashboard_outlined, currentPath),
-                  _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
-                  _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
-                  _buildNavItem(context, '/ventas/cobro', 'Caja', Icons.payments_outlined, currentPath),
-                  _buildNavItem(context, '/creditos', 'Crédito', Icons.credit_score_outlined, currentPath),
-                  _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
-
-                  const SizedBox(height: 18),
-                  _buildSectionTitle('INVENTARIO'),
-                  _buildNavItem(context, '/inventario', 'Productos', Icons.inventory_2_outlined, currentPath),
-                  _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
-                  _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.fact_check_outlined, currentPath),
-                  _buildNavItem(context, '/lista-ajustes', 'Ajustes', Icons.tune_outlined, currentPath),
-                  _buildNavItem(context, '/transferencias/registrar', 'Transferencias', Icons.swap_horiz_outlined, currentPath),
-
-                  const SizedBox(height: 18),
-                  _buildSectionTitle('MAESTROS'),
-                  _buildNavItem(context, '/clientes', 'Clientes', Icons.people_outline, currentPath),
-                  _buildNavItem(context, '/proveedores', 'Proveedores', Icons.business_outlined, currentPath),
-                  _buildNavItem(context, '/categorias', 'Categorías', Icons.category_outlined, currentPath),
-                  _buildNavItem(context, '/marcas', 'Marcas', Icons.branding_watermark_outlined, currentPath),
-                  _buildNavItem(context, '/unidades', 'Unidades', Icons.straighten_outlined, currentPath),
-                  _buildNavItem(context, '/presentaciones', 'Presentaciones', Icons.view_module_outlined, currentPath),
-
-                  const SizedBox(height: 18),
-                  _buildSectionTitle('ADMINISTRACIÓN'),
-                  _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
-                  _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
-                  _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
-                  _buildNavItem(context, '/configuracion', 'Configuración', Icons.settings_outlined, currentPath),
-                ],
-              ),
-            ),
-
-            // ─── FOOTER FIJO (siempre visible) ───
-            const Divider(color: AppColors.divider, height: 1),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Botón Cerrar sesión
-                  Material(
-                    color: Colors.transparent,
-                    borderRadius: AppRadius.allM,
-                    child: InkWell(
-                      borderRadius: AppRadius.allM,
-                      onTap: () {
-                        // TODO: implementar logout real
-                        if (AppBreakpoints.isMobile(context)) {
-                          Navigator.of(context).pop();
-                        }
-                        // context.go('/login');
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.logout_rounded,
+                          Text(
+                            'Gestión Comercial',
+                            style: AppTypography.labelSmall.copyWith(
                               color: AppColors.grey400,
-                              size: 20,
+                              fontSize: 11,
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Cerrar sesión',
-                              style: AppTypography.labelMedium.copyWith(
-                                color: AppColors.grey400,
-                                fontSize: 13.5,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12),
-                    child: Text(
-                      'v3.0 Pro',
-                      style: AppTypography.labelSmall.copyWith(
-                        color: AppColors.grey500,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              const Divider(color: AppColors.divider, height: 1),
+              // ─── MENÚ CON SCROLL ───
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
+                  children: [
+                    _buildSectionTitle('OPERACIONES'),
+                    _buildNavItem(context, '/', 'Dashboard', Icons.dashboard_outlined, currentPath),
+                    _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
+                    _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
+                    _buildNavItem(context, '/ventas/cobro', 'Caja', Icons.payments_outlined, currentPath),
+                    _buildNavItem(context, '/creditos', 'Crédito', Icons.credit_score_outlined, currentPath),
+                    _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
+                    const SizedBox(height: 18),
+                    _buildSectionTitle('INVENTARIO'),
+                    _buildNavItem(context, '/inventario', 'Productos', Icons.inventory_2_outlined, currentPath),
+                    _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
+                    _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.fact_check_outlined, currentPath),
+                    _buildNavItem(context, '/lista-ajustes', 'Ajustes', Icons.tune_outlined, currentPath),
+                    _buildNavItem(context, '/transferencias/registrar', 'Transferencias', Icons.swap_horiz_outlined, currentPath),
+                    const SizedBox(height: 18),
+                    _buildSectionTitle('CATÁLOGOS'),
+                    _buildNavItem(context, '/clientes', 'Clientes', Icons.people_outline, currentPath),
+                    _buildNavItem(context, '/proveedores', 'Proveedores', Icons.business_outlined, currentPath),
+                    _buildNavItem(context, '/categorias', 'Categorías', Icons.category_outlined, currentPath),
+                    _buildNavItem(context, '/marcas', 'Marcas', Icons.branding_watermark_outlined, currentPath),
+                    _buildNavItem(context, '/unidades', 'Unidades', Icons.straighten_outlined, currentPath),
+                    _buildNavItem(context, '/presentaciones', 'Presentaciones', Icons.view_module_outlined, currentPath),
+                    const SizedBox(height: 18),
+                    _buildSectionTitle('SISTEMA'),
+                    _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
+                    _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
+                    _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
+                    _buildNavItem(context, '/configuracion', 'Configuración', Icons.settings_outlined, currentPath),
+                  ],
+                ),
+              ),
+              // ─── PIE ───
+              const Divider(color: AppColors.divider, height: 1),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: Text(
+                  'v3.0 Pro',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.grey500,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
