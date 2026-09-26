@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 class RegistrarVentaState {
   const RegistrarVentaState({
@@ -87,7 +88,13 @@ class RegistrarVentaState {
 }
 
 class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
-  static const double tasaItbis = 0.18;
+  /// 0 en modo simplificado; 0.18 en operación fiscal.
+  double get tasaItbis {
+    final cfg = ref.read(configuracionControllerProvider).valueOrNull;
+    if (cfg?.modoSimplificado == true) return 0.0;
+    return 0.18;
+  }
+
   late IProductoRepository productoRepo;
 
   @override

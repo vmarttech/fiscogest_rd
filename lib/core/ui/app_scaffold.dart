@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
+
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
     super.key,
@@ -16,7 +18,9 @@ class AppScaffold extends StatelessWidget {
     this.padding,
     this.floatingActionButton,
     this.centerTitle = false,
+    this.showAppBar = true,
   });
+
   final String? title;
   final String? subtitle;
   final Widget? body;
@@ -29,24 +33,35 @@ class AppScaffold extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final Widget? floatingActionButton;
   final bool centerTitle;
+  final bool showAppBar;
+
   @override
   Widget build(BuildContext context) {
     final Widget? contenido = padding != null && body != null
         ? Padding(padding: padding!, child: body!)
         : body;
+
     return Scaffold(
       backgroundColor: backgroundColor ?? AppColors.background,
-      appBar: appBar ?? _buildAppBar(context),
+      appBar: showAppBar ? (appBar ?? _buildAppBar(context)) : null,
       body: contenido,
       floatingActionButton: floatingActionButton,
     );
   }
+
   PreferredSizeWidget? _buildAppBar(BuildContext context) {
     if (title == null && bottom == null) return null;
     return AppBar(
       toolbarHeight: subtitle != null ? 56 : 48,
-      automaticallyImplyLeading: showBackButton && leading == null,
-      leading: leading,
+      automaticallyImplyLeading: false,
+      leading: leading ??
+          (showBackButton
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  tooltip: 'Atrás',
+                  onPressed: () => safeBack(context),
+                )
+              : null),
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
@@ -104,13 +119,6 @@ class AppScaffold extends StatelessWidget {
               height: 3,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.08),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
               ),
             ),
           ),

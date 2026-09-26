@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
@@ -13,7 +14,14 @@ import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/registrar
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/anular_compra_usecase.dart';
 
 final calcularTotalesCompraUseCaseProvider = Provider<CalcularTotalesCompraUseCase>((Ref ref) {
-  return const CalcularTotalesCompraUseCase();
+  // Lee config si el provider existe; si no, 18%
+  bool simplificado = false;
+  try {
+    // Ajusta el nombre del provider si en tu proyecto es otro:
+    final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
+    simplificado = cfg?.modoSimplificado ?? false;
+  } catch (_) {}
+  return CalcularTotalesCompraUseCase(tasaItbis: simplificado ? 0.0 : 0.18);
 });
 
 final listadoComprasProvider = FutureProvider.autoDispose<List<Compra>>((Ref ref) async {

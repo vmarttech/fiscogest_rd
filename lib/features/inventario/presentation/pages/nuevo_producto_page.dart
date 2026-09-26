@@ -46,6 +46,8 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   bool _activo = true;
   Producto? _productoEditar;
   bool _esEdicion = false;
+  /// En edición, costos/stock los define Compra (solo lectura).
+  bool get _costesSoloLectura => _esEdicion;
   bool _precioManual = false; // Si el usuario edita precio venta, no recalcular automáticamente
 
   @override
@@ -320,6 +322,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                       child1: AppTextField(
                         label: 'Costo de Compra',
                         controller: _precioCompraCtrl,
+                        enabled: !_costesSoloLectura,
                         prefixIcon: Icons.shopping_cart,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
@@ -328,6 +331,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                       child2: AppTextField(
                         label: 'Gastos Asociados',
                         controller: _gastosAsocCtrl,
+                        enabled: !_costesSoloLectura,
                         prefixIcon: Icons.receipt_long,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
@@ -441,6 +445,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                       child1: AppTextField(
                         label: 'Existencia Actual',
                         controller: _stockCtrl,
+                        enabled: !_costesSoloLectura,
                         prefixIcon: Icons.format_list_numbered,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [

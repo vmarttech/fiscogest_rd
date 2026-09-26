@@ -15,6 +15,8 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_provid
     as venta_providers;
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
@@ -40,6 +42,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   /// Comprobante fiscal en Caja (antes de cobrar).
   String _tipoNcf = 'B02';
   final TextEditingController _rncFiscalController = TextEditingController();
+  String _dirCliente = '';
+  String _telCliente = '';
   double montoTotal = 0.0;
   bool esCredito = false;
   String numeroCotizacion = 'N/A';
@@ -270,9 +274,23 @@ Future<void> _cargarDocumento({
     if (accion == null || !mounted) return;
     try {
       if (accion == 'enviar') {
-        await ComprobantePdf.imprimirFactura(ventaConDetalle, compartir: true, empresa: emp);
+        await ComprobantePdf.imprimirFactura(
+          ventaConDetalle,
+          compartir: true,
+          empresa: emp,
+          rncCliente: _rncFiscalController.text.trim(),
+          direccionCliente: _dirCliente,
+          telefonoCliente: _telCliente,
+        );
       } else {
-        await ComprobantePdf.imprimirFactura(ventaConDetalle, compartir: false, empresa: emp);
+        await ComprobantePdf.imprimirFactura(
+          ventaConDetalle,
+          compartir: false,
+          empresa: emp,
+          rncCliente: _rncFiscalController.text.trim(),
+          direccionCliente: _dirCliente,
+          telefonoCliente: _telCliente,
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -384,17 +402,22 @@ Future<void> _cargarDocumento({
         }
       }
       final rnc = (cli?.rncCedula ?? '').trim();
-      final soloDig = rnc.replaceAll(RegExp(r'[^0-9]'), '');
-      final esRnc = soloDig.length == 9 || soloDig.length == 11;
       if (!mounted) return;
       setState(() {
         _rncFiscalController.text = rnc;
-        _tipoNcf = esRnc ? 'B01' : 'B02';
+        _dirCliente = (cli?.direccion ?? '').trim();
+        _telCliente = (cli?.telefono ?? '').trim();
+        // Solo el cajero elige B01/B02. Cliente en ficha ≠ crédito fiscal automático.
+        if (_tipoNcf != 'B01' && _tipoNcf != 'B02') {
+          _tipoNcf = 'B02';
+        }
       });
     } catch (_) {
       if (mounted) {
         setState(() {
           _rncFiscalController.clear();
+          _dirCliente = '';
+          _telCliente = '';
           _tipoNcf = 'B02';
         });
       }
@@ -555,6 +578,10 @@ Future<void> _cargarDocumento({
       }
       final inv = ref.read(ventaInventarioServiceProvider);
       await inv.aplicarSalidaInventario(ventaConDetalle);
+      // Refrescar listados de inventario / kárdex en UI
+      ref.invalidate(productoControllerProvider);
+      try { ref.invalidate(kardexPorProductoProvider); } catch (_) {}
+
 
       // Ingreso módulo Caja
       final montoCaja = esCredito ? estado.abono : montoTotal;

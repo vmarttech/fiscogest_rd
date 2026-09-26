@@ -379,11 +379,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<Venta> confirmarVentaBorrador(int cotizacionId, {String? formaPago}) async {
     final actual = await _ventasDao.obtenerVentaPorId(cotizacionId);
     final ya = (actual?.numeroFactura ?? '').trim();
-    if (ya.isEmpty) {
-      throw StateError(
-        'Debe emitir NCF en Facturación antes de cobrar en Caja',
-      );
-    }
+    /* NCF lo emite Caja con emitirNcfFiscal antes/durante cobro */
     final numeroFactura = ya;
     await _ventasDao.actualizarVenta(
       cotizacionId,
@@ -420,11 +416,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   }) async {
     final actual = await _ventasDao.obtenerVentaPorId(ventaId);
     final ya = (actual?.numeroFactura ?? '').trim();
-    if (ya.isEmpty) {
-      throw StateError(
-        'Debe emitir NCF en Facturación antes de cobrar en Caja',
-      );
-    }
+    /* NCF lo emite Caja con emitirNcfFiscal antes/durante cobro */
     final numeroFactura = ya;
     await _ventasDao.actualizarVenta(
       ventaId,

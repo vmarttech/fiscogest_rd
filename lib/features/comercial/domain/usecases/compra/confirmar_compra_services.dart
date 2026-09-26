@@ -36,17 +36,24 @@ class ConfirmarCompraServices {
       final stockAnterior = producto.stock ?? 0.0;
       final costoPromAnterior = producto.costoPromedio;
       final cantidadNueva = detalle.cantidad;
-      final costoUnitarioNuevo = detalle.costoAdquisicion;
-
+      final costoLimpio = detalle.costoUnitario;
+      final gastosUnit =
+          detalle.fleteUnitario +
+          detalle.seguroUnitario +
+          detalle.arancelesUnitario +
+          detalle.gastosUnitario;
+      final costoAdq = detalle.costoAdquisicion > 0
+          ? detalle.costoAdquisicion
+          : (costoLimpio + gastosUnit);
       final nuevoCostoPromedio = stockAnterior <= 0
-          ? costoUnitarioNuevo
-          : ((stockAnterior * costoPromAnterior) + (cantidadNueva * costoUnitarioNuevo)) /
+          ? costoAdq
+          : ((stockAnterior * costoPromAnterior) + (cantidadNueva * costoAdq)) /
               (stockAnterior + cantidadNueva);
-
       await productoRepo.actualizarProducto(producto.copyWith(
+        precioCompra: costoLimpio,
+        gastosAsociados: gastosUnit,
         costoPromedio: nuevoCostoPromedio,
         stock: stockAnterior + cantidadNueva,
-        precioCompra: costoUnitarioNuevo, // costoAdquisicion = unitario + gastos
       ));
     }
   }

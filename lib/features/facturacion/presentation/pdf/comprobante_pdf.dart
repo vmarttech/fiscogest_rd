@@ -19,7 +19,8 @@ class ComprobantePdf {
   static String emisorTel = '';
   static String emisorEmail = '';
 
-  static final _money = NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$');
+  static final _moneyFmt = NumberFormat('#,##0.00', 'en_US');
+  static String _money(double v) => 'RD\$ ${_moneyFmt.format(v)}';
   static final _fecha = DateFormat('dd/MM/yyyy HH:mm');
 
 
@@ -29,6 +30,9 @@ class ComprobantePdf {
     Venta v, {
     ConfiguracionEntity? empresa,
     bool compartir = false,
+    String? rncCliente,
+    String? direccionCliente,
+    String? telefonoCliente,
   }) async {
     final ncf = (v.numeroFactura ?? '').trim();
     if (ncf.isEmpty) {
@@ -41,7 +45,13 @@ class ComprobantePdf {
         return true;
       }());
     }
-    final doc = await _buildDocumento(v, empresa: empresa);
+    final doc = await _buildDocumento(
+      v,
+      empresa: empresa,
+      rncCliente: rncCliente,
+      direccionCliente: direccionCliente,
+      telefonoCliente: telefonoCliente,
+    );
     final bytes = await doc.save();
     if (compartir) {
       await Printing.sharePdf(
@@ -90,7 +100,7 @@ class ComprobantePdf {
     return doc.save();
   }
 
-  static Future<pw.Document> _buildDocumento(Venta v, {ConfiguracionEntity? empresa}) async {
+  static Future<pw.Document> _buildDocumento(Venta v, {ConfiguracionEntity? empresa, String? rncCliente, String? direccionCliente, String? telefonoCliente}) async {
     _empresa = empresa;
     // Modo simplificado: no mostrar NCF ni desglose ITBIS aunque flags docs digan sí
     if (empresa?.modoSimplificado == true) {
@@ -166,6 +176,9 @@ class ComprobantePdf {
           if (_empresa?.docMostrarCliente ?? true)
             _bloqueEmisorCliente(
               cliente: cliente,
+              rncCliente: rncCliente,
+              direccionCliente: direccionCliente,
+              telefonoCliente: telefonoCliente,
               esB01: esB01,
               venta: v,
               fecha: fecha,
@@ -178,6 +191,8 @@ class ComprobantePdf {
             itbis: itbis,
             total: total,
             formaPago: formaPago,
+            costoEnvio: v.costoEnvio,
+            montoDescuento: v.montoDescuento,
           ),
           pw.SizedBox(height: 20),
           _leyendaLegal(esB01: esB01, ncf: ncf),
@@ -273,6 +288,9 @@ class ComprobantePdf {
 
   static pw.Widget _bloqueEmisorCliente({
     required String cliente,
+    String? rncCliente,
+    String? direccionCliente,
+    String? telefonoCliente,
     required bool esB01,
     required Venta venta,
     required DateTime fecha,
@@ -304,11 +322,31 @@ class ComprobantePdf {
                   cliente,
                   style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
                 ),
-                if (esB01) ...[
+                if ((direccionCliente ?? '').trim().isNotEmpty) ...[
                   pw.SizedBox(height: 2),
                   pw.Text(
-                    'RNC / Cédula: (registrar en ficha del cliente)',
+                    'Dir: ${(direccionCliente ?? '').trim()}',
+                    style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+                  ),
+                ],
+                if ((telefonoCliente ?? '').trim().isNotEmpty) ...[
+                  pw.SizedBox(height: 2),
+                  pw.Text(
+                    'Tel: ${(telefonoCliente ?? '').trim()}',
+                    style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+                  ),
+                ],
+                if ((rncCliente ?? '').trim().isNotEmpty) ...[
+                  pw.SizedBox(height: 2),
+                  pw.Text(
+                    'RNC / Cédula: ${(rncCliente ?? '').trim()}',
                     style: const pw.TextStyle(fontSize: 9),
+                  ),
+                ] else if (esB01) ...[
+                  pw.SizedBox(height: 2),
+                  pw.Text(
+                    'RNC / Cédula: (completar en ficha del cliente)',
+                    style: const pw.TextStyle(fontSize: 9, color: PdfColors.orange700),
                   ),
                 ] else ...[
                   pw.SizedBox(height: 2),
@@ -382,8 +420,8 @@ class ComprobantePdf {
           '${i + 1}',
           desc,
           _fmtQty(cant.toDouble()),
-          _money.format(precio),
-          _money.format(imp),
+          _money(precio),
+          _money(imp),
         ]);
       }
     }
@@ -429,6 +467,8 @@ class ComprobantePdf {
     required double itbis,
     required double total,
     required String formaPago,
+    double costoEnvio = 0,
+    double montoDescuento = 0,
   }) {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -460,11 +500,15 @@ class ComprobantePdf {
           child: pw.Column(
             children: [
               if ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarItbisDesglose ?? true)) ...[
-                _totalRow('Subtotal', _money.format(subtotal)),
-                _totalRow('ITBIS (18%)', _money.format(itbis)),
+                _totalRow('Subtotal', _money(subtotal)),
+                if (montoDescuento > 0.001)
+                  _totalRow('Descuento', '- ${_money(montoDescuento)}'),
+                if (costoEnvio > 0.001)
+                  _totalRow('Envío / delivery', _money(costoEnvio)),
+                _totalRow('ITBIS (18%)', _money(itbis)),
                 pw.Divider(color: PdfColors.grey600),
               ],
-              _totalRow('TOTAL', _money.format(total), bold: true),
+              _totalRow('TOTAL', _money(total), bold: true),
             ],
           ),
         ),
@@ -593,7 +637,7 @@ class ComprobantePdf {
           pw.Text('Cliente: $nombreCliente'),
           pw.SizedBox(height: 8),
           pw.Text(
-            'Monto: ${_money.format(monto)}',
+            'Monto: ${_money(monto)}',
             style: const pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,

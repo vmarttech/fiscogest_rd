@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -618,6 +619,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
           );
         }
         await confirmarCompra(compra.id);
+        ref.invalidate(productoControllerProvider);
         if (!mounted) return;
         ref.invalidate(compraPorIdProvider(_compraId));
         if (mounted) {
