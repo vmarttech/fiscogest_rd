@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
@@ -209,7 +210,27 @@ class InventarioFisicoRepositoryImpl
               ),
             );
 
-        // 3) Línea aprobada
+        // 3) Lista de ajustes (auditoría)
+        if (d.diferencia != 0) {
+          final tipo = d.diferencia > 0 ? 'entrada' : 'salida';
+          await _db.into(_db.ajusteInventarioTable).insert(
+                AjusteInventarioTableCompanion.insert(
+                  productoId: d.productoId,
+                  tipoAjuste: tipo,
+                  cantidad: d.diferencia.abs(),
+                  motivo: 'Conteo físico #$conteoId',
+                  observaciones: const Value(
+                    '\${d.nombreProducto}: '
+                    '\${d.stockSistema.toStringAsFixed(2)} → '
+                    '\${d.stockFisico.toStringAsFixed(2)}',
+                  ),
+                  usuarioId: usuarioId,
+                  fechaCreacion: ahora,
+                ),
+              );
+        }
+
+        // 4) Línea aprobada
         await (_db.update(_db.diferenciasConteo)
               ..where((t) => t.id.equals(d.id)))
             .write(
@@ -233,35 +254,60 @@ class InventarioFisicoRepositoryImpl
     final cab = conteos.where((c) => c.id == conteoId).firstOrNull;
     final difs = await listarDiferencias(conteoId);
 
-    final buf = StringBuffer();
-    buf.writeln('REPORTE CONTEO FÍSICO #$conteoId');
-    buf.writeln('================================');
-    if (cab != null) {
-      buf.writeln('Nombre: ${cab.nombreConteo}');
-      buf.writeln('Estado: ${cab.estado.etiqueta}');
-      buf.writeln('Fecha:  ${cab.fechaConteo}');
-      if (cab.observaciones != null && cab.observaciones!.isNotEmpty) {
-        buf.writeln('Obs:    ${cab.observaciones}');
-      }
-    }
-    buf.writeln('');
-    buf.writeln(
-      'Código | Producto | Sistema | Físico | Dif | Estado',
+    final doc = pw.Document();
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (ctx) => [
+          pw.Text(
+            'REPORTE CONTEO FÍSICO #$conteoId',
+            style: const pw.TextStyle(
+              fontSize: 16,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+          pw.SizedBox(height: 8),
+          if (cab != null) ...[
+            pw.Text('Nombre: ${cab.nombreConteo}'),
+            pw.Text('Estado: ${cab.estado.etiqueta}'),
+            pw.Text('Fecha: ${cab.fechaConteo}'),
+            if (cab.observaciones != null && cab.observaciones!.isNotEmpty)
+              pw.Text('Obs: ${cab.observaciones}'),
+          ],
+          pw.SizedBox(height: 16),
+          pw.TableHelper.fromTextArray(
+            headers: const [
+              'Código',
+              'Producto',
+              'Sistema',
+              'Físico',
+              'Dif',
+              'Estado',
+            ],
+            data: [
+              for (final d in difs)
+                [
+                  d.codigoProducto,
+                  d.nombreProducto,
+                  d.stockSistema.toStringAsFixed(2),
+                  d.stockFisico.toStringAsFixed(2),
+                  d.diferencia.toStringAsFixed(2),
+                  d.estado,
+                ],
+            ],
+            headerStyle: const pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9),
+            cellStyle: const pw.TextStyle(fontSize: 8),
+            cellAlignment: pw.Alignment.centerLeft,
+          ),
+          pw.SizedBox(height: 12),
+          pw.Text('Total líneas: ${difs.length}'),
+          pw.Text(
+            'Con diferencia: ${difs.where((d) => d.diferencia != 0).length}',
+          ),
+        ],
+      ),
     );
-    buf.writeln('-' * 72);
-    for (final d in difs) {
-      buf.writeln(
-        '${d.codigoProducto} | ${d.nombreProducto} | '
-        '${d.stockSistema.toStringAsFixed(2)} | '
-        '${d.stockFisico.toStringAsFixed(2)} | '
-        '${d.diferencia.toStringAsFixed(2)} | ${d.estado}',
-      );
-    }
-    buf.writeln('');
-    buf.writeln('Total líneas: ${difs.length}');
-    final conDif = difs.where((d) => d.diferencia != 0).length;
-    buf.writeln('Con diferencia: $conDif');
-
-    return Uint8List.fromList(utf8.encode(buf.toString()));
+    return doc.save();
   }
 }

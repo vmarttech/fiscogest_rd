@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'package:printing/printing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -34,7 +34,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
         actions: [
         IconButton(
           tooltip: 'Reporte',
-          icon: const Icon(Icons.description_outlined),
+          icon: const Icon(Icons.description_outlined, color: Colors.white),
           onPressed: _exportarReporte,
         ),
           TextButton(
@@ -85,37 +85,19 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
   Future<void> _exportarReporte() async {
     try {
       final bytes = await ref.read(generarReporteProvider).call(widget.conteoId);
-      final texto = utf8.decode(bytes);
-      if (!mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Reporte de conteo'),
-          content: SizedBox(
-            width: 480,
-            child: SingleChildScrollView(
-              child: SelectableText(
-                texto,
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cerrar'),
-            ),
-          ],
-        ),
+      await Printing.layoutPdf(
+        onLayout: (_) async => bytes,
+        name: 'conteo_\${widget.conteoId}.pdf',
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error reporte: $e')),
+          const SnackBar(content: Text('Error reporte: \$e')),
         );
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

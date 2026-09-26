@@ -159,14 +159,39 @@ class AppScaffold extends StatelessWidget {
                 ],
               ],
             ),
-      actions: actions
-          ?.map(
-            (action) => Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: action,
-            ),
-          )
-          .toList(),
+      actions: actions == null
+          ? null
+          : [
+              for (final action in actions!)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: IconTheme(
+                    data: const IconThemeData(color: Colors.white, size: 22),
+                    child: DefaultTextStyle(
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          textButtonTheme: TextButtonThemeData(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                          iconButtonTheme: IconButtonThemeData(
+                            style: IconButton.styleFrom(
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                        child: action,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
       iconTheme: const IconThemeData(color: Colors.white, size: 24),
       actionsIconTheme: const IconThemeData(color: Colors.white, size: 23),
       bottom: bottom ??

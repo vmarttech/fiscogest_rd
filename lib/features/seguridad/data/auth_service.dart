@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 
@@ -11,10 +13,13 @@ class AuthService {
   AuthService(this._db);
   final AppDatabase _db;
 
+  static String hashPassword(String plain) {
+    return sha256.convert(utf8.encode(plain)).toString();
+  }
+
   Future<AuthResult?> login(String username, String password) async {
     final u = username.trim();
-    final p = password;
-    if (u.isEmpty || p.isEmpty) return null;
+    if (u.isEmpty || password.isEmpty) return null;
 
     final row = await (_db.select(_db.usuariosTable)
           ..where((t) => t.username.equals(u)))
@@ -22,21 +27,24 @@ class AuthService {
     if (row == null) return null;
     if (row.estado.toLowerCase() != 'activo') return null;
 
-    final hash = row.passwordHash;
-    final ok = hash == p;
+    final hashed = hashPassword(password);
+    // Compat: hash nuevo o texto plano antiguo
+    final ok = row.passwordHash == hashed || row.passwordHash == password;
     if (!ok) return null;
+
+    if (row.passwordHash == password) {
+      await (_db.update(_db.usuariosTable)..where((t) => t.id.equals(row.id)))
+          .write(UsuariosTableCompanion(passwordHash: Value(hashed)));
+    }
 
     await (_db.update(_db.usuariosTable)..where((t) => t.id.equals(row.id)))
         .write(
-      UsuariosTableCompanion(
-        fechaUltimoAcceso: Value(DateTime.now()),
-      ),
+      UsuariosTableCompanion(fechaUltimoAcceso: Value(DateTime.now())),
     );
 
     return AuthResult(usuarioId: row.id, username: row.username);
   }
 
-  /// Crea admin/admin si la tabla está vacía.
   Future<void> ensureAdminSeed() async {
     final existentes = await _db.select(_db.usuariosTable).get();
     if (existentes.isNotEmpty) return;
@@ -45,7 +53,7 @@ class AuthService {
           UsuariosTableCompanion.insert(
             nombre: 'Administrador',
             username: 'admin',
-            passwordHash: 'admin',
+            passwordHash: hashPassword('admin'),
             apellido: const Value('Sistema'),
             email: const Value('admin@local'),
             rol: const Value('Admin'),
