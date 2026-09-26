@@ -46,16 +46,16 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
         bottom: true,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            isMobile ? 16 : 24,
-            isMobile ? 16 : 20,
-            isMobile ? 16 : 24,
-            16,
+            isMobile ? 16 : 8,
+            isMobile ? 12 : 16,
+            isMobile ? 16 : 8,
+            12,
           ),
           child: Center(
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 1100),
+              constraints: const BoxConstraints(maxWidth: 1320),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   isMobile
                       ? Column(
@@ -134,7 +134,202 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                             );
                           }
 
-                          return ListView.separated(
+                          return Container(
+
+
+                            decoration: BoxDecoration(
+
+
+                              color: Colors.white.withValues(alpha: 0.94),
+
+
+                              borderRadius: BorderRadius.circular(16),
+
+
+                              border: Border.all(color: AppColors.border),
+
+
+                              boxShadow: [
+
+
+                                BoxShadow(
+
+
+                                  color: AppColors.grey900.withValues(alpha: 0.05),
+
+
+                                  blurRadius: 18,
+
+
+                                  offset: const Offset(0, 6),
+
+
+                                ),
+
+
+                              ],
+
+
+                            ),
+
+
+                            clipBehavior: Clip.antiAlias,
+
+
+                            child: Column(
+
+
+                              children: [
+
+
+                                if (!isMobile)
+
+
+                                  Container(
+
+
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+
+
+                                    decoration: const BoxDecoration(
+
+
+                                      color: Color(0xFFF8FAFC),
+
+
+                                      border: Border(
+
+
+                                        bottom: BorderSide(color: AppColors.border),
+
+
+                                      ),
+
+
+                                    ),
+
+
+                                    child: Row(
+
+
+                                      children: [
+
+
+                                        Expanded(
+
+
+                                          flex: 3,
+
+
+                                          child: Text(
+
+
+                                            'CLIENTE',
+
+
+                                            style: AppTypography.labelSmall.copyWith(
+
+
+                                              color: AppColors.textSecondary,
+
+
+                                              fontWeight: FontWeight.w700,
+
+
+                                              letterSpacing: 0.4,
+
+
+                                            ),
+
+
+                                          ),
+
+
+                                        ),
+
+
+                                        Expanded(
+
+
+                                          flex: 2,
+
+
+                                          child: Text(
+
+
+                                            'DOCUMENTO',
+
+
+                                            style: AppTypography.labelSmall.copyWith(
+
+
+                                              color: AppColors.textSecondary,
+
+
+                                              fontWeight: FontWeight.w700,
+
+
+                                              letterSpacing: 0.4,
+
+
+                                            ),
+
+
+                                          ),
+
+
+                                        ),
+
+
+                                        Expanded(
+
+
+                                          flex: 2,
+
+
+                                          child: Text(
+
+
+                                            'CONTACTO',
+
+
+                                            style: AppTypography.labelSmall.copyWith(
+
+
+                                              color: AppColors.textSecondary,
+
+
+                                              fontWeight: FontWeight.w700,
+
+
+                                              letterSpacing: 0.4,
+
+
+                                            ),
+
+
+                                          ),
+
+
+                                        ),
+
+
+                                        const SizedBox(width: 48),
+
+
+                                      ],
+
+
+                                    ),
+
+
+                                  ),
+
+
+                                Expanded(
+
+
+                                  child: ListView.separated(
                             padding: AppSpacing.allM,
                             itemCount: filtrados.length,
                             separatorBuilder: (_, __) => const Divider(color: AppColors.border, height: 1),
@@ -257,7 +452,11 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                                       ),
                               );
                             },
-                          );
+                          ), // ListView.separated
+                        ), // Expanded
+                      ], // Column children
+                    ),
+                    ); // Container panel
                         },
                         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
                         error: (e, _) => Center(

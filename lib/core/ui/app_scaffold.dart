@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_page.dart';
+import 'package:fiscogest_rd/core/ui/app_atmosphere.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
@@ -22,6 +24,7 @@ class AppScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.centerTitle = false,
     this.showAppBar = true,
+    this.useAppPage = true,
   });
 
   final String? title;
@@ -37,6 +40,8 @@ class AppScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final bool centerTitle;
   final bool showAppBar;
+  /// Limita y centra el body (PC con menú oculto).
+  final bool useAppPage;
 
   /// Rutas de módulo: menú sándwich, sin flecha atrás.
   static const rutasPrincipales = {
@@ -71,10 +76,16 @@ class AppScaffold extends StatelessWidget {
         ? Padding(padding: padding!, child: body!)
         : body;
 
+    final Widget? bodyWidget = contenido == null
+        ? null
+        : (useAppPage ? AppPage(child: contenido) : contenido);
+
     return Scaffold(
-      backgroundColor: backgroundColor ?? AppColors.background,
+      backgroundColor: backgroundColor ?? const Color(0xFFEEF2F6),
       appBar: showAppBar ? (appBar ?? _buildAppBar(context)) : null,
-      body: contenido,
+      body: bodyWidget == null
+          ? null
+          : AppAtmosphere(child: bodyWidget),
       floatingActionButton: floatingActionButton,
     );
   }

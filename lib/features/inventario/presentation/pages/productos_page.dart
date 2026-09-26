@@ -15,7 +15,6 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
-import 'package:fiscogest_rd/core/ui/app_radius.dart';
 
 class ProductosPage extends ConsumerStatefulWidget {
   const ProductosPage({super.key});
@@ -121,10 +120,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        isMobile ? 16 : 24,
-        isMobile ? 16 : 20,
-        isMobile ? 16 : 24,
-        16,
+        isMobile ? 16 : 8,
+        isMobile ? 12 : 16,
+        isMobile ? 16 : 8,
+        12,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,31 +245,71 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: AppRadius.allL,
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.grey900.withValues(alpha: 0.05),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
             decoration: const BoxDecoration(
-              color: AppColors.grey50,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              color: Color(0xFFF8FAFC),
+              border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
             child: Row(
               children: [
-                Expanded(flex: 3, child: Text('Producto', style: _headerStyle)),
-                Expanded(flex: 2, child: Text('Código', style: _headerStyle)),
-                Expanded(flex: 1, child: Text('Stock', style: _headerStyle, textAlign: TextAlign.center)),
-                Expanded(flex: 1, child: Text('Estado', style: _headerStyle, textAlign: TextAlign.center)),
+                Expanded(flex: 3, child: Text('PRODUCTO', style: _headerStyle)),
+                Expanded(flex: 2, child: Text('CÓDIGO', style: _headerStyle)),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'STOCK',
+                    style: _headerStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'ESTADO',
+                    style: _headerStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
                 if (puedeVerCostos) ...[
-                  Expanded(flex: 1, child: Text('Costo', style: _headerStyle, textAlign: TextAlign.right)),
-                  Expanded(flex: 1, child: Text('Venta', style: _headerStyle, textAlign: TextAlign.right)),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      'COSTO',
+                      style: _headerStyle,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      'VENTA',
+                      style: _headerStyle,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
                 ],
                 SizedBox(
                   width: 100,
-                  child: Text('Acciones', style: _headerStyle, textAlign: TextAlign.center),
+                  child: Text(
+                    'ACCIONES',
+                    style: _headerStyle,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
             ),
@@ -278,103 +317,126 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           Expanded(
             child: ListView.separated(
               itemCount: productos.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.border),
+              separatorBuilder: (_, __) =>
+                  const Divider(height: 1, color: AppColors.border),
               itemBuilder: (_, i) {
                 final p = productos[i];
                 final stock = p.stock ?? 0;
                 final (statusText, statusColor) = _getStatus(stock);
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          p.nombre,
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          p.codigo,
-                          style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          stock.toStringAsFixed(stock.truncateToDouble() == stock ? 0 : 2),
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(20),
+                return Material(
+                  color: i.isEven
+                      ? AppColors.white
+                      : AppColors.grey50.withValues(alpha: 0.55),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            p.nombre,
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
                             ),
-                            child: Text(
-                              statusText,
-                              style: AppTypography.labelSmall.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            p.codigo,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            stock.toStringAsFixed(
+                              stock.truncateToDouble() == stock ? 0 : 2,
+                            ),
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                statusText,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      if (puedeVerCostos) ...[
-                        Expanded(
-                          flex: 1,
-                          child: Text(
-                            '\$${p.precioCompra.toStringAsFixed(2)}',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.success),
-                            textAlign: TextAlign.right,
+                        if (puedeVerCostos) ...[
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              '\$${p.precioCompra.toStringAsFixed(2)}',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.success,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Text(
-                            '\$${p.precioVenta.toStringAsFixed(2)}',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
-                            textAlign: TextAlign.right,
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              '\$${p.precioVenta.toStringAsFixed(2)}',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textPrimary,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                        ],
+                        SizedBox(
+                          width: 100,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 18),
+                                color: AppColors.primary,
+                                onPressed: () => _editarProducto(p),
+                                tooltip: 'Editar',
+                              ),
+                              if (puedeEliminar)
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    size: 18,
+                                  ),
+                                  color: AppColors.error,
+                                  onPressed: () => _confirmarEliminar(p),
+                                  tooltip: 'Eliminar',
+                                ),
+                            ],
                           ),
                         ),
                       ],
-                      SizedBox(
-                        width: 100,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit_outlined, size: 18),
-                              color: AppColors.primary,
-                              onPressed: () => _editarProducto(p),
-                              tooltip: 'Editar',
-                            ),
-                            if (puedeEliminar)
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 18),
-                                color: AppColors.error,
-                                onPressed: () => _confirmarEliminar(p),
-                                tooltip: 'Eliminar',
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 );
               },

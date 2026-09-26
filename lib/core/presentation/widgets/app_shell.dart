@@ -201,7 +201,9 @@ class AppShell extends ConsumerWidget {
             if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
               Navigator.of(context).pop();
             }
-            context.go(routePath);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.push(routePath);
+            });
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),

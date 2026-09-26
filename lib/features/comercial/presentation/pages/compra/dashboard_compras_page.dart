@@ -1,13 +1,8 @@
+import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_card.dart';
-import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
-import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/dashboard_compras_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
@@ -31,6 +26,7 @@ class DashboardComprasPage extends ConsumerWidget {
       orElse: () => 0,
     );
 
+    final desktop = !isMobile;
     return AppScaffold(
       title: 'Compras',
       body: RefreshIndicator(
@@ -40,8 +36,25 @@ class DashboardComprasPage extends ConsumerWidget {
           ref.invalidate(actividadRecienteComprasProvider);
         },
         child: ListView(
-          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          padding: EdgeInsets.fromLTRB(
+            isMobile ? 16 : 8,
+            isMobile ? 16 : 20,
+            isMobile ? 16 : 8,
+            32,
+          ),
           children: [
+            AppLayout.centerConstrained(
+              maxWidth: desktop ? 1320 : 960,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+            const AppHubHero(
+              title: 'Centro de compras',
+              subtitle:
+                  'Registra compras, revisa actividad y controla cuentas por pagar.',
+              icon: Icons.shopping_cart_checkout_rounded,
+            ),
+            const SizedBox(height: 20),
             kpisAsync.when(
               data: (kpis) => _KpisGrid(
                 comprasEsteMes: currency.format(kpis.comprasEsteMes),
@@ -62,43 +75,84 @@ class DashboardComprasPage extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 28),
-            Text(
-              'Accesos rápidos',
-              style: AppTypography.h4.copyWith(fontWeight: FontWeight.w600),
+            const SizedBox(height: 24),
+            const SectionHeader(
+              title: 'Accesos rápidos',
+              subtitle: 'Compra y pagos',
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _AccesoRapido(
-                  icon: Icons.add_shopping_cart_rounded,
-                  label: 'Registrar\ncompra',
-                  color: AppColors.primary,
-                  onTap: () => context.push('/compras/registrar'),
-                ),
-                _AccesoRapido(
-                  icon: Icons.list_alt_rounded,
-                  label: 'Lista de\ncompras',
-                  color: AppColors.info,
-                  onTap: () => context.push('/compras/lista'),
-                ),
-                _AccesoRapido(
-                  icon: Icons.account_balance_wallet_outlined,
-                  label: 'Cuentas\npor pagar',
-                  color: AppColors.warning,
-                  onTap: () => context.goNamed(ListaCuentasPagarPage.routeName),
-                  badge: alertas > 0 ? alertas : null,
-                ),
-                _AccesoRapido(
-                  icon: Icons.request_quote_outlined,
-                  label: 'Cuentas\npor cobrar',
-                  color: AppColors.secondary,
-                  onTap: () => context.push('/ventas/cobrar'),
-                ),
-              ],
-            ),
+            const SizedBox(height: 8),
+            if (!isMobile)
+              Row(
+                children: [
+                  Expanded(
+                    child: AppAccessTile(
+                      icon: Icons.add_shopping_cart_rounded,
+                      title: 'Registrar compra',
+                      subtitle: 'Nueva orden de compra',
+                      color: AppColors.primary,
+                      onTap: () => context.push('/compras/registrar'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppAccessTile(
+                      icon: Icons.list_alt_rounded,
+                      title: 'Lista de compras',
+                      subtitle: 'Historial y seguimiento',
+                      color: AppColors.info,
+                      onTap: () => context.push('/compras/lista'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppAccessTile(
+                      icon: Icons.account_balance_wallet_outlined,
+                      title: 'Cuentas por pagar',
+                      subtitle: alertas > 0
+                          ? '$alertas alerta(s)'
+                          : 'Saldos a proveedores',
+                      color: AppColors.warning,
+                      onTap: () =>
+                          context.goNamed(ListaCuentasPagarPage.routeName),
+                    ),
+                  ),
+                ],
+              )
+            else ...[
+              AppAccessTile(
+                icon: Icons.add_shopping_cart_rounded,
+                title: 'Registrar compra',
+                subtitle: 'Nueva orden de compra',
+                color: AppColors.primary,
+                onTap: () => context.push('/compras/registrar'),
+              ),
+              const SizedBox(height: 10),
+              AppAccessTile(
+                icon: Icons.list_alt_rounded,
+                title: 'Lista de compras',
+                subtitle: 'Historial y seguimiento',
+                color: AppColors.info,
+                onTap: () => context.push('/compras/lista'),
+              ),
+              const SizedBox(height: 10),
+              AppAccessTile(
+                icon: Icons.account_balance_wallet_outlined,
+                title: 'Cuentas por pagar',
+                subtitle: alertas > 0
+                    ? '$alertas alerta(s)'
+                    : 'Saldos a proveedores',
+                color: AppColors.warning,
+                onTap: () => context.goNamed(ListaCuentasPagarPage.routeName),
+              ),
+              const SizedBox(height: 10),
+              AppAccessTile(
+                icon: Icons.request_quote_outlined,
+                title: 'Cuentas por cobrar',
+                subtitle: 'Cobros a clientes',
+                color: AppColors.secondary,
+                onTap: () => context.push('/ventas/cobrar'),
+              ),
+            ],
             const SizedBox(height: 28),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -229,10 +283,13 @@ class DashboardComprasPage extends ConsumerWidget {
               ),
               error: (e, _) => Text('Error: $e', style: AppTypography.error),
             ),
-          ],
-        ),
-      ),
-    );
+                ], // Column children
+              ), // Column
+            ), // centerConstrained
+          ], // ListView children
+        ), // ListView
+      ), // RefreshIndicator
+    ); // AppScaffold
   }
 
   String _formatearFechaRelativa(DateTime fecha) {
@@ -403,63 +460,3 @@ class _KpiCard extends StatelessWidget {
   }
 }
 
-class _AccesoRapido extends StatelessWidget {
-  const _AccesoRapido({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-    this.badge,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  final int? badge;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: color.withValues(alpha: 0.08),
-      borderRadius: AppRadius.allL,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.allL,
-        child: Container(
-          width: 110,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          decoration: BoxDecoration(
-            borderRadius: AppRadius.allL,
-            border: Border.all(color: color.withValues(alpha: 0.2)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Badge(
-                isLabelVisible: badge != null && badge! > 0,
-                label: badge != null
-                    ? Text(
-                        '$badge',
-                        style: AppTypography.labelSmall.copyWith(color: AppColors.white),
-                      )
-                    : null,
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: AppTypography.labelSmall.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                  height: 1.25,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

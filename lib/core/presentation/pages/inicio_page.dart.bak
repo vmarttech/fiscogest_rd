@@ -1,0 +1,197 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
+
+/// Hub de inicio: accesos rápidos y presentación operativa.
+class InicioPage extends ConsumerWidget {
+  const InicioPage({super.key});
+
+  static const String routeName = 'inicio';
+  static const String path = '/';
+
+  String _saludo() {
+    final h = DateTime.now().hour;
+    if (h < 12) return 'Buenos días';
+    if (h < 19) return 'Buenas tardes';
+    return 'Buenas noches';
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mobile = AppBreakpoints.isMobile(context);
+    final desktop = AppBreakpoints.isDesktop(context);
+    final int maxW = desktop ? 1320 : (mobile ? 520 : 900);
+    final fecha = DateFormat("EEEE d 'de' MMMM yyyy", 'es').format(DateTime.now());
+
+    return AppScaffold(
+      title: 'INICIO',
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: SingleChildScrollView(
+            padding: AppLayout.pantallaPadding.add(
+              const EdgeInsets.only(bottom: 24),
+            ),
+            child: AppLayout.centerConstrained(
+              maxWidth: maxW,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppCard(
+                    borderColor: AppColors.border,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _saludo(),
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        AppLayout.vXs,
+                        Text(
+                          'FiscoGest RD',
+                          style: AppTypography.h3.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        AppLayout.vXs,
+                        Text(
+                          fecha,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        AppLayout.vS,
+                        Text(
+                          'Cotiza, facture con NCF, cobre en caja y gestione crédito '
+                          'desde un solo lugar.',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  AppLayout.vL,
+                  SectionHeader(
+                    title: 'Accesos rápidos',
+                    subtitle: desktop ? 'Operación del día' : null,
+                  ),
+                  if (desktop)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: _acc(context, Icons.point_of_sale, 'Ventas', 'Cotizaciones y pedidos', AppColors.primary, '/ventas')),
+                        AppLayout.hM,
+                        Expanded(child: _acc(context, Icons.payments_outlined, 'Caja', 'Cobrar y turnos', AppColors.success, '/ventas/cobro')),
+                        AppLayout.hM,
+                        Expanded(child: _acc(context, Icons.receipt_long_outlined, 'Facturación y NC', 'NCF B01 / B02 / B04', AppColors.info, '/sales')),
+                      ],
+                    )
+                  else ...[
+                    _acc(context, Icons.point_of_sale, 'Ventas', 'Cotizaciones y pedidos', AppColors.primary, '/ventas'),
+                    AppLayout.vS,
+                    _acc(context, Icons.payments_outlined, 'Caja', 'Cobrar y turnos', AppColors.success, '/ventas/cobro'),
+                    AppLayout.vS,
+                    _acc(context, Icons.receipt_long_outlined, 'Facturación y NC', 'NCF B01 / B02 / B04', AppColors.info, '/sales'),
+                  ],
+                  AppLayout.vS,
+                  if (desktop)
+                    Row(
+                      children: [
+                        Expanded(child: _acc(context, Icons.credit_score_outlined, 'Crédito', 'Solicitudes y CxC', AppColors.warning, '/creditos')),
+                        AppLayout.hM,
+                        Expanded(child: _acc(context, Icons.people_outline, 'Clientes', 'Cartera', AppColors.primary, '/clientes')),
+                        AppLayout.hM,
+                        Expanded(child: _acc(context, Icons.inventory_2_outlined, 'Inventario', 'Existencias', AppColors.info, '/inventario')),
+                      ],
+                    )
+                  else ...[
+                    _acc(context, Icons.credit_score_outlined, 'Crédito', 'Solicitudes y CxC', AppColors.warning, '/creditos'),
+                    AppLayout.vS,
+                    _acc(context, Icons.people_outline, 'Clientes', 'Cartera', AppColors.primary, '/clientes'),
+                    AppLayout.vS,
+                    _acc(context, Icons.inventory_2_outlined, 'Inventario', 'Existencias', AppColors.info, '/inventario'),
+                  ],
+                  AppLayout.vL,
+                  const SectionHeader(title: 'Flujo recomendado'),
+                  AppCard(
+                    borderColor: AppColors.border,
+                    child: Text(
+                      '1. Ventas → cotización  ·  2. Crédito (si aplica)  ·  '
+                      '3. Facturación → NCF  ·  4. Caja → cobro',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _acc(
+    BuildContext context,
+    IconData icon,
+    String titulo,
+    String sub,
+    Color color,
+    String ruta,
+  ) {
+    final mobile = AppBreakpoints.isMobile(context);
+    return AppCard(
+      borderColor: AppColors.border,
+      onTap: () {
+        try {
+          context.go(ruta);
+        } catch (_) {
+          context.push(ruta);
+        }
+      },
+      padding: EdgeInsets.symmetric(
+        horizontal: mobile ? 14 : 16,
+        vertical: mobile ? 14 : 16,
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          SizedBox(width: mobile ? 12 : 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  titulo,
+                  style: AppTypography.labelLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  sub,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: AppColors.grey600),
+        ],
+      ),
+    );
+  }
+}

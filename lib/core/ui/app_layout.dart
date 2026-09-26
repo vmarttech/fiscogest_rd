@@ -47,7 +47,7 @@ abstract class AppLayout {
   // Centrado inteligente por pantalla
   static Widget centerConstrained({
     required Widget child,
-    int maxWidth = 1200,
+    int maxWidth = 1320,
   }) {
     return Center(
       child: Container(

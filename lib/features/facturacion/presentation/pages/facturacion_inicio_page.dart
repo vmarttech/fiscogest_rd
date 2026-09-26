@@ -2,92 +2,115 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 
-/// Hub Facturación y NC (menú → /sales). Ancho controlado por AppLayout.
 class FacturacionInicioPage extends StatelessWidget {
   const FacturacionInicioPage({super.key});
 
-  static const String routeName = 'facturacion-inicio';
+  static const String routeName = 'sales';
   static const String path = '/sales';
 
   @override
   Widget build(BuildContext context) {
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
-    // Mismos topes que Crédito / resto del sistema
-    final int maxW = desktop ? 1100 : (mobile ? 520 : 720);
 
     return AppScaffold(
       title: 'FACTURACIÓN Y NC',
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/');
-          }
-        },
-      ),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            padding: AppLayout.pantallaPadding.add(
-              const EdgeInsets.only(bottom: 24),
+            padding: EdgeInsets.fromLTRB(
+              mobile ? 16 : 8,
+              mobile ? 16 : 20,
+              mobile ? 16 : 8,
+              32,
             ),
             child: AppLayout.centerConstrained(
-              maxWidth: maxW,
+              maxWidth: desktop ? 1320 : (mobile ? 520 : 960),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AppCard(
-                    borderColor: AppColors.border,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Comprobantes fiscales',
-                          style: AppTypography.h4.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        AppLayout.vXs,
-                        Text(
-                          'Emisión de facturas (NCF) y notas de crédito. '
-                          'Las cotizaciones se generan en Ventas; el cobro en Caja.',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  AppLayout.vL,
-                  SectionHeader(
-                    title: 'Operaciones',
+                  const _HubHero(
+                    title: 'Facturación electrónica',
                     subtitle:
-                        desktop ? 'Factura · NC · historial · secuencias' : null,
+                        'Emite facturas y notas de crédito con NCF (B01, B02, B04) '
+                        'y consulta el historial fiscal.',
+                    icon: Icons.receipt_long_rounded,
                   ),
+                  const SizedBox(height: 20),
+                  const SectionHeader(
+                    title: 'Operaciones',
+                    subtitle: 'Comprobantes fiscales',
+                  ),
+                  const SizedBox(height: 8),
                   if (desktop)
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(child: _accionEmitirFactura(context)),
-                        AppLayout.hM,
-                        Expanded(child: _accionEmitirNc(context)),
-                        AppLayout.hM,
-                        Expanded(child: _accionHistorial(context)),
+                        Expanded(
+                          child: AppAccessTile(
+                            icon: Icons.note_add_outlined,
+                            title: 'Emitir factura',
+                            subtitle: 'NCF de consumo o crédito fiscal',
+                            color: AppColors.primary,
+                            onTap: () =>
+                                context.push('/sales/emitir-factura'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppAccessTile(
+                            icon: Icons.assignment_return_outlined,
+                            title: 'Emitir NC',
+                            subtitle: 'Nota de crédito sobre factura',
+                            color: AppColors.warning,
+                            onTap: () => context.push('/sales/emitir-nc'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppAccessTile(
+                            icon: Icons.history_outlined,
+                            title: 'Historial',
+                            subtitle: 'Facturas y NC emitidas',
+                            color: AppColors.info,
+                            onTap: () => context.push('/sales/historial'),
+                          ),
+                        ),
                       ],
                     )
                   else ...[
-                    _accionEmitirFactura(context),
-                    AppLayout.vS,
-                    _accionEmitirNc(context),
-                    AppLayout.vS,
-                    _accionHistorial(context),
+                    AppAccessTile(
+                      icon: Icons.note_add_outlined,
+                      title: 'Emitir factura',
+                      subtitle: 'NCF de consumo o crédito fiscal',
+                      color: AppColors.primary,
+                      onTap: () => context.push('/sales/emitir-factura'),
+                    ),
+                    const SizedBox(height: 10),
+                    AppAccessTile(
+                      icon: Icons.assignment_return_outlined,
+                      title: 'Emitir NC',
+                      subtitle: 'Nota de crédito sobre factura',
+                      color: AppColors.warning,
+                      onTap: () => context.push('/sales/emitir-nc'),
+                    ),
+                    const SizedBox(height: 10),
+                    AppAccessTile(
+                      icon: Icons.history_outlined,
+                      title: 'Historial',
+                      subtitle: 'Facturas y NC emitidas',
+                      color: AppColors.info,
+                      onTap: () => context.push('/sales/historial'),
+                    ),
                   ],
-                  AppLayout.vS,
-                  _accionSecuencias(context),
+                  const SizedBox(height: 12),
+                  AppAccessTile(
+                    icon: Icons.pin_outlined,
+                    title: 'Secuencias NCF',
+                    subtitle: 'Rangos y correlativos DGII',
+                    color: AppColors.secondary,
+                    onTap: () => context.push('/sales/secuencias-ncf'),
+                  ),
                 ],
               ),
             ),
@@ -96,105 +119,75 @@ class FacturacionInicioPage extends StatelessWidget {
       ),
     );
   }
-
-  Widget _accionEmitirFactura(BuildContext context) {
-    return _AccionFacturacion(
-      icono: Icons.receipt_long_outlined,
-      titulo: 'Emitir factura',
-      subtitulo: 'Desde cotización o venta lista (próximamente)',
-      color: AppColors.primary,
-      onTap: () => context.push('/sales/emitir-factura'),
-    );
-  }
-
-  Widget _accionEmitirNc(BuildContext context) {
-    return _AccionFacturacion(
-      icono: Icons.note_alt_outlined,
-      titulo: 'Emitir nota de crédito',
-      subtitulo: 'Anulación o ajuste de factura (próximamente)',
-      color: AppColors.warning,
-      onTap: () => context.push('/sales/emitir-nc'),
-    );
-  }
-
-  Widget _accionHistorial(BuildContext context) {
-    return _AccionFacturacion(
-      icono: Icons.history,
-      titulo: 'Historial de facturas',
-      subtitulo: 'Consultar y reimprimir',
-      color: AppColors.info,
-      onTap: () => context.push('/sales/historial'),
-    );
-  }
-
-  Widget _accionSecuencias(BuildContext context) {
-    return _AccionFacturacion(
-      icono: Icons.pin_outlined,
-      titulo: 'Secuencias NCF',
-      subtitulo: 'Rangos autorizados por tipo de comprobante',
-      color: AppColors.primary,
-      onTap: () => context.push('/sales/secuencias-ncf'),
-    );
-  }
 }
 
-class _AccionFacturacion extends StatelessWidget {
-  const _AccionFacturacion({
-    required this.icono,
-    required this.titulo,
-    required this.subtitulo,
-    required this.color,
-    required this.onTap,
+class _HubHero extends StatelessWidget {
+  const _HubHero({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
   });
 
-  final IconData icono;
-  final String titulo;
-  final String subtitulo;
-  final Color color;
-  final VoidCallback onTap;
+  final String title;
+  final String subtitle;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    final mobile = AppBreakpoints.isMobile(context);
-    return AppCard(
-      borderColor: AppColors.border,
-      onTap: onTap,
-      padding: EdgeInsets.symmetric(
-        horizontal: mobile ? 14 : 16,
-        vertical: mobile ? 14 : 16,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryDark,
+            AppColors.primary,
+            AppColors.primaryLight.withValues(alpha: 0.9),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.28),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icono, color: color, size: 24),
+            child: Icon(icon, color: Colors.white, size: 28),
           ),
-          SizedBox(width: mobile ? 12 : 14),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  titulo,
-                  style: AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.w600,
+                  title,
+                  style: AppTypography.h4.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 6),
                 Text(
-                  subtitulo,
+                  subtitle,
                   style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    height: 1.35,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.grey600),
         ],
       ),
     );

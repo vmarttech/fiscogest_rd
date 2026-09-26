@@ -48,13 +48,13 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         bottom: true,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            isMobile ? 16 : 24,
-            isMobile ? 16 : 20,
-            isMobile ? 16 : 24,
-            16,
+            isMobile ? 16 : 8,
+            isMobile ? 12 : 16,
+            isMobile ? 16 : 8,
+            12,
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Filtros en fila responsiva
               if (isMobile) ...[
@@ -109,13 +109,22 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               const SizedBox(height: 16),
 
               // Lista de movimientos
+              const SizedBox(height: 12),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withValues(alpha: 0.94),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.grey900.withValues(alpha: 0.05),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
+                  clipBehavior: Clip.antiAlias,
                   child: movimientosAsync.when(
                     loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
                     error: (error, _) => Center(
@@ -158,65 +167,259 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                         );
                       }
 
-                      return ListView.separated(
-                        padding: AppSpacing.allM,
-                        itemCount: filtrados.length,
-                        separatorBuilder: (_, __) => const Divider(color: AppColors.border, height: 1),
-                        itemBuilder: (_, indice) {
-                          final mov = filtrados[indice];
-                          final colorTipo = switch (mov.tipoMovimiento) {
-                            TipoMovimiento.entrada => AppColors.success,
-                            TipoMovimiento.salida => AppColors.error,
-                            TipoMovimiento.ajuste => AppColors.warning,
-                            TipoMovimiento.transferencia => AppColors.info,
-                            _ => AppColors.secondary,
-                          };
-                          final fechaValida = mov.fechaMovimiento ?? DateTime.now();
-                          return Padding(
-                            padding: AppSpacing.vS,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    color: colorTipo,
-                                    borderRadius: BorderRadius.circular(4),
+                      return Column(
+                        children: [
+                          // Cabecera tipo tabla (desktop)
+                          if (!isMobile)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: const BoxDecoration(
+                                color: AppColors.grey50,
+                                border: Border(
+                                  bottom: BorderSide(color: AppColors.border),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 110,
+                                    child: Text(
+                                      'TIPO',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.4,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: AppSpacing.m),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        mov.tipoMovimiento.name.toUpperCase(),
-                                        style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      'DOCUMENTO / PRODUCTO',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.4,
                                       ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Prod: ${mov.productoId} • Doc: ${mov.documentoReferencia ?? 'Sin documento'}',
-                                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Cant: ${mov.cantidad} • Saldo: ${mov.saldoAnterior} → ${mov.saldoNuevo}',
-                                        style: AppTypography.bodySmall,
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  '${fechaValida.day.toString().padLeft(2, '0')}/'
-                                  '${fechaValida.month.toString().padLeft(2, '0')}/'
-                                  '${fechaValida.year}',
-                                  style: AppTypography.bodySmall.copyWith(color: AppColors.textDisabled),
-                                ),
-                              ],
+                                  SizedBox(
+                                    width: 72,
+                                    child: Text(
+                                      'CANT.',
+                                      textAlign: TextAlign.right,
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      'SALDO',
+                                      textAlign: TextAlign.right,
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 100,
+                                    child: Text(
+                                      'FECHA',
+                                      textAlign: TextAlign.right,
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          );
-                        },
+                          Expanded(
+                            child: ListView.separated(
+                              padding: EdgeInsets.zero,
+                              itemCount: filtrados.length,
+                              separatorBuilder: (_, __) =>
+                                  const Divider(color: AppColors.border, height: 1),
+                              itemBuilder: (_, indice) {
+                                final mov = filtrados[indice];
+                                final colorTipo = switch (mov.tipoMovimiento) {
+                                  TipoMovimiento.entrada => AppColors.success,
+                                  TipoMovimiento.salida => AppColors.error,
+                                  TipoMovimiento.ajuste => AppColors.warning,
+                                  TipoMovimiento.transferencia => AppColors.info,
+                                  _ => AppColors.secondary,
+                                };
+                                final fechaValida =
+                                    mov.fechaMovimiento ?? DateTime.now();
+                                final fechaStr =
+                                    '${fechaValida.day.toString().padLeft(2, '0')}/'
+                                    '${fechaValida.month.toString().padLeft(2, '0')}/'
+                                    '${fechaValida.year}';
+
+                                if (isMobile) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 4,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: colorTipo,
+                                            borderRadius:
+                                                BorderRadius.circular(2),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                mov.tipoMovimiento.name
+                                                    .toUpperCase(),
+                                                style: AppTypography.labelLarge
+                                                    .copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                  color: colorTipo,
+                                                ),
+                                              ),
+                                              Text(
+                                                mov.documentoReferencia ??
+                                                    'Sin documento',
+                                                style: AppTypography.bodySmall
+                                                    .copyWith(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Cant ${mov.cantidad} · Saldo ${mov.saldoAnterior} → ${mov.saldoNuevo}',
+                                                style:
+                                                    AppTypography.bodySmall,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                          fechaStr,
+                                          style: AppTypography.bodySmall
+                                              .copyWith(
+                                            color: AppColors.textDisabled,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
+
+                                // Desktop: fila densa en columnas
+                                return Material(
+                                  color: indice.isEven
+                                      ? AppColors.white
+                                      : AppColors.grey50.withValues(alpha: 0.5),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 110,
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 4,
+                                                height: 28,
+                                                decoration: BoxDecoration(
+                                                  color: colorTipo,
+                                                  borderRadius:
+                                                      BorderRadius.circular(2),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Flexible(
+                                                child: Text(
+                                                  mov.tipoMovimiento.name
+                                                      .toUpperCase(),
+                                                  style: AppTypography
+                                                      .labelMedium
+                                                      .copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                    color: colorTipo,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 3,
+                                          child: Text(
+                                            'Prod ${mov.productoId} · ${mov.documentoReferencia ?? 'Sin documento'}',
+                                            style: AppTypography.bodySmall,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 72,
+                                          child: Text(
+                                            '${mov.cantidad}',
+                                            textAlign: TextAlign.right,
+                                            style: AppTypography.bodySmall
+                                                .copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 120,
+                                          child: Text(
+                                            '${mov.saldoAnterior} → ${mov.saldoNuevo}',
+                                            textAlign: TextAlign.right,
+                                            style: AppTypography.bodySmall
+                                                .copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 100,
+                                          child: Text(
+                                            fechaStr,
+                                            textAlign: TextAlign.right,
+                                            style: AppTypography.bodySmall
+                                                .copyWith(
+                                              color: AppColors.textDisabled,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),
