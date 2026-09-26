@@ -11,7 +11,6 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/conteo_fisico.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/estado_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
-import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/listar_conteos_page.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
 
 class RegistrarConteoPage extends ConsumerStatefulWidget {
@@ -67,13 +66,13 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         fechaCreacion: DateTime.now(),
         estado: EstadoConteo.pendiente,
       );
-      await ref.read(registrarConteoProvider).call(conteo);
+      final id = await ref.read(registrarConteoProvider).call(conteo);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('✅ Conteo creado exitosamente')),
       );
       ref.invalidate(listaConteosProvider);
-      context.goNamed(ListarConteosPage.routeName);
+      context.go('/inventario-fisico/capturar/$id');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

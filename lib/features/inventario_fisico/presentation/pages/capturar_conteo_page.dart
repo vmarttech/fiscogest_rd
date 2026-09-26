@@ -109,12 +109,24 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
       title: 'Capturar conteo #${widget.conteoId}',
       subtitle: isMobile ? null : 'Registre cantidades físicas por producto',
       actions: [
-        TextButton(
-          onPressed: () => context.pushNamed(
-            'diferencias-conteo-fisico',
-            pathParameters: {'conteoId': '${widget.conteoId}'},
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => context.push(
+              '/diferencias-conteo-fisico/${widget.conteoId}',
+            ),
+            icon: const Icon(Icons.difference_outlined, color: Colors.white),
+            label: const Text(
+              'Ver diferencias',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          child: const Text('Ver diferencias'),
         ),
       ],
       body: SafeArea(
@@ -186,7 +198,11 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                           return Column(
                             children: filtrados.map((p) {
                               final sel = _seleccionado?.id == p.id;
-                              return ListTile(
+                              return Material(
+                              color: sel
+                                  ? AppColors.primary.withValues(alpha: 0.08)
+                                  : AppColors.white,
+                              child: ListTile(
                                 dense: true,
                                 selected: sel,
                                 title: Text(p.nombre),
@@ -200,7 +216,8 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                                         (p.stock ?? 0).toString();
                                   });
                                 },
-                              );
+                              ),
+                            );
                             }).toList(),
                           );
                         },

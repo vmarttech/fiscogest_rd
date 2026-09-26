@@ -4,7 +4,7 @@ import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferenc
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/estado_conteo.dart';
 
 abstract class InventarioFisicoRepositoryInterface {
-  Future<void> registrarConteo(ConteoFisico conteo);
+  Future<int> registrarConteo(ConteoFisico conteo);
   Future<List<ConteoFisico>> listarConteos();
   Future<List<DiferenciaConteo>> listarDiferencias(int conteoId);
   Future<void> guardarDiferencia(DiferenciaConteo dif);

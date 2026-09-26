@@ -28,8 +28,8 @@ class InventarioFisicoRepositoryImpl
   }
 
   @override
-  Future<void> registrarConteo(ConteoFisico conteo) async {
-    await _db.into(_db.conteosFisicos).insert(
+  Future<int> registrarConteo(ConteoFisico conteo) async {
+    final id = await _db.into(_db.conteosFisicos).insert(
           ConteosFisicosCompanion.insert(
             nombreConteo: conteo.nombreConteo,
             fechaConteo: conteo.fechaConteo,
@@ -39,6 +39,7 @@ class InventarioFisicoRepositoryImpl
             estado: conteo.estado.name,
           ),
         );
+    return id;
   }
 
   @override

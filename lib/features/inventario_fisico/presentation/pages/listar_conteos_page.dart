@@ -141,7 +141,7 @@ class ListarConteosPage extends ConsumerWidget {
                                   '${c.fechaConteo.day.toString().padLeft(2, '0')}/'
                                   '${c.fechaConteo.month.toString().padLeft(2, '0')}/'
                                   '${c.fechaConteo.year}';
-                              final estado = c.estado.name.toUpperCase();
+                              final estado = c.estado.etiqueta;
 
                               return Material(
                                 color: i.isEven

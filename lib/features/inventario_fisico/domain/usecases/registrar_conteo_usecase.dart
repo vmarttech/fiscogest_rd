@@ -5,7 +5,7 @@ class RegistrarConteoUsecase {
   RegistrarConteoUsecase(this._repo);
   final InventarioFisicoRepositoryInterface _repo;
 
-  Future<void> call(ConteoFisico conteo) async {
-    await _repo.registrarConteo(conteo);
+  Future<int> call(ConteoFisico conteo) async {
+    return _repo.registrarConteo(conteo);
   }
 }
