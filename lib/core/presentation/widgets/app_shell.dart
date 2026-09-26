@@ -1,11 +1,11 @@
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
-import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
@@ -23,33 +23,34 @@ class AppShell extends ConsumerWidget {
         ? cfg!.nombreComercial.trim()
         : 'Mi negocio';
 
-    final isMobile = AppBreakpoints.isMobile(context);
     const navWidth = 280.0;
     final currentPath = GoRouterState.of(context).uri.path;
 
-    if (isMobile) {
-      // Sin AppBar del shell: la barra la pone cada página (AppScaffold).
-      return Scaffold(
-        backgroundColor: AppColors.pageBackground,
-        drawer: _buildMenu(navWidth, currentPath, context, nombreEmpresa, modoSimplificado),
-        body: child,
-      );
-    }
-
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
-      body: Row(
-        children: [
-          SizedBox(
-            width: navWidth,
-            child: _buildMenu(navWidth, currentPath, context, nombreEmpresa, modoSimplificado),
-          ),
-          Expanded(child: child),
-        ],
+      drawer: SizedBox(
+        width: navWidth,
+        child: _buildMenu(
+          navWidth,
+          currentPath,
+          context,
+          nombreEmpresa,
+          modoSimplificado,
+        ),
+      ),
+      body: Builder(
+        builder: (scaffoldContext) {
+          return ShellDrawerScope(
+            openDrawer: () {
+              final s = Scaffold.maybeOf(scaffoldContext);
+              if (s != null && s.hasDrawer) s.openDrawer();
+            },
+            child: child,
+          );
+        },
       ),
     );
   }
-
 
   Widget _buildMenu(double width, String currentPath, BuildContext context, String nombreEmpresa, bool modoSimplificado) {
     return Material(
@@ -197,7 +198,7 @@ class AppShell extends ConsumerWidget {
         child: InkWell(
           borderRadius: AppRadius.allM,
           onTap: () {
-            if (AppBreakpoints.isMobile(context)) {
+            if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
               Navigator.of(context).pop();
             }
             context.go(routePath);

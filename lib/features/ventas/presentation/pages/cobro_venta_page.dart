@@ -45,6 +45,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   String _dirCliente = '';
   String _telCliente = '';
   double montoTotal = 0.0;
+  final double _costoEnvio = 0.0;
   bool esCredito = false;
   String numeroCotizacion = 'N/A';
   String? nombreCliente;
@@ -1104,6 +1105,30 @@ Future<void> _cargarDocumento({
                                 const SizedBox(height: 14),
                               ],
 
+                              // === ENVÍO / DELIVERY (detalle visible) ===
+                              if (_costoEnvio > 0.001) ...[
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Envío / Delivery',
+                                      style: AppTypography.bodySmall.copyWith(
+                                        fontSize: tamanoCuerpo,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    Text(
+                                      'RD\$ \${_costoEnvio.toStringAsFixed(2)}',
+                                      style: AppTypography.bodySmall.copyWith(
+                                        fontSize: tamanoCuerpo,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                              ],
                               // === TOTAL DOMINANTE ===
                               Row(
                                 mainAxisAlignment:

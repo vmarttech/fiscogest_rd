@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
+import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 
 class AppScaffold extends StatelessWidget {
@@ -35,6 +38,33 @@ class AppScaffold extends StatelessWidget {
   final bool centerTitle;
   final bool showAppBar;
 
+  /// Rutas de módulo: menú sándwich, sin flecha atrás.
+  static const rutasPrincipales = {
+    '/',
+    '/ventas',
+    '/creditos',
+    '/compras',
+    '/inventario',
+    '/clientes',
+    '/proveedores',
+    '/sales',
+    '/reports',
+    '/impuestos',
+    '/import-export',
+    '/configuracion',
+    '/kardex',
+    '/categorias',
+    '/marcas',
+    '/unidades',
+    '/presentaciones',
+    '/ajustes-inventario',
+    '/lista-ajustes',
+    '/inventario-fisico',
+    '/inventario-fisico/listar',
+  };
+
+  static bool esRutaPrincipal(String path) => rutasPrincipales.contains(path);
+
   @override
   Widget build(BuildContext context) {
     final Widget? contenido = padding != null && body != null
@@ -51,17 +81,33 @@ class AppScaffold extends StatelessWidget {
 
   PreferredSizeWidget? _buildAppBar(BuildContext context) {
     if (title == null && bottom == null) return null;
+
+    final path = GoRouterState.of(context).uri.path;
+    final principal = esRutaPrincipal(path);
+    final underShell =
+        context.findAncestorWidgetOfExactType<AppShell>() != null;
+
+    Widget? resolvedLeading = leading;
+    if (resolvedLeading == null && showBackButton) {
+      if (principal && underShell) {
+        resolvedLeading = IconButton(
+          icon: const Icon(Icons.menu),
+          tooltip: 'Menú',
+          onPressed: () => ShellDrawerScope.open(context),
+        );
+      } else if (!principal) {
+        resolvedLeading = IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Atrás',
+          onPressed: () => safeBack(context),
+        );
+      }
+    }
+
     return AppBar(
       toolbarHeight: subtitle != null ? 56 : 48,
       automaticallyImplyLeading: false,
-      leading: leading ??
-          (showBackButton
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  tooltip: 'Atrás',
-                  onPressed: () => safeBack(context),
-                )
-              : null),
+      leading: resolvedLeading,
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,

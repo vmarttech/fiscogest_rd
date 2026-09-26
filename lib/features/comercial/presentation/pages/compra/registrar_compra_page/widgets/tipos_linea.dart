@@ -8,27 +8,33 @@ class DetalleLinea {
   double fleteUnitario = 0.0;
   double seguroUnitario = 0.0;
   double arancelesUnitario = 0.0;
+  /// Otros gastos REALES por unidad (flete aparte). NO poner aquí el ITBIS.
   double gastosUnitario = 0.0;
   double descuentoPorcentaje = 0.0;
 
-  double get gastosAsociados =>
+  /// Tasa ITBIS de la línea (0.0 = plan simplificado).
+  double tasaImpuestoLinea = 0.18;
+
+  /// Gastos extra por unidad (sin ITBIS).
+  double get gastosAsociadosUnitarios =>
       fleteUnitario + seguroUnitario + arancelesUnitario + gastosUnitario;
 
-  double get costoReal => costoUnitario + gastosAsociados;
+  /// Gastos extra de la línea completa.
+  double get gastosAsociados => gastosAsociadosUnitarios * cantidad;
+
+  /// Costo de adquisición unitario para inventario (sin ITBIS recuperable).
+  double get costoReal => costoUnitario + gastosAsociadosUnitarios;
 
   double get importeBruto => cantidad * costoUnitario;
-
   double get montoDescuentoLinea => importeBruto * (descuentoPorcentaje / 100);
-
   double get subtotalLinea => importeBruto - montoDescuentoLinea;
-
   double get baseImponibleLinea => subtotalLinea;
-
-  double get tasaImpuestoLinea => 0.18;
 
   double get itbisLinea => baseImponibleLinea * tasaImpuestoLinea;
 
-  double get totalLinea => baseImponibleLinea + itbisLinea + gastosAsociados;
+  /// Total a pagar de la línea = base + ITBIS + gastos reales (× cantidad).
+  double get totalLinea =>
+      baseImponibleLinea + itbisLinea + gastosAsociados;
 }
 
 class ControladoresLinea {
@@ -54,8 +60,7 @@ class ControladoresLinea {
     descuento.dispose();
   }
 
-  /// ✅ Leer valores desde controladores y crear línea — CONECTA EL RECÁLCULO
-  DetalleLinea haciaLinea() => DetalleLinea()
+  DetalleLinea haciaLinea({double tasaItbis = 0.18}) => DetalleLinea()
     ..productoId = int.tryParse(productoId.text.trim())
     ..cantidad = double.tryParse(cantidad.text) ?? 0.0
     ..costoUnitario = double.tryParse(costoUnitario.text) ?? 0.0
@@ -63,9 +68,9 @@ class ControladoresLinea {
     ..seguroUnitario = double.tryParse(seguroUnitario.text) ?? 0.0
     ..arancelesUnitario = double.tryParse(arancelesUnitario.text) ?? 0.0
     ..gastosUnitario = double.tryParse(gastosUnitario.text) ?? 0.0
-    ..descuentoPorcentaje = double.tryParse(descuento.text) ?? 0.0;
+    ..descuentoPorcentaje = double.tryParse(descuento.text) ?? 0.0
+    ..tasaImpuestoLinea = tasaItbis;
 
-  /// ✅ Cargar valores desde línea hacia controladores
   void desdeLinea(DetalleLinea linea) {
     cantidad.text = linea.cantidad.toString();
     costoUnitario.text = linea.costoUnitario.toString();

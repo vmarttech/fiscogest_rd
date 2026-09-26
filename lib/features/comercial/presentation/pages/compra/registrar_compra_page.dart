@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
@@ -84,7 +85,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   /// ✅ FUNCIÓN CLAVE: Leer controlador → actualizar modelo → recálculo automático
   void _actualizarLineaEnTiempoReal(int index, String campo) {
     setState(() {
-      _lineas[index] = _controladores[index].haciaLinea();
+      _lineas[index] = _controladores[index].haciaLinea(tasaItbis: _tasaImpuesto);
     });
   }
 
@@ -94,7 +95,14 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   double get _descuentoGlobal =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.montoDescuentoLinea);
 
-  double get _tasaImpuesto => 0.18;
+  double get _tasaImpuesto {
+    final simplificado = ref
+            .watch(configuracionControllerProvider)
+            .valueOrNull
+            ?.modoSimplificado ??
+        false;
+    return simplificado ? 0.0 : 0.18;
+  }
 
   double get _montoImpuesto =>
       _lineas.fold(0.0, (sum, linea) => sum + linea.itbisLinea);

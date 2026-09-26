@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/presentation/providers/shell_app_bar_provider.dart';
 
+/// Publica acciones en la AppBar del shell (si se usa).
 class ShellAppBarScope extends ConsumerStatefulWidget {
   const ShellAppBarScope({
     super.key,
@@ -36,20 +37,19 @@ class _ShellAppBarScopeState extends ConsumerState<ShellAppBarScope> {
 
   void _publish() {
     if (!mounted) return;
-    ref.read(shellAppBarProvider.notifier).set(
-          actions: widget.actions,
-          titleOverride: widget.titleOverride,
-        );
+    try {
+      ref.read(shellAppBarProvider.notifier).set(
+            actions: widget.actions,
+            titleOverride: widget.titleOverride,
+          );
+    } catch (_) {
+      // Widget desmontado o provider no disponible
+    }
   }
 
   @override
   void dispose() {
-    final container = ProviderScope.containerOf(context, listen: false);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        container.read(shellAppBarProvider.notifier).clear();
-      } catch (_) {}
-    });
+    // NUNCA usar ref ni context aquí → Bad state: Cannot use "ref" after disposed
     super.dispose();
   }
 
