@@ -56,10 +56,13 @@ class _RegistrarTransferenciaPageState
       title: 'Transferencia de Inventario',
       body: SafeArea(
         bottom: true,
-        child: Form(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Form(
           key: _formKey,
           child: ListView(
-            padding: AppLayout.pantallaPadding,
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
             children: [
               const Text(
                 'Seleccionar Producto',
@@ -84,6 +87,8 @@ class _RegistrarTransferenciaPageState
             ],
           ),
         ),
+          ), // ConstrainedBox
+        ), // Center
       ),
     );
   }

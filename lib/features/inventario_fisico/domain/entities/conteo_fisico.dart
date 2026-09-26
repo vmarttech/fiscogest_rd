@@ -1,4 +1,4 @@
-enum EstadoConteo { pendiente, aprobado, rechazado }
+import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/estado_conteo.dart';
 
 class ConteoFisico {
   ConteoFisico({
@@ -10,6 +10,7 @@ class ConteoFisico {
     required this.fechaCreacion,
     required this.estado,
   });
+
   final int? id;
   final String nombreConteo;
   final DateTime fechaConteo;

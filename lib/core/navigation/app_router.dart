@@ -9,6 +9,9 @@ import 'package:fiscogest_rd/features/inventario/presentation/pages/registrar_sa
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/registrar_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/diferencias_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/listar_conteos_page.dart';
+import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/capturar_conteo_page.dart';
+import 'package:fiscogest_rd/features/seguridad/presentation/pages/login_page.dart';
+
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cotizaciones_historial_page.dart';
@@ -66,6 +69,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
     routes: [
+      GoRoute(
+        path: '/login',
+        name: LoginPage.routeName,
+        builder: (_, __) => const LoginPage(),
+      ),
       
       GoRoute(
         path: '/splash',
@@ -379,6 +387,15 @@ GoRoute(
         path: '/inventario-fisico/listar',
         name: ListarConteosPage.routeName,
         builder: (_, __) => const AppShell(child: ListarConteosPage()),
+      ),
+      GoRoute(
+        path: '/inventario-fisico/capturar/:conteoId',
+        name: CapturarConteoPage.routeName,
+        builder: (context, state) {
+          final idRaw = state.pathParameters['conteoId'] ?? '0';
+          final id = int.tryParse(idRaw.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          return AppShell(child: CapturarConteoPage(conteoId: id));
+        },
       ),
       GoRoute(
         path: '/diferencias-conteo-fisico/:conteoId',

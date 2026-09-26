@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferencia_conteo.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -5,6 +6,7 @@ import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/conteo_f
 import 'package:fiscogest_rd/features/inventario_fisico/domain/usecases/registrar_conteo_usecase.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/usecases/listar_diferencias_usecase.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/usecases/aprobar_ajustes_usecase.dart';
+import 'package:fiscogest_rd/features/inventario_fisico/domain/usecases/guardar_diferencia_usecase.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/usecases/generar_reporte_usecase.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/data/repositories/inventario_fisico_repository_impl.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
@@ -42,4 +44,13 @@ final generarReporteProvider = Provider<GenerarReporteUsecase>((ref) {
 // ✅ Listado con tipo exacto y llamado directo
 final listaConteosProvider = FutureProvider<List<ConteoFisico>>((ref) async {
   return ref.watch(inventarioFisicoRepoProvider).listarConteos();
+});
+
+final guardarDiferenciaProvider = Provider<GuardarDiferenciaUsecase>((ref) {
+  return GuardarDiferenciaUsecase(ref.watch(inventarioFisicoRepoProvider));
+});
+
+final diferenciasConteoProvider =
+    FutureProvider.family<List<DiferenciaConteo>, int>((ref, conteoId) async {
+  return ref.watch(listarDiferenciasProvider).call(conteoId);
 });

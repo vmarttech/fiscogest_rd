@@ -69,11 +69,11 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
           children: [
             Center(
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 1000),
+                constraints: const BoxConstraints(maxWidth: 1320),
                 padding: EdgeInsets.fromLTRB(
-                  isMobile ? 16 : 24,
-                  isMobile ? 16 : 20,
-                  isMobile ? 16 : 24,
+                  isMobile ? 16 : 8,
+                  isMobile ? 12 : 16,
+                  isMobile ? 16 : 8,
                   100,
                 ),
                 child: unidadesAsync.when(
@@ -98,10 +98,67 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                       );
                     }
 
-                    return ListView.separated(
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.94),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.grey900.withValues(alpha: 0.05),
+                            blurRadius: 18,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          if (!isMobile)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 11,
+                              ),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF8FAFC),
+                                border: Border(
+                                  bottom: BorderSide(color: AppColors.border),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 54),
+                                  Expanded(
+                                    child: Text(
+                                      'UNIDAD',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 96,
+                                    child: Text(
+                                      'ACCIONES',
+                                      textAlign: TextAlign.center,
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          Expanded(
+                            child: ListView.separated(
                       itemCount: filtradas.length,
                       separatorBuilder: (context, index) =>
-                          const Divider(color: AppColors.grey200, height: 1),
+                          const Divider(color: AppColors.border, height: 1),
                       itemBuilder: (context, index) {
                         final unidad = filtradas[index];
                         final subtitulo = unidad.abreviatura != null && unidad.abreviatura!.isNotEmpty
@@ -110,8 +167,15 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                 ? 'Sin descripción'
                                 : unidad.descripcion!;
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        return Material(
+                          color: index.isEven
+                              ? AppColors.white
+                              : AppColors.grey50.withValues(alpha: 0.55),
+                          child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
                           child: isMobile
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,9 +311,14 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                     ),
                                   ],
                                 ),
+                        ),
                         );
                       },
-                    );
+                      ), // ListView
+                          ), // Expanded
+                        ], // Column children
+                      ), // Column
+                    ); // Container
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Center(

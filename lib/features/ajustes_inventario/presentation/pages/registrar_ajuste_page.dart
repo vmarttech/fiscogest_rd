@@ -83,9 +83,9 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
           error: (e, _) => Center(child: Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error))),
           data: (todos) => SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
-              isMobile ? 16 : 24,
-              isMobile ? 16 : 20,
-              isMobile ? 16 : 24,
+              isMobile ? 16 : 8,
+              isMobile ? 12 : 16,
+              isMobile ? 16 : 8,
               24,
             ),
             child: Form(

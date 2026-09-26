@@ -92,7 +92,7 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
           child: SingleChildScrollView(
             padding: AppLayout.pantallaPadding,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 650),
+              constraints: const BoxConstraints(maxWidth: 720),
               child: AppCard(
                 padding: AppSpacing.allXl,
                 elevation: 2,

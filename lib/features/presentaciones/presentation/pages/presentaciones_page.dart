@@ -40,7 +40,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
       padding: AppSpacing.hL.copyWith(top: AppSpacing.m, bottom: AppSpacing.l),
       body: Center(
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 1000),
+          constraints: const BoxConstraints(maxWidth: 1320),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

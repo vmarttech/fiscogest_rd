@@ -1,6 +1,11 @@
+import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/capturar_conteo_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
 
 class ListarConteosPage extends ConsumerWidget {
@@ -10,76 +15,225 @@ class ListarConteosPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final conteosAsync = ref.watch(listaConteosProvider);
+    final isMobile = AppBreakpoints.isMobile(context);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: const Text('Inventario Físico'),
-        backgroundColor: const Color(0xFF0A2463),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
-            tooltip: 'Nuevo Conteo',
-            onPressed: () => context.pushNamed('registrar-conteo-fisico'),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: conteosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text('Error: $e', style: const TextStyle(color: Colors.red)),
+    return AppScaffold(
+      title: 'Inventario Físico',
+      subtitle: isMobile ? null : 'Conteos y diferencias de stock',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          tooltip: 'Nuevo Conteo',
+          onPressed: () => context.pushNamed('registrar-conteo-fisico'),
         ),
-        data: (lista) {
-          if (lista.isEmpty) {
-            return const Center(
-              child: Text(
-                'No hay conteos registrados. Cree el primero.',
-                style: TextStyle(color: Color(0xFF64748B)),
-              ),
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(24),
-            itemCount: lista.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (_, i) {
-              final c = lista[i];
-              return Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+      ],
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            isMobile ? 16 : 8,
+            isMobile ? 12 : 16,
+            isMobile ? 16 : 8,
+            12,
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1320),
+              child: conteosAsync.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                error: (e, _) => Center(
+                  child: Text(
+                    'Error: $e',
+                    style: AppTypography.bodyMedium
+                        .copyWith(color: AppColors.error),
                   ),
-                  title: Text(
-                    c.nombreConteo,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B),
+                ),
+                data: (lista) {
+                  if (lista.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No hay conteos registrados. Cree el primero.',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.94),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.grey900.withValues(alpha: 0.05),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                  ),
-                  subtitle: Text(
-                    'Fecha: ${c.fechaConteo.day}/${c.fechaConteo.month}/${c.fechaConteo.year} • Estado: ${c.estado.name.toUpperCase()}',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Color(0xFF94A3B8),
-                  ),
-                  onTap: () =>
-                      context.pushNamed('diferencias-conteo', extra: c.id),
-                ),
-              );
-            },
-          );
-        },
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        if (!isMobile)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 11,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF8FAFC),
+                              border: Border(
+                                bottom: BorderSide(color: AppColors.border),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    'CONTEO',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'FECHA',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'ESTADO',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 32),
+                              ],
+                            ),
+                          ),
+                        Expanded(
+                          child: ListView.separated(
+                            itemCount: lista.length,
+                            separatorBuilder: (_, __) => const Divider(
+                              height: 1,
+                              color: AppColors.border,
+                            ),
+                            itemBuilder: (_, i) {
+                              final c = lista[i];
+                              final fecha =
+                                  '${c.fechaConteo.day.toString().padLeft(2, '0')}/'
+                                  '${c.fechaConteo.month.toString().padLeft(2, '0')}/'
+                                  '${c.fechaConteo.year}';
+                              final estado = c.estado.name.toUpperCase();
+
+                              return Material(
+                                color: i.isEven
+                                    ? AppColors.white
+                                    : AppColors.grey50.withValues(alpha: 0.55),
+                                child: InkWell(
+                                  onTap: () => context.pushNamed(
+                                    CapturarConteoPage.routeName,
+                                    pathParameters: {
+                                      'conteoId': '${c.id ?? 0}',
+                                    },
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    child: isMobile
+                                        ? Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                c.nombreConteo,
+                                                style: AppTypography.labelLarge
+                                                    .copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'Fecha: $fecha · Estado: $estado',
+                                                style: AppTypography.bodySmall
+                                                    .copyWith(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 3,
+                                                child: Text(
+                                                  c.nombreConteo,
+                                                  style: AppTypography
+                                                      .bodyMedium
+                                                      .copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  fecha,
+                                                  style:
+                                                      AppTypography.bodySmall,
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  estado,
+                                                  style: AppTypography.bodySmall
+                                                      .copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                              const Icon(
+                                                Icons.chevron_right,
+                                                size: 20,
+                                                color: AppColors.grey400,
+                                              ),
+                                            ],
+                                          ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,10 +1,13 @@
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 
 // ✅ Opcional válido: el usuario puede no estar autenticado
-final usuarioAutenticadoProvider = Provider<int?>((ref) => null);
+final usuarioAutenticadoProvider = Provider<int?>((ref) {
+  return ref.watch(sesionUsuarioIdProvider);
+});
 
 // ✅ OBLIGATORIO POR ARQUITECTURA: No nulo, exige inicialización explícita en main.dart
 final inventarioRepositoryProvider = Provider<InventarioRepositoryInterface>((
