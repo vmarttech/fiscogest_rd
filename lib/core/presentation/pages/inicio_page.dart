@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 /// Hub de inicio — layout denso y atmósfera premium en desktop.
 class InicioPage extends ConsumerWidget {
@@ -49,12 +50,24 @@ class InicioPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _HeroBanner(
-                    saludo: _saludo(),
-                    fecha: fecha,
-                    onNuevaVenta: () => _go(context, '/ventas/cotizaciones/nueva'),
-                    onCaja: () => _go(context, '/ventas/cobro'),
-                    compact: mobile,
+                  Builder(
+                    builder: (_) {
+                      final cfg =
+                          ref.watch(configuracionControllerProvider).valueOrNull;
+                      final n1 = cfg?.nombreComercial.trim() ?? '';
+                      final n2 = cfg?.razonSocial.trim() ?? '';
+                      final nombre =
+                          n1.isNotEmpty ? n1 : (n2.isNotEmpty ? n2 : 'Mi negocio');
+                      return _HeroBanner(
+                        saludo: _saludo(),
+                        fecha: fecha,
+                        nombreNegocio: nombre,
+                        onNuevaVenta: () =>
+                            _go(context, '/ventas/cotizaciones/nueva'),
+                        onCaja: () => _go(context, '/ventas/cobro'),
+                        compact: mobile,
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   // KPIs — llenan el ancho
@@ -369,6 +382,7 @@ class _HeroBanner extends StatelessWidget {
   const _HeroBanner({
     required this.saludo,
     required this.fecha,
+    required this.nombreNegocio,
     required this.onNuevaVenta,
     required this.onCaja,
     required this.compact,
@@ -376,6 +390,7 @@ class _HeroBanner extends StatelessWidget {
 
   final String saludo;
   final String fecha;
+  final String nombreNegocio;
   final VoidCallback onNuevaVenta;
   final VoidCallback onCaja;
   final bool compact;
@@ -449,12 +464,14 @@ class _HeroBanner extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'FiscoGest RD',
+                nombreNegocio,
                 style: AppTypography.h2.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 6),
               Text(
