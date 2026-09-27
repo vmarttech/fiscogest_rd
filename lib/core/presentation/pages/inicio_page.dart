@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/dashboard_compras_providers.dart';
 
 /// Hub de inicio — layout denso y atmósfera premium en desktop.
 class InicioPage extends ConsumerWidget {
@@ -256,48 +258,12 @@ class InicioPage extends ConsumerWidget {
                             children: [
                               const SectionHeader(
                                 title: 'Hoy en el negocio',
-                                subtitle: 'Atajos y foco',
+                                subtitle: 'Indicadores en vivo',
                               ),
                               const SizedBox(height: 8),
-                              AppCard(
-                                accent: true,
-                                padding: const EdgeInsets.all(18),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Flujo recomendado',
-                                      style: AppTypography.labelLarge.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    const _Paso(n: '1', t: 'Ventas → cotización'),
-                                    const _Paso(n: '2', t: 'Crédito (si aplica)'),
-                                    const _Paso(n: '3', t: 'Facturación → NCF'),
-                                    const _Paso(n: '4', t: 'Caja → cobro'),
-                                    const SizedBox(height: 16),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: FilledButton.icon(
-                                        onPressed: () =>
-                                            _go(context, '/ventas/cotizaciones/nueva'),
-                                        icon: const Icon(Icons.add, size: 18),
-                                        label: const Text('Nueva cotización'),
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor: AppColors.primary,
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 14,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              _InsightsCarousel(
+                                onNuevaCotizacion: () =>
+                                    _go(context, '/ventas/cotizaciones/nueva'),
                               ),
                             ],
                           ),
@@ -355,17 +321,14 @@ class InicioPage extends ConsumerWidget {
                       onTap: () => _go(context, '/inventario'),
                     ),
                     const SizedBox(height: 20),
-                    const SectionHeader(title: 'Flujo recomendado'),
+                    const SectionHeader(
+                      title: 'Hoy en el negocio',
+                      subtitle: 'Indicadores en vivo',
+                    ),
                     const SizedBox(height: 8),
-                    const AppCard(
-                      child: Column(
-                        children: [
-                          _Paso(n: '1', t: 'Ventas → cotización'),
-                          _Paso(n: '2', t: 'Crédito (si aplica)'),
-                          _Paso(n: '3', t: 'Facturación → NCF'),
-                          _Paso(n: '4', t: 'Caja → cobro'),
-                        ],
-                      ),
+                    _InsightsCarousel(
+                      onNuevaCotizacion: () =>
+                          _go(context, '/ventas/cotizaciones/nueva'),
                     ),
                   ],
                 ],
@@ -668,40 +631,367 @@ class _Acceso extends StatelessWidget {
   }
 }
 
-class _Paso extends StatelessWidget {
-  const _Paso({required this.n, required this.t});
+/// Carrusel tipo panel bancario: rota indicadores con progreso y fade.
+class _InsightsCarousel extends ConsumerStatefulWidget {
+  const _InsightsCarousel({required this.onNuevaCotizacion});
 
-  final String n;
-  final String t;
+  final VoidCallback onNuevaCotizacion;
+
+  @override
+  ConsumerState<_InsightsCarousel> createState() => _InsightsCarouselState();
+}
+
+class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
+    with SingleTickerProviderStateMixin {
+  static const _interval = Duration(seconds: 6);
+
+  int _index = 0;
+  bool _paused = false;
+  List<_InsightSlide> _slides = const [];
+
+  late final AnimationController _progress;
+
+  static final _money = NumberFormat.currency(
+    locale: 'es_DO',
+    symbol: 'RD\$ ',
+    decimalDigits: 0,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _progress = AnimationController(vsync: this, duration: _interval)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted && !_paused) {
+          _goNext();
+        }
+      });
+    _progress.forward();
+  }
+
+  void _goNext() {
+    if (!mounted || _slides.isEmpty) {
+      _progress
+        ..reset()
+        ..forward();
+      return;
+    }
+    setState(() => _index = (_index + 1) % _slides.length);
+    _progress
+      ..reset()
+      ..forward();
+  }
+
+  void _goTo(int i) {
+    setState(() => _index = i);
+    _progress
+      ..reset()
+      ..forward();
+  }
+
+  void _setPaused(bool v) {
+    if (_paused == v) return;
+    setState(() => _paused = v);
+    if (v) {
+      _progress.stop();
+    } else {
+      _progress.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _progress.dispose();
+    super.dispose();
+  }
+
+  List<_InsightSlide> _buildSlides(
+    DashboardComprasKpis? kpis,
+    int productos,
+    int bajoStock,
+  ) {
+    return [
+      _InsightSlide(
+        icon: Icons.route_outlined,
+        color: AppColors.primary,
+        badge: 'FLUJO',
+        title: 'Ruta del día',
+        body: 'Cotiza → crédito → factura NCF → cobra en caja.',
+        value: '4 pasos',
+        footer: 'Operación recomendada',
+      ),
+      _InsightSlide(
+        icon: Icons.shopping_cart_checkout_rounded,
+        color: AppColors.info,
+        badge: 'COMPRAS',
+        title: 'Compras del mes',
+        body: 'Total de compras válidas en el mes en curso.',
+        value: kpis == null ? '—' : _money.format(kpis.comprasEsteMes),
+        footer: kpis == null ? 'Cargando…' : 'Incluye crédito y contado',
+      ),
+      _InsightSlide(
+        icon: Icons.account_balance_wallet_outlined,
+        color: AppColors.warning,
+        badge: 'CxP',
+        title: 'Por pagar',
+        body: 'Saldos a proveedores aún no vencidos.',
+        value: kpis == null ? '—' : _money.format(kpis.porPagar),
+        footer: 'Cuentas por pagar',
+      ),
+      _InsightSlide(
+        icon: Icons.warning_amber_rounded,
+        color: AppColors.error,
+        badge: 'ALERTA',
+        title: 'CxP vencido',
+        body: (kpis != null && kpis.vencido > 0)
+            ? 'Revisa saldos vencidos con proveedores.'
+            : 'Sin saldos vencidos por ahora.',
+        value: kpis == null ? '—' : _money.format(kpis.vencido),
+        footer: (kpis != null && kpis.vencido > 0) ? 'Requiere atención' : 'Al día',
+      ),
+      _InsightSlide(
+        icon: Icons.inventory_2_outlined,
+        color: AppColors.success,
+        badge: 'STOCK',
+        title: 'Inventario',
+        body: bajoStock > 0
+            ? '$bajoStock ítem(s) con stock ≤ 10 unidades.'
+            : 'Catálogo estable · $productos producto(s).',
+        value: '$productos',
+        footer: bajoStock > 0 ? 'Revisar bajo stock' : 'Sin alertas fuertes',
+      ),
+      _InsightSlide(
+        icon: Icons.bolt_outlined,
+        color: AppColors.primary,
+        badge: 'ATAJO',
+        title: 'Empezar ahora',
+        body: 'Genera una cotización y avanza el flujo en minutos.',
+        value: 'Venta',
+        footer: 'Acción rápida',
+        showCta: true,
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 26,
-            height: 26,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              n,
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w800,
+    final kpis = ref.watch(dashboardComprasKpisProvider).valueOrNull;
+    final productos = ref.watch(productoControllerProvider).valueOrNull ?? [];
+    final bajo = productos.where((p) => (p.stock ?? 0) <= 10).length;
+    _slides = _buildSlides(kpis, productos.length, bajo);
+    final s = _slides[_index.clamp(0, _slides.length - 1)];
+
+    return MouseRegion(
+      onEnter: (_) => _setPaused(true),
+      onExit: (_) => _setPaused(false),
+      child: GestureDetector(
+        onTapDown: (_) => _setPaused(true),
+        onTapUp: (_) => _setPaused(false),
+        onTapCancel: () => _setPaused(false),
+        child: AppCard(
+          accent: true,
+          padding: EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Barra de progreso del ciclo
+              AnimatedBuilder(
+                animation: _progress,
+                builder: (_, __) {
+                  return LinearProgressIndicator(
+                    value: _paused ? _progress.value : _progress.value,
+                    minHeight: 3,
+                    backgroundColor: AppColors.grey100,
+                    color: s.color,
+                  );
+                },
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: s.color.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            s.badge,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: s.color,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '${_index + 1}/${_slides.length}',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 380),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, anim) {
+                        return FadeTransition(
+                          opacity: anim,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0.04, 0),
+                              end: Offset.zero,
+                            ).animate(anim),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: KeyedSubtree(
+                        key: ValueKey(_index),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: s.color.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(s.icon, color: s.color, size: 24),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    s.title,
+                                    style: AppTypography.labelMedium.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    s.value,
+                                    style: AppTypography.h3.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.4,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    s.body,
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      height: 1.35,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    s.footer,
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: s.color,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (s.showCta) ...[
+                                    const SizedBox(height: 10),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: FilledButton.icon(
+                                        onPressed: widget.onNuevaCotizacion,
+                                        icon: const Icon(Icons.add, size: 18),
+                                        label: const Text('Nueva cotización'),
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: AppColors.primary,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    // Puntos clicables
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_slides.length, (i) {
+                        final on = i == _index;
+                        return GestureDetector(
+                          onTap: () => _goTo(i),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: on ? 18 : 7,
+                            height: 7,
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            decoration: BoxDecoration(
+                              color: on ? s.color : AppColors.grey300,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(t, style: AppTypography.bodySmall),
-          ),
-        ],
+        ),
       ),
     );
   }
+}
+
+class _InsightSlide {
+  const _InsightSlide({
+    required this.icon,
+    required this.color,
+    required this.badge,
+    required this.title,
+    required this.body,
+    required this.value,
+    required this.footer,
+    this.showCta = false,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String badge;
+  final String title;
+  final String body;
+  final String value;
+  final String footer;
+  final bool showCta;
 }
