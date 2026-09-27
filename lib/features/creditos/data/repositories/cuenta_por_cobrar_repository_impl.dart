@@ -104,6 +104,18 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       );
     }
 
+    
+    // Plan de cuotas al alta (sin botón en detalle CxC)
+    final nCuotas = cuenta.numeroCuotas < 1 ? 1 : cuenta.numeroCuotas;
+    final montoPlan =
+        saldoActual > 0.001 ? saldoActual : montoOriginal;
+    await _dao.generarPlanCuotas(
+      cuentaCobrarId: id,
+      montoTotal: montoPlan,
+      numeroCuotas: nCuotas,
+      primerVencimiento: cuenta.fechaVencimiento,
+    );
+
     return id;
   }
 
@@ -175,7 +187,7 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     final saldoAnt = cuenta?.saldoPendiente ?? 0.0;
     final saldoAct = (saldoAnt - abono.monto).clamp(0.0, double.infinity);
 
-    return _dao.registrarCobro(
+    final cobroId = await _dao.registrarCobro(
       CobrosTableCompanion.insert(
         cuentaCobrarId: abono.cuentaId,
         fecha: abono.fecha,
@@ -185,6 +197,8 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
         saldoActual: saldoAct,
       ),
     );
+    await _dao.aplicarPagoACuotas(abono.cuentaId, abono.monto);
+    return cobroId;
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+
 class ImportExportLog {
   const ImportExportLog({
     required this.fila,
@@ -15,27 +17,24 @@ class ImportExportService {
   List<ImportExportLog> get registroErrores =>
       List.unmodifiable(_registroErrores);
 
-  void limpiarErrores() {
-    _registroErrores.clear();
-  }
+  void limpiarErrores() => _registroErrores.clear();
 
-  // Simulación de exportación de productos a formato CSV / Excel compatible
   Future<String> exportarProductos(List<Map<String, dynamic>> productos) async {
     final buffer = StringBuffer();
-    buffer.writeln('ID,Codigo,Nombre,Precio,Stock,ITBIS');
-    for (var p in productos) {
+    buffer.writeln('Codigo,Nombre,Precio,Stock,ITBIS');
+    for (final p in productos) {
+      final nombre = '${p['nombre']}'.replaceAll('"', '""');
       buffer.writeln(
-        '${p['id']},${p['codigo']},"${p['nombre']}",${p['precio']},${p['stock']},${p['itbis']}',
+        '${p['codigo']},"$nombre",${p['precio']},${p['stock']},${p['itbis']}',
       );
     }
     return buffer.toString();
   }
 
-  // Simulación de exportación de clientes
   Future<String> exportarClientes(List<Map<String, dynamic>> clientes) async {
     final buffer = StringBuffer();
     buffer.writeln('ID,Nombre,RNC_Cedula,Telefono,Correo,Direccion');
-    for (var c in clientes) {
+    for (final c in clientes) {
       buffer.writeln(
         '${c['id']},"${c['nombre']}","${c['rncCedula']}","${c['telefono']}","${c['correo']}","${c['direccion']}"',
       );
@@ -43,13 +42,12 @@ class ImportExportService {
     return buffer.toString();
   }
 
-  // Simulación de exportación de proveedores
   Future<String> exportarProveedores(
     List<Map<String, dynamic>> proveedores,
   ) async {
     final buffer = StringBuffer();
     buffer.writeln('ID,Nombre,RNC,Contacto,Telefono,Correo,Direccion');
-    for (var p in proveedores) {
+    for (final p in proveedores) {
       buffer.writeln(
         '${p['id']},"${p['nombre']}","${p['rnc']}","${p['contacto']}","${p['telefono']}","${p['correo']}","${p['direccion']}"',
       );
@@ -57,79 +55,118 @@ class ImportExportService {
     return buffer.toString();
   }
 
-  // Importación masiva de productos con validaciones y captura de errores por fila
-  Future<int> importarProductosDesdeCSV(String contenidoCsv) async {
+  /// CSV: Codigo,Nombre,Precio,Stock,ITBIS (cabecera en fila 1)
+  /// [onProductoValido] persiste cada fila OK (p. ej. controller.guardar).
+  Future<int> importarProductosDesdeCSV(
+    String contenidoCsv, {
+    Future<void> Function(Producto producto)? onProductoValido,
+    int categoriaIdDefault = 1,
+    int marcaIdDefault = 1,
+    int unidadMedidaIdDefault = 1,
+  }) async {
     limpiarErrores();
-    final lineas = contenidoCsv.split('\n');
-    int importadosExitosamente = 0;
+    final lineas = contenidoCsv.replaceAll('\r\n', '\n').split('\n');
+    var importados = 0;
 
-    for (int i = 1; i < lineas.length; i++) {
+    for (var i = 1; i < lineas.length; i++) {
       final linea = lineas[i].trim();
       if (linea.isEmpty) continue;
 
-      final columnas = linea.split(',');
-      if (columnas.length < 5) {
-        _registroErrores.add(
-          ImportExportLog(
-            fila: i + 1,
-            entidad: 'Producto',
-            mensajeError:
-                'Estructura de columnas incompleta o formato inválido.',
-          ),
-        );
+      final columnas = _splitCsvLine(linea);
+      if (columnas.length < 4) {
+        _registroErrores.add(ImportExportLog(
+          fila: i + 1,
+          entidad: 'Producto',
+          mensajeError: 'Estructura incompleta (min. Codigo,Nombre,Precio,Stock).',
+        ));
         continue;
       }
 
       final codigo = columnas[0].trim();
-      final nombre = columnas[1].trim();
+      final nombre = columnas[1].trim().replaceAll('"', '');
       final precio = double.tryParse(columnas[2].trim());
-      final stock = int.tryParse(columnas[3].trim());
+      final stock = double.tryParse(columnas[3].trim());
 
-      // Validaciones estrictas de negocio
       if (codigo.isEmpty) {
-        _registroErrores.add(
-          ImportExportLog(
-            fila: i + 1,
-            entidad: 'Producto',
-            mensajeError: 'El código del producto es obligatorio.',
-          ),
-        );
+        _registroErrores.add(ImportExportLog(
+          fila: i + 1,
+          entidad: 'Producto',
+          mensajeError: 'El código es obligatorio.',
+        ));
         continue;
       }
       if (nombre.isEmpty) {
-        _registroErrores.add(
-          ImportExportLog(
-            fila: i + 1,
-            entidad: 'Producto',
-            mensajeError: 'El nombre del producto es obligatorio.',
-          ),
-        );
+        _registroErrores.add(ImportExportLog(
+          fila: i + 1,
+          entidad: 'Producto',
+          mensajeError: 'El nombre es obligatorio.',
+        ));
         continue;
       }
       if (precio == null || precio < 0) {
-        _registroErrores.add(
-          ImportExportLog(
-            fila: i + 1,
-            entidad: 'Producto',
-            mensajeError: 'Precio inválido o negativo.',
-          ),
-        );
+        _registroErrores.add(ImportExportLog(
+          fila: i + 1,
+          entidad: 'Producto',
+          mensajeError: 'Precio inválido o negativo.',
+        ));
         continue;
       }
       if (stock == null || stock < 0) {
-        _registroErrores.add(
-          ImportExportLog(
-            fila: i + 1,
-            entidad: 'Producto',
-            mensajeError: 'Stock inválido o negativo.',
-          ),
-        );
+        _registroErrores.add(ImportExportLog(
+          fila: i + 1,
+          entidad: 'Producto',
+          mensajeError: 'Stock inválido o negativo.',
+        ));
         continue;
       }
 
-      importadosExitosamente++;
-    }
+      final producto = Producto(
+        codigo: codigo,
+        nombre: nombre,
+        precioCompra: precio,
+        precioVenta: precio,
+        stock: stock,
+        categoriaId: categoriaIdDefault,
+        marcaId: marcaIdDefault,
+        unidadMedidaId: unidadMedidaIdDefault,
+        activo: true,
+      );
 
-    return importadosExitosamente;
+      try {
+        if (onProductoValido != null) {
+          await onProductoValido(producto);
+        }
+        importados++;
+      } catch (e) {
+        _registroErrores.add(ImportExportLog(
+          fila: i + 1,
+          entidad: 'Producto',
+          mensajeError: 'No se pudo guardar: $e',
+        ));
+      }
+    }
+    return importados;
+  }
+
+  List<String> _splitCsvLine(String line) {
+    // Soporta campos entre comillas simples
+    final out = <String>[];
+    final buf = StringBuffer();
+    var inQuotes = false;
+    for (var i = 0; i < line.length; i++) {
+      final ch = line[i];
+      if (ch == '"') {
+        inQuotes = !inQuotes;
+        continue;
+      }
+      if (ch == ',' && !inQuotes) {
+        out.add(buf.toString());
+        buf.clear();
+        continue;
+      }
+      buf.write(ch);
+    }
+    out.add(buf.toString());
+    return out;
   }
 }

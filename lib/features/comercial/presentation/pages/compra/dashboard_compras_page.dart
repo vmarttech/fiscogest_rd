@@ -144,14 +144,6 @@ class DashboardComprasPage extends ConsumerWidget {
                 color: AppColors.warning,
                 onTap: () => context.goNamed(ListaCuentasPagarPage.routeName),
               ),
-              const SizedBox(height: 10),
-              AppAccessTile(
-                icon: Icons.request_quote_outlined,
-                title: 'Cuentas por cobrar',
-                subtitle: 'Cobros a clientes',
-                color: AppColors.secondary,
-                onTap: () => context.push('/ventas/cobrar'),
-              ),
             ],
             const SizedBox(height: 28),
             Row(

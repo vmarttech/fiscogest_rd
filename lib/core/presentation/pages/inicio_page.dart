@@ -711,7 +711,7 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
     int bajoStock,
   ) {
     return [
-      _InsightSlide(
+      const _InsightSlide(
         icon: Icons.route_outlined,
         color: AppColors.primary,
         badge: 'FLUJO',
@@ -760,7 +760,7 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
         value: '$productos',
         footer: bajoStock > 0 ? 'Revisar bajo stock' : 'Sin alertas fuertes',
       ),
-      _InsightSlide(
+      const _InsightSlide(
         icon: Icons.bolt_outlined,
         color: AppColors.primary,
         badge: 'ATAJO',

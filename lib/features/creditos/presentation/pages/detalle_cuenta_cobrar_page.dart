@@ -111,102 +111,6 @@ class _DetalleCuentaCobrarPageState
   }
 
 
-  Future<void> _dialogoGenerarPlan() async {
-    final c = _cuenta;
-    if (c == null || c.id == null) return;
-    var n = c.numeroCuotas > 1 ? c.numeroCuotas : 3;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setLocal) {
-            final cuota = c.saldoPendiente / (n < 1 ? 1 : n);
-            return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-              title: const Text(
-                'Generar plan de cuotas',
-                style: AppTypography.h4,
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Saldo: RD\$ ${_fmt.format(c.saldoPendiente)}',
-                    style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  AppLayout.vM,
-                  const Text('Número de cuotas', style: AppTypography.bodySmall),
-                  AppLayout.vS,
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      for (final k in const [1, 2, 3, 4, 6, 12])
-                        ChoiceChip(
-                          label: Text('$k'),
-                          selected: n == k,
-                          onSelected: (_) => setLocal(() => n = k),
-                        ),
-                    ],
-                  ),
-                  AppLayout.vM,
-                  Text(
-                    'Cuota aprox.: RD\$ ${_fmt.format(cuota)}',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Generar'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-    if (confirmed != true || !mounted) return;
-    setState(() => _pagando = true);
-    try {
-      await ref.read(cuentaPorCobrarRepositoryProvider).generarPlanCuotas(
-            cuentaId: c.id!,
-            numeroCuotas: n,
-          );
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Plan de $n cuota(s) generado'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      ref.invalidate(cuentasCobrarListaProvider);
-      ref.invalidate(creditoTotalesProvider);
-      await _cargar();
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$e'.replaceAll('Exception: ', '')),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _pagando = false);
-    }
-  }
 
   Future<void> _dialogoRegistrarPago() async {
     final c = _cuenta;
@@ -218,7 +122,7 @@ class _DetalleCuentaCobrarPageState
         ? pendientes.length
         : (c.numeroCuotas > 1 ? c.numeroCuotas : 1);
     final aPagar = pendientes.isNotEmpty
-        ? pendientes.first.saldoDespues.clamp(0.01, c.saldoPendiente)
+        ? pendientes.first.montoTotal.clamp(0.01, c.saldoPendiente)
         : (nCuotas > 1
             ? c.saldoPendiente / nCuotas
             : c.saldoPendiente);
@@ -350,13 +254,19 @@ class _DetalleCuentaCobrarPageState
 
     setState(() => _pagando = true);
     try {
+      final notaAuto = nota.isEmpty
+          ? (pendientes.isNotEmpty
+              ? 'Cuota #${pendientes.first.numeroCuota}'
+                  '${c.ventaId != null ? ' · Venta #${c.ventaId}' : ''}'
+              : (c.ventaId != null ? 'Venta #${c.ventaId}' : null))
+          : nota;
       await ref.read(cuentaPorCobrarRepositoryProvider).registrarAbono(
             AbonoCredito(
               cuentaId: c.id!,
               monto: monto,
               metodoPago: metodo,
               fecha: DateTime.now(),
-              nota: nota.isEmpty ? null : nota,
+              nota: notaAuto,
             ),
           );
       try {
@@ -565,14 +475,6 @@ class _DetalleCuentaCobrarPageState
                   ),
               ],
             ),
-          ),
-        ],
-        if (c.planPago == null || c.planPago!.cuotas.isEmpty) ...[
-          AppLayout.vM,
-          OutlinedButton.icon(
-            onPressed: _pagando ? null : _dialogoGenerarPlan,
-            icon: const Icon(Icons.calendar_month_outlined),
-            label: const Text('Generar plan de cuotas'),
           ),
         ],
         AppLayout.vM,
