@@ -128,11 +128,11 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
   }
 
   @override
+
   Widget build(BuildContext context) {
     final async = ref.watch(documentosPendientesFacturaProvider);
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
-    final int maxW = desktop ? 1100 : (mobile ? 520 : 720);
 
     return AppScaffold(
       title: 'EMITIR FACTURA',
@@ -151,128 +151,71 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('Error: $e')),
           data: (docs) {
-            return Align(
-              alignment: Alignment.topCenter,
-              child: SingleChildScrollView(
-                padding: AppLayout.pantallaPadding.add(
-                  const EdgeInsets.only(bottom: 24),
-                ),
-                child: AppLayout.centerConstrained(
-                  maxWidth: maxW,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      AppCard(
-                        borderColor: AppColors.border,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Documentos listos',
-                              style: AppTypography.h4.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            AppLayout.vXs,
-                            Text(
-                              'Cotizado (contado) o aprobado (crédito), sin NCF. '
-                              'B01 = crédito fiscal · B02 = consumidor final.',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      AppLayout.vM,
-                      if (docs.isEmpty)
-                        AppCard(
-                          borderColor: AppColors.border,
-                          child: Text(
-                            'No hay cotizaciones pendientes de facturar.',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        )
-                      else
-                        for (final d in docs) ...[
-                          _DocTile(
-                            venta: d,
-                            fmt: _fmt,
-                            seleccionado: _seleccion?.id == d.id,
-                            onTap: () => _seleccionar(d),
-                          ),
-                          AppLayout.vS,
-                        ],
-                      if (_seleccion != null) ...[
-                        AppLayout.vM,
-                        AppCard(
-                          borderColor: AppColors.primary,
-                          child: Column(
+            final lista = _ListaDocs(
+              docs: docs,
+              fmt: _fmt,
+              seleccionadoId: _seleccion?.id,
+              onTap: _seleccionar,
+            );
+            final panel = _seleccion == null
+                ? _PanelVacio(
+                    icon: Icons.receipt_long_outlined,
+                    texto: docs.isEmpty
+                        ? 'No hay cotizaciones pendientes de facturar.'
+                        : 'Seleccione un documento de la lista para emitir el NCF.',
+                  )
+                : _PanelEmitir(
+                    venta: _seleccion!,
+                    tipoNcf: _tipoNcf,
+                    emitiendo: _emitiendo,
+                    onTipo: (t) => setState(() => _tipoNcf = t),
+                    onEmitir: _emitir,
+                  );
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                mobile ? 16 : 20,
+                mobile ? 12 : 16,
+                mobile ? 16 : 20,
+                20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Documentos listos',
+                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Cotizado (contado) o aprobado (crédito), sin NCF.  B01 · B02',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: desktop
+                        ? Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Text(
-                                'Emitir NCF',
-                                style: AppTypography.labelLarge.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              SizedBox(
+                                width: 380,
+                                child: lista,
                               ),
-                              AppLayout.vS,
-                              Text(
-                                '${_seleccion!.numeroCotizacion} · '
-                                '${_seleccion!.nombreCliente ?? 'Cliente #${_seleccion!.clienteId}'}',
-                              ),
-                              AppLayout.vS,
-                              Text(
-                                'Tipo de comprobante',
-                                style: AppTypography.labelLarge.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              AppLayout.vS,
-                              Wrap(
-                                spacing: 8,
-                                children: [
-                                  ChoiceChip(
-                                    label: const Text('B02 · Consumidor final'),
-                                    selected: _tipoNcf == 'B02',
-                                    onSelected: (_) => setState(() {
-                                      _tipoNcf = 'B02';
-                                    }),
-                                  ),
-                                  ChoiceChip(
-                                    label: const Text('B01 · Crédito fiscal'),
-                                    selected: _tipoNcf == 'B01',
-                                    onSelected: (_) => setState(() {
-                                      _tipoNcf = 'B01';
-                                    }),
-                                  ),
-                                ],
-                              ),
-                              AppLayout.vXs,
-                              Text(
-                                _tipoNcf == 'B01'
-                                    ? 'Requiere RNC del cliente (crédito fiscal).'
-                                    : 'Consumidor final / sin RNC.',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              AppLayout.vS,
-                              AppButton(
-                                text: _emitiendo
-                                    ? 'Emitiendo…'
-                                    : 'Emitir $_tipoNcf',
-                                onPressed: _emitiendo ? null : _emitir,
-                              ),
+                              const SizedBox(width: 16),
+                              Expanded(child: panel),
+                            ],
+                          )
+                        : ListView(
+                            children: [
+                              SizedBox(height: 280, child: lista),
+                              const SizedBox(height: 12),
+                              panel,
                             ],
                           ),
-                        ),
-                      ],
-                    ],
                   ),
-                ),
+                ],
               ),
             );
           },
@@ -282,57 +225,229 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
   }
 }
 
-class _DocTile extends StatelessWidget {
-  const _DocTile({
-    required this.venta,
+class _ListaDocs extends StatelessWidget {
+  const _ListaDocs({
+    required this.docs,
     required this.fmt,
-    required this.seleccionado,
+    required this.seleccionadoId,
     required this.onTap,
   });
-
-  final Venta venta;
+  final List<Venta> docs;
   final NumberFormat fmt;
-  final bool seleccionado;
-  final VoidCallback onTap;
+  final int? seleccionadoId;
+  final void Function(Venta) onTap;
 
   @override
   Widget build(BuildContext context) {
-    final est = venta.estadoDocumento == EstadoDocumento.aprobado
-        ? 'Aprobado'
-        : 'Cotizado';
-    return AppCard(
-      borderColor: seleccionado ? AppColors.primary : AppColors.border,
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(
-            seleccionado ? Icons.radio_button_checked : Icons.radio_button_off,
-            color: AppColors.primary,
-          ),
-          AppLayout.hS,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  venta.numeroCotizacion,
-                  style: AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  '${venta.nombreCliente ?? 'Cliente #${venta.clienteId}'} · $est',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
+    if (docs.isEmpty) {
+      return AppCard(
+        child: Center(
+          child: Text(
+            'Sin pendientes',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
+        ),
+      );
+    }
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: ListView.separated(
+        itemCount: docs.length,
+        separatorBuilder: (_, __) =>
+            const Divider(height: 1, color: AppColors.border),
+        itemBuilder: (context, i) {
+          final d = docs[i];
+          final sel = seleccionadoId == d.id;
+          final est = d.estadoDocumento == EstadoDocumento.aprobado
+              ? 'Aprobado'
+              : 'Cotizado';
+          return Material(
+            color: sel
+                ? AppColors.primary.withValues(alpha: 0.08)
+                : Colors.transparent,
+            child: InkWell(
+              onTap: () => onTap(d),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      sel
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      size: 20,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            d.numeroCotizacion,
+                            style: AppTypography.labelMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            '${d.nombreCliente ?? 'Cliente #${d.clienteId}'} · $est',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      fmt.format(d.montoTotal),
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PanelVacio extends StatelessWidget {
+  const _PanelVacio({required this.icon, required this.texto});
+  final IconData icon;
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 48, color: AppColors.grey300),
+              const SizedBox(height: 12),
+              Text(
+                texto,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PanelEmitir extends StatelessWidget {
+  const _PanelEmitir({
+    required this.venta,
+    required this.tipoNcf,
+    required this.emitiendo,
+    required this.onTipo,
+    required this.onEmitir,
+  });
+  final Venta venta;
+  final String tipoNcf;
+  final bool emitiendo;
+  final ValueChanged<String> onTipo;
+  final VoidCallback onEmitir;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.receipt_long, color: AppColors.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Emitir NCF',
+                      style: AppTypography.labelLarge
+                          .copyWith(fontWeight: FontWeight.w800),
+                    ),
+                    Text(
+                      '${venta.numeroCotizacion} · ${venta.nombreCliente ?? 'Cliente'}',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
           Text(
-            fmt.format(venta.montoTotal),
-            style: AppTypography.labelLarge.copyWith(
-              fontWeight: FontWeight.w600,
+            'Tipo de comprobante',
+            style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('B02 · Consumidor final'),
+                selected: tipoNcf == 'B02',
+                onSelected: (_) => onTipo('B02'),
+              ),
+              ChoiceChip(
+                label: const Text('B01 · Crédito fiscal'),
+                selected: tipoNcf == 'B01',
+                onSelected: (_) => onTipo('B01'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            tipoNcf == 'B01'
+                ? 'Requiere RNC del cliente (crédito fiscal).'
+                : 'Consumidor final / sin RNC.',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const Spacer(),
+          FilledButton.icon(
+            onPressed: emitiendo ? null : onEmitir,
+            icon: emitiendo
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.check, size: 20),
+            label: Text(emitiendo ? 'Emitiendo…' : 'Emitir $tipoNcf'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
             ),
           ),
         ],
@@ -340,3 +455,5 @@ class _DocTile extends StatelessWidget {
     );
   }
 }
+
+
