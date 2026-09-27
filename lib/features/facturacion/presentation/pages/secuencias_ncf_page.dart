@@ -36,7 +36,7 @@ class SecuenciasNcfPage extends ConsumerWidget {
               padding: AppLayout.pantallaPadding,
               children: [
                 AppLayout.centerConstrained(
-                  maxWidth: 720,
+                  maxWidth: 1200,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -56,38 +56,55 @@ class SecuenciasNcfPage extends ConsumerWidget {
                         ),
                       ),
                       AppLayout.vL,
-                      for (final f in filas) ...[
-                        _TarjetaSecuencia(
-                          tipo: f.tipo,
-                          prefijo: f.prefijo,
-                          actual: f.secuenciaActual,
-                          desde: f.secuenciaDesde,
-                          hasta: f.secuenciaHasta,
-                          activo: f.activo,
-                          onGuardar: (p) async {
-                            final dao = ref.read(secuenciasNcfDaoProvider);
-                            await dao.guardar(
-                              tipo: f.tipo,
-                              prefijo: p.prefijo,
-                              secuenciaActual: p.actual,
-                              secuenciaDesde: p.desde,
-                              secuenciaHasta: p.hasta,
-                              activo: p.activo,
-                            );
-                            ref.invalidate(secuenciasNcfListProvider);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('${f.tipo} guardado'),
-                                  backgroundColor: AppColors.success,
-                                  behavior: SnackBarBehavior.floating,
+                      LayoutBuilder(
+                        builder: (context, c) {
+                          final w = c.maxWidth;
+                          final cols = w > 900 ? 3 : (w > 560 ? 2 : 1);
+                          const gap = 14.0;
+                          final tileW = (w - gap * (cols - 1)) / cols;
+                          return Wrap(
+                            spacing: gap,
+                            runSpacing: gap,
+                            children: [
+                              for (final f in filas)
+                                SizedBox(
+                                  width: tileW,
+                                  child: _TarjetaSecuencia(
+                                    tipo: f.tipo,
+                                    prefijo: f.prefijo,
+                                    actual: f.secuenciaActual,
+                                    desde: f.secuenciaDesde,
+                                    hasta: f.secuenciaHasta,
+                                    activo: f.activo,
+                                    onGuardar: (p) async {
+                                      final dao =
+                                          ref.read(secuenciasNcfDaoProvider);
+                                      await dao.guardar(
+                                        tipo: f.tipo,
+                                        prefijo: p.prefijo,
+                                        secuenciaActual: p.actual,
+                                        secuenciaDesde: p.desde,
+                                        secuenciaHasta: p.hasta,
+                                        activo: p.activo,
+                                      );
+                                      ref.invalidate(secuenciasNcfListProvider);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text('${f.tipo} guardado'),
+                                            backgroundColor: AppColors.success,
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
                                 ),
-                              );
-                            }
-                          },
-                        ),
-                        AppLayout.vM,
-                      ],
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

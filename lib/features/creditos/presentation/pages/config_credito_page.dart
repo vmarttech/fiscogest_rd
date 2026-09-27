@@ -112,102 +112,180 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
           error: (e, _) => Center(child: Text('$e')),
           data: (p) {
             _llenarDesde(p);
-            return SingleChildScrollView(
-              padding: AppLayout.pantallaPadding,
+            return Align(
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
               child: AppLayout.centerConstrained(
-                maxWidth: 720,
+                maxWidth: 640,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SectionHeader(
-                      title: 'Parámetros',
-                      subtitle: 'Valores por defecto del área de crédito',
+                    AppCard(
+                      borderColor: AppColors.border,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: AppColors.secondary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.tune_outlined,
+                                color: AppColors.secondary),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Parámetros de crédito',
+                                  style: AppTypography.h4.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  'Valores por defecto y plantillas PDF',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.grey600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Parámetros',
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Valores por defecto del área de crédito',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     AppCard(
                       borderColor: AppColors.border,
                       child: Column(
                         children: [
-                          TextField(
+                          AppTextField(
+                            label: 'Tasa mensual por defecto (%)',
                             controller: _tasaCtrl,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            decoration: const InputDecoration(
-                              labelText: 'Tasa mensual por defecto (%)',
-                              border: OutlineInputBorder(),
-                            ),
                           ),
                           AppLayout.vM,
-                          TextField(
+                          AppTextField(
+                            label: 'Cuotas por defecto',
                             controller: _cuotasCtrl,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Cuotas por defecto',
-                              border: OutlineInputBorder(),
-                            ),
                           ),
                           AppLayout.vM,
-                          TextField(
+                          AppTextField(
+                            label: 'Plazo máximo (meses)',
                             controller: _plazoCtrl,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Plazo máximo (meses)',
-                              border: OutlineInputBorder(),
-                            ),
                           ),
                           AppLayout.vM,
-                          TextField(
+                          AppTextField(
+                            label: 'Días de gracia',
                             controller: _graciaCtrl,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Días de gracia',
-                              border: OutlineInputBorder(),
-                            ),
                           ),
                           AppLayout.vM,
-                          TextField(
+                          AppTextField(
+                            label: 'Mora mensual (%)',
                             controller: _moraCtrl,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            decoration: const InputDecoration(
-                              labelText: 'Mora mensual (%)',
-                              border: OutlineInputBorder(),
-                              helperText: 'Política interna; se refleja en textos',
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Política interna; se refleja en textos',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: 11,
                             ),
                           ),
                         ],
                       ),
                     ),
                     AppLayout.vL,
-                    const SectionHeader(
-                      title: 'Plantilla solicitud',
-                      subtitle: 'Texto adicional en el PDF de solicitud',
+                    const SizedBox(height: 8),
+                    Text(
+                      'Plantilla solicitud',
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Texto adicional en el PDF de solicitud',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     AppCard(
                       borderColor: AppColors.border,
                       child: TextField(
                         controller: _plantillaSolCtrl,
                         maxLines: 5,
-                        decoration: const InputDecoration(
-                          hintText: 'Párrafo extra para la solicitud…',
-                          border: OutlineInputBorder(),
+                        style: AppTypography.bodyMedium,
+                        decoration: InputDecoration(
+                          labelText: 'Texto adicional solicitud',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
                         ),
                       ),
                     ),
                     AppLayout.vL,
-                    const SectionHeader(
-                      title: 'Plantilla contrato',
-                      subtitle: 'Cláusulas adicionales del contrato PDF',
+                    const SizedBox(height: 8),
+                    Text(
+                      'Plantilla contrato',
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Cláusulas adicionales del contrato PDF',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     AppCard(
                       borderColor: AppColors.border,
                       child: TextField(
                         controller: _plantillaConCtrl,
                         maxLines: 8,
-                        decoration: const InputDecoration(
-                          hintText: 'Cláusulas legales adicionales…',
-                          border: OutlineInputBorder(),
+                        style: AppTypography.bodyMedium,
+                        decoration: InputDecoration(
+                          labelText: 'Cláusulas adicionales contrato',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
                         ),
                       ),
                     ),
@@ -222,6 +300,7 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                     ),
                   ],
                 ),
+              ),
               ),
             );
           },

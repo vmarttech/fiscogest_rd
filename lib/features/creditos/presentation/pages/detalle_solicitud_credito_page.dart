@@ -483,7 +483,7 @@ class _DetalleSolicitudCreditoPageState
         (v.montoTotal - abonoMostrar).clamp(0.0, double.infinity);
 
     final maxW = AppBreakpoints.isDesktop(context)
-        ? 1100
+        ? 1200
         : (AppBreakpoints.isTablet(context) ? 900 : 720);
 
     final cardDocumento = AppCard(
@@ -728,31 +728,33 @@ class _DetalleSolicitudCreditoPageState
         maxWidth: maxW,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final ancha = constraints.maxWidth >= 720;
-            if (!ancha) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  cardDocumento,
-                  AppLayout.vL,
-                  bloqueExpediente,
-                  AppLayout.vL,
-                  bloqueCondiciones,
-                ],
-              );
-            }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 cardDocumento,
                 AppLayout.vL,
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(flex: 3, child: bloqueExpediente),
-                    AppLayout.hM,
-                    Expanded(flex: 2, child: bloqueCondiciones),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final esAncho = constraints.maxWidth >= 720;
+                    if (esAncho) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 3, child: bloqueExpediente),
+                          AppLayout.hL,
+                          Expanded(flex: 2, child: bloqueCondiciones),
+                        ],
+                      );
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        bloqueExpediente,
+                        AppLayout.vL,
+                        bloqueCondiciones,
+                      ],
+                    );
+                  },
                 ),
               ],
             );

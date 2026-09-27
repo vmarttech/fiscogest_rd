@@ -10,12 +10,11 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_provid
 final solicitudesCreditoProvider =
     FutureProvider.autoDispose<List<Venta>>((ref) async {
   final repo = ref.watch(ventasRepositoryProvider);
-  // Preferir API de cotizaciones si existe; fallback listar y filtrar
   try {
     final todas = await repo.listarVentas();
     return todas
         .where((v) => v.estadoDocumento == EstadoDocumento.enCredito)
-      .toList()
+        .toList()
       ..sort((a, b) => b.fecha.compareTo(a.fecha));
   } catch (_) {
     return [];
@@ -35,6 +34,7 @@ class SolicitudesCreditoPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(solicitudesCreditoProvider);
     final mobile = AppBreakpoints.isMobile(context);
+    final desktop = AppBreakpoints.isDesktop(context);
 
     return AppScaffold(
       title: 'SOLICITUDES DE CRÉDITO',
@@ -58,89 +58,168 @@ class SolicitudesCreditoPage extends ConsumerWidget {
             ),
           ),
           data: (lista) {
-            if (lista.isEmpty) {
-              return Center(
-                child: Text(
-                  'No hay cotizaciones en crédito pendientes',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+            return Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                mobile ? 16 : 20,
+                mobile ? 12 : 16,
+                mobile ? 16 : 20,
+                16,
+              ),
+              child: AppLayout.centerConstrained(
+                maxWidth: desktop ? 920 : (mobile ? 520 : 720),
+                child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'En análisis',
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-              );
-            }
-            return RefreshIndicator(
-              onRefresh: () async =>
-                  ref.invalidate(solicitudesCreditoProvider),
-              child: ListView.separated(
-                padding: AppLayout.pantallaPadding,
-                itemCount: lista.length,
-                separatorBuilder: (_, __) => AppLayout.vS,
-                itemBuilder: (_, i) {
-                  final v = lista[i];
-                  final pendiente =
-                      v.estadoDocumento == EstadoDocumento.enCredito;
-                  return AppCard(
-                    borderColor: AppColors.border,
-                    onTap: () => context.push(
-                      '/creditos/solicitudes/${v.id}',
+                  const SizedBox(height: 4),
+                  Text(
+                    'Cotizaciones en crédito pendientes de aprobación.',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.grey600,
                     ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: mobile ? 14 : 16,
-                      vertical: mobile ? 12 : 14,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                v.numeroCotizacion,
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: lista.isEmpty
+                        ? AppCard(
+                            child: Center(
+                              child: Text(
+                                'No hay cotizaciones en crédito pendientes',
                                 style: AppTypography.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                v.nombreCliente?.isNotEmpty == true
-                                    ? v.nombreCliente!
-                                    : 'Cliente #${v.clienteId}',
-                                style: AppTypography.bodySmall.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
                               ),
-                              Text(
-                                _fmtFecha.format(v.fecha),
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 11,
+                            ),
+                          )
+                        : AppCard(
+                            padding: EdgeInsets.zero,
+                            child: RefreshIndicator(
+                              onRefresh: () async =>
+                                  ref.invalidate(solicitudesCreditoProvider),
+                              child: ListView.separated(
+                                itemCount: lista.length,
+                                separatorBuilder: (_, __) => const Divider(
+                                  height: 1,
+                                  color: AppColors.border,
                                 ),
+                                itemBuilder: (_, i) {
+                                  final v = lista[i];
+                                  final pendiente = v.estadoDocumento ==
+                                      EstadoDocumento.enCredito;
+                                  return InkWell(
+                                    onTap: () => context.push(
+                                      '/creditos/solicitudes/${v.id}',
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: mobile ? 14 : 16,
+                                        vertical: 12,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  v.numeroCotizacion,
+                                                  style: AppTypography
+                                                      .labelMedium
+                                                      .copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                    color: AppColors.textPrimary,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  v.nombreCliente?.isNotEmpty ==
+                                                          true
+                                                      ? v.nombreCliente!
+                                                      : 'Cliente #${v.clienteId}',
+                                                  style: AppTypography.bodySmall
+                                                      .copyWith(
+                                                    color: AppColors.grey600,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                if (desktop)
+                                                  Text(
+                                                    _fmtFecha.format(v.fecha),
+                                                    style: AppTypography
+                                                        .bodySmall
+                                                        .copyWith(
+                                                      color: AppColors
+                                                          .textSecondary,
+                                                      fontSize: 11,
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          if (!desktop)
+                                            Text(
+                                              _fmtFecha.format(v.fecha),
+                                              style: AppTypography.bodySmall
+                                                  .copyWith(
+                                                color:
+                                                    AppColors.textSecondary,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          const SizedBox(width: 12),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                'RD\$ ${_fmt.format(v.montoTotal)}',
+                                                style: AppTypography
+                                                    .labelMedium
+                                                    .copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                  color: AppColors.textPrimary,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              StatusChip(
+                                                label: pendiente
+                                                    ? 'EN ANÁLISIS'
+                                                    : v.estadoDocumento.name
+                                                        .toUpperCase(),
+                                                type: pendiente
+                                                    ? StatusChipType.warning
+                                                    : StatusChipType.info,
+                                                dense: true,
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(width: 4),
+                                          const Icon(
+                                            Icons.chevron_right,
+                                            color: AppColors.grey400,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'RD\$ ${_fmt.format(v.montoTotal)}',
-                              style: AppTypography.bodyMedium.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            StatusChip(
-                              label: pendiente ? 'EN ANÁLISIS' : v.estadoDocumento.name.toUpperCase(),
-                              type: pendiente
-                                  ? StatusChipType.warning
-                                  : StatusChipType.info,
-                              dense: true,
-                            ),
-                          ],
-                        ),
-                        const Icon(Icons.chevron_right),
-                      ],
-                    ),
-                  );
-                },
+                  ),
+                ],
+              ),
+              ),
               ),
             );
           },

@@ -379,7 +379,7 @@ class _PanelEmitir extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.receipt_long, color: AppColors.primary),
+                child: const Icon(Icons.receipt_long, color: AppColors.primary),
               ),
               const SizedBox(width: 12),
               Expanded(
