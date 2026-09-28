@@ -4,6 +4,9 @@ class VentasTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get clienteId => integer()();
   TextColumn get nombreCliente => text().nullable()();
+  TextColumn get clienteTelefono => text().nullable()();
+  TextColumn get clienteWhatsapp => text().nullable()();
+  TextColumn get clienteDireccion => text().nullable()();
   DateTimeColumn get fecha => dateTime()();
   RealColumn get montoSubtotal => real().withDefault(const Constant(0.0))();
   RealColumn get descuentoGlobal => real().withDefault(const Constant(0.0))();
@@ -29,4 +32,7 @@ class VentasTable extends Table {
   IntColumn get descuentoId => integer().nullable()();
   TextColumn get descuentoNombre => text().nullable()();
   RealColumn get montoDescuento => real().withDefault(const Constant(0.0))();
+  BoolColumn get comprobanteEntregaImpreso =>
+      boolean().withDefault(const Constant(false))();
+  DateTimeColumn get fechaComprobanteEntrega => dateTime().nullable()();
 }

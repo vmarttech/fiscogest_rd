@@ -63,7 +63,7 @@ class RepositoryInjection {
     final inventarioService = InventarioServiceImpl(db);
     final ventasDao = VentasDao(db);
     final cuentasCobrarDao = CuentasCobrarDao(db);
-    final ventasRepository = VentasRepositoryImpl(ventasDao, cuentasCobrarDao);
+    final ventasRepository = VentasRepositoryImpl(ventasDao, cuentasCobrarDao, productosDao);
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,
       kardexRepository: kardexRepo,

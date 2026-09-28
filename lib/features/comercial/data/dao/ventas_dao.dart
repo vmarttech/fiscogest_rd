@@ -144,35 +144,26 @@ class VentasDao {
     return filas > 0;
   }
 
-  Future<int> obtenerUltimoCorrelativoCotizacion({bool? soloCredito}) async {
-    // Series independientes: C-… (contado) y CR-… (crédito).
-    // OJO: like('C-%') también matchea 'CR-%' → hay que excluir CR en contado.
-    final query = _db.select(_db.ventasTable)
-      ..where((final t) => t.numeroCotizacion.isNotNull());
-
-    if (soloCredito == true) {
-      query.where((final t) => t.numeroCotizacion.like('CR-%'));
-    } else if (soloCredito == false) {
-      query.where((final t) => t.numeroCotizacion.like('C-%'));
-    }
-
-    final filas = await query.get();
+  /// Máximo correlativo para la serie del [prefijo] de configuración.
+  /// Acepta cualquier prefijo (V, C, COT, FG, …). Formato: `{prefijo}-{dígitos}`.
+  /// Máximo correlativo de la serie del [prefijo] (configuración global).
+  /// Cualquier prefijo: V, C, COT, FG, … Formato: `{prefijo}-{dígitos}`.
+  Future<int> obtenerUltimoCorrelativoCotizacion({
+    required String prefijo,
+  }) async {
+    final p = prefijo.trim();
+    if (p.isEmpty) return 0;
+    final head = p.endsWith('-') ? p : '$p-';
+    final filas = await (_db.select(_db.ventasTable)
+          ..where((final t) => t.numeroCotizacion.isNotNull()))
+        .get();
     var maxN = 0;
     for (final fila in filas) {
-      final raw = fila.numeroCotizacion;
-      if (raw.isEmpty) continue;
-
-      if (soloCredito == true) {
-        if (!raw.startsWith('CR-')) continue;
-      } else if (soloCredito == false) {
-        // Contado: C- pero nunca CR-
-        if (!raw.startsWith('C-') || raw.startsWith('CR-')) continue;
-      }
-
-      final prefijoLen = raw.startsWith('CR-') ? 3 : 2; // 'CR-' | 'C-'
-      final digitos = raw.length > prefijoLen
-          ? raw.substring(prefijoLen).replaceAll(RegExp(r'[^0-9]'), '')
-          : '';
+      final raw = fila.numeroCotizacion.trim();
+      if (raw.isEmpty || !raw.startsWith(head)) continue;
+      final resto = raw.substring(head.length);
+      final digitos = resto.replaceAll(RegExp(r'[^0-9]'), '');
+      if (digitos.isEmpty) continue;
       final n = int.tryParse(digitos) ?? 0;
       if (n > maxN) maxN = n;
     }

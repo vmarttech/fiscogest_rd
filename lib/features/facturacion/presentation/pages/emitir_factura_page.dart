@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_co
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 
 class EmitirFacturaPage extends ConsumerStatefulWidget {
   const EmitirFacturaPage({super.key});
@@ -97,7 +98,31 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
       );
       if (imprimir == true && mounted) {
         try {
-          await ComprobantePdf.imprimirFactura(paraPdf, empresa: ref.read(configuracionControllerProvider).valueOrNull);
+          var pdfVenta = paraPdf;
+          final full = await ref
+              .read(ventasRepositoryProvider)
+              .obtenerVentaPorId(v.id!);
+          if (full != null) {
+            pdfVenta = full.copyWith(
+              numeroFactura: ncf,
+              estadoDocumento: EstadoDocumento.facturado,
+            );
+          }
+          if (pdfVenta.detalles.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Factura emitida pero sin líneas de producto en BD.',
+                ),
+                backgroundColor: AppColors.warning,
+              ),
+            );
+          } else {
+            await ComprobantePdf.imprimirFactura(
+              pdfVenta,
+              empresa: ref.read(configuracionControllerProvider).valueOrNull,
+            );
+          }
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

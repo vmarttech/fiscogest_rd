@@ -1142,6 +1142,17 @@ class $ClientesTableTable extends ClientesTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _whatsappMeta = const VerificationMeta(
+    'whatsapp',
+  );
+  @override
+  late final GeneratedColumn<String> whatsapp = GeneratedColumn<String>(
+    'whatsapp',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _correoMeta = const VerificationMeta('correo');
   @override
   late final GeneratedColumn<String> correo = GeneratedColumn<String>(
@@ -1194,6 +1205,7 @@ class $ClientesTableTable extends ClientesTable
     nombre,
     rncCedula,
     telefono,
+    whatsapp,
     correo,
     direccion,
     activo,
@@ -1245,6 +1257,12 @@ class $ClientesTableTable extends ClientesTable
       );
     } else if (isInserting) {
       context.missing(_telefonoMeta);
+    }
+    if (data.containsKey('whatsapp')) {
+      context.handle(
+        _whatsappMeta,
+        whatsapp.isAcceptableOrUnknown(data['whatsapp']!, _whatsappMeta),
+      );
     }
     if (data.containsKey('correo')) {
       context.handle(
@@ -1306,6 +1324,10 @@ class $ClientesTableTable extends ClientesTable
         DriftSqlType.string,
         data['${effectivePrefix}telefono'],
       )!,
+      whatsapp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}whatsapp'],
+      ),
       correo: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}correo'],
@@ -1338,6 +1360,7 @@ class ClientesTableData extends DataClass
   final String nombre;
   final String rncCedula;
   final String telefono;
+  final String? whatsapp;
   final String correo;
   final String direccion;
   final bool activo;
@@ -1348,6 +1371,7 @@ class ClientesTableData extends DataClass
     required this.nombre,
     required this.rncCedula,
     required this.telefono,
+    this.whatsapp,
     required this.correo,
     required this.direccion,
     required this.activo,
@@ -1361,6 +1385,9 @@ class ClientesTableData extends DataClass
     map['nombre'] = Variable<String>(nombre);
     map['rnc_cedula'] = Variable<String>(rncCedula);
     map['telefono'] = Variable<String>(telefono);
+    if (!nullToAbsent || whatsapp != null) {
+      map['whatsapp'] = Variable<String>(whatsapp);
+    }
     map['correo'] = Variable<String>(correo);
     map['direccion'] = Variable<String>(direccion);
     map['activo'] = Variable<bool>(activo);
@@ -1375,6 +1402,9 @@ class ClientesTableData extends DataClass
       nombre: Value(nombre),
       rncCedula: Value(rncCedula),
       telefono: Value(telefono),
+      whatsapp: whatsapp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(whatsapp),
       correo: Value(correo),
       direccion: Value(direccion),
       activo: Value(activo),
@@ -1393,6 +1423,7 @@ class ClientesTableData extends DataClass
       nombre: serializer.fromJson<String>(json['nombre']),
       rncCedula: serializer.fromJson<String>(json['rncCedula']),
       telefono: serializer.fromJson<String>(json['telefono']),
+      whatsapp: serializer.fromJson<String?>(json['whatsapp']),
       correo: serializer.fromJson<String>(json['correo']),
       direccion: serializer.fromJson<String>(json['direccion']),
       activo: serializer.fromJson<bool>(json['activo']),
@@ -1408,6 +1439,7 @@ class ClientesTableData extends DataClass
       'nombre': serializer.toJson<String>(nombre),
       'rncCedula': serializer.toJson<String>(rncCedula),
       'telefono': serializer.toJson<String>(telefono),
+      'whatsapp': serializer.toJson<String?>(whatsapp),
       'correo': serializer.toJson<String>(correo),
       'direccion': serializer.toJson<String>(direccion),
       'activo': serializer.toJson<bool>(activo),
@@ -1421,6 +1453,7 @@ class ClientesTableData extends DataClass
     String? nombre,
     String? rncCedula,
     String? telefono,
+    Value<String?> whatsapp = const Value.absent(),
     String? correo,
     String? direccion,
     bool? activo,
@@ -1431,6 +1464,7 @@ class ClientesTableData extends DataClass
     nombre: nombre ?? this.nombre,
     rncCedula: rncCedula ?? this.rncCedula,
     telefono: telefono ?? this.telefono,
+    whatsapp: whatsapp.present ? whatsapp.value : this.whatsapp,
     correo: correo ?? this.correo,
     direccion: direccion ?? this.direccion,
     activo: activo ?? this.activo,
@@ -1443,6 +1477,7 @@ class ClientesTableData extends DataClass
       nombre: data.nombre.present ? data.nombre.value : this.nombre,
       rncCedula: data.rncCedula.present ? data.rncCedula.value : this.rncCedula,
       telefono: data.telefono.present ? data.telefono.value : this.telefono,
+      whatsapp: data.whatsapp.present ? data.whatsapp.value : this.whatsapp,
       correo: data.correo.present ? data.correo.value : this.correo,
       direccion: data.direccion.present ? data.direccion.value : this.direccion,
       activo: data.activo.present ? data.activo.value : this.activo,
@@ -1460,6 +1495,7 @@ class ClientesTableData extends DataClass
           ..write('nombre: $nombre, ')
           ..write('rncCedula: $rncCedula, ')
           ..write('telefono: $telefono, ')
+          ..write('whatsapp: $whatsapp, ')
           ..write('correo: $correo, ')
           ..write('direccion: $direccion, ')
           ..write('activo: $activo, ')
@@ -1475,6 +1511,7 @@ class ClientesTableData extends DataClass
     nombre,
     rncCedula,
     telefono,
+    whatsapp,
     correo,
     direccion,
     activo,
@@ -1489,6 +1526,7 @@ class ClientesTableData extends DataClass
           other.nombre == this.nombre &&
           other.rncCedula == this.rncCedula &&
           other.telefono == this.telefono &&
+          other.whatsapp == this.whatsapp &&
           other.correo == this.correo &&
           other.direccion == this.direccion &&
           other.activo == this.activo &&
@@ -1501,6 +1539,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
   final Value<String> nombre;
   final Value<String> rncCedula;
   final Value<String> telefono;
+  final Value<String?> whatsapp;
   final Value<String> correo;
   final Value<String> direccion;
   final Value<bool> activo;
@@ -1511,6 +1550,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     this.nombre = const Value.absent(),
     this.rncCedula = const Value.absent(),
     this.telefono = const Value.absent(),
+    this.whatsapp = const Value.absent(),
     this.correo = const Value.absent(),
     this.direccion = const Value.absent(),
     this.activo = const Value.absent(),
@@ -1522,6 +1562,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     required String nombre,
     required String rncCedula,
     required String telefono,
+    this.whatsapp = const Value.absent(),
     required String correo,
     required String direccion,
     this.activo = const Value.absent(),
@@ -1538,6 +1579,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     Expression<String>? nombre,
     Expression<String>? rncCedula,
     Expression<String>? telefono,
+    Expression<String>? whatsapp,
     Expression<String>? correo,
     Expression<String>? direccion,
     Expression<bool>? activo,
@@ -1549,6 +1591,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
       if (nombre != null) 'nombre': nombre,
       if (rncCedula != null) 'rnc_cedula': rncCedula,
       if (telefono != null) 'telefono': telefono,
+      if (whatsapp != null) 'whatsapp': whatsapp,
       if (correo != null) 'correo': correo,
       if (direccion != null) 'direccion': direccion,
       if (activo != null) 'activo': activo,
@@ -1562,6 +1605,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     Value<String>? nombre,
     Value<String>? rncCedula,
     Value<String>? telefono,
+    Value<String?>? whatsapp,
     Value<String>? correo,
     Value<String>? direccion,
     Value<bool>? activo,
@@ -1573,6 +1617,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
       nombre: nombre ?? this.nombre,
       rncCedula: rncCedula ?? this.rncCedula,
       telefono: telefono ?? this.telefono,
+      whatsapp: whatsapp ?? this.whatsapp,
       correo: correo ?? this.correo,
       direccion: direccion ?? this.direccion,
       activo: activo ?? this.activo,
@@ -1598,6 +1643,9 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
     if (telefono.present) {
       map['telefono'] = Variable<String>(telefono.value);
     }
+    if (whatsapp.present) {
+      map['whatsapp'] = Variable<String>(whatsapp.value);
+    }
     if (correo.present) {
       map['correo'] = Variable<String>(correo.value);
     }
@@ -1621,6 +1669,7 @@ class ClientesTableCompanion extends UpdateCompanion<ClientesTableData> {
           ..write('nombre: $nombre, ')
           ..write('rncCedula: $rncCedula, ')
           ..write('telefono: $telefono, ')
+          ..write('whatsapp: $whatsapp, ')
           ..write('correo: $correo, ')
           ..write('direccion: $direccion, ')
           ..write('activo: $activo, ')
@@ -11173,6 +11222,39 @@ class $VentasTableTable extends VentasTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _clienteTelefonoMeta = const VerificationMeta(
+    'clienteTelefono',
+  );
+  @override
+  late final GeneratedColumn<String> clienteTelefono = GeneratedColumn<String>(
+    'cliente_telefono',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _clienteWhatsappMeta = const VerificationMeta(
+    'clienteWhatsapp',
+  );
+  @override
+  late final GeneratedColumn<String> clienteWhatsapp = GeneratedColumn<String>(
+    'cliente_whatsapp',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _clienteDireccionMeta = const VerificationMeta(
+    'clienteDireccion',
+  );
+  @override
+  late final GeneratedColumn<String> clienteDireccion = GeneratedColumn<String>(
+    'cliente_direccion',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _fechaMeta = const VerificationMeta('fecha');
   @override
   late final GeneratedColumn<DateTime> fecha = GeneratedColumn<DateTime>(
@@ -11412,11 +11494,40 @@ class $VentasTableTable extends VentasTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _comprobanteEntregaImpresoMeta =
+      const VerificationMeta('comprobanteEntregaImpreso');
+  @override
+  late final GeneratedColumn<bool> comprobanteEntregaImpreso =
+      GeneratedColumn<bool>(
+        'comprobante_entrega_impreso',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("comprobante_entrega_impreso" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  static const VerificationMeta _fechaComprobanteEntregaMeta =
+      const VerificationMeta('fechaComprobanteEntrega');
+  @override
+  late final GeneratedColumn<DateTime> fechaComprobanteEntrega =
+      GeneratedColumn<DateTime>(
+        'fecha_comprobante_entrega',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     clienteId,
     nombreCliente,
+    clienteTelefono,
+    clienteWhatsapp,
+    clienteDireccion,
     fecha,
     montoSubtotal,
     descuentoGlobal,
@@ -11438,6 +11549,8 @@ class $VentasTableTable extends VentasTable
     descuentoId,
     descuentoNombre,
     montoDescuento,
+    comprobanteEntregaImpreso,
+    fechaComprobanteEntrega,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -11468,6 +11581,33 @@ class $VentasTableTable extends VentasTable
         nombreCliente.isAcceptableOrUnknown(
           data['nombre_cliente']!,
           _nombreClienteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cliente_telefono')) {
+      context.handle(
+        _clienteTelefonoMeta,
+        clienteTelefono.isAcceptableOrUnknown(
+          data['cliente_telefono']!,
+          _clienteTelefonoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cliente_whatsapp')) {
+      context.handle(
+        _clienteWhatsappMeta,
+        clienteWhatsapp.isAcceptableOrUnknown(
+          data['cliente_whatsapp']!,
+          _clienteWhatsappMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cliente_direccion')) {
+      context.handle(
+        _clienteDireccionMeta,
+        clienteDireccion.isAcceptableOrUnknown(
+          data['cliente_direccion']!,
+          _clienteDireccionMeta,
         ),
       );
     }
@@ -11651,6 +11791,24 @@ class $VentasTableTable extends VentasTable
         ),
       );
     }
+    if (data.containsKey('comprobante_entrega_impreso')) {
+      context.handle(
+        _comprobanteEntregaImpresoMeta,
+        comprobanteEntregaImpreso.isAcceptableOrUnknown(
+          data['comprobante_entrega_impreso']!,
+          _comprobanteEntregaImpresoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fecha_comprobante_entrega')) {
+      context.handle(
+        _fechaComprobanteEntregaMeta,
+        fechaComprobanteEntrega.isAcceptableOrUnknown(
+          data['fecha_comprobante_entrega']!,
+          _fechaComprobanteEntregaMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -11671,6 +11829,18 @@ class $VentasTableTable extends VentasTable
       nombreCliente: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}nombre_cliente'],
+      ),
+      clienteTelefono: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cliente_telefono'],
+      ),
+      clienteWhatsapp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cliente_whatsapp'],
+      ),
+      clienteDireccion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cliente_direccion'],
       ),
       fecha: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -11756,6 +11926,14 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.double,
         data['${effectivePrefix}monto_descuento'],
       )!,
+      comprobanteEntregaImpreso: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}comprobante_entrega_impreso'],
+      )!,
+      fechaComprobanteEntrega: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_comprobante_entrega'],
+      ),
     );
   }
 
@@ -11769,6 +11947,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
   final int id;
   final int clienteId;
   final String? nombreCliente;
+  final String? clienteTelefono;
+  final String? clienteWhatsapp;
+  final String? clienteDireccion;
   final DateTime fecha;
   final double montoSubtotal;
   final double descuentoGlobal;
@@ -11790,10 +11971,15 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
   final int? descuentoId;
   final String? descuentoNombre;
   final double montoDescuento;
+  final bool comprobanteEntregaImpreso;
+  final DateTime? fechaComprobanteEntrega;
   const VentasTableData({
     required this.id,
     required this.clienteId,
     this.nombreCliente,
+    this.clienteTelefono,
+    this.clienteWhatsapp,
+    this.clienteDireccion,
     required this.fecha,
     required this.montoSubtotal,
     required this.descuentoGlobal,
@@ -11815,6 +12001,8 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     this.descuentoId,
     this.descuentoNombre,
     required this.montoDescuento,
+    required this.comprobanteEntregaImpreso,
+    this.fechaComprobanteEntrega,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -11823,6 +12011,15 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     map['cliente_id'] = Variable<int>(clienteId);
     if (!nullToAbsent || nombreCliente != null) {
       map['nombre_cliente'] = Variable<String>(nombreCliente);
+    }
+    if (!nullToAbsent || clienteTelefono != null) {
+      map['cliente_telefono'] = Variable<String>(clienteTelefono);
+    }
+    if (!nullToAbsent || clienteWhatsapp != null) {
+      map['cliente_whatsapp'] = Variable<String>(clienteWhatsapp);
+    }
+    if (!nullToAbsent || clienteDireccion != null) {
+      map['cliente_direccion'] = Variable<String>(clienteDireccion);
     }
     map['fecha'] = Variable<DateTime>(fecha);
     map['monto_subtotal'] = Variable<double>(montoSubtotal);
@@ -11853,6 +12050,14 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       map['descuento_nombre'] = Variable<String>(descuentoNombre);
     }
     map['monto_descuento'] = Variable<double>(montoDescuento);
+    map['comprobante_entrega_impreso'] = Variable<bool>(
+      comprobanteEntregaImpreso,
+    );
+    if (!nullToAbsent || fechaComprobanteEntrega != null) {
+      map['fecha_comprobante_entrega'] = Variable<DateTime>(
+        fechaComprobanteEntrega,
+      );
+    }
     return map;
   }
 
@@ -11863,6 +12068,15 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       nombreCliente: nombreCliente == null && nullToAbsent
           ? const Value.absent()
           : Value(nombreCliente),
+      clienteTelefono: clienteTelefono == null && nullToAbsent
+          ? const Value.absent()
+          : Value(clienteTelefono),
+      clienteWhatsapp: clienteWhatsapp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(clienteWhatsapp),
+      clienteDireccion: clienteDireccion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(clienteDireccion),
       fecha: Value(fecha),
       montoSubtotal: Value(montoSubtotal),
       descuentoGlobal: Value(descuentoGlobal),
@@ -11892,6 +12106,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           ? const Value.absent()
           : Value(descuentoNombre),
       montoDescuento: Value(montoDescuento),
+      comprobanteEntregaImpreso: Value(comprobanteEntregaImpreso),
+      fechaComprobanteEntrega: fechaComprobanteEntrega == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaComprobanteEntrega),
     );
   }
 
@@ -11904,6 +12122,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       id: serializer.fromJson<int>(json['id']),
       clienteId: serializer.fromJson<int>(json['clienteId']),
       nombreCliente: serializer.fromJson<String?>(json['nombreCliente']),
+      clienteTelefono: serializer.fromJson<String?>(json['clienteTelefono']),
+      clienteWhatsapp: serializer.fromJson<String?>(json['clienteWhatsapp']),
+      clienteDireccion: serializer.fromJson<String?>(json['clienteDireccion']),
       fecha: serializer.fromJson<DateTime>(json['fecha']),
       montoSubtotal: serializer.fromJson<double>(json['montoSubtotal']),
       descuentoGlobal: serializer.fromJson<double>(json['descuentoGlobal']),
@@ -11925,6 +12146,12 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       descuentoId: serializer.fromJson<int?>(json['descuentoId']),
       descuentoNombre: serializer.fromJson<String?>(json['descuentoNombre']),
       montoDescuento: serializer.fromJson<double>(json['montoDescuento']),
+      comprobanteEntregaImpreso: serializer.fromJson<bool>(
+        json['comprobanteEntregaImpreso'],
+      ),
+      fechaComprobanteEntrega: serializer.fromJson<DateTime?>(
+        json['fechaComprobanteEntrega'],
+      ),
     );
   }
   @override
@@ -11934,6 +12161,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       'id': serializer.toJson<int>(id),
       'clienteId': serializer.toJson<int>(clienteId),
       'nombreCliente': serializer.toJson<String?>(nombreCliente),
+      'clienteTelefono': serializer.toJson<String?>(clienteTelefono),
+      'clienteWhatsapp': serializer.toJson<String?>(clienteWhatsapp),
+      'clienteDireccion': serializer.toJson<String?>(clienteDireccion),
       'fecha': serializer.toJson<DateTime>(fecha),
       'montoSubtotal': serializer.toJson<double>(montoSubtotal),
       'descuentoGlobal': serializer.toJson<double>(descuentoGlobal),
@@ -11955,6 +12185,12 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       'descuentoId': serializer.toJson<int?>(descuentoId),
       'descuentoNombre': serializer.toJson<String?>(descuentoNombre),
       'montoDescuento': serializer.toJson<double>(montoDescuento),
+      'comprobanteEntregaImpreso': serializer.toJson<bool>(
+        comprobanteEntregaImpreso,
+      ),
+      'fechaComprobanteEntrega': serializer.toJson<DateTime?>(
+        fechaComprobanteEntrega,
+      ),
     };
   }
 
@@ -11962,6 +12198,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     int? id,
     int? clienteId,
     Value<String?> nombreCliente = const Value.absent(),
+    Value<String?> clienteTelefono = const Value.absent(),
+    Value<String?> clienteWhatsapp = const Value.absent(),
+    Value<String?> clienteDireccion = const Value.absent(),
     DateTime? fecha,
     double? montoSubtotal,
     double? descuentoGlobal,
@@ -11983,12 +12222,23 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     Value<int?> descuentoId = const Value.absent(),
     Value<String?> descuentoNombre = const Value.absent(),
     double? montoDescuento,
+    bool? comprobanteEntregaImpreso,
+    Value<DateTime?> fechaComprobanteEntrega = const Value.absent(),
   }) => VentasTableData(
     id: id ?? this.id,
     clienteId: clienteId ?? this.clienteId,
     nombreCliente: nombreCliente.present
         ? nombreCliente.value
         : this.nombreCliente,
+    clienteTelefono: clienteTelefono.present
+        ? clienteTelefono.value
+        : this.clienteTelefono,
+    clienteWhatsapp: clienteWhatsapp.present
+        ? clienteWhatsapp.value
+        : this.clienteWhatsapp,
+    clienteDireccion: clienteDireccion.present
+        ? clienteDireccion.value
+        : this.clienteDireccion,
     fecha: fecha ?? this.fecha,
     montoSubtotal: montoSubtotal ?? this.montoSubtotal,
     descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
@@ -12014,6 +12264,11 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
         ? descuentoNombre.value
         : this.descuentoNombre,
     montoDescuento: montoDescuento ?? this.montoDescuento,
+    comprobanteEntregaImpreso:
+        comprobanteEntregaImpreso ?? this.comprobanteEntregaImpreso,
+    fechaComprobanteEntrega: fechaComprobanteEntrega.present
+        ? fechaComprobanteEntrega.value
+        : this.fechaComprobanteEntrega,
   );
   VentasTableData copyWithCompanion(VentasTableCompanion data) {
     return VentasTableData(
@@ -12022,6 +12277,15 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       nombreCliente: data.nombreCliente.present
           ? data.nombreCliente.value
           : this.nombreCliente,
+      clienteTelefono: data.clienteTelefono.present
+          ? data.clienteTelefono.value
+          : this.clienteTelefono,
+      clienteWhatsapp: data.clienteWhatsapp.present
+          ? data.clienteWhatsapp.value
+          : this.clienteWhatsapp,
+      clienteDireccion: data.clienteDireccion.present
+          ? data.clienteDireccion.value
+          : this.clienteDireccion,
       fecha: data.fecha.present ? data.fecha.value : this.fecha,
       montoSubtotal: data.montoSubtotal.present
           ? data.montoSubtotal.value
@@ -12075,6 +12339,12 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       montoDescuento: data.montoDescuento.present
           ? data.montoDescuento.value
           : this.montoDescuento,
+      comprobanteEntregaImpreso: data.comprobanteEntregaImpreso.present
+          ? data.comprobanteEntregaImpreso.value
+          : this.comprobanteEntregaImpreso,
+      fechaComprobanteEntrega: data.fechaComprobanteEntrega.present
+          ? data.fechaComprobanteEntrega.value
+          : this.fechaComprobanteEntrega,
     );
   }
 
@@ -12084,6 +12354,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           ..write('id: $id, ')
           ..write('clienteId: $clienteId, ')
           ..write('nombreCliente: $nombreCliente, ')
+          ..write('clienteTelefono: $clienteTelefono, ')
+          ..write('clienteWhatsapp: $clienteWhatsapp, ')
+          ..write('clienteDireccion: $clienteDireccion, ')
           ..write('fecha: $fecha, ')
           ..write('montoSubtotal: $montoSubtotal, ')
           ..write('descuentoGlobal: $descuentoGlobal, ')
@@ -12104,7 +12377,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           ..write('fechaRegistro: $fechaRegistro, ')
           ..write('descuentoId: $descuentoId, ')
           ..write('descuentoNombre: $descuentoNombre, ')
-          ..write('montoDescuento: $montoDescuento')
+          ..write('montoDescuento: $montoDescuento, ')
+          ..write('comprobanteEntregaImpreso: $comprobanteEntregaImpreso, ')
+          ..write('fechaComprobanteEntrega: $fechaComprobanteEntrega')
           ..write(')'))
         .toString();
   }
@@ -12114,6 +12389,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     id,
     clienteId,
     nombreCliente,
+    clienteTelefono,
+    clienteWhatsapp,
+    clienteDireccion,
     fecha,
     montoSubtotal,
     descuentoGlobal,
@@ -12135,6 +12413,8 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     descuentoId,
     descuentoNombre,
     montoDescuento,
+    comprobanteEntregaImpreso,
+    fechaComprobanteEntrega,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -12143,6 +12423,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           other.id == this.id &&
           other.clienteId == this.clienteId &&
           other.nombreCliente == this.nombreCliente &&
+          other.clienteTelefono == this.clienteTelefono &&
+          other.clienteWhatsapp == this.clienteWhatsapp &&
+          other.clienteDireccion == this.clienteDireccion &&
           other.fecha == this.fecha &&
           other.montoSubtotal == this.montoSubtotal &&
           other.descuentoGlobal == this.descuentoGlobal &&
@@ -12163,13 +12446,18 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           other.fechaRegistro == this.fechaRegistro &&
           other.descuentoId == this.descuentoId &&
           other.descuentoNombre == this.descuentoNombre &&
-          other.montoDescuento == this.montoDescuento);
+          other.montoDescuento == this.montoDescuento &&
+          other.comprobanteEntregaImpreso == this.comprobanteEntregaImpreso &&
+          other.fechaComprobanteEntrega == this.fechaComprobanteEntrega);
 }
 
 class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
   final Value<int> id;
   final Value<int> clienteId;
   final Value<String?> nombreCliente;
+  final Value<String?> clienteTelefono;
+  final Value<String?> clienteWhatsapp;
+  final Value<String?> clienteDireccion;
   final Value<DateTime> fecha;
   final Value<double> montoSubtotal;
   final Value<double> descuentoGlobal;
@@ -12191,10 +12479,15 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
   final Value<int?> descuentoId;
   final Value<String?> descuentoNombre;
   final Value<double> montoDescuento;
+  final Value<bool> comprobanteEntregaImpreso;
+  final Value<DateTime?> fechaComprobanteEntrega;
   const VentasTableCompanion({
     this.id = const Value.absent(),
     this.clienteId = const Value.absent(),
     this.nombreCliente = const Value.absent(),
+    this.clienteTelefono = const Value.absent(),
+    this.clienteWhatsapp = const Value.absent(),
+    this.clienteDireccion = const Value.absent(),
     this.fecha = const Value.absent(),
     this.montoSubtotal = const Value.absent(),
     this.descuentoGlobal = const Value.absent(),
@@ -12216,11 +12509,16 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     this.descuentoId = const Value.absent(),
     this.descuentoNombre = const Value.absent(),
     this.montoDescuento = const Value.absent(),
+    this.comprobanteEntregaImpreso = const Value.absent(),
+    this.fechaComprobanteEntrega = const Value.absent(),
   });
   VentasTableCompanion.insert({
     this.id = const Value.absent(),
     required int clienteId,
     this.nombreCliente = const Value.absent(),
+    this.clienteTelefono = const Value.absent(),
+    this.clienteWhatsapp = const Value.absent(),
+    this.clienteDireccion = const Value.absent(),
     required DateTime fecha,
     this.montoSubtotal = const Value.absent(),
     this.descuentoGlobal = const Value.absent(),
@@ -12242,6 +12540,8 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     this.descuentoId = const Value.absent(),
     this.descuentoNombre = const Value.absent(),
     this.montoDescuento = const Value.absent(),
+    this.comprobanteEntregaImpreso = const Value.absent(),
+    this.fechaComprobanteEntrega = const Value.absent(),
   }) : clienteId = Value(clienteId),
        fecha = Value(fecha),
        formaPago = Value(formaPago),
@@ -12253,6 +12553,9 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     Expression<int>? id,
     Expression<int>? clienteId,
     Expression<String>? nombreCliente,
+    Expression<String>? clienteTelefono,
+    Expression<String>? clienteWhatsapp,
+    Expression<String>? clienteDireccion,
     Expression<DateTime>? fecha,
     Expression<double>? montoSubtotal,
     Expression<double>? descuentoGlobal,
@@ -12274,11 +12577,16 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     Expression<int>? descuentoId,
     Expression<String>? descuentoNombre,
     Expression<double>? montoDescuento,
+    Expression<bool>? comprobanteEntregaImpreso,
+    Expression<DateTime>? fechaComprobanteEntrega,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (clienteId != null) 'cliente_id': clienteId,
       if (nombreCliente != null) 'nombre_cliente': nombreCliente,
+      if (clienteTelefono != null) 'cliente_telefono': clienteTelefono,
+      if (clienteWhatsapp != null) 'cliente_whatsapp': clienteWhatsapp,
+      if (clienteDireccion != null) 'cliente_direccion': clienteDireccion,
       if (fecha != null) 'fecha': fecha,
       if (montoSubtotal != null) 'monto_subtotal': montoSubtotal,
       if (descuentoGlobal != null) 'descuento_global': descuentoGlobal,
@@ -12300,6 +12608,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
       if (descuentoId != null) 'descuento_id': descuentoId,
       if (descuentoNombre != null) 'descuento_nombre': descuentoNombre,
       if (montoDescuento != null) 'monto_descuento': montoDescuento,
+      if (comprobanteEntregaImpreso != null)
+        'comprobante_entrega_impreso': comprobanteEntregaImpreso,
+      if (fechaComprobanteEntrega != null)
+        'fecha_comprobante_entrega': fechaComprobanteEntrega,
     });
   }
 
@@ -12307,6 +12619,9 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     Value<int>? id,
     Value<int>? clienteId,
     Value<String?>? nombreCliente,
+    Value<String?>? clienteTelefono,
+    Value<String?>? clienteWhatsapp,
+    Value<String?>? clienteDireccion,
     Value<DateTime>? fecha,
     Value<double>? montoSubtotal,
     Value<double>? descuentoGlobal,
@@ -12328,11 +12643,16 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     Value<int?>? descuentoId,
     Value<String?>? descuentoNombre,
     Value<double>? montoDescuento,
+    Value<bool>? comprobanteEntregaImpreso,
+    Value<DateTime?>? fechaComprobanteEntrega,
   }) {
     return VentasTableCompanion(
       id: id ?? this.id,
       clienteId: clienteId ?? this.clienteId,
       nombreCliente: nombreCliente ?? this.nombreCliente,
+      clienteTelefono: clienteTelefono ?? this.clienteTelefono,
+      clienteWhatsapp: clienteWhatsapp ?? this.clienteWhatsapp,
+      clienteDireccion: clienteDireccion ?? this.clienteDireccion,
       fecha: fecha ?? this.fecha,
       montoSubtotal: montoSubtotal ?? this.montoSubtotal,
       descuentoGlobal: descuentoGlobal ?? this.descuentoGlobal,
@@ -12354,6 +12674,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
       descuentoId: descuentoId ?? this.descuentoId,
       descuentoNombre: descuentoNombre ?? this.descuentoNombre,
       montoDescuento: montoDescuento ?? this.montoDescuento,
+      comprobanteEntregaImpreso:
+          comprobanteEntregaImpreso ?? this.comprobanteEntregaImpreso,
+      fechaComprobanteEntrega:
+          fechaComprobanteEntrega ?? this.fechaComprobanteEntrega,
     );
   }
 
@@ -12368,6 +12692,15 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     }
     if (nombreCliente.present) {
       map['nombre_cliente'] = Variable<String>(nombreCliente.value);
+    }
+    if (clienteTelefono.present) {
+      map['cliente_telefono'] = Variable<String>(clienteTelefono.value);
+    }
+    if (clienteWhatsapp.present) {
+      map['cliente_whatsapp'] = Variable<String>(clienteWhatsapp.value);
+    }
+    if (clienteDireccion.present) {
+      map['cliente_direccion'] = Variable<String>(clienteDireccion.value);
     }
     if (fecha.present) {
       map['fecha'] = Variable<DateTime>(fecha.value);
@@ -12432,6 +12765,16 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     if (montoDescuento.present) {
       map['monto_descuento'] = Variable<double>(montoDescuento.value);
     }
+    if (comprobanteEntregaImpreso.present) {
+      map['comprobante_entrega_impreso'] = Variable<bool>(
+        comprobanteEntregaImpreso.value,
+      );
+    }
+    if (fechaComprobanteEntrega.present) {
+      map['fecha_comprobante_entrega'] = Variable<DateTime>(
+        fechaComprobanteEntrega.value,
+      );
+    }
     return map;
   }
 
@@ -12441,6 +12784,9 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
           ..write('id: $id, ')
           ..write('clienteId: $clienteId, ')
           ..write('nombreCliente: $nombreCliente, ')
+          ..write('clienteTelefono: $clienteTelefono, ')
+          ..write('clienteWhatsapp: $clienteWhatsapp, ')
+          ..write('clienteDireccion: $clienteDireccion, ')
           ..write('fecha: $fecha, ')
           ..write('montoSubtotal: $montoSubtotal, ')
           ..write('descuentoGlobal: $descuentoGlobal, ')
@@ -12461,7 +12807,9 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
           ..write('fechaRegistro: $fechaRegistro, ')
           ..write('descuentoId: $descuentoId, ')
           ..write('descuentoNombre: $descuentoNombre, ')
-          ..write('montoDescuento: $montoDescuento')
+          ..write('montoDescuento: $montoDescuento, ')
+          ..write('comprobanteEntregaImpreso: $comprobanteEntregaImpreso, ')
+          ..write('fechaComprobanteEntrega: $fechaComprobanteEntrega')
           ..write(')'))
         .toString();
   }
@@ -27185,6 +27533,7 @@ typedef $$ClientesTableTableCreateCompanionBuilder =
       required String nombre,
       required String rncCedula,
       required String telefono,
+      Value<String?> whatsapp,
       required String correo,
       required String direccion,
       Value<bool> activo,
@@ -27197,6 +27546,7 @@ typedef $$ClientesTableTableUpdateCompanionBuilder =
       Value<String> nombre,
       Value<String> rncCedula,
       Value<String> telefono,
+      Value<String?> whatsapp,
       Value<String> correo,
       Value<String> direccion,
       Value<bool> activo,
@@ -27313,6 +27663,11 @@ class $$ClientesTableTableFilterComposer
 
   ColumnFilters<String> get telefono => $composableBuilder(
     column: $table.telefono,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get whatsapp => $composableBuilder(
+    column: $table.whatsapp,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -27446,6 +27801,11 @@ class $$ClientesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get whatsapp => $composableBuilder(
+    column: $table.whatsapp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get correo => $composableBuilder(
     column: $table.correo,
     builder: (column) => ColumnOrderings(column),
@@ -27490,6 +27850,9 @@ class $$ClientesTableTableAnnotationComposer
 
   GeneratedColumn<String> get telefono =>
       $composableBuilder(column: $table.telefono, builder: (column) => column);
+
+  GeneratedColumn<String> get whatsapp =>
+      $composableBuilder(column: $table.whatsapp, builder: (column) => column);
 
   GeneratedColumn<String> get correo =>
       $composableBuilder(column: $table.correo, builder: (column) => column);
@@ -27620,6 +27983,7 @@ class $$ClientesTableTableTableManager
                 Value<String> nombre = const Value.absent(),
                 Value<String> rncCedula = const Value.absent(),
                 Value<String> telefono = const Value.absent(),
+                Value<String?> whatsapp = const Value.absent(),
                 Value<String> correo = const Value.absent(),
                 Value<String> direccion = const Value.absent(),
                 Value<bool> activo = const Value.absent(),
@@ -27630,6 +27994,7 @@ class $$ClientesTableTableTableManager
                 nombre: nombre,
                 rncCedula: rncCedula,
                 telefono: telefono,
+                whatsapp: whatsapp,
                 correo: correo,
                 direccion: direccion,
                 activo: activo,
@@ -27642,6 +28007,7 @@ class $$ClientesTableTableTableManager
                 required String nombre,
                 required String rncCedula,
                 required String telefono,
+                Value<String?> whatsapp = const Value.absent(),
                 required String correo,
                 required String direccion,
                 Value<bool> activo = const Value.absent(),
@@ -27652,6 +28018,7 @@ class $$ClientesTableTableTableManager
                 nombre: nombre,
                 rncCedula: rncCedula,
                 telefono: telefono,
+                whatsapp: whatsapp,
                 correo: correo,
                 direccion: direccion,
                 activo: activo,
@@ -33286,6 +33653,9 @@ typedef $$VentasTableTableCreateCompanionBuilder =
       Value<int> id,
       required int clienteId,
       Value<String?> nombreCliente,
+      Value<String?> clienteTelefono,
+      Value<String?> clienteWhatsapp,
+      Value<String?> clienteDireccion,
       required DateTime fecha,
       Value<double> montoSubtotal,
       Value<double> descuentoGlobal,
@@ -33307,12 +33677,17 @@ typedef $$VentasTableTableCreateCompanionBuilder =
       Value<int?> descuentoId,
       Value<String?> descuentoNombre,
       Value<double> montoDescuento,
+      Value<bool> comprobanteEntregaImpreso,
+      Value<DateTime?> fechaComprobanteEntrega,
     });
 typedef $$VentasTableTableUpdateCompanionBuilder =
     VentasTableCompanion Function({
       Value<int> id,
       Value<int> clienteId,
       Value<String?> nombreCliente,
+      Value<String?> clienteTelefono,
+      Value<String?> clienteWhatsapp,
+      Value<String?> clienteDireccion,
       Value<DateTime> fecha,
       Value<double> montoSubtotal,
       Value<double> descuentoGlobal,
@@ -33334,6 +33709,8 @@ typedef $$VentasTableTableUpdateCompanionBuilder =
       Value<int?> descuentoId,
       Value<String?> descuentoNombre,
       Value<double> montoDescuento,
+      Value<bool> comprobanteEntregaImpreso,
+      Value<DateTime?> fechaComprobanteEntrega,
     });
 
 final class $$VentasTableTableReferences
@@ -33510,6 +33887,21 @@ class $$VentasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get clienteTelefono => $composableBuilder(
+    column: $table.clienteTelefono,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clienteWhatsapp => $composableBuilder(
+    column: $table.clienteWhatsapp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clienteDireccion => $composableBuilder(
+    column: $table.clienteDireccion,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get fecha => $composableBuilder(
     column: $table.fecha,
     builder: (column) => ColumnFilters(column),
@@ -33612,6 +34004,16 @@ class $$VentasTableTableFilterComposer
 
   ColumnFilters<double> get montoDescuento => $composableBuilder(
     column: $table.montoDescuento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get comprobanteEntregaImpreso => $composableBuilder(
+    column: $table.comprobanteEntregaImpreso,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaComprobanteEntrega => $composableBuilder(
+    column: $table.fechaComprobanteEntrega,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -33791,6 +34193,21 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get clienteTelefono => $composableBuilder(
+    column: $table.clienteTelefono,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clienteWhatsapp => $composableBuilder(
+    column: $table.clienteWhatsapp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clienteDireccion => $composableBuilder(
+    column: $table.clienteDireccion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get fecha => $composableBuilder(
     column: $table.fecha,
     builder: (column) => ColumnOrderings(column),
@@ -33895,6 +34312,16 @@ class $$VentasTableTableOrderingComposer
     column: $table.montoDescuento,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get comprobanteEntregaImpreso => $composableBuilder(
+    column: $table.comprobanteEntregaImpreso,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaComprobanteEntrega => $composableBuilder(
+    column: $table.fechaComprobanteEntrega,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$VentasTableTableAnnotationComposer
@@ -33914,6 +34341,21 @@ class $$VentasTableTableAnnotationComposer
 
   GeneratedColumn<String> get nombreCliente => $composableBuilder(
     column: $table.nombreCliente,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get clienteTelefono => $composableBuilder(
+    column: $table.clienteTelefono,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get clienteWhatsapp => $composableBuilder(
+    column: $table.clienteWhatsapp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get clienteDireccion => $composableBuilder(
+    column: $table.clienteDireccion,
     builder: (column) => column,
   );
 
@@ -34009,6 +34451,16 @@ class $$VentasTableTableAnnotationComposer
 
   GeneratedColumn<double> get montoDescuento => $composableBuilder(
     column: $table.montoDescuento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get comprobanteEntregaImpreso => $composableBuilder(
+    column: $table.comprobanteEntregaImpreso,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fechaComprobanteEntrega => $composableBuilder(
+    column: $table.fechaComprobanteEntrega,
     builder: (column) => column,
   );
 
@@ -34207,6 +34659,9 @@ class $$VentasTableTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> clienteId = const Value.absent(),
                 Value<String?> nombreCliente = const Value.absent(),
+                Value<String?> clienteTelefono = const Value.absent(),
+                Value<String?> clienteWhatsapp = const Value.absent(),
+                Value<String?> clienteDireccion = const Value.absent(),
                 Value<DateTime> fecha = const Value.absent(),
                 Value<double> montoSubtotal = const Value.absent(),
                 Value<double> descuentoGlobal = const Value.absent(),
@@ -34228,10 +34683,15 @@ class $$VentasTableTableTableManager
                 Value<int?> descuentoId = const Value.absent(),
                 Value<String?> descuentoNombre = const Value.absent(),
                 Value<double> montoDescuento = const Value.absent(),
+                Value<bool> comprobanteEntregaImpreso = const Value.absent(),
+                Value<DateTime?> fechaComprobanteEntrega = const Value.absent(),
               }) => VentasTableCompanion(
                 id: id,
                 clienteId: clienteId,
                 nombreCliente: nombreCliente,
+                clienteTelefono: clienteTelefono,
+                clienteWhatsapp: clienteWhatsapp,
+                clienteDireccion: clienteDireccion,
                 fecha: fecha,
                 montoSubtotal: montoSubtotal,
                 descuentoGlobal: descuentoGlobal,
@@ -34253,12 +34713,17 @@ class $$VentasTableTableTableManager
                 descuentoId: descuentoId,
                 descuentoNombre: descuentoNombre,
                 montoDescuento: montoDescuento,
+                comprobanteEntregaImpreso: comprobanteEntregaImpreso,
+                fechaComprobanteEntrega: fechaComprobanteEntrega,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required int clienteId,
                 Value<String?> nombreCliente = const Value.absent(),
+                Value<String?> clienteTelefono = const Value.absent(),
+                Value<String?> clienteWhatsapp = const Value.absent(),
+                Value<String?> clienteDireccion = const Value.absent(),
                 required DateTime fecha,
                 Value<double> montoSubtotal = const Value.absent(),
                 Value<double> descuentoGlobal = const Value.absent(),
@@ -34280,10 +34745,15 @@ class $$VentasTableTableTableManager
                 Value<int?> descuentoId = const Value.absent(),
                 Value<String?> descuentoNombre = const Value.absent(),
                 Value<double> montoDescuento = const Value.absent(),
+                Value<bool> comprobanteEntregaImpreso = const Value.absent(),
+                Value<DateTime?> fechaComprobanteEntrega = const Value.absent(),
               }) => VentasTableCompanion.insert(
                 id: id,
                 clienteId: clienteId,
                 nombreCliente: nombreCliente,
+                clienteTelefono: clienteTelefono,
+                clienteWhatsapp: clienteWhatsapp,
+                clienteDireccion: clienteDireccion,
                 fecha: fecha,
                 montoSubtotal: montoSubtotal,
                 descuentoGlobal: descuentoGlobal,
@@ -34305,6 +34775,8 @@ class $$VentasTableTableTableManager
                 descuentoId: descuentoId,
                 descuentoNombre: descuentoNombre,
                 montoDescuento: montoDescuento,
+                comprobanteEntregaImpreso: comprobanteEntregaImpreso,
+                fechaComprobanteEntrega: fechaComprobanteEntrega,
               ),
           withReferenceMapper: (p0) => p0
               .map(

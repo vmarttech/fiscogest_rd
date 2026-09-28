@@ -8,6 +8,9 @@ class Venta {
     this.numeroFactura,
     required this.clienteId,
     this.nombreCliente,
+    this.clienteTelefono,
+    this.clienteWhatsapp,
+    this.clienteDireccion,
     required this.fecha,
     required this.detalles,
     required this.montoSubtotal,
@@ -28,6 +31,8 @@ class Venta {
     this.descuentoId,
     this.descuentoNombre,
     required this.montoDescuento,
+    this.comprobanteEntregaImpreso = false,
+    this.fechaComprobanteEntrega,
   });
 
   final int? id;
@@ -35,6 +40,9 @@ class Venta {
   final String? numeroFactura;
   final int clienteId;
   final String? nombreCliente;
+  final String? clienteTelefono;
+  final String? clienteWhatsapp;
+  final String? clienteDireccion;
   final DateTime fecha;
   final List<DetalleVenta> detalles;
   final double montoSubtotal;
@@ -55,6 +63,8 @@ class Venta {
   final int? descuentoId;
   final String? descuentoNombre;
   final double montoDescuento;
+  final bool comprobanteEntregaImpreso;
+  final DateTime? fechaComprobanteEntrega;
 
   // ==============================================
   // ✅ GETTERS DE COMPATIBILIDAD — NOMBRES ANTIGUOS
@@ -73,6 +83,9 @@ class Venta {
     String? numeroFactura,
     int? clienteId,
     String? nombreCliente,
+    String? clienteTelefono,
+    String? clienteWhatsapp,
+    String? clienteDireccion,
     DateTime? fecha,
     List<DetalleVenta>? detalles,
     double? montoSubtotal,
@@ -93,6 +106,8 @@ class Venta {
     int? descuentoId,
     String? descuentoNombre,
     double? montoDescuento,
+    bool? comprobanteEntregaImpreso,
+    DateTime? fechaComprobanteEntrega,
   }) {
     return Venta(
       id: id ?? this.id,
@@ -100,6 +115,9 @@ class Venta {
       numeroFactura: numeroFactura ?? this.numeroFactura,
       clienteId: clienteId ?? this.clienteId,
       nombreCliente: nombreCliente ?? this.nombreCliente,
+      clienteTelefono: clienteTelefono ?? this.clienteTelefono,
+      clienteWhatsapp: clienteWhatsapp ?? this.clienteWhatsapp,
+      clienteDireccion: clienteDireccion ?? this.clienteDireccion,
       fecha: fecha ?? this.fecha,
       detalles: detalles ?? this.detalles,
       montoSubtotal: montoSubtotal ?? this.montoSubtotal,
@@ -120,6 +138,10 @@ class Venta {
       descuentoId: descuentoId ?? this.descuentoId,
       descuentoNombre: descuentoNombre ?? this.descuentoNombre,
       montoDescuento: montoDescuento ?? this.montoDescuento,
+      comprobanteEntregaImpreso:
+          comprobanteEntregaImpreso ?? this.comprobanteEntregaImpreso,
+      fechaComprobanteEntrega:
+          fechaComprobanteEntrega ?? this.fechaComprobanteEntrega,
     );
   }
 }

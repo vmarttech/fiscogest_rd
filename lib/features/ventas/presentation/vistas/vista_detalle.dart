@@ -90,6 +90,72 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     return venta.numeroCotizacion.startsWith('CR-');
   }
 
+  Future<void> _imprimirEntrega(BuildContext context, WidgetRef ref) async {
+    if (venta.comprobanteEntregaImpreso) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('El comprobante de entrega ya fue impreso'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+    try {
+      Venta v = venta;
+      if (v.detalles.isEmpty && v.id != null) {
+        final repo = ref.read(venta_providers.ventasRepositoryProvider);
+        v = await repo.obtenerVentaPorId(v.id!) ?? v;
+      }
+      await ComprobantePdf.imprimirComprobanteInterno(
+        v,
+        empresa: ref.read(configuracionControllerProvider).valueOrNull,
+        telefonoCliente: v.clienteTelefono,
+        direccionCliente: v.clienteDireccion,
+      );
+      final repo = ref.read(venta_providers.ventasRepositoryProvider);
+      final ok = await repo.marcarComprobanteEntregaImpreso(v.id!);
+      if (!context.mounted) return;
+      if (ok) {
+        final actualizada = await repo.obtenerVentaPorId(v.id!);
+        if (actualizada != null) {
+          final n = ref.read(ventaCargadaDesdeHistorialProvider.notifier);
+          try {
+            // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+            n.state = actualizada;
+          } catch (_) {
+            ref.invalidate(ventaCargadaDesdeHistorialProvider);
+          }
+        }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Comprobante de entrega registrado'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo registrar (¿ya impreso o no facturada?)'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Entrega: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
       await ComprobantePdf.imprimirFactura(venta, empresa: ref.read(configuracionControllerProvider).valueOrNull);
@@ -682,6 +748,26 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       onTap: () => _imprimir(context, ref),
                       esPantallaPequena: esPantallaPequena,
                     ),
+                    if ((venta.estadoDocumento == EstadoDocumento.facturado ||
+                            _ncf.isNotEmpty) &&
+                        !venta.comprobanteEntregaImpreso)
+                      _chipAccion(
+                        icon: Icons.local_shipping_outlined,
+                        label: 'Entrega',
+                        onTap: () => _imprimirEntrega(context, ref),
+                        esPantallaPequena: esPantallaPequena,
+                      ),
+                    if (venta.comprobanteEntregaImpreso)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          venta.fechaComprobanteEntrega != null
+                              ? 'Entrega impresa · ${_formatearFecha(venta.fechaComprobanteEntrega!)}'
+                              : 'Entrega ya impresa',
+                          style: AppTypography.bodySmall
+                              .copyWith(color: AppColors.textSecondary),
+                        ),
+                      ),
                     if (esCotizacionActiva) _chipAccion(
                       icon: Icons.picture_as_pdf_outlined,
                       label: 'PDF',

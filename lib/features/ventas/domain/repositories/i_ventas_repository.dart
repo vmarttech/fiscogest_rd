@@ -83,4 +83,7 @@ abstract class IVentasRepository {
   Future<bool> validarOferta(int ofertaId, double montoCompra);
 
   Future<void> actualizarEnCascada(int ventaId);
+
+  Future<bool> marcarComprobanteEntregaImpreso(int ventaId);
+
 }

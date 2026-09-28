@@ -71,7 +71,12 @@ class _NuevaVentaBorradorPageState
     if (cliente != null && mounted) {
       ref
           .read(ventaBorradorProvider.notifier)
-          .seleccionarCliente(cliente.id ?? 0, cliente.nombre);
+          .seleccionarCliente(
+            cliente.id ?? 0,
+            cliente.nombre,
+            telefono: cliente.telefono,
+            direccion: cliente.direccion,
+          );
     }
   }
 

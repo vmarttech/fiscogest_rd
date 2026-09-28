@@ -6,6 +6,7 @@ class ClientesTable extends Table {
   TextColumn get nombre => text()();
   TextColumn get rncCedula => text()();
   TextColumn get telefono => text()();
+  TextColumn get whatsapp => text().nullable()();
   TextColumn get correo => text()();
   TextColumn get direccion => text()();
   BoolColumn get activo => boolean().withDefault(const Constant(true))();

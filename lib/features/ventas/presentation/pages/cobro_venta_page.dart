@@ -654,8 +654,9 @@ Future<void> _cargarDocumento({
                   await _opcionesComprobantePdf(ventaConDetalle);
                 },
                 icon: const Icon(Icons.print_outlined, size: 18),
-                label: const Text('Imprimir'),
+                label: const Text('Fiscal'),
               ),
+
               TextButton.icon(
                 onPressed: () async {
                   Navigator.pop(ctx);

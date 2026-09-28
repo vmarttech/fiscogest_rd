@@ -408,7 +408,7 @@ class ComprobantePdf {
     final headers = ['#', 'Descripción', 'Cant.', 'Precio', 'Importe'];
     final rows = <List<String>>[];
     if (detalles.isEmpty) {
-      rows.add(['1', 'Producto / servicio', '1', '-', '-']);
+      rows.add(['—', 'Sin líneas de detalle en base de datos', '—', '—', '—']);
     } else {
       for (var i = 0; i < detalles.length; i++) {
         final d = detalles[i];
@@ -658,6 +658,233 @@ class ComprobantePdf {
     await Printing.layoutPdf(
       onLayout: (_) async => doc.save(),
       name: 'NC_$ncfNc.pdf',
+    );
+  }
+
+  /// Comprobante de entrega (despacho / delivery). Sin montos ni datos fiscales.
+  static Future<void> imprimirComprobanteInterno(
+    Venta v, {
+    ConfiguracionEntity? empresa,
+    bool compartir = false,
+    String? telefonoCliente,
+    String? whatsappCliente,
+    String? direccionCliente,
+  }) async {
+    if (empresa != null) {
+      _empresa = empresa;
+      emisorNombre = (empresa.nombreComercial.isNotEmpty)
+          ? empresa.nombreComercial
+          : (empresa.razonSocial.isNotEmpty)
+              ? empresa.razonSocial
+              : 'Empresa';
+      emisorRnc = empresa.rnc;
+      emisorDir = empresa.direccion;
+      emisorTel = empresa.telefono;
+      emisorEmail = empresa.correo;
+    }
+
+    final tel = (telefonoCliente ?? v.clienteTelefono ?? '').trim();
+    final wa = (whatsappCliente ?? v.clienteWhatsapp ?? '').trim();
+    final dir = (direccionCliente ?? v.clienteDireccion ?? '').trim();
+    final cot = v.numeroCotizacion;
+    final ncf = (v.numeroFactura ?? '').trim();
+    final cliente = (v.nombreCliente ?? 'Cliente #${v.clienteId}').trim();
+
+    final doc = pw.Document();
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.letter,
+        margin: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+        build: (ctx) => [
+          pw.Text(
+            emisorNombre,
+            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+          ),
+          if (emisorTel.isNotEmpty)
+            pw.Text('Tel: $emisorTel', style: const pw.TextStyle(fontSize: 9)),
+          pw.SizedBox(height: 12),
+          pw.Center(
+            child: pw.Text(
+              'COMPROBANTE DE ENTREGA',
+              style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Center(
+            child: pw.Text(
+              'Uso: despacho / delivery — no es comprobante fiscal',
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+            ),
+          ),
+          pw.SizedBox(height: 14),
+          pw.Divider(),
+          pw.Text('Ref. cotización: $cot', style: const pw.TextStyle(fontSize: 10)),
+          if (ncf.isNotEmpty)
+            pw.Text('Ref. factura: $ncf', style: const pw.TextStyle(fontSize: 10)),
+          pw.Text(
+            'Fecha: ${_fecha.format(v.fecha)}',
+            style: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.SizedBox(height: 12),
+          pw.Text(
+            'ENTREGAR A',
+            style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            cliente,
+            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+          ),
+          if (tel.isNotEmpty)
+            pw.Text('Teléfono: $tel', style: const pw.TextStyle(fontSize: 10)),
+          if (wa.isNotEmpty)
+            pw.Text('WhatsApp: $wa', style: const pw.TextStyle(fontSize: 10)),
+          pw.SizedBox(height: 6),
+          pw.Text(
+            'Dirección de entrega:',
+            style: const pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.Text(
+            dir.isNotEmpty
+                ? dir
+                : '(Sin dirección registrada — completar a mano)',
+            style: const pw.TextStyle(fontSize: 11),
+          ),
+          pw.SizedBox(height: 14),
+          pw.Text(
+            'ARTÍCULOS A ENTREGAR',
+            style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 6),
+          _tablaEntrega(v.detalles),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            'Cantidad de líneas: ${v.detalles.length}',
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+          ),
+          pw.SizedBox(height: 28),
+          pw.Text(
+            'CONFIRMACIÓN DE ENTREGA',
+            style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            'Recibí conforme la mercancía descrita, en buen estado.',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
+          pw.SizedBox(height: 36),
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
+                child: _bloqueFirmaEntrega(
+                  'Firma del cliente',
+                  'Nombre: _________________',
+                ),
+              ),
+              pw.SizedBox(width: 24),
+              pw.Expanded(
+                child: _bloqueFirmaEntrega(
+                  'Firma quien entrega',
+                  'Nombre: _________________',
+                ),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 16),
+          pw.Text(
+            'Fecha/hora entrega: ____ / ____ / ________   Hora: ____ : ____',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            'Observaciones: _______________________________________________',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            '________________________________________________________________',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
+        ],
+      ),
+    );
+
+    final bytes = await doc.save();
+    final name =
+        ncf.isNotEmpty ? 'Entrega_${ncf}_$cot.pdf' : 'Entrega_$cot.pdf';
+    if (compartir) {
+      await Printing.sharePdf(bytes: bytes, filename: name);
+    } else {
+      await Printing.layoutPdf(onLayout: (_) async => bytes, name: name);
+    }
+  }
+
+  static pw.Widget _tablaEntrega(List<DetalleVenta> detalles) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(3.5),
+        1: const pw.FlexColumnWidth(1),
+        2: const pw.FlexColumnWidth(1.2),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+          children: [
+            _celdaEntrega('Descripción', bold: true),
+            _celdaEntrega('Cant.', bold: true, align: pw.TextAlign.center),
+            _celdaEntrega('Unidad', bold: true, align: pw.TextAlign.center),
+          ],
+        ),
+        ...detalles.map((d) {
+          final np = d.nombreProducto?.trim();
+          final nombre = (np != null && np.isNotEmpty)
+              ? np
+              : 'Producto #${d.productoId}';
+          return pw.TableRow(
+            children: [
+              _celdaEntrega(nombre),
+              _celdaEntrega('${d.cantidad}', align: pw.TextAlign.center),
+              _celdaEntrega('UND', align: pw.TextAlign.center),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  static pw.Widget _celdaEntrega(
+    String text, {
+    bool bold = false,
+    pw.TextAlign align = pw.TextAlign.left,
+  }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+      child: pw.Text(
+        text,
+        textAlign: align,
+        style: pw.TextStyle(
+          fontSize: 9,
+          fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+        ),
+      ),
+    );
+  }
+
+  static pw.Widget _bloqueFirmaEntrega(String titulo, String lineaNombre) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          titulo,
+          style: const pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.SizedBox(height: 28),
+        pw.Container(height: 0.8, color: PdfColors.black),
+        pw.SizedBox(height: 4),
+        pw.Text(lineaNombre, style: const pw.TextStyle(fontSize: 8)),
+      ],
     );
   }
 }

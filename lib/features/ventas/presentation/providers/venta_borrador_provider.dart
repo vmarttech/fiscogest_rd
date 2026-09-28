@@ -16,6 +16,9 @@ class VentaBorradorState {
     this.vencimiento,
     this.clienteId,
     this.clienteNombre,
+    this.clienteTelefono,
+    this.clienteWhatsapp,
+    this.clienteDireccion,
     required this.subtotal,
     required this.itbis,
     this.costoEnvio = 0.0,
@@ -38,6 +41,9 @@ class VentaBorradorState {
   final DateTime? vencimiento;
   final int? clienteId;
   final String? clienteNombre;
+  final String? clienteTelefono;
+  final String? clienteWhatsapp;
+  final String? clienteDireccion;
   final double subtotal;
   final double itbis;
   final double costoEnvio;
@@ -60,6 +66,9 @@ class VentaBorradorState {
     DateTime? vencimiento,
     int? clienteId,
     String? clienteNombre,
+    String? clienteTelefono,
+    String? clienteWhatsapp,
+    String? clienteDireccion,
     double? subtotal,
     double? itbis,
     double? costoEnvio,
@@ -82,6 +91,9 @@ class VentaBorradorState {
       vencimiento: vencimiento ?? this.vencimiento,
       clienteId: clienteId ?? this.clienteId,
       clienteNombre: clienteNombre ?? this.clienteNombre,
+      clienteTelefono: clienteTelefono ?? this.clienteTelefono,
+      clienteWhatsapp: clienteWhatsapp ?? this.clienteWhatsapp,
+      clienteDireccion: clienteDireccion ?? this.clienteDireccion,
       subtotal: subtotal ?? this.subtotal,
       itbis: itbis ?? this.itbis,
       costoEnvio: costoEnvio ?? this.costoEnvio,
@@ -135,8 +147,20 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     state = state.copyWith(modoCotizacion: false);
   }
 
-  void seleccionarCliente(int id, String nombre) {
-    state = state.copyWith(clienteId: id, clienteNombre: nombre);
+  void seleccionarCliente(
+    int id,
+    String nombre, {
+    String? telefono,
+    String? whatsapp,
+    String? direccion,
+  }) {
+    state = state.copyWith(
+      clienteId: id,
+      clienteNombre: nombre,
+      clienteTelefono: telefono,
+      clienteWhatsapp: whatsapp,
+      clienteDireccion: direccion,
+    );
   }
 
   void establecerConsumidorFinal() {
@@ -298,6 +322,9 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       numeroFactura: null,
       clienteId: state.clienteId ?? 0,
       nombreCliente: state.clienteNombre,
+      clienteTelefono: state.clienteTelefono,
+      clienteWhatsapp: state.clienteWhatsapp,
+      clienteDireccion: state.clienteDireccion,
       fecha: state.fecha,
       vencimiento: state.vencimiento,
       detalles: state.detalles.map((m) {

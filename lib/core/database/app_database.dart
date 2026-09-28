@@ -100,11 +100,23 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 40;
+  int get schemaVersion => 42;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 42) {
+        await m.addColumn(ventasTable, ventasTable.comprobanteEntregaImpreso);
+        await m.addColumn(ventasTable, ventasTable.fechaComprobanteEntrega);
+      }
+
+      if (from < 41) {
+        await m.addColumn(clientesTable, clientesTable.whatsapp);
+        await m.addColumn(ventasTable, ventasTable.clienteTelefono);
+        await m.addColumn(ventasTable, ventasTable.clienteWhatsapp);
+        await m.addColumn(ventasTable, ventasTable.clienteDireccion);
+      }
+
       if (from < 40) {
         for (final sql in [
           'ALTER TABLE ventas_table ADD COLUMN numero_cuotas INTEGER NOT NULL DEFAULT 1',

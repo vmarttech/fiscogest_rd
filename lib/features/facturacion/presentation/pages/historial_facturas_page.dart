@@ -317,8 +317,31 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                         FilledButton.icon(
                           onPressed: () async {
                             try {
+                              var paraPdf = _sel!;
+                              if (paraPdf.id != null) {
+                                final full = await ref
+                                    .read(ventasRepositoryProvider)
+                                    .obtenerVentaPorId(paraPdf.id!);
+                                if (full != null) {
+                                  paraPdf = full;
+                                }
+                              }
+                              if (paraPdf.detalles.isEmpty) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Esta factura no tiene líneas de producto en BD. '
+                                        'No se puede reimprimir el detalle.',
+                                      ),
+                                      backgroundColor: AppColors.warning,
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
                               await ComprobantePdf.imprimirFactura(
-                                _sel!,
+                                paraPdf,
                                 empresa: ref
                                     .read(configuracionControllerProvider)
                                     .valueOrNull,

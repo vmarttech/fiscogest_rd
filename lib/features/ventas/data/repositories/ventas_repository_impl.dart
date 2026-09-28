@@ -117,6 +117,8 @@ class VentasRepositoryImpl implements IVentasRepository {
       descuentoId: datos.descuentoId,
       descuentoNombre: datos.descuentoNombre,
       montoDescuento: datos.montoDescuento,
+      comprobanteEntregaImpreso: datos.comprobanteEntregaImpreso,
+      fechaComprobanteEntrega: datos.fechaComprobanteEntrega,
     );
   }
 
@@ -132,6 +134,9 @@ class VentasRepositoryImpl implements IVentasRepository {
       numeroFactura: datos.numeroFactura,
       clienteId: datos.clienteId,
       nombreCliente: nombreCliente ?? datos.nombreCliente ?? '',
+      clienteTelefono: datos.clienteTelefono,
+      clienteWhatsapp: datos.clienteWhatsapp,
+      clienteDireccion: datos.clienteDireccion,
       fecha: datos.fecha,
       detalles: detalles,
       montoSubtotal: datos.montoSubtotal,
@@ -244,17 +249,17 @@ class VentasRepositoryImpl implements IVentasRepository {
     String prefijoContado = 'C',
     String prefijoCredito = 'CR',
   }) async {
+    // Prefijo 100% desde configuración global (cualquier valor).
+    final p = (esCredito ? prefijoCredito : prefijoContado).trim();
+    final pref = p.isEmpty ? (esCredito ? 'CR' : 'C') : p;
     final ultimo = await _ventasDao.obtenerUltimoCorrelativoCotizacion(
-      soloCredito: esCredito,
+      prefijo: pref,
     );
     final siguiente = ultimo + 1;
     final digitos = siguiente.toString().padLeft(6, '0');
-    final p = esCredito ? prefijoCredito.trim() : prefijoContado.trim();
-    final pref = p.isEmpty ? (esCredito ? 'CR' : 'C') : p;
     return '$pref-$digitos';
   }
 
-  @override
   Future<String> siguienteNumeroFactura() async {
     final ultimo = await _ventasDao.obtenerUltimoCorrelativoFactura();
     final siguiente = ultimo + 1;
@@ -319,6 +324,9 @@ class VentasRepositoryImpl implements IVentasRepository {
         numeroFactura: Value(cotizacion.numeroFactura),
         clienteId: Value(cotizacion.clienteId),
         nombreCliente: Value(cotizacion.nombreCliente),
+        clienteTelefono: Value(cotizacion.clienteTelefono),
+        clienteWhatsapp: Value(cotizacion.clienteWhatsapp),
+        clienteDireccion: Value(cotizacion.clienteDireccion),
         fecha: Value(cotizacion.fecha),
         montoSubtotal: Value(cotizacion.montoSubtotal),
         descuentoGlobal: Value(cotizacion.descuentoGlobal),
@@ -536,4 +544,23 @@ class VentasRepositoryImpl implements IVentasRepository {
   @override
   Future<void> actualizarEnCascada(int ventaId) async =>
       throw UnimplementedError();
+
+  @override
+  Future<bool> marcarComprobanteEntregaImpreso(int ventaId) async {
+    final reg = await _ventasDao.obtenerVentaPorId(ventaId);
+    if (reg == null) return false;
+    if (reg.comprobanteEntregaImpreso) return false;
+    final ncf = (reg.numeroFactura ?? '').trim();
+    final facturado = ncf.isNotEmpty ||
+        reg.estadoDocumento == EstadoDocumento.facturado.name;
+    if (!facturado) return false;
+    return _ventasDao.actualizarVenta(
+      ventaId,
+      VentasTableCompanion(
+        comprobanteEntregaImpreso: const Value(true),
+        fechaComprobanteEntrega: Value(DateTime.now()),
+      ),
+    );
+  }
+
 }
