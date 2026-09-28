@@ -180,6 +180,7 @@ class _CotizacionesHistorialPageState
   Widget _buildTarjetaCotizacion(Venta cot, bool esPantallaPequena) {
     final numero = cot.numeroCotizacion;
     final estado = cot.estadoDocumento;
+    final esCotizacionActiva = estado != EstadoDocumento.facturado && estado != EstadoDocumento.anulado;
     final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
     final tamanoTotal = esPantallaPequena ? 16.0 : 18.0;
     final tamanoEtiqueta = esPantallaPequena ? 11.0 : 12.0;
@@ -303,7 +304,7 @@ class _CotizacionesHistorialPageState
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  _chipAccion(
+                  if (esCotizacionActiva) _chipAccion(
                     icon: Icons.print_outlined,
                     label: 'Imprimir',
                     onTap: () => _imprimirCotizacion(numero),
@@ -414,42 +415,53 @@ class _CotizacionesHistorialPageState
   }
 
   Future<void> _convertirEnVenta(String numero) async {
-    final confirmar = await showDialog<bool>(
+    final tipo = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Convertir a Venta', style: AppTypography.h4),
         content: Text(
-          '¿Convertir la cotización N° $numero en venta?\n\n'
+          '¿Cómo deseas convertir la cotización N° $numero?\n\n'
           'Se descontará inventario y generará el documento.',
           style: AppTypography.bodyMedium,
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context, null),
             style: TextButton.styleFrom(foregroundColor: AppColors.grey600),
             child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'credito'),
+            child: const Text('A Crédito'),
+          ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(context, 'contado'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.success,
               foregroundColor: AppColors.white,
             ),
-            child: const Text('Confirmar'),
+            child: const Text('De Contado'),
           ),
         ],
       ),
     );
-    if (confirmar != true) return;
+
+    if (tipo == null) return;
     if (!mounted) return;
+
+    final msg = tipo == 'contado'
+        ? '$numero convertida en Venta de Contado.'
+        : '$numero enviada a Crédito.';
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$numero convertida en Venta.'),
+        content: Text(msg),
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
       ),
     );
     ref.invalidate(listaCotizacionesProvider);
   }
+
 }

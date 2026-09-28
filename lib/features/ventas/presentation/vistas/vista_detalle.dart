@@ -363,6 +363,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final estado = venta.estadoDocumento;
+    final esCotizacionActiva = estado != EstadoDocumento.facturado && estado != EstadoDocumento.anulado;
     final puedeEnviarAprobacion =
         estado == EstadoDocumento.cotizado && venta.id != null;
     // Aprobar/rechazar crédito SOLO en módulo Créditos (no ventas).
@@ -675,19 +676,19 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _chipAccion(
+                    if (esCotizacionActiva) _chipAccion(
                       icon: Icons.print_outlined,
                       label: 'Imprimir',
                       onTap: () => _imprimir(context, ref),
                       esPantallaPequena: esPantallaPequena,
                     ),
-                    _chipAccion(
+                    if (esCotizacionActiva) _chipAccion(
                       icon: Icons.picture_as_pdf_outlined,
                       label: 'PDF',
                       onTap: () => _exportarPDF(context, ref),
                       esPantallaPequena: esPantallaPequena,
                     ),
-                    _chipAccion(
+                    if (esCotizacionActiva) _chipAccion(
                       icon: Icons.email_outlined,
                       label: 'Enviar',
                       onTap: () => _enviarPorCorreo(context, ref),

@@ -497,7 +497,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
         build: (ctx) => [
           pw.Text(
             'CRONOGRAMA DE PAGOS',
-            style: pw.TextStyle(
+            style: const pw.TextStyle(
               fontSize: 14,
               fontWeight: pw.FontWeight.bold,
             ),
