@@ -165,7 +165,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
                           )
                         : ListView(
                             children: [
-                              SizedBox(height: 260, child: lista),
+                              SizedBox(height: MediaQuery.sizeOf(context).height * 0.32, child: lista),
                               const SizedBox(height: 12),
                               panel,
                             ],
@@ -364,7 +364,7 @@ class _NcPanelEmitir extends StatelessWidget {
             label: 'Motivo de la NC',
             controller: motivo,
           ),
-          const Spacer(),
+          const SizedBox(height: 20),
           FilledButton.icon(
             onPressed: busy ? null : onEmitir,
             icon: busy

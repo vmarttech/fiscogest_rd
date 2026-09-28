@@ -50,6 +50,15 @@ abstract class IVentasRepository {
   /// Solo abono (cotización crédito). NO asigna factura ni cambia a facturado.
   Future<Venta> actualizarAbonoInicial(int ventaId, double montoAbono);
 
+  Future<Venta> actualizarCondicionesCredito({
+    required int ventaId,
+    required double abonoInicial,
+    required int numeroCuotas,
+    required int plazoDias,
+    required double tasaInteres,
+    double montoInteres = 0.0,
+  });
+
   Future<Venta> registrarVentaConAbono(
     int ventaId,
     double montoAbono,

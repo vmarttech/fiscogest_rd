@@ -76,18 +76,24 @@ class CuentasCobrarPage extends ConsumerWidget {
         },
       ),
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
+        child: Padding(
           padding: EdgeInsets.fromLTRB(
             mobile ? 16 : 20,
             mobile ? 12 : 16,
             mobile ? 16 : 20,
             12,
           ),
-          child: AppLayout.centerConstrained(
-            maxWidth: mobile ? 520 : 920,
-            child: Column(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: mobile ? double.infinity : 920,
+                    ),
+                    child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               totales.when(
@@ -272,8 +278,11 @@ class CuentasCobrarPage extends ConsumerWidget {
                 ),
               ),
             ],
-          ),
-          ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

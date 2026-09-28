@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
+import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
@@ -61,7 +62,10 @@ class _DetalleSolicitudCreditoPageState
       if (!mounted) return;
       if (v != null) {
         _abono = v.abonoInicial;
+        _numeroCuotas = v.numeroCuotas < 1 ? 1 : v.numeroCuotas;
+        _tasaMensual = v.tasaInteres;
         _primerVencimiento = v.vencimiento;
+        // plazo en días queda en la venta; el resumen usa cuotas + tasa
       }
       setState(() {
         _venta = v;
@@ -220,19 +224,23 @@ class _DetalleSolicitudCreditoPageState
           );
           await ref.read(cuentaPorCobrarRepositoryProvider).registrarCredito(
                 cuenta: conVenta,
-                planPago: conVenta.planPago ??
-                    (nCuotas > 1
-                        ? PlanPago(
-                            tasaInteresMensual: _tasaMensual,
-                            numeroCuotas: nCuotas,
-                            montoPorCuota: (conVenta.totalOriginal -
-                                    conVenta.abonoInicial) /
-                                nCuotas,
-                            fechaPrimerVencimiento:
-                                _primerVencimiento ?? conVenta.fechaVencimiento,
-                            cuotas: const [],
-                          )
-                        : null),
+                planPago: () {
+                  final abono = _abono > 0 ? _abono : conVenta.abonoInicial;
+                  final totalRef = conVenta.totalOriginal;
+                  // Si totalOriginal parece el total de venta ( > abono), capital = total - abono
+                  // Si totalOriginal ya es saldo financiado (~igual a total venta - abono), usar tal cual
+                  final capitalFinal = totalRef > abono + 0.01
+                      ? (totalRef - abono).clamp(0.0, double.infinity)
+                      : totalRef;
+                  final fecha = _primerVencimiento ?? conVenta.fechaVencimiento;
+                  if (nCuotas <= 1) return conVenta.planPago;
+                  return CalculadoraCreditoService.generarPlanPago(
+                    capital: capitalFinal,
+                    tasaMensual: _tasaMensual,
+                    numeroCuotas: nCuotas,
+                    fechaPrimerVencimiento: fecha,
+                  );
+                }(),
                 abonoInicial: null,
               );
         } else {
@@ -251,14 +259,12 @@ class _DetalleSolicitudCreditoPageState
           await ref.read(cuentaPorCobrarRepositoryProvider).registrarCredito(
                 cuenta: minima,
                 planPago: nCuotas > 1
-                    ? PlanPago(
-                        tasaInteresMensual: _tasaMensual,
+                    ? CalculadoraCreditoService.generarPlanPago(
+                        capital: (minima.totalOriginal - minima.abonoInicial)
+                            .clamp(0.0, double.infinity),
+                        tasaMensual: _tasaMensual,
                         numeroCuotas: nCuotas,
-                        montoPorCuota:
-                            (minima.totalOriginal - minima.abonoInicial) /
-                                nCuotas,
                         fechaPrimerVencimiento: minima.fechaVencimiento,
-                        cuotas: const [],
                       )
                     : null,
               );
@@ -484,7 +490,7 @@ class _DetalleSolicitudCreditoPageState
 
     final maxW = AppBreakpoints.isDesktop(context)
         ? 1200
-        : (AppBreakpoints.isTablet(context) ? 900 : 720);
+        : (AppBreakpoints.isTablet(context) ? 900 : 9999);
 
     final cardDocumento = AppCard(
       borderColor: AppColors.border,
@@ -613,6 +619,16 @@ class _DetalleSolicitudCreditoPageState
                 valor: _tasaMensual > 0
                     ? '${(_tasaMensual * 100).toStringAsFixed(2)}%'
                     : (_cuentaBorrador != null ? '0%' : '—'),
+              ),
+              AppLayout.filaDato(
+                etiqueta: 'Cuota mensual',
+                valor: _numeroCuotas > 0 && saldo > 0
+                    ? 'RD\$ ${_fmt.format(CalculadoraCreditoService.calcularCuotaFija(
+                        capital: saldo,
+                        tasaMensual: _tasaMensual,
+                        numeroCuotas: _numeroCuotas,
+                      ))}'
+                    : '—',
               ),
               AppLayout.filaDato(
                 etiqueta: 'Vencimiento',

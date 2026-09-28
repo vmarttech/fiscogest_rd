@@ -38,6 +38,7 @@ class _DetalleCuentaCobrarPageState
   bool _cargando = true;
   String? _error;
   bool _pagando = false;
+  bool _imprimiendoCronograma = false;
 
   static final _fmt = NumberFormat('#,##0.00', 'es_DO');
   static final _fmtFecha = DateFormat('dd/MM/yyyy');
@@ -46,6 +47,30 @@ class _DetalleCuentaCobrarPageState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _cargar());
+  }
+
+
+  Future<void> _imprimirCronograma(CuentaPorCobrar c) async {
+    if (c.planPago == null || c.planPago!.cuotas.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No hay cuotas para imprimir')),
+      );
+      return;
+    }
+    setState(() => _imprimiendoCronograma = true);
+    try {
+      final svc = await ref.read(creditoDocumentoServiceProvider.future);
+      await svc.imprimirCronograma(cuenta: c);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al imprimir: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _imprimiendoCronograma = false);
+    }
   }
 
   Future<void> _cargar() async {
@@ -535,12 +560,31 @@ class _DetalleCuentaCobrarPageState
                 if (c.planPago != null &&
                     c.planPago!.cuotas.isNotEmpty) ...[
                   const SizedBox(height: 20),
-                  Text(
-                    'Plan de cuotas',
-                    style: AppTypography.labelLarge.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Plan de cuotas',
+                          style: AppTypography.labelLarge.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: _imprimiendoCronograma
+                            ? null
+                            : () => _imprimirCronograma(c),
+                        icon: _imprimiendoCronograma
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.print_outlined, size: 18),
+                        label: const Text('Imprimir'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   AppCard(

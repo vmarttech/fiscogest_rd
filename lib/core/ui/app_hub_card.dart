@@ -109,14 +109,15 @@ class _AppHubCardState extends State<AppHubCard> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 22, 18, 14),
+                      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Icono con “glow”
                           Container(
-                            width: 54,
-                            height: 54,
+                            width: 44,
+                            height: 44,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
                               gradient: LinearGradient(
@@ -138,7 +139,7 @@ class _AppHubCardState extends State<AppHubCard> {
                                 ),
                               ],
                             ),
-                            child: Icon(widget.icon, color: c, size: 28),
+                            child: Icon(widget.icon, color: c, size: 24),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -151,16 +152,14 @@ class _AppHubCardState extends State<AppHubCard> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Expanded(
-                            child: Text(
-                              widget.subtitle,
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
-                                height: 1.35,
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
+                          Text(
+                            widget.subtitle,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                              height: 1.35,
                             ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 6),
                           Align(

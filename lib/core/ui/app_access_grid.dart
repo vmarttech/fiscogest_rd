@@ -22,12 +22,13 @@ class AppAccessGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (AppBreakpoints.isMobile(context)) {
+      // Sin altura fija: evita overflow del AppHubCard en pantallas bajas
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (var i = 0; i < children.length; i++) ...[
             if (i > 0) SizedBox(height: runSpacing),
-            SizedBox(height: tileHeight, child: children[i]),
+            children[i],
           ],
         ],
       );

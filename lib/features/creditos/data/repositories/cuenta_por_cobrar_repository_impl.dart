@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/creditos/domain/entities/estado_credito.da
 import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuota.dart';
 import 'package:fiscogest_rd/features/creditos/domain/repositories/i_cuenta_por_cobrar_repository.dart';
+import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
 
 /// Implementación sobre [CuentasCobrarDao] y [CobrosTable] (feature comercial).
 class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
@@ -76,18 +77,34 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     if (ventaId == null || ventaId <= 0) {
       throw Exception('La cuenta de crédito requiere ventaId de la cotización');
     }
-
-    final montoOriginal =
-        cuenta.totalAPagar > 0 ? cuenta.totalAPagar : cuenta.totalOriginal;
     final abono = abonoInicial?.monto ?? cuenta.abonoInicial;
-    final saldoAnterior = montoOriginal;
-    final saldoActual = (montoOriginal - abono).clamp(0.0, double.infinity);
+    final nCuotas = cuenta.numeroCuotas < 1 ? 1 : cuenta.numeroCuotas;
+    final tasa = cuenta.tasaInteres;
+    final totalVenta = cuenta.totalOriginal;
+    final capital = (totalVenta - abono).clamp(0.0, double.infinity);
+
+    PlanPago plan = (planPago != null && planPago.cuotas.isNotEmpty)
+        ? planPago
+        : CalculadoraCreditoService.generarPlanPago(
+            capital: capital,
+            tasaMensual: tasa,
+            numeroCuotas: nCuotas,
+            fechaPrimerVencimiento: cuenta.fechaVencimiento,
+          );
+    if (plan.cuotas.isEmpty && nCuotas >= 1) {
+      plan = CalculadoraCreditoService.generarPlanPago(
+        capital: capital,
+        tasaMensual: tasa,
+        numeroCuotas: nCuotas,
+        fechaPrimerVencimiento: cuenta.fechaVencimiento,
+      );
+    }
 
     final id = await _dao.crearCuentaPorVenta(
       clienteId: cuenta.clienteId,
       ventaId: ventaId,
-      montoOriginal: montoOriginal,
-      montoAbonado: abono,
+      montoOriginal: capital,
+      montoAbonado: 0.0,
       fechaVencimiento: cuenta.fechaVencimiento,
     );
 
@@ -98,24 +115,32 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
           fecha: DateTime.now(),
           montoAbonado: abono,
           formaPago: _parseFormaPago(abonoInicial?.metodoPago),
-          saldoAnterior: saldoAnterior,
-          saldoActual: saldoActual,
+          saldoAnterior: capital,
+          saldoActual: capital,
         ),
       );
     }
 
-    
-    // Plan de cuotas al alta (sin botón en detalle CxC)
-    final nCuotas = cuenta.numeroCuotas < 1 ? 1 : cuenta.numeroCuotas;
-    final montoPlan =
-        saldoActual > 0.001 ? saldoActual : montoOriginal;
-    await _dao.generarPlanCuotas(
-      cuentaCobrarId: id,
-      montoTotal: montoPlan,
-      numeroCuotas: nCuotas,
-      primerVencimiento: cuenta.fechaVencimiento,
-    );
-
+    if (plan.cuotas.isNotEmpty) {
+      await _dao.insertarCuotasPlan(
+        cuentaCobrarId: id,
+        cuotas: [
+          for (final c in plan.cuotas)
+            (
+              numero: c.numeroCuota,
+              fechaVencimiento: c.fechaVencimiento,
+              monto: c.montoTotal,
+            ),
+        ],
+      );
+    } else {
+      await _dao.generarPlanCuotas(
+        cuentaCobrarId: id,
+        montoTotal: capital,
+        numeroCuotas: nCuotas,
+        primerVencimiento: cuenta.fechaVencimiento,
+      );
+    }
     return id;
   }
 

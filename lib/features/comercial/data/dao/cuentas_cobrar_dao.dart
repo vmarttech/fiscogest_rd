@@ -290,6 +290,29 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     }
   }
 
+
+  /// Inserta el plan ya calculado (sistema francés). No reparte monto/n.
+  Future<void> insertarCuotasPlan({
+    required int cuentaCobrarId,
+    required List<({int numero, DateTime fechaVencimiento, double monto})> cuotas,
+  }) async {
+    await (delete(cuotasCuentaTable)
+          ..where((t) => t.cuentaCobrarId.equals(cuentaCobrarId)))
+        .go();
+    for (final c in cuotas) {
+      await into(cuotasCuentaTable).insert(
+        CuotasCuentaTableCompanion.insert(
+          cuentaCobrarId: cuentaCobrarId,
+          numero: c.numero,
+          fechaVencimiento: c.fechaVencimiento,
+          monto: c.monto,
+          montoPagado: const Value(0.0),
+          estado: const Value('pendiente'),
+        ),
+      );
+    }
+  }
+
   Future<List<CuotaCuentaData>> listarCuotas(int cuentaId) {
     return (select(cuotasCuentaTable)
           ..where((t) => t.cuentaCobrarId.equals(cuentaId))

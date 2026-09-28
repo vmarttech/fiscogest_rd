@@ -106,6 +106,10 @@ class VentasRepositoryImpl implements IVentasRepository {
       formaPago: datos.formaPago,
       costoEnvio: datos.costoEnvio,
       abonoInicial: datos.abonoInicial,
+      numeroCuotas: datos.numeroCuotas,
+      plazoDias: datos.plazoDias,
+      tasaInteres: datos.tasaInteres,
+      montoInteres: datos.montoInteres,
       vencimiento: datos.vencimiento,
       estadoDocumento: _parsearEstado(datos.estadoDocumento),
       usuarioId: datos.usuarioId,
@@ -137,6 +141,10 @@ class VentasRepositoryImpl implements IVentasRepository {
       formaPago: datos.formaPago,
       costoEnvio: datos.costoEnvio,
       abonoInicial: datos.abonoInicial,
+      numeroCuotas: datos.numeroCuotas,
+      plazoDias: datos.plazoDias,
+      tasaInteres: datos.tasaInteres,
+      montoInteres: datos.montoInteres,
       vencimiento: datos.vencimiento,
       estadoDocumento: _parsearEstado(datos.estadoDocumento),
       usuarioId: datos.usuarioId,
@@ -284,6 +292,10 @@ class VentasRepositoryImpl implements IVentasRepository {
         formaPago: Value(venta.formaPago),
         costoEnvio: Value(venta.costoEnvio),
         abonoInicial: Value(venta.abonoInicial),
+        numeroCuotas: Value(venta.numeroCuotas),
+        plazoDias: Value(venta.plazoDias),
+        tasaInteres: Value(venta.tasaInteres),
+        montoInteres: Value(venta.montoInteres),
         vencimiento: Value(venta.vencimiento),
         estadoDocumento: Value(venta.estadoDocumento.name),
         usuarioId: Value(venta.usuarioId),
@@ -315,6 +327,10 @@ class VentasRepositoryImpl implements IVentasRepository {
         formaPago: Value(cotizacion.formaPago),
         costoEnvio: Value(cotizacion.costoEnvio),
         abonoInicial: Value(cotizacion.abonoInicial),
+        numeroCuotas: Value(cotizacion.numeroCuotas),
+        plazoDias: Value(cotizacion.plazoDias),
+        tasaInteres: Value(cotizacion.tasaInteres),
+        montoInteres: Value(cotizacion.montoInteres),
         vencimiento: Value(cotizacion.vencimiento),
         estadoDocumento: Value(cotizacion.estadoDocumento.name),
         usuarioId: Value(cotizacion.usuarioId),
@@ -361,6 +377,10 @@ class VentasRepositoryImpl implements IVentasRepository {
         formaPago: Value(cotizacion.formaPago),
         costoEnvio: Value(cotizacion.costoEnvio),
         abonoInicial: Value(cotizacion.abonoInicial),
+        numeroCuotas: Value(cotizacion.numeroCuotas),
+        plazoDias: Value(cotizacion.plazoDias),
+        tasaInteres: Value(cotizacion.tasaInteres),
+        montoInteres: Value(cotizacion.montoInteres),
         vencimiento: Value(cotizacion.vencimiento),
         estadoDocumento: Value(cotizacion.estadoDocumento.name),
         usuarioId: Value(cotizacion.usuarioId),
@@ -405,6 +425,30 @@ class VentasRepositoryImpl implements IVentasRepository {
     final registro = await _ventasDao.obtenerVentaPorId(ventaId);
     return _mapearDesdeVentasTableData(registro!);
   }
+
+  @override
+  Future<Venta> actualizarCondicionesCredito({
+    required int ventaId,
+    required double abonoInicial,
+    required int numeroCuotas,
+    required int plazoDias,
+    required double tasaInteres,
+    double montoInteres = 0.0,
+  }) async {
+    await _ventasDao.actualizarVenta(
+      ventaId,
+      VentasTableCompanion(
+        abonoInicial: Value(abonoInicial),
+        numeroCuotas: Value(numeroCuotas < 1 ? 1 : numeroCuotas),
+        plazoDias: Value(plazoDias < 1 ? 30 : plazoDias),
+        tasaInteres: Value(tasaInteres),
+        montoInteres: Value(montoInteres),
+      ),
+    );
+    final registro = await _ventasDao.obtenerVentaPorId(ventaId);
+    return _mapearDesdeVentasTableData(registro!);
+  }
+
 
   /// Solo Caja (crédito): asigna numeroFactura, abono y estado FACTURADO.
   @override

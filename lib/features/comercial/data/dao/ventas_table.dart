@@ -12,6 +12,14 @@ class VentasTable extends Table {
   TextColumn get formaPago => text()();
   RealColumn get costoEnvio => real().withDefault(const Constant(0.0))();
   RealColumn get abonoInicial => real().withDefault(const Constant(0.0))();
+  IntColumn get numeroCuotas =>
+      integer().named('numero_cuotas').withDefault(const Constant(1))();
+  IntColumn get plazoDias =>
+      integer().named('plazo_dias').withDefault(const Constant(30))();
+  RealColumn get tasaInteres =>
+      real().named('tasa_interes').withDefault(const Constant(0.0))();
+  RealColumn get montoInteres =>
+      real().named('monto_interes').withDefault(const Constant(0.0))();
   DateTimeColumn get vencimiento => dateTime().nullable()();
   TextColumn get numeroCotizacion => text()();
   TextColumn get numeroFactura => text().nullable()();

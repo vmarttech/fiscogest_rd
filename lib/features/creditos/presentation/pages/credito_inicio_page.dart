@@ -26,7 +26,7 @@ class CreditoInicioPage extends StatelessWidget {
               32,
             ),
             child: AppLayout.centerConstrained(
-              maxWidth: desktop ? 1800 : (mobile ? 520 : 1100),
+              maxWidth: desktop ? 1800 : 9999,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -139,7 +139,7 @@ class CreditoInicioPage extends StatelessWidget {
                     maxColumns: 3,
                     spacing: 16,
                     runSpacing: 16,
-                    tileHeight: mobile ? 180 : 200,
+                    tileHeight: mobile ? 200 : 200,
                     children: [
                       AppHubCard(
                         icon: Icons.assignment_outlined,

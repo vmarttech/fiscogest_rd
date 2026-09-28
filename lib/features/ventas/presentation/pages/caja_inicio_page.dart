@@ -241,16 +241,31 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               difLabel = 'Faltante';
             }
 
+            final mq = MediaQuery.of(ctx);
+            final maxH = (mq.size.height
+                    - mq.viewInsets.bottom
+                    - mq.padding.vertical
+                    - 160)
+                .clamp(200.0, 480.0);
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-              title: const Text('Arqueo y cierre de caja', style: AppTypography.h4),
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 24,
+              ),
+              title: const Text(
+                'Arqueo y cierre de caja',
+                style: AppTypography.h4,
+              ),
               content: SizedBox(
-                width: ancho >= AppBreakpoints.tablet ? 440 : null,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                width: ancho >= AppBreakpoints.tablet ? 440 : double.maxFinite,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: maxH),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       Text(
                         'Sesión #${_sesion!.id} · Fondo inicial RD\$ ${_fmtMonto.format(_sesion!.fondoInicial)}',
                         style: AppTypography.bodySmall.copyWith(
@@ -336,6 +351,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     ],
                   ),
                 ),
+                ),
               ),
               actions: [
                 TextButton(
@@ -377,9 +393,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         );
       },
     );
-
-    controller.dispose();
-    obsController.dispose();
+    // controllers liberados con el cierre del diálogo
     if (result == null || !mounted) return;
 
     setState(() => _procesando = true);
@@ -425,6 +439,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       );
     } finally {
       if (mounted) setState(() => _procesando = false);
+      // controllers del diálogo: no dispose aquí (evita _dependents.isEmpty)
     }
   }
 
@@ -433,7 +448,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
     final abierta = _cajaAbierta;
-    final maxW = desktop ? 1100 : (mobile ? 520 : 720);
+    final maxW = desktop ? 1800 : (mobile ? 520 : 960);
 
     return AppScaffold(
       title: 'CAJA',
@@ -460,46 +475,120 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Container(
+                    padding: EdgeInsets.fromLTRB(
+                      mobile ? 20 : 28,
+                      mobile ? 22 : 28,
+                      mobile ? 20 : 28,
+                      mobile ? 22 : 28,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          AppColors.primaryDark,
+                          AppColors.primary,
+                          AppColors.primaryLight.withValues(alpha: 0.95),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.28),
+                          blurRadius: 24,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: mobile ? 56 : 64,
+                          height: mobile ? 56 : 64,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.95),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            Icons.point_of_sale_rounded,
+                            color: AppColors.primary,
+                            size: mobile ? 30 : 34,
+                          ),
+                        ),
+                        const SizedBox(width: 18),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Estación de caja',
+                                style: (mobile
+                                        ? AppTypography.h4
+                                        : AppTypography.h3)
+                                    .copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Apertura, cobros, arqueo y movimientos del turno.',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   _buildEstadoTurno(mobile, abierta),
                   AppLayout.vL,
-                  SectionHeader(
+                  const SectionHeader(
                     title: 'Operaciones',
-                    subtitle: desktop
-                        ? 'Acciones de la estación de caja'
-                        : null,
+                    subtitle: 'Estación de caja',
                   ),
-                  if (desktop)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _accionCobrar(abierta, mobile)),
-                        AppLayout.hM,
-                        Expanded(child: _accionCxc(mobile)),
-                        AppLayout.hM,
-                        Expanded(child: _accionHistorial(abierta, mobile)),
-                      ],
-                    )
-                  else if (!mobile)
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(child: _accionCobrar(abierta, mobile)),
-                            AppLayout.hM,
-                            Expanded(child: _accionCxc(mobile)),
-                          ],
-                        ),
-                        AppLayout.vS,
-                        _accionHistorial(abierta, mobile),
-                      ],
-                    )
-                  else ...[
-                    _accionCobrar(abierta, mobile),
-                    AppLayout.vS,
-                    _accionCxc(mobile),
-                    AppLayout.vS,
-                    _accionHistorial(abierta, mobile),
-                  ],
+                  const SizedBox(height: 12),
+                  AppAccessGrid(
+                    minTileWidth: 200,
+                    maxColumns: 3,
+                    spacing: 16,
+                    runSpacing: 16,
+                    tileHeight: 200,
+                    children: [
+                      AppHubCard(
+                        icon: Icons.point_of_sale_outlined,
+                        title: 'Cobrar cotización',
+                        subtitle: _puedeCobrar
+                            ? 'Buscar por N° o cliente y generar factura'
+                            : 'Requiere caja abierta',
+                        color: _puedeCobrar
+                            ? AppColors.success
+                            : AppColors.grey500,
+                        onTap: _irACobrarCotizacion,
+                      ),
+                      AppHubCard(
+                        icon: Icons.account_balance_wallet_outlined,
+                        title: 'Cuentas por cobrar',
+                        subtitle: 'Saldos y abonos de clientes',
+                        color: AppColors.info,
+                        onTap: _irACuentasPorCobrar,
+                      ),
+                      AppHubCard(
+                        icon: Icons.receipt_long_outlined,
+                        title: 'Historial del turno',
+                        subtitle: abierta
+                            ? 'Movimientos desde la apertura'
+                            : 'Movimientos desde hoy 00:00',
+                        color: AppColors.primary,
+                        onTap: _irAHistorialTurno,
+                      ),
+                    ],
+                  ),
                   AppLayout.vXl,
                   Text(
                     'El cobro de cotizaciones asigna N° de factura e impacta '
@@ -615,108 +704,6 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               ),
             ),
         ],
-      ),
-    );
-  }
-
-  Widget _accionCobrar(bool abierta, bool mobile) => _AccionCaja(
-        icono: Icons.point_of_sale,
-        titulo: 'Cobrar cotización',
-        subtitulo: abierta
-            ? 'Buscar por N° o cliente y generar factura'
-            : 'Requiere caja abierta',
-        color: _puedeCobrar ? AppColors.success : AppColors.grey500,
-        onTap: _irACobrarCotizacion,
-        habilitado: _puedeCobrar,
-      );
-
-  Widget _accionCxc(bool mobile) => _AccionCaja(
-        icono: Icons.account_balance_wallet_outlined,
-        titulo: 'Cuentas por cobrar',
-        subtitulo: 'Saldos y abonos de clientes',
-        color: AppColors.info,
-        onTap: _irACuentasPorCobrar,
-      );
-
-  Widget _accionHistorial(bool abierta, bool mobile) => _AccionCaja(
-        icono: Icons.receipt_long_outlined,
-        titulo: 'Historial del turno',
-        subtitulo: abierta
-            ? 'Movimientos desde la apertura'
-            : 'Movimientos desde hoy 00:00',
-        color: AppColors.primary,
-        onTap: _irAHistorialTurno,
-      );
-}
-
-class _AccionCaja extends StatelessWidget {
-  const _AccionCaja({
-    required this.icono,
-    required this.titulo,
-    required this.subtitulo,
-    required this.color,
-    required this.onTap,
-    this.habilitado = true,
-  });
-
-  final IconData icono;
-  final String titulo;
-  final String subtitulo;
-  final Color color;
-  final VoidCallback onTap;
-  final bool habilitado;
-
-  @override
-  Widget build(BuildContext context) {
-    final mobile = AppBreakpoints.isMobile(context);
-    return Opacity(
-      opacity: habilitado ? 1 : 0.55,
-      child: AppCard(
-        borderColor: AppColors.border,
-        onTap: onTap,
-        padding: EdgeInsets.symmetric(
-          horizontal: mobile ? 14 : 16,
-          vertical: mobile ? 14 : 18,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: mobile ? 44 : 52,
-              height: mobile ? 44 : 52,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: AppRadius.allM,
-              ),
-              child: Icon(icono, color: color, size: mobile ? 22 : 26),
-            ),
-            AppLayout.hM,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    titulo,
-                    style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitulo,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: AppColors.textSecondary,
-              size: mobile ? 22 : 24,
-            ),
-          ],
-        ),
       ),
     );
   }

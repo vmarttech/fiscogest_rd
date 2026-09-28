@@ -1,5 +1,6 @@
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
@@ -21,8 +22,15 @@ import 'package:fiscogest_rd/features/facturacion/presentation/providers/factura
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 
+final _fmtMontoCobro = NumberFormat.currency(
+  locale: 'es_DO',
+  symbol: 'RD\$ ',
+  decimalDigits: 2,
+);
+
+
 class CobroVentaPage extends ConsumerStatefulWidget {
-  const CobroVentaPage({super.key});
+const CobroVentaPage({super.key});
 
   static const String routeName = 'cobro-venta-operacion';
   /// Operación: buscar cotización y cobrar (no es el home de Caja).
@@ -102,11 +110,17 @@ Future<void> _cargarDocumento({
     _modoBusqueda = false;
 
     // Cargar detalles de productos para el resumen compacto
+    var abonoDesdeDoc = 0.0;
     try {
       final repo = ref.read(venta_providers.ventasRepositoryProvider);
       final ventaCompleta = await repo.obtenerVentaPorId(id);
-      if (ventaCompleta != null && ventaCompleta.detalles.isNotEmpty) {
-        _detalles = List<DetalleVenta>.from(ventaCompleta.detalles);
+      if (ventaCompleta != null) {
+        if (ventaCompleta.detalles.isNotEmpty) {
+          _detalles = List<DetalleVenta>.from(ventaCompleta.detalles);
+        } else {
+          _detalles = [];
+        }
+        abonoDesdeDoc = ventaCompleta.abonoInicial;
       } else {
         _detalles = [];
       }
@@ -116,9 +130,11 @@ Future<void> _cargarDocumento({
 
     ref.read(cajaProvider.notifier).inicializarVenta(montoTotal, esCredito);
     if (esCredito) {
-      final abonoMinimo = montoTotal * 0.30;
-      _abonoController.text = abonoMinimo.toStringAsFixed(2);
-      ref.read(cajaProvider.notifier).establecerAbono(abonoMinimo);
+      // Abono pactado en cotización / crédito (no regla comercial del 30% en caja)
+      final abonoPactado =
+          (abonoDesdeDoc > 0 ? abonoDesdeDoc : 0.0).clamp(0.0, montoTotal);
+      _abonoController.text = abonoPactado.toStringAsFixed(2);
+      ref.read(cajaProvider.notifier).establecerAbono(abonoPactado);
     } else {
       _abonoController.text = montoTotal.toStringAsFixed(2);
       ref.read(cajaProvider.notifier).establecerAbono(montoTotal);
@@ -327,25 +343,23 @@ Future<void> _cargarDocumento({
     if (v > 999999999) return 'Monto fuera de rango';
 
     if (esCredito) {
-      final minimo = montoTotal * 0.30;
-      if (v <= 0) {
-        return 'El abono debe ser mayor a RD\$ 0';
+      // Caja no impone % comercial; crédito ya autorizó condiciones.
+      // Solo rangos coherentes: 0 <= abono <= total
+      if (v < 0) {
+        return 'El monto no puede ser negativo';
       }
       if (v > montoTotal + 0.009) {
         return 'El abono no puede exceder el total '
-            '(RD\$ ${montoTotal.toStringAsFixed(2)})';
-      }
-      if (v + 0.009 < minimo) {
-        return 'Abono mínimo 30%: RD\$ ${minimo.toStringAsFixed(2)}';
+            '(${_fmtMontoCobro.format(montoTotal)})';
       }
     } else {
       // Contado: debe cubrir el total (tolerancia 1 centavo)
       if (v + 0.009 < montoTotal) {
-        return 'Debe cubrir el total: RD\$ ${montoTotal.toStringAsFixed(2)}';
+        return 'Debe cubrir el total: ${_fmtMontoCobro.format(montoTotal)}';
       }
       if (v > montoTotal + 0.05) {
         // opcional: permitir sobrante pequeño como cambio; bloquear exceso grande
-        // return 'Monto mayor al total. Ajuste a RD\$ ${montoTotal.toStringAsFixed(2)}';
+        // return 'Monto mayor al total. Ajuste a ${_fmtMontoCobro.format(montoTotal)}';
       }
     }
     return null;
@@ -628,8 +642,8 @@ Future<void> _cargarDocumento({
                 Text('Ref. Cotización: ${venta.numeroCotizacion}'),
                 if (esCredito) ...[
                   const SizedBox(height: 8),
-                  Text('Abono: RD\$ ${estado.abono.toStringAsFixed(2)}'),
-                  Text('Saldo: RD\$ ${saldo.toStringAsFixed(2)}'),
+                  Text('Abono: ${_fmtMontoCobro.format(estado.abono)}'),
+                  Text('Saldo: ${_fmtMontoCobro.format(saldo)}'),
                 ],
               ],
             ),
@@ -928,7 +942,7 @@ Future<void> _cargarDocumento({
                                             ),
                                             const SizedBox(width: 12),
                                             Text(
-                                              'RD\$ ${v.montoTotal.toStringAsFixed(2)}',
+                                              _fmtMontoCobro.format(v.montoTotal),
                                               style: AppTypography.bodyMedium
                                                   .copyWith(
                                                 fontWeight: FontWeight.bold,
@@ -1078,7 +1092,7 @@ Future<void> _cargarDocumento({
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          'RD\$ ${subtotal.toStringAsFixed(2)}',
+                                          _fmtMontoCobro.format(subtotal),
                                           style: AppTypography.bodySmall
                                               .copyWith(
                                             fontSize: tamanoCuerpo,
@@ -1119,7 +1133,7 @@ Future<void> _cargarDocumento({
                                       ),
                                     ),
                                     Text(
-                                      'RD\$ \${_costoEnvio.toStringAsFixed(2)}',
+                                      _fmtMontoCobro.format(_costoEnvio),
                                       style: AppTypography.bodySmall.copyWith(
                                         fontSize: tamanoCuerpo,
                                         fontWeight: FontWeight.w600,
@@ -1152,7 +1166,7 @@ Future<void> _cargarDocumento({
                                     ],
                                   ),
                                   Text(
-                                    'RD\$ ${montoTotal.toStringAsFixed(2)}',
+                                    _fmtMontoCobro.format(montoTotal),
                                     style: AppTypography.h3.copyWith(
                                       fontWeight: FontWeight.bold,
                                       fontSize: tamanoTotal,
@@ -1259,7 +1273,7 @@ Future<void> _cargarDocumento({
 
                         // === MONTO / ABONO ===
                         Text(
-                          esCredito ? 'Abono inicial (mín. 30%)' : 'Monto a pagar',
+                          esCredito ? 'Abono inicial (según crédito)' : 'Monto a pagar',
                           style: AppTypography.labelMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: tamanoCuerpo,
@@ -1316,7 +1330,7 @@ Future<void> _cargarDocumento({
                                   ),
                                 ),
                                 Text(
-                                  'RD\$ ${estado.saldoPendiente.toStringAsFixed(2)}',
+                                  _fmtMontoCobro.format(estado.saldoPendiente),
                                   style: AppTypography.bodyMedium.copyWith(
                                     fontSize: tamanoCuerpo + 1,
                                     fontWeight: FontWeight.bold,

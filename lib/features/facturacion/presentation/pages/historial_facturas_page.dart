@@ -313,7 +313,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                             );
                           },
                         ),
-                        const Spacer(),
+                        const SizedBox(height: 20),
                         FilledButton.icon(
                           onPressed: () async {
                             try {
@@ -380,9 +380,13 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                           )
                         : ListView(
                             children: [
-                              SizedBox(height: 260, child: lista),
+                              SizedBox(
+                                height: MediaQuery.sizeOf(context).height * 0.32,
+                                child: lista,
+                              ),
                               const SizedBox(height: 12),
-                              SizedBox(height: 280, child: panel),
+                              panel,
+                              const SizedBox(height: 24),
                             ],
                           ),
                   ),

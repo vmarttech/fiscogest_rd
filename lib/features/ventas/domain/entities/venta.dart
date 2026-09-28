@@ -17,6 +17,10 @@ class Venta {
     required this.formaPago,
     required this.costoEnvio,
     required this.abonoInicial,
+    this.numeroCuotas = 1,
+    this.plazoDias = 30,
+    this.tasaInteres = 0.0,
+    this.montoInteres = 0.0,
     this.vencimiento,
     required this.estadoDocumento,
     required this.usuarioId,
@@ -40,6 +44,10 @@ class Venta {
   final String formaPago;
   final double costoEnvio;
   final double abonoInicial;
+  final int numeroCuotas;
+  final int plazoDias;
+  final double tasaInteres;
+  final double montoInteres;
   final DateTime? vencimiento;
   final EstadoDocumento estadoDocumento;
   final int usuarioId;
@@ -74,6 +82,10 @@ class Venta {
     String? formaPago,
     double? costoEnvio,
     double? abonoInicial,
+    int? numeroCuotas,
+    int? plazoDias,
+    double? tasaInteres,
+    double? montoInteres,
     DateTime? vencimiento,
     EstadoDocumento? estadoDocumento,
     int? usuarioId,
@@ -97,6 +109,10 @@ class Venta {
       formaPago: formaPago ?? this.formaPago,
       costoEnvio: costoEnvio ?? this.costoEnvio,
       abonoInicial: abonoInicial ?? this.abonoInicial,
+      numeroCuotas: numeroCuotas ?? this.numeroCuotas,
+      plazoDias: plazoDias ?? this.plazoDias,
+      tasaInteres: tasaInteres ?? this.tasaInteres,
+      montoInteres: montoInteres ?? this.montoInteres,
       vencimiento: vencimiento ?? this.vencimiento,
       estadoDocumento: estadoDocumento ?? this.estadoDocumento,
       usuarioId: usuarioId ?? this.usuarioId,

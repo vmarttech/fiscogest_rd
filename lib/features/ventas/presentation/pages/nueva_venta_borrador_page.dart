@@ -332,12 +332,15 @@ class _NuevaVentaBorradorPageState
       }
 
       final idGuardado = ref.read(ventaBorradorProvider).id;
-      if (idGuardado != null && abonoDesdeFormulario > 0) {
-        await repositorio.registrarVentaConAbono(
-          idGuardado,
-          abonoDesdeFormulario,
-          'Abono inicial cotización crédito',
-          formaPago: 'Credito',
+      if (idGuardado != null) {
+        final c = resultado.cuenta;
+        await repositorio.actualizarCondicionesCredito(
+          ventaId: idGuardado,
+          abonoInicial: c.abonoInicial,
+          numeroCuotas: c.numeroCuotas,
+          plazoDias: c.plazoDias,
+          tasaInteres: c.tasaInteres,
+          montoInteres: c.montoInteres,
         );
         await repositorio.cambiarEstadoDocumento(
           idGuardado,

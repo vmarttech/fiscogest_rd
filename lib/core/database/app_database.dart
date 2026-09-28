@@ -100,11 +100,26 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 39;
+  int get schemaVersion => 40;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 40) {
+        for (final sql in [
+          'ALTER TABLE ventas_table ADD COLUMN numero_cuotas INTEGER NOT NULL DEFAULT 1',
+          'ALTER TABLE ventas_table ADD COLUMN plazo_dias INTEGER NOT NULL DEFAULT 30',
+          'ALTER TABLE ventas_table ADD COLUMN tasa_interes REAL NOT NULL DEFAULT 0.0',
+          'ALTER TABLE ventas_table ADD COLUMN monto_interes REAL NOT NULL DEFAULT 0.0',
+        ]) {
+          try {
+            await m.database.customStatement(sql);
+          } catch (_) {
+            // columna ya existe o nombre legacy
+          }
+        }
+      }
+
       if (from < 33) {
         await m.createTable(notasCreditoTable);
       }

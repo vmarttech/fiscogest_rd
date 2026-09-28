@@ -11263,6 +11263,54 @@ class $VentasTableTable extends VentasTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _numeroCuotasMeta = const VerificationMeta(
+    'numeroCuotas',
+  );
+  @override
+  late final GeneratedColumn<int> numeroCuotas = GeneratedColumn<int>(
+    'numero_cuotas',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _plazoDiasMeta = const VerificationMeta(
+    'plazoDias',
+  );
+  @override
+  late final GeneratedColumn<int> plazoDias = GeneratedColumn<int>(
+    'plazo_dias',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
+  static const VerificationMeta _tasaInteresMeta = const VerificationMeta(
+    'tasaInteres',
+  );
+  @override
+  late final GeneratedColumn<double> tasaInteres = GeneratedColumn<double>(
+    'tasa_interes',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _montoInteresMeta = const VerificationMeta(
+    'montoInteres',
+  );
+  @override
+  late final GeneratedColumn<double> montoInteres = GeneratedColumn<double>(
+    'monto_interes',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _vencimientoMeta = const VerificationMeta(
     'vencimiento',
   );
@@ -11377,6 +11425,10 @@ class $VentasTableTable extends VentasTable
     formaPago,
     costoEnvio,
     abonoInicial,
+    numeroCuotas,
+    plazoDias,
+    tasaInteres,
+    montoInteres,
     vencimiento,
     numeroCotizacion,
     numeroFactura,
@@ -11477,6 +11529,39 @@ class $VentasTableTable extends VentasTable
         abonoInicial.isAcceptableOrUnknown(
           data['abono_inicial']!,
           _abonoInicialMeta,
+        ),
+      );
+    }
+    if (data.containsKey('numero_cuotas')) {
+      context.handle(
+        _numeroCuotasMeta,
+        numeroCuotas.isAcceptableOrUnknown(
+          data['numero_cuotas']!,
+          _numeroCuotasMeta,
+        ),
+      );
+    }
+    if (data.containsKey('plazo_dias')) {
+      context.handle(
+        _plazoDiasMeta,
+        plazoDias.isAcceptableOrUnknown(data['plazo_dias']!, _plazoDiasMeta),
+      );
+    }
+    if (data.containsKey('tasa_interes')) {
+      context.handle(
+        _tasaInteresMeta,
+        tasaInteres.isAcceptableOrUnknown(
+          data['tasa_interes']!,
+          _tasaInteresMeta,
+        ),
+      );
+    }
+    if (data.containsKey('monto_interes')) {
+      context.handle(
+        _montoInteresMeta,
+        montoInteres.isAcceptableOrUnknown(
+          data['monto_interes']!,
+          _montoInteresMeta,
         ),
       );
     }
@@ -11619,6 +11704,22 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.double,
         data['${effectivePrefix}abono_inicial'],
       )!,
+      numeroCuotas: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numero_cuotas'],
+      )!,
+      plazoDias: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}plazo_dias'],
+      )!,
+      tasaInteres: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}tasa_interes'],
+      )!,
+      montoInteres: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_interes'],
+      )!,
       vencimiento: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}vencimiento'],
@@ -11676,6 +11777,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
   final String formaPago;
   final double costoEnvio;
   final double abonoInicial;
+  final int numeroCuotas;
+  final int plazoDias;
+  final double tasaInteres;
+  final double montoInteres;
   final DateTime? vencimiento;
   final String numeroCotizacion;
   final String? numeroFactura;
@@ -11697,6 +11802,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     required this.formaPago,
     required this.costoEnvio,
     required this.abonoInicial,
+    required this.numeroCuotas,
+    required this.plazoDias,
+    required this.tasaInteres,
+    required this.montoInteres,
     this.vencimiento,
     required this.numeroCotizacion,
     this.numeroFactura,
@@ -11723,6 +11832,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     map['forma_pago'] = Variable<String>(formaPago);
     map['costo_envio'] = Variable<double>(costoEnvio);
     map['abono_inicial'] = Variable<double>(abonoInicial);
+    map['numero_cuotas'] = Variable<int>(numeroCuotas);
+    map['plazo_dias'] = Variable<int>(plazoDias);
+    map['tasa_interes'] = Variable<double>(tasaInteres);
+    map['monto_interes'] = Variable<double>(montoInteres);
     if (!nullToAbsent || vencimiento != null) {
       map['vencimiento'] = Variable<DateTime>(vencimiento);
     }
@@ -11758,6 +11871,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       formaPago: Value(formaPago),
       costoEnvio: Value(costoEnvio),
       abonoInicial: Value(abonoInicial),
+      numeroCuotas: Value(numeroCuotas),
+      plazoDias: Value(plazoDias),
+      tasaInteres: Value(tasaInteres),
+      montoInteres: Value(montoInteres),
       vencimiento: vencimiento == null && nullToAbsent
           ? const Value.absent()
           : Value(vencimiento),
@@ -11795,6 +11912,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       formaPago: serializer.fromJson<String>(json['formaPago']),
       costoEnvio: serializer.fromJson<double>(json['costoEnvio']),
       abonoInicial: serializer.fromJson<double>(json['abonoInicial']),
+      numeroCuotas: serializer.fromJson<int>(json['numeroCuotas']),
+      plazoDias: serializer.fromJson<int>(json['plazoDias']),
+      tasaInteres: serializer.fromJson<double>(json['tasaInteres']),
+      montoInteres: serializer.fromJson<double>(json['montoInteres']),
       vencimiento: serializer.fromJson<DateTime?>(json['vencimiento']),
       numeroCotizacion: serializer.fromJson<String>(json['numeroCotizacion']),
       numeroFactura: serializer.fromJson<String?>(json['numeroFactura']),
@@ -11821,6 +11942,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       'formaPago': serializer.toJson<String>(formaPago),
       'costoEnvio': serializer.toJson<double>(costoEnvio),
       'abonoInicial': serializer.toJson<double>(abonoInicial),
+      'numeroCuotas': serializer.toJson<int>(numeroCuotas),
+      'plazoDias': serializer.toJson<int>(plazoDias),
+      'tasaInteres': serializer.toJson<double>(tasaInteres),
+      'montoInteres': serializer.toJson<double>(montoInteres),
       'vencimiento': serializer.toJson<DateTime?>(vencimiento),
       'numeroCotizacion': serializer.toJson<String>(numeroCotizacion),
       'numeroFactura': serializer.toJson<String?>(numeroFactura),
@@ -11845,6 +11970,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     String? formaPago,
     double? costoEnvio,
     double? abonoInicial,
+    int? numeroCuotas,
+    int? plazoDias,
+    double? tasaInteres,
+    double? montoInteres,
     Value<DateTime?> vencimiento = const Value.absent(),
     String? numeroCotizacion,
     Value<String?> numeroFactura = const Value.absent(),
@@ -11868,6 +11997,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     formaPago: formaPago ?? this.formaPago,
     costoEnvio: costoEnvio ?? this.costoEnvio,
     abonoInicial: abonoInicial ?? this.abonoInicial,
+    numeroCuotas: numeroCuotas ?? this.numeroCuotas,
+    plazoDias: plazoDias ?? this.plazoDias,
+    tasaInteres: tasaInteres ?? this.tasaInteres,
+    montoInteres: montoInteres ?? this.montoInteres,
     vencimiento: vencimiento.present ? vencimiento.value : this.vencimiento,
     numeroCotizacion: numeroCotizacion ?? this.numeroCotizacion,
     numeroFactura: numeroFactura.present
@@ -11907,6 +12040,16 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       abonoInicial: data.abonoInicial.present
           ? data.abonoInicial.value
           : this.abonoInicial,
+      numeroCuotas: data.numeroCuotas.present
+          ? data.numeroCuotas.value
+          : this.numeroCuotas,
+      plazoDias: data.plazoDias.present ? data.plazoDias.value : this.plazoDias,
+      tasaInteres: data.tasaInteres.present
+          ? data.tasaInteres.value
+          : this.tasaInteres,
+      montoInteres: data.montoInteres.present
+          ? data.montoInteres.value
+          : this.montoInteres,
       vencimiento: data.vencimiento.present
           ? data.vencimiento.value
           : this.vencimiento,
@@ -11949,6 +12092,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           ..write('formaPago: $formaPago, ')
           ..write('costoEnvio: $costoEnvio, ')
           ..write('abonoInicial: $abonoInicial, ')
+          ..write('numeroCuotas: $numeroCuotas, ')
+          ..write('plazoDias: $plazoDias, ')
+          ..write('tasaInteres: $tasaInteres, ')
+          ..write('montoInteres: $montoInteres, ')
           ..write('vencimiento: $vencimiento, ')
           ..write('numeroCotizacion: $numeroCotizacion, ')
           ..write('numeroFactura: $numeroFactura, ')
@@ -11963,7 +12110,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     clienteId,
     nombreCliente,
@@ -11975,6 +12122,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     formaPago,
     costoEnvio,
     abonoInicial,
+    numeroCuotas,
+    plazoDias,
+    tasaInteres,
+    montoInteres,
     vencimiento,
     numeroCotizacion,
     numeroFactura,
@@ -11984,7 +12135,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     descuentoId,
     descuentoNombre,
     montoDescuento,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -12000,6 +12151,10 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           other.formaPago == this.formaPago &&
           other.costoEnvio == this.costoEnvio &&
           other.abonoInicial == this.abonoInicial &&
+          other.numeroCuotas == this.numeroCuotas &&
+          other.plazoDias == this.plazoDias &&
+          other.tasaInteres == this.tasaInteres &&
+          other.montoInteres == this.montoInteres &&
           other.vencimiento == this.vencimiento &&
           other.numeroCotizacion == this.numeroCotizacion &&
           other.numeroFactura == this.numeroFactura &&
@@ -12023,6 +12178,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
   final Value<String> formaPago;
   final Value<double> costoEnvio;
   final Value<double> abonoInicial;
+  final Value<int> numeroCuotas;
+  final Value<int> plazoDias;
+  final Value<double> tasaInteres;
+  final Value<double> montoInteres;
   final Value<DateTime?> vencimiento;
   final Value<String> numeroCotizacion;
   final Value<String?> numeroFactura;
@@ -12044,6 +12203,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     this.formaPago = const Value.absent(),
     this.costoEnvio = const Value.absent(),
     this.abonoInicial = const Value.absent(),
+    this.numeroCuotas = const Value.absent(),
+    this.plazoDias = const Value.absent(),
+    this.tasaInteres = const Value.absent(),
+    this.montoInteres = const Value.absent(),
     this.vencimiento = const Value.absent(),
     this.numeroCotizacion = const Value.absent(),
     this.numeroFactura = const Value.absent(),
@@ -12066,6 +12229,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     required String formaPago,
     this.costoEnvio = const Value.absent(),
     this.abonoInicial = const Value.absent(),
+    this.numeroCuotas = const Value.absent(),
+    this.plazoDias = const Value.absent(),
+    this.tasaInteres = const Value.absent(),
+    this.montoInteres = const Value.absent(),
     this.vencimiento = const Value.absent(),
     required String numeroCotizacion,
     this.numeroFactura = const Value.absent(),
@@ -12094,6 +12261,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     Expression<String>? formaPago,
     Expression<double>? costoEnvio,
     Expression<double>? abonoInicial,
+    Expression<int>? numeroCuotas,
+    Expression<int>? plazoDias,
+    Expression<double>? tasaInteres,
+    Expression<double>? montoInteres,
     Expression<DateTime>? vencimiento,
     Expression<String>? numeroCotizacion,
     Expression<String>? numeroFactura,
@@ -12116,6 +12287,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
       if (formaPago != null) 'forma_pago': formaPago,
       if (costoEnvio != null) 'costo_envio': costoEnvio,
       if (abonoInicial != null) 'abono_inicial': abonoInicial,
+      if (numeroCuotas != null) 'numero_cuotas': numeroCuotas,
+      if (plazoDias != null) 'plazo_dias': plazoDias,
+      if (tasaInteres != null) 'tasa_interes': tasaInteres,
+      if (montoInteres != null) 'monto_interes': montoInteres,
       if (vencimiento != null) 'vencimiento': vencimiento,
       if (numeroCotizacion != null) 'numero_cotizacion': numeroCotizacion,
       if (numeroFactura != null) 'numero_factura': numeroFactura,
@@ -12140,6 +12315,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     Value<String>? formaPago,
     Value<double>? costoEnvio,
     Value<double>? abonoInicial,
+    Value<int>? numeroCuotas,
+    Value<int>? plazoDias,
+    Value<double>? tasaInteres,
+    Value<double>? montoInteres,
     Value<DateTime?>? vencimiento,
     Value<String>? numeroCotizacion,
     Value<String?>? numeroFactura,
@@ -12162,6 +12341,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
       formaPago: formaPago ?? this.formaPago,
       costoEnvio: costoEnvio ?? this.costoEnvio,
       abonoInicial: abonoInicial ?? this.abonoInicial,
+      numeroCuotas: numeroCuotas ?? this.numeroCuotas,
+      plazoDias: plazoDias ?? this.plazoDias,
+      tasaInteres: tasaInteres ?? this.tasaInteres,
+      montoInteres: montoInteres ?? this.montoInteres,
       vencimiento: vencimiento ?? this.vencimiento,
       numeroCotizacion: numeroCotizacion ?? this.numeroCotizacion,
       numeroFactura: numeroFactura ?? this.numeroFactura,
@@ -12210,6 +12393,18 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     if (abonoInicial.present) {
       map['abono_inicial'] = Variable<double>(abonoInicial.value);
     }
+    if (numeroCuotas.present) {
+      map['numero_cuotas'] = Variable<int>(numeroCuotas.value);
+    }
+    if (plazoDias.present) {
+      map['plazo_dias'] = Variable<int>(plazoDias.value);
+    }
+    if (tasaInteres.present) {
+      map['tasa_interes'] = Variable<double>(tasaInteres.value);
+    }
+    if (montoInteres.present) {
+      map['monto_interes'] = Variable<double>(montoInteres.value);
+    }
     if (vencimiento.present) {
       map['vencimiento'] = Variable<DateTime>(vencimiento.value);
     }
@@ -12254,6 +12449,10 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
           ..write('formaPago: $formaPago, ')
           ..write('costoEnvio: $costoEnvio, ')
           ..write('abonoInicial: $abonoInicial, ')
+          ..write('numeroCuotas: $numeroCuotas, ')
+          ..write('plazoDias: $plazoDias, ')
+          ..write('tasaInteres: $tasaInteres, ')
+          ..write('montoInteres: $montoInteres, ')
           ..write('vencimiento: $vencimiento, ')
           ..write('numeroCotizacion: $numeroCotizacion, ')
           ..write('numeroFactura: $numeroFactura, ')
@@ -33095,6 +33294,10 @@ typedef $$VentasTableTableCreateCompanionBuilder =
       required String formaPago,
       Value<double> costoEnvio,
       Value<double> abonoInicial,
+      Value<int> numeroCuotas,
+      Value<int> plazoDias,
+      Value<double> tasaInteres,
+      Value<double> montoInteres,
       Value<DateTime?> vencimiento,
       required String numeroCotizacion,
       Value<String?> numeroFactura,
@@ -33118,6 +33321,10 @@ typedef $$VentasTableTableUpdateCompanionBuilder =
       Value<String> formaPago,
       Value<double> costoEnvio,
       Value<double> abonoInicial,
+      Value<int> numeroCuotas,
+      Value<int> plazoDias,
+      Value<double> tasaInteres,
+      Value<double> montoInteres,
       Value<DateTime?> vencimiento,
       Value<String> numeroCotizacion,
       Value<String?> numeroFactura,
@@ -33340,6 +33547,26 @@ class $$VentasTableTableFilterComposer
 
   ColumnFilters<double> get abonoInicial => $composableBuilder(
     column: $table.abonoInicial,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numeroCuotas => $composableBuilder(
+    column: $table.numeroCuotas,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get plazoDias => $composableBuilder(
+    column: $table.plazoDias,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get tasaInteres => $composableBuilder(
+    column: $table.tasaInteres,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montoInteres => $composableBuilder(
+    column: $table.montoInteres,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -33604,6 +33831,26 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get numeroCuotas => $composableBuilder(
+    column: $table.numeroCuotas,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get plazoDias => $composableBuilder(
+    column: $table.plazoDias,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get tasaInteres => $composableBuilder(
+    column: $table.tasaInteres,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montoInteres => $composableBuilder(
+    column: $table.montoInteres,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get vencimiento => $composableBuilder(
     column: $table.vencimiento,
     builder: (column) => ColumnOrderings(column),
@@ -33701,6 +33948,24 @@ class $$VentasTableTableAnnotationComposer
 
   GeneratedColumn<double> get abonoInicial => $composableBuilder(
     column: $table.abonoInicial,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get numeroCuotas => $composableBuilder(
+    column: $table.numeroCuotas,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get plazoDias =>
+      $composableBuilder(column: $table.plazoDias, builder: (column) => column);
+
+  GeneratedColumn<double> get tasaInteres => $composableBuilder(
+    column: $table.tasaInteres,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get montoInteres => $composableBuilder(
+    column: $table.montoInteres,
     builder: (column) => column,
   );
 
@@ -33950,6 +34215,10 @@ class $$VentasTableTableTableManager
                 Value<String> formaPago = const Value.absent(),
                 Value<double> costoEnvio = const Value.absent(),
                 Value<double> abonoInicial = const Value.absent(),
+                Value<int> numeroCuotas = const Value.absent(),
+                Value<int> plazoDias = const Value.absent(),
+                Value<double> tasaInteres = const Value.absent(),
+                Value<double> montoInteres = const Value.absent(),
                 Value<DateTime?> vencimiento = const Value.absent(),
                 Value<String> numeroCotizacion = const Value.absent(),
                 Value<String?> numeroFactura = const Value.absent(),
@@ -33971,6 +34240,10 @@ class $$VentasTableTableTableManager
                 formaPago: formaPago,
                 costoEnvio: costoEnvio,
                 abonoInicial: abonoInicial,
+                numeroCuotas: numeroCuotas,
+                plazoDias: plazoDias,
+                tasaInteres: tasaInteres,
+                montoInteres: montoInteres,
                 vencimiento: vencimiento,
                 numeroCotizacion: numeroCotizacion,
                 numeroFactura: numeroFactura,
@@ -33994,6 +34267,10 @@ class $$VentasTableTableTableManager
                 required String formaPago,
                 Value<double> costoEnvio = const Value.absent(),
                 Value<double> abonoInicial = const Value.absent(),
+                Value<int> numeroCuotas = const Value.absent(),
+                Value<int> plazoDias = const Value.absent(),
+                Value<double> tasaInteres = const Value.absent(),
+                Value<double> montoInteres = const Value.absent(),
                 Value<DateTime?> vencimiento = const Value.absent(),
                 required String numeroCotizacion,
                 Value<String?> numeroFactura = const Value.absent(),
@@ -34015,6 +34292,10 @@ class $$VentasTableTableTableManager
                 formaPago: formaPago,
                 costoEnvio: costoEnvio,
                 abonoInicial: abonoInicial,
+                numeroCuotas: numeroCuotas,
+                plazoDias: plazoDias,
+                tasaInteres: tasaInteres,
+                montoInteres: montoInteres,
                 vencimiento: vencimiento,
                 numeroCotizacion: numeroCotizacion,
                 numeroFactura: numeroFactura,

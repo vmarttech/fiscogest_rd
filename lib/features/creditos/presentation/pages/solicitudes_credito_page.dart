@@ -58,18 +58,24 @@ class SolicitudesCreditoPage extends ConsumerWidget {
             ),
           ),
           data: (lista) {
-            return Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
+            return Padding(
               padding: EdgeInsets.fromLTRB(
                 mobile ? 16 : 20,
                 mobile ? 12 : 16,
                 mobile ? 16 : 20,
                 16,
               ),
-              child: AppLayout.centerConstrained(
-                maxWidth: desktop ? 920 : (mobile ? 520 : 720),
-                child: Column(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: desktop ? 920 : double.infinity,
+                        ),
+                        child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
@@ -218,8 +224,11 @@ class SolicitudesCreditoPage extends ConsumerWidget {
                           ),
                   ),
                 ],
-              ),
-              ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           },

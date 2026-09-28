@@ -199,19 +199,27 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
                         ? Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              SizedBox(
-                                width: 380,
-                                child: lista,
-                              ),
+                              SizedBox(width: 380, child: lista),
                               const SizedBox(width: 16),
-                              Expanded(child: panel),
+                              Expanded(
+                                child: SingleChildScrollView(child: panel),
+                              ),
                             ],
                           )
-                        : ListView(
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              SizedBox(height: 280, child: lista),
+                              // Lista ocupa el espacio libre (sin altura fija)
+                              Expanded(child: lista),
                               const SizedBox(height: 12),
-                              panel,
+                              // Panel visible abajo, scrollea si no cabe
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxHeight:
+                                      MediaQuery.sizeOf(context).height * 0.42,
+                                ),
+                                child: SingleChildScrollView(child: panel),
+                              ),
                             ],
                           ),
                   ),
@@ -369,6 +377,7 @@ class _PanelEmitir extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
@@ -433,7 +442,7 @@ class _PanelEmitir extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 20),
           FilledButton.icon(
             onPressed: emitiendo ? null : onEmitir,
             icon: emitiendo
@@ -455,5 +464,6 @@ class _PanelEmitir extends StatelessWidget {
     );
   }
 }
+
 
 

@@ -481,4 +481,98 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
       subject: 'Contrato de crédito $nro — FiscoGest RD',
     );
   }
+
+  @override
+  Future<Uint8List> generarPdfCronograma({
+    required CuentaPorCobrar cuenta,
+  }) async {
+    final fmt = NumberFormat('#,##0.00', 'es_DO');
+    final fmtFecha = DateFormat('dd/MM/yyyy');
+    final cuotas = cuenta.planPago?.cuotas ?? const [];
+    final doc = pw.Document();
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (ctx) => [
+          pw.Text(
+            'CRONOGRAMA DE PAGOS',
+            style: pw.TextStyle(
+              fontSize: 14,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+          pw.SizedBox(height: 6),
+          pw.Text(
+            '${cuenta.clienteNombre}  ·  Cuenta #${cuenta.id ?? ''}',
+            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+          ),
+          pw.SizedBox(height: 16),
+          pw.Table(
+            border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
+            columnWidths: {
+              0: const pw.FlexColumnWidth(1.2),
+              1: const pw.FlexColumnWidth(2.2),
+              2: const pw.FlexColumnWidth(2),
+              3: const pw.FlexColumnWidth(1.8),
+            },
+            children: [
+              pw.TableRow(
+                decoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                children: [
+                  _celda('N°', bold: true),
+                  _celda('Vencimiento', bold: true),
+                  _celda('Monto', bold: true, align: pw.TextAlign.right),
+                  _celda('Estado', bold: true),
+                ],
+              ),
+              for (final q in cuotas)
+                pw.TableRow(
+                  children: [
+                    _celda('${q.numeroCuota}'),
+                    _celda(fmtFecha.format(q.fechaVencimiento)),
+                    _celda(
+                      'RD\$ ${fmt.format(q.montoTotal)}',
+                      align: pw.TextAlign.right,
+                    ),
+                    _celda(q.pagada ? 'Pagada' : 'Pendiente'),
+                  ],
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+    return doc.save();
+  }
+
+  pw.Widget _celda(
+    String text, {
+    bool bold = false,
+    pw.TextAlign align = pw.TextAlign.left,
+  }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+      child: pw.Text(
+        text,
+        textAlign: align,
+        style: pw.TextStyle(
+          fontSize: 9,
+          fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Future<void> imprimirCronograma({
+    required CuentaPorCobrar cuenta,
+  }) async {
+    final bytes = await generarPdfCronograma(cuenta: cuenta);
+    await Printing.layoutPdf(
+      onLayout: (_) async => bytes,
+      name: 'Cronograma_${cuenta.id ?? 'cuenta'}',
+    );
+  }
+
 }
