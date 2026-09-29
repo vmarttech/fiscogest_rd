@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_provid
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_delivery.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_contado_fiao.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -162,7 +163,58 @@ class _NuevaVentaBorradorPageState
     );
   }
 
-  Future<void> _guardarCotizacion({required bool esCredito}) async {
+  Future<void> _onGenerarVentaSimplificada() async {
+    final estado = ref.read(ventaBorradorProvider);
+    if (estado.detalles.isEmpty || estado.montoTotal <= 0) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Agregue productos antes de generar la venta'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final totalTexto =
+        'RD\$ ${estado.montoTotal.toStringAsFixed(2)}';
+    final nombre = (estado.clienteNombre ?? '').trim();
+
+    final resultado = await SheetContadoFiao.show(
+      context,
+      totalTexto: totalTexto,
+      nombreCliente: nombre.isEmpty ? null : nombre,
+    );
+
+    if (!mounted || resultado == null) return;
+
+    switch (resultado) {
+      case ResultadoCobro.contado:
+        await _guardarCotizacion(esCredito: false, abrirCobro: true);
+        break;
+      case ResultadoCobro.fiao:
+        // Módulo Fío: se cableará cuando exista la pantalla/formulario
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              nombre.isEmpty
+                  ? 'Fiao: RD\$ ${estado.montoTotal.toStringAsFixed(2)} (sin nombre) — módulo Fío pendiente'
+                  : 'Fiao: $nombre debe RD\$ ${estado.montoTotal.toStringAsFixed(2)} — módulo Fío pendiente',
+            ),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        break;
+    }
+  }
+
+  Future<void> _guardarCotizacion({
+    required bool esCredito,
+    bool abrirCobro = false,
+  }) async {
     setState(() => _guardando = true);
     try {
       final notificador = ref.read(ventaBorradorProvider.notifier);
@@ -259,6 +311,33 @@ class _NuevaVentaBorradorPageState
       }
 
       if (!mounted) return;
+
+      // Modo simplificado Contado: abrir cobro en la misma secuencia
+      if (abrirCobro && !esCredito) {
+        final estadoFinal = ref.read(ventaBorradorProvider);
+        final ventaId = estadoFinal.id;
+        final montoTotal = estadoFinal.montoTotal;
+        final numeroCot = estadoFinal.numero.trim().isNotEmpty
+            ? estadoFinal.numero
+            : numeroGuardado;
+        final nombreCli = estadoFinal.clienteNombre;
+        ref.invalidate(listaCotizacionesProvider);
+        _limpiarFormulario();
+        if (ventaId != null && mounted) {
+          await context.push(
+            '/ventas/cobro/operacion',
+            extra: <String, dynamic>{
+              'ventaId': ventaId,
+              'montoTotal': montoTotal,
+              'esCredito': false,
+              'numeroCotizacion': numeroCot,
+              'nombreCliente': nombreCli,
+            },
+          );
+        }
+        return;
+      }
+
       final mensaje = _esCredito
           ? 'Cotización N° $numeroGuardado en crédito.\n'
               'Abono: RD\$ ${abonoDesdeFormulario.toStringAsFixed(2)}\n'
@@ -1186,42 +1265,61 @@ class _NuevaVentaBorradorPageState
             Expanded(
               child: SizedBox(
                 height: alturaBoton,
-                child: ElevatedButton(
-                  onPressed: puedeGenerar && !_guardando
-                      ? () => _guardarCotizacion(esCredito: _esCredito)
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _esCredito ? AppColors.warning : AppColors.primary,
-                    foregroundColor: AppColors.white,
-                    disabledBackgroundColor: AppColors.grey300,
-                    disabledForegroundColor: AppColors.grey500,
-                    elevation: 0,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: esPantallaPequena ? 8 : 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: _guardando
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
-                      : Text(
-                          _esCredito
-                              ? 'Crear cotización (CR)'
-                              : 'Crear cotización (C)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: tamanoBoton,
-                          ),
+                child: Builder(
+                  builder: (context) {
+                    final simplificado = ref
+                            .watch(configuracionControllerProvider)
+                            .valueOrNull
+                            ?.modoSimplificado ??
+                        false;
+                    final onTap = !puedeGenerar || _guardando
+                        ? null
+                        : simplificado
+                            ? _onGenerarVentaSimplificada
+                            : () => _guardarCotizacion(esCredito: _esCredito);
+                    final label = simplificado
+                        ? 'GENERAR VENTA'
+                        : (_esCredito
+                            ? 'Crear cotización (CR)'
+                            : 'Crear cotización (C)');
+                    final bg = simplificado
+                        ? AppColors.primary
+                        : (_esCredito
+                            ? AppColors.warning
+                            : AppColors.primary);
+                    return ElevatedButton(
+                      onPressed: onTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: bg,
+                        foregroundColor: AppColors.white,
+                        disabledBackgroundColor: AppColors.grey300,
+                        disabledForegroundColor: AppColors.grey500,
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: esPantallaPequena ? 8 : 12,
                         ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _guardando
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : Text(
+                              label,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: tamanoBoton,
+                              ),
+                            ),
+                    );
+                  },
                 ),
               ),
             ),
