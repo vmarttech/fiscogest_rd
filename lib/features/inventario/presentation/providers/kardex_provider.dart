@@ -21,3 +21,10 @@ final kardexPorProductoProvider = FutureProvider.family<List<Kardex>, int>((
   final repo = ref.watch(kardexRepositoryProvider);
   return repo.obtenerHistorialPorProducto(productoId);
 });
+
+final kardexHistorialCompletoProvider =
+    FutureProvider.autoDispose<List<Kardex>>((ref) async {
+  final repo = ref.watch(kardexRepositoryProvider);
+  return repo.obtenerTodoElHistorial();
+});
+

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/app_hub_hero.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/barra_navegacion_inferior.dart';
@@ -17,6 +17,7 @@ class VentasContenedorPage extends ConsumerStatefulWidget {
     super.key,
     this.modoInicial = ModoOperacion.venta,
   });
+
   static const String nombreRuta = 'ventas-contenedor';
   final ModoOperacion modoInicial;
 
@@ -44,19 +45,33 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     final modoOperacion = ref.watch(
       ventasNavegacionProvider.select((e) => e.modoOperacion),
     );
+    final mobile = AppBreakpoints.isMobile(context);
 
-    final String tituloDinamico = switch (modoOperacion) {
-      ModoOperacion.venta => 'Gestión de Ventas',
-      ModoOperacion.cotizacion => 'Gestión de Cotizaciones',
-      ModoOperacion.apartado => 'Gestión de Apartados',
-      ModoOperacion.cobrar => 'Gestión de Ventas',
+    final String tituloApp = switch (modoOperacion) {
+      ModoOperacion.venta || ModoOperacion.cobrar => 'VENTAS',
+      ModoOperacion.cotizacion => 'COTIZACIONES',
+      ModoOperacion.apartado => 'VENTAS',
     };
 
-    final String subtitulo = switch (modoOperacion) {
-      ModoOperacion.venta => 'Facturación y operaciones de venta',
-      ModoOperacion.cotizacion => 'Cotizaciones y presupuestos',
-      ModoOperacion.apartado => 'Apartados y reservas',
-      ModoOperacion.cobrar => 'Facturación y operaciones de venta',
+    final String heroTitulo = switch (modoOperacion) {
+      ModoOperacion.venta || ModoOperacion.cobrar => 'Punto de venta',
+      ModoOperacion.cotizacion => 'Cotizaciones',
+      ModoOperacion.apartado => 'Punto de venta',
+    };
+
+    final String heroSub = switch (modoOperacion) {
+      ModoOperacion.venta ||
+      ModoOperacion.cobrar =>
+        'Productos, carrito, cotizaciones e historial.',
+      ModoOperacion.cotizacion =>
+        'Arme presupuestos y envíelos a cobro en caja.',
+      ModoOperacion.apartado =>
+        'Productos, carrito, cotizaciones e historial.',
+    };
+
+    final IconData heroIcon = switch (modoOperacion) {
+      ModoOperacion.cotizacion => Icons.request_quote_rounded,
+      _ => Icons.storefront_rounded,
     };
 
     final Widget vistaActiva = switch (vistaActual) {
@@ -66,52 +81,41 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
       VistaActual.historial => const HistorialVentas(),
     };
 
-    final isMobile = AppBreakpoints.isMobile(context);
+    // En historial / detalle no mostramos hero (más espacio de lista)
+    final showHero = vistaActual == VistaActual.inicio;
 
     return AppScaffold(
-      title: tituloDinamico,
-      subtitle: isMobile ? null : subtitulo,
+      title: tituloApp,
       body: Column(
         children: [
-          if (!isMobile)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              color: AppColors.primary.withValues(alpha: 0.04),
-              child: Row(
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _modoLabel(modoOperacion),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          Expanded(child: vistaActiva),
+          Expanded(
+            child: showHero
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: AppLayout.pantallaPadding.add(
+                          EdgeInsets.only(
+                            top: mobile ? 8 : 12,
+                            bottom: 0,
+                          ),
+                        ),
+                        child: AppHubHero(
+                          title: heroTitulo,
+                          subtitle: heroSub,
+                          icon: heroIcon,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(child: vistaActiva),
+                    ],
+                  )
+                : vistaActiva,
+          ),
           const BarraNavegacionInferior(),
         ],
       ),
     );
   }
-
-  String _modoLabel(ModoOperacion modo) {
-    return switch (modo) {
-      ModoOperacion.venta => 'Modo Venta',
-      ModoOperacion.cotizacion => 'Modo Cotización',
-      ModoOperacion.apartado => 'Modo Apartado',
-      ModoOperacion.cobrar => 'Modo Venta',
-    };
-  }
 }
+

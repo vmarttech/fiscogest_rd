@@ -558,63 +558,94 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     );
   }
 
-  /// Entrada al único punto de venta: Cotización
+  /// Entrada al único punto de venta: Cotización (visual hub = Caja)
   Widget _buildEntradaCotizacion(bool isMobile) {
-    return Column(
-      children: [
-        const SizedBox(height: 24),
-        Icon(
-          Icons.point_of_sale,
-          size: isMobile ? 56 : 64,
-          color: AppColors.info.withValues(alpha: 0.7),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Punto de venta',
-          style: AppTypography.h3.copyWith(
-            fontWeight: FontWeight.bold,
-            fontSize: isMobile ? 18 : 20,
-            color: AppColors.textPrimary,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 8 : 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Operaciones',
+            style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Todo se gestiona por Cotización:\n'
-          'Cotizar → Crédito (si aplica) → Caja factura',
-          textAlign: TextAlign.center,
-          style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
-            fontSize: isMobile ? 13 : 14,
-          ),
-        ),
-        const SizedBox(height: 28),
-        SizedBox(
-          width: isMobile ? double.infinity : 320,
-          height: isMobile ? 52 : 56,
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.description_outlined, size: 22),
-            label: const Text(
-              'NUEVA COTIZACIÓN',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                letterSpacing: 0.3,
-              ),
-            ),
-            onPressed: () => context.push('/ventas/cotizaciones/nueva'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.info,
-              foregroundColor: AppColors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+          const SizedBox(height: 4),
+          Text(
+            'Cotizar → crédito (si aplica) → Caja factura',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-
-      ],
+          const SizedBox(height: 16),
+          Material(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => context.push('/ventas/cotizaciones/nueva'),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 18 : 22,
+                  vertical: isMobile ? 18 : 22,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(
+                        Icons.description_outlined,
+                        color: AppColors.primary,
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Nueva cotización',
+                            style: AppTypography.bodyLarge.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Armar pedido y enviar a cobro',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: AppColors.textSecondary.withValues(alpha: 0.7),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

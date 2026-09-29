@@ -9,6 +9,8 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/app_hub_hero.dart';
 
 class KardexPage extends ConsumerStatefulWidget {
   const KardexPage({super.key, this.productoId});
@@ -35,85 +37,113 @@ class _KardexPageState extends ConsumerState<KardexPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = AppBreakpoints.isMobile(context);
-    final productoIdConsulta = _productoIdFijo ?? 1;
-    final movimientosAsync = ref.watch(kardexPorProductoProvider(productoIdConsulta));
+    final movimientosAsync = _productoIdFijo != null
+        ? ref.watch(kardexPorProductoProvider(_productoIdFijo))
+        : ref.watch(kardexHistorialCompletoProvider);
 
     return AppScaffold(
       // ✅ Barra superior UNIFORME
-      title: 'Kárdex',
-      subtitle: 'Historial de movimientos de inventario',
+      title: 'KÁRDEX',
+      
       actions: const [],
       floatingActionButton: null,
       body: SafeArea(
         bottom: true,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            isMobile ? 16 : 8,
-            isMobile ? 12 : 16,
-            isMobile ? 16 : 8,
-            12,
-          ),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1100),
+            child: Padding(
+              padding: AppLayout.pantallaPadding.add(
+                const EdgeInsets.only(bottom: 12),
+              ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Filtros en fila responsiva
-              if (isMobile) ...[
-                AppTextField(
-                  hint: 'Buscar por producto, documento o fecha...',
-                  onChanged: (valor) => setState(() => _filtroBusqueda = valor.trim().toLowerCase()),
-                ),
-                const SizedBox(height: 12),
-                AppDropdown<TipoMovimiento>(
-                  initialValue: _filtroTipo,
-                  hint: 'Tipo de Movimiento',
-                  items: TipoMovimiento.values
-                      .map((tipo) => DropdownMenuItem<TipoMovimiento>(
-                            value: tipo,
-                            child: Text(
-                              tipo.name.toUpperCase(),
-                              style: AppTypography.bodySmall,
-                            ),
-                          ))
-                      .toList(),
-                  onChanged: (valor) => setState(() => _filtroTipo = valor),
-                ),
-              ] else
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppTextField(
-                        hint: 'Buscar por producto, documento o fecha...',
-                        onChanged: (valor) => setState(() => _filtroBusqueda = valor.trim().toLowerCase()),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 220,
-                      child: AppDropdown<TipoMovimiento>(
-                        initialValue: _filtroTipo,
-                        hint: 'Tipo de Movimiento',
-                        items: TipoMovimiento.values
-                            .map((tipo) => DropdownMenuItem<TipoMovimiento>(
-                                  value: tipo,
-                                  child: Text(
-                                    tipo.name.toUpperCase(),
-                                    style: AppTypography.bodySmall,
-                                  ),
-                                ))
-                            .toList(),
-                        onChanged: (valor) => setState(() => _filtroTipo = valor),
-                      ),
+              const AppHubHero(
+                title: 'Kárdex de inventario',
+                subtitle:
+                    'Entradas, salidas y saldos por producto y documento.',
+                icon: Icons.history_edu_rounded,
+              ),
+              SizedBox(height: isMobile ? 14 : 18),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                // Filtros en fila responsiva
+                if (isMobile) ...[
+                  AppTextField(
+                    hint: 'Buscar por producto, documento o fecha...',
+                    onChanged: (valor) => setState(() => _filtroBusqueda = valor.trim().toLowerCase()),
+                  ),
+                  const SizedBox(height: 12),
+                  AppDropdown<TipoMovimiento>(
+                    initialValue: _filtroTipo,
+                    hint: 'Tipo de Movimiento',
+                    items: TipoMovimiento.values
+                        .map((tipo) => DropdownMenuItem<TipoMovimiento>(
+                              value: tipo,
+                              child: Text(
+                                tipo.name.toUpperCase(),
+                                style: AppTypography.bodySmall,
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: (valor) => setState(() => _filtroTipo = valor),
+                  ),
+                ] else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          hint: 'Buscar por producto, documento o fecha...',
+                          onChanged: (valor) => setState(() => _filtroBusqueda = valor.trim().toLowerCase()),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      SizedBox(
+                        width: 220,
+                        child: AppDropdown<TipoMovimiento>(
+                          initialValue: _filtroTipo,
+                          hint: 'Tipo de Movimiento',
+                          items: TipoMovimiento.values
+                              .map((tipo) => DropdownMenuItem<TipoMovimiento>(
+                                    value: tipo,
+                                    child: Text(
+                                      tipo.name.toUpperCase(),
+                                      style: AppTypography.bodySmall,
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (valor) => setState(() => _filtroTipo = valor),
+                        ),
+                      ),
+                    ],
+                  ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
-
               // Lista de movimientos
               const SizedBox(height: 12),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.94),
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.border),
                     boxShadow: [
@@ -176,9 +206,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                 horizontal: 16,
                                 vertical: 10,
                               ),
-                              decoration: const BoxDecoration(
-                                color: AppColors.grey50,
-                                border: Border(
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.07),
+                                border: const Border(
                                   bottom: BorderSide(color: AppColors.border),
                                 ),
                               ),
@@ -189,20 +219,22 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                     child: Text(
                                       'TIPO',
                                       style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w800,
                                         letterSpacing: 0.4,
+                                        fontSize: 11,
                                       ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 3,
                                     child: Text(
-                                      'DOCUMENTO / PRODUCTO',
+                                      'DOCUMENTO',
                                       style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w800,
                                         letterSpacing: 0.4,
+                                        fontSize: 11,
                                       ),
                                     ),
                                   ),
@@ -212,9 +244,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                       'CANT.',
                                       textAlign: TextAlign.right,
                                       style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w800,
                                         letterSpacing: 0.4,
+                                        fontSize: 11,
                                       ),
                                     ),
                                   ),
@@ -224,9 +257,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                       'SALDO',
                                       textAlign: TextAlign.right,
                                       style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w800,
                                         letterSpacing: 0.4,
+                                        fontSize: 11,
                                       ),
                                     ),
                                   ),
@@ -236,9 +270,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                       'FECHA',
                                       textAlign: TextAlign.right,
                                       style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w800,
                                         letterSpacing: 0.4,
+                                        fontSize: 11,
                                       ),
                                     ),
                                   ),
@@ -249,8 +284,14 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                             child: ListView.separated(
                               padding: EdgeInsets.zero,
                               itemCount: filtrados.length,
-                              separatorBuilder: (_, __) =>
-                                  const Divider(color: AppColors.border, height: 1),
+                              separatorBuilder: (_, __) => isMobile
+                                  ? const SizedBox.shrink()
+                                  : Divider(
+                                      color: AppColors.border
+                                          .withValues(alpha: 0.9),
+                                      height: 1,
+                                      thickness: 1,
+                                    ),
                               itemBuilder: (_, indice) {
                                 final mov = filtrados[indice];
                                 final colorTipo = switch (mov.tipoMovimiento) {
@@ -268,60 +309,111 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                     '${fechaValida.year}';
 
                                 if (isMobile) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 10,
+                                  final cantStr = mov.cantidad ==
+                                          mov.cantidad.roundToDouble()
+                                      ? mov.cantidad.toInt().toString()
+                                      : mov.cantidad.toStringAsFixed(1);
+                                  final sa = mov.saldoAnterior;
+                                  final sn = mov.saldoNuevo;
+                                  final saldoStr =
+                                      '${sa == sa.roundToDouble() ? sa.toInt() : sa.toStringAsFixed(1)} → ${sn == sn.roundToDouble() ? sn.toInt() : sn.toStringAsFixed(1)}';
+                                  final doc =
+                                      (mov.documentoReferencia ?? '').trim();
+                                  return Container(
+                                    margin: const EdgeInsets.fromLTRB(
+                                      10,
+                                      6,
+                                      10,
+                                      6,
                                     ),
-                                    child: Row(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: AppColors.border,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
                                       children: [
-                                        Container(
-                                          width: 4,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: colorTipo,
-                                            borderRadius:
-                                                BorderRadius.circular(2),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 4,
+                                              height: 36,
+                                              decoration: BoxDecoration(
+                                                color: colorTipo,
+                                                borderRadius:
+                                                    BorderRadius.circular(2),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
                                                 mov.tipoMovimiento.name
                                                     .toUpperCase(),
                                                 style: AppTypography.labelLarge
                                                     .copyWith(
-                                                  fontWeight: FontWeight.w700,
+                                                  fontWeight: FontWeight.w800,
                                                   color: colorTipo,
                                                 ),
                                               ),
-                                              Text(
-                                                mov.documentoReferencia ??
-                                                    'Sin documento',
-                                                style: AppTypography.bodySmall
-                                                    .copyWith(
-                                                  color:
-                                                      AppColors.textSecondary,
-                                                ),
+                                            ),
+                                            Text(
+                                              fechaStr,
+                                              style: AppTypography.bodySmall
+                                                  .copyWith(
+                                                color: AppColors.textPrimary
+                                                    .withValues(alpha: 0.75),
+                                                fontWeight: FontWeight.w600,
                                               ),
-                                              Text(
-                                                'Cant ${mov.cantidad} · Saldo ${mov.saldoAnterior} → ${mov.saldoNuevo}',
-                                                style:
-                                                    AppTypography.bodySmall,
-                                              ),
-                                            ],
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          doc.isEmpty ? 'Sin documento' : doc,
+                                          style: AppTypography.bodyMedium
+                                              .copyWith(
+                                            color: AppColors.textPrimary,
+                                            fontWeight: FontWeight.w700,
                                           ),
                                         ),
+                                        const SizedBox(height: 2),
                                         Text(
-                                          fechaStr,
+                                          'Producto #${mov.productoId}',
                                           style: AppTypography.bodySmall
                                               .copyWith(
-                                            color: AppColors.textDisabled,
+                                            color: AppColors.textPrimary
+                                                .withValues(alpha: 0.65),
                                           ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                'Cant. $cantStr',
+                                                style: AppTypography.bodyMedium
+                                                    .copyWith(
+                                                  color:
+                                                      AppColors.textPrimary,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              'Saldo $saldoStr',
+                                              style: AppTypography.bodyMedium
+                                                  .copyWith(
+                                                color: AppColors.textPrimary
+                                                    .withValues(alpha: 0.85),
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -373,10 +465,33 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                         ),
                                         Expanded(
                                           flex: 3,
-                                          child: Text(
-                                            'Prod ${mov.productoId} · ${mov.documentoReferencia ?? 'Sin documento'}',
-                                            style: AppTypography.bodySmall,
-                                            overflow: TextOverflow.ellipsis,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                (mov.documentoReferencia ?? '')
+                                                        .trim()
+                                                        .isEmpty
+                                                    ? 'Sin documento'
+                                                    : mov.documentoReferencia!
+                                                        .trim(),
+                                                style: AppTypography.bodyMedium
+                                                    .copyWith(
+                                                  color: AppColors.textPrimary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Text(
+                                                'Producto #${mov.productoId}',
+                                                style: AppTypography.bodySmall
+                                                    .copyWith(
+                                                  color: AppColors.textPrimary
+                                                      .withValues(alpha: 0.65),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                         SizedBox(
@@ -384,9 +499,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                           child: Text(
                                             '${mov.cantidad}',
                                             textAlign: TextAlign.right,
-                                            style: AppTypography.bodySmall
+                                            style: AppTypography.bodyMedium
                                                 .copyWith(
-                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
+                                              fontWeight: FontWeight.w700,
                                             ),
                                           ),
                                         ),
@@ -426,6 +542,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                 ),
               ),
             ],
+          ),
+            ),
           ),
         ),
       ),

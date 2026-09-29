@@ -952,7 +952,7 @@ class ComprobantePdf {
                 width: 72,
                 child: pw.Text(
                   k,
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 8,
                     fontWeight: pw.FontWeight.bold,
                   ),
@@ -997,7 +997,7 @@ class ComprobantePdf {
       final kids = <pw.Widget>[
         pw.Text(
           desc,
-          style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+          style: const pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
         ),
       ];
       if ((d.ofertaNombre ?? '').trim().isNotEmpty) {
@@ -1057,7 +1057,7 @@ class ComprobantePdf {
             children: [
               pw.Text(
                 'ENVÍO / DELIVERY',
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 8,
                   fontWeight: pw.FontWeight.bold,
                 ),
@@ -1111,7 +1111,7 @@ class ComprobantePdf {
         if (showCliente) ...[
           pw.Text(
             'Cliente',
-            style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
           ),
           pw.Text(cliente, style: const pw.TextStyle(fontSize: 9)),
           if (telCli.isNotEmpty)
@@ -1134,7 +1134,7 @@ class ComprobantePdf {
         sep(),
         pw.Text(
           'Descripción',
-          style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+          style: const pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
         ),
         nums('Cant.', 'Precio', 'Subtotal', header: true),
         gap(3),
