@@ -1,20 +1,26 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
-class FacturacionInicioPage extends StatelessWidget {
+class FacturacionInicioPage extends ConsumerWidget {
   const FacturacionInicioPage({super.key});
 
   static const String routeName = 'sales';
   static const String path = '/sales';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final simple = ref.watch(configuracionControllerProvider)
+            .valueOrNull?.modoSimplificado == true;
+
+
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
 
     return AppScaffold(
-      title: 'FACTURACIÓN Y NC',
+      title: simple ? 'VENTAS / COMPROBANTES' : 'FACTURACIÓN Y NC',  // not const
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -143,9 +149,9 @@ class FacturacionInicioPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  const SectionHeader(
+                  SectionHeader(
                     title: 'Operaciones',
-                    subtitle: 'Comprobantes fiscales',
+                    subtitle: simple ? 'Comprobantes de venta' : 'Comprobantes fiscales',
                   ),
                   const SizedBox(height: 14),
                   AppAccessGrid(
@@ -155,7 +161,8 @@ class FacturacionInicioPage extends StatelessWidget {
                     runSpacing: 16,
                     tileHeight: mobile ? 200 : 200,
                     children: [
-                      AppHubCard(
+                      if (!simple)
+                        AppHubCard(
                         icon: Icons.note_add_outlined,
                         title: 'Emitir factura',
                         subtitle:
@@ -163,7 +170,8 @@ class FacturacionInicioPage extends StatelessWidget {
                         color: AppColors.primary,
                         onTap: () => context.push('/sales/emitir-factura'),
                       ),
-                      AppHubCard(
+                      if (!simple)
+                        AppHubCard(
                         icon: Icons.assignment_return_outlined,
                         title: 'Emitir NC',
                         subtitle: 'Emite una nota de crédito sobre una factura',
@@ -177,7 +185,8 @@ class FacturacionInicioPage extends StatelessWidget {
                         color: AppColors.primary,
                         onTap: () => context.push('/sales/historial'),
                       ),
-                      AppHubCard(
+                      if (!simple)
+                        AppHubCard(
                         icon: Icons.pin_outlined,
                         title: 'Secuencias NCF',
                         subtitle: 'Gestiona secuencias y rangos autorizados',

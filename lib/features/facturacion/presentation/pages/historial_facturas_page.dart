@@ -385,7 +385,9 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Documentos con NCF o estado facturado.',
+                    ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado == true
+                        ? 'Comprobantes de venta emitidos.'
+                        : 'Documentos con NCF o estado facturado.',
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),

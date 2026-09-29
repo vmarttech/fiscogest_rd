@@ -260,6 +260,7 @@ class VentasRepositoryImpl implements IVentasRepository {
     return '$pref-$digitos';
   }
 
+  @override
   Future<String> siguienteNumeroFactura() async {
     final ultimo = await _ventasDao.obtenerUltimoCorrelativoFactura();
     final siguiente = ultimo + 1;

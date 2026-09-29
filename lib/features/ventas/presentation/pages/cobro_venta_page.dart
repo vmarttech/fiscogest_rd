@@ -254,8 +254,9 @@ Future<void> _cargarDocumento({
 
   Future<void> _opcionesComprobantePdf(Venta ventaConDetalle) async {
     final emp = ref.read(configuracionControllerProvider).valueOrNull;
+    final simple = emp?.modoSimplificado == true;
     final ncf = (ventaConDetalle.numeroFactura ?? '').trim();
-    if (ncf.isEmpty) {
+    if (ncf.isEmpty && !simple) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -269,7 +270,7 @@ Future<void> _cargarDocumento({
     final accion = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Comprobante fiscal'),
+        title: Text(simple ? 'Comprobante' : 'Comprobante fiscal'),
         content: Text('NCF: $ncf\n\nElija imprimir o enviar (WhatsApp, correo, etc.).'),
         actions: [
           TextButton(

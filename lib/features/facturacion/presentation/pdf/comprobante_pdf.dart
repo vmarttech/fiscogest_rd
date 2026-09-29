@@ -1,3 +1,4 @@
+// ignore_for_file: unused_element
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
@@ -11,6 +12,15 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart'
 /// Comprobante fiscal impreso (B01 crédito fiscal · B02 consumidor final).
 /// Estructura orientada a uso comercial en RD (DGII serie B).
 class ComprobantePdf {
+  static const PdfPageFormat formatoTicket80 = PdfPageFormat(
+    80 * PdfPageFormat.mm,
+    160 * PdfPageFormat.mm,
+    marginLeft: 4 * PdfPageFormat.mm,
+    marginRight: 4 * PdfPageFormat.mm,
+    marginTop: 4 * PdfPageFormat.mm,
+    marginBottom: 4 * PdfPageFormat.mm,
+  );
+
   // Datos del emisor: los asigna imprimirFactura() con la configuración guardada.
   static ConfiguracionEntity? _empresa;
   static String emisorNombre = 'FiscoGest RD';
@@ -35,7 +45,8 @@ class ComprobantePdf {
     String? telefonoCliente,
   }) async {
     final ncf = (v.numeroFactura ?? '').trim();
-    if (ncf.isEmpty) {
+    final simple = empresa?.modoSimplificado == true;
+    if (ncf.isEmpty && !simple) {
       throw StateError('Sin NCF: no se puede imprimir comprobante fiscal');
     }
     if (v.detalles.isEmpty) {
@@ -72,7 +83,8 @@ class ComprobantePdf {
     ConfiguracionEntity? empresa,
   }) async {
     final ncf = (v.numeroFactura ?? '').trim();
-    if (ncf.isEmpty) {
+    final simple = empresa?.modoSimplificado == true;
+    if (ncf.isEmpty && !simple) {
       throw StateError('Sin NCF: no se puede generar comprobante fiscal');
     }
     final doc = await _buildDocumento(v, empresa: empresa);
@@ -117,25 +129,17 @@ class ComprobantePdf {
     emisorEmail = empresa?.correo ?? '';
 
     final ncf = (v.numeroFactura ?? '').trim();
-    final esB01 = ncf.startsWith('B01');
-    final esB02 = ncf.startsWith('B02');
-    final titulo = esB01
-        ? 'FACTURA DE CRÉDITO FISCAL'
-        : esB02
-            ? 'FACTURA PARA CONSUMIDOR FINAL'
-            : 'COMPROBANTE FISCAL';
-    final tipoLabel = esB01
-        ? 'B01 · Crédito fiscal'
-        : esB02
-            ? 'B02 · Consumidor final'
-            : ncf.length >= 3
-                ? ncf.substring(0, 3)
-                : ncf;
+    final simple = empresa?.modoSimplificado == true;
+    final esB01 = !simple && ncf.startsWith('B01');
+    final esB02 = !simple && ncf.startsWith('B02');
+    final titulo = simple
+        ? 'COMPROBANTE DE VENTA'
+        : esB01
+            ? 'FACTURA DE CRÉDITO FISCAL'
+            : esB02
+                ? 'FACTURA PARA CONSUMIDOR FINAL'
+                : 'COMPROBANTE DE VENTA';
 
-    final detalles = v.detalles;
-    final subtotal = v.montoSubtotal;
-    final itbis = v.itbis;
-    final total = v.montoTotal;
     final cliente = (v.nombreCliente ?? 'Consumidor Final').trim();
     final formaPago = () {
       try {
@@ -166,37 +170,22 @@ class ComprobantePdf {
     }
 
     doc.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.letter,
-        margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 40),
-        header: (ctx) => _header(titulo: titulo, tipoLabel: tipoLabel, ncf: ncf, logo: logoImage),
-        footer: (ctx) => _footer(ctx, ncf),
-        build: (ctx) => [
-          pw.SizedBox(height: 8),
-          if (_empresa?.docMostrarCliente ?? true)
-            _bloqueEmisorCliente(
-              cliente: cliente,
-              rncCliente: rncCliente,
-              direccionCliente: direccionCliente,
-              telefonoCliente: telefonoCliente,
-              esB01: esB01,
-              venta: v,
-              fecha: fecha,
-            ),
-          pw.SizedBox(height: 16),
-          _tablaProductos(detalles),
-          pw.SizedBox(height: 12),
-          _totales(
-            subtotal: subtotal,
-            itbis: itbis,
-            total: total,
-            formaPago: formaPago,
-            costoEnvio: v.costoEnvio,
-            montoDescuento: v.montoDescuento,
-          ),
-          pw.SizedBox(height: 20),
-          _leyendaLegal(esB01: esB01, ncf: ncf),
-        ],
+      pw.Page(
+        pageFormat: formatoTicket80,
+        build: (ctx) => _ticketBody(
+          v: v,
+          empresa: empresa,
+          simple: simple,
+          ncf: ncf,
+          titulo: titulo,
+          cliente: cliente,
+          rncCliente: rncCliente,
+          direccionCliente: direccionCliente,
+          telefonoCliente: telefonoCliente,
+          formaPago: formaPago,
+          fecha: fecha,
+          logoImage: logoImage,
+        ),
       ),
     );
     return doc;
@@ -884,6 +873,293 @@ class ComprobantePdf {
         pw.Container(height: 0.8, color: PdfColors.black),
         pw.SizedBox(height: 4),
         pw.Text(lineaNombre, style: const pw.TextStyle(fontSize: 8)),
+      ],
+    );
+  }
+
+  static pw.Widget _ticketBody({
+    required Venta v,
+    required ConfiguracionEntity? empresa,
+    required bool simple,
+    required String ncf,
+    required String titulo,
+    required String cliente,
+    String? rncCliente,
+    String? direccionCliente,
+    String? telefonoCliente,
+    required String formaPago,
+    required DateTime fecha,
+    pw.MemoryImage? logoImage,
+  }) {
+    // —— Configuración documentos (editable en Configuración global) ——
+    final showLogo = empresa?.docMostrarLogo ?? true;
+    final showRnc = !simple && (empresa?.docMostrarRnc ?? true);
+    final showDir = empresa?.docMostrarDireccion ?? true;
+    final showTel = empresa?.docMostrarTelefono ?? true;
+    final showMail = empresa?.docMostrarCorreo ?? true;
+    final showCliente = empresa?.docMostrarCliente ?? true;
+    final showNcf = !simple && (empresa?.docMostrarNcf ?? true);
+    final showItbis = !simple
+        ? (empresa?.docMostrarItbisDesglose ?? true)
+        : (v.itbis > 0.001);
+    final pie = (empresa?.docPiePagina ?? '').trim();
+
+    final telEmp = (empresa?.telefono ?? emisorTel).trim();
+    final mailEmp = (empresa?.correo ?? emisorEmail).trim();
+    final dirEmp = (empresa?.direccion ?? emisorDir).trim();
+    final nombreEmp = emisorNombre;
+    final rncEmp = (empresa?.rnc ?? emisorRnc).trim();
+
+    final cotizacion = v.numeroCotizacion;
+    final fechaStr =
+        '${fecha.day.toString().padLeft(2, '0')}/'
+        '${fecha.month.toString().padLeft(2, '0')}/'
+        '${fecha.year} '
+        '${fecha.hour.toString().padLeft(2, '0')}:'
+        '${fecha.minute.toString().padLeft(2, '0')}';
+    final telCli = (telefonoCliente ?? v.clienteTelefono ?? '').trim();
+    final dirCli = (direccionCliente ?? v.clienteDireccion ?? '').trim();
+    final status = ncf.isNotEmpty ? 'Pagado' : 'Pendiente';
+    final envio = v.costoEnvio;
+    // Descuento general: montoDescuento o descuentoGlobal (el mayor / suma coherente)
+    final descGlobal = v.montoDescuento > 0.001
+        ? v.montoDescuento
+        : v.descuentoGlobal;
+    final descNombre = (v.descuentoNombre ?? '').trim();
+
+    pw.Widget gap([double h = 3]) => pw.SizedBox(height: h);
+    pw.Widget sep() => pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(vertical: 4),
+          child: pw.Divider(thickness: 0.6, color: PdfColors.grey700),
+        );
+    pw.Widget center(String s, {double size = 8, bool bold = false}) =>
+        pw.Center(
+          child: pw.Text(
+            s,
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(
+              fontSize: size,
+              fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ),
+        );
+    pw.Widget kv(String k, String val) => pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 2),
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.SizedBox(
+                width: 72,
+                child: pw.Text(
+                  k,
+                  style: pw.TextStyle(
+                    fontSize: 8,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ),
+              pw.Expanded(
+                child: pw.Text(val, style: const pw.TextStyle(fontSize: 8)),
+              ),
+            ],
+          ),
+        );
+
+    // Fila numérica con anchos fijos (no se amontona en 80 mm)
+    pw.Widget nums(String a, String b, String c, {bool header = false}) {
+      final st = pw.TextStyle(
+        fontSize: header ? 7 : 8,
+        fontWeight: header ? pw.FontWeight.bold : pw.FontWeight.normal,
+      );
+      return pw.Row(
+        children: [
+          pw.SizedBox(
+            width: 42,
+            child: pw.Text(a, style: st, textAlign: pw.TextAlign.left),
+          ),
+          pw.Expanded(
+            child: pw.Text(b, style: st, textAlign: pw.TextAlign.right),
+          ),
+          pw.SizedBox(
+            width: 58,
+            child: pw.Text(c, style: st, textAlign: pw.TextAlign.right),
+          ),
+        ],
+      );
+    }
+
+    final lineas = <pw.Widget>[];
+    for (final d in v.detalles) {
+      final desc = (d.nombreProducto ?? 'Ítem').trim();
+      final cant = d.cantidad.toDouble();
+      final precio = d.precioUnitario;
+      final sub = d.subtotalLinea ?? d.subtotal;
+      final kids = <pw.Widget>[
+        pw.Text(
+          desc,
+          style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+        ),
+      ];
+      if ((d.ofertaNombre ?? '').trim().isNotEmpty) {
+        kids.add(
+          pw.Text(
+            'Oferta: ${d.ofertaNombre!.trim()}',
+            style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+          ),
+        );
+      }
+      if (d.precioOriginal != null &&
+          d.precioOriginal! > precio + 0.001) {
+        kids.add(
+          pw.Text(
+            'Antes: ${_money(d.precioOriginal!)}',
+            style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600),
+          ),
+        );
+      }
+      kids.add(nums(
+        cant.toStringAsFixed(2),
+        _money(precio),
+        _money(sub),
+      ));
+      if (d.montoDescuento > 0.001) {
+        kids.add(
+          pw.Text(
+            'Desc. línea: -${_money(d.montoDescuento)}'
+            '${d.descuentoPorcentaje > 0 ? ' (${d.descuentoPorcentaje.toStringAsFixed(1)}%)' : ''}',
+            style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+          ),
+        );
+      } else if (d.descuentoPorcentaje > 0.001) {
+        kids.add(
+          pw.Text(
+            'Desc. línea: ${d.descuentoPorcentaje.toStringAsFixed(1)}%',
+            style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+          ),
+        );
+      }
+      lineas.add(
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 5),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: kids,
+          ),
+        ),
+      );
+    }
+    if (envio > 0.0001) {
+      lineas.add(
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 5),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: [
+              pw.Text(
+                'ENVÍO / DELIVERY',
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              nums('1.00', _money(envio), _money(envio)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    pw.Widget totalRow(String label, String value, {bool bold = false}) =>
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 2),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                label,
+                style: pw.TextStyle(
+                  fontSize: bold ? 10 : 8,
+                  fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+                ),
+              ),
+              pw.Text(
+                value,
+                style: pw.TextStyle(
+                  fontSize: bold ? 10 : 8,
+                  fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        );
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+      children: [
+        if (showLogo && logoImage != null) ...[
+          pw.Center(
+            child: pw.Image(logoImage, height: 32, fit: pw.BoxFit.contain),
+          ),
+          gap(3),
+        ],
+        center(nombreEmp, size: 11, bold: true),
+        if (showRnc && rncEmp.isNotEmpty) center('RNC: $rncEmp', size: 7),
+        if (showTel && telEmp.isNotEmpty) center(telEmp, size: 8),
+        if (showMail && mailEmp.isNotEmpty) center(mailEmp, size: 7),
+        if (showDir && dirEmp.isNotEmpty) center(dirEmp, size: 7),
+        sep(),
+        if (showCliente) ...[
+          pw.Text(
+            'Cliente',
+            style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.Text(cliente, style: const pw.TextStyle(fontSize: 9)),
+          if (telCli.isNotEmpty)
+            pw.Text(telCli, style: const pw.TextStyle(fontSize: 8)),
+          if (dirCli.isNotEmpty)
+            pw.Text(dirCli, style: const pw.TextStyle(fontSize: 8)),
+          gap(4),
+        ],
+        kv('Cotización:', cotizacion),
+        if (showNcf && ncf.isNotEmpty) kv('NCF:', ncf),
+        kv('Fecha:', fechaStr),
+        kv('Status:', status),
+        kv('Forma Pago:', formaPago.toUpperCase()),
+        if (showNcf && (rncCliente ?? '').trim().isNotEmpty)
+          kv('RNC cliente:', rncCliente!.trim()),
+        if (!simple && titulo.isNotEmpty) ...[
+          gap(3),
+          center(titulo, size: 8, bold: true),
+        ],
+        sep(),
+        pw.Text(
+          'Descripción',
+          style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+        ),
+        nums('Cant.', 'Precio', 'Subtotal', header: true),
+        gap(3),
+        ...lineas,
+        sep(),
+        totalRow('Subtotal', _money(v.montoSubtotal)),
+        if (descGlobal > 0.001)
+          totalRow(
+            descNombre.isNotEmpty ? 'Desc. $descNombre' : 'Descuento',
+            '- ${_money(descGlobal)}',
+          ),
+        if (showItbis)
+          totalRow(simple ? 'Impuesto' : 'ITBIS', '+ ${_money(v.itbis)}'),
+        if (envio > 0.0001) totalRow('Envío', _money(envio)),
+        gap(2),
+        totalRow('TOTAL', _money(v.montoTotal), bold: true),
+        sep(),
+        if (pie.isNotEmpty)
+          center(pie, size: 7)
+        else ...[
+          center('Verifique su pedido al recibirlo.', size: 6),
+          center('Reclamaciones: 24 horas.', size: 6),
+        ],
+        gap(4),
+        center('FiscoGest RD', size: 6),
       ],
     );
   }
