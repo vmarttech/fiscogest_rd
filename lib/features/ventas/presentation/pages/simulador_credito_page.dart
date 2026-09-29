@@ -9,14 +9,10 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 
-/// Simulación rápida. Motor: [CalculadoraCreditoService] (igual que crédito formal).
-/// Tasa oculta. Plazo y cuotas: mismas opciones que formulario_credito_dialog.
 class SimuladorCreditoPage extends StatefulWidget {
   const SimuladorCreditoPage({super.key});
-
   static const String path = '/ventas/simulador-credito';
   static const String routeName = 'simulador-credito';
-
   static const List<int> opcionesPlazo = [1, 2, 3, 6];
   static const List<int> opcionesCuotas = [1, 2, 3, 6];
   static const double tasaMensualDefault = 0.05;
@@ -30,7 +26,6 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
   final _inicialCtrl = TextEditingController(text: '0');
   int _plazoMeses = 6;
   int _numeroCuotas = 6;
-
   ResumenCreditoCliente? _resumen;
   PlanPago? _plan;
   String? _error;
@@ -60,6 +55,7 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
       });
       return;
     }
+
     if (capital <= 0) {
       setState(() {
         _error = 'El saldo a financiar debe ser mayor a RD\$ 0.00';
@@ -68,6 +64,7 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
       });
       return;
     }
+
     if (!SimuladorCreditoPage.opcionesPlazo.contains(_plazoMeses) ||
         !SimuladorCreditoPage.opcionesCuotas.contains(_numeroCuotas) ||
         _numeroCuotas > _plazoMeses) {
@@ -326,57 +323,6 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                  ],
-                  if (_plan != null && _plan!.cuotas.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      'Tabla de cuotas',
-                      style: AppTypography.h4.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ..._plan!.cuotas.map(
-                      (c) => Container(
-                        margin: const EdgeInsets.only(bottom: 6),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 36,
-                              child: Text(
-                                '#${c.numeroCuota}',
-                                style: AppTypography.labelMedium.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                _rd(c.montoTotal),
-                                style: AppTypography.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Cap ${_rd(c.montoCapital)} · Int ${_rd(c.montoInteres)}',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                   ],
