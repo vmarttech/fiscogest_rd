@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
 class AppHubHero extends StatelessWidget {
   const AppHubHero({
@@ -16,10 +17,17 @@ class AppHubHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(context);
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
+      padding: EdgeInsets.fromLTRB(
+        isMobile ? 16 : 24,
+        isMobile ? 12 : 22,
+        isMobile ? 16 : 24,
+        isMobile ? 12 : 22,
+      ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -32,41 +40,57 @@ class AppHubHero extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.28),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+            blurRadius: isMobile ? 12 : 24,
+            offset: Offset(0, isMobile ? 4 : 10),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(isMobile ? 8 : 14),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(isMobile ? 10 : 14),
             ),
-            child: Icon(icon, color: Colors.white, size: 28),
+            child: Icon(icon, color: Colors.white, size: isMobile ? 20 : 28),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: isMobile ? 12 : 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
-                  style: AppTypography.h4.copyWith(
+                  style: (isMobile ? AppTypography.bodyLarge : AppTypography.h4)
+                      .copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  subtitle,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    height: 1.35,
+                if (!isMobile) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      height: 1.35,
+                    ),
                   ),
-                ),
+                ] else ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 11,
+                      height: 1.25,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),

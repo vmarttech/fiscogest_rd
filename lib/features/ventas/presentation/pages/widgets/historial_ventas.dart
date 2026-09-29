@@ -48,7 +48,7 @@ class HistorialVentas extends ConsumerWidget {
                 padding: const EdgeInsets.only(top: 8, bottom: 12),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.history_rounded,
                       color: AppColors.primary,
                       size: 22,
@@ -95,7 +95,7 @@ class HistorialVentas extends ConsumerWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.receipt_long_outlined,
                                 size: 56,
                                 color: AppColors.grey400,
@@ -207,7 +207,7 @@ class HistorialVentas extends ConsumerWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  Icon(
+                                  const Icon(
                                     Icons.chevron_right,
                                     size: 18,
                                     color: AppColors.grey400,

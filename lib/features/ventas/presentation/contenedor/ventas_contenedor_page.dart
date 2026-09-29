@@ -82,7 +82,8 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
     };
 
     // En historial / detalle no mostramos hero (más espacio de lista)
-    final showHero = vistaActual == VistaActual.inicio;
+    // En móvil tampoco: el hero ocupa demasiado y ya está el título en el AppBar
+    final showHero = vistaActual == VistaActual.inicio && !mobile;
 
     return AppScaffold(
       title: tituloApp,

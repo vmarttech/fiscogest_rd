@@ -569,17 +569,14 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
     void irNuevaCotizacion() =>
         context.push('/ventas/cotizaciones/nueva');
-
     void irHistorial() {
       ref
           .read(ventasNavegacionProvider.notifier)
           .cambiarVista(VistaActual.historial);
     }
-
     void irSimuladorCredito() {
       context.push('/ventas/simulador-credito');
     }
-
     void consultarStock() {
       showModalBottomSheet<void>(
         context: context,
@@ -597,21 +594,21 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final atajos = AppAccessGrid(
       minTileWidth: isMobile ? 150 : 180,
       maxColumns: isMobile ? 1 : 2,
-      spacing: 12,
-      runSpacing: 12,
-      tileHeight: 168,
+      spacing: isMobile ? 8 : 12,
+      runSpacing: isMobile ? 8 : 12,
+      tileHeight: isMobile ? 72 : 168,
       children: [
         AppHubCard(
           icon: Icons.inventory_2_outlined,
           title: 'Consultar stock',
-          subtitle: 'Solo lectura, sin salir',
+          subtitle: isMobile ? 'Solo lectura' : 'Solo lectura, sin salir',
           color: AppColors.primary,
           onTap: consultarStock,
         ),
         AppHubCard(
           icon: Icons.calculate_outlined,
           title: 'Simular crédito',
-          subtitle: 'Montos y cuotas oficiales',
+          subtitle: isMobile ? 'Montos y cuotas' : 'Montos y cuotas oficiales',
           color: AppColors.warning,
           onTap: irSimuladorCredito,
         ),
@@ -619,7 +616,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     );
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: isMobile ? 4 : 8),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 10 : 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -631,49 +628,50 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 const SizedBox(width: 16),
                 Expanded(
                   flex: 2,
-                  child: _PosContextoCard(onHistorial: irHistorial),
+                  child: _PosContextoCard(onHistorial: irHistorial, isMobile: false),
                 ),
               ],
             )
           else ...[
             cta,
-            const SizedBox(height: 14),
-            _PosContextoCard(onHistorial: irHistorial),
+            SizedBox(height: isMobile ? 8 : 14),
+            _PosContextoCard(onHistorial: irHistorial, isMobile: isMobile),
           ],
-          const SizedBox(height: 22),
+          SizedBox(height: isMobile ? 14 : 22),
           Text(
             'Accesos del vendedor',
-            style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Stock en solo lectura y simulación de crédito. Historial en la tarjeta superior.',
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+            style: AppTypography.h4.copyWith(
+              fontWeight: FontWeight.w800,
+              fontSize: isMobile ? 15 : null,
             ),
           ),
-          const SizedBox(height: 14),
+          if (!isMobile) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Stock en solo lectura y simulación de crédito. Historial en la tarjeta superior.',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+          SizedBox(height: isMobile ? 8 : 14),
           atajos,
-          const SizedBox(height: 22),
+          SizedBox(height: isMobile ? 14 : 22),
           Text(
             'Flujo del vendedor',
-            style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+            style: AppTypography.h4.copyWith(
+              fontWeight: FontWeight.w800,
+              fontSize: isMobile ? 15 : null,
+            ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: isMobile ? 6 : 10),
           _PosFlujoBanner(isMobile: isMobile),
-          const SizedBox(height: 12),
+          SizedBox(height: isMobile ? 8 : 12),
         ],
       ),
     );
   }
-
-
-
-
-
 }
-
-
 
 /// CTA principal del POS — máxima jerarquía visual.
 class _PosCtaCard extends StatelessWidget {
@@ -687,10 +685,10 @@ class _PosCtaCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -703,14 +701,14 @@ class _PosCtaCard extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: AppColors.primary.withValues(alpha: 0.35),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                blurRadius: isMobile ? 10 : 20,
+                offset: Offset(0, isMobile ? 4 : 8),
               ),
             ],
           ),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 20 : 28,
+              horizontal: isMobile ? 18 : 28,
               vertical: isMobile ? 22 : 28,
             ),
             child: Row(
@@ -720,7 +718,7 @@ class _PosCtaCard extends StatelessWidget {
                   height: isMobile ? 56 : 64,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(isMobile ? 14 : 16),
                   ),
                   child: Icon(
                     Icons.request_quote_rounded,
@@ -728,7 +726,7 @@ class _PosCtaCard extends StatelessWidget {
                     size: isMobile ? 30 : 34,
                   ),
                 ),
-                const SizedBox(width: 18),
+                SizedBox(width: isMobile ? 16 : 18),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -741,15 +739,21 @@ class _PosCtaCard extends StatelessWidget {
                             .copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
+                          fontSize: isMobile ? 18 : null,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: isMobile ? 4 : 4),
                       Text(
-                        'Arme el pedido, aplique crédito si aplica y envíe a Caja',
+                        isMobile
+                            ? 'Arme el pedido y envíe a Caja'
+                            : 'Arme el pedido, aplique crédito si aplica y envíe a Caja',
                         style: AppTypography.bodyMedium.copyWith(
                           color: Colors.white.withValues(alpha: 0.92),
                           height: 1.3,
+                          fontSize: isMobile ? 13 : null,
                         ),
+                        maxLines: isMobile ? 2 : 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -757,7 +761,7 @@ class _PosCtaCard extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_rounded,
                   color: Colors.white.withValues(alpha: 0.9),
-                  size: 28,
+                  size: isMobile ? 26 : 28,
                 ),
               ],
             ),
@@ -770,8 +774,12 @@ class _PosCtaCard extends StatelessWidget {
 
 /// Contexto / recordatorio de estación (sin depender aún de KPIs live).
 class _PosContextoCard extends StatelessWidget {
-  const _PosContextoCard({required this.onHistorial});
+  const _PosContextoCard({
+    required this.onHistorial,
+    this.isMobile = false,
+  });
   final VoidCallback onHistorial;
+  final bool isMobile;
 
   @override
   Widget build(BuildContext context) {
@@ -779,61 +787,76 @@ class _PosContextoCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onHistorial,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
         child: Ink(
-          padding: const EdgeInsets.all(18),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 14 : 18,
+            vertical: isMobile ? 10 : 18,
+          ),
           decoration: BoxDecoration(
             color: AppColors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
             border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                blurRadius: isMobile ? 6 : 12,
+                offset: Offset(0, isMobile ? 2 : 4),
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.info.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.history_rounded,
-                      color: AppColors.info,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
+              Container(
+                padding: EdgeInsets.all(isMobile ? 8 : 10),
+                decoration: BoxDecoration(
+                  color: AppColors.info.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
+                ),
+                child: Icon(
+                  Icons.history_rounded,
+                  color: AppColors.info,
+                  size: isMobile ? 18 : 22,
+                ),
+              ),
+              SizedBox(width: isMobile ? 10 : 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       'Historial',
                       style: AppTypography.bodyLarge.copyWith(
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
+                        fontSize: isMobile ? 14 : null,
                       ),
                     ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.textSecondary.withValues(alpha: 0.7),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Cotizaciones y ventas del vendedor.',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textPrimary.withValues(alpha: 0.75),
-                  height: 1.35,
+                    if (!isMobile) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Cotizaciones y ventas del vendedor.',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textPrimary.withValues(alpha: 0.75),
+                          height: 1.35,
+                        ),
+                      ),
+                    ] else ...[
+                      Text(
+                        'Cotizaciones y ventas',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textSecondary.withValues(alpha: 0.7),
+                size: isMobile ? 18 : 24,
               ),
             ],
           ),
@@ -855,26 +878,33 @@ class _PosFlujoBanner extends StatelessWidget {
       (Icons.calculate_outlined, 'Simular cuotas'),
       (Icons.outgoing_mail, 'Enviar a cobro'),
     ];
+
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 12 : 18,
-        vertical: isMobile ? 14 : 16,
+        horizontal: isMobile ? 10 : 18,
+        vertical: isMobile ? 10 : 16,
       ),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
         border: Border.all(
           color: AppColors.primary.withValues(alpha: 0.15),
         ),
       ),
       child: isMobile
-          ? Column(
+          ? Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              alignment: WrapAlignment.center,
               children: [
                 for (var i = 0; i < pasos.length; i++) ...[
-                  _paso(pasos[i].$1, pasos[i].$2),
+                  _paso(pasos[i].$1, pasos[i].$2, compact: true),
                   if (i < pasos.length - 1)
-                    Icon(Icons.keyboard_arrow_down_rounded,
-                        color: AppColors.primary.withValues(alpha: 0.5)),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 14,
+                      color: AppColors.primary.withValues(alpha: 0.45),
+                    ),
                 ],
               ],
             )
@@ -883,25 +913,29 @@ class _PosFlujoBanner extends StatelessWidget {
                 for (var i = 0; i < pasos.length; i++) ...[
                   Expanded(child: _paso(pasos[i].$1, pasos[i].$2)),
                   if (i < pasos.length - 1)
-                    Icon(Icons.arrow_forward_rounded,
-                        size: 18,
-                        color: AppColors.primary.withValues(alpha: 0.45)),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 18,
+                      color: AppColors.primary.withValues(alpha: 0.45),
+                    ),
                 ],
               ],
             ),
     );
   }
 
-  Widget _paso(IconData icon, String label) {
+  Widget _paso(IconData icon, String label, {bool compact = false}) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, size: 20, color: AppColors.primary),
-        const SizedBox(width: 8),
+        Icon(icon, size: compact ? 16 : 20, color: AppColors.primary),
+        SizedBox(width: compact ? 4 : 8),
         Text(
           label,
-          style: AppTypography.bodyMedium.copyWith(
-            fontWeight: FontWeight.w700,
+          style: TextStyle(
+            fontSize: compact ? 11 : 13,
+            fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
@@ -921,7 +955,6 @@ class _FilaResumen extends StatelessWidget {
   final String value;
   final bool destacado;
   final Color? color;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
