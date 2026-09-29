@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/apartados_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
@@ -32,11 +31,6 @@ final List<VentasRoute> ventasRoutes = [
     path: '/ventas/cotizaciones/nueva',
     name: NuevaVentaBorradorPage.routeName,
     builder: (_) => const NuevaVentaBorradorPage(),
-  ),
-  VentasRoute(
-    path: '/ventas/apartados',
-    name: ApartadosPage.routeName,
-    builder: (_) => const ApartadosPage(),
   ),
   VentasRoute(
     path: '/ventas/devoluciones',

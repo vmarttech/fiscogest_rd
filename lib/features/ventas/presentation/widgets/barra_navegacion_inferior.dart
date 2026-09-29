@@ -12,22 +12,11 @@ class BarraNavegacionInferior extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final vistaActual =
         ref.watch(ventasNavegacionProvider.select((e) => e.vistaActual));
-    final modo =
-        ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
 
     void irInicio() {
       ref
           .read(ventasNavegacionProvider.notifier)
           .establecerModoOperacion(ModoOperacion.cotizacion);
-      ref
-          .read(ventasNavegacionProvider.notifier)
-          .cambiarVista(VistaActual.inicio);
-    }
-
-    void irApartado() {
-      ref
-          .read(ventasNavegacionProvider.notifier)
-          .establecerModoOperacion(ModoOperacion.apartado);
       ref
           .read(ventasNavegacionProvider.notifier)
           .cambiarVista(VistaActual.inicio);
@@ -87,11 +76,7 @@ class BarraNavegacionInferior extends ConsumerWidget {
       );
     }
 
-    final enInicio = vistaActual == VistaActual.inicio;
-    final activoInicio =
-        enInicio && modo != ModoOperacion.apartado;
-    final activoApartado =
-        enInicio && modo == ModoOperacion.apartado;
+    final activoInicio = vistaActual == VistaActual.inicio;
     final activoHistorial = vistaActual == VistaActual.historial;
 
     return Container(
@@ -102,19 +87,12 @@ class BarraNavegacionInferior extends ConsumerWidget {
       child: SafeArea(
         top: false,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             boton(
               activo: activoInicio,
               icono: Icons.point_of_sale,
               etiqueta: 'Inicio',
               onTap: irInicio,
-            ),
-            boton(
-              activo: activoApartado,
-              icono: Icons.inventory_2_outlined,
-              etiqueta: 'Apartado',
-              onTap: irApartado,
             ),
             boton(
               activo: activoHistorial,

@@ -613,12 +613,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           ),
         ),
         const SizedBox(height: 12),
-        TextButton.icon(
-          icon: const Icon(Icons.history, size: 18),
-          label: const Text('Historial de Cotizaciones'),
-          onPressed: () => context.push('/ventas/cotizaciones/historial'),
-          style: TextButton.styleFrom(foregroundColor: AppColors.info),
-        ),
+
       ],
     );
   }

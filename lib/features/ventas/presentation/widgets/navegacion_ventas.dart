@@ -79,21 +79,6 @@ class NavegacionVentas extends ConsumerWidget {
           ),
           _buildListTile(
             context,
-            icon: Icons.bookmark,
-            title: 'Apartados',
-            isMobile: isMobile,
-            onTap: () {
-              Navigator.pop(context);
-              ref
-                  .read(ventasNavegacionProvider.notifier)
-                  .establecerModoOperacion(ModoOperacion.apartado);
-              ref
-                  .read(ventasNavegacionProvider.notifier)
-                  .cambiarVista(VistaActual.inicio);
-            },
-          ),
-          _buildListTile(
-            context,
             icon: Icons.undo,
             title: 'Devoluciones',
             isMobile: isMobile,
