@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/seguridad/presentation/pages/login_page.da
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cotizaciones_historial_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/simulador_credito_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
@@ -138,6 +139,7 @@ GoRoute(
             builder: (_, __) =>
                 const AppShell(child: CotizacionesHistorialPage()),
           ),
+
           GoRoute(
             path: 'devoluciones',
             name: DevolucionesPage.routeName,
@@ -318,6 +320,11 @@ GoRoute(
             },
           ),
         ],
+      ),
+      GoRoute(
+        path: '/ventas/simulador-credito',
+        name: SimuladorCreditoPage.routeName,
+        builder: (_, __) => const AppShell(child: SimuladorCreditoPage()),
       ),
       GoRoute(
         path: '/inventario',

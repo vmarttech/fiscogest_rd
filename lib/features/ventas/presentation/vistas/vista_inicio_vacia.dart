@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/ui/app_access_grid.dart';
+import 'package:fiscogest_rd/core/ui/app_hub_card.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
@@ -558,94 +561,351 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     );
   }
 
-  /// Entrada al único punto de venta: Cotización (visual hub = Caja)
+  /// Hub del punto de venta (solo vendedor: cotizar + historial).
+  /// Hub vendedor: cotizar, historial, simular crédito, consultar stock (lectura).
   Widget _buildEntradaCotizacion(bool isMobile) {
+    final width = MediaQuery.sizeOf(context).width;
+    final wide = !isMobile && width >= 900;
+
+    void irNuevaCotizacion() =>
+        context.push('/ventas/cotizaciones/nueva');
+
+    void irHistorial() {
+      ref
+          .read(ventasNavegacionProvider.notifier)
+          .cambiarVista(VistaActual.historial);
+    }
+
+    void irSimuladorCredito() {
+      context.push('/ventas/simulador-credito');
+    }
+
+    void consultarStock() {
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (ctx) => const ConsultaStockLecturaSheet(),
+      );
+    }
+
+    final cta = _PosCtaCard(
+      isMobile: isMobile,
+      onTap: irNuevaCotizacion,
+    );
+
+    final atajos = AppAccessGrid(
+      minTileWidth: isMobile ? 150 : 180,
+      maxColumns: isMobile ? 1 : 2,
+      spacing: 12,
+      runSpacing: 12,
+      tileHeight: 168,
+      children: [
+        AppHubCard(
+          icon: Icons.inventory_2_outlined,
+          title: 'Consultar stock',
+          subtitle: 'Solo lectura, sin salir',
+          color: AppColors.primary,
+          onTap: consultarStock,
+        ),
+        AppHubCard(
+          icon: Icons.calculate_outlined,
+          title: 'Simular crédito',
+          subtitle: 'Montos y cuotas oficiales',
+          color: AppColors.warning,
+          onTap: irSimuladorCredito,
+        ),
+      ],
+    );
+
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: isMobile ? 8 : 16),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 4 : 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (wide)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 3, child: cta),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 2,
+                  child: _PosContextoCard(onHistorial: irHistorial),
+                ),
+              ],
+            )
+          else ...[
+            cta,
+            const SizedBox(height: 14),
+            _PosContextoCard(onHistorial: irHistorial),
+          ],
+          const SizedBox(height: 22),
           Text(
-            'Operaciones',
-            style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
+            'Accesos del vendedor',
+            style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 4),
           Text(
-            'Cotizar → crédito (si aplica) → Caja factura',
+            'Stock en solo lectura y simulación de crédito. Historial en la tarjeta superior.',
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 16),
-          Material(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () => context.push('/ventas/cotizaciones/nueva'),
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 18 : 22,
-                  vertical: isMobile ? 18 : 22,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.description_outlined,
-                        color: AppColors.primary,
-                        size: 26,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Nueva cotización',
-                            style: AppTypography.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Armar pedido y enviar a cobro',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: AppColors.textSecondary.withValues(alpha: 0.7),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          const SizedBox(height: 14),
+          atajos,
+          const SizedBox(height: 22),
+          Text(
+            'Flujo del vendedor',
+            style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
           ),
+          const SizedBox(height: 10),
+          _PosFlujoBanner(isMobile: isMobile),
+          const SizedBox(height: 12),
         ],
       ),
+    );
+  }
+
+
+
+
+
+}
+
+
+
+/// CTA principal del POS — máxima jerarquía visual.
+class _PosCtaCard extends StatelessWidget {
+  const _PosCtaCard({required this.isMobile, required this.onTap});
+  final bool isMobile;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.primaryDark,
+                AppColors.primary,
+                AppColors.primaryLight.withValues(alpha: 0.95),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.35),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 28,
+              vertical: isMobile ? 22 : 28,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: isMobile ? 56 : 64,
+                  height: isMobile ? 56 : 64,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.request_quote_rounded,
+                    color: Colors.white,
+                    size: isMobile ? 30 : 34,
+                  ),
+                ),
+                const SizedBox(width: 18),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Nueva cotización',
+                        style: (isMobile
+                                ? AppTypography.h4
+                                : AppTypography.h3)
+                            .copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Arme el pedido, aplique crédito si aplica y envíe a Caja',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.white.withValues(alpha: 0.9),
+                  size: 28,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Contexto / recordatorio de estación (sin depender aún de KPIs live).
+class _PosContextoCard extends StatelessWidget {
+  const _PosContextoCard({required this.onHistorial});
+  final VoidCallback onHistorial;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onHistorial,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.info.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.history_rounded,
+                      color: AppColors.info,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Historial',
+                      style: AppTypography.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textSecondary.withValues(alpha: 0.7),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Cotizaciones y ventas del vendedor.',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textPrimary.withValues(alpha: 0.75),
+                  height: 1.35,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PosFlujoBanner extends StatelessWidget {
+  const _PosFlujoBanner({required this.isMobile});
+  final bool isMobile;
+
+  @override
+  Widget build(BuildContext context) {
+    final pasos = <(IconData, String)>[
+      (Icons.edit_note_rounded, 'Cotizar'),
+      (Icons.inventory_2_outlined, 'Ver stock'),
+      (Icons.calculate_outlined, 'Simular cuotas'),
+      (Icons.outgoing_mail, 'Enviar a cobro'),
+    ];
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 12 : 18,
+        vertical: isMobile ? 14 : 16,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.15),
+        ),
+      ),
+      child: isMobile
+          ? Column(
+              children: [
+                for (var i = 0; i < pasos.length; i++) ...[
+                  _paso(pasos[i].$1, pasos[i].$2),
+                  if (i < pasos.length - 1)
+                    Icon(Icons.keyboard_arrow_down_rounded,
+                        color: AppColors.primary.withValues(alpha: 0.5)),
+                ],
+              ],
+            )
+          : Row(
+              children: [
+                for (var i = 0; i < pasos.length; i++) ...[
+                  Expanded(child: _paso(pasos[i].$1, pasos[i].$2)),
+                  if (i < pasos.length - 1)
+                    Icon(Icons.arrow_forward_rounded,
+                        size: 18,
+                        color: AppColors.primary.withValues(alpha: 0.45)),
+                ],
+              ],
+            ),
+    );
+  }
+
+  Widget _paso(IconData icon, String label) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 20, color: AppColors.primary),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: AppTypography.bodyMedium.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }

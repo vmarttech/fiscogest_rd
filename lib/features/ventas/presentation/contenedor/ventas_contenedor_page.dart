@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
@@ -6,7 +7,6 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_hub_hero.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/widgets/barra_navegacion_inferior.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inventario.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_detalle.dart';
@@ -86,7 +86,18 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
 
     return AppScaffold(
       title: tituloApp,
-      body: Column(
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(-0.6, -0.85),
+            radius: 1.15,
+            colors: [
+              AppColors.primary.withValues(alpha: 0.07),
+              AppColors.background,
+            ],
+          ),
+        ),
+        child: Column(
         children: [
           Expanded(
             child: showHero
@@ -112,8 +123,8 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
                   )
                 : vistaActiva,
           ),
-          const BarraNavegacionInferior(),
         ],
+      ),
       ),
     );
   }
