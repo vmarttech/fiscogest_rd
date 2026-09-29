@@ -45,16 +45,42 @@ final configuracionControllerProvider =
 class ConfiguracionController extends AsyncNotifier<ConfiguracionEntity?> {
   @override
   Future<ConfiguracionEntity?> build() async {
+    ref.keepAlive();
     final obtener = ref.read(obtenerConfiguracionUseCaseProvider);
     return await obtener.ejecutar();
   }
 
   Future<void> guardar(ConfiguracionEntity configuracion) async {
-    state = const AsyncValue.loading();
+    final previous = state;
+    state = const AsyncValue<ConfiguracionEntity?>.loading()
+        .copyWithPrevious(previous);
     state = await AsyncValue.guard(() async {
       final guardarUseCase = ref.read(guardarConfiguracionUseCaseProvider);
       await guardarUseCase.ejecutar(configuracion);
       return await ref.read(obtenerConfiguracionUseCaseProvider).ejecutar();
     });
+    final cfg = state.valueOrNull;
+    if (cfg != null) {
+      ref.read(modoSimplificadoCacheProvider.notifier).state =
+          cfg.modoSimplificado;
+    }
   }
 }
+
+/// Último valor conocido (no vuelve a false en loading).
+final modoSimplificadoCacheProvider = StateProvider<bool>((ref) => false);
+
+/// Lectura estable para dashboard / menú / ventas.
+final modoSimplificadoProvider = Provider<bool>((ref) {
+  final live = ref.watch(configuracionControllerProvider).valueOrNull;
+  if (live != null) {
+    final v = live.modoSimplificado;
+    if (ref.read(modoSimplificadoCacheProvider) != v) {
+      Future.microtask(() {
+        ref.read(modoSimplificadoCacheProvider.notifier).state = v;
+      });
+    }
+    return v;
+  }
+  return ref.watch(modoSimplificadoCacheProvider);
+});

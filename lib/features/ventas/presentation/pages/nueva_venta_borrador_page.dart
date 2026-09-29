@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_delivery.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_contado_fiao.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_anotar_fiao.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -194,19 +195,24 @@ class _NuevaVentaBorradorPageState
         await _guardarCotizacion(esCredito: false, abrirCobro: true);
         break;
       case ResultadoCobro.fiao:
-        // Módulo Fío: se cableará cuando exista la pantalla/formulario
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              nombre.isEmpty
-                  ? 'Fiao: RD\$ ${estado.montoTotal.toStringAsFixed(2)} (sin nombre) — módulo Fío pendiente'
-                  : 'Fiao: $nombre debe RD\$ ${estado.montoTotal.toStringAsFixed(2)} — módulo Fío pendiente',
-            ),
-            backgroundColor: AppColors.warning,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 3),
-          ),
+        final ok = await SheetAnotarFiao.show(
+          context,
+          total: estado.montoTotal,
+          nombreInicial: nombre.isEmpty ? null : nombre,
         );
+        if (!mounted) return;
+        if (ok == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Fiao anotado: RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
+              ),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          _limpiarFormulario();
+        }
         break;
     }
   }

@@ -10,11 +10,13 @@ class TotalesCompraWidget extends StatelessWidget {
     required this.descuentoGlobal,
     required this.montoImpuesto,
     required this.totalCompra,
+    this.modoSimplificado = false,
   });
   final double subtotalSinImpuestos;
   final double descuentoGlobal;
   final double montoImpuesto;
   final double totalCompra;
+  final bool modoSimplificado;
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +40,14 @@ class TotalesCompraWidget extends StatelessWidget {
                 Text('RD\$ ${descuentoGlobal.toStringAsFixed(2)}'),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('ITBIS (18%):'),
-                Text('RD\$ ${montoImpuesto.toStringAsFixed(2)}'),
-              ],
-            ),
+            if (!modoSimplificado)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('ITBIS (18%):'),
+                  Text('RD\$ ${montoImpuesto.toStringAsFixed(2)}'),
+                ],
+              ),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

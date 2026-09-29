@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page
 import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/fios_lista_page.dart';
 
 class VentasRoute {
   const VentasRoute({
@@ -66,5 +67,10 @@ final List<VentasRoute> ventasRoutes = [
     path: '/ventas/ofertas',
     name: OfertasPage.routeName,
     builder: (_) => const OfertasPage(),
+  ),
+  VentasRoute(
+    path: '/ventas/fios',
+    name: FiosListaPage.routeName,
+    builder: (_) => const FiosListaPage(),
   ),
 ];

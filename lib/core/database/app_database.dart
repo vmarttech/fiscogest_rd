@@ -25,6 +25,7 @@ import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_detalle_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cotizaciones_table.dart';
+import 'package:fiscogest_rd/features/ventas/data/dao/fios_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cotizaciones_detalle_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/apartados_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/apartados_detalle_table.dart';
@@ -92,6 +93,7 @@ part 'app_database.g.dart';
     CajaSesionesTable,
     ComprasTable,
     DetalleCompraTable,
+    FiosTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -100,11 +102,14 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 42;
+  int get schemaVersion => 43;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 43) {
+        await m.createTable(fiosTable);
+      }
       if (from < 42) {
         await m.addColumn(ventasTable, ventasTable.comprobanteEntregaImpreso);
         await m.addColumn(ventasTable, ventasTable.fechaComprobanteEntrega);

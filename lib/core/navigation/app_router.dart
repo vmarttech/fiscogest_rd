@@ -32,6 +32,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_historial_t
 import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/ofertas_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/fios_lista_page.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_page.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_gestion_page.dart';
@@ -182,6 +183,11 @@ GoRoute(
             path: 'ofertas',
             name: OfertasPage.routeName,
             builder: (_, __) => const AppShell(child: OfertasPage()),
+          ),
+          GoRoute(
+            path: 'fios',
+            name: FiosListaPage.routeName,
+            builder: (_, __) => const AppShell(child: FiosListaPage()),
           ),
         ],
       ),

@@ -15,9 +15,7 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final modoSimplificado =
-        ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ??
-            false;
+    final modoSimplificado = ref.watch(modoSimplificadoProvider);
     final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
     final nombreEmpresa = (cfg?.nombreComercial.trim().isNotEmpty == true)
         ? cfg!.nombreComercial.trim()
@@ -113,19 +111,31 @@ class AppShell extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
                   children: [
                     _buildSectionTitle('OPERACIONES'),
-                    _buildNavItem(context, '/', 'Dashboard', Icons.dashboard_outlined, currentPath),
-                    _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
+                    _buildNavItem(
+                      context,
+                      '/',
+                      modoSimplificado ? 'Inicio' : 'Dashboard',
+                      Icons.home_outlined,
+                      currentPath,
+                    ),
+                    if (!modoSimplificado)
+                      _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
                     _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
                     _buildNavItem(context, '/ventas/cobro', 'Caja', Icons.payments_outlined, currentPath),
-                    _buildNavItem(context, '/creditos', 'Crédito', Icons.credit_score_outlined, currentPath),
+                    if (modoSimplificado)
+                      _buildNavItem(context, '/ventas/fios', 'Fiao', Icons.edit_note_rounded, currentPath),
+                    if (!modoSimplificado)
+                      _buildNavItem(context, '/creditos', 'Crédito', Icons.credit_score_outlined, currentPath),
                     _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
                     const SizedBox(height: 18),
                     _buildSectionTitle('INVENTARIO'),
                     _buildNavItem(context, '/inventario', 'Productos', Icons.inventory_2_outlined, currentPath),
-                    _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
-                    _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.fact_check_outlined, currentPath),
-                    _buildNavItem(context, '/lista-ajustes', 'Ajustes', Icons.tune_outlined, currentPath),
-                    _buildNavItem(context, '/transferencias/registrar', 'Transferencias', Icons.swap_horiz_outlined, currentPath),
+                    if (!modoSimplificado) ...[
+                      _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
+                      _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.fact_check_outlined, currentPath),
+                      _buildNavItem(context, '/lista-ajustes', 'Ajustes', Icons.tune_outlined, currentPath),
+                      _buildNavItem(context, '/transferencias/registrar', 'Transferencias', Icons.swap_horiz_outlined, currentPath),
+                    ],
                     const SizedBox(height: 18),
                     _buildSectionTitle('CATÁLOGOS'),
                     _buildNavItem(context, '/clientes', 'Clientes', Icons.people_outline, currentPath),
@@ -136,10 +146,11 @@ class AppShell extends ConsumerWidget {
                     _buildNavItem(context, '/presentaciones', 'Presentaciones', Icons.view_module_outlined, currentPath),
                     const SizedBox(height: 18),
                     _buildSectionTitle('SISTEMA'),
-                    _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
-                    if (!modoSimplificado)
-                    _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
-                    _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
+                    if (!modoSimplificado) ...[
+                      _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
+                      _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
+                      _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
+                    ],
                     _buildNavItem(context, '/configuracion', 'Configuración', Icons.settings_outlined, currentPath),
                   ],
                 ),

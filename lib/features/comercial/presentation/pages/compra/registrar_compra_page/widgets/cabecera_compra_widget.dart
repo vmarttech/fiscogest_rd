@@ -24,6 +24,7 @@ class CabeceraCompraWidget extends StatelessWidget {
     required this.observacionesController,
     required this.esPequena,
     required this.filaResponsiva,
+    this.modoSimplificado = false,
   });
   final TextEditingController fechaController;
   final TextEditingController proveedorIdController;
@@ -40,6 +41,7 @@ class CabeceraCompraWidget extends StatelessWidget {
   final TextEditingController fechaVencimientoController;
   final TextEditingController observacionesController;
   final bool esPequena;
+  final bool modoSimplificado;
   final Widget Function({required Widget child1, required Widget child2}) filaResponsiva;
 
   Widget _buildChipTipoComprobante(String valor, String etiqueta, BuildContext context) {
@@ -151,35 +153,44 @@ class CabeceraCompraWidget extends StatelessWidget {
           ),
         ),
         AppLayout.vM,
-        filaResponsiva(
-          child1: AppTextField(
+        if (modoSimplificado)
+          AppTextField(
             controller: comprobanteController,
-            label: 'Comprobante / Nº Factura',
+            label: 'Nº factura / recibo (opcional)',
             prefixIcon: Icons.receipt_outlined,
+          )
+        else
+          filaResponsiva(
+            child1: AppTextField(
+              controller: comprobanteController,
+              label: 'Comprobante / Nº Factura',
+              prefixIcon: Icons.receipt_outlined,
+            ),
+            child2: AppTextField(
+              controller: ncfController,
+              label: 'NCF (ej: B01-00000000)',
+              prefixIcon: Icons.confirmation_num_outlined,
+            ),
           ),
-          child2: AppTextField(
-            controller: ncfController,
-            label: 'NCF (ej: B01-00000000)',
-            prefixIcon: Icons.confirmation_num_outlined,
+        AppLayout.vM,
+        if (!modoSimplificado) ...[
+          const Text(
+            'Tipo de Comprobante',
+            style: AppTypography.labelMedium,
           ),
-        ),
-        AppLayout.vM,
-        const Text(
-          'Tipo de Comprobante',
-          style: AppTypography.labelMedium,
-        ),
-        AppLayout.vS,
-        Wrap(
-          spacing: AppSpacing.s,
-          runSpacing: AppSpacing.s,
-          children: [
-            _buildChipTipoComprobante('B01', 'Gastos', context),
-            _buildChipTipoComprobante('B02', 'Activos', context),
-            _buildChipTipoComprobante('B14', 'Gastos Menores', context),
-            _buildChipTipoComprobante('B15', 'Exento', context),
-          ],
-        ),
-        AppLayout.vM,
+          AppLayout.vS,
+          Wrap(
+            spacing: AppSpacing.s,
+            runSpacing: AppSpacing.s,
+            children: [
+              _buildChipTipoComprobante('B01', 'Gastos', context),
+              _buildChipTipoComprobante('B02', 'Activos', context),
+              _buildChipTipoComprobante('B14', 'Gastos Menores', context),
+              _buildChipTipoComprobante('B15', 'Exento', context),
+            ],
+          ),
+          AppLayout.vM,
+        ],
         const Text(
           'Forma de Pago',
           style: AppTypography.labelMedium,
@@ -188,12 +199,14 @@ class CabeceraCompraWidget extends StatelessWidget {
         Row(
           children: [
             _buildBotonFormaPago('contado', 'Contado', context),
-            AppLayout.hM,
-            _buildBotonFormaPago('credito', 'Crédito', context),
+            if (!modoSimplificado) ...[
+              AppLayout.hM,
+              _buildBotonFormaPago('credito', 'Crédito', context),
+            ],
           ],
         ),
         AppLayout.vM,
-        if (formaPago == 'credito') ...[
+        if (!modoSimplificado && formaPago == 'credito') ...[
           filaResponsiva(
             child1: AppTextField(
               controller: condicionPagoController,
@@ -206,13 +219,13 @@ class CabeceraCompraWidget extends StatelessWidget {
             ),
           ),
           AppLayout.vM,
+          AppTextField(
+            controller: fechaVencimientoController,
+            label: 'Fecha de Vencimiento (YYYY-MM-DD)',
+            prefixIcon: Icons.event_outlined,
+          ),
+          AppLayout.vM,
         ],
-        AppTextField(
-          controller: fechaVencimientoController,
-          label: 'Fecha de Vencimiento (YYYY-MM-DD)',
-          prefixIcon: Icons.event_outlined,
-        ),
-        AppLayout.vM,
         AppTextField(
           controller: observacionesController,
           label: 'Observaciones',

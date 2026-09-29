@@ -22,18 +22,58 @@ class InicioPage extends ConsumerWidget {
   }
 
   void _go(BuildContext context, String ruta) {
-    try {
-      context.go(ruta);
-    } catch (_) {
-      context.push(ruta);
-    }
+    context.push(ruta);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
+    final simplificado = ref.watch(modoSimplificadoProvider);
     final fecha = DateFormat("EEEE d 'de' MMMM yyyy", 'es').format(DateTime.now());
+    final cfgDash = ref.watch(configuracionControllerProvider).valueOrNull;
+    final n1Dash = cfgDash?.nombreComercial.trim() ?? '';
+    final n2Dash = cfgDash?.razonSocial.trim() ?? '';
+    final nombreNegocioDash =
+        n1Dash.isNotEmpty ? n1Dash : (n2Dash.isNotEmpty ? n2Dash : 'Mi negocio');
+
+    // Dashboard EXCLUSIVO modo simplificado (colmadero)
+    if (simplificado) {
+      return AppScaffold(
+        title: 'INICIO',
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                mobile ? 16 : 20,
+                mobile ? 12 : 20,
+                mobile ? 16 : 20,
+                32,
+              ),
+              child: AppLayout.centerConstrained(
+                maxWidth: desktop ? 900 : (mobile ? 520 : 720),
+                child: _DashboardColmado(
+                  mobile: mobile,
+                  desktop: desktop,
+                  saludo: _saludo(),
+                  fecha: fecha,
+                  nombreNegocio: nombreNegocioDash,
+                  onNuevaVenta: () =>
+                      _go(context, '/ventas/cotizaciones/nueva'),
+                  onCaja: () => _go(context, '/ventas/cobro'),
+                  onVentas: () => _go(context, '/ventas'),
+                  onFiao: () => _go(context, '/ventas/fios'),
+                  onProductos: () => _go(context, '/inventario'),
+                  onCompras: () => _go(context, '/compras'),
+                  onClientes: () => _go(context, '/clientes'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return AppScaffold(
       title: 'INICIO',
@@ -72,8 +112,16 @@ class InicioPage extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 20),
-                  // KPIs — llenan el ancho
-                  if (desktop)
+                  // KPIs
+                  if (simplificado)
+                    _KpisSimplificado(
+                      mobile: mobile,
+                      desktop: desktop,
+                      onCaja: () => _go(context, '/ventas/cobro'),
+                      onFiao: () => _go(context, '/ventas/fios'),
+                      onStock: () => _go(context, '/inventario'),
+                    )
+                  else if (desktop)
                     Row(
                       children: [
                         const Expanded(
@@ -165,8 +213,21 @@ class InicioPage extends ConsumerWidget {
                       ),
                     ),
                   const SizedBox(height: 24),
-                  // Dos columnas en desktop
-                  if (desktop)
+                  // Accesos
+                  if (simplificado)
+                    _AccesosSimplificado(
+                      mobile: mobile,
+                      desktop: desktop,
+                      onVentas: () => _go(context, '/ventas'),
+                      onCaja: () => _go(context, '/ventas/cobro'),
+                      onFiao: () => _go(context, '/ventas/fios'),
+                      onProductos: () => _go(context, '/inventario'),
+                      onCompras: () => _go(context, '/compras'),
+                      onClientes: () => _go(context, '/clientes'),
+                      onNuevaVenta: () =>
+                          _go(context, '/ventas/cotizaciones/nueva'),
+                    )
+                  else if (desktop)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -198,7 +259,8 @@ class InicioPage extends ConsumerWidget {
                                       titulo: 'Caja',
                                       sub: 'Cobrar y turnos',
                                       color: AppColors.success,
-                                      onTap: () => _go(context, '/ventas/cobro'),
+                                      onTap: () =>
+                                          _go(context, '/ventas/cobro'),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -262,8 +324,8 @@ class InicioPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 8),
                               _InsightsCarousel(
-                                onNuevaCotizacion: () =>
-                                    _go(context, '/ventas/cotizaciones/nueva'),
+                                onNuevaCotizacion: () => _go(
+                                    context, '/ventas/cotizaciones/nueva'),
                               ),
                             ],
                           ),
@@ -337,6 +399,418 @@ class InicioPage extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+
+/// Dashboard completo solo para modo simplificado (negocio informal).
+class _DashboardColmado extends StatelessWidget {
+  const _DashboardColmado({
+    required this.mobile,
+    required this.desktop,
+    required this.saludo,
+    required this.fecha,
+    required this.nombreNegocio,
+    required this.onNuevaVenta,
+    required this.onCaja,
+    required this.onVentas,
+    required this.onFiao,
+    required this.onProductos,
+    required this.onCompras,
+    required this.onClientes,
+  });
+
+  final bool mobile;
+  final bool desktop;
+  final String saludo;
+  final String fecha;
+  final String nombreNegocio;
+  final VoidCallback onNuevaVenta;
+  final VoidCallback onCaja;
+  final VoidCallback onVentas;
+  final VoidCallback onFiao;
+  final VoidCallback onProductos;
+  final VoidCallback onCompras;
+  final VoidCallback onClientes;
+
+  @override
+  Widget build(BuildContext context) {
+    final cols = desktop ? 3 : 2;
+    final items = <(IconData, String, String, Color, VoidCallback)>[
+      (Icons.point_of_sale_rounded, 'Ventas', 'Cobrar y fiar', AppColors.primary, onVentas),
+      (Icons.payments_rounded, 'Caja', 'Cobros del día', AppColors.success, onCaja),
+      (Icons.edit_note_rounded, 'Fiao', 'Lo que me deben', AppColors.warning, onFiao),
+      (Icons.inventory_2_rounded, 'Productos', 'Existencias', AppColors.info, onProductos),
+      (Icons.shopping_cart_rounded, 'Compras', 'Al proveedor', AppColors.primary, onCompras),
+      (Icons.people_rounded, 'Clientes', 'Mis clientes', AppColors.primary, onClientes),
+    ];
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        // 1) Degradado vertical de marca
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primary.withValues(alpha: 0.10),
+            AppColors.pageBackground,
+            AppColors.pageBackground,
+          ],
+          stops: const [0.0, 0.38, 1.0],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // 2) Halo radial detrás del hero
+          Positioned(
+            top: -40,
+            left: -30,
+            right: -30,
+            height: 220,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(0, -0.2),
+                  radius: 0.95,
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.14),
+                    AppColors.primary.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // 3) Puntos sutiles (textura)
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _FondoPuntosPainter(
+                color: AppColors.primary.withValues(alpha: 0.04),
+              ),
+            ),
+          ),
+          // Contenido
+          Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: EdgeInsets.fromLTRB(
+            mobile ? 16 : 20,
+            mobile ? 14 : 18,
+            mobile ? 16 : 20,
+            mobile ? 14 : 18,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(mobile ? 16 : 20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.primaryDark,
+                AppColors.primary,
+                AppColors.primaryLight.withValues(alpha: 0.95),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.28),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                saludo,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: mobile ? 13 : 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                nombreNegocio,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: mobile ? 20 : 24,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                fecha,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  fontSize: 11,
+                ),
+              ),
+              SizedBox(height: mobile ? 14 : 16),
+              SizedBox(
+                width: double.infinity,
+                height: mobile ? 48 : 52,
+                child: ElevatedButton.icon(
+                  onPressed: onNuevaVenta,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primaryDark,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.add_shopping_cart_rounded),
+                  label: const Text(
+                    'NUEVA VENTA',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: mobile ? 18 : 22),
+        Text(
+          'Accesos del día',
+          style: AppTypography.h4.copyWith(
+            fontWeight: FontWeight.w800,
+            fontSize: mobile ? 16 : null,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Todo lo que usas en el mostrador',
+          style: AppTypography.bodySmall.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        SizedBox(height: mobile ? 12 : 14),
+        LayoutBuilder(
+          builder: (context, c) {
+            final gap = mobile ? 10.0 : 12.0;
+            final w = (c.maxWidth - gap * (cols - 1)) / cols;
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final e in items)
+                  SizedBox(
+                    width: w,
+                    child: Material(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      child: InkWell(
+                        onTap: e.$5,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: e.$4.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(e.$1, color: e.$4, size: 20),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                e.$2,
+                                style: AppTypography.bodyLarge.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: mobile ? 14 : 15,
+                                ),
+                              ),
+                              Text(
+                                e.$3,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// KPIs del colmadero (modo simplificado).
+class _KpisSimplificado extends StatelessWidget {
+  const _KpisSimplificado({
+    required this.mobile,
+    required this.desktop,
+    required this.onCaja,
+    required this.onFiao,
+    required this.onStock,
+  });
+  final bool mobile;
+  final bool desktop;
+  final VoidCallback onCaja;
+  final VoidCallback onFiao;
+  final VoidCallback onStock;
+
+  @override
+  Widget build(BuildContext context) {
+    final tiles = [
+      _KpiTile(
+        label: 'Caja',
+        value: 'Hoy',
+        hint: 'Cobrar',
+        icon: Icons.payments_outlined,
+        color: AppColors.success,
+        onTap: onCaja,
+      ),
+      _KpiTile(
+        label: 'Fiao',
+        value: 'Deudas',
+        hint: 'Lo que me deben',
+        icon: Icons.edit_note_rounded,
+        color: AppColors.warning,
+        onTap: onFiao,
+      ),
+      _KpiTile(
+        label: 'Stock',
+        value: 'Inv.',
+        hint: 'Productos',
+        icon: Icons.inventory_2_outlined,
+        color: AppColors.info,
+        onTap: onStock,
+      ),
+    ];
+    if (desktop) {
+      return Row(
+        children: [
+          for (var i = 0; i < tiles.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(child: tiles[i]),
+          ],
+        ],
+      );
+    }
+    return Row(
+      children: [
+        for (var i = 0; i < tiles.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(child: SizedBox(height: 100, child: tiles[i])),
+        ],
+      ],
+    );
+  }
+}
+
+/// Accesos del colmadero: 2 cols móvil/tablet, 3 en desktop.
+class _AccesosSimplificado extends StatelessWidget {
+  const _AccesosSimplificado({
+    required this.mobile,
+    required this.desktop,
+    required this.onVentas,
+    required this.onCaja,
+    required this.onFiao,
+    required this.onProductos,
+    required this.onCompras,
+    required this.onClientes,
+    required this.onNuevaVenta,
+  });
+  final bool mobile;
+  final bool desktop;
+  final VoidCallback onVentas;
+  final VoidCallback onCaja;
+  final VoidCallback onFiao;
+  final VoidCallback onProductos;
+  final VoidCallback onCompras;
+  final VoidCallback onClientes;
+  final VoidCallback onNuevaVenta;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <(IconData, String, String, Color, VoidCallback)>[
+      (Icons.point_of_sale, 'Ventas', 'Cobrar y fiar', AppColors.primary, onVentas),
+      (Icons.payments_outlined, 'Caja', 'Turno del día', AppColors.success, onCaja),
+      (Icons.edit_note_rounded, 'Fiao', 'Lo que me deben', AppColors.warning, onFiao),
+      (Icons.inventory_2_outlined, 'Productos', 'Existencias', AppColors.info, onProductos),
+      (Icons.shopping_cart_outlined, 'Compras', 'Proveedores', AppColors.primary, onCompras),
+      (Icons.people_outline, 'Clientes', 'Cartera', AppColors.primary, onClientes),
+    ];
+    final cols = desktop ? 3 : 2;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SectionHeader(
+          title: 'Accesos rápidos',
+          subtitle: 'Lo del día a día',
+        ),
+        const SizedBox(height: 8),
+        LayoutBuilder(
+          builder: (context, c) {
+            const gap = 10.0;
+            final w = (c.maxWidth - gap * (cols - 1)) / cols;
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final e in items)
+                  SizedBox(
+                    width: w,
+                    child: _Acceso(
+                      icon: e.$1,
+                      titulo: e.$2,
+                      sub: e.$3,
+                      color: e.$4,
+                      onTap: e.$5,
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: mobile ? 52 : 56,
+          child: ElevatedButton.icon(
+            onPressed: onNuevaVenta,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            icon: const Icon(Icons.add_shopping_cart_rounded),
+            label: const Text(
+              'NUEVA VENTA',
+              style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.3),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -995,3 +1469,28 @@ class _InsightSlide {
   final String footer;
   final bool showCta;
 }
+
+class _FondoPuntosPainter extends CustomPainter {
+  _FondoPuntosPainter({required this.color});
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    const step = 18.0;
+    for (var y = 0.0; y < size.height; y += step) {
+      for (var x = 0.0; x < size.width; x += step) {
+        canvas.drawCircle(
+          Offset(x + ((y ~/ step).isEven ? 0.0 : 6.0), y),
+          1.1,
+          paint,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _FondoPuntosPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+

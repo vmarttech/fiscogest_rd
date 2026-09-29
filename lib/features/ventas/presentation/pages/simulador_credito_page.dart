@@ -7,7 +7,6 @@ import 'package:fiscogest_rd/core/ui/app_hub_hero.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
-import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 
 class SimuladorCreditoPage extends StatefulWidget {
   const SimuladorCreditoPage({super.key});
@@ -27,7 +26,6 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
   int _plazoMeses = 6;
   int _numeroCuotas = 6;
   ResumenCreditoCliente? _resumen;
-  PlanPago? _plan;
   String? _error;
 
   @override
@@ -51,7 +49,6 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
       setState(() {
         _error = 'Indique un monto total mayor a 0.';
         _resumen = null;
-        _plan = null;
       });
       return;
     }
@@ -60,7 +57,6 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
       setState(() {
         _error = 'El saldo a financiar debe ser mayor a RD\$ 0.00';
         _resumen = null;
-        _plan = null;
       });
       return;
     }
@@ -71,7 +67,6 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
       setState(() {
         _error = 'Plazo/cuotas no permitidos por el módulo de créditos.';
         _resumen = null;
-        _plan = null;
       });
       return;
     }
@@ -87,20 +82,9 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
       fechaPrimerVencimiento: fechaPrimer,
     );
 
-    PlanPago? plan;
-    if (_numeroCuotas > 1) {
-      plan = CalculadoraCreditoService.generarPlanPago(
-        capital: capital,
-        tasaMensual: tasa,
-        numeroCuotas: _numeroCuotas,
-        fechaPrimerVencimiento: fechaPrimer,
-      );
-    }
-
     setState(() {
       _error = null;
       _resumen = resumen;
-      _plan = plan;
     });
   }
 

@@ -12,9 +12,10 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart'
 /// Comprobante fiscal impreso (B01 crédito fiscal · B02 consumidor final).
 /// Estructura orientada a uso comercial en RD (DGII serie B).
 class ComprobantePdf {
+  /// Ticket térmico 80 mm (ancho fijo, alto según contenido).
   static const PdfPageFormat formatoTicket80 = PdfPageFormat(
     80 * PdfPageFormat.mm,
-    160 * PdfPageFormat.mm,
+    double.infinity,
     marginLeft: 4 * PdfPageFormat.mm,
     marginRight: 4 * PdfPageFormat.mm,
     marginTop: 4 * PdfPageFormat.mm,
@@ -73,6 +74,7 @@ class ComprobantePdf {
       await Printing.layoutPdf(
         onLayout: (format) async => bytes,
         name: 'Factura_$ncf.pdf',
+        format: formatoTicket80,
       );
     }
   }
@@ -100,6 +102,7 @@ class ComprobantePdf {
     await Printing.layoutPdf(
       onLayout: (_) async => bytes,
       name: filename,
+      format: formatoTicket80,
     );
   }
 
@@ -948,18 +951,20 @@ class ComprobantePdf {
           child: pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.SizedBox(
-                width: 72,
-                child: pw.Text(
-                  k,
-                  style: const pw.TextStyle(
-                    fontSize: 8,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+              pw.Text(
+                k,
+                style: const pw.TextStyle(
+                  fontSize: 8,
+                  fontWeight: pw.FontWeight.bold,
                 ),
               ),
+              pw.SizedBox(width: 6),
               pw.Expanded(
-                child: pw.Text(val, style: const pw.TextStyle(fontSize: 8)),
+                child: pw.Text(
+                  val,
+                  textAlign: pw.TextAlign.right,
+                  style: const pw.TextStyle(fontSize: 8),
+                ),
               ),
             ],
           ),

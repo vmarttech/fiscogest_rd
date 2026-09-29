@@ -26779,6 +26779,572 @@ class DetalleCompraTableCompanion
   }
 }
 
+class $FiosTableTable extends FiosTable
+    with TableInfo<$FiosTableTable, FioData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FiosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nombreClienteMeta = const VerificationMeta(
+    'nombreCliente',
+  );
+  @override
+  late final GeneratedColumn<String> nombreCliente = GeneratedColumn<String>(
+    'nombre_cliente',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 120,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _montoOriginalMeta = const VerificationMeta(
+    'montoOriginal',
+  );
+  @override
+  late final GeneratedColumn<double> montoOriginal = GeneratedColumn<double>(
+    'monto_original',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _montoAbonadoMeta = const VerificationMeta(
+    'montoAbonado',
+  );
+  @override
+  late final GeneratedColumn<double> montoAbonado = GeneratedColumn<double>(
+    'monto_abonado',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _saldoPendienteMeta = const VerificationMeta(
+    'saldoPendiente',
+  );
+  @override
+  late final GeneratedColumn<double> saldoPendiente = GeneratedColumn<double>(
+    'saldo_pendiente',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fechaMeta = const VerificationMeta('fecha');
+  @override
+  late final GeneratedColumn<DateTime> fecha = GeneratedColumn<DateTime>(
+    'fecha',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _notaMeta = const VerificationMeta('nota');
+  @override
+  late final GeneratedColumn<String> nota = GeneratedColumn<String>(
+    'nota',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
+  @override
+  late final GeneratedColumn<String> estado = GeneratedColumn<String>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pendiente'),
+  );
+  static const VerificationMeta _ventaIdMeta = const VerificationMeta(
+    'ventaId',
+  );
+  @override
+  late final GeneratedColumn<int> ventaId = GeneratedColumn<int>(
+    'venta_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    nombreCliente,
+    montoOriginal,
+    montoAbonado,
+    saldoPendiente,
+    fecha,
+    nota,
+    estado,
+    ventaId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'fios_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FioData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('nombre_cliente')) {
+      context.handle(
+        _nombreClienteMeta,
+        nombreCliente.isAcceptableOrUnknown(
+          data['nombre_cliente']!,
+          _nombreClienteMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_nombreClienteMeta);
+    }
+    if (data.containsKey('monto_original')) {
+      context.handle(
+        _montoOriginalMeta,
+        montoOriginal.isAcceptableOrUnknown(
+          data['monto_original']!,
+          _montoOriginalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_montoOriginalMeta);
+    }
+    if (data.containsKey('monto_abonado')) {
+      context.handle(
+        _montoAbonadoMeta,
+        montoAbonado.isAcceptableOrUnknown(
+          data['monto_abonado']!,
+          _montoAbonadoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('saldo_pendiente')) {
+      context.handle(
+        _saldoPendienteMeta,
+        saldoPendiente.isAcceptableOrUnknown(
+          data['saldo_pendiente']!,
+          _saldoPendienteMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_saldoPendienteMeta);
+    }
+    if (data.containsKey('fecha')) {
+      context.handle(
+        _fechaMeta,
+        fecha.isAcceptableOrUnknown(data['fecha']!, _fechaMeta),
+      );
+    }
+    if (data.containsKey('nota')) {
+      context.handle(
+        _notaMeta,
+        nota.isAcceptableOrUnknown(data['nota']!, _notaMeta),
+      );
+    }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    }
+    if (data.containsKey('venta_id')) {
+      context.handle(
+        _ventaIdMeta,
+        ventaId.isAcceptableOrUnknown(data['venta_id']!, _ventaIdMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FioData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FioData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      nombreCliente: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre_cliente'],
+      )!,
+      montoOriginal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_original'],
+      )!,
+      montoAbonado: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_abonado'],
+      )!,
+      saldoPendiente: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}saldo_pendiente'],
+      )!,
+      fecha: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha'],
+      )!,
+      nota: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nota'],
+      ),
+      estado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}estado'],
+      )!,
+      ventaId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}venta_id'],
+      ),
+    );
+  }
+
+  @override
+  $FiosTableTable createAlias(String alias) {
+    return $FiosTableTable(attachedDatabase, alias);
+  }
+}
+
+class FioData extends DataClass implements Insertable<FioData> {
+  final int id;
+  final String nombreCliente;
+  final double montoOriginal;
+  final double montoAbonado;
+  final double saldoPendiente;
+  final DateTime fecha;
+  final String? nota;
+
+  /// pendiente | pagado
+  final String estado;
+
+  /// Opcional: vínculo a cotización/venta si existió
+  final int? ventaId;
+  const FioData({
+    required this.id,
+    required this.nombreCliente,
+    required this.montoOriginal,
+    required this.montoAbonado,
+    required this.saldoPendiente,
+    required this.fecha,
+    this.nota,
+    required this.estado,
+    this.ventaId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['nombre_cliente'] = Variable<String>(nombreCliente);
+    map['monto_original'] = Variable<double>(montoOriginal);
+    map['monto_abonado'] = Variable<double>(montoAbonado);
+    map['saldo_pendiente'] = Variable<double>(saldoPendiente);
+    map['fecha'] = Variable<DateTime>(fecha);
+    if (!nullToAbsent || nota != null) {
+      map['nota'] = Variable<String>(nota);
+    }
+    map['estado'] = Variable<String>(estado);
+    if (!nullToAbsent || ventaId != null) {
+      map['venta_id'] = Variable<int>(ventaId);
+    }
+    return map;
+  }
+
+  FiosTableCompanion toCompanion(bool nullToAbsent) {
+    return FiosTableCompanion(
+      id: Value(id),
+      nombreCliente: Value(nombreCliente),
+      montoOriginal: Value(montoOriginal),
+      montoAbonado: Value(montoAbonado),
+      saldoPendiente: Value(saldoPendiente),
+      fecha: Value(fecha),
+      nota: nota == null && nullToAbsent ? const Value.absent() : Value(nota),
+      estado: Value(estado),
+      ventaId: ventaId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ventaId),
+    );
+  }
+
+  factory FioData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FioData(
+      id: serializer.fromJson<int>(json['id']),
+      nombreCliente: serializer.fromJson<String>(json['nombreCliente']),
+      montoOriginal: serializer.fromJson<double>(json['montoOriginal']),
+      montoAbonado: serializer.fromJson<double>(json['montoAbonado']),
+      saldoPendiente: serializer.fromJson<double>(json['saldoPendiente']),
+      fecha: serializer.fromJson<DateTime>(json['fecha']),
+      nota: serializer.fromJson<String?>(json['nota']),
+      estado: serializer.fromJson<String>(json['estado']),
+      ventaId: serializer.fromJson<int?>(json['ventaId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'nombreCliente': serializer.toJson<String>(nombreCliente),
+      'montoOriginal': serializer.toJson<double>(montoOriginal),
+      'montoAbonado': serializer.toJson<double>(montoAbonado),
+      'saldoPendiente': serializer.toJson<double>(saldoPendiente),
+      'fecha': serializer.toJson<DateTime>(fecha),
+      'nota': serializer.toJson<String?>(nota),
+      'estado': serializer.toJson<String>(estado),
+      'ventaId': serializer.toJson<int?>(ventaId),
+    };
+  }
+
+  FioData copyWith({
+    int? id,
+    String? nombreCliente,
+    double? montoOriginal,
+    double? montoAbonado,
+    double? saldoPendiente,
+    DateTime? fecha,
+    Value<String?> nota = const Value.absent(),
+    String? estado,
+    Value<int?> ventaId = const Value.absent(),
+  }) => FioData(
+    id: id ?? this.id,
+    nombreCliente: nombreCliente ?? this.nombreCliente,
+    montoOriginal: montoOriginal ?? this.montoOriginal,
+    montoAbonado: montoAbonado ?? this.montoAbonado,
+    saldoPendiente: saldoPendiente ?? this.saldoPendiente,
+    fecha: fecha ?? this.fecha,
+    nota: nota.present ? nota.value : this.nota,
+    estado: estado ?? this.estado,
+    ventaId: ventaId.present ? ventaId.value : this.ventaId,
+  );
+  FioData copyWithCompanion(FiosTableCompanion data) {
+    return FioData(
+      id: data.id.present ? data.id.value : this.id,
+      nombreCliente: data.nombreCliente.present
+          ? data.nombreCliente.value
+          : this.nombreCliente,
+      montoOriginal: data.montoOriginal.present
+          ? data.montoOriginal.value
+          : this.montoOriginal,
+      montoAbonado: data.montoAbonado.present
+          ? data.montoAbonado.value
+          : this.montoAbonado,
+      saldoPendiente: data.saldoPendiente.present
+          ? data.saldoPendiente.value
+          : this.saldoPendiente,
+      fecha: data.fecha.present ? data.fecha.value : this.fecha,
+      nota: data.nota.present ? data.nota.value : this.nota,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      ventaId: data.ventaId.present ? data.ventaId.value : this.ventaId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FioData(')
+          ..write('id: $id, ')
+          ..write('nombreCliente: $nombreCliente, ')
+          ..write('montoOriginal: $montoOriginal, ')
+          ..write('montoAbonado: $montoAbonado, ')
+          ..write('saldoPendiente: $saldoPendiente, ')
+          ..write('fecha: $fecha, ')
+          ..write('nota: $nota, ')
+          ..write('estado: $estado, ')
+          ..write('ventaId: $ventaId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    nombreCliente,
+    montoOriginal,
+    montoAbonado,
+    saldoPendiente,
+    fecha,
+    nota,
+    estado,
+    ventaId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FioData &&
+          other.id == this.id &&
+          other.nombreCliente == this.nombreCliente &&
+          other.montoOriginal == this.montoOriginal &&
+          other.montoAbonado == this.montoAbonado &&
+          other.saldoPendiente == this.saldoPendiente &&
+          other.fecha == this.fecha &&
+          other.nota == this.nota &&
+          other.estado == this.estado &&
+          other.ventaId == this.ventaId);
+}
+
+class FiosTableCompanion extends UpdateCompanion<FioData> {
+  final Value<int> id;
+  final Value<String> nombreCliente;
+  final Value<double> montoOriginal;
+  final Value<double> montoAbonado;
+  final Value<double> saldoPendiente;
+  final Value<DateTime> fecha;
+  final Value<String?> nota;
+  final Value<String> estado;
+  final Value<int?> ventaId;
+  const FiosTableCompanion({
+    this.id = const Value.absent(),
+    this.nombreCliente = const Value.absent(),
+    this.montoOriginal = const Value.absent(),
+    this.montoAbonado = const Value.absent(),
+    this.saldoPendiente = const Value.absent(),
+    this.fecha = const Value.absent(),
+    this.nota = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.ventaId = const Value.absent(),
+  });
+  FiosTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String nombreCliente,
+    required double montoOriginal,
+    this.montoAbonado = const Value.absent(),
+    required double saldoPendiente,
+    this.fecha = const Value.absent(),
+    this.nota = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.ventaId = const Value.absent(),
+  }) : nombreCliente = Value(nombreCliente),
+       montoOriginal = Value(montoOriginal),
+       saldoPendiente = Value(saldoPendiente);
+  static Insertable<FioData> custom({
+    Expression<int>? id,
+    Expression<String>? nombreCliente,
+    Expression<double>? montoOriginal,
+    Expression<double>? montoAbonado,
+    Expression<double>? saldoPendiente,
+    Expression<DateTime>? fecha,
+    Expression<String>? nota,
+    Expression<String>? estado,
+    Expression<int>? ventaId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (nombreCliente != null) 'nombre_cliente': nombreCliente,
+      if (montoOriginal != null) 'monto_original': montoOriginal,
+      if (montoAbonado != null) 'monto_abonado': montoAbonado,
+      if (saldoPendiente != null) 'saldo_pendiente': saldoPendiente,
+      if (fecha != null) 'fecha': fecha,
+      if (nota != null) 'nota': nota,
+      if (estado != null) 'estado': estado,
+      if (ventaId != null) 'venta_id': ventaId,
+    });
+  }
+
+  FiosTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? nombreCliente,
+    Value<double>? montoOriginal,
+    Value<double>? montoAbonado,
+    Value<double>? saldoPendiente,
+    Value<DateTime>? fecha,
+    Value<String?>? nota,
+    Value<String>? estado,
+    Value<int?>? ventaId,
+  }) {
+    return FiosTableCompanion(
+      id: id ?? this.id,
+      nombreCliente: nombreCliente ?? this.nombreCliente,
+      montoOriginal: montoOriginal ?? this.montoOriginal,
+      montoAbonado: montoAbonado ?? this.montoAbonado,
+      saldoPendiente: saldoPendiente ?? this.saldoPendiente,
+      fecha: fecha ?? this.fecha,
+      nota: nota ?? this.nota,
+      estado: estado ?? this.estado,
+      ventaId: ventaId ?? this.ventaId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (nombreCliente.present) {
+      map['nombre_cliente'] = Variable<String>(nombreCliente.value);
+    }
+    if (montoOriginal.present) {
+      map['monto_original'] = Variable<double>(montoOriginal.value);
+    }
+    if (montoAbonado.present) {
+      map['monto_abonado'] = Variable<double>(montoAbonado.value);
+    }
+    if (saldoPendiente.present) {
+      map['saldo_pendiente'] = Variable<double>(saldoPendiente.value);
+    }
+    if (fecha.present) {
+      map['fecha'] = Variable<DateTime>(fecha.value);
+    }
+    if (nota.present) {
+      map['nota'] = Variable<String>(nota.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<String>(estado.value);
+    }
+    if (ventaId.present) {
+      map['venta_id'] = Variable<int>(ventaId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FiosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('nombreCliente: $nombreCliente, ')
+          ..write('montoOriginal: $montoOriginal, ')
+          ..write('montoAbonado: $montoAbonado, ')
+          ..write('saldoPendiente: $saldoPendiente, ')
+          ..write('fecha: $fecha, ')
+          ..write('nota: $nota, ')
+          ..write('estado: $estado, ')
+          ..write('ventaId: $ventaId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -26850,6 +27416,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ComprasTableTable comprasTable = $ComprasTableTable(this);
   late final $DetalleCompraTableTable detalleCompraTable =
       $DetalleCompraTableTable(this);
+  late final $FiosTableTable fiosTable = $FiosTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -26895,6 +27462,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cajaSesionesTable,
     comprasTable,
     detalleCompraTable,
+    fiosTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -45467,6 +46035,278 @@ typedef $$DetalleCompraTableTableProcessedTableManager =
       DetalleCompraTableData,
       PrefetchHooks Function()
     >;
+typedef $$FiosTableTableCreateCompanionBuilder =
+    FiosTableCompanion Function({
+      Value<int> id,
+      required String nombreCliente,
+      required double montoOriginal,
+      Value<double> montoAbonado,
+      required double saldoPendiente,
+      Value<DateTime> fecha,
+      Value<String?> nota,
+      Value<String> estado,
+      Value<int?> ventaId,
+    });
+typedef $$FiosTableTableUpdateCompanionBuilder =
+    FiosTableCompanion Function({
+      Value<int> id,
+      Value<String> nombreCliente,
+      Value<double> montoOriginal,
+      Value<double> montoAbonado,
+      Value<double> saldoPendiente,
+      Value<DateTime> fecha,
+      Value<String?> nota,
+      Value<String> estado,
+      Value<int?> ventaId,
+    });
+
+class $$FiosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $FiosTableTable> {
+  $$FiosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montoOriginal => $composableBuilder(
+    column: $table.montoOriginal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montoAbonado => $composableBuilder(
+    column: $table.montoAbonado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get saldoPendiente => $composableBuilder(
+    column: $table.saldoPendiente,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fecha => $composableBuilder(
+    column: $table.fecha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nota => $composableBuilder(
+    column: $table.nota,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get ventaId => $composableBuilder(
+    column: $table.ventaId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FiosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $FiosTableTable> {
+  $$FiosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montoOriginal => $composableBuilder(
+    column: $table.montoOriginal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montoAbonado => $composableBuilder(
+    column: $table.montoAbonado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get saldoPendiente => $composableBuilder(
+    column: $table.saldoPendiente,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fecha => $composableBuilder(
+    column: $table.fecha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nota => $composableBuilder(
+    column: $table.nota,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get ventaId => $composableBuilder(
+    column: $table.ventaId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FiosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FiosTableTable> {
+  $$FiosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get nombreCliente => $composableBuilder(
+    column: $table.nombreCliente,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get montoOriginal => $composableBuilder(
+    column: $table.montoOriginal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get montoAbonado => $composableBuilder(
+    column: $table.montoAbonado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get saldoPendiente => $composableBuilder(
+    column: $table.saldoPendiente,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fecha =>
+      $composableBuilder(column: $table.fecha, builder: (column) => column);
+
+  GeneratedColumn<String> get nota =>
+      $composableBuilder(column: $table.nota, builder: (column) => column);
+
+  GeneratedColumn<String> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<int> get ventaId =>
+      $composableBuilder(column: $table.ventaId, builder: (column) => column);
+}
+
+class $$FiosTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FiosTableTable,
+          FioData,
+          $$FiosTableTableFilterComposer,
+          $$FiosTableTableOrderingComposer,
+          $$FiosTableTableAnnotationComposer,
+          $$FiosTableTableCreateCompanionBuilder,
+          $$FiosTableTableUpdateCompanionBuilder,
+          (FioData, BaseReferences<_$AppDatabase, $FiosTableTable, FioData>),
+          FioData,
+          PrefetchHooks Function()
+        > {
+  $$FiosTableTableTableManager(_$AppDatabase db, $FiosTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FiosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FiosTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FiosTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> nombreCliente = const Value.absent(),
+                Value<double> montoOriginal = const Value.absent(),
+                Value<double> montoAbonado = const Value.absent(),
+                Value<double> saldoPendiente = const Value.absent(),
+                Value<DateTime> fecha = const Value.absent(),
+                Value<String?> nota = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+                Value<int?> ventaId = const Value.absent(),
+              }) => FiosTableCompanion(
+                id: id,
+                nombreCliente: nombreCliente,
+                montoOriginal: montoOriginal,
+                montoAbonado: montoAbonado,
+                saldoPendiente: saldoPendiente,
+                fecha: fecha,
+                nota: nota,
+                estado: estado,
+                ventaId: ventaId,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String nombreCliente,
+                required double montoOriginal,
+                Value<double> montoAbonado = const Value.absent(),
+                required double saldoPendiente,
+                Value<DateTime> fecha = const Value.absent(),
+                Value<String?> nota = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+                Value<int?> ventaId = const Value.absent(),
+              }) => FiosTableCompanion.insert(
+                id: id,
+                nombreCliente: nombreCliente,
+                montoOriginal: montoOriginal,
+                montoAbonado: montoAbonado,
+                saldoPendiente: saldoPendiente,
+                fecha: fecha,
+                nota: nota,
+                estado: estado,
+                ventaId: ventaId,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FiosTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FiosTableTable,
+      FioData,
+      $$FiosTableTableFilterComposer,
+      $$FiosTableTableOrderingComposer,
+      $$FiosTableTableAnnotationComposer,
+      $$FiosTableTableCreateCompanionBuilder,
+      $$FiosTableTableUpdateCompanionBuilder,
+      (FioData, BaseReferences<_$AppDatabase, $FiosTableTable, FioData>),
+      FioData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -45566,4 +46406,6 @@ class $AppDatabaseManager {
       $$ComprasTableTableTableManager(_db, _db.comprasTable);
   $$DetalleCompraTableTableTableManager get detalleCompraTable =>
       $$DetalleCompraTableTableTableManager(_db, _db.detalleCompraTable);
+  $$FiosTableTableTableManager get fiosTable =>
+      $$FiosTableTableTableManager(_db, _db.fiosTable);
 }

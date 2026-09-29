@@ -566,6 +566,11 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   Widget _buildEntradaCotizacion(bool isMobile) {
     final width = MediaQuery.sizeOf(context).width;
     final wide = !isMobile && width >= 900;
+    final simplificado = ref
+            .watch(configuracionControllerProvider)
+            .valueOrNull
+            ?.modoSimplificado ??
+        false;
 
     void irNuevaCotizacion() =>
         context.push('/ventas/cotizaciones/nueva');
@@ -605,13 +610,24 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           color: AppColors.primary,
           onTap: consultarStock,
         ),
-        AppHubCard(
-          icon: Icons.calculate_outlined,
-          title: 'Simular crédito',
-          subtitle: isMobile ? 'Montos y cuotas' : 'Montos y cuotas oficiales',
-          color: AppColors.warning,
-          onTap: irSimuladorCredito,
-        ),
+        if (!simplificado)
+          if (!simplificado)
+
+          AppHubCard(
+            icon: Icons.calculate_outlined,
+            title: 'Simular crédito',
+            subtitle: isMobile ? 'Montos y cuotas' : 'Montos y cuotas oficiales',
+            color: AppColors.warning,
+            onTap: irSimuladorCredito,
+          ),
+        if (simplificado)
+          AppHubCard(
+            icon: Icons.edit_note_rounded,
+            title: 'Fiao',
+            subtitle: isMobile ? 'Lo que me deben' : 'Pendientes y abonos',
+            color: AppColors.warning,
+            onTap: () => context.push('/ventas/fios'),
+          ),
       ],
     );
 
@@ -657,16 +673,18 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           SizedBox(height: isMobile ? 8 : 14),
           atajos,
           SizedBox(height: isMobile ? 14 : 22),
-          Text(
-            'Flujo del vendedor',
-            style: AppTypography.h4.copyWith(
-              fontWeight: FontWeight.w800,
-              fontSize: isMobile ? 15 : null,
+          if (!simplificado) ...[
+            Text(
+              'Flujo del vendedor',
+              style: AppTypography.h4.copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: isMobile ? 15 : null,
+              ),
             ),
-          ),
-          SizedBox(height: isMobile ? 6 : 10),
-          _PosFlujoBanner(isMobile: isMobile),
-          SizedBox(height: isMobile ? 8 : 12),
+            SizedBox(height: isMobile ? 6 : 10),
+            _PosFlujoBanner(isMobile: isMobile),
+            SizedBox(height: isMobile ? 8 : 12),
+          ],
         ],
       ),
     );

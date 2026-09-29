@@ -390,6 +390,11 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CabeceraCompraWidget(
+                  modoSimplificado: ref
+                          .watch(configuracionControllerProvider)
+                          .valueOrNull
+                          ?.modoSimplificado ??
+                      false,
                   fechaController: _fechaController,
                   proveedorIdController: _proveedorIdController,
                   proveedorNombreController: _proveedorNombreController,
@@ -426,6 +431,11 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   descuentoGlobal: _descuentoGlobal,
                   montoImpuesto: _montoImpuesto,
                   totalCompra: _totalCompra,
+                  modoSimplificado: ref
+                          .watch(configuracionControllerProvider)
+                          .valueOrNull
+                          ?.modoSimplificado ??
+                      false,
                 ),
                 AppLayout.vL,
                 BotonesAccionWidget(
