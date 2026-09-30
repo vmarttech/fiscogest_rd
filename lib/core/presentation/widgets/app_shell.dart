@@ -187,8 +187,9 @@ class AppShell extends ConsumerWidget {
                       _buildNavItem(context, '/presentaciones', 'Presentaciones', Icons.view_module_outlined, currentPath),
                     const SizedBox(height: 18),
                     _buildSectionTitle('SISTEMA'),
-                    if (!modoColmadoFlag && puede(Permiso.kardexVer)) ...[
-                      _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
+                    if (puede(Permiso.reportesVer) || modoSimplificado || esAdmin)
+                      _buildNavItem(context, '/reports', 'Reportes', Icons.assessment_outlined, currentPath),
+                    if (!modoColmadoFlag && esAdmin) ...[
                       _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
                       _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
                     ],

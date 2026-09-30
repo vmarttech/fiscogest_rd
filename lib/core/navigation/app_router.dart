@@ -44,6 +44,7 @@ import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_gesti
 import 'package:fiscogest_rd/features/clientes/presentation/pages/nuevo_cliente_page.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/pages/proveedores_page.dart';
 import 'package:fiscogest_rd/features/reports/presentation/pages/reports_page.dart';
+import 'package:fiscogest_rd/features/reportes/presentation/pages/dashboard_economico_page.dart';
 import 'package:fiscogest_rd/features/impuestos/presentation/pages/impuestos_page.dart';
 import 'package:fiscogest_rd/features/import_export/presentation/pages/import_export_page.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/pages/configuracion_page.dart';
@@ -542,8 +543,15 @@ GoRoute(
       ),
       GoRoute(
         path: '/reports',
-        name: ReportsPage.routeName,
-        builder: (_, __) => const AppShell(child: ReportsPage()),
+        name: 'dashboard-reportes',
+        builder: (_, __) => const AppShell(child: DashboardEconomicoPage()),
+        routes: [
+          GoRoute(
+            path: 'dgii',
+            name: ReportsPage.routeName,
+            builder: (_, __) => const AppShell(child: ReportsPage()),
+          ),
+        ],
       ),
       GoRoute(
         path: '/impuestos',
