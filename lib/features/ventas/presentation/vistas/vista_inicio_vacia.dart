@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
@@ -566,11 +567,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   Widget _buildEntradaCotizacion(bool isMobile) {
     final width = MediaQuery.sizeOf(context).width;
     final wide = !isMobile && width >= 900;
-    final simplificado = ref
-            .watch(configuracionControllerProvider)
-            .valueOrNull
-            ?.modoSimplificado ??
-        false;
+    final simplificado = ref.watch(modoColmadoProvider);
 
     void irNuevaCotizacion() =>
         context.push('/ventas/cotizaciones/nueva');

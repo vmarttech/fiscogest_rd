@@ -19,7 +19,7 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _userCtrl = TextEditingController(text: 'admin');
+  final _userCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _cargando = false;
   bool _ocultar = true;
@@ -71,7 +71,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (res.requiereSetupInicial) {
         context.go('/setup-cuenta');
       } else {
-        context.go('/');
+        final rol = res.rol.toLowerCase();
+        if (rol.contains('vendedor')) {
+          context.go('/ventas');
+        } else if (rol.contains('cajero')) {
+          context.go('/ventas/cobro');
+        } else {
+          context.go('/');
+        }
       }
     } catch (e) {
       setState(() => _error = 'Error: $e');
@@ -174,13 +181,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       isLoading: _cargando,
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      'Usuario inicial: admin / admin',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
                   ],
                 ),
               ),

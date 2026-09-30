@@ -1,4 +1,6 @@
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 class UsuarioSesion {
   const UsuarioSesion({
@@ -23,11 +25,17 @@ class UsuarioSesion {
 
 final sesionProvider = StateProvider<UsuarioSesion?>((ref) => null);
 
-/// Compatibilidad con código antiguo
 final sesionUsuarioIdProvider = Provider<int?>((ref) {
   return ref.watch(sesionProvider)?.id;
 });
 
 final sesionUsernameProvider = Provider<String?>((ref) {
   return ref.watch(sesionProvider)?.username;
+});
+
+/// Colmado (Fiao / Contado-Fiao / hub informal): solo Admin + modo simplificado.
+final modoColmadoProvider = Provider<bool>((ref) {
+  final modo = ref.watch(modoSimplificadoProvider);
+  final sesion = ref.watch(sesionProvider);
+  return modo && (sesion?.esAdmin ?? false);
 });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
@@ -29,7 +30,11 @@ class InicioPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
-    final simplificado = ref.watch(modoSimplificadoProvider);
+    final modoCfg = ref.watch(modoSimplificadoProvider);
+    final sesion = ref.watch(sesionProvider);
+    final esAdmin = sesion?.esAdmin ?? false;
+    // Dashboard colmado solo Admin + config simplificada
+    final simplificado = modoCfg && esAdmin;
     final fecha = DateFormat("EEEE d 'de' MMMM yyyy", 'es').format(DateTime.now());
     final cfgDash = ref.watch(configuracionControllerProvider).valueOrNull;
     final n1Dash = cfgDash?.nombreComercial.trim() ?? '';

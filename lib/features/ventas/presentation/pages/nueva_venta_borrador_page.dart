@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
@@ -1116,7 +1117,7 @@ class _NuevaVentaBorradorPageState
             'RD\$ ${estado.subtotal.toStringAsFixed(2)}',
             tamanoCuerpo,
           ),
-          if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
+          if (!(ref.watch(modoColmadoProvider)))
             _filaResumen(
               'ITBIS (18%)',
               'RD\$ ${estado.itbis.toStringAsFixed(2)}',
@@ -1273,11 +1274,7 @@ class _NuevaVentaBorradorPageState
                 height: alturaBoton,
                 child: Builder(
                   builder: (context) {
-                    final simplificado = ref
-                            .watch(configuracionControllerProvider)
-                            .valueOrNull
-                            ?.modoSimplificado ??
-                        false;
+                    final simplificado = ref.watch(modoColmadoProvider);
                     final onTap = !puedeGenerar || _guardando
                         ? null
                         : simplificado

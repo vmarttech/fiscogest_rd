@@ -11,6 +11,9 @@ import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/difer
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/listar_conteos_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/capturar_conteo_page.dart';
 import 'package:fiscogest_rd/features/seguridad/presentation/pages/login_page.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/permisos.dart';
+import 'package:fiscogest_rd/features/seguridad/presentation/pages/usuarios_page.dart';
 import 'package:fiscogest_rd/features/seguridad/presentation/pages/setup_cuenta_page.dart';
 import 'package:fiscogest_rd/features/seguridad/presentation/pages/recuperar_clave_page.dart';
 
@@ -71,6 +74,29 @@ import 'package:fiscogest_rd/core/presentation/pages/inicio_page.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
+    redirect: (context, state) {
+      final path = state.uri.path;
+      // Auth libre
+      if (path == '/login' ||
+          path == '/splash' ||
+          path == '/setup-cuenta' ||
+          path == '/recuperar-clave') {
+        return null;
+      }
+      final sesion = ref.read(sesionProvider);
+      if (sesion == null) return '/login';
+      if (sesion.requiereSetupInicial && path != '/setup-cuenta') {
+        return '/setup-cuenta';
+      }
+      if (!rutaPermitida(path, sesion)) {
+        // Vendedor sin permiso → ventas; otros → inicio
+        final rol = sesion.rol.toLowerCase();
+        if (rol.contains('vendedor')) return '/ventas';
+        if (rol.contains('cajero')) return '/ventas/cobro';
+        return '/';
+      }
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/login',
@@ -86,6 +112,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/recuperar-clave',
         name: RecuperarClavePage.routeName,
         builder: (_, __) => const RecuperarClavePage(),
+      ),
+      GoRoute(
+        path: '/usuarios',
+        name: UsuariosPage.routeName,
+        builder: (_, __) => const AppShell(child: UsuariosPage()),
       ),
       
       GoRoute(
