@@ -16,4 +16,15 @@ class UsuariosTable extends Table {
       dateTime().named('fecha_creacion').withDefault(currentDateAndTime)();
   DateTimeColumn get fechaUltimoAcceso =>
       dateTime().named('fecha_ultimo_acceso').nullable()();
+
+  /// true = debe cambiar usuario/clave de fábrica antes de usar la app
+  BoolColumn get requiereSetupInicial => boolean()
+      .named('requiere_setup_inicial')
+      .withDefault(const Constant(true))();
+
+  TextColumn get preguntaRecuperacion =>
+      text().named('pregunta_recuperacion').nullable()();
+
+  TextColumn get respuestaHash =>
+      text().named('respuesta_hash').nullable()();
 }

@@ -10688,6 +10688,42 @@ class $UsuariosTableTable extends UsuariosTable
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _requiereSetupInicialMeta =
+      const VerificationMeta('requiereSetupInicial');
+  @override
+  late final GeneratedColumn<bool> requiereSetupInicial = GeneratedColumn<bool>(
+    'requiere_setup_inicial',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("requiere_setup_inicial" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _preguntaRecuperacionMeta =
+      const VerificationMeta('preguntaRecuperacion');
+  @override
+  late final GeneratedColumn<String> preguntaRecuperacion =
+      GeneratedColumn<String>(
+        'pregunta_recuperacion',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _respuestaHashMeta = const VerificationMeta(
+    'respuestaHash',
+  );
+  @override
+  late final GeneratedColumn<String> respuestaHash = GeneratedColumn<String>(
+    'respuesta_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -10700,6 +10736,9 @@ class $UsuariosTableTable extends UsuariosTable
     estado,
     fechaCreacion,
     fechaUltimoAcceso,
+    requiereSetupInicial,
+    preguntaRecuperacion,
+    respuestaHash,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -10785,6 +10824,33 @@ class $UsuariosTableTable extends UsuariosTable
         ),
       );
     }
+    if (data.containsKey('requiere_setup_inicial')) {
+      context.handle(
+        _requiereSetupInicialMeta,
+        requiereSetupInicial.isAcceptableOrUnknown(
+          data['requiere_setup_inicial']!,
+          _requiereSetupInicialMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pregunta_recuperacion')) {
+      context.handle(
+        _preguntaRecuperacionMeta,
+        preguntaRecuperacion.isAcceptableOrUnknown(
+          data['pregunta_recuperacion']!,
+          _preguntaRecuperacionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('respuesta_hash')) {
+      context.handle(
+        _respuestaHashMeta,
+        respuestaHash.isAcceptableOrUnknown(
+          data['respuesta_hash']!,
+          _respuestaHashMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -10834,6 +10900,18 @@ class $UsuariosTableTable extends UsuariosTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha_ultimo_acceso'],
       ),
+      requiereSetupInicial: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}requiere_setup_inicial'],
+      )!,
+      preguntaRecuperacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pregunta_recuperacion'],
+      ),
+      respuestaHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}respuesta_hash'],
+      ),
     );
   }
 
@@ -10854,6 +10932,11 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
   final String estado;
   final DateTime fechaCreacion;
   final DateTime? fechaUltimoAcceso;
+
+  /// true = debe cambiar usuario/clave de fábrica antes de usar la app
+  final bool requiereSetupInicial;
+  final String? preguntaRecuperacion;
+  final String? respuestaHash;
   const UsuarioData({
     required this.id,
     required this.nombre,
@@ -10865,6 +10948,9 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     required this.estado,
     required this.fechaCreacion,
     this.fechaUltimoAcceso,
+    required this.requiereSetupInicial,
+    this.preguntaRecuperacion,
+    this.respuestaHash,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -10884,6 +10970,13 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
     if (!nullToAbsent || fechaUltimoAcceso != null) {
       map['fecha_ultimo_acceso'] = Variable<DateTime>(fechaUltimoAcceso);
+    }
+    map['requiere_setup_inicial'] = Variable<bool>(requiereSetupInicial);
+    if (!nullToAbsent || preguntaRecuperacion != null) {
+      map['pregunta_recuperacion'] = Variable<String>(preguntaRecuperacion);
+    }
+    if (!nullToAbsent || respuestaHash != null) {
+      map['respuesta_hash'] = Variable<String>(respuestaHash);
     }
     return map;
   }
@@ -10906,6 +10999,13 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
       fechaUltimoAcceso: fechaUltimoAcceso == null && nullToAbsent
           ? const Value.absent()
           : Value(fechaUltimoAcceso),
+      requiereSetupInicial: Value(requiereSetupInicial),
+      preguntaRecuperacion: preguntaRecuperacion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(preguntaRecuperacion),
+      respuestaHash: respuestaHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(respuestaHash),
     );
   }
 
@@ -10927,6 +11027,13 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
       fechaUltimoAcceso: serializer.fromJson<DateTime?>(
         json['fechaUltimoAcceso'],
       ),
+      requiereSetupInicial: serializer.fromJson<bool>(
+        json['requiereSetupInicial'],
+      ),
+      preguntaRecuperacion: serializer.fromJson<String?>(
+        json['preguntaRecuperacion'],
+      ),
+      respuestaHash: serializer.fromJson<String?>(json['respuestaHash']),
     );
   }
   @override
@@ -10943,6 +11050,9 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
       'estado': serializer.toJson<String>(estado),
       'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
       'fechaUltimoAcceso': serializer.toJson<DateTime?>(fechaUltimoAcceso),
+      'requiereSetupInicial': serializer.toJson<bool>(requiereSetupInicial),
+      'preguntaRecuperacion': serializer.toJson<String?>(preguntaRecuperacion),
+      'respuestaHash': serializer.toJson<String?>(respuestaHash),
     };
   }
 
@@ -10957,6 +11067,9 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     String? estado,
     DateTime? fechaCreacion,
     Value<DateTime?> fechaUltimoAcceso = const Value.absent(),
+    bool? requiereSetupInicial,
+    Value<String?> preguntaRecuperacion = const Value.absent(),
+    Value<String?> respuestaHash = const Value.absent(),
   }) => UsuarioData(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
@@ -10970,6 +11083,13 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     fechaUltimoAcceso: fechaUltimoAcceso.present
         ? fechaUltimoAcceso.value
         : this.fechaUltimoAcceso,
+    requiereSetupInicial: requiereSetupInicial ?? this.requiereSetupInicial,
+    preguntaRecuperacion: preguntaRecuperacion.present
+        ? preguntaRecuperacion.value
+        : this.preguntaRecuperacion,
+    respuestaHash: respuestaHash.present
+        ? respuestaHash.value
+        : this.respuestaHash,
   );
   UsuarioData copyWithCompanion(UsuariosTableCompanion data) {
     return UsuarioData(
@@ -10989,6 +11109,15 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
       fechaUltimoAcceso: data.fechaUltimoAcceso.present
           ? data.fechaUltimoAcceso.value
           : this.fechaUltimoAcceso,
+      requiereSetupInicial: data.requiereSetupInicial.present
+          ? data.requiereSetupInicial.value
+          : this.requiereSetupInicial,
+      preguntaRecuperacion: data.preguntaRecuperacion.present
+          ? data.preguntaRecuperacion.value
+          : this.preguntaRecuperacion,
+      respuestaHash: data.respuestaHash.present
+          ? data.respuestaHash.value
+          : this.respuestaHash,
     );
   }
 
@@ -11004,7 +11133,10 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
           ..write('rol: $rol, ')
           ..write('estado: $estado, ')
           ..write('fechaCreacion: $fechaCreacion, ')
-          ..write('fechaUltimoAcceso: $fechaUltimoAcceso')
+          ..write('fechaUltimoAcceso: $fechaUltimoAcceso, ')
+          ..write('requiereSetupInicial: $requiereSetupInicial, ')
+          ..write('preguntaRecuperacion: $preguntaRecuperacion, ')
+          ..write('respuestaHash: $respuestaHash')
           ..write(')'))
         .toString();
   }
@@ -11021,6 +11153,9 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
     estado,
     fechaCreacion,
     fechaUltimoAcceso,
+    requiereSetupInicial,
+    preguntaRecuperacion,
+    respuestaHash,
   );
   @override
   bool operator ==(Object other) =>
@@ -11035,7 +11170,10 @@ class UsuarioData extends DataClass implements Insertable<UsuarioData> {
           other.rol == this.rol &&
           other.estado == this.estado &&
           other.fechaCreacion == this.fechaCreacion &&
-          other.fechaUltimoAcceso == this.fechaUltimoAcceso);
+          other.fechaUltimoAcceso == this.fechaUltimoAcceso &&
+          other.requiereSetupInicial == this.requiereSetupInicial &&
+          other.preguntaRecuperacion == this.preguntaRecuperacion &&
+          other.respuestaHash == this.respuestaHash);
 }
 
 class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
@@ -11049,6 +11187,9 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
   final Value<String> estado;
   final Value<DateTime> fechaCreacion;
   final Value<DateTime?> fechaUltimoAcceso;
+  final Value<bool> requiereSetupInicial;
+  final Value<String?> preguntaRecuperacion;
+  final Value<String?> respuestaHash;
   const UsuariosTableCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
@@ -11060,6 +11201,9 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
     this.estado = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
     this.fechaUltimoAcceso = const Value.absent(),
+    this.requiereSetupInicial = const Value.absent(),
+    this.preguntaRecuperacion = const Value.absent(),
+    this.respuestaHash = const Value.absent(),
   });
   UsuariosTableCompanion.insert({
     this.id = const Value.absent(),
@@ -11072,6 +11216,9 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
     this.estado = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
     this.fechaUltimoAcceso = const Value.absent(),
+    this.requiereSetupInicial = const Value.absent(),
+    this.preguntaRecuperacion = const Value.absent(),
+    this.respuestaHash = const Value.absent(),
   }) : nombre = Value(nombre),
        username = Value(username),
        passwordHash = Value(passwordHash);
@@ -11086,6 +11233,9 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
     Expression<String>? estado,
     Expression<DateTime>? fechaCreacion,
     Expression<DateTime>? fechaUltimoAcceso,
+    Expression<bool>? requiereSetupInicial,
+    Expression<String>? preguntaRecuperacion,
+    Expression<String>? respuestaHash,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -11098,6 +11248,11 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
       if (estado != null) 'estado': estado,
       if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
       if (fechaUltimoAcceso != null) 'fecha_ultimo_acceso': fechaUltimoAcceso,
+      if (requiereSetupInicial != null)
+        'requiere_setup_inicial': requiereSetupInicial,
+      if (preguntaRecuperacion != null)
+        'pregunta_recuperacion': preguntaRecuperacion,
+      if (respuestaHash != null) 'respuesta_hash': respuestaHash,
     });
   }
 
@@ -11112,6 +11267,9 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
     Value<String>? estado,
     Value<DateTime>? fechaCreacion,
     Value<DateTime?>? fechaUltimoAcceso,
+    Value<bool>? requiereSetupInicial,
+    Value<String?>? preguntaRecuperacion,
+    Value<String?>? respuestaHash,
   }) {
     return UsuariosTableCompanion(
       id: id ?? this.id,
@@ -11124,6 +11282,9 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
       estado: estado ?? this.estado,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
       fechaUltimoAcceso: fechaUltimoAcceso ?? this.fechaUltimoAcceso,
+      requiereSetupInicial: requiereSetupInicial ?? this.requiereSetupInicial,
+      preguntaRecuperacion: preguntaRecuperacion ?? this.preguntaRecuperacion,
+      respuestaHash: respuestaHash ?? this.respuestaHash,
     );
   }
 
@@ -11160,6 +11321,19 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
     if (fechaUltimoAcceso.present) {
       map['fecha_ultimo_acceso'] = Variable<DateTime>(fechaUltimoAcceso.value);
     }
+    if (requiereSetupInicial.present) {
+      map['requiere_setup_inicial'] = Variable<bool>(
+        requiereSetupInicial.value,
+      );
+    }
+    if (preguntaRecuperacion.present) {
+      map['pregunta_recuperacion'] = Variable<String>(
+        preguntaRecuperacion.value,
+      );
+    }
+    if (respuestaHash.present) {
+      map['respuesta_hash'] = Variable<String>(respuestaHash.value);
+    }
     return map;
   }
 
@@ -11175,7 +11349,10 @@ class UsuariosTableCompanion extends UpdateCompanion<UsuarioData> {
           ..write('rol: $rol, ')
           ..write('estado: $estado, ')
           ..write('fechaCreacion: $fechaCreacion, ')
-          ..write('fechaUltimoAcceso: $fechaUltimoAcceso')
+          ..write('fechaUltimoAcceso: $fechaUltimoAcceso, ')
+          ..write('requiereSetupInicial: $requiereSetupInicial, ')
+          ..write('preguntaRecuperacion: $preguntaRecuperacion, ')
+          ..write('respuestaHash: $respuestaHash')
           ..write(')'))
         .toString();
   }
@@ -33933,6 +34110,9 @@ typedef $$UsuariosTableTableCreateCompanionBuilder =
       Value<String> estado,
       Value<DateTime> fechaCreacion,
       Value<DateTime?> fechaUltimoAcceso,
+      Value<bool> requiereSetupInicial,
+      Value<String?> preguntaRecuperacion,
+      Value<String?> respuestaHash,
     });
 typedef $$UsuariosTableTableUpdateCompanionBuilder =
     UsuariosTableCompanion Function({
@@ -33946,6 +34126,9 @@ typedef $$UsuariosTableTableUpdateCompanionBuilder =
       Value<String> estado,
       Value<DateTime> fechaCreacion,
       Value<DateTime?> fechaUltimoAcceso,
+      Value<bool> requiereSetupInicial,
+      Value<String?> preguntaRecuperacion,
+      Value<String?> respuestaHash,
     });
 
 class $$UsuariosTableTableFilterComposer
@@ -34004,6 +34187,21 @@ class $$UsuariosTableTableFilterComposer
 
   ColumnFilters<DateTime> get fechaUltimoAcceso => $composableBuilder(
     column: $table.fechaUltimoAcceso,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get requiereSetupInicial => $composableBuilder(
+    column: $table.requiereSetupInicial,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get preguntaRecuperacion => $composableBuilder(
+    column: $table.preguntaRecuperacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get respuestaHash => $composableBuilder(
+    column: $table.respuestaHash,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -34066,6 +34264,21 @@ class $$UsuariosTableTableOrderingComposer
     column: $table.fechaUltimoAcceso,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get requiereSetupInicial => $composableBuilder(
+    column: $table.requiereSetupInicial,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get preguntaRecuperacion => $composableBuilder(
+    column: $table.preguntaRecuperacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get respuestaHash => $composableBuilder(
+    column: $table.respuestaHash,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsuariosTableTableAnnotationComposer
@@ -34112,6 +34325,21 @@ class $$UsuariosTableTableAnnotationComposer
     column: $table.fechaUltimoAcceso,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get requiereSetupInicial => $composableBuilder(
+    column: $table.requiereSetupInicial,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get preguntaRecuperacion => $composableBuilder(
+    column: $table.preguntaRecuperacion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get respuestaHash => $composableBuilder(
+    column: $table.respuestaHash,
+    builder: (column) => column,
+  );
 }
 
 class $$UsuariosTableTableTableManager
@@ -34155,6 +34383,9 @@ class $$UsuariosTableTableTableManager
                 Value<String> estado = const Value.absent(),
                 Value<DateTime> fechaCreacion = const Value.absent(),
                 Value<DateTime?> fechaUltimoAcceso = const Value.absent(),
+                Value<bool> requiereSetupInicial = const Value.absent(),
+                Value<String?> preguntaRecuperacion = const Value.absent(),
+                Value<String?> respuestaHash = const Value.absent(),
               }) => UsuariosTableCompanion(
                 id: id,
                 nombre: nombre,
@@ -34166,6 +34397,9 @@ class $$UsuariosTableTableTableManager
                 estado: estado,
                 fechaCreacion: fechaCreacion,
                 fechaUltimoAcceso: fechaUltimoAcceso,
+                requiereSetupInicial: requiereSetupInicial,
+                preguntaRecuperacion: preguntaRecuperacion,
+                respuestaHash: respuestaHash,
               ),
           createCompanionCallback:
               ({
@@ -34179,6 +34413,9 @@ class $$UsuariosTableTableTableManager
                 Value<String> estado = const Value.absent(),
                 Value<DateTime> fechaCreacion = const Value.absent(),
                 Value<DateTime?> fechaUltimoAcceso = const Value.absent(),
+                Value<bool> requiereSetupInicial = const Value.absent(),
+                Value<String?> preguntaRecuperacion = const Value.absent(),
+                Value<String?> respuestaHash = const Value.absent(),
               }) => UsuariosTableCompanion.insert(
                 id: id,
                 nombre: nombre,
@@ -34190,6 +34427,9 @@ class $$UsuariosTableTableTableManager
                 estado: estado,
                 fechaCreacion: fechaCreacion,
                 fechaUltimoAcceso: fechaUltimoAcceso,
+                requiereSetupInicial: requiereSetupInicial,
+                preguntaRecuperacion: preguntaRecuperacion,
+                respuestaHash: respuestaHash,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

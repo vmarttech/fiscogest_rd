@@ -11,6 +11,8 @@ import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/difer
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/listar_conteos_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/capturar_conteo_page.dart';
 import 'package:fiscogest_rd/features/seguridad/presentation/pages/login_page.dart';
+import 'package:fiscogest_rd/features/seguridad/presentation/pages/setup_cuenta_page.dart';
+import 'package:fiscogest_rd/features/seguridad/presentation/pages/recuperar_clave_page.dart';
 
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
@@ -74,6 +76,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: LoginPage.routeName,
         builder: (_, __) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/setup-cuenta',
+        name: SetupCuentaPage.routeName,
+        builder: (_, __) => const SetupCuentaPage(),
+      ),
+      GoRoute(
+        path: '/recuperar-clave',
+        name: RecuperarClavePage.routeName,
+        builder: (_, __) => const RecuperarClavePage(),
       ),
       
       GoRoute(

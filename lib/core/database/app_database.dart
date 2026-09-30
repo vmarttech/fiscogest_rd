@@ -102,13 +102,24 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 43;
+  int get schemaVersion => 44;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async => await m.createAll(),
     onUpgrade: (Migrator m, int from, int to) async {
       if (from < 43) {
         await m.createTable(fiosTable);
+      }
+      if (from < 44) {
+        for (final sql in [
+          'ALTER TABLE usuarios_table ADD COLUMN requiere_setup_inicial INTEGER NOT NULL DEFAULT 1',
+          'ALTER TABLE usuarios_table ADD COLUMN pregunta_recuperacion TEXT',
+          'ALTER TABLE usuarios_table ADD COLUMN respuesta_hash TEXT',
+        ]) {
+          try {
+            await m.database.customStatement(sql);
+          } catch (_) {}
+        }
       }
       if (from < 42) {
         await m.addColumn(ventasTable, ventasTable.comprobanteEntregaImpreso);
