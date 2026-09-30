@@ -1,6 +1,6 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 
 class UsuarioSesion {
   const UsuarioSesion({
@@ -17,10 +17,13 @@ class UsuarioSesion {
   final String rol;
   final bool requiereSetupInicial;
 
-  bool get esAdmin {
-    final r = rol.toLowerCase();
-    return r == 'admin' || r == 'administrador';
-  }
+  String get rolNorm => normalizarRol(rol);
+
+  bool get esAdmin => rolNorm == 'Admin';
+
+  bool puede(String permiso) => rolTienePermiso(rol, permiso);
+
+  String get rutaInicio => rutaInicioParaRol(rol);
 }
 
 final sesionProvider = StateProvider<UsuarioSesion?>((ref) => null);
@@ -33,9 +36,17 @@ final sesionUsernameProvider = Provider<String?>((ref) {
   return ref.watch(sesionProvider)?.username;
 });
 
-/// Colmado (Fiao / Contado-Fiao / hub informal): solo Admin + modo simplificado.
+/// ¿El usuario actual tiene [permiso]?
+final puedeProvider = Provider.family<bool, String>((ref, permiso) {
+  final s = ref.watch(sesionProvider);
+  if (s == null) return false;
+  return s.puede(permiso);
+});
+
+/// Colmado solo si config simplificada Y permiso fiao (Admin lo tiene vía *).
 final modoColmadoProvider = Provider<bool>((ref) {
   final modo = ref.watch(modoSimplificadoProvider);
-  final sesion = ref.watch(sesionProvider);
-  return modo && (sesion?.esAdmin ?? false);
+  final s = ref.watch(sesionProvider);
+  if (!modo || s == null) return false;
+  return s.puede(Permiso.fiaoUsar);
 });

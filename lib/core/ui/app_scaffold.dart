@@ -47,6 +47,7 @@ class AppScaffold extends StatelessWidget {
   static const rutasPrincipales = {
     '/',
     '/ventas',
+    '/ventas/cobro',
     '/creditos',
     '/compras',
     '/inventario',

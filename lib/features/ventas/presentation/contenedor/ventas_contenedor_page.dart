@@ -1,3 +1,6 @@
+import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +42,16 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final sesion = ref.watch(sesionProvider);
+    if (sesion != null && normalizarRol(sesion.rol) == 'Cajero') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.go('/ventas/cobro');
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final vistaActual = ref.watch(
       ventasNavegacionProvider.select((e) => e.vistaActual),
     );

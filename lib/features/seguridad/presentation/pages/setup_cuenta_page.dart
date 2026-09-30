@@ -82,7 +82,8 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
         requiereSetupInicial: false,
       );
       if (!mounted) return;
-      context.go('/');
+      final s = ref.read(sesionProvider);
+      context.go(s?.rutaInicio ?? '/');
     } catch (e) {
       setState(() => _error = 'Error: $e');
     } finally {
@@ -168,13 +169,21 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Pregunta *',
                         border: OutlineInputBorder(),
                       ),
                       items: _preguntas
                           .map(
-                            (p) => DropdownMenuItem(value: p, child: Text(p)),
+                            (p) => DropdownMenuItem(
+                              value: p,
+                              child: Text(
+                                p,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
                           )
                           .toList(),
                       onChanged: (v) {

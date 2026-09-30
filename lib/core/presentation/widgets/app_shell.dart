@@ -1,5 +1,6 @@
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,6 +49,7 @@ class AppShell extends ConsumerWidget {
           esVendedor,
           esCajero,
           operadorLabel,
+          sesion?.rol ?? '',
           () {
             ref.read(sesionProvider.notifier).state = null;
             context.go('/login');
@@ -68,27 +70,15 @@ class AppShell extends ConsumerWidget {
     );
   }
 
-  Widget _buildMenu(double width, String currentPath, BuildContext context, String nombreEmpresa, bool modoSimplificado, bool esAdmin, bool esVendedor, bool esCajero, String operadorLabel, VoidCallback onLogout) {
+  Widget _buildMenu(double width, String currentPath, BuildContext context, String nombreEmpresa, bool modoSimplificado, bool esAdmin, bool esVendedor, bool esCajero, String operadorLabel, String rolUsuario, VoidCallback onLogout) {
     // Menú completo SOLO Admin.
     // Cara "colmado" (Fiao, etc.) SOLO si config.simplificado Y es Admin.
     // Vendedor/Cajero siempre ven menú formal de su rol.
-    final bool full = esAdmin;
-    final bool modoColmado = modoSimplificado && esAdmin;
-    bool can(String area) {
-      if (full) return true;
-      if (esVendedor) {
-        // Solo su área: vender y consultar. Sin catálogos ni maestros.
-        return area == 'inicio' ||
-            area == 'ventas' ||
-            area == 'clientes';
-      }
-      if (esCajero) {
-        // Pantalla principal = Caja (sin dashboard)
-        return area == 'caja' ||
-            area == 'ventas';
-      }
-      return area == 'inicio';
-    }
+    // modoColmado: param modoSimplificado && fiao
+    final bool modoColmadoFlag = modoSimplificado &&
+        rolTienePermiso(rolUsuario, Permiso.fiaoUsar);
+    bool puede(String permiso) => rolTienePermiso(rolUsuario, permiso);
+
 
     return Material(
       color: AppColors.sidebarBackground,
@@ -151,31 +141,31 @@ class AppShell extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
                   children: [
                     _buildSectionTitle('OPERACIONES'),
-                    if (can('inicio'))
+                    if (puede(Permiso.dashboardVer))
                       _buildNavItem(
                         context,
                         '/',
-                        modoColmado ? 'Inicio' : 'Dashboard',
+                        modoColmadoFlag ? 'Inicio' : 'Dashboard',
                         Icons.home_outlined,
                         currentPath,
                       ),
-                    if (!modoColmado && can('facturacion'))
+                    if (!modoColmadoFlag && puede(Permiso.facturacionGestionar))
                       _buildNavItem(context, '/sales', 'Facturación y NC', Icons.point_of_sale_outlined, currentPath),
-                    if (can('ventas'))
+                    if (puede(Permiso.ventasCotizar))
                       _buildNavItem(context, '/ventas', 'Ventas', Icons.point_of_sale, currentPath),
-                    if (can('caja'))
+                    if (puede(Permiso.cajaCobrar))
                       _buildNavItem(context, '/ventas/cobro', 'Caja', Icons.payments_outlined, currentPath),
-                    if (modoColmado)
+                    if (modoColmadoFlag)
                       _buildNavItem(context, '/ventas/fios', 'Fiao', Icons.edit_note_rounded, currentPath),
-                    if (!modoColmado && can('creditos'))
+                    if (!modoColmadoFlag && puede(Permiso.creditosGestionar))
                       _buildNavItem(context, '/creditos', 'Crédito', Icons.credit_score_outlined, currentPath),
-                    if (can('compras'))
+                    if (puede(Permiso.comprasGestionar))
                       _buildNavItem(context, '/compras', 'Compras', Icons.shopping_cart_outlined, currentPath),
                     const SizedBox(height: 18),
                     _buildSectionTitle('INVENTARIO'),
-                    if (can('productos'))
+                    if (puede(Permiso.inventarioVer))
                       _buildNavItem(context, '/inventario', 'Productos', Icons.inventory_2_outlined, currentPath),
-                    if (!modoColmado && full) ...[
+                    if (!modoColmadoFlag && puede(Permiso.kardexVer)) ...[
                       _buildNavItem(context, '/kardex', 'Kárdex', Icons.receipt_long_outlined, currentPath),
                       _buildNavItem(context, '/inventario-fisico', 'Inventario Físico', Icons.fact_check_outlined, currentPath),
                       _buildNavItem(context, '/lista-ajustes', 'Ajustes', Icons.tune_outlined, currentPath),
@@ -183,28 +173,28 @@ class AppShell extends ConsumerWidget {
                     ],
                     const SizedBox(height: 18),
                     _buildSectionTitle('CATÁLOGOS'),
-                    if (can('clientes'))
+                    if (puede(Permiso.clientesVer))
                       _buildNavItem(context, '/clientes', 'Clientes', Icons.people_outline, currentPath),
-                    if (can('catalogo'))
+                    if (puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/proveedores', 'Proveedores', Icons.business_outlined, currentPath),
-                    if (can('catalogo'))
+                    if (puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/categorias', 'Categorías', Icons.category_outlined, currentPath),
-                    if (can('catalogo'))
+                    if (puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/marcas', 'Marcas', Icons.branding_watermark_outlined, currentPath),
-                    if (can('catalogo'))
+                    if (puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/unidades', 'Unidades', Icons.straighten_outlined, currentPath),
-                    if (can('catalogo'))
+                    if (puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/presentaciones', 'Presentaciones', Icons.view_module_outlined, currentPath),
                     const SizedBox(height: 18),
                     _buildSectionTitle('SISTEMA'),
-                    if (!modoColmado && full) ...[
+                    if (!modoColmadoFlag && puede(Permiso.kardexVer)) ...[
                       _buildNavItem(context, '/reports', 'Reportes 606/607', Icons.assessment_outlined, currentPath),
                       _buildNavItem(context, '/impuestos', 'Impuestos', Icons.calculate_outlined, currentPath),
                       _buildNavItem(context, '/import-export', 'Importar / Exportar', Icons.import_export, currentPath),
                     ],
-                    if (esAdmin)
+                    if (puede(Permiso.usuariosGestionar))
                       _buildNavItem(context, '/usuarios', 'Usuarios', Icons.manage_accounts_outlined, currentPath),
-                    if (full)
+                    if (puede(Permiso.configAdmin))
                       _buildNavItem(context, '/configuracion', 'Configuración', Icons.settings_outlined, currentPath),
                     const SizedBox(height: 8),
                     const Divider(color: AppColors.divider, height: 24),

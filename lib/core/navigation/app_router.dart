@@ -76,7 +76,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     redirect: (context, state) {
       final path = state.uri.path;
-      // Auth libre
       if (path == '/login' ||
           path == '/splash' ||
           path == '/setup-cuenta' ||
@@ -89,11 +88,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/setup-cuenta';
       }
       if (!rutaPermitida(path, sesion)) {
-        // Vendedor sin permiso → ventas; otros → inicio
-        final rol = sesion.rol.toLowerCase();
-        if (rol.contains('vendedor')) return '/ventas';
-        if (rol.contains('cajero')) return '/ventas/cobro';
-        return '/';
+        return rutaFallback(sesion);
       }
       return null;
     },

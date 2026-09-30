@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -760,7 +761,8 @@ Future<void> _cargarDocumento({
           if (context.canPop()) {
             context.pop();
           } else {
-            context.go('/ventas');
+            final s = ref.read(sesionProvider);
+            context.go(s?.rutaInicio ?? '/ventas/cobro');
           }
         },
       ),

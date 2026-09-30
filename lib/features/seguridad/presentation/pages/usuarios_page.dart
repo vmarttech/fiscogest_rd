@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -226,7 +227,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
   String? _error;
   bool _ocultar = true;
 
-  static const roles = ['Admin', 'Vendedor', 'Cajero'];
+  static const roles = rolesDisponibles;
 
   @override
   void initState() {

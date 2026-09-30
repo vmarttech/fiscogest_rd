@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
@@ -448,21 +449,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
     final abierta = _cajaAbierta;
-    final maxW = desktop ? 1800 : (mobile ? 520 : 960);
+    final maxW = desktop ? 1280 : (mobile ? 520 : 960);
 
     return AppScaffold(
       title: 'CAJA',
+      showBackButton: false,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/');
-          }
-        },
+        icon: const Icon(Icons.menu),
+        tooltip: 'Menú',
+        onPressed: () => ShellDrawerScope.open(context),
       ),
-      body: SafeArea(
+body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refrescar,
           child: SingleChildScrollView(
@@ -473,8 +470,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             child: AppLayout.centerConstrained(
               maxWidth: maxW,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: mobile
+                    ? CrossAxisAlignment.stretch
+                    : CrossAxisAlignment.start,
                 children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: mobile ? double.infinity : 640,
+                      ),
+                      child:
                   Container(
                     padding: EdgeInsets.fromLTRB(
                       mobile ? 20 : 28,
@@ -545,21 +551,24 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  _buildEstadoTurno(mobile, abierta),
-                  AppLayout.vL,
-                  const SectionHeader(
-                    title: 'Operaciones',
-                    subtitle: 'Estación de caja',
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  AppAccessGrid(
-                    minTileWidth: 200,
-                    maxColumns: 3,
-                    spacing: 16,
-                    runSpacing: 16,
-                    tileHeight: 200,
-                    children: [
+                  const SizedBox(height: 20),
+                  if (mobile) ...[
+                    _buildEstadoTurno(mobile, abierta),
+                    AppLayout.vL,
+                    const SectionHeader(
+                      title: 'Operaciones',
+                      subtitle: 'Estación de caja',
+                    ),
+                    const SizedBox(height: 12),
+                    AppAccessGrid(
+                      minTileWidth: 200,
+                      maxColumns: 1,
+                      spacing: 16,
+                      runSpacing: 16,
+                      tileHeight: 200,
+                      children: [
                       AppHubCard(
                         icon: Icons.point_of_sale_outlined,
                         title: 'Cobrar cotización',
@@ -587,8 +596,67 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         color: AppColors.primary,
                         onTap: _irAHistorialTurno,
                       ),
+
                     ],
-                  ),
+                    ),
+                  ] else ...[
+                    // PC: izquierda turno | derecha operaciones (aprovecha el ancho)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 520,
+                          child: _buildEstadoTurno(mobile, abierta),
+                        ),
+                        const Spacer(),
+                        const SizedBox(width: 28),
+                        SizedBox(
+                          width: 520,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SectionHeader(
+                                title: 'Operaciones',
+                                subtitle: 'Accesos rápidos del turno',
+                              ),
+                              const SizedBox(height: 16),
+                              ...[
+                                _CajaOpTile(
+                                  icon: Icons.point_of_sale_outlined,
+                                  title: 'Cobrar cotización',
+                                  subtitle: _puedeCobrar
+                                      ? 'Buscar por N° o cliente y generar factura'
+                                      : 'Requiere caja abierta',
+                                  color: _puedeCobrar
+                                      ? AppColors.success
+                                      : AppColors.grey500,
+                                  onTap: _irACobrarCotizacion,
+                                ),
+                                const SizedBox(height: 14),
+                                _CajaOpTile(
+                                  icon: Icons.account_balance_wallet_outlined,
+                                  title: 'Cuentas por cobrar',
+                                  subtitle: 'Saldos y abonos de clientes',
+                                  color: AppColors.info,
+                                  onTap: _irACuentasPorCobrar,
+                                ),
+                                const SizedBox(height: 14),
+                                _CajaOpTile(
+                                  icon: Icons.receipt_long_outlined,
+                                  title: 'Historial del turno',
+                                  subtitle: abierta
+                                      ? 'Movimientos desde la apertura'
+                                      : 'Movimientos desde hoy 00:00',
+                                  color: AppColors.primary,
+                                  onTap: _irAHistorialTurno,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   AppLayout.vXl,
                   Text(
                     'El cobro de cotizaciones asigna N° de factura e impacta '
@@ -610,7 +678,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   Widget _buildEstadoTurno(bool mobile, bool abierta) {
     return AppCard(
       borderColor: AppColors.border,
-      padding: EdgeInsets.all(mobile ? AppSpacing.m : AppSpacing.l),
+      padding: EdgeInsets.all(mobile ? AppSpacing.m : 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -659,7 +727,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               style: AppTypography.h2.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
-                fontSize: mobile ? 28 : 36,
+                fontSize: mobile ? 28 : 42,
               ),
             ),
           if (abierta && _sesion != null) ...[
@@ -681,12 +749,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               onPressed: _procesando ? null : _dialogoAbrirCaja,
               isDisabled: _procesando,
               width: double.infinity,
-              height: mobile ? 48 : AppSizes.buttonHeightMd,
+              height: mobile ? 48 : 52,
             )
           else
             SizedBox(
               width: double.infinity,
-              height: mobile ? 48 : AppSizes.buttonHeightMd,
+              height: mobile ? 48 : 52,
               child: OutlinedButton.icon(
                 onPressed: _procesando ? null : _dialogoCerrarCaja,
                 icon: const Icon(Icons.lock_outline, size: 20),
@@ -704,6 +772,84 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _CajaOpTile extends StatelessWidget {
+  const _CajaOpTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 22),
+          constraints: const BoxConstraints(minHeight: 88),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.grey900.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: color, size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTypography.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
+            ],
+          ),
+        ),
       ),
     );
   }

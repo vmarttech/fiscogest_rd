@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -71,13 +72,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (res.requiereSetupInicial) {
         context.go('/setup-cuenta');
       } else {
-        final rol = res.rol.toLowerCase();
-        if (rol.contains('vendedor')) {
-          context.go('/ventas');
-        } else if (rol.contains('cajero')) {
+        final sesion = ref.read(sesionProvider);
+        if (sesion != null && normalizarRol(sesion.rol) == 'Cajero') {
           context.go('/ventas/cobro');
         } else {
-          context.go('/');
+          context.go(sesion?.rutaInicio ?? '/');
         }
       }
     } catch (e) {
