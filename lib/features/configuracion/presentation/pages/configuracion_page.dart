@@ -1035,7 +1035,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               Switch.adaptive(
                 value: _modoSimplificado,
                 activeThumbColor: AppColors.primary,
-                onChanged: (v) => setState(() => _modoSimplificado = v),
+                onChanged: (v) {
+                  setState(() => _modoSimplificado = v);
+                  // UI inmediata; Guardar confirma en BD
+                  ref.read(modoSimplificadoCacheProvider.notifier).state = v;
+                },
               ),
             ],
           ),

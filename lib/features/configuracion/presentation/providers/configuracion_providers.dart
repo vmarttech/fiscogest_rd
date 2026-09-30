@@ -47,7 +47,13 @@ class ConfiguracionController extends AsyncNotifier<ConfiguracionEntity?> {
   Future<ConfiguracionEntity?> build() async {
     ref.keepAlive();
     final obtener = ref.read(obtenerConfiguracionUseCaseProvider);
-    return await obtener.ejecutar();
+    final cfg = await obtener.ejecutar();
+    // Sincronizar cache YA en el primer load (evita flash de modo normal)
+    if (cfg != null) {
+      ref.read(modoSimplificadoCacheProvider.notifier).state =
+          cfg.modoSimplificado;
+    }
+    return cfg;
   }
 
   Future<void> guardar(ConfiguracionEntity configuracion) async {

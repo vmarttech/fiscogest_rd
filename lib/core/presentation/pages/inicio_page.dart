@@ -62,7 +62,7 @@ class InicioPage extends ConsumerWidget {
                   onNuevaVenta: () =>
                       _go(context, '/ventas/cotizaciones/nueva'),
                   onCaja: () => _go(context, '/ventas/cobro'),
-                  onVentas: () => _go(context, '/ventas'),
+                  onProveedores: () => _go(context, '/proveedores'),
                   onFiao: () => _go(context, '/ventas/fios'),
                   onProductos: () => _go(context, '/inventario'),
                   onCompras: () => _go(context, '/compras'),
@@ -218,7 +218,7 @@ class InicioPage extends ConsumerWidget {
                     _AccesosSimplificado(
                       mobile: mobile,
                       desktop: desktop,
-                      onVentas: () => _go(context, '/ventas'),
+                      onProveedores: () => _go(context, '/proveedores'),
                       onCaja: () => _go(context, '/ventas/cobro'),
                       onFiao: () => _go(context, '/ventas/fios'),
                       onProductos: () => _go(context, '/inventario'),
@@ -415,7 +415,7 @@ class _DashboardColmado extends StatelessWidget {
     required this.nombreNegocio,
     required this.onNuevaVenta,
     required this.onCaja,
-    required this.onVentas,
+    required this.onProveedores,
     required this.onFiao,
     required this.onProductos,
     required this.onCompras,
@@ -429,7 +429,7 @@ class _DashboardColmado extends StatelessWidget {
   final String nombreNegocio;
   final VoidCallback onNuevaVenta;
   final VoidCallback onCaja;
-  final VoidCallback onVentas;
+  final VoidCallback onProveedores;
   final VoidCallback onFiao;
   final VoidCallback onProductos;
   final VoidCallback onCompras;
@@ -439,7 +439,7 @@ class _DashboardColmado extends StatelessWidget {
   Widget build(BuildContext context) {
     final cols = desktop ? 3 : 2;
     final items = <(IconData, String, String, Color, VoidCallback)>[
-      (Icons.point_of_sale_rounded, 'Ventas', 'Cobrar y fiar', AppColors.primary, onVentas),
+      (Icons.business_outlined, 'Proveedores', 'Mis proveedores', AppColors.primary, onProveedores),
       (Icons.payments_rounded, 'Caja', 'Cobros del día', AppColors.success, onCaja),
       (Icons.edit_note_rounded, 'Fiao', 'Lo que me deben', AppColors.warning, onFiao),
       (Icons.inventory_2_rounded, 'Productos', 'Existencias', AppColors.info, onProductos),
@@ -731,7 +731,7 @@ class _AccesosSimplificado extends StatelessWidget {
   const _AccesosSimplificado({
     required this.mobile,
     required this.desktop,
-    required this.onVentas,
+    required this.onProveedores,
     required this.onCaja,
     required this.onFiao,
     required this.onProductos,
@@ -741,7 +741,7 @@ class _AccesosSimplificado extends StatelessWidget {
   });
   final bool mobile;
   final bool desktop;
-  final VoidCallback onVentas;
+  final VoidCallback onProveedores;
   final VoidCallback onCaja;
   final VoidCallback onFiao;
   final VoidCallback onProductos;
@@ -752,7 +752,7 @@ class _AccesosSimplificado extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <(IconData, String, String, Color, VoidCallback)>[
-      (Icons.point_of_sale, 'Ventas', 'Cobrar y fiar', AppColors.primary, onVentas),
+      (Icons.business_outlined, 'Proveedores', 'Mis proveedores', AppColors.primary, onProveedores),
       (Icons.payments_outlined, 'Caja', 'Turno del día', AppColors.success, onCaja),
       (Icons.edit_note_rounded, 'Fiao', 'Lo que me deben', AppColors.warning, onFiao),
       (Icons.inventory_2_outlined, 'Productos', 'Existencias', AppColors.info, onProductos),
