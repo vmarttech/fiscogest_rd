@@ -7,12 +7,16 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 part 'apartados_dao.g.dart';
 
 @DriftAccessor(tables: [ApartadosTable, ApartadosDetalleTable])
-class ApartadosDao extends DatabaseAccessor<AppDatabase> with _$ApartadosDaoMixin {
+class ApartadosDao extends DatabaseAccessor<AppDatabase>
+    with _$ApartadosDaoMixin {
   ApartadosDao(super.db);
 
   Future<List<Map<String, dynamic>>> listarApartados() async {
     final query = select(apartadosTable)
-      ..orderBy([(ApartadosTable t) => OrderingTerm(expression: t.fechaReserva, mode: OrderingMode.desc)]);
+      ..orderBy([
+        (ApartadosTable t) =>
+            OrderingTerm(expression: t.fechaReserva, mode: OrderingMode.desc),
+      ]);
     final List<ApartadoData> resultados = await query.get();
     return resultados.map((ApartadoData a) => a.toJson()).toList();
   }
@@ -61,30 +65,40 @@ class ApartadosDao extends DatabaseAccessor<AppDatabase> with _$ApartadosDaoMixi
     );
   }
 
-  Future<bool> actualizarSaldo(int apartadoId, double montoAbonado, double saldoPendiente) async {
-    final filasAfectadas = await (update(apartadosTable)
-      ..where((ApartadosTable t) => t.id.equals(apartadoId)))
-      .write(ApartadosTableCompanion(
-        montoAbonado: Value(montoAbonado),
-        saldoPendiente: Value(saldoPendiente),
-      ));
+  Future<bool> actualizarSaldo(
+    int apartadoId,
+    double montoAbonado,
+    double saldoPendiente,
+  ) async {
+    final filasAfectadas =
+        await (update(
+          apartadosTable,
+        )..where((ApartadosTable t) => t.id.equals(apartadoId))).write(
+          ApartadosTableCompanion(
+            montoAbonado: Value(montoAbonado),
+            saldoPendiente: Value(saldoPendiente),
+          ),
+        );
     return filasAfectadas > 0;
   }
 
   Future<bool> cambiarEstado(int apartadoId, ApartadoEstado estado) async {
-    final filasAfectadas = await (update(apartadosTable)
-      ..where((ApartadosTable t) => t.id.equals(apartadoId)))
-      .write(ApartadosTableCompanion(estado: Value(estado)));
+    final filasAfectadas =
+        await (update(apartadosTable)
+              ..where((ApartadosTable t) => t.id.equals(apartadoId)))
+            .write(ApartadosTableCompanion(estado: Value(estado)));
     return filasAfectadas > 0;
   }
 
   Future<ApartadoData?> buscarPorId(int apartadoId) async {
-    return (select(apartadosTable)
-      ..where((ApartadosTable t) => t.id.equals(apartadoId))).getSingleOrNull();
+    return (select(
+      apartadosTable,
+    )..where((ApartadosTable t) => t.id.equals(apartadoId))).getSingleOrNull();
   }
 
   Future<List<dynamic>> listarDetalles(int apartadoId) async {
-    return (select(apartadosDetalleTable)
-      ..where((t) => t.apartadoId.equals(apartadoId))).get();
+    return (select(
+      apartadosDetalleTable,
+    )..where((t) => t.apartadoId.equals(apartadoId))).get();
   }
 }

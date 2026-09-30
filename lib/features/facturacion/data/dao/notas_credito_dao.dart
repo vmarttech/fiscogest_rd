@@ -14,8 +14,8 @@ class NotasCreditoDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<List<NotasCreditoTableData>> listar() {
-    return (select(notasCreditoTable)
-          ..orderBy([(t) => OrderingTerm.desc(t.creadoEn)]))
-        .get();
+    return (select(
+      notasCreditoTable,
+    )..orderBy([(t) => OrderingTerm.desc(t.creadoEn)])).get();
   }
 }

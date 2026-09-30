@@ -51,10 +51,11 @@ import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.da
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_table.dart';
 part 'app_database.g.dart';
+
 @DriftDatabase(
   tables: [
-  NotasCreditoTable,
-  SecuenciasNcfTable,
+    NotasCreditoTable,
+    SecuenciasNcfTable,
     ClientesTable,
     ConfiguracionTable,
     ProductosTable,
@@ -154,13 +155,13 @@ class AppDatabase extends _$AppDatabase {
       if (from < 32) {
         await m.createTable(secuenciasNcfTable);
       }
-        if (from < 31) {
-          try {
-            await customStatement(
-              'ALTER TABLE productos_table ADD COLUMN stock_reservado REAL NOT NULL DEFAULT 0.0',
-            );
-          } catch (_) {}
-        }
+      if (from < 31) {
+        try {
+          await customStatement(
+            'ALTER TABLE productos_table ADD COLUMN stock_reservado REAL NOT NULL DEFAULT 0.0',
+          );
+        } catch (_) {}
+      }
       if (from < 30) {
         await m.createTable(solicitudesCreditoTable);
         await m.createTable(referenciasCreditoTable);
@@ -212,7 +213,9 @@ class AppDatabase extends _$AppDatabase {
             ],
           ),
         );
-        await m.alterTable(TableMigration(salidasTable, newColumns: [salidasTable.observacion]));
+        await m.alterTable(
+          TableMigration(salidasTable, newColumns: [salidasTable.observacion]),
+        );
         await m.alterTable(
           TableMigration(
             existenciasTable,
@@ -280,52 +283,80 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 17) {
         try {
-          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN costo_envio REAL DEFAULT 0.0');
+          await m.database.customStatement(
+            'ALTER TABLE ventas_table ADD COLUMN costo_envio REAL DEFAULT 0.0',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN abono_inicial REAL DEFAULT 0.0');
+          await m.database.customStatement(
+            'ALTER TABLE ventas_table ADD COLUMN abono_inicial REAL DEFAULT 0.0',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN vencimiento TEXT');
+          await m.database.customStatement(
+            'ALTER TABLE ventas_table ADD COLUMN vencimiento TEXT',
+          );
         } catch (_) {}
       }
       if (from < 18) {
         try {
-          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN estado TEXT DEFAULT "pendiente"');
+          await m.database.customStatement(
+            'ALTER TABLE ventas_table ADD COLUMN estado TEXT DEFAULT "pendiente"',
+          );
         } catch (_) {}
       }
       if (from < 19) {
         try {
-          await m.database.customStatement('ALTER TABLE ventas_table ADD COLUMN numero_cotizacion TEXT');
+          await m.database.customStatement(
+            'ALTER TABLE ventas_table ADD COLUMN numero_cotizacion TEXT',
+          );
         } catch (_) {}
       }
       if (from < 20) {
         try {
-          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN fecha_vencimiento TEXT');
+          await m.database.customStatement(
+            'ALTER TABLE compras_table ADD COLUMN fecha_vencimiento TEXT',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN fecha_recepcion TEXT');
+          await m.database.customStatement(
+            'ALTER TABLE compras_table ADD COLUMN fecha_recepcion TEXT',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN ncf TEXT NOT NULL DEFAULT ""');
+          await m.database.customStatement(
+            'ALTER TABLE compras_table ADD COLUMN ncf TEXT NOT NULL DEFAULT ""',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN forma_pago TEXT NOT NULL DEFAULT "contado"');
+          await m.database.customStatement(
+            'ALTER TABLE compras_table ADD COLUMN forma_pago TEXT NOT NULL DEFAULT "contado"',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE compras_table ADD COLUMN dias_credito INTEGER NOT NULL DEFAULT 0');
+          await m.database.customStatement(
+            'ALTER TABLE compras_table ADD COLUMN dias_credito INTEGER NOT NULL DEFAULT 0',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN subtotal_linea REAL');
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN subtotal_linea REAL',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN base_imponible_linea REAL');
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN base_imponible_linea REAL',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN itbis_linea REAL');
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN itbis_linea REAL',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE detalle_compra_table ADD COLUMN total_linea REAL');
+          await m.database.customStatement(
+            'ALTER TABLE detalle_compra_table ADD COLUMN total_linea REAL',
+          );
         } catch (_) {}
       }
       if (from < 21) {
@@ -336,13 +367,19 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 23) {
         try {
-          await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN whatsapp TEXT');
+          await m.database.customStatement(
+            'ALTER TABLE proveedores_table ADD COLUMN whatsapp TEXT',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN limite_credito REAL NOT NULL DEFAULT 0.0');
+          await m.database.customStatement(
+            'ALTER TABLE proveedores_table ADD COLUMN limite_credito REAL NOT NULL DEFAULT 0.0',
+          );
         } catch (_) {}
         try {
-          await m.database.customStatement('ALTER TABLE proveedores_table ADD COLUMN condiciones_nota TEXT');
+          await m.database.customStatement(
+            'ALTER TABLE proveedores_table ADD COLUMN condiciones_nota TEXT',
+          );
         } catch (_) {}
       }
       if (from < 24) {
@@ -442,7 +479,8 @@ class AppDatabase extends _$AppDatabase {
           'doc_mostrar_ncf': 'INTEGER NOT NULL DEFAULT 1',
           'doc_mostrar_cliente': 'INTEGER NOT NULL DEFAULT 1',
           'doc_mostrar_itbis_desglose': 'INTEGER NOT NULL DEFAULT 1',
-          'doc_pie_pagina': "TEXT NOT NULL DEFAULT 'Gracias por su preferencia'",
+          'doc_pie_pagina':
+              "TEXT NOT NULL DEFAULT 'Gracias por su preferencia'",
         };
         for (final e in cols.entries) {
           try {
@@ -505,11 +543,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 39) {
         await m.createTable(cuotasCuentaTable);
       }
-
-
     },
   );
 }
+
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final carpetaBase = await getApplicationDocumentsDirectory();
@@ -517,6 +554,7 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(archivoDb);
   });
 }
+
 final appDatabaseProvider = Provider((ref) {
   final db = AppDatabase();
   ref.onDispose(() => db.close());

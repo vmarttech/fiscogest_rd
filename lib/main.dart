@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/data/repositories/ajust
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart'
     as ajuste_prov;
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   _InventarioRepositoryAdapter(this._db);
@@ -257,6 +258,15 @@ class FiscoGestApp extends ConsumerWidget {
         Locale('en', 'US'),
       ],
       locale: const Locale('es', 'DO'),
-    );
+    
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const FiscoGestNotificationOverlay(),
+          ],
+        );
+      },
+);
   }
 }

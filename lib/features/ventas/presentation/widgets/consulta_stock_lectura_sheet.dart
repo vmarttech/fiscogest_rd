@@ -69,8 +69,10 @@ class _ConsultaStockLecturaSheetState
               onVerticalDragUpdate: (details) {
                 setState(() {
                   // Solo permitir subir (negativo) o bajar un poco
-                  _offsetY = (_offsetY + details.delta.dy)
-                      .clamp(-size.height * 0.45, 40.0);
+                  _offsetY = (_offsetY + details.delta.dy).clamp(
+                    -size.height * 0.45,
+                    40.0,
+                  );
                 });
               },
               onVerticalDragEnd: (_) {
@@ -166,8 +168,8 @@ class _ConsultaStockLecturaSheetState
                       // Lista
                       Expanded(
                         child: async.when(
-                          loading: () => const Center(
-                              child: CircularProgressIndicator()),
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
                           error: (Object e, StackTrace st) => Center(
                             child: Padding(
                               padding: const EdgeInsets.all(16),
@@ -179,8 +181,8 @@ class _ConsultaStockLecturaSheetState
                               if (_filtro.isEmpty) return true;
                               final nombre = p.nombre.toLowerCase();
                               final codigo = p.codigo.toLowerCase();
-                              final barras =
-                                  (p.codigoBarras ?? '').toLowerCase();
+                              final barras = (p.codigoBarras ?? '')
+                                  .toLowerCase();
                               return nombre.contains(_filtro) ||
                                   codigo.contains(_filtro) ||
                                   barras.contains(_filtro);
@@ -198,30 +200,27 @@ class _ConsultaStockLecturaSheetState
                             }
 
                             return ListView.separated(
-                              padding:
-                                  const EdgeInsets.fromLTRB(8, 0, 8, 12),
+                              padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
                               itemCount: list.length,
                               separatorBuilder: (_, __) =>
                                   const Divider(height: 1, thickness: 0.5),
                               itemBuilder: (_, i) {
                                 final p = list[i];
                                 final stock = p.stock ?? 0;
-                                final stockTxt =
-                                    stock == stock.roundToDouble()
-                                        ? '${stock.toInt()}'
-                                        : stock.toStringAsFixed(1);
+                                final stockTxt = stock == stock.roundToDouble()
+                                    ? '${stock.toInt()}'
+                                    : stock.toStringAsFixed(1);
                                 return ListTile(
                                   dense: true,
                                   visualDensity: VisualDensity.compact,
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 8),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                   title: Text(
                                     p.nombre,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.bodyMedium
-                                        .copyWith(
+                                    style: AppTypography.bodyMedium.copyWith(
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),

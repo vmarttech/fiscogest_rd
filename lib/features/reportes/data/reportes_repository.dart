@@ -79,12 +79,16 @@ class ReportesRepository {
   }
 
   /// (ventas, num, ganancia)
-  Future<(double, int, double)> _agregado(DateTime desde, DateTime hasta) async {
+  Future<(double, int, double)> _agregado(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
     final ds = desde.toIso8601String();
     final hs = hasta.toIso8601String();
 
-    final rows = await _db.customSelect(
-      '''
+    final rows = await _db
+        .customSelect(
+          '''
       SELECT
         COALESCE(SUM(v.monto_total), 0.0) AS ventas,
         COUNT(*) AS n,
@@ -100,12 +104,14 @@ class ReportesRepository {
       WHERE v.fecha >= ? AND v.fecha < ?
         AND v.estado_documento IN $_estadosVenta
       ''',
-      variables: [
-        Variable.withString(ds),
-        Variable.withString(hs),
-      ],
-      readsFrom: {_db.ventasTable, _db.ventasDetalleTable, _db.productosTable},
-    ).get();
+          variables: [Variable.withString(ds), Variable.withString(hs)],
+          readsFrom: {
+            _db.ventasTable,
+            _db.ventasDetalleTable,
+            _db.productosTable,
+          },
+        )
+        .get();
 
     if (rows.isEmpty) return (0.0, 0, 0.0);
     final r = rows.first;
@@ -116,8 +122,9 @@ class ReportesRepository {
   }
 
   Future<List<SeriePunto>> _serieDiaria(DateTime desde, DateTime hasta) async {
-    final rows = await _db.customSelect(
-      '''
+    final rows = await _db
+        .customSelect(
+          '''
       SELECT date(v.fecha) AS dia,
              COALESCE(SUM(v.monto_total), 0.0) AS total
       FROM ventas_table v
@@ -126,12 +133,13 @@ class ReportesRepository {
       GROUP BY date(v.fecha)
       ORDER BY dia
       ''',
-      variables: [
-        Variable.withString(desde.toIso8601String()),
-        Variable.withString(hasta.toIso8601String()),
-      ],
-      readsFrom: {_db.ventasTable},
-    ).get();
+          variables: [
+            Variable.withString(desde.toIso8601String()),
+            Variable.withString(hasta.toIso8601String()),
+          ],
+          readsFrom: {_db.ventasTable},
+        )
+        .get();
 
     final map = <String, double>{};
     for (final r in rows) {
@@ -142,8 +150,11 @@ class ReportesRepository {
     final out = <SeriePunto>[];
     final fmt = DateFormat('d/M');
     for (var i = 0; i < 30; i++) {
-      final d = DateTime(desde.year, desde.month, desde.day)
-          .add(Duration(days: i));
+      final d = DateTime(
+        desde.year,
+        desde.month,
+        desde.day,
+      ).add(Duration(days: i));
       if (d.isAfter(hasta) || d.isAtSameMomentAs(hasta)) break;
       final key =
           '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -156,8 +167,9 @@ class ReportesRepository {
     DateTime desde,
     DateTime hasta,
   ) async {
-    final rows = await _db.customSelect(
-      '''
+    final rows = await _db
+        .customSelect(
+          '''
       SELECT COALESCE(v.forma_pago, 'Otro') AS fp,
              COALESCE(SUM(v.monto_total), 0.0) AS total
       FROM ventas_table v
@@ -166,12 +178,13 @@ class ReportesRepository {
       GROUP BY fp
       ORDER BY total DESC
       ''',
-      variables: [
-        Variable.withString(desde.toIso8601String()),
-        Variable.withString(hasta.toIso8601String()),
-      ],
-      readsFrom: {_db.ventasTable},
-    ).get();
+          variables: [
+            Variable.withString(desde.toIso8601String()),
+            Variable.withString(hasta.toIso8601String()),
+          ],
+          readsFrom: {_db.ventasTable},
+        )
+        .get();
 
     final m = <String, double>{};
     for (final r in rows) {
@@ -186,8 +199,9 @@ class ReportesRepository {
     DateTime hasta,
     int limit,
   ) async {
-    final rows = await _db.customSelect(
-      '''
+    final rows = await _db
+        .customSelect(
+          '''
       SELECT COALESCE(p.nombre, 'Producto') AS nombre,
              COALESCE(SUM(d.cantidad), 0.0) AS cant,
              COALESCE(SUM(d.subtotal), 0.0) AS monto
@@ -200,17 +214,18 @@ class ReportesRepository {
       ORDER BY monto DESC
       LIMIT ?
       ''',
-      variables: [
-        Variable.withString(desde.toIso8601String()),
-        Variable.withString(hasta.toIso8601String()),
-        Variable.withInt(limit),
-      ],
-      readsFrom: {
-        _db.ventasTable,
-        _db.ventasDetalleTable,
-        _db.productosTable,
-      },
-    ).get();
+          variables: [
+            Variable.withString(desde.toIso8601String()),
+            Variable.withString(hasta.toIso8601String()),
+            Variable.withInt(limit),
+          ],
+          readsFrom: {
+            _db.ventasTable,
+            _db.ventasDetalleTable,
+            _db.productosTable,
+          },
+        )
+        .get();
 
     return rows
         .map(

@@ -58,8 +58,9 @@ class ConfiguracionController extends AsyncNotifier<ConfiguracionEntity?> {
 
   Future<void> guardar(ConfiguracionEntity configuracion) async {
     final previous = state;
-    state = const AsyncValue<ConfiguracionEntity?>.loading()
-        .copyWithPrevious(previous);
+    state = const AsyncValue<ConfiguracionEntity?>.loading().copyWithPrevious(
+      previous,
+    );
     state = await AsyncValue.guard(() async {
       final guardarUseCase = ref.read(guardarConfiguracionUseCaseProvider);
       await guardarUseCase.ejecutar(configuracion);

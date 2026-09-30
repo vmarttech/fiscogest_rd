@@ -12,8 +12,9 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
 import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_dao.dart';
 
-final _usuariosListaProvider =
-    FutureProvider.autoDispose<List<UsuarioData>>((ref) async {
+final _usuariosListaProvider = FutureProvider.autoDispose<List<UsuarioData>>((
+  ref,
+) async {
   final db = ref.watch(databaseProvider);
   return UsuariosDao(db).obtenerTodos();
 });
@@ -45,7 +46,12 @@ class UsuariosPage extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(mobile ? 16 : 24, 12, mobile ? 16 : 24, 8),
+            padding: EdgeInsets.fromLTRB(
+              mobile ? 16 : 24,
+              12,
+              mobile ? 16 : 24,
+              8,
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -107,8 +113,9 @@ class UsuariosPage extends ConsumerWidget {
                           child: Row(
                             children: [
                               CircleAvatar(
-                                backgroundColor: AppColors.primary
-                                    .withValues(alpha: 0.12),
+                                backgroundColor: AppColors.primary.withValues(
+                                  alpha: 0.12,
+                                ),
                                 child: const Icon(
                                   Icons.person_outline,
                                   color: AppColors.primary,
@@ -141,10 +148,11 @@ class UsuariosPage extends ConsumerWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: (activo
-                                          ? AppColors.success
-                                          : AppColors.error)
-                                      .withValues(alpha: 0.12),
+                                  color:
+                                      (activo
+                                              ? AppColors.success
+                                              : AppColors.error)
+                                          .withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -161,7 +169,9 @@ class UsuariosPage extends ConsumerWidget {
                               IconButton(
                                 tooltip: activo ? 'Desactivar' : 'Activar',
                                 onPressed: () async {
-                                  final dao = UsuariosDao(ref.read(databaseProvider));
+                                  final dao = UsuariosDao(
+                                    ref.read(databaseProvider),
+                                  );
                                   await dao.cambiarEstado(
                                     u.id,
                                     activo ? 'Inactivo' : 'Activo',
@@ -314,8 +324,9 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
             return;
           }
         }
-        await (db.update(db.usuariosTable)..where((t) => t.id.equals(e.id)))
-            .write(
+        await (db.update(
+          db.usuariosTable,
+        )..where((t) => t.id.equals(e.id))).write(
           UsuariosTableCompanion(
             username: Value(user),
             nombre: Value(nombre),

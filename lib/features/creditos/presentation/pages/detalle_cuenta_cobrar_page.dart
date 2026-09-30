@@ -17,6 +17,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_provid
     as venta_providers;
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart'
     show cajaRepositoryProvider;
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class DetalleCuentaCobrarPage extends ConsumerStatefulWidget {
   const DetalleCuentaCobrarPage({super.key, required this.cuentaId});
@@ -53,7 +54,7 @@ class _DetalleCuentaCobrarPageState
   Future<void> _imprimirCronograma(CuentaPorCobrar c) async {
     if (c.planPago == null || c.planPago!.cuotas.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('No hay cuotas para imprimir')),
       );
       return;
@@ -64,7 +65,7 @@ class _DetalleCuentaCobrarPageState
       await svc.imprimirCronograma(cuenta: c);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(content: Text('Error al imprimir: $e')),
         );
       }
@@ -305,7 +306,7 @@ class _DetalleCuentaCobrarPageState
             );
       } catch (_) {}
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Pago registrado: RD\$ ${_fmt.format(monto)}'),
           backgroundColor: AppColors.success,
@@ -317,7 +318,7 @@ class _DetalleCuentaCobrarPageState
       await _cargar();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('$e'.replaceAll('Exception: ', '')),
           backgroundColor: AppColors.error,

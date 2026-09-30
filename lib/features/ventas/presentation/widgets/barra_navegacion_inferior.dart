@@ -10,8 +10,9 @@ class BarraNavegacionInferior extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vistaActual =
-        ref.watch(ventasNavegacionProvider.select((e) => e.vistaActual));
+    final vistaActual = ref.watch(
+      ventasNavegacionProvider.select((e) => e.vistaActual),
+    );
 
     void irInicio() {
       ref
@@ -63,10 +64,8 @@ class BarraNavegacionInferior extends ConsumerWidget {
                   etiqueta,
                   style: TextStyle(
                     fontSize: 11,
-                    color:
-                        activo ? AppColors.primary : AppColors.textSecondary,
-                    fontWeight:
-                        activo ? FontWeight.w600 : FontWeight.normal,
+                    color: activo ? AppColors.primary : AppColors.textSecondary,
+                    fontWeight: activo ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ],

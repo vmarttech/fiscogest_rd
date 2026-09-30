@@ -13,11 +13,9 @@ class KpiPeriodo {
   final double ventasAnterior;
   final double gananciaAnterior;
 
-  double get ticketPromedio =>
-      numFacturas == 0 ? 0.0 : ventas / numFacturas;
+  double get ticketPromedio => numFacturas == 0 ? 0.0 : ventas / numFacturas;
 
-  double get margenPct =>
-      ventas <= 0 ? 0.0 : (ganancia / ventas) * 100.0;
+  double get margenPct => ventas <= 0 ? 0.0 : (ganancia / ventas) * 100.0;
 
   double get deltaVentasPct {
     if (ventasAnterior <= 0) return ventas > 0 ? 100.0 : 0.0;

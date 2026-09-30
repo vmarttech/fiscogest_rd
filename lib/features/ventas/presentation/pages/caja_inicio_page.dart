@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/caja/domain/repositories/i_caja_repository.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 /// Hub de la estación de Caja — responsive PC / tablet / móvil.
 class CajaInicioPage extends ConsumerStatefulWidget {
@@ -64,10 +65,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   /// Parsea monto (coma o punto). null si no es número.
   double? _parseMonto(String raw) {
-    final s = raw
-        .trim()
-        .replaceAll(' ', '')
-        .replaceAll(',', '.');
+    final s = raw.trim().replaceAll(' ', '').replaceAll(',', '.');
     if (s.isEmpty) return null;
     return double.tryParse(s);
   }
@@ -82,7 +80,6 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     return null;
   }
 
-
   /// Política de Configuración → Caja (default: no exigir).
   bool get _exigeSesionCaja {
     final cfg = ref.read(configuracionControllerProvider).valueOrNull;
@@ -94,7 +91,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   void _irACobrarCotizacion() {
     if (!_puedeCobrar) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Debe abrir la caja antes de cobrar'),
           backgroundColor: AppColors.warning,
@@ -108,8 +105,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   void _irACuentasPorCobrar() => context.push('/ventas/cobrar');
 
-  void _irAHistorialTurno() =>
-      context.push('/ventas/cobro/historial-turno');
+  void _irAHistorialTurno() => context.push('/ventas/cobro/historial-turno');
 
   Future<void> _dialogoAbrirCaja() async {
     final controller = TextEditingController(text: '0');
@@ -135,8 +131,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 AppLayout.vM,
                 TextField(
                   controller: controller,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Fondo inicial',
                     prefixText: 'RD\$ ',
@@ -186,11 +183,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     try {
       await ref.read(cajaRepositoryProvider).abrirSesion(fondoInicial: fondo);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
-          content: Text(
-            'Caja abierta. Fondo: RD\$ ${_fmtMonto.format(fondo)}',
-          ),
+          content: Text('Caja abierta. Fondo: RD\$ ${_fmtMonto.format(fondo)}'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
@@ -198,7 +193,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       await _refrescar();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('$e'.replaceAll('Exception: ', '')),
           backgroundColor: AppColors.error,
@@ -213,8 +208,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   Future<void> _dialogoCerrarCaja() async {
     if (_sesion == null) return;
     final teorico = _saldo ?? 0.0;
-    final controller =
-        TextEditingController(text: teorico.toStringAsFixed(2));
+    final controller = TextEditingController(text: teorico.toStringAsFixed(2));
     final obsController = TextEditingController();
     final ancho = MediaQuery.of(context).size.width;
 
@@ -224,9 +218,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setLocal) {
-            final double contado = double.tryParse(
-                  controller.text.trim().replaceAll(',', '.'),
-                ) ??
+            final double contado =
+                double.tryParse(controller.text.trim().replaceAll(',', '.')) ??
                 teorico;
             final dif = contado - teorico;
             final Color difColor;
@@ -243,11 +236,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             }
 
             final mq = MediaQuery.of(ctx);
-            final maxH = (mq.size.height
-                    - mq.viewInsets.bottom
-                    - mq.padding.vertical
-                    - 160)
-                .clamp(200.0, 480.0);
+            final maxH =
+                (mq.size.height -
+                        mq.viewInsets.bottom -
+                        mq.padding.vertical -
+                        160)
+                    .clamp(200.0, 480.0);
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
               insetPadding: const EdgeInsets.symmetric(
@@ -267,91 +261,93 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                      Text(
-                        'Sesión #${_sesion!.id} · Fondo inicial RD\$ ${_fmtMonto.format(_sesion!.fondoInicial)}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                        Text(
+                          'Sesión #${_sesion!.id} · Fondo inicial RD\$ ${_fmtMonto.format(_sesion!.fondoInicial)}',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                      ),
-                      AppLayout.vM,
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Saldo teórico',
-                              style: AppTypography.labelMedium,
-                            ),
-                            Text(
-                              'RD\$ ${_fmtMonto.format(teorico)}',
-                              style: AppTypography.h4.copyWith(
-                                fontWeight: FontWeight.w700,
+                        AppLayout.vM,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Saldo teórico',
+                                style: AppTypography.labelMedium,
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      AppLayout.vM,
-                      TextField(
-                        controller: controller,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'Efectivo contado en cajón',
-                          prefixText: 'RD\$ ',
-                          border: OutlineInputBorder(),
-                          helperText: 'Cuente billetes y monedas del cajón',
-                        ),
-                        autofocus: true,
-                        onChanged: (_) => setLocal(() {}),
-                      ),
-                      AppLayout.vM,
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: difColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: difColor.withValues(alpha: 0.4)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              difLabel,
-                              style: AppTypography.labelMedium.copyWith(
-                                color: difColor,
-                                fontWeight: FontWeight.w600,
+                              Text(
+                                'RD\$ ${_fmtMonto.format(teorico)}',
+                                style: AppTypography.h4.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
+                            ],
+                          ),
+                        ),
+                        AppLayout.vM,
+                        TextField(
+                          controller: controller,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Efectivo contado en cajón',
+                            prefixText: 'RD\$ ',
+                            border: OutlineInputBorder(),
+                            helperText: 'Cuente billetes y monedas del cajón',
+                          ),
+                          autofocus: true,
+                          onChanged: (_) => setLocal(() {}),
+                        ),
+                        AppLayout.vM,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: difColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: difColor.withValues(alpha: 0.4),
                             ),
-                            Text(
-                              'RD\$ ${_fmtMonto.format(dif)}',
-                              style: AppTypography.h4.copyWith(
-                                color: difColor,
-                                fontWeight: FontWeight.w700,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                difLabel,
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: difColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
+                              Text(
+                                'RD\$ ${_fmtMonto.format(dif)}',
+                                style: AppTypography.h4.copyWith(
+                                  color: difColor,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      AppLayout.vM,
-                      TextField(
-                        controller: obsController,
-                        decoration: const InputDecoration(
-                          labelText: 'Observación (opcional)',
-                          border: OutlineInputBorder(),
-                          hintText: 'Ej. faltante por cambio, billete roto…',
+                        AppLayout.vM,
+                        TextField(
+                          controller: obsController,
+                          decoration: const InputDecoration(
+                            labelText: 'Observación (opcional)',
+                            border: OutlineInputBorder(),
+                            hintText: 'Ej. faltante por cambio, billete roto…',
+                          ),
+                          maxLines: 2,
                         ),
-                        maxLines: 2,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
                 ),
               ),
               actions: [
@@ -377,10 +373,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     }
                     final v = _parseMonto(controller.text)!;
                     final obs = obsController.text.trim();
-                    Navigator.pop(
-                      ctx,
-                      (contado: v, obs: obs.isEmpty ? null : obs),
-                    );
+                    Navigator.pop(ctx, (
+                      contado: v,
+                      obs: obs.isEmpty ? null : obs,
+                    ));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.warning,
@@ -399,7 +395,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
     setState(() => _procesando = true);
     try {
-      final ok = await ref.read(cajaRepositoryProvider).cerrarSesion(
+      final ok = await ref
+          .read(cajaRepositoryProvider)
+          .cerrarSesion(
             sesionId: _sesion!.id,
             saldoTeorico: teorico,
             montoContado: result.contado,
@@ -413,13 +411,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       } else if (dif.abs() < 0.005) {
         msg = 'Caja cerrada. Cuadre exacto.';
       } else if (dif > 0) {
-        msg =
-            'Caja cerrada. Sobrante: RD\$ ${_fmtMonto.format(dif)}';
+        msg = 'Caja cerrada. Sobrante: RD\$ ${_fmtMonto.format(dif)}';
       } else {
-        msg =
-            'Caja cerrada. Faltante: RD\$ ${_fmtMonto.format(dif.abs())}';
+        msg = 'Caja cerrada. Faltante: RD\$ ${_fmtMonto.format(dif.abs())}';
       }
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(msg),
           backgroundColor: ok
@@ -431,7 +427,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       await _refrescar();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('$e'.replaceAll('Exception: ', '')),
           backgroundColor: AppColors.error,
@@ -459,7 +455,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         tooltip: 'Menú',
         onPressed: () => ShellDrawerScope.open(context),
       ),
-body: SafeArea(
+      body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refrescar,
           child: SingleChildScrollView(
@@ -480,77 +476,79 @@ body: SafeArea(
                       constraints: BoxConstraints(
                         maxWidth: mobile ? double.infinity : 640,
                       ),
-                      child:
-                  Container(
-                    padding: EdgeInsets.fromLTRB(
-                      mobile ? 20 : 28,
-                      mobile ? 22 : 28,
-                      mobile ? 20 : 28,
-                      mobile ? 22 : 28,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          AppColors.primaryDark,
-                          AppColors.primary,
-                          AppColors.primaryLight.withValues(alpha: 0.95),
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.28),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          mobile ? 20 : 28,
+                          mobile ? 22 : 28,
+                          mobile ? 20 : 28,
+                          mobile ? 22 : 28,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: mobile ? 56 : 64,
-                          height: mobile ? 56 : 64,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.95),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Icon(
-                            Icons.point_of_sale_rounded,
-                            color: AppColors.primary,
-                            size: mobile ? 30 : 34,
-                          ),
-                        ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Estación de caja',
-                                style: (mobile
-                                        ? AppTypography.h4
-                                        : AppTypography.h3)
-                                    .copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Apertura, cobros, arqueo y movimientos del turno.',
-                                style: AppTypography.bodyMedium.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  height: 1.3,
-                                ),
-                              ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              AppColors.primaryDark,
+                              AppColors.primary,
+                              AppColors.primaryLight.withValues(alpha: 0.95),
                             ],
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.28),
+                              blurRadius: 24,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: mobile ? 56 : 64,
+                              height: mobile ? 56 : 64,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.95),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Icon(
+                                Icons.point_of_sale_rounded,
+                                color: AppColors.primary,
+                                size: mobile ? 30 : 34,
+                              ),
+                            ),
+                            const SizedBox(width: 18),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Estación de caja',
+                                    style:
+                                        (mobile
+                                                ? AppTypography.h4
+                                                : AppTypography.h3)
+                                            .copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Apertura, cobros, arqueo y movimientos del turno.',
+                                    style: AppTypography.bodyMedium.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -569,35 +567,34 @@ body: SafeArea(
                       runSpacing: 16,
                       tileHeight: 200,
                       children: [
-                      AppHubCard(
-                        icon: Icons.point_of_sale_outlined,
-                        title: 'Cobrar cotización',
-                        subtitle: _puedeCobrar
-                            ? 'Buscar por N° o cliente y generar factura'
-                            : 'Requiere caja abierta',
-                        color: _puedeCobrar
-                            ? AppColors.success
-                            : AppColors.grey500,
-                        onTap: _irACobrarCotizacion,
-                      ),
-                      AppHubCard(
-                        icon: Icons.account_balance_wallet_outlined,
-                        title: 'Cuentas por cobrar',
-                        subtitle: 'Saldos y abonos de clientes',
-                        color: AppColors.info,
-                        onTap: _irACuentasPorCobrar,
-                      ),
-                      AppHubCard(
-                        icon: Icons.receipt_long_outlined,
-                        title: 'Historial del turno',
-                        subtitle: abierta
-                            ? 'Movimientos desde la apertura'
-                            : 'Movimientos desde hoy 00:00',
-                        color: AppColors.primary,
-                        onTap: _irAHistorialTurno,
-                      ),
-
-                    ],
+                        AppHubCard(
+                          icon: Icons.point_of_sale_outlined,
+                          title: 'Cobrar cotización',
+                          subtitle: _puedeCobrar
+                              ? 'Buscar por N° o cliente y generar factura'
+                              : 'Requiere caja abierta',
+                          color: _puedeCobrar
+                              ? AppColors.success
+                              : AppColors.grey500,
+                          onTap: _irACobrarCotizacion,
+                        ),
+                        AppHubCard(
+                          icon: Icons.account_balance_wallet_outlined,
+                          title: 'Cuentas por cobrar',
+                          subtitle: 'Saldos y abonos de clientes',
+                          color: AppColors.info,
+                          onTap: _irACuentasPorCobrar,
+                        ),
+                        AppHubCard(
+                          icon: Icons.receipt_long_outlined,
+                          title: 'Historial del turno',
+                          subtitle: abierta
+                              ? 'Movimientos desde la apertura'
+                              : 'Movimientos desde hoy 00:00',
+                          color: AppColors.primary,
+                          onTap: _irAHistorialTurno,
+                        ),
+                      ],
                     ),
                   ] else ...[
                     // PC: izquierda turno | derecha operaciones (aprovecha el ancho)
@@ -686,9 +683,7 @@ body: SafeArea(
             children: [
               StatusChip(
                 label: abierta ? 'ABIERTA' : 'CERRADA',
-                type: abierta
-                    ? StatusChipType.success
-                    : StatusChipType.neutral,
+                type: abierta ? StatusChipType.success : StatusChipType.neutral,
               ),
               const Spacer(),
               if (_procesando)

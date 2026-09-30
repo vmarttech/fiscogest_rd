@@ -21,13 +21,18 @@ class ListaCuentasPagarPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<List<CuentaPagar>> cuentasAsync = ref.watch(listadoCuentasPagarProvider);
+    final AsyncValue<List<CuentaPagar>> cuentasAsync = ref.watch(
+      listadoCuentasPagarProvider,
+    );
     final double ancho = MediaQuery.of(context).size.width;
     final bool esPequena = ancho < 768;
 
     Widget buildEstadoTag(CuentaPagar cuenta) {
       final (Color color, String texto) = switch (cuenta.estado) {
-        PagarEstado.pendiente when cuenta.estaVencida => (Colors.red, 'Vencida'),
+        PagarEstado.pendiente when cuenta.estaVencida => (
+          Colors.red,
+          'Vencida',
+        ),
         PagarEstado.pendiente => (Colors.orange, 'Pendiente'),
         PagarEstado.parcial => (Colors.blue, 'Parcial'),
         PagarEstado.pagado => (Colors.green, 'Pagada'),
@@ -82,7 +87,11 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.account_balance_wallet_outlined, size: 48, color: Colors.grey),
+                      Icon(
+                        Icons.account_balance_wallet_outlined,
+                        size: 48,
+                        color: Colors.grey,
+                      ),
                       SizedBox(height: 16),
                       Text(
                         'No hay cuentas por pagar registradas.',
@@ -112,7 +121,9 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                   child: InkWell(
                     onTap: () => context.goNamed(
                       DetalleCuentaPagarPage.routeName,
-                      pathParameters: <String, String>{'cuentaId': cuenta.id.toString()},
+                      pathParameters: <String, String>{
+                        'cuentaId': cuenta.id.toString(),
+                      },
                     ),
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
@@ -139,7 +150,10 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                                       cuenta.numeroDocumento.isNotEmpty
                                           ? cuenta.numeroDocumento
                                           : 'Cuenta #${cuenta.id}',
-                                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -189,7 +203,9 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
-                                      color: vencida ? Colors.red.shade700 : Colors.blue.shade700,
+                                      color: vencida
+                                          ? Colors.red.shade700
+                                          : Colors.blue.shade700,
                                     ),
                                   ),
                                 ],
@@ -197,7 +213,13 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                               if (!esPequena)
                                 const Row(
                                   children: [
-                                    Text('Ver →', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                                    Text(
+                                      'Ver →',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                                   ],
                                 ),
                             ],

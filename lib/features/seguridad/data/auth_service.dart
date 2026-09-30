@@ -33,9 +33,9 @@ class AuthService {
     final u = username.trim();
     if (u.isEmpty || password.isEmpty) return null;
 
-    final row = await (_db.select(_db.usuariosTable)
-          ..where((t) => t.username.equals(u)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.usuariosTable,
+    )..where((t) => t.username.equals(u))).getSingleOrNull();
     if (row == null) return null;
     if (row.estado.toLowerCase() != 'activo') return null;
 
@@ -48,14 +48,15 @@ class AuthService {
           .write(UsuariosTableCompanion(passwordHash: Value(hashed)));
     }
 
-    await (_db.update(_db.usuariosTable)..where((t) => t.id.equals(row.id)))
-        .write(
+    await (_db.update(
+      _db.usuariosTable,
+    )..where((t) => t.id.equals(row.id))).write(
       UsuariosTableCompanion(fechaUltimoAcceso: Value(DateTime.now())),
     );
 
     // Credenciales de fábrica siguen siendo provisionales
-    final provisional = row.requiereSetupInicial ||
-        row.username.toLowerCase() == 'admin';
+    final provisional =
+        row.requiereSetupInicial || row.username.toLowerCase() == 'admin';
 
     return AuthResult(
       usuarioId: row.id,
@@ -71,7 +72,9 @@ class AuthService {
     final existentes = await _db.select(_db.usuariosTable).get();
     if (existentes.isNotEmpty) return;
 
-    await _db.into(_db.usuariosTable).insert(
+    await _db
+        .into(_db.usuariosTable)
+        .insert(
           UsuariosTableCompanion.insert(
             nombre: 'Administrador',
             username: 'admin',
@@ -102,17 +105,22 @@ class AuthService {
     if (user.toLowerCase() == 'admin') {
       return 'No puede usar "admin" como usuario';
     }
-    if (pass.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+    if (pass.length < 6) {
+      return 'La contraseña debe tener al menos 6 caracteres';
+    }
     if (preg.isEmpty) return 'Indique una pregunta de recuperación';
     if (resp.length < 3) return 'La respuesta debe tener al menos 3 caracteres';
 
-    final existe = await (_db.select(_db.usuariosTable)
-          ..where((t) => t.username.equals(user) & t.id.isNotValue(usuarioId)))
-        .getSingleOrNull();
+    final existe =
+        await (_db.select(_db.usuariosTable)..where(
+              (t) => t.username.equals(user) & t.id.isNotValue(usuarioId),
+            ))
+            .getSingleOrNull();
     if (existe != null) return 'Ese nombre de usuario ya existe';
 
-    await (_db.update(_db.usuariosTable)..where((t) => t.id.equals(usuarioId)))
-        .write(
+    await (_db.update(
+      _db.usuariosTable,
+    )..where((t) => t.id.equals(usuarioId))).write(
       UsuariosTableCompanion(
         username: Value(user),
         passwordHash: Value(hashPassword(pass)),
@@ -125,9 +133,9 @@ class AuthService {
   }
 
   Future<UsuarioData?> buscarPorUsername(String username) async {
-    return (_db.select(_db.usuariosTable)
-          ..where((t) => t.username.equals(username.trim())))
-        .getSingleOrNull();
+    return (_db.select(
+      _db.usuariosTable,
+    )..where((t) => t.username.equals(username.trim()))).getSingleOrNull();
   }
 
   Future<String?> recuperarClave({
@@ -137,8 +145,7 @@ class AuthService {
   }) async {
     final row = await buscarPorUsername(username);
     if (row == null) return 'Usuario no encontrado';
-    if (row.respuestaHash == null ||
-        (row.preguntaRecuperacion ?? '').isEmpty) {
+    if (row.respuestaHash == null || (row.preguntaRecuperacion ?? '').isEmpty) {
       return 'Este usuario no tiene recuperación configurada';
     }
     final hash = hashPassword(respuesta.trim().toLowerCase());
@@ -147,11 +154,10 @@ class AuthService {
       return 'La contraseña debe tener al menos 6 caracteres';
     }
 
-    await (_db.update(_db.usuariosTable)..where((t) => t.id.equals(row.id)))
-        .write(
-      UsuariosTableCompanion(
-        passwordHash: Value(hashPassword(nuevaPassword)),
-      ),
+    await (_db.update(
+      _db.usuariosTable,
+    )..where((t) => t.id.equals(row.id))).write(
+      UsuariosTableCompanion(passwordHash: Value(hashPassword(nuevaPassword))),
     );
     return null;
   }

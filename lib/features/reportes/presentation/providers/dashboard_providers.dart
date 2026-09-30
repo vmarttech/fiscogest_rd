@@ -7,10 +7,12 @@ final reportesRepositoryProvider = Provider<ReportesRepository>((ref) {
   return ReportesRepository(ref.watch(databaseProvider));
 });
 
-final dashboardSnapshotProvider =
-    FutureProvider.autoDispose<DashboardSnapshot>((ref) async {
-  return ref.watch(reportesRepositoryProvider).cargarDashboard();
-});
+final dashboardSnapshotProvider = FutureProvider.autoDispose<DashboardSnapshot>(
+  (ref) async {
+    return ref.watch(reportesRepositoryProvider).cargarDashboard();
+  },
+);
 
-final periodoDashProvider =
-    StateProvider.autoDispose<PeriodoDash>((ref) => PeriodoDash.hoy);
+final periodoDashProvider = StateProvider.autoDispose<PeriodoDash>(
+  (ref) => PeriodoDash.hoy,
+);

@@ -221,12 +221,12 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                         Wrap(
                           spacing: 8,
                           children: [
-                            for (final n in SimuladorCreditoPage.opcionesCuotas
-                                .where((c) => c <= _plazoMeses))
+                            for (final n
+                                in SimuladorCreditoPage.opcionesCuotas.where(
+                                  (c) => c <= _plazoMeses,
+                                ))
                               ChoiceChip(
-                                label: Text(
-                                  n == 1 ? '1 cuota' : '$n cuotas',
-                                ),
+                                label: Text(n == 1 ? '1 cuota' : '$n cuotas'),
                                 selected: _numeroCuotas == n,
                                 onSelected: (_) =>
                                     setState(() => _numeroCuotas = n),
@@ -272,10 +272,7 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                       padding: const EdgeInsets.all(18),
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            AppColors.primaryDark,
-                            AppColors.primary,
-                          ],
+                          colors: [AppColors.primaryDark, AppColors.primary],
                         ),
                         borderRadius: BorderRadius.all(Radius.circular(16)),
                       ),

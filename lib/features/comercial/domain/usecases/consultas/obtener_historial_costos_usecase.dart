@@ -28,7 +28,9 @@ class ObtenerHistorialCostosUseCase {
             fecha: compra.fechaEmision,
             proveedorNombre: compra.nombreProveedor,
             costoUnitario: d.costoUnitario,
-            costoAdquisicion: d.costoAdquisicion > 0 ? d.costoAdquisicion : d.costoUnitario,
+            costoAdquisicion: d.costoAdquisicion > 0
+                ? d.costoAdquisicion
+                : d.costoUnitario,
             cantidad: d.cantidad,
             ncf: compra.ncf,
           ),
@@ -44,7 +46,8 @@ class ObtenerHistorialCostosUseCase {
     final ultimoCosto = items.isEmpty ? 0.0 : items.first.costoAdquisicion;
     final costoPromedio = items.isEmpty
         ? 0.0
-        : items.map((e) => e.costoAdquisicion).reduce((a, b) => a + b) / items.length;
+        : items.map((e) => e.costoAdquisicion).reduce((a, b) => a + b) /
+              items.length;
 
     double variacion = 0;
     double variacionPct = 0;

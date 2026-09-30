@@ -56,8 +56,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                   error: (Object e, _) => Center(
                     child: Text(
                       'Error: $e',
-                      style: AppTypography.bodyMedium
-                          .copyWith(color: AppColors.error),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.error,
+                      ),
                     ),
                   ),
                   data: (List<AjusteInventario> lista) {
@@ -66,8 +67,11 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           const SizedBox(height: 80),
-                          const Icon(Icons.tune_outlined,
-                              size: 48, color: AppColors.grey300),
+                          const Icon(
+                            Icons.tune_outlined,
+                            size: 48,
+                            color: AppColors.grey300,
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             'No hay ajustes registrados',
@@ -105,8 +109,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                               decoration: const BoxDecoration(
                                 color: Color(0xFFF8FAFC),
                                 border: Border(
-                                  bottom:
-                                      BorderSide(color: AppColors.border),
+                                  bottom: BorderSide(color: AppColors.border),
                                 ),
                               ),
                               child: Row(
@@ -121,8 +124,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                             ),
                           Expanded(
                             child: ListView.separated(
-                              physics:
-                                  const AlwaysScrollableScrollPhysics(),
+                              physics: const AlwaysScrollableScrollPhysics(),
                               itemCount: lista.length,
                               separatorBuilder: (_, __) => const Divider(
                                 height: 1,
@@ -148,8 +150,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                           'Producto ID: ${a.productoId}',
                                           style: AppTypography.labelLarge
                                               .copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -160,15 +162,15 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                           a.motivo,
                                           style: AppTypography.bodySmall
                                               .copyWith(
-                                            color: AppColors.textSecondary,
-                                          ),
+                                                color: AppColors.textSecondary,
+                                              ),
                                         ),
                                         Text(
                                           fecha,
                                           style: AppTypography.bodySmall
                                               .copyWith(
-                                            color: AppColors.textDisabled,
-                                          ),
+                                                color: AppColors.textDisabled,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -178,8 +180,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                 return Material(
                                   color: i.isEven
                                       ? AppColors.white
-                                      : AppColors.grey50
-                                          .withValues(alpha: 0.55),
+                                      : AppColors.grey50.withValues(
+                                          alpha: 0.55,
+                                        ),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -193,8 +196,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                             '${a.productoId}',
                                             style: AppTypography.bodyMedium
                                                 .copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ),
                                         Expanded(
@@ -211,8 +214,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                             textAlign: TextAlign.right,
                                             style: AppTypography.bodySmall
                                                 .copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ),
                                         Expanded(
@@ -222,9 +225,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                             overflow: TextOverflow.ellipsis,
                                             style: AppTypography.bodySmall
                                                 .copyWith(
-                                              color:
-                                                  AppColors.textSecondary,
-                                            ),
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                ),
                                           ),
                                         ),
                                         Expanded(
@@ -234,9 +237,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                             textAlign: TextAlign.right,
                                             style: AppTypography.bodySmall
                                                 .copyWith(
-                                              color:
-                                                  AppColors.textDisabled,
-                                            ),
+                                                  color: AppColors.textDisabled,
+                                                ),
                                           ),
                                         ),
                                       ],

@@ -45,7 +45,8 @@ class _CajaHistorialTurnoPageState
       var desde = widget.desde;
       if (desde == null) {
         final sesion = await repo.obtenerSesionAbierta();
-        desde = sesion?.fechaApertura ??
+        desde =
+            sesion?.fechaApertura ??
             DateTime(
               DateTime.now().year,
               DateTime.now().month,
@@ -120,121 +121,113 @@ class _CajaHistorialTurnoPageState
                 child: _cargando
                     ? const Center(child: CircularProgressIndicator())
                     : _error != null
-                        ? Center(
-                            child: Text(
-                              _error!,
-                              style: AppTypography.bodyMedium
-                                  .copyWith(color: AppColors.error),
-                            ),
-                          )
-                        : _items.isEmpty
-                            ? Center(
-                                child: Text(
-                                  'Sin movimientos en este turno',
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              )
-                            : Padding(
-                                padding: AppLayout.pantallaPadding,
-                                child: AppCard(
-                                  padding: EdgeInsets.zero,
-                                  child: RefreshIndicator(
-                                    onRefresh: _cargar,
-                                    child: ListView.separated(
-                                      itemCount: _items.length,
-                                      separatorBuilder: (_, __) =>
-                                          const Divider(
-                                        height: 1,
-                                        color: AppColors.border,
-                                      ),
-                                      itemBuilder: (_, i) {
-                                        final m = _items[i];
-                                        final esIngreso = m.tipo
-                                            .toLowerCase()
-                                            .contains('ingreso');
-                                        return Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: mobile ? 14 : 16,
-                                            vertical: 12,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                esIngreso
-                                                    ? Icons.arrow_downward
-                                                    : Icons.arrow_upward,
-                                                color: esIngreso
-                                                    ? AppColors.success
-                                                    : AppColors.error,
-                                                size: 22,
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      '${m.tipo.toUpperCase()} · ${m.formaPago}',
-                                                      style: AppTypography
-                                                          .labelMedium
-                                                          .copyWith(
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        color: AppColors
-                                                            .textPrimary,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      '${m.referenciaTipo} #${m.referenciaId} · ${_fmt.format(m.fecha)}',
-                                                      style: AppTypography
-                                                          .bodySmall
-                                                          .copyWith(
-                                                        color:
-                                                            AppColors.grey600,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
-                                                children: [
-                                                  Text(
-                                                    'RD\$ ${_fmtMonto.format(m.monto)}',
-                                                    style: AppTypography
-                                                        .labelMedium
-                                                        .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                      color: esIngreso
-                                                          ? AppColors.success
-                                                          : AppColors.error,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    'Saldo ${_fmtMonto.format(m.saldoNuevo)}',
-                                                    style: AppTypography
-                                                        .bodySmall
-                                                        .copyWith(
-                                                      color:
-                                                          AppColors.grey600,
-                                                      fontSize: 11,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
+                    ? Center(
+                        child: Text(
+                          _error!,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
+                      )
+                    : _items.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Sin movimientos en este turno',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      )
+                    : Padding(
+                        padding: AppLayout.pantallaPadding,
+                        child: AppCard(
+                          padding: EdgeInsets.zero,
+                          child: RefreshIndicator(
+                            onRefresh: _cargar,
+                            child: ListView.separated(
+                              itemCount: _items.length,
+                              separatorBuilder: (_, __) => const Divider(
+                                height: 1,
+                                color: AppColors.border,
                               ),
+                              itemBuilder: (_, i) {
+                                final m = _items[i];
+                                final esIngreso = m.tipo.toLowerCase().contains(
+                                  'ingreso',
+                                );
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: mobile ? 14 : 16,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        esIngreso
+                                            ? Icons.arrow_downward
+                                            : Icons.arrow_upward,
+                                        color: esIngreso
+                                            ? AppColors.success
+                                            : AppColors.error,
+                                        size: 22,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '${m.tipo.toUpperCase()} · ${m.formaPago}',
+                                              style: AppTypography.labelMedium
+                                                  .copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                  ),
+                                            ),
+                                            Text(
+                                              '${m.referenciaTipo} #${m.referenciaId} · ${_fmt.format(m.fecha)}',
+                                              style: AppTypography.bodySmall
+                                                  .copyWith(
+                                                    color: AppColors.grey600,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            'RD\$ ${_fmtMonto.format(m.monto)}',
+                                            style: AppTypography.labelMedium
+                                                .copyWith(
+                                                  fontWeight: FontWeight.w800,
+                                                  color: esIngreso
+                                                      ? AppColors.success
+                                                      : AppColors.error,
+                                                ),
+                                          ),
+                                          Text(
+                                            'Saldo ${_fmtMonto.format(m.saldoNuevo)}',
+                                            style: AppTypography.bodySmall
+                                                .copyWith(
+                                                  color: AppColors.grey600,
+                                                  fontSize: 11,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
               ),
             ],
           ),

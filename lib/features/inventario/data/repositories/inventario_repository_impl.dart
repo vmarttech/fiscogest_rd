@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/inventario/domain/repositories/inventario_repository.dart';
+
 /// Implementación concreta | Capa Datos | Cumple contrato InventarioRepository
 class InventarioRepositoryImpl implements InventarioRepository {
   InventarioRepositoryImpl(this._db);

@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/features/creditos/domain/entities/estado_credito.da
 import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class ResultadoFormularioCredito {
   const ResultadoFormularioCredito({
@@ -107,7 +108,9 @@ class _FormularioCreditoDialogState
     final valor = double.tryParse(_abonoInicialController.text) ?? 0.0;
     return valor.clamp(0.0, _totalVenta);
   }
-  double get _saldoFinanciado => (_totalVenta - _abonoInicial).clamp(0.0, double.infinity);
+
+  double get _saldoFinanciado =>
+      (_totalVenta - _abonoInicial).clamp(0.0, double.infinity);
   double get _tasaMensual {
     return double.tryParse(_tasaInteresController.text) ?? 0.05;
   }
@@ -148,7 +151,7 @@ class _FormularioCreditoDialogState
   Future<void> _confirmar() async {
     if (_saldoFinanciado <= 0) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text('El saldo financiado debe ser mayor a RD\$ 0.00'),
             backgroundColor: AppColors.error,
@@ -163,7 +166,9 @@ class _FormularioCreditoDialogState
       final ahora = DateTime.now();
       final fechaVencimientoFinal = _numeroCuotas <= 1
           ? _fechaPrimerVencimiento
-          : _fechaPrimerVencimiento.add(Duration(days: 30 * (_numeroCuotas - 1)));
+          : _fechaPrimerVencimiento.add(
+              Duration(days: 30 * (_numeroCuotas - 1)),
+            );
       PlanPago? planPago;
       if (_numeroCuotas > 1) {
         planPago = CalculadoraCreditoService.generarPlanPago(
@@ -215,7 +220,7 @@ class _FormularioCreditoDialogState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: AppColors.error,
@@ -248,7 +253,9 @@ class _FormularioCreditoDialogState
             Expanded(
               child: Text(
                 'Formulario de Crédito',
-                style: AppTypography.h4Bold.copyWith(color: AppColors.textPrimary),
+                style: AppTypography.h4Bold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           ],
@@ -307,13 +314,17 @@ class _FormularioCreditoDialogState
                       children: _opcionesCuotas
                           .where((c) => c <= _plazoMeses)
                           .map((cuotas) {
-                        final activo = _numeroCuotas == cuotas;
-                        return ChoiceChip(
-                          label: Text('$cuotas ${cuotas == 1 ? 'cuota' : 'cuotas'}'),
-                          selected: activo,
-                          onSelected: (_) => setState(() => _numeroCuotas = cuotas),
-                        );
-                      }).toList(),
+                            final activo = _numeroCuotas == cuotas;
+                            return ChoiceChip(
+                              label: Text(
+                                '$cuotas ${cuotas == 1 ? 'cuota' : 'cuotas'}',
+                              ),
+                              selected: activo,
+                              onSelected: (_) =>
+                                  setState(() => _numeroCuotas = cuotas),
+                            );
+                          })
+                          .toList(),
                     ),
                     InkWell(
                       onTap: _seleccionarFecha,
@@ -391,10 +402,13 @@ class _FormularioCreditoDialogState
                     if (resumen.cuotas.isNotEmpty) ...[
                       TextButton.icon(
                         onPressed: () => setState(
-                            () => _mostrarTablaCuotas = !_mostrarTablaCuotas),
-                        icon: Icon(_mostrarTablaCuotas
-                            ? Icons.expand_less
-                            : Icons.expand_more),
+                          () => _mostrarTablaCuotas = !_mostrarTablaCuotas,
+                        ),
+                        icon: Icon(
+                          _mostrarTablaCuotas
+                              ? Icons.expand_less
+                              : Icons.expand_more,
+                        ),
                         label: Text(
                           _mostrarTablaCuotas
                               ? 'Ocultar tabla'
@@ -447,7 +461,11 @@ class _FormularioCreditoDialogState
     );
   }
 
-  Widget _buildFilaSoloLectura(String etiqueta, String valor, {bool destacado = false}) {
+  Widget _buildFilaSoloLectura(
+    String etiqueta,
+    String valor, {
+    bool destacado = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
@@ -468,7 +486,12 @@ class _FormularioCreditoDialogState
     );
   }
 
-  Widget _buildFilaResumen(String etiqueta, String valor, {bool destacado = false, Color? colorTexto}) {
+  Widget _buildFilaResumen(
+    String etiqueta,
+    String valor, {
+    bool destacado = false,
+    Color? colorTexto,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
@@ -509,21 +532,64 @@ class _FormularioCreditoDialogState
           dataRowMaxHeight: 48,
           columns: const [
             DataColumn(label: Text('Cuota', style: AppTypography.labelMedium)),
-            DataColumn(label: Text('Vencimiento', style: AppTypography.labelMedium)),
-            DataColumn(label: Text('Capital', style: AppTypography.labelMedium), numeric: true),
-            DataColumn(label: Text('Interés', style: AppTypography.labelMedium), numeric: true),
-            DataColumn(label: Text('Total', style: AppTypography.labelMedium), numeric: true),
-            DataColumn(label: Text('Saldo', style: AppTypography.labelMedium), numeric: true),
+            DataColumn(
+              label: Text('Vencimiento', style: AppTypography.labelMedium),
+            ),
+            DataColumn(
+              label: Text('Capital', style: AppTypography.labelMedium),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text('Interés', style: AppTypography.labelMedium),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text('Total', style: AppTypography.labelMedium),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text('Saldo', style: AppTypography.labelMedium),
+              numeric: true,
+            ),
           ],
           rows: cuotas.map((c) {
-            return DataRow(cells: [
-              DataCell(Text('#${c.numeroCuota}', style: AppTypography.labelMedium)),
-              DataCell(Text(_formatoFecha.format(c.fechaVencimiento), style: AppTypography.labelMedium)),
-              DataCell(Text(_formatearMonto(c.montoCapital), style: AppTypography.labelMedium)), // ✅
-              DataCell(Text(_formatearMonto(c.montoInteres), style: AppTypography.labelMedium)), // ✅
-              DataCell(Text(_formatearMonto(c.montoTotal), style: AppTypography.labelMedium)), // ✅
-              DataCell(Text(_formatearMonto(c.saldoDespues), style: AppTypography.labelMedium)), // ✅
-            ]);
+            return DataRow(
+              cells: [
+                DataCell(
+                  Text('#${c.numeroCuota}', style: AppTypography.labelMedium),
+                ),
+                DataCell(
+                  Text(
+                    _formatoFecha.format(c.fechaVencimiento),
+                    style: AppTypography.labelMedium,
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    _formatearMonto(c.montoCapital),
+                    style: AppTypography.labelMedium,
+                  ),
+                ), // ✅
+                DataCell(
+                  Text(
+                    _formatearMonto(c.montoInteres),
+                    style: AppTypography.labelMedium,
+                  ),
+                ), // ✅
+                DataCell(
+                  Text(
+                    _formatearMonto(c.montoTotal),
+                    style: AppTypography.labelMedium,
+                  ),
+                ), // ✅
+                DataCell(
+                  Text(
+                    _formatearMonto(c.saldoDespues),
+                    style: AppTypography.labelMedium,
+                  ),
+                ), // ✅
+              ],
+            );
           }).toList(),
         ),
       ),

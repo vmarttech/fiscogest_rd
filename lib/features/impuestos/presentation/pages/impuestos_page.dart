@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class ImpuestosPage extends ConsumerStatefulWidget {
   const ImpuestosPage({super.key});
@@ -180,8 +181,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
             // Lista
             Expanded(
               child: impuestosAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -384,10 +384,9 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                           controller: nombreController,
                           textCapitalization: TextCapitalization.sentences,
                           decoration: _inputDeco('Nombre (ej. ITBIS 18%)'),
-                          validator: (v) =>
-                              (v == null || v.trim().isEmpty)
-                                  ? 'Ingrese el nombre'
-                                  : null,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Ingrese el nombre'
+                              : null,
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
@@ -395,10 +394,8 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                           decoration: _inputDeco('Tipo'),
                           items: ['ITBIS', 'Exento', 'Adicional', 'Selectivo']
                               .map(
-                                (t) => DropdownMenuItem(
-                                  value: t,
-                                  child: Text(t),
-                                ),
+                                (t) =>
+                                    DropdownMenuItem(value: t, child: Text(t)),
                               )
                               .toList(),
                           onChanged: (val) {
@@ -478,8 +475,8 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                   ),
                                   tipo: tipoSeleccionado,
                                   esExento: esExento,
-                                  descripcion:
-                                      descripcionController.text.trim(),
+                                  descripcion: descripcionController.text
+                                      .trim(),
                                 );
                                 final notifier = ref.read(
                                   impuestoControllerProvider.notifier,
@@ -491,12 +488,13 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                 }
                                 Navigator.pop(ctx);
                               } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                FiscoGestNotifications.show(
                                   SnackBar(
                                     content: Text(
-                                      e
-                                          .toString()
-                                          .replaceAll('Exception: ', ''),
+                                      e.toString().replaceAll(
+                                        'Exception: ',
+                                        '',
+                                      ),
                                     ),
                                     backgroundColor: AppColors.error,
                                     behavior: SnackBarBehavior.floating,

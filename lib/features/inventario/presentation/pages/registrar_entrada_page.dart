@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class RegistrarEntradaPage extends ConsumerStatefulWidget {
   const RegistrarEntradaPage({
@@ -53,7 +54,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
     final cantidad = double.tryParse(_cantidadController.text);
     if (cantidad == null || cantidad <= 0) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text('Ingrese una cantidad válida mayor a cero'),
           ),
@@ -74,7 +75,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
     ref.invalidate(productoControllerProvider);
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Entrada registrada y existencias actualizadas'),
         ),

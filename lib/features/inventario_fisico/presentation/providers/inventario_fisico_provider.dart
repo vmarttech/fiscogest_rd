@@ -52,5 +52,5 @@ final guardarDiferenciaProvider = Provider<GuardarDiferenciaUsecase>((ref) {
 
 final diferenciasConteoProvider =
     FutureProvider.family<List<DiferenciaConteo>, int>((ref, conteoId) async {
-  return ref.watch(listarDiferenciasProvider).call(conteoId);
-});
+      return ref.watch(listarDiferenciasProvider).call(conteoId);
+    });

@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class CategoriasPage extends ConsumerStatefulWidget {
   const CategoriasPage({super.key});
@@ -81,12 +82,17 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                     final filtradas = _filtroBusqueda.isEmpty
                         ? categorias
                         : categorias
-                            .where(
-                              (c) =>
-                                  c.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                                  (c.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false),
-                            )
-                            .toList();
+                              .where(
+                                (c) =>
+                                    c.nombre.toLowerCase().contains(
+                                      _filtroBusqueda,
+                                    ) ||
+                                    (c.descripcion?.toLowerCase().contains(
+                                          _filtroBusqueda,
+                                        ) ??
+                                        false),
+                              )
+                              .toList();
 
                     if (filtradas.isEmpty) {
                       return const Center(
@@ -155,163 +161,200 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                             ),
                           Expanded(
                             child: ListView.separated(
-                      itemCount: filtradas.length,
-                      separatorBuilder: (context, index) =>
-                          const Divider(color: AppColors.border, height: 1),
-                      itemBuilder: (context, index) {
-                        final categoria = filtradas[index];
-                        return Material(
-                          color: index.isEven
-                              ? AppColors.white
-                              : AppColors.grey50.withValues(alpha: 0.55),
-                          child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          child: isMobile
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 42,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color: AppColors.grey50,
-                                            borderRadius: AppRadius.allM,
-                                          ),
-                                          child: const Icon(
-                                            Icons.category_outlined,
-                                            color: AppColors.textPrimary,
-                                            size: 20,
-                                          ),
+                              itemCount: filtradas.length,
+                              separatorBuilder: (context, index) =>
+                                  const Divider(
+                                    color: AppColors.border,
+                                    height: 1,
+                                  ),
+                              itemBuilder: (context, index) {
+                                final categoria = filtradas[index];
+                                return Material(
+                                  color: index.isEven
+                                      ? AppColors.white
+                                      : AppColors.grey50.withValues(
+                                          alpha: 0.55,
                                         ),
-                                        AppLayout.hM,
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    child: isMobile
+                                        ? Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                categoria.nombre,
-                                                style: AppTypography.labelLarge,
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    width: 42,
+                                                    height: 42,
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.grey50,
+                                                      borderRadius:
+                                                          AppRadius.allM,
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.category_outlined,
+                                                      color:
+                                                          AppColors.textPrimary,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                  AppLayout.hM,
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          categoria.nombre,
+                                                          style: AppTypography
+                                                              .labelLarge,
+                                                        ),
+                                                        AppLayout.vXs,
+                                                        Text(
+                                                          categoria
+                                                                      .descripcion
+                                                                      ?.isEmpty ??
+                                                                  true
+                                                              ? 'Sin descripción'
+                                                              : categoria
+                                                                    .descripcion!,
+                                                          style: AppTypography
+                                                              .bodySmall,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              AppLayout.vXs,
-                                              Text(
-                                                categoria.descripcion?.isEmpty ?? true
-                                                    ? 'Sin descripción'
-                                                    : categoria.descripcion!,
-                                                style: AppTypography.bodySmall,
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.edit_outlined,
+                                                      color: AppColors.primary,
+                                                      size: 20,
+                                                    ),
+                                                    tooltip: 'Editar Categoría',
+                                                    onPressed: () =>
+                                                        _mostrarModalRegistro(
+                                                          context,
+                                                          categoriaToEdit:
+                                                              categoria,
+                                                        ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.delete_outline,
+                                                      color: AppColors.error,
+                                                      size: 20,
+                                                    ),
+                                                    tooltip:
+                                                        'Eliminar Categoría',
+                                                    onPressed: () =>
+                                                        _confirmarEliminacion(
+                                                          context,
+                                                          categoria,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          )
+                                        : Row(
+                                            children: [
+                                              Container(
+                                                width: 42,
+                                                height: 42,
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.grey50,
+                                                  borderRadius: AppRadius.allM,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.category_outlined,
+                                                  color: AppColors.textPrimary,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                              AppLayout.hM,
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      categoria.nombre,
+                                                      style: AppTypography
+                                                          .labelLarge,
+                                                    ),
+                                                    AppLayout.vXs,
+                                                    Text(
+                                                      categoria
+                                                                  .descripcion
+                                                                  ?.isEmpty ??
+                                                              true
+                                                          ? 'Sin descripción'
+                                                          : categoria
+                                                                .descripcion!,
+                                                      style: AppTypography
+                                                          .bodySmall,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.edit_outlined,
+                                                      color: AppColors.primary,
+                                                      size: 20,
+                                                    ),
+                                                    tooltip: 'Editar Categoría',
+                                                    onPressed: () =>
+                                                        _mostrarModalRegistro(
+                                                          context,
+                                                          categoriaToEdit:
+                                                              categoria,
+                                                        ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.delete_outline,
+                                                      color: AppColors.error,
+                                                      size: 20,
+                                                    ),
+                                                    tooltip:
+                                                        'Eliminar Categoría',
+                                                    onPressed: () =>
+                                                        _confirmarEliminacion(
+                                                          context,
+                                                          categoria,
+                                                        ),
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.edit_outlined,
-                                            color: AppColors.primary,
-                                            size: 20,
-                                          ),
-                                          tooltip: 'Editar Categoría',
-                                          onPressed: () => _mostrarModalRegistro(
-                                            context,
-                                            categoriaToEdit: categoria,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            color: AppColors.error,
-                                            size: 20,
-                                          ),
-                                          tooltip: 'Eliminar Categoría',
-                                          onPressed: () =>
-                                              _confirmarEliminacion(context, categoria),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                )
-                              : Row(
-                                  children: [
-                                    Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.grey50,
-                                        borderRadius: AppRadius.allM,
-                                      ),
-                                      child: const Icon(
-                                        Icons.category_outlined,
-                                        color: AppColors.textPrimary,
-                                        size: 20,
-                                      ),
-                                    ),
-                                    AppLayout.hM,
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            categoria.nombre,
-                                            style: AppTypography.labelLarge,
-                                          ),
-                                          AppLayout.vXs,
-                                          Text(
-                                            categoria.descripcion?.isEmpty ?? true
-                                                ? 'Sin descripción'
-                                                : categoria.descripcion!,
-                                            style: AppTypography.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.edit_outlined,
-                                            color: AppColors.primary,
-                                            size: 20,
-                                          ),
-                                          tooltip: 'Editar Categoría',
-                                          onPressed: () => _mostrarModalRegistro(
-                                            context,
-                                            categoriaToEdit: categoria,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            color: AppColors.error,
-                                            size: 20,
-                                          ),
-                                          tooltip: 'Eliminar Categoría',
-                                          onPressed: () =>
-                                              _confirmarEliminacion(context, categoria),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                        ),
-                        );
-                      },
-                      ), // ListView
+                                  ),
+                                );
+                              },
+                            ), // ListView
                           ), // Expanded
                         ], // Column children
                       ), // Column
                     ); // Container panel
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Center(
                     child: Text('Error: $e', style: AppTypography.bodyMedium),
                   ),
@@ -361,7 +404,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
           text: 'Eliminar',
           onPressed: () {
             if (categoria.id != null) {
-              ref.read(categoriaControllerProvider.notifier).eliminar(categoria.id!);
+              ref
+                  .read(categoriaControllerProvider.notifier)
+                  .eliminar(categoria.id!);
             }
             Navigator.pop(context);
           },
@@ -393,7 +438,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
       content: StatefulBuilder(
         builder: (dialogContext, setDialogState) {
           final anchoPantalla = MediaQuery.of(dialogContext).size.width;
-          final anchoDialogo = anchoPantalla > 420 ? 400.0 : anchoPantalla * 0.85;
+          final anchoDialogo = anchoPantalla > 420
+              ? 400.0
+              : anchoPantalla * 0.85;
 
           bool validarNombre() {
             final limpio = nombreController.text.trim();
@@ -412,7 +459,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                     initialValue: nombreController.text,
                     validator: (value) {
                       final limpio = value?.trim() ?? '';
-                      if (limpio.isEmpty) return 'Ingrese el nombre de la categoría';
+                      if (limpio.isEmpty) {
+                        return 'Ingrese el nombre de la categoría';
+                      }
                       if (limpio.length > 60) return 'Máximo 60 caracteres';
                       return null;
                     },
@@ -433,7 +482,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                             padding: const EdgeInsets.only(top: 4, left: 12),
                             child: Text(
                               formFieldState.errorText!,
-                              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.error,
+                              ),
                             ),
                           ),
                       ],
@@ -457,7 +508,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                             hint: 'Breve descripción...',
                             controller: descripcionController,
                             onChanged: (_) {
-                              formFieldState.didChange(descripcionController.text);
+                              formFieldState.didChange(
+                                descripcionController.text,
+                              );
                               setDialogState(() {});
                             },
                           ),
@@ -469,7 +522,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                             child: Text(
                               '${descripcionController.text.trim().length}/200',
                               style: AppTypography.bodySmall.copyWith(
-                                color: descripcionController.text.trim().length > 200
+                                color:
+                                    descripcionController.text.trim().length >
+                                        200
                                     ? AppColors.error
                                     : AppColors.grey500,
                               ),
@@ -481,7 +536,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                             padding: const EdgeInsets.only(top: 4, left: 12),
                             child: Text(
                               formFieldState.errorText!,
-                              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.error,
+                              ),
                             ),
                           ),
                       ],
@@ -503,23 +560,39 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                           child: AppButton(
                             text: isEditing ? 'Actualizar' : 'Guardar',
                             onPressed: () {
-                              if (!validarNombre() || !formKey.currentState!.validate()) return;
+                              if (!validarNombre() ||
+                                  !formKey.currentState!.validate()) {
+                                return;
+                              }
                               try {
                                 final cat = Categoria(
                                   id: categoriaToEdit?.id,
                                   nombre: nombreController.text.trim(),
-                                  descripcion: descripcionController.text.trim(),
-                                  creadoEn: categoriaToEdit?.creadoEn ?? DateTime.now(),
-                                  actualizadoEn: isEditing ? DateTime.now() : null,
+                                  descripcion: descripcionController.text
+                                      .trim(),
+                                  creadoEn:
+                                      categoriaToEdit?.creadoEn ??
+                                      DateTime.now(),
+                                  actualizadoEn: isEditing
+                                      ? DateTime.now()
+                                      : null,
                                 );
                                 if (isEditing) {
-                                  ref.read(categoriaControllerProvider.notifier).actualizar(cat);
+                                  ref
+                                      .read(
+                                        categoriaControllerProvider.notifier,
+                                      )
+                                      .actualizar(cat);
                                 } else {
-                                  ref.read(categoriaControllerProvider.notifier).guardar(cat);
+                                  ref
+                                      .read(
+                                        categoriaControllerProvider.notifier,
+                                      )
+                                      .guardar(cat);
                                 }
                                 if (!mounted) return;
                                 Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                FiscoGestNotifications.show(
                                   SnackBar(
                                     content: Text(
                                       isEditing
@@ -532,9 +605,14 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                 );
                               } catch (e) {
                                 if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                FiscoGestNotifications.show(
                                   SnackBar(
-                                    content: Text(e.toString().replaceAll('Exception: ', '')),
+                                    content: Text(
+                                      e.toString().replaceAll(
+                                        'Exception: ',
+                                        '',
+                                      ),
+                                    ),
                                     backgroundColor: AppColors.error,
                                     behavior: SnackBarBehavior.floating,
                                   ),

@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class SeleccionarClienteDialog extends ConsumerWidget {
   const SeleccionarClienteDialog._interno();
@@ -65,8 +66,9 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                           labelText: 'Nombre / Razón Social *',
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Requerido'
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -75,8 +77,9 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                           labelText: 'RNC o Cédula *',
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Requerido'
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -85,8 +88,9 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                           labelText: 'Teléfono / Celular *',
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Requerido'
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -95,8 +99,9 @@ class SeleccionarClienteDialog extends ConsumerWidget {
                           labelText: 'Correo electrónico *',
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Requerido'
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -156,7 +161,7 @@ class SeleccionarClienteDialog extends ConsumerWidget {
       return encontrado ?? (lista.isNotEmpty ? lista.first : null);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al guardar cliente: $e'),
             backgroundColor: AppColors.error,

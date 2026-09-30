@@ -28,10 +28,8 @@ class _SelectorDeliveryDialogState
   late final TextEditingController _montoController;
   String? _opcionSeleccionada;
 
-  static final NumberFormat _formatoNumero =
-      NumberFormat('#,##0.00', 'es_DO');
-  String _formatearMonto(double valor) =>
-      'RD\$${_formatoNumero.format(valor)}';
+  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
+  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
 
   static const List<Map<String, dynamic>> _opciones = [
     {'nombre': 'Santo Domingo', 'monto': 50.0},
@@ -44,9 +42,7 @@ class _SelectorDeliveryDialogState
   void initState() {
     super.initState();
     _montoController = TextEditingController(
-      text: widget.costoActual > 0
-          ? widget.costoActual.toStringAsFixed(2)
-          : '',
+      text: widget.costoActual > 0 ? widget.costoActual.toStringAsFixed(2) : '',
     );
   }
 
@@ -78,8 +74,7 @@ class _SelectorDeliveryDialogState
   Widget build(BuildContext context) {
     final anchoPantalla = MediaQuery.of(context).size.width;
     final esPantallaPequena = anchoPantalla < 600;
-    final anchoMaximoDialog =
-        esPantallaPequena ? anchoPantalla * 0.92 : 400.0;
+    final anchoMaximoDialog = esPantallaPequena ? anchoPantalla * 0.92 : 400.0;
     final paddingDialogo = esPantallaPequena ? 12.0 : 16.0;
     final tamanoIcono = esPantallaPequena ? 20.0 : 24.0;
     final tamanoTitulo = esPantallaPequena ? 16.0 : 18.0;
@@ -87,14 +82,21 @@ class _SelectorDeliveryDialogState
 
     return AlertDialog(
       titlePadding: EdgeInsets.all(paddingDialogo),
-      contentPadding:
-          EdgeInsets.symmetric(horizontal: paddingDialogo, vertical: 8),
-      actionsPadding:
-          EdgeInsets.symmetric(horizontal: paddingDialogo, vertical: 12),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: paddingDialogo,
+        vertical: 8,
+      ),
+      actionsPadding: EdgeInsets.symmetric(
+        horizontal: paddingDialogo,
+        vertical: 12,
+      ),
       title: Row(
         children: [
-          Icon(Icons.delivery_dining,
-              color: AppColors.primary, size: tamanoIcono),
+          Icon(
+            Icons.delivery_dining,
+            color: AppColors.primary,
+            size: tamanoIcono,
+          ),
           SizedBox(width: espaciadoIconoTitulo),
           Expanded(
             child: Text(
@@ -118,7 +120,8 @@ class _SelectorDeliveryDialogState
             ..._opciones.map((Map<String, dynamic> opcion) {
               final String nombre = opcion['nombre'] as String;
               final double monto = opcion['monto'] as double;
-              final bool seleccionada = _opcionSeleccionada == nombre ||
+              final bool seleccionada =
+                  _opcionSeleccionada == nombre ||
                   (_opcionSeleccionada == null && widget.costoActual == monto);
               return ListTile(
                 dense: esPantallaPequena,
@@ -142,14 +145,17 @@ class _SelectorDeliveryDialogState
             const Divider(height: 16),
             TextField(
               controller: _montoController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Monto personalizado (RD\$)',
                 labelStyle: AppTypography.labelMedium,
                 border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
               ),
               style: AppTypography.labelMedium,
               onChanged: (_) {
@@ -164,10 +170,7 @@ class _SelectorDeliveryDialogState
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancelar'),
         ),
-        FilledButton(
-          onPressed: _confirmar,
-          child: const Text('Confirmar'),
-        ),
+        FilledButton(onPressed: _confirmar, child: const Text('Confirmar')),
       ],
     );
   }

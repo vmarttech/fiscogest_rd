@@ -18,7 +18,7 @@ Future<void> migrar002AgregarCamposProductos(Migrator m) async {
   if (tablas.isEmpty) return;
 
   final nombreTablaVieja = tablas.first.read<String>('name');
-  
+
   // Ya tiene el nombre correcto → no renombrar
   if (nombreTablaVieja == 'productos_table') return;
 
@@ -51,11 +51,19 @@ Future<void> migrar002AgregarCamposProductos(Migrator m) async {
   ''');
 
   // 2. Detectar columnas existentes
-  final infoColumnas = await db.customSelect('PRAGMA table_info($nombreTablaVieja)').get();
-  final nombresColumnas = infoColumnas.map((r) => r.read<String>('name')).toList();
+  final infoColumnas = await db
+      .customSelect('PRAGMA table_info($nombreTablaVieja)')
+      .get();
+  final nombresColumnas = infoColumnas
+      .map((r) => r.read<String>('name'))
+      .toList();
 
-  final colStock = nombresColumnas.contains('stock_actual') ? 'stock_actual' : 'stock';
-  final colUnidad = nombresColumnas.contains('unidad_id') ? 'unidad_id' : 'unidad_medida_id';
+  final colStock = nombresColumnas.contains('stock_actual')
+      ? 'stock_actual'
+      : 'stock';
+  final colUnidad = nombresColumnas.contains('unidad_id')
+      ? 'unidad_id'
+      : 'unidad_medida_id';
 
   // 3. Copiar datos
   await db.customStatement('''
@@ -72,5 +80,7 @@ Future<void> migrar002AgregarCamposProductos(Migrator m) async {
 
   // 4. Reemplazar con nombre correcto
   await db.customStatement('DROP TABLE $nombreTablaVieja');
-  await db.customStatement('ALTER TABLE productos_nueva RENAME TO productos_table');
+  await db.customStatement(
+    'ALTER TABLE productos_nueva RENAME TO productos_table',
+  );
 }

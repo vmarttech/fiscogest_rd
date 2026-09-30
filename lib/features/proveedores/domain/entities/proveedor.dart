@@ -40,7 +40,8 @@ class Proveedor {
   final DateTime? fechaActualizacion;
 
   bool tieneCredito() => limiteCredito > 0 || diasCredito > 0;
-  bool excedeLimite(double montoCompra) => limiteCredito > 0 && (saldo + montoCompra) > limiteCredito;
+  bool excedeLimite(double montoCompra) =>
+      limiteCredito > 0 && (saldo + montoCompra) > limiteCredito;
 
   String get direccionCompleta {
     final partes = <String>[];

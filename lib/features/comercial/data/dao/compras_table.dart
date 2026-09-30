@@ -5,7 +5,6 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 import 'package:fiscogest_rd/features/proveedores/data/dao/proveedores_table.dart';
 
 class EstadoCompraConverter extends TypeConverter<EstadoCompra, String> {
-
   const EstadoCompraConverter();
 
   @override
@@ -19,11 +18,9 @@ class EstadoCompraConverter extends TypeConverter<EstadoCompra, String> {
 
   @override
   String toSql(EstadoCompra value) => value.name;
-
 }
 
 class ComprasTable extends Table {
-
   IntColumn get id => integer().autoIncrement()();
 
   TextColumn get numeroComprobante => text()();
@@ -71,5 +68,4 @@ class ComprasTable extends Table {
   DateTimeColumn get creadoEn => dateTime()();
 
   DateTimeColumn get actualizadoEn => dateTime().nullable()();
-
 }

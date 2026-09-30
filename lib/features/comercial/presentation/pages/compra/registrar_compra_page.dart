@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart
 import 'package:fiscogest_rd/features/proveedores/presentation/providers/proveedor_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class RegistrarCompraPage extends ConsumerStatefulWidget {
   const RegistrarCompraPage({super.key});
@@ -85,7 +86,9 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   /// ✅ FUNCIÓN CLAVE: Leer controlador → actualizar modelo → recálculo automático
   void _actualizarLineaEnTiempoReal(int index, String campo) {
     setState(() {
-      _lineas[index] = _controladores[index].haciaLinea(tasaItbis: _tasaImpuesto);
+      _lineas[index] = _controladores[index].haciaLinea(
+        tasaItbis: _tasaImpuesto,
+      );
     });
   }
 
@@ -96,7 +99,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       _lineas.fold(0.0, (sum, linea) => sum + linea.montoDescuentoLinea);
 
   double get _tasaImpuesto {
-    final simplificado = ref
+    final simplificado =
+        ref
             .watch(configuracionControllerProvider)
             .valueOrNull
             ?.modoSimplificado ??
@@ -115,7 +119,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     final listaProveedores = estado.valueOrNull;
     if (!mounted) return;
     if (listaProveedores?.isEmpty ?? true) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('⚠️ No hay proveedores registrados')),
       );
       return;
@@ -123,7 +127,10 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     await showDialog<Proveedor>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Seleccionar Proveedor', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Seleccionar Proveedor',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -158,7 +165,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     final listaProductos = estado.valueOrNull;
     if (!mounted) return;
     if (listaProductos?.isEmpty ?? true) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('⚠️ No hay productos registrados')),
       );
       return;
@@ -211,17 +218,19 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       _lineas[i].cantidad = double.tryParse(ctrl.cantidad.text) ?? 0;
       _lineas[i].costoUnitario = double.tryParse(ctrl.costoUnitario.text) ?? 0;
       _lineas[i].fleteUnitario = double.tryParse(ctrl.fleteUnitario.text) ?? 0;
-      _lineas[i].seguroUnitario = double.tryParse(ctrl.seguroUnitario.text) ?? 0;
+      _lineas[i].seguroUnitario =
+          double.tryParse(ctrl.seguroUnitario.text) ?? 0;
       _lineas[i].arancelesUnitario =
           double.tryParse(ctrl.arancelesUnitario.text) ?? 0;
-      _lineas[i].gastosUnitario = double.tryParse(ctrl.gastosUnitario.text) ?? 0;
+      _lineas[i].gastosUnitario =
+          double.tryParse(ctrl.gastosUnitario.text) ?? 0;
       _lineas[i].descuentoPorcentaje =
           double.tryParse(ctrl.descuento.text) ?? 0;
     }
 
     if (!_formKey.currentState!.validate()) return;
     if (_lineas.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('⚠️ Debe agregar al menos un producto')),
       );
       return;
@@ -231,13 +240,13 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     for (var i = 0; i < _lineas.length; i++) {
       final linea = _lineas[i];
       if (linea.productoId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(content: Text('⚠️ Línea ${i + 1}: Seleccione el producto')),
         );
         return;
       }
       if (linea.cantidad <= 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('⚠️ Línea ${i + 1}: Cantidad debe ser mayor a cero'),
           ),
@@ -245,7 +254,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
         return;
       }
       if (linea.costoUnitario <= 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text(
               '⚠️ Línea ${i + 1}: Costo unitario debe ser mayor a cero',
@@ -257,7 +266,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     }
 
     if (proveedorId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('⚠️ Seleccione un proveedor')),
       );
       return;
@@ -329,16 +338,12 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
         final mensaje = _estadoGuardado == EstadoCompra.registrada
             ? '✅ Compra registrada correctamente'
             : '✅ Compra guardada como borrador';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(mensaje)),
-        );
+        FiscoGestNotifications.show(SnackBar(content: Text(mensaje)));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        FiscoGestNotifications.show(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -360,13 +365,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
 
     Widget filaResponsiva({required Widget child1, required Widget child2}) {
       if (esPequena) {
-        return Column(
-          children: [
-            child1,
-            AppLayout.vM,
-            child2,
-          ],
-        );
+        return Column(children: [child1, AppLayout.vM, child2]);
       }
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +389,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CabeceraCompraWidget(
-                  modoSimplificado: ref
+                  modoSimplificado:
+                      ref
                           .watch(configuracionControllerProvider)
                           .valueOrNull
                           ?.modoSimplificado ??
@@ -402,7 +402,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   comprobanteController: _comprobanteController,
                   ncfController: _ncfController,
                   tipoComprobante: _tipoComprobante,
-                  onTipoComprobanteChanged: (v) => setState(() => _tipoComprobante = v),
+                  onTipoComprobanteChanged: (v) =>
+                      setState(() => _tipoComprobante = v),
                   formaPago: _formaPago,
                   onFormaPagoChanged: (v) => setState(() => _formaPago = v),
                   condicionPagoController: _condicionPagoController,
@@ -431,7 +432,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   descuentoGlobal: _descuentoGlobal,
                   montoImpuesto: _montoImpuesto,
                   totalCompra: _totalCompra,
-                  modoSimplificado: ref
+                  modoSimplificado:
+                      ref
                           .watch(configuracionControllerProvider)
                           .valueOrNull
                           ?.modoSimplificado ??

@@ -41,19 +41,24 @@ class AppAccessTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTypography.labelLarge
-                      .copyWith(fontWeight: FontWeight.w700),
+                  style: AppTypography.labelLarge.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 Text(
                   subtitle,
-                  style: AppTypography.bodySmall
-                      .copyWith(color: AppColors.textSecondary),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios_rounded,
-              size: 14, color: AppColors.grey400),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 14,
+            color: AppColors.grey400,
+          ),
         ],
       ),
     );

@@ -41,7 +41,8 @@ class ProveedorRepositoryImpl implements IProveedorRepository {
 
     final nuevoId = _proveedores.isEmpty
         ? 1
-        : (_proveedores.map((e) => e.id ?? 0).reduce((a, b) => a > b ? a : b) + 1);
+        : (_proveedores.map((e) => e.id ?? 0).reduce((a, b) => a > b ? a : b) +
+              1);
 
     final nuevo = proveedor.copyWith(id: nuevoId);
     _proveedores.add(nuevo);

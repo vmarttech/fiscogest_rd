@@ -52,9 +52,7 @@ class FacturaServiceImpl implements IFacturaService {
     for (var i = 0; i < venta.detalles.length; i++) {
       final d = venta.detalles[i];
       b.writeln('${i + 1}. ${d.nombreProducto ?? "Producto"}');
-      b.writeln(
-        '   Cant: ${d.cantidad}  x  ${_monto(d.precioUnitario)}',
-      );
+      b.writeln('   Cant: ${d.cantidad}  x  ${_monto(d.precioUnitario)}');
       final sub = d.subtotalLinea ?? d.subtotal;
       b.writeln('   Subtotal: ${_monto(sub)}');
       b.writeln('');
@@ -141,7 +139,10 @@ class FacturaServiceImpl implements IFacturaService {
           pw.SizedBox(height: 16),
           pw.Text(
             'Detalle',
-            style: const pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12),
+            style: const pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 12,
+            ),
           ),
           pw.SizedBox(height: 8),
           pw.TableHelper.fromTextArray(
@@ -214,7 +215,10 @@ class FacturaServiceImpl implements IFacturaService {
             width: 120,
             child: pw.Text(
               k,
-              style: const pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
+              style: const pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 10,
+              ),
             ),
           ),
           pw.Expanded(
@@ -266,10 +270,7 @@ class FacturaServiceImpl implements IFacturaService {
   }
 
   @override
-  Future<void> enviarPorCorreo(
-    Venta venta,
-    String correoDestinatario,
-  ) async {
+  Future<void> enviarPorCorreo(Venta venta, String correoDestinatario) async {
     final ruta = await exportarPDF(venta);
     final nro = venta.numeroFactura ?? venta.numeroCotizacion;
     await Share.shareXFiles(

@@ -45,25 +45,17 @@ class CotizacionServiceImpl implements ICotizacionService {
         );
       }
       if (detalle.montoDescuento > 0) {
-        texto.writeln(
-          '   Desc: ${formatearMonto(detalle.montoDescuento)}',
-        );
+        texto.writeln('   Desc: ${formatearMonto(detalle.montoDescuento)}');
       }
       final subtotalLinea = detalle.subtotalLinea ?? detalle.subtotal;
       texto.writeln('   Subtotal: ${formatearMonto(subtotalLinea)}');
       texto.writeln('');
     }
     texto.writeln('----------------------------------------');
-    texto.writeln(
-      'Subtotal:          ${formatearMonto(cotizacion.subtotal)}',
-    );
-    texto.writeln(
-      'ITBIS (18%):       ${formatearMonto(cotizacion.itbis)}',
-    );
+    texto.writeln('Subtotal:          ${formatearMonto(cotizacion.subtotal)}');
+    texto.writeln('ITBIS (18%):       ${formatearMonto(cotizacion.itbis)}');
     texto.writeln('========================================');
-    texto.writeln(
-      'TOTAL COTIZACIÓN:  ${formatearMonto(cotizacion.total)}',
-    );
+    texto.writeln('TOTAL COTIZACIÓN:  ${formatearMonto(cotizacion.total)}');
     texto.writeln('========================================');
     texto.writeln('');
     texto.writeln('');

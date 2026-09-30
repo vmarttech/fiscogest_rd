@@ -7,7 +7,6 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 /// márgenes uniformes y scroll adaptable.
 /// Basado en la estructura de NuevoProductoPage.
 class PaginaBase extends StatelessWidget {
-
   const PaginaBase({
     super.key,
     required this.cuerpo,
@@ -21,10 +20,7 @@ class PaginaBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: AppBar(
-        title: Text(titulo ?? ''),
-        actions: accionesAppBar,
-      ),
+      appBar: AppBar(title: Text(titulo ?? ''), actions: accionesAppBar),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: AppLayout.pantallaPadding,

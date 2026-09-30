@@ -22,10 +22,7 @@ class _PagarPageState extends ConsumerState<PagarPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Gestión de Pagos y Compromisos',
-              style: AppTypography.h4,
-            ),
+            Text('Gestión de Pagos y Compromisos', style: AppTypography.h4),
             SizedBox(height: 16),
             Text(
               'Pantalla en desarrollo. Aquí se mostrarán las cuentas por pagar a proveedores.',

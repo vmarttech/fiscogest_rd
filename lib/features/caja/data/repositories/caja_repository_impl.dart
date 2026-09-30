@@ -124,7 +124,6 @@ class CajaRepositoryImpl implements ICajaRepository {
     return id;
   }
 
-
   @override
   Future<List<CajaMovimientoResumen>> listarMovimientosDesde(
     DateTime desde,

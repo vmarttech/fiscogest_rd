@@ -4,8 +4,7 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 
 /// Fiaos pendientes (saldo > 0 y estado pendiente).
-final fiosPendientesProvider =
-    StreamProvider.autoDispose<List<FioData>>((ref) {
+final fiosPendientesProvider = StreamProvider.autoDispose<List<FioData>>((ref) {
   final db = ref.watch(databaseProvider);
   return (db.select(db.fiosTable)
         ..where((t) => t.estado.equals('pendiente'))
@@ -17,9 +16,9 @@ final fiosPendientesProvider =
 /// Todos los fiaos (historial simple).
 final fiosTodosProvider = StreamProvider.autoDispose<List<FioData>>((ref) {
   final db = ref.watch(databaseProvider);
-  return (db.select(db.fiosTable)
-        ..orderBy([(t) => OrderingTerm.desc(t.fecha)]))
-      .watch();
+  return (db.select(
+    db.fiosTable,
+  )..orderBy([(t) => OrderingTerm.desc(t.fecha)])).watch();
 });
 
 class FiosRepository {
@@ -30,9 +29,9 @@ class FiosRepository {
   Future<void> abonar(int id, double monto) async {
     if (monto <= 0) throw ArgumentError('El abono debe ser mayor a 0');
 
-    final row = await (_db.select(_db.fiosTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingle();
+    final row = await (_db.select(
+      _db.fiosTable,
+    )..where((t) => t.id.equals(id))).getSingle();
 
     final nuevoAbonado = row.montoAbonado + monto;
     final nuevoSaldo = (row.saldoPendiente - monto).clamp(0.0, double.infinity);

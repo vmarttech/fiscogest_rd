@@ -8,6 +8,7 @@ class DetalleLinea {
   double fleteUnitario = 0.0;
   double seguroUnitario = 0.0;
   double arancelesUnitario = 0.0;
+
   /// Otros gastos REALES por unidad (flete aparte). NO poner aquí el ITBIS.
   double gastosUnitario = 0.0;
   double descuentoPorcentaje = 0.0;
@@ -33,8 +34,7 @@ class DetalleLinea {
   double get itbisLinea => baseImponibleLinea * tasaImpuestoLinea;
 
   /// Total a pagar de la línea = base + ITBIS + gastos reales (× cantidad).
-  double get totalLinea =>
-      baseImponibleLinea + itbisLinea + gastosAsociados;
+  double get totalLinea => baseImponibleLinea + itbisLinea + gastosAsociados;
 }
 
 class ControladoresLinea {

@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/conteo_f
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/estado_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class RegistrarConteoPage extends ConsumerStatefulWidget {
   const RegistrarConteoPage({super.key});
@@ -38,7 +39,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
     final nombre = _nombreCtrl.text.trim();
     if (nombre.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(content: Text('⚠️ Escribe un nombre para el conteo')),
         );
       }
@@ -49,7 +50,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
     final idUsuario = ref.read(usuarioAutenticadoProvider);
     if (idUsuario == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(content: Text('⚠️ No hay sesión activa')),
         );
       }
@@ -68,21 +69,20 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
       );
       final id = await ref.read(registrarConteoProvider).call(conteo);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('✅ Conteo creado exitosamente')),
       );
       ref.invalidate(listaConteosProvider);
       context.go('/inventario-fisico/capturar/$id');
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(content: Text('❌ Error: $e'), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

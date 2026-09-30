@@ -8,10 +8,12 @@ class ProveedoresDao extends DatabaseAccessor<AppDatabase>
     with _$ProveedoresDaoMixin {
   ProveedoresDao(super.db);
 
-  Future<List<ProveedoresTableData>> obtenerTodos() => select(proveedoresTable).get();
+  Future<List<ProveedoresTableData>> obtenerTodos() =>
+      select(proveedoresTable).get();
 
-  Future<ProveedoresTableData?> obtenerPorId(int id) =>
-      (select(proveedoresTable)..where((t) => t.id.equals(id))).getSingleOrNull();
+  Future<ProveedoresTableData?> obtenerPorId(int id) => (select(
+    proveedoresTable,
+  )..where((t) => t.id.equals(id))).getSingleOrNull();
 
   Future<int> insertar(ProveedoresTableCompanion proveedor) =>
       into(proveedoresTable).insert(proveedor);
@@ -25,14 +27,15 @@ class ProveedoresDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<bool> eliminar(int id) async {
-    final filas = await (delete(proveedoresTable)
-          ..where((t) => t.id.equals(id)))
-        .go();
+    final filas = await (delete(
+      proveedoresTable,
+    )..where((t) => t.id.equals(id))).go();
     return filas > 0;
   }
 
   Future<List<ProveedoresTableData>> buscarPorNombre(String nombre) =>
-      (select(proveedoresTable)
-            ..where((t) => t.nombreEmpresa.lower().like('%${nombre.toLowerCase()}%')))
+      (select(proveedoresTable)..where(
+            (t) => t.nombreEmpresa.lower().like('%${nombre.toLowerCase()}%'),
+          ))
           .get();
 }

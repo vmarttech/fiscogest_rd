@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class SheetAnotarFiao extends ConsumerStatefulWidget {
   const SheetAnotarFiao({
@@ -73,11 +74,9 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
   Future<void> _guardar() async {
     final nombre = _nombre.text.trim();
     if (nombre.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
-          content: Text(
-            'Escriba un nombre o elija un cliente de la lista',
-          ),
+          content: Text('Escriba un nombre o elija un cliente de la lista'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -85,7 +84,7 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
       return;
     }
     if (widget.total <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('El monto debe ser mayor a cero'),
           backgroundColor: AppColors.error,
@@ -98,14 +97,14 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
     setState(() => _guardando = true);
     try {
       final db = ref.read(databaseProvider);
-      await db.into(db.fiosTable).insert(
+      await db
+          .into(db.fiosTable)
+          .insert(
             FiosTableCompanion.insert(
               nombreCliente: nombre,
               montoOriginal: widget.total,
               saldoPendiente: widget.total,
-              nota: Value(
-                _nota.text.trim().isEmpty ? null : _nota.text.trim(),
-              ),
+              nota: Value(_nota.text.trim().isEmpty ? null : _nota.text.trim()),
               ventaId: Value(widget.ventaId),
             ),
           );
@@ -113,7 +112,7 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error al guardar fiao: $e'),
           backgroundColor: AppColors.error,

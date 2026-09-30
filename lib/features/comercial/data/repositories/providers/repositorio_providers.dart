@@ -25,9 +25,11 @@ import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/datasources/promocion_datasource.dart';
 import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_repository_impl.dart';
-import 'package:fiscogest_rd/features/inventario/data/repositories/producto_repository_impl.dart' as inventario_producto;
+import 'package:fiscogest_rd/features/inventario/data/repositories/producto_repository_impl.dart'
+    as inventario_producto;
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
-import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart' as inventario_repo;
+import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart'
+    as inventario_repo;
 import 'package:riverpod/riverpod.dart';
 
 final promocionDatasourceProvider = Provider<PromocionDatasource>((ref) {
@@ -64,10 +66,10 @@ final productoRepositoryProvider = Provider<IProductoRepository>((ref) {
 
 final inventarioProductoRepositoryProvider =
     Provider<inventario_repo.IProductoRepository>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  final kardexRepo = ref.watch(kardexRepositoryProvider);
-  return inventario_producto.ProductoRepositoryImpl(db, kardexRepo);
-});
+      final db = ref.watch(appDatabaseProvider);
+      final kardexRepo = ref.watch(kardexRepositoryProvider);
+      return inventario_producto.ProductoRepositoryImpl(db, kardexRepo);
+    });
 
 final proveedorRepositoryProvider = Provider<IProveedorRepository>((ref) {
   return ProveedorRepositoryImpl();
@@ -91,10 +93,7 @@ final cajaMovimientosDaoProvider = Provider<CajaMovimientosDao>((ref) {
 final cajaRepositoryProvider = Provider<ICajaRepository>((ref) {
   final dao = ref.watch(cajaMovimientosDaoProvider);
   final sesiones = ref.watch(cajaSesionesDaoProvider);
-  return CajaRepositoryImpl(
-    cajaMovimientosDao: dao,
-    cajaSesionesDao: sesiones,
-  );
+  return CajaRepositoryImpl(cajaMovimientosDao: dao, cajaSesionesDao: sesiones);
 });
 
 final clienteDaoProvider = Provider<ClienteDao>((ref) {

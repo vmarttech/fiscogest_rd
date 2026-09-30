@@ -31,7 +31,6 @@ import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar
 import 'package:fiscogest_rd/features/creditos/presentation/pages/detalle_cuenta_cobrar_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/config_credito_page.dart';
 
-
 import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_historial_turno_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
@@ -114,13 +113,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: UsuariosPage.routeName,
         builder: (_, __) => const AppShell(child: UsuariosPage()),
       ),
-      
+
       GoRoute(
         path: '/splash',
         name: 'splash',
         builder: (context, state) => const SplashPage(),
       ),
-GoRoute(
+      GoRoute(
         path: '/',
         name: 'inicio',
         builder: (_, __) => const AppShell(child: InicioPage()),
@@ -128,33 +127,31 @@ GoRoute(
       GoRoute(
         path: '/sales',
         name: 'facturacion-inicio',
-        builder: (context, state) => const AppShell(child: FacturacionInicioPage()),
+        builder: (context, state) =>
+            const AppShell(child: FacturacionInicioPage()),
         routes: [
           GoRoute(
             path: 'emitir-factura',
             name: 'facturacion-emitir-factura',
-            builder: (context, state) => const AppShell(
-              child: EmitirFacturaPage(),
-            ),
+            builder: (context, state) =>
+                const AppShell(child: EmitirFacturaPage()),
           ),
           GoRoute(
             path: 'emitir-nc',
             name: 'facturacion-emitir-nc',
-            builder: (context, state) => const AppShell(
-              child: EmitirNcPage(),
-            ),
+            builder: (context, state) => const AppShell(child: EmitirNcPage()),
           ),
           GoRoute(
             path: 'historial',
             name: 'facturacion-historial',
-            builder: (context, state) => const AppShell(
-              child: HistorialFacturasPage(),
-            ),
+            builder: (context, state) =>
+                const AppShell(child: HistorialFacturasPage()),
           ),
           GoRoute(
             path: 'secuencias-ncf',
             name: 'facturacion-secuencias-ncf',
-            builder: (context, state) => const AppShell(child: SecuenciasNcfPage()),
+            builder: (context, state) =>
+                const AppShell(child: SecuenciasNcfPage()),
           ),
         ],
       ),
@@ -165,13 +162,11 @@ GoRoute(
         routes: [
           GoRoute(
             path: 'registrar',
-            builder: (_, __) =>
-                const AppShell(child: NuevaVentaBorradorPage()),
+            builder: (_, __) => const AppShell(child: NuevaVentaBorradorPage()),
           ),
           GoRoute(
             path: 'cotizaciones/nueva',
-            builder: (_, __) =>
-                const AppShell(child: NuevaVentaBorradorPage()),
+            builder: (_, __) => const AppShell(child: NuevaVentaBorradorPage()),
           ),
           GoRoute(
             path: 'cotizaciones/historial',
@@ -230,10 +225,8 @@ GoRoute(
           ),
         ],
       ),
-      
-      
-      
-GoRoute(
+
+      GoRoute(
         path: '/creditos',
         name: CreditoInicioPage.routeName,
         builder: (_, __) => const AppShell(child: CreditoInicioPage()),
@@ -255,9 +248,7 @@ GoRoute(
                 builder: (context, state) {
                   final id =
                       int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
-                  return AppShell(
-                    child: DetalleCuentaCobrarPage(cuentaId: id),
-                  );
+                  return AppShell(child: DetalleCuentaCobrarPage(cuentaId: id));
                 },
               ),
             ],
@@ -266,14 +257,14 @@ GoRoute(
           GoRoute(
             path: 'solicitudes',
             name: SolicitudesCreditoPage.routeName,
-            builder: (_, __) =>
-                const AppShell(child: SolicitudesCreditoPage()),
+            builder: (_, __) => const AppShell(child: SolicitudesCreditoPage()),
             routes: [
               GoRoute(
                 path: ':ventaId',
                 name: DetalleSolicitudCreditoPage.routeName,
                 builder: (context, state) {
-                  final id = int.tryParse(state.pathParameters['ventaId'] ?? '') ?? 0;
+                  final id =
+                      int.tryParse(state.pathParameters['ventaId'] ?? '') ?? 0;
                   return AppShell(
                     child: DetalleSolicitudCreditoPage(ventaId: id),
                   );
@@ -283,7 +274,7 @@ GoRoute(
           ),
         ],
       ),
-GoRoute(
+      GoRoute(
         path: '/compras',
         name: DashboardComprasPage.routeName,
         builder: (_, __) => const AppShell(child: DashboardComprasPage()),
@@ -305,8 +296,10 @@ GoRoute(
               int compraId = 0;
               final idDesdePath = state.pathParameters['compraId'];
               if (idDesdePath != null && idDesdePath.isNotEmpty) {
-                final soloDigitos =
-                    idDesdePath.replaceAll(RegExp(r'[^0-9]'), '');
+                final soloDigitos = idDesdePath.replaceAll(
+                  RegExp(r'[^0-9]'),
+                  '',
+                );
                 compraId = int.tryParse(soloDigitos) ?? 0;
               }
               if (compraId == 0 && state.extra != null) {
@@ -314,8 +307,7 @@ GoRoute(
                 if (extra is int) {
                   compraId = extra;
                 } else if (extra is String) {
-                  final soloDigitos =
-                      extra.replaceAll(RegExp(r'[^0-9]'), '');
+                  final soloDigitos = extra.replaceAll(RegExp(r'[^0-9]'), '');
                   compraId = int.tryParse(soloDigitos) ?? 0;
                 }
               }
@@ -337,8 +329,7 @@ GoRoute(
           GoRoute(
             path: 'cuentas-pagar',
             name: ListaCuentasPagarPage.routeName,
-            builder: (_, __) =>
-                const AppShell(child: ListaCuentasPagarPage()),
+            builder: (_, __) => const AppShell(child: ListaCuentasPagarPage()),
           ),
           GoRoute(
             path: 'cuentas-pagar/detalle/:cuentaId',
@@ -359,9 +350,7 @@ GoRoute(
               final idCrudo = state.pathParameters['cuentaId'] ?? '0';
               final soloDigitos = idCrudo.replaceAll(RegExp(r'[^0-9]'), '');
               final cuentaId = int.tryParse(soloDigitos) ?? 0;
-              return AppShell(
-                child: RegistrarAbonoPage(cuentaId: cuentaId),
-              );
+              return AppShell(child: RegistrarAbonoPage(cuentaId: cuentaId));
             },
           ),
         ],
@@ -391,8 +380,10 @@ GoRoute(
         name: RegistrarEntradaPage.routeName,
         builder: (context, state) {
           final productoIdCrudo = state.pathParameters['productoId'] ?? '0';
-          final soloDigitosProd =
-              productoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+          final soloDigitosProd = productoIdCrudo.replaceAll(
+            RegExp(r'[^0-9]'),
+            '',
+          );
           final productoId = int.tryParse(soloDigitosProd) ?? 0;
           final nombreProducto = Uri.decodeComponent(
             state.pathParameters['nombreProducto'] ?? '',
@@ -410,8 +401,10 @@ GoRoute(
         name: RegistrarSalidaPage.routeName,
         builder: (context, state) {
           final productoIdCrudo = state.pathParameters['productoId'] ?? '0';
-          final soloDigitosProd =
-              productoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+          final soloDigitosProd = productoIdCrudo.replaceAll(
+            RegExp(r'[^0-9]'),
+            '',
+          );
           final productoId = int.tryParse(soloDigitosProd) ?? 0;
           final nombreProducto = Uri.decodeComponent(
             state.pathParameters['nombreProducto'] ?? '',
@@ -448,8 +441,10 @@ GoRoute(
         name: DiferenciasConteoPage.routeName,
         builder: (context, state) {
           final conteoIdCrudo = state.pathParameters['conteoId'] ?? '0';
-          final soloDigitosConteo =
-              conteoIdCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+          final soloDigitosConteo = conteoIdCrudo.replaceAll(
+            RegExp(r'[^0-9]'),
+            '',
+          );
           final conteoId = int.tryParse(soloDigitosConteo) ?? 0;
           return AppShell(child: DiferenciasConteoPage(conteoId: conteoId));
         },
@@ -501,8 +496,10 @@ GoRoute(
         name: RegistrarRecepcionPage.routeName,
         builder: (context, state) {
           final idCompraCrudo = state.pathParameters['compraId']!;
-          final compraIdLimpio =
-              idCompraCrudo.replaceAll(RegExp(r'[^0-9]'), '');
+          final compraIdLimpio = idCompraCrudo.replaceAll(
+            RegExp(r'[^0-9]'),
+            '',
+          );
           final compraId = int.tryParse(compraIdLimpio) ?? 0;
           final idProvCrudo = state.pathParameters['proveedorId']!;
           final provIdLimpio = idProvCrudo.replaceAll(RegExp(r'[^0-9]'), '');
@@ -518,8 +515,7 @@ GoRoute(
       GoRoute(
         path: '/transferencias/registrar',
         name: RegistrarTransferenciaPage.routeName,
-        builder: (_, __) =>
-            const AppShell(child: RegistrarTransferenciaPage()),
+        builder: (_, __) => const AppShell(child: RegistrarTransferenciaPage()),
       ),
       GoRoute(
         path: '/presentaciones',

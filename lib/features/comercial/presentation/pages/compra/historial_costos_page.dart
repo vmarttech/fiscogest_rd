@@ -39,9 +39,8 @@ class HistorialCostosPage extends ConsumerWidget {
       ],
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text('Error: $e', style: AppTypography.error),
-        ),
+        error: (e, _) =>
+            Center(child: Text('Error: $e', style: AppTypography.error)),
         data: (HistorialCostoResumen resumen) {
           if (resumen.items.isEmpty) {
             return Center(
@@ -58,10 +57,7 @@ class HistorialCostosPage extends ConsumerWidget {
           return ListView(
             padding: AppLayout.pantallaPadding,
             children: [
-              Text(
-                resumen.nombreProducto,
-                style: AppTypography.h4Bold,
-              ),
+              Text(resumen.nombreProducto, style: AppTypography.h4Bold),
               AppLayout.vM,
               _ResumenCostos(
                 ultimo: currency.format(resumen.ultimoCosto),
@@ -71,21 +67,21 @@ class HistorialCostosPage extends ConsumerWidget {
                 currency: currency,
               ),
               AppLayout.vL,
-              const AppSection(
-                title: 'Historial',
-                children: [],
-              ),
+              const AppSection(title: 'Historial', children: []),
               AppLayout.vS,
               ...resumen.items.map((item) {
                 return Padding(
                   padding: AppSpacing.bS,
                   child: AppCard(
-                    onTap: () => context.go('/compras/detalle/${item.compraId}'),
+                    onTap: () =>
+                        context.go('/compras/detalle/${item.compraId}'),
                     padding: EdgeInsets.zero,
                     child: ListTile(
                       contentPadding: AppSpacing.hM,
                       leading: CircleAvatar(
-                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                        backgroundColor: AppColors.primary.withValues(
+                          alpha: 0.1,
+                        ),
                         child: const Icon(
                           Icons.attach_money,
                           color: AppColors.primary,
@@ -141,13 +137,13 @@ class _ResumenCostos extends StatelessWidget {
     final colorVar = variacion > 0
         ? AppColors.error
         : variacion < 0
-            ? AppColors.success
-            : AppColors.textSecondary;
+        ? AppColors.success
+        : AppColors.textSecondary;
     final iconVar = variacion > 0
         ? Icons.trending_up
         : variacion < 0
-            ? Icons.trending_down
-            : Icons.trending_flat;
+        ? Icons.trending_down
+        : Icons.trending_flat;
 
     return AppCard(
       child: Column(
@@ -178,7 +174,9 @@ class _ResumenCostos extends StatelessWidget {
               Text(
                 'Variación: ${currency.format(variacion)} '
                 '(${variacionPct.toStringAsFixed(1)}%)',
-                style: AppTypography.bodyMediumSemiBold.copyWith(color: colorVar),
+                style: AppTypography.bodyMediumSemiBold.copyWith(
+                  color: colorVar,
+                ),
               ),
             ],
           ),
@@ -206,13 +204,12 @@ class _KpiMini extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
+          style: AppTypography.labelSmall.copyWith(
+            color: AppColors.textSecondary,
+          ),
         ),
         AppLayout.vXs,
-        Text(
-          value,
-          style: AppTypography.h4Bold.copyWith(color: color),
-        ),
+        Text(value, style: AppTypography.h4Bold.copyWith(color: color)),
       ],
     );
   }

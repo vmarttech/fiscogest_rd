@@ -3,10 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 
 class FacturacionPlaceholderPage extends StatelessWidget {
-  const FacturacionPlaceholderPage({
-    super.key,
-    required this.titulo,
-  });
+  const FacturacionPlaceholderPage({super.key, required this.titulo});
 
   final String titulo;
 

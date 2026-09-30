@@ -5,18 +5,16 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_borrad
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 
 class SelectorDescuentoDialog extends ConsumerStatefulWidget {
-
-  const SelectorDescuentoDialog({
-    super.key,
-    this.esParaCotizacion = false,
-  });
+  const SelectorDescuentoDialog({super.key, this.esParaCotizacion = false});
   final bool esParaCotizacion;
 
   @override
-  ConsumerState<SelectorDescuentoDialog> createState() => _SelectorDescuentoDialogState();
+  ConsumerState<SelectorDescuentoDialog> createState() =>
+      _SelectorDescuentoDialogState();
 }
 
-class _SelectorDescuentoDialogState extends ConsumerState<SelectorDescuentoDialog> {
+class _SelectorDescuentoDialogState
+    extends ConsumerState<SelectorDescuentoDialog> {
   @override
   Widget build(BuildContext context) {
     final estadoVenta = ref.watch(registrarVentaProvider);

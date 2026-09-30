@@ -38,7 +38,9 @@ class _DescuentosPageState extends ConsumerState<DescuentosPage> {
               error: (error, stack) => Center(
                 child: Text(
                   'Error al cargar descuentos: $error',
-                  style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.error,
+                  ),
                 ),
               ),
               data: (descuentos) {

@@ -1,0 +1,12 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'detalle_compra_dao.dart';
+
+// ignore_for_file: type=lint
+mixin _$DetalleCompraDaoMixin on DatabaseAccessor<AppDatabase> {
+  $DetalleCompraTableTable get detalleCompraTable =>
+      attachedDatabase.detalleCompraTable;
+  $ProveedoresTableTable get proveedoresTable =>
+      attachedDatabase.proveedoresTable;
+  $ComprasTableTable get comprasTable => attachedDatabase.comprasTable;
+}

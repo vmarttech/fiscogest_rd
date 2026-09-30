@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class Abono {
-
   const Abono({
     required this.id,
     required this.cuentaPagarId,

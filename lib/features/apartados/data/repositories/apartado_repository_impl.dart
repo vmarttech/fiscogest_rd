@@ -71,11 +71,13 @@ class ApartadoRepositoryImpl implements IApartadoRepository {
     return resultados.where((map) {
       bool ok = true;
       if (desde != null && map['fechaReserva'] != null) {
-        ok &= (map['fechaReserva'] as DateTime).isAfter(desde) ||
+        ok &=
+            (map['fechaReserva'] as DateTime).isAfter(desde) ||
             (map['fechaReserva'] as DateTime).isAtSameMomentAs(desde);
       }
       if (hasta != null && map['fechaReserva'] != null) {
-        ok &= (map['fechaReserva'] as DateTime).isBefore(hasta) ||
+        ok &=
+            (map['fechaReserva'] as DateTime).isBefore(hasta) ||
             (map['fechaReserva'] as DateTime).isAtSameMomentAs(hasta);
       }
       if (clienteId != null) ok &= map['clienteId'] == clienteId;

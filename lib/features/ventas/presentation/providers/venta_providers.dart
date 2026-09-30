@@ -30,7 +30,11 @@ final _cuentasCobrarDaoProvider = Provider<CuentasCobrarDao>((ref) {
 final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
   final ventasDao = ref.watch(_ventasDaoProvider);
   final cuentasCobrarDao = ref.watch(_cuentasCobrarDaoProvider);
-  return VentasRepositoryImpl(ventasDao, cuentasCobrarDao, ProductosDao(ref.watch(databaseProvider)));
+  return VentasRepositoryImpl(
+    ventasDao,
+    cuentasCobrarDao,
+    ProductosDao(ref.watch(databaseProvider)),
+  );
 });
 
 final confirmarVentaBorradorUseCaseProvider = Provider<ConfirmarVentaBorrador>((

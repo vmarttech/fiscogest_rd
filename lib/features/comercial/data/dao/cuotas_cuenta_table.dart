@@ -14,9 +14,9 @@ class CuotasCuentaTable extends Table {
       real().named('monto_pagado').withDefault(const Constant(0.0))();
   DateTimeColumn get fechaVencimiento =>
       dateTime().named('fecha_vencimiento')();
+
   /// pendiente | parcial | pagada
   TextColumn get estado =>
       text().named('estado').withDefault(const Constant('pendiente'))();
-  DateTimeColumn get fechaPago =>
-      dateTime().named('fecha_pago').nullable()();
+  DateTimeColumn get fechaPago => dateTime().named('fecha_pago').nullable()();
 }

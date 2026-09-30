@@ -13,20 +13,20 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' as repo;
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart'
+    as repo;
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/registrar_abono_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/detalle_cuenta_pagar_page.dart';
+
 class FichaProveedorPage extends ConsumerStatefulWidget {
-  const FichaProveedorPage({
-    super.key,
-    required this.proveedorId,
-  });
+  const FichaProveedorPage({super.key, required this.proveedorId});
   static String ruta = '/ficha-proveedor';
   final int proveedorId;
   @override
   ConsumerState<FichaProveedorPage> createState() => _FichaProveedorPageState();
 }
+
 class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
     with SingleTickerProviderStateMixin {
   Proveedor? _proveedor;
@@ -43,11 +43,13 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
     _tabController = TabController(length: 3, vsync: this);
     _cargarDatos();
   }
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
+
   Future<void> _cargarDatos() async {
     setState(() => _cargando = true);
     final db = ref.read(appDatabaseProvider);
@@ -79,71 +81,79 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       fechaCreacion: fila.fechaCreacion,
       fechaActualizacion: fila.fechaActualizacion,
     );
-    final compras = await (db.select(db.comprasTable)
-          ..where((c) => c.proveedorId.equals(widget.proveedorId))
-          ..orderBy([
-            (c) => OrderingTerm(
+    final compras =
+        await (db.select(db.comprasTable)
+              ..where((c) => c.proveedorId.equals(widget.proveedorId))
+              ..orderBy([
+                (c) => OrderingTerm(
                   expression: c.fechaEmision,
                   mode: OrderingMode.desc,
-                )
-          ]))
-        .get();
+                ),
+              ]))
+            .get();
     final historial = compras
-        .map((c) => _ItemHistorialCompra(
-              id: c.id,
-              fecha: c.fechaEmision,
-              numero: c.numeroComprobante.isNotEmpty
-                  ? c.numeroComprobante
-                  : 'Compra #${c.id}',
-              total: c.totalCompra,
-              estado: c.estado.name,
-              esCredito: c.formaPago.toLowerCase().contains('credito') ||
-                  c.condicionPago.toLowerCase().contains('credito'),
-            ))
+        .map(
+          (c) => _ItemHistorialCompra(
+            id: c.id,
+            fecha: c.fechaEmision,
+            numero: c.numeroComprobante.isNotEmpty
+                ? c.numeroComprobante
+                : 'Compra #${c.id}',
+            total: c.totalCompra,
+            estado: c.estado.name,
+            esCredito:
+                c.formaPago.toLowerCase().contains('credito') ||
+                c.condicionPago.toLowerCase().contains('credito'),
+          ),
+        )
         .toList();
     final cuentasDao = ref.read(repo.cuentasPagarDaoProvider);
-    final cuentas = await (db.select(db.cuentasPagarTable)
-          ..where((cp) => cp.proveedorId.equals(widget.proveedorId)))
-        .get();
+    final cuentas = await (db.select(
+      db.cuentasPagarTable,
+    )..where((cp) => cp.proveedorId.equals(widget.proveedorId))).get();
     double saldoTotal = 0.0;
     final pendientes = <_ItemCuentaPendiente>[];
     for (final cta in cuentas) {
       final pagos = await cuentasDao.listarPagosPorCuenta(cta.id);
-      final totalAbonado =
-          pagos.fold<double>(0.0, (s, p) => s + p.monto);
+      final totalAbonado = pagos.fold<double>(0.0, (s, p) => s + p.monto);
       final saldo = cta.monto - totalAbonado;
       if (saldo > 0.01) {
         saldoTotal += saldo;
-        pendientes.add(_ItemCuentaPendiente(
-          id: cta.id,
-          concepto: cta.concepto,
-          fechaEmision: cta.fechaEmision,
-          fechaVencimiento: cta.fechaVencimiento,
-          monto: cta.monto,
-          abonado: totalAbonado,
-          pendiente: saldo,
-          estado: cta.estado.name,
-        ));
+        pendientes.add(
+          _ItemCuentaPendiente(
+            id: cta.id,
+            concepto: cta.concepto,
+            fechaEmision: cta.fechaEmision,
+            fechaVencimiento: cta.fechaVencimiento,
+            monto: cta.monto,
+            abonado: totalAbonado,
+            pendiente: saldo,
+            estado: cta.estado.name,
+          ),
+        );
       }
     }
-    final todosPagos = await (db.select(db.pagosProveedorTable)
-          ..where((p) => p.proveedorId.equals(widget.proveedorId))
-          ..orderBy([
-            (p) => OrderingTerm(
+    final todosPagos =
+        await (db.select(db.pagosProveedorTable)
+              ..where((p) => p.proveedorId.equals(widget.proveedorId))
+              ..orderBy([
+                (p) => OrderingTerm(
                   expression: p.fechaPago,
                   mode: OrderingMode.desc,
-                )
-          ]))
-        .get();
+                ),
+              ]))
+            .get();
     final pagos = todosPagos
-        .map((p) => _ItemPago(
-              id: p.id,
-              fecha: p.fechaPago,
-              monto: p.monto,
-              formaPago: p.formaPago,
-              referencia: p.referencia,
-              nota: p.nota,
-            ))
+        .map(
+          (p) => _ItemPago(
+            id: p.id,
+            fecha: p.fechaPago,
+            monto: p.monto,
+            formaPago: p.formaPago,
+            referencia: p.referencia,
+            nota: p.nota,
+          ),
+        )
         .toList();
     setState(() {
       _proveedor = proveedor;
@@ -155,17 +165,19 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       _cargando = false;
     });
   }
+
   String _formatearMonto(double valor) {
     return NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$').format(valor);
   }
-  String _formatearFecha(DateTime f) =>
-      DateFormat('dd/MM/yyyy').format(f);
+
+  String _formatearFecha(DateTime f) => DateFormat('dd/MM/yyyy').format(f);
   void _irADetalleCompra(int compraId) {
     context.goNamed(
       DetalleCompraPage.routeName,
       pathParameters: {'compraId': compraId.toString()},
     );
   }
+
   void _irARegistrarAbono(int cuentaId) {
     try {
       context.goNamed(
@@ -179,6 +191,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       );
     }
   }
+
   void _irADetalleCuenta(int cuentaId) {
     try {
       context.goNamed(
@@ -186,12 +199,10 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
         pathParameters: {'cuentaId': cuentaId.toString()},
       );
     } catch (_) {
-      context.pushNamed(
-        DetalleCuentaPagarPage.routeName,
-        extra: cuentaId,
-      );
+      context.pushNamed(DetalleCuentaPagarPage.routeName, extra: cuentaId);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -215,18 +226,19 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
         child: _cargando
             ? const Center(child: CircularProgressIndicator())
             : _proveedor == null
-                ? const Center(child: Text('Proveedor no encontrado'))
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildTabDatos(),
-                      _buildTabCompras(),
-                      _buildTabCuentasYPagos(),
-                    ],
-                  ),
+            ? const Center(child: Text('Proveedor no encontrado'))
+            : TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildTabDatos(),
+                  _buildTabCompras(),
+                  _buildTabCuentasYPagos(),
+                ],
+              ),
       ),
     );
   }
+
   Widget _buildTabDatos() {
     final p = _proveedor!;
     return SingleChildScrollView(
@@ -245,7 +257,9 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
               const SizedBox(height: AppSpacing.m),
               AppTextField(
                 label: 'Contacto',
-                controller: TextEditingController(text: p.nombreContacto ?? '—'),
+                controller: TextEditingController(
+                  text: p.nombreContacto ?? '—',
+                ),
                 enabled: false,
               ),
               const SizedBox(height: AppSpacing.m),
@@ -309,7 +323,9 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
               const SizedBox(height: AppSpacing.m),
               AppTextField(
                 label: 'Días de Crédito',
-                controller: TextEditingController(text: '${p.diasCredito} días'),
+                controller: TextEditingController(
+                  text: '${p.diasCredito} días',
+                ),
                 enabled: false,
               ),
               const SizedBox(height: AppSpacing.m),
@@ -336,7 +352,8 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                       const SizedBox(height: AppSpacing.s),
                       Text(
                         _formatearMonto(_saldoPendiente),
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: _saldoPendiente > 0
                                   ? AppColors.error
@@ -368,20 +385,16 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
             },
           ),
           const SizedBox(height: AppSpacing.m),
-          AppButton(
-            text: 'Volver',
-            onPressed: () => Navigator.pop(context),
-          ),
+          AppButton(text: 'Volver', onPressed: () => Navigator.pop(context)),
           const SizedBox(height: AppSpacing.l),
         ],
       ),
     );
   }
+
   Widget _buildTabCompras() {
     if (_historialCompras.isEmpty) {
-      return const Center(
-        child: Text('Sin compras registradas'),
-      );
+      return const Center(child: Text('Sin compras registradas'));
     }
     return ListView.separated(
       padding: AppLayout.pantallaPadding,
@@ -414,6 +427,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
       },
     );
   }
+
   Widget _buildTabCuentasYPagos() {
     return SingleChildScrollView(
       padding: AppLayout.pantallaPadding,
@@ -422,9 +436,9 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
         children: [
           Text(
             'Cuentas pendientes',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.s),
           if (_cuentasPendientes.isEmpty)
@@ -437,7 +451,8 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
             )
           else
             ..._cuentasPendientes.map((cta) {
-              final vencida = DateTime.now().isAfter(cta.fechaVencimiento) &&
+              final vencida =
+                  DateTime.now().isAfter(cta.fechaVencimiento) &&
                   cta.estado != 'pagado';
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
@@ -455,14 +470,18 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                             Expanded(
                               child: Text(
                                 cta.concepto,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                             Text(
                               _formatearMonto(cta.pendiente),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: vencida ? Colors.red : Colors.orange.shade800,
+                                color: vencida
+                                    ? Colors.red
+                                    : Colors.orange.shade800,
                               ),
                             ),
                           ],
@@ -500,9 +519,9 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
           const SizedBox(height: AppSpacing.l),
           Text(
             'Pagos realizados',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.s),
           if (_pagosRealizados.isEmpty)
@@ -534,6 +553,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
     );
   }
 }
+
 class _ItemHistorialCompra {
   const _ItemHistorialCompra({
     required this.id,
@@ -550,6 +570,7 @@ class _ItemHistorialCompra {
   final String estado;
   final bool esCredito;
 }
+
 class _ItemCuentaPendiente {
   const _ItemCuentaPendiente({
     required this.id,
@@ -570,6 +591,7 @@ class _ItemCuentaPendiente {
   final double pendiente;
   final String estado;
 }
+
 class _ItemPago {
   const _ItemPago({
     required this.id,

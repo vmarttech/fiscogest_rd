@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/convertir_cotizacion_provider.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class HistorialVentasBorrador extends ConsumerWidget {
   const HistorialVentasBorrador({super.key});
@@ -21,33 +22,33 @@ class HistorialVentasBorrador extends ConsumerWidget {
   }
 
   String _etiquetaEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.borrador => 'Borrador',
-        EstadoDocumento.cotizado => 'Vigente',
-        EstadoDocumento.enCredito => 'En aprobación',
-        EstadoDocumento.aprobado => 'Aprobado',
-        EstadoDocumento.anulado => 'Rechazado',
-        EstadoDocumento.facturado => 'Facturada',
-      };
+    EstadoDocumento.borrador => 'Borrador',
+    EstadoDocumento.cotizado => 'Vigente',
+    EstadoDocumento.enCredito => 'En aprobación',
+    EstadoDocumento.aprobado => 'Aprobado',
+    EstadoDocumento.anulado => 'Rechazado',
+    EstadoDocumento.facturado => 'Facturada',
+  };
 
   Color _colorEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.borrador => AppColors.textSecondary,
-        EstadoDocumento.cotizado => AppColors.primary,
-        EstadoDocumento.enCredito => const Color(0xFFE65100),
-        EstadoDocumento.aprobado => AppColors.success,
-        EstadoDocumento.anulado => AppColors.error,
-        EstadoDocumento.facturado => AppColors.success,
-      };
+    EstadoDocumento.borrador => AppColors.textSecondary,
+    EstadoDocumento.cotizado => AppColors.primary,
+    EstadoDocumento.enCredito => const Color(0xFFE65100),
+    EstadoDocumento.aprobado => AppColors.success,
+    EstadoDocumento.anulado => AppColors.error,
+    EstadoDocumento.facturado => AppColors.success,
+  };
 
   Color _colorFondoEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.borrador =>
-          AppColors.textSecondary.withValues(alpha: 0.12),
-        EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
-        EstadoDocumento.enCredito =>
-          const Color(0xFFE65100).withValues(alpha: 0.12),
-        EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
-        EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
-        EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
-      };
+    EstadoDocumento.borrador => AppColors.textSecondary.withValues(alpha: 0.12),
+    EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
+    EstadoDocumento.enCredito => const Color(
+      0xFFE65100,
+    ).withValues(alpha: 0.12),
+    EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
+    EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
+    EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -246,7 +247,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
       final servicio = ref.read(cotizacionAprobacionProvider);
       await servicio.enviarAprobacion(cotizacion.id!);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text(
               'Cotización ${cotizacion.numero} enviada a aprobación',
@@ -259,7 +260,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: AppColors.error,
@@ -274,7 +275,8 @@ class _TarjetaCotizacion extends ConsumerWidget {
   Future<void> _irACaja(WidgetRef ref, BuildContext context) async {
     if (cotizacion.id == null) return;
 
-    final esCredito = cotizacion.esCredito ||
+    final esCredito =
+        cotizacion.esCredito ||
         cotizacion.tipoPago.toLowerCase().contains('credito') ||
         cotizacion.tipoPago.toLowerCase().contains('crédito') ||
         cotizacion.numero.startsWith('CR-');

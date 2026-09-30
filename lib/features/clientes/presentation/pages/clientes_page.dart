@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class ClientesPage extends ConsumerStatefulWidget {
   const ClientesPage({super.key});
@@ -17,6 +18,7 @@ class ClientesPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<ClientesPage> createState() => _ClientesPageState();
 }
+
 class _ClientesPageState extends ConsumerState<ClientesPage> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
@@ -38,7 +40,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
 
   void _guardarCliente() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: const Row(
             children: [

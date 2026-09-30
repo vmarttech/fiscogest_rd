@@ -32,7 +32,8 @@ class RegistrarTransferenciaPage extends ConsumerWidget {
               items: const [],
               onChanged: (val) {
                 if (val != null) {
-                  ref.read(transferenciaFormProvider.notifier)
+                  ref
+                      .read(transferenciaFormProvider.notifier)
                       .seleccionarAlmacenOrigen(val);
                 }
               },
@@ -44,7 +45,8 @@ class RegistrarTransferenciaPage extends ConsumerWidget {
               items: const [],
               onChanged: (val) {
                 if (val != null) {
-                  ref.read(transferenciaFormProvider.notifier)
+                  ref
+                      .read(transferenciaFormProvider.notifier)
                       .seleccionarAlmacenDestino(val);
                 }
               },

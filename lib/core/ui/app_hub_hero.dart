@@ -65,9 +65,9 @@ class AppHubHero extends StatelessWidget {
                   title,
                   style: (isMobile ? AppTypography.bodyLarge : AppTypography.h4)
                       .copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
                 ),
                 if (!isMobile) ...[
                   const SizedBox(height: 6),

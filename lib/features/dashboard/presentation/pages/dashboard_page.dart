@@ -46,7 +46,10 @@ class DashboardPage extends StatelessWidget {
                   ),
                   if (!isMobile)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.white,
                         borderRadius: AppRadius.allM,
@@ -54,14 +57,24 @@ class DashboardPage extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textSecondary),
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Hoy',
-                            style: AppTypography.labelMedium.copyWith(color: AppColors.textPrimary),
+                            style: AppTypography.labelMedium.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.textSecondary),
+                          const Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 18,
+                            color: AppColors.textSecondary,
+                          ),
                         ],
                       ),
                     ),
@@ -135,22 +148,26 @@ class DashboardPage extends StatelessWidget {
     if (isMobile) {
       return Column(
         children: kpis
-            .map((kpi) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _KpiCard(data: kpi),
-                ))
+            .map(
+              (kpi) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _KpiCard(data: kpi),
+              ),
+            )
             .toList(),
       );
     }
 
     return Row(
       children: kpis
-          .map((kpi) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: _KpiCard(data: kpi),
-                ),
-              ))
+          .map(
+            (kpi) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: _KpiCard(data: kpi),
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -177,7 +194,9 @@ class DashboardPage extends StatelessWidget {
                 onPressed: () {},
                 child: Text(
                   'Ver todas',
-                  style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             ],
@@ -230,7 +249,9 @@ class DashboardPage extends StatelessWidget {
                 onPressed: () {},
                 child: Text(
                   'Ver inventario',
-                  style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             ],
@@ -245,10 +266,22 @@ class DashboardPage extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Expanded(flex: 3, child: Text('Producto', style: _tableHeaderStyle)),
-                Expanded(flex: 2, child: Text('Estado', style: _tableHeaderStyle)),
-                Expanded(flex: 2, child: Text('Stock', style: _tableHeaderStyle)),
-                Expanded(flex: 2, child: Text('Riesgo', style: _tableHeaderStyle)),
+                Expanded(
+                  flex: 3,
+                  child: Text('Producto', style: _tableHeaderStyle),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text('Estado', style: _tableHeaderStyle),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text('Stock', style: _tableHeaderStyle),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text('Riesgo', style: _tableHeaderStyle),
+                ),
               ],
             ),
           ),
@@ -294,9 +327,9 @@ class DashboardPage extends StatelessWidget {
   }
 
   TextStyle get _tableHeaderStyle => AppTypography.labelSmall.copyWith(
-        color: AppColors.textSecondary,
-        fontWeight: FontWeight.w600,
-      );
+    color: AppColors.textSecondary,
+    fontWeight: FontWeight.w600,
+  );
 }
 
 // ─────────────────────────────────────────────
@@ -304,7 +337,6 @@ class DashboardPage extends StatelessWidget {
 // ─────────────────────────────────────────────
 
 class _KpiData {
-
   const _KpiData({
     required this.title,
     required this.value,
@@ -322,7 +354,6 @@ class _KpiData {
 }
 
 class _KpiCard extends StatelessWidget {
-
   const _KpiCard({required this.data});
   final _KpiData data;
 
@@ -352,7 +383,10 @@ class _KpiCard extends StatelessWidget {
               ),
               if (data.change.startsWith('+') || data.change.startsWith('-'))
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: data.isPositive
                         ? AppColors.success.withValues(alpha: 0.12)
@@ -362,7 +396,9 @@ class _KpiCard extends StatelessWidget {
                   child: Text(
                     data.change,
                     style: AppTypography.labelSmall.copyWith(
-                      color: data.isPositive ? AppColors.success : AppColors.error,
+                      color: data.isPositive
+                          ? AppColors.success
+                          : AppColors.error,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -372,7 +408,9 @@ class _KpiCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             data.title,
-            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -386,7 +424,9 @@ class _KpiCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               data.change,
-              style: AppTypography.labelSmall.copyWith(color: AppColors.warning),
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.warning,
+              ),
             ),
           ],
         ],
@@ -398,7 +438,6 @@ class _KpiCard extends StatelessWidget {
 enum AlertLevel { critical, warning, info }
 
 class _AlertItem extends StatelessWidget {
-
   const _AlertItem({
     required this.title,
     required this.subtitle,
@@ -425,10 +464,7 @@ class _AlertItem extends StatelessWidget {
             width: 8,
             height: 8,
             margin: const EdgeInsets.only(top: 6),
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -445,7 +481,9 @@ class _AlertItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -457,7 +495,6 @@ class _AlertItem extends StatelessWidget {
 }
 
 class _ExceptionRow extends StatelessWidget {
-
   const _ExceptionRow({
     required this.name,
     required this.status,
@@ -481,7 +518,9 @@ class _ExceptionRow extends StatelessWidget {
             flex: 3,
             child: Text(
               name,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -507,7 +546,9 @@ class _ExceptionRow extends StatelessWidget {
             flex: 2,
             child: Text(
               stock,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
           ),

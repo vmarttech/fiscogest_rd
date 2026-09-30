@@ -1,0 +1,34 @@
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
+import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
+import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
+
+// ✅ Opcional válido: el usuario puede no estar autenticado
+final usuarioAutenticadoProvider = Provider<int?>((ref) {
+  return ref.watch(sesionUsuarioIdProvider);
+});
+
+// ✅ OBLIGATORIO POR ARQUITECTURA: No nulo, exige inicialización explícita en main.dart
+final inventarioRepositoryProvider = Provider<InventarioRepositoryInterface>((
+  ref,
+) {
+  throw StateError(
+    'Inicializa inventarioRepositoryProvider en main.dart mediante overrideWithValue',
+  );
+});
+
+// ✅ MISMA REGLA: No nulo, inicialización controlada en el arranque
+final inventarioFisicoRepositoryProvider =
+    Provider<InventarioFisicoRepositoryInterface>((ref) {
+      throw StateError(
+        'Inicializa inventarioFisicoRepositoryProvider en main.dart mediante overrideWithValue',
+      );
+    });
+
+// ✅ MISMA REGLA PARA VENTAS: Inicializar en main.dart mediante overrideWithValue
+final ventasRepositoryProvider = Provider<IVentasRepository>((ref) {
+  throw StateError(
+    'Inicializa ventasRepositoryProvider en main.dart mediante overrideWithValue',
+  );
+});

@@ -56,7 +56,10 @@ class Compra {
   bool get esCredito {
     final fp = formaPago.toLowerCase();
     final cp = condicionPago.toLowerCase();
-    return fp == 'credito' || fp == 'crédito' || cp == 'credito' || cp == 'crédito';
+    return fp == 'credito' ||
+        fp == 'crédito' ||
+        cp == 'credito' ||
+        cp == 'crédito';
   }
 
   DateTime? get fechaVencimientoCalculada {

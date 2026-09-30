@@ -7,9 +7,11 @@ import 'package:fiscogest_rd/features/facturacion/presentation/providers/factura
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
-final facturasParaNcProvider =
-    FutureProvider.autoDispose<List<Venta>>((ref) async {
+final facturasParaNcProvider = FutureProvider.autoDispose<List<Venta>>((
+  ref,
+) async {
   final repo = ref.watch(ventasRepositoryProvider);
   final list = await repo.listarCotizaciones();
   return list.where((v) {
@@ -43,10 +45,9 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
     if (_sel?.id == null) return;
     setState(() => _busy = true);
     try {
-      final r = await ref.read(emitirNcServiceProvider).emitir(
-            facturaVentaId: _sel!.id!,
-            motivo: _motivo.text,
-          );
+      final r = await ref
+          .read(emitirNcServiceProvider)
+          .emitir(facturaVentaId: _sel!.id!, motivo: _motivo.text);
       ref.invalidate(secuenciasNcfListProvider);
       ref.invalidate(notasCreditoListProvider);
       if (!mounted) return;
@@ -76,7 +77,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _busy = false);
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('$e'),
             backgroundColor: AppColors.error,
@@ -88,7 +89,6 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
   }
 
   @override
-
   Widget build(BuildContext context) {
     final async = ref.watch(facturasParaNcProvider);
     final mobile = AppBreakpoints.isMobile(context);
@@ -143,7 +143,9 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
                 children: [
                   Text(
                     'Facturas con NCF',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -165,7 +167,11 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
                           )
                         : ListView(
                             children: [
-                              SizedBox(height: MediaQuery.sizeOf(context).height * 0.32, child: lista),
+                              SizedBox(
+                                height:
+                                    MediaQuery.sizeOf(context).height * 0.32,
+                                child: lista,
+                              ),
                               const SizedBox(height: 12),
                               panel,
                             ],
@@ -226,14 +232,14 @@ class _ListaFacturasNc extends StatelessWidget {
             child: InkWell(
               onTap: () => onTap(d),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Icon(
-                      sel
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_off,
+                      sel ? Icons.radio_button_checked : Icons.radio_button_off,
                       size: 20,
                       color: AppColors.primary,
                     ),
@@ -289,8 +295,11 @@ class _NcPanelVacio extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.assignment_return_outlined,
-                  size: 48, color: AppColors.grey300),
+              const Icon(
+                Icons.assignment_return_outlined,
+                size: 48,
+                color: AppColors.grey300,
+              ),
               const SizedBox(height: 12),
               Text(
                 texto,
@@ -335,8 +344,10 @@ class _NcPanelEmitir extends StatelessWidget {
                   color: AppColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.assignment_return_outlined,
-                    color: AppColors.warning),
+                child: const Icon(
+                  Icons.assignment_return_outlined,
+                  color: AppColors.warning,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -345,8 +356,9 @@ class _NcPanelEmitir extends StatelessWidget {
                   children: [
                     Text(
                       'Emitir B04',
-                      style: AppTypography.labelLarge
-                          .copyWith(fontWeight: FontWeight.w800),
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     Text(
                       '${venta.numeroFactura} · ${fmt.format(venta.montoTotal)}',
@@ -360,10 +372,7 @@ class _NcPanelEmitir extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          AppTextField(
-            label: 'Motivo de la NC',
-            controller: motivo,
-          ),
+          AppTextField(label: 'Motivo de la NC', controller: motivo),
           const SizedBox(height: 20),
           FilledButton.icon(
             onPressed: busy ? null : onEmitir,

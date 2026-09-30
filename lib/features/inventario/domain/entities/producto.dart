@@ -60,11 +60,16 @@ class Producto {
   }
 
   // Cálculo de Costo Promedio Ponderado al recibir nueva compra
-  double recalcularCostoPromedio(double cantidadAnterior, double cantidadNueva, double costoUnitarioNuevo) {
+  double recalcularCostoPromedio(
+    double cantidadAnterior,
+    double cantidadNueva,
+    double costoUnitarioNuevo,
+  ) {
     if (cantidadAnterior <= 0) return costoUnitarioNuevo;
     final inventarioAnterior = cantidadAnterior * costoPromedio;
     final montoNuevaEntrada = cantidadNueva * costoUnitarioNuevo;
-    return (inventarioAnterior + montoNuevaEntrada) / (cantidadAnterior + cantidadNueva);
+    return (inventarioAnterior + montoNuevaEntrada) /
+        (cantidadAnterior + cantidadNueva);
   }
 
   bool get ofertaVigente {
@@ -72,7 +77,8 @@ class Producto {
     final hoy = DateTime.now();
     final inicio = fechaInicioOferta ?? DateTime(2000);
     final fin = fechaFinOferta ?? DateTime(2100);
-    return hoy.isAfter(inicio) && hoy.isBefore(fin.add(const Duration(days: 1)));
+    return hoy.isAfter(inicio) &&
+        hoy.isBefore(fin.add(const Duration(days: 1)));
   }
 
   bool precioVentaEsValido() {

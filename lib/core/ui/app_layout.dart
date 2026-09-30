@@ -73,17 +73,16 @@ abstract class AppLayout {
     TextStyle? estiloEtiqueta,
     TextStyle? estiloValor,
     bool alinearDerecha = true,
-    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(
+      vertical: AppSpacing.xs,
+    ),
   }) {
     return Padding(
       padding: padding,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            etiqueta,
-            style: estiloEtiqueta ?? AppTypography.labelMedium,
-          ),
+          Text(etiqueta, style: estiloEtiqueta ?? AppTypography.labelMedium),
           Text(
             valor,
             style: estiloValor ?? AppTypography.labelMedium,

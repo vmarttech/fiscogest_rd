@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/unidad_medida.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class UnidadesPage extends ConsumerStatefulWidget {
   const UnidadesPage({super.key});
@@ -81,13 +82,21 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                     final filtradas = _filtroBusqueda.isEmpty
                         ? unidades
                         : unidades
-                            .where(
-                              (u) =>
-                                  u.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                                  (u.abreviatura?.toLowerCase().contains(_filtroBusqueda) ?? false) ||
-                                  (u.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false),
-                            )
-                            .toList();
+                              .where(
+                                (u) =>
+                                    u.nombre.toLowerCase().contains(
+                                      _filtroBusqueda,
+                                    ) ||
+                                    (u.abreviatura?.toLowerCase().contains(
+                                          _filtroBusqueda,
+                                        ) ??
+                                        false) ||
+                                    (u.descripcion?.toLowerCase().contains(
+                                          _filtroBusqueda,
+                                        ) ??
+                                        false),
+                              )
+                              .toList();
 
                     if (filtradas.isEmpty) {
                       return const Center(
@@ -156,171 +165,204 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             ),
                           Expanded(
                             child: ListView.separated(
-                      itemCount: filtradas.length,
-                      separatorBuilder: (context, index) =>
-                          const Divider(color: AppColors.border, height: 1),
-                      itemBuilder: (context, index) {
-                        final unidad = filtradas[index];
-                        final subtitulo = unidad.abreviatura != null && unidad.abreviatura!.isNotEmpty
-                            ? 'Abreviatura: ${unidad.abreviatura}'
-                            : unidad.descripcion?.isNotEmpty ?? true
-                                ? 'Sin descripción'
-                                : unidad.descripcion!;
+                              itemCount: filtradas.length,
+                              separatorBuilder: (context, index) =>
+                                  const Divider(
+                                    color: AppColors.border,
+                                    height: 1,
+                                  ),
+                              itemBuilder: (context, index) {
+                                final unidad = filtradas[index];
+                                final subtitulo =
+                                    unidad.abreviatura != null &&
+                                        unidad.abreviatura!.isNotEmpty
+                                    ? 'Abreviatura: ${unidad.abreviatura}'
+                                    : unidad.descripcion?.isNotEmpty ?? true
+                                    ? 'Sin descripción'
+                                    : unidad.descripcion!;
 
-                        return Material(
-                          color: index.isEven
-                              ? AppColors.white
-                              : AppColors.grey50.withValues(alpha: 0.55),
-                          child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          child: isMobile
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 42,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color: AppColors.grey50,
-                                            borderRadius: AppRadius.allM,
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              unidad.abreviatura ?? '---',
-                                              style: AppTypography.labelMedium.copyWith(
-                                                color: AppColors.textPrimary,
-                                              ),
-                                            ),
-                                          ),
+                                return Material(
+                                  color: index.isEven
+                                      ? AppColors.white
+                                      : AppColors.grey50.withValues(
+                                          alpha: 0.55,
                                         ),
-                                        AppLayout.hM,
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    child: isMobile
+                                        ? Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                unidad.nombre,
-                                                style: AppTypography.labelLarge,
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    width: 42,
+                                                    height: 42,
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.grey50,
+                                                      borderRadius:
+                                                          AppRadius.allM,
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        unidad.abreviatura ??
+                                                            '---',
+                                                        style: AppTypography
+                                                            .labelMedium
+                                                            .copyWith(
+                                                              color: AppColors
+                                                                  .textPrimary,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  AppLayout.hM,
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          unidad.nombre,
+                                                          style: AppTypography
+                                                              .labelLarge,
+                                                        ),
+                                                        AppLayout.vXs,
+                                                        Text(
+                                                          subtitulo,
+                                                          style: AppTypography
+                                                              .bodySmall,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              AppLayout.vXs,
-                                              Text(
-                                                subtitulo,
-                                                style: AppTypography.bodySmall,
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.edit_outlined,
+                                                      color: AppColors.primary,
+                                                      size: 20,
+                                                    ),
+                                                    tooltip: 'Editar Unidad',
+                                                    onPressed: () =>
+                                                        _mostrarModalRegistro(
+                                                          context,
+                                                          unidadToEdit: unidad,
+                                                        ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.delete_outline,
+                                                      color: AppColors.error,
+                                                      size: 20,
+                                                    ),
+                                                    tooltip: 'Eliminar Unidad',
+                                                    onPressed: () =>
+                                                        _confirmarEliminacion(
+                                                          context,
+                                                          unidad,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          )
+                                        : Row(
+                                            children: [
+                                              Container(
+                                                width: 42,
+                                                height: 42,
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.grey50,
+                                                  borderRadius: AppRadius.allM,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    unidad.abreviatura ?? '---',
+                                                    style: AppTypography
+                                                        .labelMedium
+                                                        .copyWith(
+                                                          color: AppColors
+                                                              .textPrimary,
+                                                        ),
+                                                  ),
+                                                ),
+                                              ),
+                                              AppLayout.hM,
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      unidad.nombre,
+                                                      style: AppTypography
+                                                          .labelLarge,
+                                                    ),
+                                                    AppLayout.vXs,
+                                                    Text(
+                                                      subtitulo,
+                                                      style: AppTypography
+                                                          .bodySmall,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.edit_outlined,
+                                                      color: AppColors.primary,
+                                                      size: 20,
+                                                    ),
+                                                    tooltip: 'Editar Unidad',
+                                                    onPressed: () =>
+                                                        _mostrarModalRegistro(
+                                                          context,
+                                                          unidadToEdit: unidad,
+                                                        ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.delete_outline,
+                                                      color: AppColors.error,
+                                                      size: 20,
+                                                    ),
+                                                    tooltip: 'Eliminar Unidad',
+                                                    onPressed: () =>
+                                                        _confirmarEliminacion(
+                                                          context,
+                                                          unidad,
+                                                        ),
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.edit_outlined,
-                                            color: AppColors.primary,
-                                            size: 20,
-                                          ),
-                                          tooltip: 'Editar Unidad',
-                                          onPressed: () => _mostrarModalRegistro(
-                                            context,
-                                            unidadToEdit: unidad,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            color: AppColors.error,
-                                            size: 20,
-                                          ),
-                                          tooltip: 'Eliminar Unidad',
-                                          onPressed: () =>
-                                              _confirmarEliminacion(context, unidad),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                )
-                              : Row(
-                                  children: [
-                                    Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.grey50,
-                                        borderRadius: AppRadius.allM,
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          unidad.abreviatura ?? '---',
-                                          style: AppTypography.labelMedium.copyWith(
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    AppLayout.hM,
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            unidad.nombre,
-                                            style: AppTypography.labelLarge,
-                                          ),
-                                          AppLayout.vXs,
-                                          Text(
-                                            subtitulo,
-                                            style: AppTypography.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.edit_outlined,
-                                            color: AppColors.primary,
-                                            size: 20,
-                                          ),
-                                          tooltip: 'Editar Unidad',
-                                          onPressed: () => _mostrarModalRegistro(
-                                            context,
-                                            unidadToEdit: unidad,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            color: AppColors.error,
-                                            size: 20,
-                                          ),
-                                          tooltip: 'Eliminar Unidad',
-                                          onPressed: () =>
-                                              _confirmarEliminacion(context, unidad),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                        ),
-                        );
-                      },
-                      ), // ListView
+                                  ),
+                                );
+                              },
+                            ), // ListView
                           ), // Expanded
                         ], // Column children
                       ), // Column
                     ); // Container
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Center(
                     child: Text('Error: $e', style: AppTypography.bodyMedium),
                   ),
@@ -370,7 +412,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
           text: 'Eliminar',
           onPressed: () {
             if (unidad.id != null) {
-              ref.read(unidadMedidaControllerProvider.notifier).eliminar(unidad.id!);
+              ref
+                  .read(unidadMedidaControllerProvider.notifier)
+                  .eliminar(unidad.id!);
             }
             Navigator.pop(context);
           },
@@ -401,7 +445,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
       content: StatefulBuilder(
         builder: (dialogContext, setDialogState) {
           final anchoPantalla = MediaQuery.of(dialogContext).size.width;
-          final anchoDialogo = anchoPantalla > 420 ? 400.0 : anchoPantalla * 0.85;
+          final anchoDialogo = anchoPantalla > 420
+              ? 400.0
+              : anchoPantalla * 0.85;
 
           bool validarNombre() {
             final limpio = nombreController.text.trim();
@@ -420,7 +466,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                     initialValue: nombreController.text,
                     validator: (value) {
                       final limpio = value?.trim() ?? '';
-                      if (limpio.isEmpty) return 'Ingrese el nombre de la unidad';
+                      if (limpio.isEmpty) {
+                        return 'Ingrese el nombre de la unidad';
+                      }
                       if (limpio.length > 60) return 'Máximo 60 caracteres';
                       return null;
                     },
@@ -441,7 +489,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             padding: const EdgeInsets.only(top: 4, left: 12),
                             child: Text(
                               formFieldState.errorText!,
-                              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.error,
+                              ),
                             ),
                           ),
                       ],
@@ -463,7 +513,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                           hint: 'Ej: UND, KG, L...',
                           controller: abreviaturaController,
                           onChanged: (_) {
-                            formFieldState.didChange(abreviaturaController.text);
+                            formFieldState.didChange(
+                              abreviaturaController.text,
+                            );
                             setDialogState(() {});
                           },
                         ),
@@ -474,7 +526,8 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             child: Text(
                               '${abreviaturaController.text.trim().length}/8',
                               style: AppTypography.bodySmall.copyWith(
-                                color: abreviaturaController.text.trim().length > 8
+                                color:
+                                    abreviaturaController.text.trim().length > 8
                                     ? AppColors.error
                                     : AppColors.grey500,
                               ),
@@ -486,7 +539,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             padding: const EdgeInsets.only(top: 4, left: 12),
                             child: Text(
                               formFieldState.errorText!,
-                              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.error,
+                              ),
                             ),
                           ),
                       ],
@@ -510,7 +565,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             hint: 'Breve descripción...',
                             controller: descripcionController,
                             onChanged: (_) {
-                              formFieldState.didChange(descripcionController.text);
+                              formFieldState.didChange(
+                                descripcionController.text,
+                              );
                               setDialogState(() {});
                             },
                           ),
@@ -522,7 +579,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             child: Text(
                               '${descripcionController.text.trim().length}/200',
                               style: AppTypography.bodySmall.copyWith(
-                                color: descripcionController.text.trim().length > 200
+                                color:
+                                    descripcionController.text.trim().length >
+                                        200
                                     ? AppColors.error
                                     : AppColors.grey500,
                               ),
@@ -534,7 +593,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             padding: const EdgeInsets.only(top: 4, left: 12),
                             child: Text(
                               formFieldState.errorText!,
-                              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.error,
+                              ),
                             ),
                           ),
                       ],
@@ -556,28 +617,46 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                           child: AppButton(
                             text: isEditing ? 'Actualizar' : 'Guardar',
                             onPressed: () {
-                              if (!validarNombre() || !formKey.currentState!.validate()) return;
+                              if (!validarNombre() ||
+                                  !formKey.currentState!.validate()) {
+                                return;
+                              }
                               try {
                                 final und = UnidadMedida(
                                   id: unidadToEdit?.id,
                                   nombre: nombreController.text.trim(),
-                                  abreviatura: abreviaturaController.text.trim().isEmpty
+                                  abreviatura:
+                                      abreviaturaController.text.trim().isEmpty
                                       ? null
-                                      : abreviaturaController.text.trim().toUpperCase(),
-                                  descripcion: descripcionController.text.trim().isEmpty
+                                      : abreviaturaController.text
+                                            .trim()
+                                            .toUpperCase(),
+                                  descripcion:
+                                      descripcionController.text.trim().isEmpty
                                       ? null
                                       : descripcionController.text.trim(),
-                                  creadoEn: unidadToEdit?.creadoEn ?? DateTime.now(),
-                                  actualizadoEn: isEditing ? DateTime.now() : null,
+                                  creadoEn:
+                                      unidadToEdit?.creadoEn ?? DateTime.now(),
+                                  actualizadoEn: isEditing
+                                      ? DateTime.now()
+                                      : null,
                                 );
                                 if (isEditing) {
-                                  ref.read(unidadMedidaControllerProvider.notifier).actualizar(und);
+                                  ref
+                                      .read(
+                                        unidadMedidaControllerProvider.notifier,
+                                      )
+                                      .actualizar(und);
                                 } else {
-                                  ref.read(unidadMedidaControllerProvider.notifier).guardar(und);
+                                  ref
+                                      .read(
+                                        unidadMedidaControllerProvider.notifier,
+                                      )
+                                      .guardar(und);
                                 }
                                 if (!mounted) return;
                                 Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                FiscoGestNotifications.show(
                                   SnackBar(
                                     content: Text(
                                       isEditing
@@ -590,9 +669,14 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                 );
                               } catch (e) {
                                 if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                FiscoGestNotifications.show(
                                   SnackBar(
-                                    content: Text(e.toString().replaceAll('Exception: ', '')),
+                                    content: Text(
+                                      e.toString().replaceAll(
+                                        'Exception: ',
+                                        '',
+                                      ),
+                                    ),
                                     backgroundColor: AppColors.error,
                                     behavior: SnackBarBehavior.floating,
                                   ),

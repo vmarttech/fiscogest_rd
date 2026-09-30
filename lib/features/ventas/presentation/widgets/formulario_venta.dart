@@ -11,11 +11,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_ve
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
 
-enum ModoFormularioVenta {
-  normal,
-  cobro,
-  credito,
-}
+enum ModoFormularioVenta { normal, cobro, credito }
 
 class FormularioVenta extends ConsumerStatefulWidget {
   const FormularioVenta({
@@ -142,10 +138,7 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
           SizedBox(
             width: double.infinity,
             height: 48,
-            child: AppButton(
-              text: 'COBRAR',
-              onPressed: _abrirModoCobro,
-            ),
+            child: AppButton(text: 'COBRAR', onPressed: _abrirModoCobro),
           ),
         ],
       ),
@@ -191,7 +184,6 @@ class _FormularioVentaState extends ConsumerState<FormularioVenta> {
 }
 
 class _SelectorRow extends StatelessWidget {
-
   const _SelectorRow({
     required this.icon,
     required this.label,

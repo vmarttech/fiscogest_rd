@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class EmitirFacturaPage extends ConsumerStatefulWidget {
   const EmitirFacturaPage({super.key});
@@ -25,7 +26,6 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
   String _tipoNcf = 'B02';
   String _rncCliente = '';
   bool _emitiendo = false;
-
 
   Future<void> _seleccionar(Venta d) async {
     setState(() {
@@ -44,7 +44,9 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
         }
       }
       final rnc = (cli?.rncCedula ?? '').trim();
-      final esRnc = (rnc.length == 9 || rnc.length == 11) && RegExp(r'^\d+$').hasMatch(rnc);
+      final esRnc =
+          (rnc.length == 9 || rnc.length == 11) &&
+          RegExp(r'^\d+$').hasMatch(rnc);
       if (mounted) {
         setState(() {
           _tipoNcf = esRnc ? 'B01' : 'B02';
@@ -60,15 +62,13 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
     if (v == null || v.id == null) return;
     setState(() => _emitiendo = true);
     try {
-      final ncf = await ref.read(emitirFacturaServiceProvider).emitir(
-            ventaId: v.id!,
-            tipoNcf: _tipoNcf,
-            rncCliente: _rncCliente,
-          );
+      final ncf = await ref
+          .read(emitirFacturaServiceProvider)
+          .emitir(ventaId: v.id!, tipoNcf: _tipoNcf, rncCliente: _rncCliente);
       ref.invalidate(documentosPendientesFacturaProvider);
       ref.invalidate(secuenciasNcfListProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Factura emitida: $ncf'),
           backgroundColor: AppColors.success,
@@ -109,7 +109,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
             );
           }
           if (pdfVenta.detalles.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            FiscoGestNotifications.show(
               const SnackBar(
                 content: Text(
                   'Factura emitida pero sin líneas de producto en BD.',
@@ -125,7 +125,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
           }
         } catch (e) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            FiscoGestNotifications.show(
               SnackBar(
                 content: Text('No se pudo imprimir: $e'),
                 backgroundColor: AppColors.error,
@@ -141,7 +141,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _emitiendo = false);
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('$e'),
             backgroundColor: AppColors.error,
@@ -153,7 +153,6 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
   }
 
   @override
-
   Widget build(BuildContext context) {
     final async = ref.watch(documentosPendientesFacturaProvider);
     final mobile = AppBreakpoints.isMobile(context);
@@ -209,7 +208,9 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
                 children: [
                   Text(
                     'Documentos listos',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -303,13 +304,14 @@ class _ListaDocs extends StatelessWidget {
             child: InkWell(
               onTap: () => onTap(d),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Icon(
-                      sel
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_off,
+                      sel ? Icons.radio_button_checked : Icons.radio_button_off,
                       size: 20,
                       color: AppColors.primary,
                     ),
@@ -422,8 +424,9 @@ class _PanelEmitir extends StatelessWidget {
                   children: [
                     Text(
                       'Emitir NCF',
-                      style: AppTypography.labelLarge
-                          .copyWith(fontWeight: FontWeight.w800),
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     Text(
                       '${venta.numeroCotizacion} · ${venta.nombreCliente ?? 'Cliente'}',
@@ -439,7 +442,9 @@ class _PanelEmitir extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'Tipo de comprobante',
-            style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600),
+            style: AppTypography.labelMedium.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -489,6 +494,3 @@ class _PanelEmitir extends StatelessWidget {
     );
   }
 }
-
-
-

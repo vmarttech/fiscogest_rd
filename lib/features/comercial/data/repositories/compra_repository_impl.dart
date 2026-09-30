@@ -142,8 +142,9 @@ class CompraRepositoryImpl implements ICompraRepository {
 
   @override
   Future<Compra?> obtenerCompraPorId(int compraId) async {
-    final fila = await (db.select(db.comprasTable)
-      ..where((t) => t.id.equals(compraId))).getSingleOrNull();
+    final fila = await (db.select(
+      db.comprasTable,
+    )..where((t) => t.id.equals(compraId))).getSingleOrNull();
     if (fila == null) return null;
     try {
       return _filaToCompra(fila);
@@ -154,8 +155,9 @@ class CompraRepositoryImpl implements ICompraRepository {
 
   @override
   Future<List<Compra>> listarCompras() async {
-    final filas = await (db.select(db.comprasTable)
-      ..orderBy([(t) => OrderingTerm.desc(t.fechaEmision)])).get();
+    final filas = await (db.select(
+      db.comprasTable,
+    )..orderBy([(t) => OrderingTerm.desc(t.fechaEmision)])).get();
     final resultado = <Compra>[];
     for (final f in filas) {
       try {
@@ -169,8 +171,9 @@ class CompraRepositoryImpl implements ICompraRepository {
 
   @override
   Future<List<DetalleCompra>> listarDetallesDeCompra(int compraId) async {
-    final filas = await (db.select(db.detalleCompraTable)
-      ..where((t) => t.compraId.equals(compraId))).get();
+    final filas = await (db.select(
+      db.detalleCompraTable,
+    )..where((t) => t.compraId.equals(compraId))).get();
     return filas.map((DetalleCompraTableData f) => _filaToDetalle(f)).toList();
   }
 
@@ -206,8 +209,7 @@ class CompraRepositoryImpl implements ICompraRepository {
         fechaConfirmacion: DateTime.now(),
         actualizadoEn: DateTime.now(),
       );
-      await (db.update(db.comprasTable)
-        ..where((t) => t.id.equals(compraId)))
+      await (db.update(db.comprasTable)..where((t) => t.id.equals(compraId)))
           .write(_compraToCompanion(compraConfirmada));
       return compraConfirmada;
     });
@@ -228,8 +230,7 @@ class CompraRepositoryImpl implements ICompraRepository {
         fechaRecepcion: DateTime.now(),
         actualizadoEn: DateTime.now(),
       );
-      await (db.update(db.comprasTable)
-        ..where((t) => t.id.equals(compraId)))
+      await (db.update(db.comprasTable)..where((t) => t.id.equals(compraId)))
           .write(_compraToCompanion(compraRecibida));
       return compraRecibida;
     });
@@ -251,8 +252,7 @@ class CompraRepositoryImpl implements ICompraRepository {
         fechaPago: DateTime.now(),
         actualizadoEn: DateTime.now(),
       );
-      await (db.update(db.comprasTable)
-        ..where((t) => t.id.equals(compraId)))
+      await (db.update(db.comprasTable)..where((t) => t.id.equals(compraId)))
           .write(_compraToCompanion(compraPagada));
       return compraPagada;
     });
@@ -273,8 +273,7 @@ class CompraRepositoryImpl implements ICompraRepository {
         estado: EstadoCompra.anulada,
         actualizadoEn: DateTime.now(),
       );
-      await (db.update(db.comprasTable)
-        ..where((t) => t.id.equals(compraId)))
+      await (db.update(db.comprasTable)..where((t) => t.id.equals(compraId)))
           .write(_compraToCompanion(compraAnulada));
       return compraAnulada;
     });

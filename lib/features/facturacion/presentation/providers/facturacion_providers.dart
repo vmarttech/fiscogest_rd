@@ -30,19 +30,19 @@ final emitirFacturaServiceProvider = Provider<EmitirFacturaService>((ref) {
 
 final documentosPendientesFacturaProvider =
     FutureProvider.autoDispose<List<Venta>>((ref) async {
-  final repo = ref.watch(ventasRepositoryProvider);
-  final list = await repo.listarCotizaciones();
-  return list.where((v) {
-    final ncf = (v.numeroFactura ?? '').trim();
-    final ncfFiscal = ncf.startsWith('B01') || ncf.startsWith('B02');
-    if (ncfFiscal) return false;
-    // Cotizado/aprobado, o ya cobrado en Caja sin NCF DGII
-    return v.estadoDocumento == EstadoDocumento.cotizado ||
-        v.estadoDocumento == EstadoDocumento.aprobado ||
-        v.estadoDocumento == EstadoDocumento.facturado ||
-        v.estadoDocumento == EstadoDocumento.enCredito;
-  }).toList();
-});
+      final repo = ref.watch(ventasRepositoryProvider);
+      final list = await repo.listarCotizaciones();
+      return list.where((v) {
+        final ncf = (v.numeroFactura ?? '').trim();
+        final ncfFiscal = ncf.startsWith('B01') || ncf.startsWith('B02');
+        if (ncfFiscal) return false;
+        // Cotizado/aprobado, o ya cobrado en Caja sin NCF DGII
+        return v.estadoDocumento == EstadoDocumento.cotizado ||
+            v.estadoDocumento == EstadoDocumento.aprobado ||
+            v.estadoDocumento == EstadoDocumento.facturado ||
+            v.estadoDocumento == EstadoDocumento.enCredito;
+      }).toList();
+    });
 
 final _cuentasCobrarDaoFactProvider = Provider<CuentasCobrarDao>((ref) {
   return CuentasCobrarDao(ref.watch(databaseProvider));

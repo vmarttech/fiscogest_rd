@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class MostrarDetalleVenta extends ConsumerWidget {
   const MostrarDetalleVenta({super.key, required this.venta});
@@ -26,7 +27,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
       final servicio = ref.read(ventaBorradorServicioProvider);
       final resultado = await servicio.generarImpresion(venta);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text(resultado),
             backgroundColor: AppColors.success,
@@ -35,7 +36,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al imprimir: $e'),
             backgroundColor: AppColors.error,
@@ -50,7 +51,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
       final servicio = ref.read(ventaBorradorServicioProvider);
       final ruta = await servicio.exportarPDF(venta);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Archivo generado: $ruta'),
             backgroundColor: AppColors.success,
@@ -59,7 +60,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al generar archivo: $e'),
             backgroundColor: AppColors.error,
@@ -76,7 +77,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
       await servicio.enviarPorCorreo(venta, correo);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al enviar: $e'),
             backgroundColor: AppColors.error,
@@ -112,7 +113,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
       final casoUso = ref.read(confirmarVentaBorradorUseCaseProvider);
       final resultado = await casoUso.call(venta.id!);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Cotización convertida: ${resultado.numero}'),
             backgroundColor: AppColors.success,
@@ -126,7 +127,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al convertir: $e'),
             backgroundColor: AppColors.error,
@@ -319,8 +320,12 @@ class MostrarDetalleVenta extends ConsumerWidget {
               child: Column(
                 children: [
                   FilaDetalle('Subtotal', _formatearMonto(venta.subtotal)),
-                  if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
-                  FilaDetalle('ITBIS', _formatearMonto(venta.itbis)),
+                  if (!(ref
+                          .watch(configuracionControllerProvider)
+                          .valueOrNull
+                          ?.modoSimplificado ??
+                      false))
+                    FilaDetalle('ITBIS', _formatearMonto(venta.itbis)),
                   const Divider(),
                   FilaDetalle(
                     'TOTAL',
@@ -365,7 +370,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                 ),
               OutlinedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  FiscoGestNotifications.show(
                     SnackBar(
                       content: Text(
                         'Transacción ${venta.numero} copiada como referencia. Vaya a Facturación → Nota de Crédito / Devolución.',
@@ -380,7 +385,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
               ),
               OutlinedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  FiscoGestNotifications.show(
                     SnackBar(
                       content: Text(
                         'Número ${venta.numero} copiado al portapapeles',

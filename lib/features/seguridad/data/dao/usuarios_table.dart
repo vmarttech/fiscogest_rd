@@ -25,6 +25,5 @@ class UsuariosTable extends Table {
   TextColumn get preguntaRecuperacion =>
       text().named('pregunta_recuperacion').nullable()();
 
-  TextColumn get respuestaHash =>
-      text().named('respuesta_hash').nullable()();
+  TextColumn get respuestaHash => text().named('respuesta_hash').nullable()();
 }

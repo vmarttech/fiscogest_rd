@@ -20,6 +20,7 @@ class AppCard extends StatelessWidget {
   final Color? color;
   final double? elevation;
   final Color? borderColor;
+
   /// Borde con toque teal (hero / KPI).
   final bool accent;
 
@@ -32,7 +33,8 @@ class AppCard extends StatelessWidget {
         color: color ?? Colors.white.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: borderColor ??
+          color:
+              borderColor ??
               (accent
                   ? AppColors.primary.withValues(alpha: 0.35)
                   : AppColors.border),

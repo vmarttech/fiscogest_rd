@@ -11,15 +11,15 @@ class PagosProveedorTable extends Table {
       .named('cuenta_pagar_id')
       .references(CuentasPagarTable, #id, onDelete: KeyAction.cascade)();
 
-  IntColumn get proveedorId => integer()
-      .named('proveedor_id')
-      .references(ProveedoresTable, #id)();
+  IntColumn get proveedorId =>
+      integer().named('proveedor_id').references(ProveedoresTable, #id)();
 
   RealColumn get monto => real().named('monto')();
 
   DateTimeColumn get fechaPago => dateTime().named('fecha_pago')();
 
-  TextColumn get formaPago => text().named('forma_pago')(); // efectivo, transferencia, cheque, etc.
+  TextColumn get formaPago =>
+      text().named('forma_pago')(); // efectivo, transferencia, cheque, etc.
 
   TextColumn get referencia => text().named('referencia').nullable()();
 

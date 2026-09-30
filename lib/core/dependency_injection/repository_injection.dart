@@ -63,15 +63,23 @@ class RepositoryInjection {
     final inventarioService = InventarioServiceImpl(db);
     final ventasDao = VentasDao(db);
     final cuentasCobrarDao = CuentasCobrarDao(db);
-    final ventasRepository = VentasRepositoryImpl(ventasDao, cuentasCobrarDao, productosDao);
+    final ventasRepository = VentasRepositoryImpl(
+      ventasDao,
+      cuentasCobrarDao,
+      productosDao,
+    );
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,
       kardexRepository: kardexRepo,
       inventarioService: inventarioService,
       productosDao: productosDao,
     );
-    final apartadoRepository = ApartadoRepositoryImpl(apartadosDao: apartadosDao);
-    final devolucionRepository = DevolucionRepositoryImpl(devolucionesDao: devolucionesDao);
+    final apartadoRepository = ApartadoRepositoryImpl(
+      apartadosDao: apartadosDao,
+    );
+    final devolucionRepository = DevolucionRepositoryImpl(
+      devolucionesDao: devolucionesDao,
+    );
     final cajaRepository = CajaRepositoryImpl(
       cajaMovimientosDao: cajaMovimientosDao,
       cajaSesionesDao: cajaSesionesDao,

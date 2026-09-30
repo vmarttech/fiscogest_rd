@@ -128,7 +128,8 @@ class ConfiguracionEntity {
       prefijoCredito: prefijoCredito ?? this.prefijoCredito,
       cajaFormaPagoDefault: cajaFormaPagoDefault ?? this.cajaFormaPagoDefault,
       cajaPermitirTarjeta: cajaPermitirTarjeta ?? this.cajaPermitirTarjeta,
-      cajaPermitirTransferencia: cajaPermitirTransferencia ?? this.cajaPermitirTransferencia,
+      cajaPermitirTransferencia:
+          cajaPermitirTransferencia ?? this.cajaPermitirTransferencia,
       cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
       cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
       modoSimplificado: modoSimplificado ?? this.modoSimplificado,

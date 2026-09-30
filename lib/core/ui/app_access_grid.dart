@@ -50,11 +50,7 @@ class AppAccessGrid extends StatelessWidget {
           runSpacing: runSpacing,
           children: [
             for (final child in children)
-              SizedBox(
-                width: tileW,
-                height: tileHeight,
-                child: child,
-              ),
+              SizedBox(width: tileW, height: tileHeight, child: child),
           ],
         );
       },

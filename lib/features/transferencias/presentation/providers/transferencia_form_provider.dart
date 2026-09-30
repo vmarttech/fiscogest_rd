@@ -1,7 +1,6 @@
 import 'package:riverpod/riverpod.dart';
 
 class TransferenciaFormState {
-
   const TransferenciaFormState({
     this.almacenOrigen,
     this.almacenDestino,
@@ -12,7 +11,10 @@ class TransferenciaFormState {
   final String? cantidad;
 
   bool get esValido =>
-      almacenOrigen != null && almacenDestino != null && cantidad != null && almacenOrigen != almacenDestino;
+      almacenOrigen != null &&
+      almacenDestino != null &&
+      cantidad != null &&
+      almacenOrigen != almacenDestino;
 
   TransferenciaFormState copiar({
     String? almacenOrigen,
@@ -52,5 +54,5 @@ class TransferenciaFormNotifier extends Notifier<TransferenciaFormState> {
 
 final transferenciaFormProvider =
     NotifierProvider<TransferenciaFormNotifier, TransferenciaFormState>(
-  TransferenciaFormNotifier.new,
-);
+      TransferenciaFormNotifier.new,
+    );

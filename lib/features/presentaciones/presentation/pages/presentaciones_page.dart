@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/presentaciones/presentation/providers/presentacion_providers.dart';
 import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class PresentacionesPage extends ConsumerStatefulWidget {
   const PresentacionesPage({super.key});
@@ -303,7 +304,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                 }
                 Navigator.pop(context);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                FiscoGestNotifications.show(
                   SnackBar(
                     content: Text(e.toString().replaceAll('Exception: ', '')),
                   ),

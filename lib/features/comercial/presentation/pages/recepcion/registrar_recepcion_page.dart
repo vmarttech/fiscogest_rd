@@ -48,21 +48,21 @@ class _RegistrarRecepcionPageState
     super.initState();
     _detallesEditables = widget.detallesCompra.map((d) => d).toList();
     for (final d in _detallesEditables) {
-      _costoControllers.add(TextEditingController(
-        text: (d.costoUnitario ?? 0).toString(),
-      ));
-      _fleteControllers.add(TextEditingController(
-        text: d.fleteUnitario.toString(),
-      ));
-      _seguroControllers.add(TextEditingController(
-        text: d.seguroUnitario.toString(),
-      ));
-      _arancelesControllers.add(TextEditingController(
-        text: d.arancelesUnitario.toString(),
-      ));
-      _gastosControllers.add(TextEditingController(
-        text: d.gastosUnitario.toString(),
-      ));
+      _costoControllers.add(
+        TextEditingController(text: (d.costoUnitario ?? 0).toString()),
+      );
+      _fleteControllers.add(
+        TextEditingController(text: d.fleteUnitario.toString()),
+      );
+      _seguroControllers.add(
+        TextEditingController(text: d.seguroUnitario.toString()),
+      );
+      _arancelesControllers.add(
+        TextEditingController(text: d.arancelesUnitario.toString()),
+      );
+      _gastosControllers.add(
+        TextEditingController(text: d.gastosUnitario.toString()),
+      );
     }
   }
 
@@ -170,13 +170,16 @@ class _RegistrarRecepcionPageState
                           AppTextField(
                             controller: _costoControllers[index],
                             label: 'Costo Unitario',
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (valor) {
                               final nuevoCosto = double.tryParse(valor) ?? 0.0;
                               setState(() {
-                                _detallesEditables[index] = _detallesEditables[index].copyWith(
-                                  costoUnitario: nuevoCosto,
-                                );
+                                _detallesEditables[index] =
+                                    _detallesEditables[index].copyWith(
+                                      costoUnitario: nuevoCosto,
+                                    );
                               });
                             },
                           ),
@@ -184,13 +187,16 @@ class _RegistrarRecepcionPageState
                           AppTextField(
                             controller: _fleteControllers[index],
                             label: 'Flete por unidad',
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (valor) {
                               final nuevo = double.tryParse(valor) ?? 0.0;
                               setState(() {
-                                _detallesEditables[index] = _detallesEditables[index].copyWith(
-                                  fleteUnitario: nuevo,
-                                );
+                                _detallesEditables[index] =
+                                    _detallesEditables[index].copyWith(
+                                      fleteUnitario: nuevo,
+                                    );
                               });
                             },
                           ),
@@ -198,13 +204,16 @@ class _RegistrarRecepcionPageState
                           AppTextField(
                             controller: _seguroControllers[index],
                             label: 'Seguro por unidad',
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (valor) {
                               final nuevo = double.tryParse(valor) ?? 0.0;
                               setState(() {
-                                _detallesEditables[index] = _detallesEditables[index].copyWith(
-                                  seguroUnitario: nuevo,
-                                );
+                                _detallesEditables[index] =
+                                    _detallesEditables[index].copyWith(
+                                      seguroUnitario: nuevo,
+                                    );
                               });
                             },
                           ),
@@ -212,13 +221,16 @@ class _RegistrarRecepcionPageState
                           AppTextField(
                             controller: _arancelesControllers[index],
                             label: 'Aranceles por unidad',
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (valor) {
                               final nuevo = double.tryParse(valor) ?? 0.0;
                               setState(() {
-                                _detallesEditables[index] = _detallesEditables[index].copyWith(
-                                  arancelesUnitario: nuevo,
-                                );
+                                _detallesEditables[index] =
+                                    _detallesEditables[index].copyWith(
+                                      arancelesUnitario: nuevo,
+                                    );
                               });
                             },
                           ),
@@ -226,20 +238,26 @@ class _RegistrarRecepcionPageState
                           AppTextField(
                             controller: _gastosControllers[index],
                             label: 'Gastos por unidad',
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (valor) {
                               final nuevo = double.tryParse(valor) ?? 0.0;
                               setState(() {
-                                _detallesEditables[index] = _detallesEditables[index].copyWith(
-                                  gastosUnitario: nuevo,
-                                );
+                                _detallesEditables[index] =
+                                    _detallesEditables[index].copyWith(
+                                      gastosUnitario: nuevo,
+                                    );
                               });
                             },
                           ),
                           AppLayout.vS,
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.blue.shade50,
                               borderRadius: BorderRadius.circular(4),
@@ -315,7 +333,9 @@ class _RegistrarRecepcionPageState
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: seleccionado ? Theme.of(context).primaryColor : Colors.grey.shade400,
+                  color: seleccionado
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey.shade400,
                   width: 2,
                 ),
               ),

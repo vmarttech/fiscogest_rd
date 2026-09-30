@@ -23,6 +23,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_ve
 import 'package:fiscogest_rd/features/apartados/presentation/providers/apartado_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
@@ -55,8 +56,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   }
 
   Future<void> _cambiarCliente() async {
-    final ClienteEntity? cliente =
-        await SeleccionarClienteDialog.mostrar(context);
+    final ClienteEntity? cliente = await SeleccionarClienteDialog.mostrar(
+      context,
+    );
     if (cliente != null && mounted) {
       ref
           .read(registrarVentaProvider.notifier)
@@ -102,7 +104,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       final saldoPendiente = estadoConCredito.total - abonoRecibido;
       if (mounted) {
         ref.read(registrarVentaProvider.notifier).vaciarVenta();
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text(
               modo == ModoOperacion.apartado
@@ -118,7 +120,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     } catch (e, stackTrace) {
       if (kDebugMode) debugPrint('Error crédito: $e\n$stackTrace');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
             backgroundColor: AppColors.error,
@@ -133,12 +135,13 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
   Future<void> _reservarApartado() async {
     final estado = ref.read(registrarVentaProvider);
-    final valido =
-        ref.read(registrarVentaProvider.notifier).validarAntesDeGuardar();
+    final valido = ref
+        .read(registrarVentaProvider.notifier)
+        .validarAntesDeGuardar();
 
     if (!valido) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text('Agregue productos y seleccione forma de pago'),
             behavior: SnackBarBehavior.floating,
@@ -211,7 +214,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         .crearApartadoDesdeVenta(estadoFinal);
     if (mounted) {
       ref.read(registrarVentaProvider.notifier).vaciarVenta();
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             'Apartado #$idApartado registrado — Stock reservado — ${_formatearMonto(estadoFinal.total)}',
@@ -250,8 +253,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
   @override
   Widget build(BuildContext context) {
-    final modo =
-        ref.watch(ventasNavegacionProvider.select((e) => e.modoOperacion));
+    final modo = ref.watch(
+      ventasNavegacionProvider.select((e) => e.modoOperacion),
+    );
     final estado = ref.watch(registrarVentaProvider);
     final esConsumidorFinal =
         estado.clienteId == 0 || estado.clienteNombre == 'Consumidor Final';
@@ -267,9 +271,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final tieneDescuentoGeneral = estado.montoDescuento > 0;
     final descuentoPorLinea = _calcularDescuentoPorLinea(estado);
     final subtotalConDescuentoLinea = estado.subtotal - descuentoPorLinea;
-    final baseGravable =
-        (subtotalConDescuentoLinea - estado.montoDescuento)
-            .clamp(0.0, double.infinity);
+    final baseGravable = (subtotalConDescuentoLinea - estado.montoDescuento)
+        .clamp(0.0, double.infinity);
 
     if (_mostrarFormularioCredito && _estadoPasoCredito != null) {
       return Center(
@@ -357,13 +360,15 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                           dense: true,
                           title: Text(
                             prod.nombreProducto ?? 'Producto',
-                            style: AppTypography.bodyMedium
-                                .copyWith(fontWeight: FontWeight.w500),
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           subtitle: Text(
                             _formatearMonto(prod.precioUnitario),
-                            style: AppTypography.bodySmall
-                                .copyWith(color: AppColors.primary),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.primary,
+                            ),
                           ),
                           onTap: () => _seleccionarProducto(prod),
                         );
@@ -374,8 +379,10 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 const SizedBox(height: 16),
 
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: AppRadius.allM,
@@ -383,8 +390,11 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.person_outline,
-                          size: 20, color: AppColors.warning),
+                      const Icon(
+                        Icons.person_outline,
+                        size: 20,
+                        color: AppColors.warning,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -413,9 +423,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 if (!tieneProductos)
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      vertical: isMobile ? 40 : 56,
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: isMobile ? 40 : 56),
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: AppRadius.allL,
@@ -431,14 +439,16 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                         const SizedBox(height: 14),
                         Text(
                           'El apartado está vacío',
-                          style: AppTypography.h4
-                              .copyWith(fontWeight: FontWeight.w600),
+                          style: AppTypography.h4.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'Busca un producto para comenzar',
-                          style: AppTypography.bodyMedium
-                              .copyWith(color: AppColors.textSecondary),
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -481,7 +491,11 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                             label: 'Base Gravable',
                             value: _formatearMonto(baseGravable),
                           ),
-                          if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
+                          if (!(ref
+                                  .watch(configuracionControllerProvider)
+                                  .valueOrNull
+                                  ?.modoSimplificado ??
+                              false))
                             _FilaResumen(
                               label: 'ITBIS (18%)',
                               value: _formatearMonto(estado.itbis),
@@ -515,8 +529,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                         ),
                         disabledBackgroundColor: AppColors.grey300,
                       ),
-                      onPressed:
-                          tieneProductos && !_guardando ? _reservarApartado : null,
+                      onPressed: tieneProductos && !_guardando
+                          ? _reservarApartado
+                          : null,
                       child: _guardando
                           ? const SizedBox(
                               width: 24,
@@ -569,16 +584,17 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final wide = !isMobile && width >= 900;
     final simplificado = ref.watch(modoColmadoProvider);
 
-    void irNuevaCotizacion() =>
-        context.push('/ventas/cotizaciones/nueva');
+    void irNuevaCotizacion() => context.push('/ventas/cotizaciones/nueva');
     void irHistorial() {
       ref
           .read(ventasNavegacionProvider.notifier)
           .cambiarVista(VistaActual.historial);
     }
+
     void irSimuladorCredito() {
       context.push('/ventas/simulador-credito');
     }
+
     void consultarStock() {
       showModalBottomSheet<void>(
         context: context,
@@ -588,10 +604,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       );
     }
 
-    final cta = _PosCtaCard(
-      isMobile: isMobile,
-      onTap: irNuevaCotizacion,
-    );
+    final cta = _PosCtaCard(isMobile: isMobile, onTap: irNuevaCotizacion);
 
     final atajos = AppAccessGrid(
       minTileWidth: isMobile ? 150 : 180,
@@ -609,14 +622,15 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         ),
         if (!simplificado)
           if (!simplificado)
-
-          AppHubCard(
-            icon: Icons.calculate_outlined,
-            title: 'Simular crédito',
-            subtitle: isMobile ? 'Montos y cuotas' : 'Montos y cuotas oficiales',
-            color: AppColors.warning,
-            onTap: irSimuladorCredito,
-          ),
+            AppHubCard(
+              icon: Icons.calculate_outlined,
+              title: 'Simular crédito',
+              subtitle: isMobile
+                  ? 'Montos y cuotas'
+                  : 'Montos y cuotas oficiales',
+              color: AppColors.warning,
+              onTap: irSimuladorCredito,
+            ),
         if (simplificado)
           AppHubCard(
             icon: Icons.edit_note_rounded,
@@ -641,7 +655,10 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 const SizedBox(width: 16),
                 Expanded(
                   flex: 2,
-                  child: _PosContextoCard(onHistorial: irHistorial, isMobile: false),
+                  child: _PosContextoCard(
+                    onHistorial: irHistorial,
+                    isMobile: false,
+                  ),
                 ),
               ],
             )
@@ -748,14 +765,12 @@ class _PosCtaCard extends StatelessWidget {
                     children: [
                       Text(
                         'Nueva cotización',
-                        style: (isMobile
-                                ? AppTypography.h4
-                                : AppTypography.h3)
+                        style: (isMobile ? AppTypography.h4 : AppTypography.h3)
                             .copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: isMobile ? 18 : null,
-                        ),
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: isMobile ? 18 : null,
+                            ),
                       ),
                       SizedBox(height: isMobile ? 4 : 4),
                       Text(
@@ -789,10 +804,7 @@ class _PosCtaCard extends StatelessWidget {
 
 /// Contexto / recordatorio de estación (sin depender aún de KPIs live).
 class _PosContextoCard extends StatelessWidget {
-  const _PosContextoCard({
-    required this.onHistorial,
-    this.isMobile = false,
-  });
+  const _PosContextoCard({required this.onHistorial, this.isMobile = false});
   final VoidCallback onHistorial;
   final bool isMobile;
 
@@ -902,9 +914,7 @@ class _PosFlujoBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.15),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
       child: isMobile
           ? Wrap(

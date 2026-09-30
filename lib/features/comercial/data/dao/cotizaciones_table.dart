@@ -3,7 +3,8 @@ import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_table.dart';
 
-class CotizacionEstadoConverter extends TypeConverter<CotizacionEstado, String> {
+class CotizacionEstadoConverter
+    extends TypeConverter<CotizacionEstado, String> {
   const CotizacionEstadoConverter();
 
   @override

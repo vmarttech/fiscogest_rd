@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class NuevoClientePage extends ConsumerStatefulWidget {
   const NuevoClientePage({super.key, this.cliente});
@@ -34,18 +35,24 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
   @override
   void initState() {
     super.initState();
-    _nombreController =
-        TextEditingController(text: widget.cliente?.nombre ?? '');
-    _direccionController =
-        TextEditingController(text: widget.cliente?.direccion ?? '');
-    _telefonoController =
-        TextEditingController(text: widget.cliente?.telefono ?? '');
-    _correoController =
-        TextEditingController(text: widget.cliente?.correo ?? '');
-    _rncCedulaController =
-        TextEditingController(text: widget.cliente?.rncCedula ?? '');
-    _observacionesController =
-        TextEditingController(text: widget.cliente?.observaciones ?? '');
+    _nombreController = TextEditingController(
+      text: widget.cliente?.nombre ?? '',
+    );
+    _direccionController = TextEditingController(
+      text: widget.cliente?.direccion ?? '',
+    );
+    _telefonoController = TextEditingController(
+      text: widget.cliente?.telefono ?? '',
+    );
+    _correoController = TextEditingController(
+      text: widget.cliente?.correo ?? '',
+    );
+    _rncCedulaController = TextEditingController(
+      text: widget.cliente?.rncCedula ?? '',
+    );
+    _observacionesController = TextEditingController(
+      text: widget.cliente?.observaciones ?? '',
+    );
   }
 
   @override
@@ -81,7 +88,7 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
         ref.read(clienteCompletoControllerProvider.notifier).guardar(cli);
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             'Cliente ${_esEdicion ? 'actualizado' : 'registrado'} correctamente',
@@ -93,7 +100,7 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
       context.pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(e.toString().replaceAll('Exception: ', '')),
           backgroundColor: AppColors.error,
@@ -161,16 +168,15 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                               children: [
                                 TextFormField(
                                   controller: _nombreController,
-                                  textCapitalization:
-                                      TextCapitalization.words,
+                                  textCapitalization: TextCapitalization.words,
                                   decoration: _deco(
                                     'Nombre / Razón social *',
                                     hint: 'Ej. Juan Pérez',
                                   ),
                                   validator: (v) =>
                                       (v == null || v.trim().isEmpty)
-                                          ? 'Ingrese el nombre'
-                                          : null,
+                                      ? 'Ingrese el nombre'
+                                      : null,
                                 ),
                                 const SizedBox(height: 12),
                                 if (mobile) ...[

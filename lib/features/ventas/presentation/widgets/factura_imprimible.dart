@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class FacturaImprimible extends StatelessWidget {
   const FacturaImprimible({
@@ -229,7 +230,7 @@ class FacturaImprimible extends StatelessWidget {
                       baseGravable,
                     );
                     Clipboard.setData(ClipboardData(text: contenido));
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    FiscoGestNotifications.show(
                       const SnackBar(
                         content: Text('Factura copiada al portapapeles'),
                       ),

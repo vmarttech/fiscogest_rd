@@ -12,10 +12,7 @@ abstract class ICajaRepository {
   /// Sesión abierta actual, o null si la caja está cerrada.
   Future<CajaSesionResumen?> obtenerSesionAbierta();
 
-  Future<int> abrirSesion({
-    required double fondoInicial,
-    int usuarioId = 1,
-  });
+  Future<int> abrirSesion({required double fondoInicial, int usuarioId = 1});
 
   /// Movimientos desde [desde] (apertura del turno) hasta ahora.
   Future<List<CajaMovimientoResumen>> listarMovimientosDesde(DateTime desde);

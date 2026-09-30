@@ -9,15 +9,16 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
-final historialFacturasProvider =
-    FutureProvider.autoDispose<List<Venta>>((ref) async {
+final historialFacturasProvider = FutureProvider.autoDispose<List<Venta>>((
+  ref,
+) async {
   final repo = ref.watch(ventasRepositoryProvider);
   final list = await repo.listarCotizaciones();
   final facturadas = list.where((v) {
     final ncf = (v.numeroFactura ?? '').trim();
-    return ncf.isNotEmpty ||
-        v.estadoDocumento == EstadoDocumento.facturado;
+    return ncf.isNotEmpty || v.estadoDocumento == EstadoDocumento.facturado;
   }).toList();
   facturadas.sort((a, b) {
     final fa = a.fechaRegistro;
@@ -26,7 +27,6 @@ final historialFacturasProvider =
   });
   return facturadas;
 });
-
 
 class HistorialFacturasPage extends ConsumerStatefulWidget {
   const HistorialFacturasPage({super.key});
@@ -102,19 +102,21 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          ncf.isEmpty ? d.numeroCotizacion : ncf,
+                                          ncf.isEmpty
+                                              ? d.numeroCotizacion
+                                              : ncf,
                                           style: AppTypography.labelMedium
                                               .copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                         ),
                                         Text(
                                           '${d.nombreCliente ?? 'Cliente'} · ${fechaFmt.format(d.fechaRegistro)}',
-                                          style:
-                                              AppTypography.bodySmall.copyWith(
-                                            color: AppColors.textSecondary,
-                                            fontSize: 12,
-                                          ),
+                                          style: AppTypography.bodySmall
+                                              .copyWith(
+                                                color: AppColors.textSecondary,
+                                                fontSize: 12,
+                                              ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -144,8 +146,11 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.history,
-                                size: 48, color: AppColors.grey300),
+                            const Icon(
+                              Icons.history,
+                              size: 48,
+                              color: AppColors.grey300,
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               docs.isEmpty
@@ -210,14 +215,13 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                         const SizedBox(height: 8),
                         Consumer(
                           builder: (context, ref, _) {
-                            final ncsAsync =
-                                ref.watch(notasCreditoListProvider);
-                            final ncfSel =
-                                (_sel?.numeroFactura ?? '').trim();
+                            final ncsAsync = ref.watch(
+                              notasCreditoListProvider,
+                            );
+                            final ncfSel = (_sel?.numeroFactura ?? '').trim();
                             return ncsAsync.when(
-                              loading: () => const LinearProgressIndicator(
-                                minHeight: 2,
-                              ),
+                              loading: () =>
+                                  const LinearProgressIndicator(minHeight: 2),
                               error: (e, _) => Text(
                                 '$e',
                                 style: AppTypography.bodySmall.copyWith(
@@ -228,8 +232,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                                 final relacionadas = [
                                   for (final n in rows)
                                     if (ncfSel.isNotEmpty &&
-                                        (n.ncfFacturaOrigen).trim() ==
-                                            ncfSel)
+                                        (n.ncfFacturaOrigen).trim() == ncfSel)
                                       n,
                                 ];
                                 if (relacionadas.isEmpty) {
@@ -245,14 +248,17 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                                     for (final n in relacionadas)
                                       Container(
                                         width: double.infinity,
-                                        margin:
-                                            const EdgeInsets.only(bottom: 8),
+                                        margin: const EdgeInsets.only(
+                                          bottom: 8,
+                                        ),
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
-                                          color: AppColors.primary
-                                              .withValues(alpha: 0.04),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          color: AppColors.primary.withValues(
+                                            alpha: 0.04,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                           border: Border.all(
                                             color: AppColors.border,
                                           ),
@@ -269,33 +275,31 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                                                     style: AppTypography
                                                         .labelMedium
                                                         .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
                                                   ),
                                                   Text(
                                                     n.motivo,
                                                     style: AppTypography
                                                         .bodySmall
                                                         .copyWith(
-                                                      color: AppColors
-                                                          .textSecondary,
-                                                      fontSize: 12,
-                                                    ),
+                                                          color: AppColors
+                                                              .textSecondary,
+                                                          fontSize: 12,
+                                                        ),
                                                     maxLines: 2,
-                                                    overflow: TextOverflow
-                                                        .ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                 ],
                                               ),
                                             ),
                                             TextButton(
                                               onPressed: () async {
-                                                await ComprobantePdf
-                                                    .imprimirNc(
+                                                await ComprobantePdf.imprimirNc(
                                                   ncfNc: n.ncf,
-                                                  ncfOrigen:
-                                                      n.ncfFacturaOrigen,
+                                                  ncfOrigen: n.ncfFacturaOrigen,
                                                   cliente:
                                                       n.nombreCliente ?? '',
                                                   monto: n.monto,
@@ -328,7 +332,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                               }
                               if (paraPdf.detalles.isEmpty) {
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  FiscoGestNotifications.show(
                                     const SnackBar(
                                       content: Text(
                                         'Esta factura no tiene líneas de producto en BD. '
@@ -348,7 +352,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                               );
                             } catch (e) {
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                FiscoGestNotifications.show(
                                   SnackBar(
                                     content: Text('$e'),
                                     backgroundColor: AppColors.error,
@@ -381,11 +385,17 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                 children: [
                   Text(
                     'Facturas emitidas',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado == true
+                    ref
+                                .watch(configuracionControllerProvider)
+                                .valueOrNull
+                                ?.modoSimplificado ==
+                            true
                         ? 'Comprobantes de venta emitidos.'
                         : 'Documentos con NCF o estado facturado.',
                     style: AppTypography.bodySmall.copyWith(
@@ -406,7 +416,8 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                         : ListView(
                             children: [
                               SizedBox(
-                                height: MediaQuery.sizeOf(context).height * 0.32,
+                                height:
+                                    MediaQuery.sizeOf(context).height * 0.32,
                                 child: lista,
                               ),
                               const SizedBox(height: 12),

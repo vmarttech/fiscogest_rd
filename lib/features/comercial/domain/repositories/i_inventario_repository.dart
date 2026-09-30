@@ -5,11 +5,13 @@ abstract class IInventarioRepository {
     required int productoId,
     required double cantidad,
   });
+
   /// Reduce existencias tras venta o salida.
   Future<void> descontarExistencias({
     required int productoId,
     required double cantidad,
   });
+
   /// Consultar existencias actuales de un producto.
   Future<double?> obtenerStockActual(int productoId);
 }

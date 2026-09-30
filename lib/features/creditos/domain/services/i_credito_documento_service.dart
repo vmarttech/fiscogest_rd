@@ -46,11 +46,7 @@ abstract class ICreditoDocumentoService {
     String correoDestinatario = '',
   });
 
-  Future<Uint8List> generarPdfCronograma({
-    required CuentaPorCobrar cuenta,
-  });
+  Future<Uint8List> generarPdfCronograma({required CuentaPorCobrar cuenta});
 
-  Future<void> imprimirCronograma({
-    required CuentaPorCobrar cuenta,
-  });
+  Future<void> imprimirCronograma({required CuentaPorCobrar cuenta});
 }

@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferencia_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class CapturarConteoPage extends ConsumerStatefulWidget {
   const CapturarConteoPage({super.key, required this.conteoId});
@@ -40,14 +41,14 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
   Future<void> _guardarLinea() async {
     final p = _seleccionado;
     if (p == null || p.id == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('Seleccione un producto')),
       );
       return;
     }
     final fisico = double.tryParse(_fisicoCtrl.text.replaceAll(',', '.'));
     if (fisico == null || fisico < 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('Cantidad física inválida')),
       );
       return;
@@ -58,7 +59,9 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
 
     setState(() => _guardando = true);
     try {
-      await ref.read(guardarDiferenciaProvider).call(
+      await ref
+          .read(guardarDiferenciaProvider)
+          .call(
             DiferenciaConteo(
               id: 0,
               conteoId: widget.conteoId,
@@ -73,7 +76,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
             ),
           );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             'Guardado: ${p.nombre} · Dif: ${dif.toStringAsFixed(2)}',
@@ -90,9 +93,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
       ref.invalidate(diferenciasConteoProvider(widget.conteoId));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        FiscoGestNotifications.show(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _guardando = false);
@@ -112,12 +113,9 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
         Padding(
           padding: const EdgeInsets.only(right: 8),
           child: TextButton.icon(
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => context.push(
-              '/diferencias-conteo-fisico/${widget.conteoId}',
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.white),
+            onPressed: () =>
+                context.push('/diferencias-conteo-fisico/${widget.conteoId}'),
             icon: const Icon(Icons.difference_outlined, color: Colors.white),
             label: const Text(
               'Ver diferencias',
@@ -180,13 +178,17 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                           final filtrados = _filtro.isEmpty
                               ? lista.take(8).toList()
                               : lista
-                                  .where(
-                                    (p) =>
-                                        p.codigo.toLowerCase().contains(_filtro) ||
-                                        p.nombre.toLowerCase().contains(_filtro),
-                                  )
-                                  .take(12)
-                                  .toList();
+                                    .where(
+                                      (p) =>
+                                          p.codigo.toLowerCase().contains(
+                                            _filtro,
+                                          ) ||
+                                          p.nombre.toLowerCase().contains(
+                                            _filtro,
+                                          ),
+                                    )
+                                    .take(12)
+                                    .toList();
                           if (filtrados.isEmpty) {
                             return Text(
                               'Sin resultados',
@@ -199,25 +201,25 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                             children: filtrados.map((p) {
                               final sel = _seleccionado?.id == p.id;
                               return Material(
-                              color: sel
-                                  ? AppColors.primary.withValues(alpha: 0.08)
-                                  : AppColors.white,
-                              child: ListTile(
-                                dense: true,
-                                selected: sel,
-                                title: Text(p.nombre),
-                                subtitle: Text(
-                                  '${p.codigo} · Stock sistema: ${p.stock ?? 0}',
+                                color: sel
+                                    ? AppColors.primary.withValues(alpha: 0.08)
+                                    : AppColors.white,
+                                child: ListTile(
+                                  dense: true,
+                                  selected: sel,
+                                  title: Text(p.nombre),
+                                  subtitle: Text(
+                                    '${p.codigo} · Stock sistema: ${p.stock ?? 0}',
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      _seleccionado = p;
+                                      _fisicoCtrl.text = (p.stock ?? 0)
+                                          .toString();
+                                    });
+                                  },
                                 ),
-                                onTap: () {
-                                  setState(() {
-                                    _seleccionado = p;
-                                    _fisicoCtrl.text =
-                                        (p.stock ?? 0).toString();
-                                  });
-                                },
-                              ),
-                            );
+                              );
                             }).toList(),
                           );
                         },
@@ -309,8 +311,8 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                                 color: d.diferencia == 0
                                     ? AppColors.textSecondary
                                     : (d.diferencia > 0
-                                        ? AppColors.success
-                                        : AppColors.error),
+                                          ? AppColors.success
+                                          : AppColors.error),
                               ),
                             ),
                           );

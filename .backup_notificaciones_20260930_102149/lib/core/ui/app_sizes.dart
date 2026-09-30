@@ -1,0 +1,19 @@
+abstract class AppSizes {
+  static const double buttonHeightSm = 36;
+  static const double buttonHeightMd = 44;
+  static const double buttonHeightLg = 52;
+  static const double inputHeightSm = 36;
+  static const double inputHeightMd = 44;
+  static const double inputHeightLg = 52;
+  static const double cardMinHeight = 80;
+  static const double cardMaxWidth = 600;
+  static const double maxContentWidth = 1320;
+  static const double drawerWidth = 280;
+  static const double appBarHeight = 48;
+  static const double iconXs = 12;
+  static const double iconSm = 16;
+  static const double iconMd = 20;
+  static const double iconLg = 24;
+  static const double iconXl = 32;
+  static const double accesoRapidoWidth = 110;
+}

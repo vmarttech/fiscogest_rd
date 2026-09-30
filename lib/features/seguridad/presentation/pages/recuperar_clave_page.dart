@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class RecuperarClavePage extends ConsumerStatefulWidget {
   const RecuperarClavePage({super.key});
@@ -13,8 +14,7 @@ class RecuperarClavePage extends ConsumerStatefulWidget {
   static const path = '/recuperar-clave';
 
   @override
-  ConsumerState<RecuperarClavePage> createState() =>
-      _RecuperarClavePageState();
+  ConsumerState<RecuperarClavePage> createState() => _RecuperarClavePageState();
 }
 
 class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
@@ -49,8 +49,9 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         return;
       }
       if ((row.preguntaRecuperacion ?? '').isEmpty) {
-        setState(() =>
-            _error = 'No hay pregunta de recuperación en esta cuenta');
+        setState(
+          () => _error = 'No hay pregunta de recuperación en esta cuenta',
+        );
         return;
       }
       setState(() {
@@ -85,7 +86,7 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         return;
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Contraseña actualizada. Inicie sesión.'),
           behavior: SnackBarBehavior.floating,

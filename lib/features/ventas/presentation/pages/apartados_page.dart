@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/apartados/presentation/providers/apartado_provider.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class ApartadosPage extends ConsumerStatefulWidget {
   const ApartadosPage({super.key});
@@ -260,7 +261,7 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
               Navigator.pop(ctx);
               await notifier.registrarAbono(apartadoId, monto);
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                FiscoGestNotifications.show(
                   const SnackBar(
                     content: Text('Abono registrado correctamente'),
                   ),
@@ -305,7 +306,7 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
               Navigator.pop(ctx);
               await notifier.cancelarApartado(apartadoId, motivo);
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                FiscoGestNotifications.show(
                   const SnackBar(
                     content: Text('Apartado cancelado — inventario liberado'),
                   ),

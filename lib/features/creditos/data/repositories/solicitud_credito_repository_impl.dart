@@ -86,7 +86,8 @@ class SolicitudCreditoRepositoryImpl implements ISolicitudCreditoRepository {
       direccion: exp.direccion.trim().isEmpty ? c.direccion : exp.direccion,
     );
 
-    final huboCambio = actualizado.nombreCompleto != exp.nombreCompleto ||
+    final huboCambio =
+        actualizado.nombreCompleto != exp.nombreCompleto ||
         actualizado.cedula != exp.cedula ||
         actualizado.telefono != exp.telefono ||
         actualizado.celular != exp.celular ||

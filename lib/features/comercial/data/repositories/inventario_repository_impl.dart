@@ -8,10 +8,11 @@ class InventarioRepositoryImpl implements IInventarioRepository {
 
   @override
   Future<double?> obtenerStockActual(int productoId) async {
-    final registro = await (_db.select(_db.productosTable)
-          ..where((fila) => fila.id.equals(productoId))
-          ..limit(1))
-        .getSingleOrNull();
+    final registro =
+        await (_db.select(_db.productosTable)
+              ..where((fila) => fila.id.equals(productoId))
+              ..limit(1))
+            .getSingleOrNull();
     return registro?.stock;
   }
 
@@ -20,10 +21,11 @@ class InventarioRepositoryImpl implements IInventarioRepository {
     required int productoId,
     required double cantidad,
   }) async {
-    final registro = await (_db.select(_db.productosTable)
-          ..where((fila) => fila.id.equals(productoId))
-          ..limit(1))
-        .getSingleOrNull();
+    final registro =
+        await (_db.select(_db.productosTable)
+              ..where((fila) => fila.id.equals(productoId))
+              ..limit(1))
+            .getSingleOrNull();
     final actual = registro?.stock ?? 0.0;
     final nuevoStock = actual + cantidad;
     await (_db.update(_db.productosTable)
@@ -36,10 +38,11 @@ class InventarioRepositoryImpl implements IInventarioRepository {
     required int productoId,
     required double cantidad,
   }) async {
-    final registro = await (_db.select(_db.productosTable)
-          ..where((fila) => fila.id.equals(productoId))
-          ..limit(1))
-        .getSingleOrNull();
+    final registro =
+        await (_db.select(_db.productosTable)
+              ..where((fila) => fila.id.equals(productoId))
+              ..limit(1))
+            .getSingleOrNull();
     final actual = registro?.stock ?? 0.0;
     if (actual < cantidad) {
       throw StateError('Existencias insuficientes para producto: $productoId');

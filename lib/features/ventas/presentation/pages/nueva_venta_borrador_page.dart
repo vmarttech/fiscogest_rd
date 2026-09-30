@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_producto
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_delivery.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_contado_fiao.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_anotar_fiao.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -56,7 +57,7 @@ class _NuevaVentaBorradorPageState
         .read(ventaBorradorProvider.notifier)
         .agregarProducto(producto, cantidad);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('${producto.nombre} agregado'),
           backgroundColor: AppColors.success,
@@ -169,7 +170,7 @@ class _NuevaVentaBorradorPageState
     final estado = ref.read(ventaBorradorProvider);
     if (estado.detalles.isEmpty || estado.montoTotal <= 0) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Agregue productos antes de generar la venta'),
           backgroundColor: AppColors.error,
@@ -179,8 +180,7 @@ class _NuevaVentaBorradorPageState
       return;
     }
 
-    final totalTexto =
-        formatRd(estado.montoTotal);
+    final totalTexto = formatRd(estado.montoTotal);
     final nombre = (estado.clienteNombre ?? '').trim();
 
     final resultado = await SheetContadoFiao.show(
@@ -203,11 +203,9 @@ class _NuevaVentaBorradorPageState
         );
         if (!mounted) return;
         if (ok == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             SnackBar(
-              content: Text(
-                'Fiao anotado: ${formatRd(estado.montoTotal)}',
-              ),
+              content: Text('Fiao anotado: ${formatRd(estado.montoTotal)}'),
               backgroundColor: AppColors.success,
               behavior: SnackBarBehavior.floating,
             ),
@@ -237,11 +235,9 @@ class _NuevaVentaBorradorPageState
         final clienteId = estadoBorrador.clienteId ?? 0;
         if (clienteId <= 0) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            FiscoGestNotifications.show(
               const SnackBar(
-                content: Text(
-                  'Seleccione o registre un cliente para crédito',
-                ),
+                content: Text('Seleccione o registre un cliente para crédito'),
                 backgroundColor: AppColors.error,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -251,9 +247,11 @@ class _NuevaVentaBorradorPageState
         }
         if (estadoBorrador.detalles.isEmpty || estadoBorrador.montoTotal <= 0) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            FiscoGestNotifications.show(
               const SnackBar(
-                content: Text('Agregue productos antes de generar la cotización'),
+                content: Text(
+                  'Agregue productos antes de generar la cotización',
+                ),
                 backgroundColor: AppColors.error,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -261,7 +259,9 @@ class _NuevaVentaBorradorPageState
           }
           return;
         }
-        final estadoParaCredito = _mapearBorradorARegistrarVenta(estadoBorrador);
+        final estadoParaCredito = _mapearBorradorARegistrarVenta(
+          estadoBorrador,
+        );
         if (!mounted) return;
         // Embebido (mismo patrón que Apartado / depto. Crédito)
         setState(() {
@@ -287,11 +287,9 @@ class _NuevaVentaBorradorPageState
       final numeroGuardado = await notificador.guardar();
       if (numeroGuardado == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(
-              content: Text(
-                'Agregue productos antes de generar la cotización',
-              ),
+              content: Text('Agregue productos antes de generar la cotización'),
               backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
             ),
@@ -347,11 +345,11 @@ class _NuevaVentaBorradorPageState
 
       final mensaje = _esCredito
           ? 'Cotización N° $numeroGuardado en crédito.\n'
-              'Abono: ${formatRd(abonoDesdeFormulario)}\n'
-              'Pendiente de aprobación → luego Caja.'
+                'Abono: ${formatRd(abonoDesdeFormulario)}\n'
+                'Pendiente de aprobación → luego Caja.'
           : 'Cotización N° $numeroGuardado generada.\n'
-              'Lista para cobrar en Caja.';
-      ScaffoldMessenger.of(context).showSnackBar(
+                'Lista para cobrar en Caja.';
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(mensaje),
           backgroundColor: AppColors.success,
@@ -363,7 +361,7 @@ class _NuevaVentaBorradorPageState
       _limpiarFormulario();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error al generar cotización: $e'),
           backgroundColor: AppColors.error,
@@ -385,7 +383,9 @@ class _NuevaVentaBorradorPageState
   }
 
   /// Tras CONFIRMAR en FormularioCreditoVista: guarda cotización crédito.
-  Future<void> _onCreditoConfirmado(ResultadoFormularioCredito resultado) async {
+  Future<void> _onCreditoConfirmado(
+    ResultadoFormularioCredito resultado,
+  ) async {
     setState(() {
       _modoFormularioCredito = false;
       _estadoFormularioCredito = null;
@@ -411,7 +411,7 @@ class _NuevaVentaBorradorPageState
       final numeroGuardado = await notificador.guardar();
       if (numeroGuardado == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(
               content: Text('Agregue productos antes de generar la cotización'),
               backgroundColor: AppColors.error,
@@ -440,7 +440,7 @@ class _NuevaVentaBorradorPageState
       }
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             'Cotización N° $numeroGuardado en crédito.\n'
@@ -456,7 +456,7 @@ class _NuevaVentaBorradorPageState
       _limpiarFormulario();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error al generar cotización: $e'),
           backgroundColor: AppColors.error,
@@ -503,12 +503,17 @@ class _NuevaVentaBorradorPageState
                   Expanded(
                     child: esPantallaAncha
                         ? _buildDosColumnas(
-                            estado, puedeGenerar, esPantallaPequena)
+                            estado,
+                            puedeGenerar,
+                            esPantallaPequena,
+                          )
                         : _buildUnaColumna(
-                            estado, puedeGenerar, esPantallaPequena),
+                            estado,
+                            puedeGenerar,
+                            esPantallaPequena,
+                          ),
                   ),
-                  _buildBarraFijaPos(
-                      estado, puedeGenerar, esPantallaPequena),
+                  _buildBarraFijaPos(estado, puedeGenerar, esPantallaPequena),
                 ],
               ),
       ),
@@ -625,8 +630,7 @@ class _NuevaVentaBorradorPageState
                     Icon(
                       _esCredito ? Icons.schedule : Icons.payments_outlined,
                       size: 20,
-                      color:
-                          _esCredito ? AppColors.warning : AppColors.primary,
+                      color: _esCredito ? AppColors.warning : AppColors.primary,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -1000,8 +1004,7 @@ class _NuevaVentaBorradorPageState
           const Divider(height: 1),
           ...estado.detalles.asMap().entries.map((entrada) {
             final item = entrada.value;
-            final nombre =
-                (item['productoNombre'] as String?) ?? 'Producto';
+            final nombre = (item['productoNombre'] as String?) ?? 'Producto';
             final cantidad = (item['cantidad'] as num?)?.toDouble() ?? 0.0;
             final precioUnitario =
                 (item['precioUnitario'] as num?)?.toDouble() ?? 0.0;
@@ -1112,17 +1115,9 @@ class _NuevaVentaBorradorPageState
             ),
           ),
           const SizedBox(height: 12),
-          _filaResumen(
-            'Subtotal',
-            formatRd(estado.subtotal),
-            tamanoCuerpo,
-          ),
+          _filaResumen('Subtotal', formatRd(estado.subtotal), tamanoCuerpo),
           if (!(ref.watch(modoColmadoProvider)))
-            _filaResumen(
-              'ITBIS (18%)',
-              formatRd(estado.itbis),
-              tamanoCuerpo,
-            ),
+            _filaResumen('ITBIS (18%)', formatRd(estado.itbis), tamanoCuerpo),
           if (estado.costoEnvio > 0)
             _filaResumen(
               'Envío / Delivery',
@@ -1203,9 +1198,7 @@ class _NuevaVentaBorradorPageState
         icon: const Icon(Icons.history, size: 18),
         label: const Text('Ver Historial de Cotizaciones'),
         onPressed: () => context.push('/ventas/cotizaciones/historial'),
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
-        ),
+        style: TextButton.styleFrom(foregroundColor: AppColors.primary),
       ),
     );
   }
@@ -1278,18 +1271,16 @@ class _NuevaVentaBorradorPageState
                     final onTap = !puedeGenerar || _guardando
                         ? null
                         : simplificado
-                            ? _onGenerarVentaSimplificada
-                            : () => _guardarCotizacion(esCredito: _esCredito);
+                        ? _onGenerarVentaSimplificada
+                        : () => _guardarCotizacion(esCredito: _esCredito);
                     final label = simplificado
                         ? 'GENERAR VENTA'
                         : (_esCredito
-                            ? 'Crear cotización (CR)'
-                            : 'Crear cotización (C)');
+                              ? 'Crear cotización (CR)'
+                              : 'Crear cotización (C)');
                     final bg = simplificado
                         ? AppColors.primary
-                        : (_esCredito
-                            ? AppColors.warning
-                            : AppColors.primary);
+                        : (_esCredito ? AppColors.warning : AppColors.primary);
                     return ElevatedButton(
                       onPressed: onTap,
                       style: ElevatedButton.styleFrom(

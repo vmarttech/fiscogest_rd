@@ -3,7 +3,8 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/servicios_transversales/operaciones_salida_service.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_salida_repository.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/salida_repository_impl.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' as repo;
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart'
+    as repo;
 import 'package:fiscogest_rd/features/inventario/domain/entities/salida.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
@@ -11,7 +12,9 @@ final salidaRepositoryProvider = Provider<ISalidaRepository>((Ref ref) {
   return SalidaRepositoryImpl(ref.watch(databaseProvider));
 });
 
-final operacionesSalidaServiceProvider = Provider<OperacionesSalidaService>((Ref ref) {
+final operacionesSalidaServiceProvider = Provider<OperacionesSalidaService>((
+  Ref ref,
+) {
   return OperacionesSalidaService(
     salidaRepository: ref.watch(salidaRepositoryProvider),
     productoRepository: ref.watch(repo.inventarioProductoRepositoryProvider),
@@ -24,7 +27,8 @@ final historialSalidasProvider = FutureProvider<List<Salida>>((Ref ref) async {
 });
 
 class SalidaController extends StateNotifier<AsyncValue<void>> {
-  SalidaController(this._servicio, this._ref) : super(const AsyncValue.data(null));
+  SalidaController(this._servicio, this._ref)
+    : super(const AsyncValue.data(null));
 
   final OperacionesSalidaService _servicio;
   final Ref _ref;
@@ -52,6 +56,7 @@ class SalidaController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final salidaControllerProvider = StateNotifierProvider<SalidaController, AsyncValue<void>>((Ref ref) {
-  return SalidaController(ref.watch(operacionesSalidaServiceProvider), ref);
-});
+final salidaControllerProvider =
+    StateNotifierProvider<SalidaController, AsyncValue<void>>((Ref ref) {
+      return SalidaController(ref.watch(operacionesSalidaServiceProvider), ref);
+    });

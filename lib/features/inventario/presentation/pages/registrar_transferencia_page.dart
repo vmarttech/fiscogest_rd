@@ -60,33 +60,36 @@ class _RegistrarTransferenciaPageState
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
             child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-            children: [
-              const Text(
-                'Seleccionar Producto',
-                style: AppTypography.labelMedium,
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                children: [
+                  const Text(
+                    'Seleccionar Producto',
+                    style: AppTypography.labelMedium,
+                  ),
+                  AppLayout.vM,
+                  AppTextField(
+                    label: 'Cantidad',
+                    controller: _cantidadCtrl,
+                    keyboardType: TextInputType.number,
+                  ),
+                  AppLayout.vM,
+                  AppTextField(
+                    label: 'Costo Unitario',
+                    controller: _costoCtrl,
+                    keyboardType: TextInputType.number,
+                  ),
+                  AppLayout.vM,
+                  AppTextField(label: 'Observación', controller: _obsCtrl),
+                  AppLayout.vL,
+                  AppButton(
+                    text: 'Registrar Transferencia',
+                    onPressed: _guardar,
+                  ),
+                ],
               ),
-              AppLayout.vM,
-              AppTextField(
-                label: 'Cantidad',
-                controller: _cantidadCtrl,
-                keyboardType: TextInputType.number,
-              ),
-              AppLayout.vM,
-              AppTextField(
-                label: 'Costo Unitario',
-                controller: _costoCtrl,
-                keyboardType: TextInputType.number,
-              ),
-              AppLayout.vM,
-              AppTextField(label: 'Observación', controller: _obsCtrl),
-              AppLayout.vL,
-              AppButton(text: 'Registrar Transferencia', onPressed: _guardar),
-            ],
-          ),
-        ),
+            ),
           ), // ConstrainedBox
         ), // Center
       ),

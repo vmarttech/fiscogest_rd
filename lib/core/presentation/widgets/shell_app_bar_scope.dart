@@ -38,10 +38,9 @@ class _ShellAppBarScopeState extends ConsumerState<ShellAppBarScope> {
   void _publish() {
     if (!mounted) return;
     try {
-      ref.read(shellAppBarProvider.notifier).set(
-            actions: widget.actions,
-            titleOverride: widget.titleOverride,
-          );
+      ref
+          .read(shellAppBarProvider.notifier)
+          .set(actions: widget.actions, titleOverride: widget.titleOverride);
     } catch (_) {
       // Widget desmontado o provider no disponible
     }

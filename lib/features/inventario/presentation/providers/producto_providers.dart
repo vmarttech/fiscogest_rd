@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' as repo;
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart'
+    as repo;
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 
@@ -65,9 +66,11 @@ class ProductoController extends StateNotifier<AsyncValue<List<Producto>>> {
 }
 
 final productoControllerProvider =
-    StateNotifierProvider<ProductoController, AsyncValue<List<Producto>>>((ref) {
-  return ProductoController(
-    ref.watch(repo.inventarioProductoRepositoryProvider),
-    ref,
-  );
-});
+    StateNotifierProvider<ProductoController, AsyncValue<List<Producto>>>((
+      ref,
+    ) {
+      return ProductoController(
+        ref.watch(repo.inventarioProductoRepositoryProvider),
+        ref,
+      );
+    });

@@ -213,18 +213,22 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<CuentaCobrarData?> obtenerCuentaPorVentaId(int ventaId) async {
-    return await (select(cuentasCobrarTable)
-          ..where((t) => t.ventaId.equals(ventaId)))
-        .getSingleOrNull();
+    return await (select(
+      cuentasCobrarTable,
+    )..where((t) => t.ventaId.equals(ventaId))).getSingleOrNull();
   }
 
   /// NC: deja saldo 0 y estado pagado (cuenta saldada por nota de crédito).
-  Future<void> anularCuentaPorNotaCredito(int ventaId, {String? referencia}) async {
+  Future<void> anularCuentaPorNotaCredito(
+    int ventaId, {
+    String? referencia,
+  }) async {
     final cuenta = await obtenerCuentaPorVentaId(ventaId);
     if (cuenta == null) return; // contado o sin CxC
     if (cuenta.saldoPendiente <= 0.001) return;
-    await (update(cuentasCobrarTable)..where((t) => t.id.equals(cuenta.id)))
-        .write(
+    await (update(
+      cuentasCobrarTable,
+    )..where((t) => t.id.equals(cuenta.id))).write(
       CuentasCobrarTableCompanion(
         montoAbonado: Value(cuenta.montoOriginal),
         saldoPendiente: const Value(0.0),
@@ -233,13 +237,11 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
-
-
   // ----- Plan de cuotas -----
   Future<void> eliminarCuotasDeCuenta(int cuentaId) async {
-    await (delete(cuotasCuentaTable)
-          ..where((t) => t.cuentaCobrarId.equals(cuentaId)))
-        .go();
+    await (delete(
+      cuotasCuentaTable,
+    )..where((t) => t.cuentaCobrarId.equals(cuentaId))).go();
   }
 
   Future<void> insertarCuota({
@@ -270,8 +272,8 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     final n = numeroCuotas;
     final base = (montoTotal / n * 100).floor() / 100.0;
     var acumulado = 0.0;
-    final inicio = primerVencimiento ??
-        DateTime.now().add(const Duration(days: 30));
+    final inicio =
+        primerVencimiento ?? DateTime.now().add(const Duration(days: 30));
     for (var i = 1; i <= n; i++) {
       final monto = i == n
           ? double.parse((montoTotal - acumulado).toStringAsFixed(2))
@@ -290,15 +292,15 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     }
   }
 
-
   /// Inserta el plan ya calculado (sistema francés). No reparte monto/n.
   Future<void> insertarCuotasPlan({
     required int cuentaCobrarId,
-    required List<({int numero, DateTime fechaVencimiento, double monto})> cuotas,
+    required List<({int numero, DateTime fechaVencimiento, double monto})>
+    cuotas,
   }) async {
-    await (delete(cuotasCuentaTable)
-          ..where((t) => t.cuentaCobrarId.equals(cuentaCobrarId)))
-        .go();
+    await (delete(
+      cuotasCuentaTable,
+    )..where((t) => t.cuentaCobrarId.equals(cuentaCobrarId))).go();
     for (final c in cuotas) {
       await into(cuotasCuentaTable).insert(
         CuotasCuentaTableCompanion.insert(
@@ -342,5 +344,4 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
       resto -= aplica;
     }
   }
-
 }

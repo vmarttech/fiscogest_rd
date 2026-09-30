@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/status_chip.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 String _formatearMonto(double monto) {
   return 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(monto)}';
@@ -50,17 +51,23 @@ class ItemCarrito extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () {
               final nuevaCantidad =
-                  double.tryParse(controlador.text) ?? detalle.cantidad.toDouble();
+                  double.tryParse(controlador.text) ??
+                  detalle.cantidad.toDouble();
               if (nuevaCantidad > 0) {
                 ref
                     .read(registrarVentaProvider.notifier)
@@ -82,7 +89,7 @@ class ItemCarrito extends ConsumerWidget {
     final error = notifier.puedeAplicarDescuentoLinea(detalle);
 
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(error),
           backgroundColor: AppColors.error,
@@ -97,8 +104,8 @@ class ItemCarrito extends ConsumerWidget {
       text: tienePorcentaje
           ? detalle.descuentoPorcentaje.toStringAsFixed(2)
           : tieneMonto
-              ? detalle.montoDescuento.toStringAsFixed(2)
-              : '',
+          ? detalle.montoDescuento.toStringAsFixed(2)
+          : '',
     );
     bool esPorcentaje = tienePorcentaje;
 
@@ -106,7 +113,9 @@ class ItemCarrito extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
             'Descuento de línea',
             style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
@@ -122,10 +131,13 @@ class ItemCarrito extends ConsumerWidget {
                       selected: !esPorcentaje,
                       selectedColor: AppColors.primary.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
-                        color: !esPorcentaje ? AppColors.primary : AppColors.textSecondary,
+                        color: !esPorcentaje
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
-                      onSelected: (_) => setDialogState(() => esPorcentaje = false),
+                      onSelected: (_) =>
+                          setDialogState(() => esPorcentaje = false),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -135,10 +147,13 @@ class ItemCarrito extends ConsumerWidget {
                       selected: esPorcentaje,
                       selectedColor: AppColors.primary.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
-                        color: esPorcentaje ? AppColors.primary : AppColors.textSecondary,
+                        color: esPorcentaje
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
-                      onSelected: (_) => setDialogState(() => esPorcentaje = true),
+                      onSelected: (_) =>
+                          setDialogState(() => esPorcentaje = true),
                     ),
                   ),
                 ],
@@ -146,11 +161,15 @@ class ItemCarrito extends ConsumerWidget {
               const SizedBox(height: 16),
               TextField(
                 controller: controlador,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(
                   hintText: '0.00',
                   suffixText: esPorcentaje ? '%' : '',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   isDense: true,
                 ),
               ),
@@ -161,7 +180,7 @@ class ItemCarrito extends ConsumerWidget {
               onPressed: () {
                 final err = notifier.aplicarDescuentoLinea(indice, 0.0, false);
                 if (err != null && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  FiscoGestNotifications.show(
                     SnackBar(
                       content: Text(err),
                       backgroundColor: AppColors.error,
@@ -171,19 +190,28 @@ class ItemCarrito extends ConsumerWidget {
                 }
                 Navigator.pop(ctx);
               },
-              child: const Text('Sin descuento', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'Sin descuento',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               onPressed: () {
                 final valor = double.tryParse(controlador.text) ?? 0.0;
-                final err = notifier.aplicarDescuentoLinea(indice, valor, esPorcentaje);
+                final err = notifier.aplicarDescuentoLinea(
+                  indice,
+                  valor,
+                  esPorcentaje,
+                );
                 if (err != null && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  FiscoGestNotifications.show(
                     SnackBar(
                       content: Text(err),
                       backgroundColor: AppColors.error,
@@ -211,9 +239,19 @@ class ItemCarrito extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 420) {
-          return _construirModoCompacto(context, ref, tieneOferta, tieneDescuento);
+          return _construirModoCompacto(
+            context,
+            ref,
+            tieneOferta,
+            tieneDescuento,
+          );
         }
-        return _construirModoCompleto(context, ref, tieneOferta, tieneDescuento);
+        return _construirModoCompleto(
+          context,
+          ref,
+          tieneOferta,
+          tieneDescuento,
+        );
       },
     );
   }
@@ -254,25 +292,37 @@ class ItemCarrito extends ConsumerWidget {
                     ),
                     if (tieneOferta) ...[
                       const SizedBox(width: 6),
-                      const StatusChip(label: 'OFERTA', type: StatusChipType.warning, dense: true),
+                      const StatusChip(
+                        label: 'OFERTA',
+                        type: StatusChipType.warning,
+                        dense: true,
+                      ),
                     ],
                     if (tieneDescuento) ...[
                       const SizedBox(width: 6),
-                      const StatusChip(label: 'DESC', type: StatusChipType.success, dense: true),
+                      const StatusChip(
+                        label: 'DESC',
+                        type: StatusChipType.success,
+                        dense: true,
+                      ),
                     ],
                   ],
                 ),
                 const SizedBox(height: 3),
                 Text(
                   'Cant: ${detalle.cantidad}  ·  ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}',
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 if (tieneOferta && detalle.precioOriginal != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
                       'Original: ${_formatearMonto(detalle.precioOriginal!)} → Oferta: ${_formatearMonto(detalle.precioUnitario)}',
-                      style: AppTypography.labelSmall.copyWith(color: AppColors.warning),
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.warning,
+                      ),
                     ),
                   ),
               ],
@@ -332,25 +382,37 @@ class ItemCarrito extends ConsumerWidget {
               ),
               if (tieneOferta) ...[
                 const SizedBox(width: 6),
-                const StatusChip(label: 'OFERTA', type: StatusChipType.warning, dense: true),
+                const StatusChip(
+                  label: 'OFERTA',
+                  type: StatusChipType.warning,
+                  dense: true,
+                ),
               ],
               if (tieneDescuento) ...[
                 const SizedBox(width: 6),
-                const StatusChip(label: 'DESC', type: StatusChipType.success, dense: true),
+                const StatusChip(
+                  label: 'DESC',
+                  type: StatusChipType.success,
+                  dense: true,
+                ),
               ],
             ],
           ),
           const SizedBox(height: 4),
           Text(
             'Cant: ${detalle.cantidad}  ·  ${_formatearMonto(detalle.subtotalLinea ?? detalle.subtotal)}',
-            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           if (tieneOferta && detalle.precioOriginal != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text(
                 'Original: ${_formatearMonto(detalle.precioOriginal!)} → Oferta: ${_formatearMonto(detalle.precioUnitario)}',
-                style: AppTypography.labelSmall.copyWith(color: AppColors.warning),
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.warning,
+                ),
               ),
             ),
           const SizedBox(height: 10),
@@ -384,7 +446,6 @@ class ItemCarrito extends ConsumerWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-
   const _ActionButton({
     required this.icon,
     required this.color,

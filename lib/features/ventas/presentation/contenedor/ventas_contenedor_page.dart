@@ -47,9 +47,7 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) context.go('/ventas/cobro');
       });
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final vistaActual = ref.watch(
@@ -74,12 +72,10 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
 
     final String heroSub = switch (modoOperacion) {
       ModoOperacion.venta ||
-      ModoOperacion.cobrar =>
-        'Productos, carrito, cotizaciones e historial.',
+      ModoOperacion.cobrar => 'Productos, carrito, cotizaciones e historial.',
       ModoOperacion.cotizacion =>
         'Arme presupuestos y envíelos a cobro en caja.',
-      ModoOperacion.apartado =>
-        'Productos, carrito, cotizaciones e historial.',
+      ModoOperacion.apartado => 'Productos, carrito, cotizaciones e historial.',
     };
 
     final IconData heroIcon = switch (modoOperacion) {
@@ -112,35 +108,31 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
           ),
         ),
         child: Column(
-        children: [
-          Expanded(
-            child: showHero
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: AppLayout.pantallaPadding.add(
-                          EdgeInsets.only(
-                            top: mobile ? 8 : 12,
-                            bottom: 0,
+          children: [
+            Expanded(
+              child: showHero
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: AppLayout.pantallaPadding.add(
+                            EdgeInsets.only(top: mobile ? 8 : 12, bottom: 0),
+                          ),
+                          child: AppHubHero(
+                            title: heroTitulo,
+                            subtitle: heroSub,
+                            icon: heroIcon,
                           ),
                         ),
-                        child: AppHubHero(
-                          title: heroTitulo,
-                          subtitle: heroSub,
-                          icon: heroIcon,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Expanded(child: vistaActiva),
-                    ],
-                  )
-                : vistaActiva,
-          ),
-        ],
-      ),
+                        const SizedBox(height: 12),
+                        Expanded(child: vistaActiva),
+                      ],
+                    )
+                  : vistaActiva,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-

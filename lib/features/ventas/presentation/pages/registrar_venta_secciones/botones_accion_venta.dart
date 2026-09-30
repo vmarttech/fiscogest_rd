@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
-enum ModoOperacionVenta {
-  venta,
-  cotizacion,
-  apartado,
-}
+enum ModoOperacionVenta { venta, cotizacion, apartado }
 
 class BotonesAccionVenta extends StatelessWidget {
   const BotonesAccionVenta({

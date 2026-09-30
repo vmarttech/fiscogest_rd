@@ -77,8 +77,9 @@ class SecuenciasNcfPage extends ConsumerWidget {
                                     hasta: f.secuenciaHasta,
                                     activo: f.activo,
                                     onGuardar: (p) async {
-                                      final dao =
-                                          ref.read(secuenciasNcfDaoProvider);
+                                      final dao = ref.read(
+                                        secuenciasNcfDaoProvider,
+                                      );
                                       await dao.guardar(
                                         tipo: f.tipo,
                                         prefijo: p.prefijo,
@@ -89,8 +90,9 @@ class SecuenciasNcfPage extends ConsumerWidget {
                                       );
                                       ref.invalidate(secuenciasNcfListProvider);
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
                                             content: Text('${f.tipo} guardado'),
                                             backgroundColor: AppColors.success,
@@ -203,7 +205,9 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
     try {
       await widget.onGuardar(
         _Params(
-          prefijo: _prefijo.text.trim().isEmpty ? widget.tipo : _prefijo.text.trim(),
+          prefijo: _prefijo.text.trim().isEmpty
+              ? widget.tipo
+              : _prefijo.text.trim(),
           actual: int.tryParse(_actual.text) ?? 0,
           desde: int.tryParse(_desde.text) ?? 1,
           hasta: int.tryParse(_hasta.text) ?? 99999999,

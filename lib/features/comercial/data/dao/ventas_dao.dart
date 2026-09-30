@@ -103,9 +103,9 @@ class VentasDao {
   ) async {
     final limpio = numero.trim().toUpperCase();
     if (limpio.isEmpty) return null;
-    return await (_db.select(_db.ventasTable)
-          ..where((final t) => t.numeroCotizacion.equals(limpio)))
-        .getSingleOrNull();
+    return await (_db.select(
+      _db.ventasTable,
+    )..where((final t) => t.numeroCotizacion.equals(limpio))).getSingleOrNull();
   }
 
   Future<List<VentaConCliente>> buscarPorNombreCliente(
@@ -129,18 +129,18 @@ class VentasDao {
   }
 
   Future<VentasTableData?> obtenerVentaPorId(final int ventaId) async {
-    return await (_db.select(_db.ventasTable)
-          ..where((final t) => t.id.equals(ventaId)))
-        .getSingleOrNull();
+    return await (_db.select(
+      _db.ventasTable,
+    )..where((final t) => t.id.equals(ventaId))).getSingleOrNull();
   }
 
   Future<bool> actualizarVenta(
     final int ventaId,
     final VentasTableCompanion venta,
   ) async {
-    final filas = await (_db.update(_db.ventasTable)
-          ..where((final t) => t.id.equals(ventaId)))
-        .write(venta);
+    final filas = await (_db.update(
+      _db.ventasTable,
+    )..where((final t) => t.id.equals(ventaId))).write(venta);
     return filas > 0;
   }
 
@@ -154,9 +154,9 @@ class VentasDao {
     final p = prefijo.trim();
     if (p.isEmpty) return 0;
     final head = p.endsWith('-') ? p : '$p-';
-    final filas = await (_db.select(_db.ventasTable)
-          ..where((final t) => t.numeroCotizacion.isNotNull()))
-        .get();
+    final filas = await (_db.select(
+      _db.ventasTable,
+    )..where((final t) => t.numeroCotizacion.isNotNull())).get();
     var maxN = 0;
     for (final fila in filas) {
       final raw = fila.numeroCotizacion.trim();
@@ -191,28 +191,30 @@ class VentasDao {
     double descuentoLinea = 0.0,
     double impuesto = 0.0,
   }) async {
-    return await _db.into(_db.ventasDetalleTable).insert(
-      VentasDetalleTableCompanion.insert(
-        ventaId: ventaId,
-        productoId: productoId,
-        cantidad: cantidad,
-        precioUnitario: precioUnitario,
-        subtotal: subtotal,
-        descuentoLinea: Value(descuentoLinea),
-        impuesto: impuesto,
-      ),
-    );
+    return await _db
+        .into(_db.ventasDetalleTable)
+        .insert(
+          VentasDetalleTableCompanion.insert(
+            ventaId: ventaId,
+            productoId: productoId,
+            cantidad: cantidad,
+            precioUnitario: precioUnitario,
+            subtotal: subtotal,
+            descuentoLinea: Value(descuentoLinea),
+            impuesto: impuesto,
+          ),
+        );
   }
 
   Future<List<VentaDetalleData>> listarDetalles(int ventaId) async {
-    return await (_db.select(_db.ventasDetalleTable)
-          ..where((t) => t.ventaId.equals(ventaId)))
-        .get();
+    return await (_db.select(
+      _db.ventasDetalleTable,
+    )..where((t) => t.ventaId.equals(ventaId))).get();
   }
 
   Future<int> eliminarDetallesDeVenta(int ventaId) async {
-    return await (_db.delete(_db.ventasDetalleTable)
-          ..where((t) => t.ventaId.equals(ventaId)))
-        .go();
+    return await (_db.delete(
+      _db.ventasDetalleTable,
+    )..where((t) => t.ventaId.equals(ventaId))).go();
   }
 }

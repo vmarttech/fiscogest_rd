@@ -6,10 +6,8 @@ import 'package:fiscogest_rd/features/comercial/data/dao/ventas_table.dart';
 class SolicitudesCreditoTable extends Table {
   IntColumn get id => integer().autoIncrement().named('id')();
 
-  IntColumn get ventaId => integer()
-      .named('venta_id')
-      .references(VentasTable, #id)
-      .unique()();
+  IntColumn get ventaId =>
+      integer().named('venta_id').references(VentasTable, #id).unique()();
 
   TextColumn get nombreCompleto =>
       text().named('nombre_completo').withDefault(const Constant(''))();

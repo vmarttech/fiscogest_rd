@@ -81,8 +81,9 @@ class HistorialVentas extends ConsumerWidget {
                       padding: const EdgeInsets.all(16),
                       child: Text(
                         'Error: $e',
-                        style: AppTypography.bodyMedium
-                            .copyWith(color: AppColors.error),
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.error,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -137,8 +138,7 @@ class HistorialVentas extends ConsumerWidget {
                             onTap: () {
                               ref
                                   .read(
-                                    ventaCargadaDesdeHistorialProvider
-                                        .notifier,
+                                    ventaCargadaDesdeHistorialProvider.notifier,
                                   )
                                   .establecerVenta(v);
                               ref
@@ -166,16 +166,16 @@ class HistorialVentas extends ConsumerWidget {
                                           v.numero,
                                           style: AppTypography.labelMedium
                                               .copyWith(
-                                            fontWeight: FontWeight.w800,
-                                          ),
+                                                fontWeight: FontWeight.w800,
+                                              ),
                                         ),
                                         const SizedBox(height: 3),
                                         Text(
                                           formatearFecha(v.fecha),
                                           style: AppTypography.bodySmall
                                               .copyWith(
-                                            color: AppColors.textSecondary,
-                                          ),
+                                                color: AppColors.textSecondary,
+                                              ),
                                         ),
                                       ],
                                     ),

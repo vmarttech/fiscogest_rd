@@ -76,7 +76,10 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            icon: const Icon(Icons.person_add_rounded, size: 20),
+                            icon: const Icon(
+                              Icons.person_add_rounded,
+                              size: 20,
+                            ),
                             label: const Text(
                               'NUEVO CLIENTE',
                               style: TextStyle(fontWeight: FontWeight.w800),
@@ -123,7 +126,10 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            icon: const Icon(Icons.person_add_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.person_add_rounded,
+                              size: 18,
+                            ),
                             label: const Text(
                               'Nuevo cliente',
                               style: TextStyle(fontWeight: FontWeight.w700),
@@ -177,8 +183,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
             ),
             Expanded(
               child: clientesAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
                   child: Text(
                     'Error: $e',
@@ -337,10 +342,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                 color: AppColors.grey50,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
-                cliente.historial,
-                style: AppTypography.bodySmall,
-              ),
+              child: Text(cliente.historial, style: AppTypography.bodySmall),
             ),
             const SizedBox(height: 12),
             TextButton(

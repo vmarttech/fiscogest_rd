@@ -74,11 +74,14 @@ class ImportExportService {
 
       final columnas = _splitCsvLine(linea);
       if (columnas.length < 4) {
-        _registroErrores.add(ImportExportLog(
-          fila: i + 1,
-          entidad: 'Producto',
-          mensajeError: 'Estructura incompleta (min. Codigo,Nombre,Precio,Stock).',
-        ));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError:
+                'Estructura incompleta (min. Codigo,Nombre,Precio,Stock).',
+          ),
+        );
         continue;
       }
 
@@ -88,35 +91,43 @@ class ImportExportService {
       final stock = double.tryParse(columnas[3].trim());
 
       if (codigo.isEmpty) {
-        _registroErrores.add(ImportExportLog(
-          fila: i + 1,
-          entidad: 'Producto',
-          mensajeError: 'El código es obligatorio.',
-        ));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'El código es obligatorio.',
+          ),
+        );
         continue;
       }
       if (nombre.isEmpty) {
-        _registroErrores.add(ImportExportLog(
-          fila: i + 1,
-          entidad: 'Producto',
-          mensajeError: 'El nombre es obligatorio.',
-        ));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'El nombre es obligatorio.',
+          ),
+        );
         continue;
       }
       if (precio == null || precio < 0) {
-        _registroErrores.add(ImportExportLog(
-          fila: i + 1,
-          entidad: 'Producto',
-          mensajeError: 'Precio inválido o negativo.',
-        ));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'Precio inválido o negativo.',
+          ),
+        );
         continue;
       }
       if (stock == null || stock < 0) {
-        _registroErrores.add(ImportExportLog(
-          fila: i + 1,
-          entidad: 'Producto',
-          mensajeError: 'Stock inválido o negativo.',
-        ));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'Stock inválido o negativo.',
+          ),
+        );
         continue;
       }
 
@@ -138,11 +149,13 @@ class ImportExportService {
         }
         importados++;
       } catch (e) {
-        _registroErrores.add(ImportExportLog(
-          fila: i + 1,
-          entidad: 'Producto',
-          mensajeError: 'No se pudo guardar: $e',
-        ));
+        _registroErrores.add(
+          ImportExportLog(
+            fila: i + 1,
+            entidad: 'Producto',
+            mensajeError: 'No se pudo guardar: $e',
+          ),
+        );
       }
     }
     return importados;

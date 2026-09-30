@@ -40,6 +40,7 @@ class AppScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final bool centerTitle;
   final bool showAppBar;
+
   /// Limita y centra el body (PC con menú oculto).
   final bool useAppPage;
 
@@ -84,9 +85,7 @@ class AppScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor ?? const Color(0xFFEEF2F6),
       appBar: showAppBar ? (appBar ?? _buildAppBar(context)) : null,
-      body: bodyWidget == null
-          ? null
-          : AppAtmosphere(child: bodyWidget),
+      body: bodyWidget == null ? null : AppAtmosphere(child: bodyWidget),
       floatingActionButton: floatingActionButton,
     );
   }
@@ -195,7 +194,8 @@ class AppScaffold extends StatelessWidget {
             ],
       iconTheme: const IconThemeData(color: Colors.white, size: 24),
       actionsIconTheme: const IconThemeData(color: Colors.white, size: 23),
-      bottom: bottom ??
+      bottom:
+          bottom ??
           PreferredSize(
             preferredSize: const Size.fromHeight(3),
             child: Container(

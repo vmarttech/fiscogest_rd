@@ -34,7 +34,6 @@ class ComprobantePdf {
   static String _money(double v) => 'RD\$ ${_moneyFmt.format(v)}';
   static final _fecha = DateFormat('dd/MM/yyyy HH:mm');
 
-
   /// [modo]: null = solo layout; true = compartir; false = imprimir.
   /// Si [mostrarOpciones] es true, el llamador debe pasar un callback UI.
   static Future<void> imprimirFactura(
@@ -66,10 +65,7 @@ class ComprobantePdf {
     );
     final bytes = await doc.save();
     if (compartir) {
-      await Printing.sharePdf(
-        bytes: bytes,
-        filename: 'Factura_$ncf.pdf',
-      );
+      await Printing.sharePdf(bytes: bytes, filename: 'Factura_$ncf.pdf');
     } else {
       await Printing.layoutPdf(
         onLayout: (format) async => bytes,
@@ -115,7 +111,13 @@ class ComprobantePdf {
     return doc.save();
   }
 
-  static Future<pw.Document> _buildDocumento(Venta v, {ConfiguracionEntity? empresa, String? rncCliente, String? direccionCliente, String? telefonoCliente}) async {
+  static Future<pw.Document> _buildDocumento(
+    Venta v, {
+    ConfiguracionEntity? empresa,
+    String? rncCliente,
+    String? direccionCliente,
+    String? telefonoCliente,
+  }) async {
     _empresa = empresa;
     // Modo simplificado: no mostrar NCF ni desglose ITBIS aunque flags docs digan sí
     if (empresa?.modoSimplificado == true) {
@@ -124,8 +126,8 @@ class ComprobantePdf {
     emisorNombre = (empresa?.nombreComercial.isNotEmpty == true)
         ? empresa!.nombreComercial
         : (empresa?.razonSocial.isNotEmpty == true)
-            ? empresa!.razonSocial
-            : 'Empresa';
+        ? empresa!.razonSocial
+        : 'Empresa';
     emisorRnc = empresa?.rnc ?? '';
     emisorDir = empresa?.direccion ?? '';
     emisorTel = empresa?.telefono ?? '';
@@ -138,10 +140,10 @@ class ComprobantePdf {
     final titulo = simple
         ? 'COMPROBANTE DE VENTA'
         : esB01
-            ? 'FACTURA DE CRÉDITO FISCAL'
-            : esB02
-                ? 'FACTURA PARA CONSUMIDOR FINAL'
-                : 'COMPROBANTE DE VENTA';
+        ? 'FACTURA DE CRÉDITO FISCAL'
+        : esB02
+        ? 'FACTURA PARA CONSUMIDOR FINAL'
+        : 'COMPROBANTE DE VENTA';
 
     final cliente = (v.nombreCliente ?? 'Consumidor Final').trim();
     final formaPago = () {
@@ -157,10 +159,7 @@ class ComprobantePdf {
     }();
     final fecha = v.fecha;
 
-    final doc = pw.Document(
-      title: 'Factura $ncf',
-      author: emisorNombre,
-    );
+    final doc = pw.Document(title: 'Factura $ncf', author: emisorNombre);
 
     pw.MemoryImage? logoImage;
     final logoPath = empresa?.logoUrl ?? '';
@@ -227,13 +226,25 @@ class ComprobantePdf {
                   ),
                   pw.SizedBox(height: 2),
                   if ((_empresa?.docMostrarRnc ?? true) && emisorRnc.isNotEmpty)
-                    pw.Text('RNC: $emisorRnc', style: const pw.TextStyle(fontSize: 9)),
-                  if ((_empresa?.docMostrarDireccion ?? true) && emisorDir.isNotEmpty)
+                    pw.Text(
+                      'RNC: $emisorRnc',
+                      style: const pw.TextStyle(fontSize: 9),
+                    ),
+                  if ((_empresa?.docMostrarDireccion ?? true) &&
+                      emisorDir.isNotEmpty)
                     pw.Text(emisorDir, style: const pw.TextStyle(fontSize: 9)),
-                  if ((_empresa?.docMostrarTelefono ?? true) && emisorTel.isNotEmpty)
-                    pw.Text('Tel: $emisorTel', style: const pw.TextStyle(fontSize: 9)),
-                  if ((_empresa?.docMostrarCorreo ?? true) && emisorEmail.isNotEmpty)
-                    pw.Text(emisorEmail, style: const pw.TextStyle(fontSize: 9)),
+                  if ((_empresa?.docMostrarTelefono ?? true) &&
+                      emisorTel.isNotEmpty)
+                    pw.Text(
+                      'Tel: $emisorTel',
+                      style: const pw.TextStyle(fontSize: 9),
+                    ),
+                  if ((_empresa?.docMostrarCorreo ?? true) &&
+                      emisorEmail.isNotEmpty)
+                    pw.Text(
+                      emisorEmail,
+                      style: const pw.TextStyle(fontSize: 9),
+                    ),
                 ],
               ),
             ),
@@ -257,8 +268,15 @@ class ComprobantePdf {
                   pw.SizedBox(height: 4),
                   pw.Text(tipoLabel, style: const pw.TextStyle(fontSize: 8)),
                   pw.SizedBox(height: 6),
-                  if ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarNcf ?? true)) ...[
-                    pw.Text('NCF', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+                  if ((_empresa?.modoSimplificado != true) &&
+                      (_empresa?.docMostrarNcf ?? true)) ...[
+                    pw.Text(
+                      'NCF',
+                      style: const pw.TextStyle(
+                        fontSize: 8,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
                     pw.Text(
                       ncf,
                       style: const pw.TextStyle(
@@ -312,20 +330,29 @@ class ComprobantePdf {
                 pw.SizedBox(height: 4),
                 pw.Text(
                   cliente,
-                  style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+                  style: const pw.TextStyle(
+                    fontSize: 11,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
                 ),
                 if ((direccionCliente ?? '').trim().isNotEmpty) ...[
                   pw.SizedBox(height: 2),
                   pw.Text(
                     'Dir: ${(direccionCliente ?? '').trim()}',
-                    style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+                    style: const pw.TextStyle(
+                      fontSize: 8,
+                      color: PdfColors.grey700,
+                    ),
                   ),
                 ],
                 if ((telefonoCliente ?? '').trim().isNotEmpty) ...[
                   pw.SizedBox(height: 2),
                   pw.Text(
                     'Tel: ${(telefonoCliente ?? '').trim()}',
-                    style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+                    style: const pw.TextStyle(
+                      fontSize: 8,
+                      color: PdfColors.grey700,
+                    ),
                   ),
                 ],
                 if ((rncCliente ?? '').trim().isNotEmpty) ...[
@@ -338,13 +365,19 @@ class ComprobantePdf {
                   pw.SizedBox(height: 2),
                   pw.Text(
                     'RNC / Cédula: (completar en ficha del cliente)',
-                    style: const pw.TextStyle(fontSize: 9, color: PdfColors.orange700),
+                    style: const pw.TextStyle(
+                      fontSize: 9,
+                      color: PdfColors.orange700,
+                    ),
                   ),
                 ] else ...[
                   pw.SizedBox(height: 2),
                   pw.Text(
                     'Consumidor final · sin crédito fiscal',
-                    style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+                    style: const pw.TextStyle(
+                      fontSize: 8,
+                      color: PdfColors.grey700,
+                    ),
                   ),
                 ],
               ],
@@ -388,7 +421,10 @@ class ComprobantePdf {
           pw.Expanded(
             child: pw.Text(
               val,
-              style: const pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+              style: const pw.TextStyle(
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -474,10 +510,14 @@ class ComprobantePdf {
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.SizedBox(height: 6),
-              if ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarItbisDesglose ?? true))
+              if ((_empresa?.modoSimplificado != true) &&
+                  (_empresa?.docMostrarItbisDesglose ?? true))
                 pw.Text(
                   'ITBIS discriminado al 18%.',
-                  style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+                  style: const pw.TextStyle(
+                    fontSize: 8,
+                    color: PdfColors.grey700,
+                  ),
                 ),
             ],
           ),
@@ -491,7 +531,8 @@ class ComprobantePdf {
           ),
           child: pw.Column(
             children: [
-              if ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarItbisDesglose ?? true)) ...[
+              if ((_empresa?.modoSimplificado != true) &&
+                  (_empresa?.docMostrarItbisDesglose ?? true)) ...[
                 _totalRow('Subtotal', _money(subtotal)),
                 if (montoDescuento > 0.001)
                   _totalRow('Descuento', '- ${_money(montoDescuento)}'),
@@ -536,10 +577,10 @@ class ComprobantePdf {
   static pw.Widget _leyendaLegal({required bool esB01, required String ncf}) {
     final texto = esB01
         ? 'Este comprobante (NCF $ncf) es Factura de Crédito Fiscal. '
-            'Permite al comprador sustentar costos y crédito de ITBIS ante la DGII, '
-            'siempre que el RNC del cliente esté correctamente registrado.'
+              'Permite al comprador sustentar costos y crédito de ITBIS ante la DGII, '
+              'siempre que el RNC del cliente esté correctamente registrado.'
         : 'Este comprobante (NCF $ncf) es Factura de Consumo (consumidor final). '
-            'No otorga crédito fiscal de ITBIS ni sustenta costos del ISR al comprador.';
+              'No otorga crédito fiscal de ITBIS ni sustenta costos del ISR al comprador.';
 
     return pw.Container(
       padding: const pw.EdgeInsets.all(8),
@@ -557,7 +598,11 @@ class ComprobantePdf {
 
   static pw.Widget _footer(pw.Context ctx, String ncf) {
     final pie = (_empresa?.docPiePagina ?? '').trim();
-    final ncfTxt = ((_empresa?.modoSimplificado != true) && (_empresa?.docMostrarNcf ?? true)) ? 'NCF: $ncf · ' : '';
+    final ncfTxt =
+        ((_empresa?.modoSimplificado != true) &&
+            (_empresa?.docMostrarNcf ?? true))
+        ? 'NCF: $ncf · '
+        : '';
     return pw.Column(
       children: [
         if (pie.isNotEmpty) ...[
@@ -596,12 +641,10 @@ class ComprobantePdf {
     required double monto,
     String? motivo,
   }) async {
-    final ncfAfectado =
-        ncfOrigen ?? (ventaOriginal?.numeroFactura ?? '-');
-    final nombreCliente =
-        (cliente != null && cliente.isNotEmpty)
-            ? cliente
-            : (ventaOriginal?.nombreCliente ?? '-');
+    final ncfAfectado = ncfOrigen ?? (ventaOriginal?.numeroFactura ?? '-');
+    final nombreCliente = (cliente != null && cliente.isNotEmpty)
+        ? cliente
+        : (ventaOriginal?.nombreCliente ?? '-');
     final doc = pw.Document();
     doc.addPage(
       pw.MultiPage(
@@ -667,8 +710,8 @@ class ComprobantePdf {
       emisorNombre = (empresa.nombreComercial.isNotEmpty)
           ? empresa.nombreComercial
           : (empresa.razonSocial.isNotEmpty)
-              ? empresa.razonSocial
-              : 'Empresa';
+          ? empresa.razonSocial
+          : 'Empresa';
       emisorRnc = empresa.rnc;
       emisorDir = empresa.direccion;
       emisorTel = empresa.telefono;
@@ -690,7 +733,10 @@ class ComprobantePdf {
         build: (ctx) => [
           pw.Text(
             emisorNombre,
-            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(
+              fontSize: 12,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
           if (emisorTel.isNotEmpty)
             pw.Text('Tel: $emisorTel', style: const pw.TextStyle(fontSize: 9)),
@@ -698,7 +744,10 @@ class ComprobantePdf {
           pw.Center(
             child: pw.Text(
               'COMPROBANTE DE ENTREGA',
-              style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              style: const pw.TextStyle(
+                fontSize: 16,
+                fontWeight: pw.FontWeight.bold,
+              ),
             ),
           ),
           pw.SizedBox(height: 4),
@@ -710,9 +759,15 @@ class ComprobantePdf {
           ),
           pw.SizedBox(height: 14),
           pw.Divider(),
-          pw.Text('Ref. cotización: $cot', style: const pw.TextStyle(fontSize: 10)),
+          pw.Text(
+            'Ref. cotización: $cot',
+            style: const pw.TextStyle(fontSize: 10),
+          ),
           if (ncf.isNotEmpty)
-            pw.Text('Ref. factura: $ncf', style: const pw.TextStyle(fontSize: 10)),
+            pw.Text(
+              'Ref. factura: $ncf',
+              style: const pw.TextStyle(fontSize: 10),
+            ),
           pw.Text(
             'Fecha: ${_fecha.format(v.fecha)}',
             style: const pw.TextStyle(fontSize: 10),
@@ -720,12 +775,18 @@ class ComprobantePdf {
           pw.SizedBox(height: 12),
           pw.Text(
             'ENTREGAR A',
-            style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(
+              fontSize: 11,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
             cliente,
-            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(
+              fontSize: 12,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
           if (tel.isNotEmpty)
             pw.Text('Teléfono: $tel', style: const pw.TextStyle(fontSize: 10)),
@@ -734,7 +795,10 @@ class ComprobantePdf {
           pw.SizedBox(height: 6),
           pw.Text(
             'Dirección de entrega:',
-            style: const pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(
+              fontSize: 10,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
           pw.Text(
             dir.isNotEmpty
@@ -745,7 +809,10 @@ class ComprobantePdf {
           pw.SizedBox(height: 14),
           pw.Text(
             'ARTÍCULOS A ENTREGAR',
-            style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(
+              fontSize: 11,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
           pw.SizedBox(height: 6),
           _tablaEntrega(v.detalles),
@@ -757,7 +824,10 @@ class ComprobantePdf {
           pw.SizedBox(height: 28),
           pw.Text(
             'CONFIRMACIÓN DE ENTREGA',
-            style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(
+              fontSize: 11,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
           pw.SizedBox(height: 8),
           pw.Text(
@@ -803,8 +873,9 @@ class ComprobantePdf {
     );
 
     final bytes = await doc.save();
-    final name =
-        ncf.isNotEmpty ? 'Entrega_${ncf}_$cot.pdf' : 'Entrega_$cot.pdf';
+    final name = ncf.isNotEmpty
+        ? 'Entrega_${ncf}_$cot.pdf'
+        : 'Entrega_$cot.pdf';
     if (compartir) {
       await Printing.sharePdf(bytes: bytes, filename: name);
     } else {
@@ -870,7 +941,10 @@ class ComprobantePdf {
       children: [
         pw.Text(
           titulo,
-          style: const pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+          style: const pw.TextStyle(
+            fontSize: 9,
+            fontWeight: pw.FontWeight.bold,
+          ),
         ),
         pw.SizedBox(height: 28),
         pw.Container(height: 0.8, color: PdfColors.black),
@@ -932,9 +1006,9 @@ class ComprobantePdf {
 
     pw.Widget gap([double h = 3]) => pw.SizedBox(height: h);
     pw.Widget sep() => pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(vertical: 4),
-          child: pw.Divider(thickness: 0.6, color: PdfColors.grey700),
-        );
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Divider(thickness: 0.6, color: PdfColors.grey700),
+    );
     pw.Widget center(String s, {double size = 8, bool bold = false}) =>
         pw.Center(
           child: pw.Text(
@@ -947,28 +1021,28 @@ class ComprobantePdf {
           ),
         );
     pw.Widget kv(String k, String val) => pw.Padding(
-          padding: const pw.EdgeInsets.only(bottom: 2),
-          child: pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                k,
-                style: const pw.TextStyle(
-                  fontSize: 8,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.SizedBox(width: 6),
-              pw.Expanded(
-                child: pw.Text(
-                  val,
-                  textAlign: pw.TextAlign.right,
-                  style: const pw.TextStyle(fontSize: 8),
-                ),
-              ),
-            ],
+      padding: const pw.EdgeInsets.only(bottom: 2),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            k,
+            style: const pw.TextStyle(
+              fontSize: 8,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
-        );
+          pw.SizedBox(width: 6),
+          pw.Expanded(
+            child: pw.Text(
+              val,
+              textAlign: pw.TextAlign.right,
+              style: const pw.TextStyle(fontSize: 8),
+            ),
+          ),
+        ],
+      ),
+    );
 
     // Fila numérica con anchos fijos (no se amontona en 80 mm)
     pw.Widget nums(String a, String b, String c, {bool header = false}) {
@@ -1002,7 +1076,10 @@ class ComprobantePdf {
       final kids = <pw.Widget>[
         pw.Text(
           desc,
-          style: const pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+          style: const pw.TextStyle(
+            fontSize: 8,
+            fontWeight: pw.FontWeight.bold,
+          ),
         ),
       ];
       if ((d.ofertaNombre ?? '').trim().isNotEmpty) {
@@ -1013,8 +1090,7 @@ class ComprobantePdf {
           ),
         );
       }
-      if (d.precioOriginal != null &&
-          d.precioOriginal! > precio + 0.001) {
+      if (d.precioOriginal != null && d.precioOriginal! > precio + 0.001) {
         kids.add(
           pw.Text(
             'Antes: ${_money(d.precioOriginal!)}',
@@ -1022,11 +1098,7 @@ class ComprobantePdf {
           ),
         );
       }
-      kids.add(nums(
-        cant.toStringAsFixed(2),
-        _money(precio),
-        _money(sub),
-      ));
+      kids.add(nums(cant.toStringAsFixed(2), _money(precio), _money(sub)));
       if (d.montoDescuento > 0.001) {
         kids.add(
           pw.Text(
@@ -1116,7 +1188,10 @@ class ComprobantePdf {
         if (showCliente) ...[
           pw.Text(
             'Cliente',
-            style: const pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(
+              fontSize: 9,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
           pw.Text(cliente, style: const pw.TextStyle(fontSize: 9)),
           if (telCli.isNotEmpty)
@@ -1139,7 +1214,10 @@ class ComprobantePdf {
         sep(),
         pw.Text(
           'Descripción',
-          style: const pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+          style: const pw.TextStyle(
+            fontSize: 8,
+            fontWeight: pw.FontWeight.bold,
+          ),
         ),
         nums('Cant.', 'Precio', 'Subtotal', header: true),
         gap(3),

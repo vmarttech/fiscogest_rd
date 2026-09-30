@@ -64,8 +64,8 @@ class RegistrarRecepcion {
     final estado = todosCero
         ? 'pendiente'
         : todosIgual
-            ? 'completa'
-            : 'parcial';
+        ? 'completa'
+        : 'parcial';
 
     return recepcion.copyWith(estado: estado);
   }

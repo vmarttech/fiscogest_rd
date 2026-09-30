@@ -5,7 +5,6 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 
 class CabeceraCompraWidget extends StatelessWidget {
-
   const CabeceraCompraWidget({
     super.key,
     required this.fechaController,
@@ -42,9 +41,14 @@ class CabeceraCompraWidget extends StatelessWidget {
   final TextEditingController observacionesController;
   final bool esPequena;
   final bool modoSimplificado;
-  final Widget Function({required Widget child1, required Widget child2}) filaResponsiva;
+  final Widget Function({required Widget child1, required Widget child2})
+  filaResponsiva;
 
-  Widget _buildChipTipoComprobante(String valor, String etiqueta, BuildContext context) {
+  Widget _buildChipTipoComprobante(
+    String valor,
+    String etiqueta,
+    BuildContext context,
+  ) {
     final seleccionado = tipoComprobante == valor;
     return InkWell(
       onTap: () => onTipoComprobanteChanged(valor),
@@ -73,7 +77,11 @@ class CabeceraCompraWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildBotonFormaPago(String valor, String etiqueta, BuildContext context) {
+  Widget _buildBotonFormaPago(
+    String valor,
+    String etiqueta,
+    BuildContext context,
+  ) {
     final seleccionado = formaPago == valor;
     return InkWell(
       onTap: () => onFormaPagoChanged(valor),
@@ -174,10 +182,7 @@ class CabeceraCompraWidget extends StatelessWidget {
           ),
         AppLayout.vM,
         if (!modoSimplificado) ...[
-          const Text(
-            'Tipo de Comprobante',
-            style: AppTypography.labelMedium,
-          ),
+          const Text('Tipo de Comprobante', style: AppTypography.labelMedium),
           AppLayout.vS,
           Wrap(
             spacing: AppSpacing.s,
@@ -191,10 +196,7 @@ class CabeceraCompraWidget extends StatelessWidget {
           ),
           AppLayout.vM,
         ],
-        const Text(
-          'Forma de Pago',
-          style: AppTypography.labelMedium,
-        ),
+        const Text('Forma de Pago', style: AppTypography.labelMedium),
         AppLayout.vS,
         Row(
           children: [

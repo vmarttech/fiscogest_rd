@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
   const NuevoProductoPage({super.key});
@@ -31,7 +32,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   final _skuCtrl = TextEditingController();
   final _stockCtrl = TextEditingController(text: '0');
   final _stockMinCtrl = TextEditingController(text: '0');
-  
+
   // Nuevos controladores para precios
   final _precioCompraCtrl = TextEditingController(text: '0.00');
   final _gastosAsocCtrl = TextEditingController(text: '0.00');
@@ -47,9 +48,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   bool _activo = true;
   Producto? _productoEditar;
   bool _esEdicion = false;
+
   /// En edición, costos/stock los define Compra (solo lectura).
   bool get _costesSoloLectura => _esEdicion;
-  bool _precioManual = false; // Si el usuario edita precio venta, no recalcular automáticamente
+  bool _precioManual =
+      false; // Si el usuario edita precio venta, no recalcular automáticamente
 
   @override
   void initState() {
@@ -71,7 +74,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     _skuCtrl.text = p.codigo;
     _stockCtrl.text = (p.stock ?? 0.0).toStringAsFixed(2);
     _stockMinCtrl.text = (p.stockMinimo ?? 0.0).toStringAsFixed(2);
-    
+
     // Cargar campos de precios
     _precioCompraCtrl.text = p.precioCompra.toStringAsFixed(2);
     _gastosAsocCtrl.text = p.gastosAsociados.toStringAsFixed(2);
@@ -80,7 +83,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     _precioMinCtrl.text = (p.precioMinimo ?? 0.0).toStringAsFixed(2);
     _precioMayCtrl.text = (p.precioMayorista ?? 0.0).toStringAsFixed(2);
     _precioEspCtrl.text = (p.precioEspecial ?? 0.0).toStringAsFixed(2);
-    
+
     _catSel = p.categoriaId;
     _marcaSel = p.marcaId;
     _unidadSel = p.unidadMedidaId;
@@ -129,14 +132,20 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   void _guardarProducto() {
     if (!_formKey.currentState!.validate()) return;
     if (_catSel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Seleccione una categoría'), backgroundColor: AppColors.error),
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('Seleccione una categoría'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
     if (_unidadSel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Seleccione unidad de medida'), backgroundColor: AppColors.error),
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('Seleccione unidad de medida'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
@@ -144,8 +153,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final stockVal = double.tryParse(_stockCtrl.text) ?? 0.0;
     final stockMinVal = double.tryParse(_stockMinCtrl.text) ?? 0.0;
     if (stockVal < 0.0 || stockMinVal < 0.0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Las cantidades no pueden ser negativas'), backgroundColor: AppColors.error),
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('Las cantidades no pueden ser negativas'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
@@ -160,9 +172,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
 
     // Validar precio venta no menor al mínimo
     if (precioMin != null && precioMin > 0 && precioVenta < precioMin) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
-          content: Text('El precio de venta (${formatRd(precioVenta)}) no puede ser menor al mínimo (${formatRd(precioMin)})'),
+          content: Text(
+            'El precio de venta (${formatRd(precioVenta)}) no puede ser menor al mínimo (${formatRd(precioMin)})',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -192,7 +206,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         activo: _activo,
       );
       ref.read(productoControllerProvider.notifier).guardar(actualizado);
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('¡Producto actualizado correctamente!')),
       );
     } else {
@@ -215,7 +229,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         activo: _activo,
       );
       ref.read(productoControllerProvider.notifier).guardar(nuevoProd);
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(content: Text('¡Producto registrado correctamente!')),
       );
     }
@@ -264,16 +278,26 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           hint: 'Seleccione categoría',
                           initialValue: _catSel,
                           items: lista
-                              .map((c) => DropdownMenuItem(
-                                    value: c.id,
-                                    child: Text(c.nombre, style: AppTypography.bodyMedium),
-                                  ))
+                              .map(
+                                (c) => DropdownMenuItem(
+                                  value: c.id,
+                                  child: Text(
+                                    c.nombre,
+                                    style: AppTypography.bodyMedium,
+                                  ),
+                                ),
+                              )
                               .toList(),
                           onChanged: (v) => setState(() => _catSel = v),
                         ),
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (e, _) => Text('Error: $e',
-                            style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (e, _) => Text(
+                          'Error: $e',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
                       ),
                     ),
                     AppLayout.vM,
@@ -284,16 +308,26 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           hint: 'Seleccione marca',
                           initialValue: _marcaSel,
                           items: lista
-                              .map((m) => DropdownMenuItem(
-                                    value: m.id,
-                                    child: Text(m.nombre, style: AppTypography.bodyMedium),
-                                  ))
+                              .map(
+                                (m) => DropdownMenuItem(
+                                  value: m.id,
+                                  child: Text(
+                                    m.nombre,
+                                    style: AppTypography.bodyMedium,
+                                  ),
+                                ),
+                              )
                               .toList(),
                           onChanged: (v) => setState(() => _marcaSel = v),
                         ),
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (e, _) => Text('Error: $e',
-                            style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (e, _) => Text(
+                          'Error: $e',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
                       ),
                       child2: unids.when(
                         data: (lista) => AppDropdown<int>(
@@ -301,16 +335,26 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           hint: 'Seleccione unidad',
                           initialValue: _unidadSel,
                           items: lista
-                              .map((u) => DropdownMenuItem(
-                                    value: u.id,
-                                    child: Text(u.nombre, style: AppTypography.bodyMedium),
-                                  ))
+                              .map(
+                                (u) => DropdownMenuItem(
+                                  value: u.id,
+                                  child: Text(
+                                    u.nombre,
+                                    style: AppTypography.bodyMedium,
+                                  ),
+                                ),
+                              )
                               .toList(),
                           onChanged: (v) => setState(() => _unidadSel = v),
                         ),
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (e, _) => Text('Error: $e',
-                            style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (e, _) => Text(
+                          'Error: $e',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
                       ),
                     ),
                     AppLayout.vL,
@@ -318,25 +362,39 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     // === SECCIÓN DE COSTOS Y PRECIOS ===
                     const Text('Costos y Precios', style: AppTypography.h4),
                     AppLayout.vS,
-                    
+
                     ResponsiveRow(
                       child1: AppTextField(
                         label: 'Costo de Compra',
                         controller: _precioCompraCtrl,
                         enabled: !_costesSoloLectura,
                         prefixIcon: Icons.shopping_cart,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
-                        onChanged: (_) => setState(() => _recalcularPrecioVenta()),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
+                        ],
+                        onChanged: (_) =>
+                            setState(() => _recalcularPrecioVenta()),
                       ),
                       child2: AppTextField(
                         label: 'Gastos Asociados',
                         controller: _gastosAsocCtrl,
                         enabled: !_costesSoloLectura,
                         prefixIcon: Icons.receipt_long,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
-                        onChanged: (_) => setState(() => _recalcularPrecioVenta()),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
+                        ],
+                        onChanged: (_) =>
+                            setState(() => _recalcularPrecioVenta()),
                       ),
                     ),
                     AppLayout.vM,
@@ -354,7 +412,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         children: [
                           Text(
                             'Costo Real Total:',
-                            style: AppTypography.labelMedium.copyWith(color: Colors.blue.shade800),
+                            style: AppTypography.labelMedium.copyWith(
+                              color: Colors.blue.shade800,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -368,7 +428,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           const SizedBox(height: 2),
                           Text(
                             '(Compra + Gastos = Base para margen)',
-                            style: AppTypography.bodySmall.copyWith(color: Colors.blue.shade700),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: Colors.blue.shade700,
+                            ),
                           ),
                         ],
                       ),
@@ -380,17 +442,31 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         label: 'Margen de Ganancia %',
                         controller: _margenCtrl,
                         prefixIcon: Icons.percent,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
-                        onChanged: (_) => setState(() => _recalcularPrecioVenta()),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
+                        ],
+                        onChanged: (_) =>
+                            setState(() => _recalcularPrecioVenta()),
                       ),
                       child2: AppTextField(
                         label: 'Precio de Venta',
                         controller: _precioVentaCtrl,
                         prefixIcon: Icons.attach_money,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
-                        onChanged: (_) => _marcarPrecioManual(), // Si edita, dejar de recalcular
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
+                        ],
+                        onChanged: (_) =>
+                            _marcarPrecioManual(), // Si edita, dejar de recalcular
                       ),
                     ),
                     AppLayout.vS,
@@ -399,7 +475,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
                           '💡 Precio sugerido calculado automáticamente',
-                          style: AppTypography.bodySmall.copyWith(color: Colors.green.shade700),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Colors.green.shade700,
+                          ),
                         ),
                       ),
                     if (_precioManual)
@@ -407,7 +485,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
                           '✏️ Precio establecido manualmente — ya no se recalcula',
-                          style: AppTypography.bodySmall.copyWith(color: Colors.orange.shade700),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Colors.orange.shade700,
+                          ),
                         ),
                       ),
                     AppLayout.vS,
@@ -417,15 +497,27 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         label: 'Precio Mínimo',
                         controller: _precioMinCtrl,
                         prefixIcon: Icons.trending_down,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
+                        ],
                       ),
                       child2: AppTextField(
                         label: 'Precio Mayorista',
                         controller: _precioMayCtrl,
                         prefixIcon: Icons.people,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
+                        ],
                       ),
                     ),
                     AppLayout.vM,
@@ -434,8 +526,14 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                       label: 'Precio Especial / Oferta',
                       controller: _precioEspCtrl,
                       prefixIcon: Icons.local_offer,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}'),
+                        ),
+                      ],
                     ),
                     AppLayout.vL,
 
@@ -448,18 +546,26 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         controller: _stockCtrl,
                         enabled: !_costesSoloLectura,
                         prefixIcon: Icons.format_list_numbered,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
                         ],
                       ),
                       child2: AppTextField(
                         label: 'Stock Mínimo (Alerta)',
                         controller: _stockMinCtrl,
                         prefixIcon: Icons.warning_amber_outlined,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'),
+                          ),
                         ],
                       ),
                     ),
@@ -467,7 +573,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
 
                     Text(
                       'Producto Activo para la Venta',
-                      style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w500),
+                      style: AppTypography.labelLarge.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     Align(
                       alignment: Alignment.centerLeft,

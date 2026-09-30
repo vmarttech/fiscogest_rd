@@ -3,14 +3,13 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 
-final productoProvider = StateNotifierProvider<ProductoNotifier, List<ProductoData>>((ref) {
-  return ProductoNotifier(ref);
-});
+final productoProvider =
+    StateNotifierProvider<ProductoNotifier, List<ProductoData>>((ref) {
+      return ProductoNotifier(ref);
+    });
 
 class ProductoNotifier extends StateNotifier<List<ProductoData>> {
-  ProductoNotifier(Ref ref) :
-    _db = ref.read(databaseProvider),
-    super([]) {
+  ProductoNotifier(Ref ref) : _db = ref.read(databaseProvider), super([]) {
     cargarTodos();
   }
 
@@ -21,8 +20,9 @@ class ProductoNotifier extends StateNotifier<List<ProductoData>> {
   }
 
   Future<ProductoData?> buscarPorId(int productoId) async {
-    return await (_db.select(_db.productosTable)
-      ..where((p) => p.id.equals(productoId))).getSingleOrNull();
+    return await (_db.select(
+      _db.productosTable,
+    )..where((p) => p.id.equals(productoId))).getSingleOrNull();
   }
 
   Future<void> reservarStock(int productoId, double cantidad) async {
@@ -31,10 +31,12 @@ class ProductoNotifier extends StateNotifier<List<ProductoData>> {
     final stockActual = reg.stock ?? 0.0;
     final reservado = reg.stockReservado ?? 0.0;
     final disponible = stockActual - reservado;
-    if (disponible < cantidad) throw Exception('Stock insuficiente para reservar');
-    await _db.update(_db.productosTable).replace(
-      reg.copyWith(stockReservado: Value(reservado + cantidad)),
-    );
+    if (disponible < cantidad) {
+      throw Exception('Stock insuficiente para reservar');
+    }
+    await _db
+        .update(_db.productosTable)
+        .replace(reg.copyWith(stockReservado: Value(reservado + cantidad)));
     await cargarTodos();
   }
 
@@ -44,9 +46,9 @@ class ProductoNotifier extends StateNotifier<List<ProductoData>> {
     final reservado = reg.stockReservado ?? 0.0;
     double nuevaReservada = reservado - cantidad;
     if (nuevaReservada < 0) nuevaReservada = 0.0;
-    await _db.update(_db.productosTable).replace(
-      reg.copyWith(stockReservado: Value(nuevaReservada)),
-    );
+    await _db
+        .update(_db.productosTable)
+        .replace(reg.copyWith(stockReservado: Value(nuevaReservada)));
     await cargarTodos();
   }
 }

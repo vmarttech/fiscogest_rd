@@ -11,9 +11,9 @@ class SolicitudCreditoDao extends DatabaseAccessor<AppDatabase>
   SolicitudCreditoDao(super.db);
 
   Future<SolicitudCreditoData?> porVentaId(int ventaId) {
-    return (select(solicitudesCreditoTable)
-          ..where((t) => t.ventaId.equals(ventaId)))
-        .getSingleOrNull();
+    return (select(
+      solicitudesCreditoTable,
+    )..where((t) => t.ventaId.equals(ventaId))).getSingleOrNull();
   }
 
   Future<SolicitudCreditoData> obtenerOCrearPorVenta({
@@ -30,11 +30,14 @@ class SolicitudCreditoDao extends DatabaseAccessor<AppDatabase>
         usuarioId: Value(usuarioId),
       ),
     );
-    return (select(solicitudesCreditoTable)..where((t) => t.id.equals(id)))
-        .getSingle();
+    return (select(
+      solicitudesCreditoTable,
+    )..where((t) => t.id.equals(id))).getSingle();
   }
 
-  Future<void> actualizarSolicitud(SolicitudesCreditoTableCompanion data) async {
+  Future<void> actualizarSolicitud(
+    SolicitudesCreditoTableCompanion data,
+  ) async {
     if (!data.id.present) {
       throw Exception('actualizarSolicitud requiere id');
     }
@@ -54,16 +57,13 @@ class SolicitudCreditoDao extends DatabaseAccessor<AppDatabase>
     required int solicitudId,
     required List<ReferenciasCreditoTableCompanion> refs,
   }) async {
-    await (delete(referenciasCreditoTable)
-          ..where((t) => t.solicitudId.equals(solicitudId)))
-        .go();
+    await (delete(
+      referenciasCreditoTable,
+    )..where((t) => t.solicitudId.equals(solicitudId))).go();
     for (var i = 0; i < refs.length; i++) {
       final r = refs[i];
       await into(referenciasCreditoTable).insert(
-        r.copyWith(
-          solicitudId: Value(solicitudId),
-          orden: Value(i + 1),
-        ),
+        r.copyWith(solicitudId: Value(solicitudId), orden: Value(i + 1)),
       );
     }
   }

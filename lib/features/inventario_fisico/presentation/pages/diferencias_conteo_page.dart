@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class DiferenciasConteoPage extends ConsumerStatefulWidget {
   const DiferenciasConteoPage({super.key, required this.conteoId});
@@ -32,11 +33,11 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
           'Se actualizará el stock de cada producto al valor físico contado. ¿Continuar?',
         ),
         actions: [
-        IconButton(
-          tooltip: 'Reporte',
-          icon: const Icon(Icons.description_outlined, color: Colors.white),
-          onPressed: _exportarReporte,
-        ),
+          IconButton(
+            tooltip: 'Reporte',
+            icon: const Icon(Icons.description_outlined, color: Colors.white),
+            onPressed: _exportarReporte,
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Cancelar'),
@@ -56,7 +57,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
       final uid = ref.read(usuarioAutenticadoProvider);
       if (uid == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(content: Text('No hay sesión activa')),
           );
         }
@@ -66,38 +67,36 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
       ref.invalidate(diferenciasConteoProvider(widget.conteoId));
       ref.invalidate(listaConteosProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(content: Text('Ajustes aplicados y conteo aprobado')),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        FiscoGestNotifications.show(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _aprobando = false);
     }
   }
 
-
   Future<void> _exportarReporte() async {
     try {
-      final bytes = await ref.read(generarReporteProvider).call(widget.conteoId);
+      final bytes = await ref
+          .read(generarReporteProvider)
+          .call(widget.conteoId);
       await Printing.layoutPdf(
         onLayout: (_) async => bytes,
         name: 'conteo_\${widget.conteoId}.pdf',
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(content: Text('Error reporte: \$e')),
         );
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -155,8 +154,8 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                             color: d.diferencia == 0
                                 ? AppColors.textSecondary
                                 : (d.diferencia > 0
-                                    ? AppColors.success
-                                    : AppColors.error),
+                                      ? AppColors.success
+                                      : AppColors.error),
                           ),
                         ),
                       );

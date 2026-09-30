@@ -7,7 +7,8 @@ import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_venta
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_cargada_desde_historial_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_borrador_servicio_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/convertir_cotizacion_provider.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart' as venta_providers;
+import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart'
+    as venta_providers;
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class VistaDetalle extends ConsumerWidget {
   const VistaDetalle({super.key});
@@ -43,32 +45,33 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
 
   String _etiquetaEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.cotizado => 'Vigente',
-        EstadoDocumento.enCredito => 'En aprobación',
-        EstadoDocumento.aprobado => 'Aprobado',
-        EstadoDocumento.anulado => 'Rechazado',
-        EstadoDocumento.facturado => 'Facturada',
-        _ => 'Borrador',
-      };
+    EstadoDocumento.cotizado => 'Vigente',
+    EstadoDocumento.enCredito => 'En aprobación',
+    EstadoDocumento.aprobado => 'Aprobado',
+    EstadoDocumento.anulado => 'Rechazado',
+    EstadoDocumento.facturado => 'Facturada',
+    _ => 'Borrador',
+  };
 
   Color _colorEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.cotizado => AppColors.primary,
-        EstadoDocumento.enCredito => const Color(0xFFE65100),
-        EstadoDocumento.aprobado => AppColors.success,
-        EstadoDocumento.anulado => AppColors.error,
-        EstadoDocumento.facturado => AppColors.success,
-        _ => AppColors.textSecondary,
-      };
+    EstadoDocumento.cotizado => AppColors.primary,
+    EstadoDocumento.enCredito => const Color(0xFFE65100),
+    EstadoDocumento.aprobado => AppColors.success,
+    EstadoDocumento.anulado => AppColors.error,
+    EstadoDocumento.facturado => AppColors.success,
+    _ => AppColors.textSecondary,
+  };
 
   Color _colorFondoEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
-        EstadoDocumento.enCredito =>
-          const Color(0xFFE65100).withValues(alpha: 0.12),
-        EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
-        EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
-        EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
-        _ => AppColors.textSecondary.withValues(alpha: 0.12),
-      };
+    EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
+    EstadoDocumento.enCredito => const Color(
+      0xFFE65100,
+    ).withValues(alpha: 0.12),
+    EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
+    EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
+    EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
+    _ => AppColors.textSecondary.withValues(alpha: 0.12),
+  };
 
   String get _ncf {
     return (venta.numeroFactura ?? '').trim();
@@ -93,7 +96,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
   Future<void> _imprimirEntrega(BuildContext context, WidgetRef ref) async {
     if (venta.comprobanteEntregaImpreso) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text('El comprobante de entrega ya fue impreso'),
             behavior: SnackBarBehavior.floating,
@@ -129,14 +132,14 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           }
         }
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text('Comprobante de entrega registrado'),
             behavior: SnackBarBehavior.floating,
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text('No se pudo registrar (¿ya impreso o no facturada?)'),
             behavior: SnackBarBehavior.floating,
@@ -145,7 +148,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Entrega: $e'),
             backgroundColor: AppColors.error,
@@ -158,10 +161,13 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
-      await ComprobantePdf.imprimirFactura(venta, empresa: ref.read(configuracionControllerProvider).valueOrNull);
+      await ComprobantePdf.imprimirFactura(
+        venta,
+        empresa: ref.read(configuracionControllerProvider).valueOrNull,
+      );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al imprimir: $e'),
             backgroundColor: AppColors.error,
@@ -180,9 +186,13 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         final repo = ref.read(venta_providers.ventasRepositoryProvider);
         v = await repo.obtenerVentaPorId(v.id!) ?? v;
       }
-      await ComprobantePdf.imprimirFactura(v, compartir: true, empresa: ref.read(configuracionControllerProvider).valueOrNull);
+      await ComprobantePdf.imprimirFactura(
+        v,
+        compartir: true,
+        empresa: ref.read(configuracionControllerProvider).valueOrNull,
+      );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text('Elige WhatsApp, Bluetooth o Guardar…'),
             backgroundColor: AppColors.success,
@@ -192,7 +202,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al generar archivo: $e'),
             backgroundColor: AppColors.error,
@@ -209,7 +219,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       await servicio.enviarPorCorreo(venta, '');
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al enviar: $e'),
             backgroundColor: AppColors.error,
@@ -250,7 +260,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       final servicio = ref.read(cotizacionAprobacionProvider);
       await servicio.enviarAprobacion(venta.id!);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Cotización ${venta.numero} enviada a aprobación'),
             backgroundColor: AppColors.success,
@@ -261,7 +271,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: AppColors.error,
@@ -302,7 +312,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       final servicio = ref.read(cotizacionAprobacionProvider);
       await servicio.aprobarCredito(venta.id!);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text(
               'Cotización ${venta.numero} aprobada. Ya puede ir a Caja.',
@@ -316,7 +326,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: AppColors.error,
@@ -357,7 +367,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       final servicio = ref.read(cotizacionAprobacionProvider);
       await servicio.rechazarCredito(venta.id!);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Cotización ${venta.numero} rechazada y anulada'),
             backgroundColor: AppColors.success,
@@ -368,7 +378,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: AppColors.error,
@@ -411,7 +421,9 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     if (confirmar != true || !context.mounted) return;
 
     ref.read(ventaCargadaDesdeHistorialProvider.notifier).limpiarVenta();
-    ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.inicio);
+    ref
+        .read(ventasNavegacionProvider.notifier)
+        .cambiarVista(VistaActual.inicio);
 
     if (!context.mounted) return;
     context.push(
@@ -429,13 +441,14 @@ class _MostrarDetalleVenta extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final estado = venta.estadoDocumento;
-    final esCotizacionActiva = estado != EstadoDocumento.facturado && estado != EstadoDocumento.anulado;
+    final esCotizacionActiva =
+        estado != EstadoDocumento.facturado &&
+        estado != EstadoDocumento.anulado;
     final puedeEnviarAprobacion =
         estado == EstadoDocumento.cotizado && venta.id != null;
     // Aprobar/rechazar crédito SOLO en módulo Créditos (no ventas).
     const puedeAprobarRechazar = false;
-    final puedeIrACaja =
-        estado == EstadoDocumento.aprobado && venta.id != null;
+    final puedeIrACaja = estado == EstadoDocumento.aprobado && venta.id != null;
     final esPantallaPequena = MediaQuery.of(context).size.width < 600;
     final padding = esPantallaPequena ? 12.0 : 16.0;
     final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
@@ -634,23 +647,23 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                                       children: [
                                         Text(
                                           linea.nombreProducto ?? 'Producto',
-                                          style:
-                                              AppTypography.bodyMedium.copyWith(
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: tamanoCuerpo,
-                                            color: AppColors.textPrimary,
-                                          ),
+                                          style: AppTypography.bodyMedium
+                                              .copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: tamanoCuerpo,
+                                                color: AppColors.textPrimary,
+                                              ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           'Cant: ${linea.cantidad}  ×  ${_formatearMonto(linea.precioUnitario)}',
-                                          style:
-                                              AppTypography.bodySmall.copyWith(
-                                            fontSize: tamanoEtiqueta,
-                                            color: AppColors.textSecondary,
-                                          ),
+                                          style: AppTypography.bodySmall
+                                              .copyWith(
+                                                fontSize: tamanoEtiqueta,
+                                                color: AppColors.textSecondary,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -687,7 +700,11 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                         _formatearMonto(venta.subtotal),
                         fontSize: tamanoCuerpo,
                       ),
-                      if (!(ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false))
+                      if (!(ref
+                              .watch(configuracionControllerProvider)
+                              .valueOrNull
+                              ?.modoSimplificado ??
+                          false))
                         _FilaResumen(
                           'ITBIS (18%)',
                           _formatearMonto(venta.itbis),
@@ -742,12 +759,13 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    if (esCotizacionActiva) _chipAccion(
-                      icon: Icons.print_outlined,
-                      label: 'Imprimir',
-                      onTap: () => _imprimir(context, ref),
-                      esPantallaPequena: esPantallaPequena,
-                    ),
+                    if (esCotizacionActiva)
+                      _chipAccion(
+                        icon: Icons.print_outlined,
+                        label: 'Imprimir',
+                        onTap: () => _imprimir(context, ref),
+                        esPantallaPequena: esPantallaPequena,
+                      ),
                     if ((venta.estadoDocumento == EstadoDocumento.facturado ||
                             _ncf.isNotEmpty) &&
                         !venta.comprobanteEntregaImpreso)
@@ -764,27 +782,30 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                           venta.fechaComprobanteEntrega != null
                               ? 'Entrega impresa · ${_formatearFecha(venta.fechaComprobanteEntrega!)}'
                               : 'Entrega ya impresa',
-                          style: AppTypography.bodySmall
-                              .copyWith(color: AppColors.textSecondary),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
-                    if (esCotizacionActiva) _chipAccion(
-                      icon: Icons.picture_as_pdf_outlined,
-                      label: 'PDF',
-                      onTap: () => _exportarPDF(context, ref),
-                      esPantallaPequena: esPantallaPequena,
-                    ),
-                    if (esCotizacionActiva) _chipAccion(
-                      icon: Icons.email_outlined,
-                      label: 'Enviar',
-                      onTap: () => _enviarPorCorreo(context, ref),
-                      esPantallaPequena: esPantallaPequena,
-                    ),
+                    if (esCotizacionActiva)
+                      _chipAccion(
+                        icon: Icons.picture_as_pdf_outlined,
+                        label: 'PDF',
+                        onTap: () => _exportarPDF(context, ref),
+                        esPantallaPequena: esPantallaPequena,
+                      ),
+                    if (esCotizacionActiva)
+                      _chipAccion(
+                        icon: Icons.email_outlined,
+                        label: 'Enviar',
+                        onTap: () => _enviarPorCorreo(context, ref),
+                        esPantallaPequena: esPantallaPequena,
+                      ),
                     _chipAccion(
                       icon: Icons.receipt_long_outlined,
                       label: 'Devolución',
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        FiscoGestNotifications.show(
                           const SnackBar(
                             content: Text(
                               'Vaya a Facturación → Nota de Crédito / Devolución.',
@@ -963,8 +984,8 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                   onPressed: puedeEnviarAprobacion
                       ? () => _enviarAprobacion(context, ref)
                       : puedeIrACaja
-                          ? () => _irACaja(context, ref)
-                          : null,
+                      ? () => _irACaja(context, ref)
+                      : null,
                   icon: Icon(
                     puedeEnviarAprobacion
                         ? Icons.send_outlined
@@ -981,8 +1002,9 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        puedeIrACaja ? AppColors.success : AppColors.primary,
+                    backgroundColor: puedeIrACaja
+                        ? AppColors.success
+                        : AppColors.primary,
                     foregroundColor: AppColors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

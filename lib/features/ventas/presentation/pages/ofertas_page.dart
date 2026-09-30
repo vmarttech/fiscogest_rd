@@ -38,7 +38,9 @@ class _OfertasPageState extends ConsumerState<OfertasPage> {
               error: (error, stack) => Center(
                 child: Text(
                   'Error al cargar ofertas: $error',
-                  style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.error,
+                  ),
                 ),
               ),
               data: (ofertas) {

@@ -42,9 +42,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
       // ✅ DECISIÓN: INSERT si es nuevo, UPDATE si ya existe
       if (producto.id == null) {
         // PRODUCTO NUEVO → INSERT + movimiento de entrada
-        final idGenerado = await _db
-            .into(_db.productosTable)
-            .insert(companion);
+        final idGenerado = await _db.into(_db.productosTable).insert(companion);
         await _kardexRepo.registrarMovimiento(
           Kardex(
             id: null,
@@ -64,9 +62,9 @@ class ProductoRepositoryImpl implements IProductoRepository {
         return idGenerado;
       } else {
         // PRODUCTO EXISTENTE → SOLO UPDATE, SIN movimiento
-        await (_db.update(_db.productosTable)
-              ..where((t) => t.id.equals(producto.id!)))
-            .write(companion);
+        await (_db.update(
+          _db.productosTable,
+        )..where((t) => t.id.equals(producto.id!))).write(companion);
         return producto.id!;
       }
     });

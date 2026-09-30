@@ -67,16 +67,22 @@ class KpiCard extends StatelessWidget {
                   ),
                   if (change != null && isPositive != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
-                        color: (isPositive! ? AppColors.success : AppColors.error)
-                            .withValues(alpha: 0.12),
+                        color:
+                            (isPositive! ? AppColors.success : AppColors.error)
+                                .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         change!,
                         style: AppTypography.labelSmall.copyWith(
-                          color: isPositive! ? AppColors.success : AppColors.error,
+                          color: isPositive!
+                              ? AppColors.success
+                              : AppColors.error,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

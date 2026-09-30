@@ -21,16 +21,18 @@ class InventarioFisicoRepositoryImpl
   }
 
   Future<EstadoConteo?> _estadoConteo(int conteoId) async {
-    final row = await (_db.select(_db.conteosFisicos)
-          ..where((t) => t.id.equals(conteoId)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.conteosFisicos,
+    )..where((t) => t.id.equals(conteoId))).getSingleOrNull();
     if (row == null) return null;
     return _parseEstado(row.estado);
   }
 
   @override
   Future<int> registrarConteo(ConteoFisico conteo) async {
-    final id = await _db.into(_db.conteosFisicos).insert(
+    final id = await _db
+        .into(_db.conteosFisicos)
+        .insert(
           ConteosFisicosCompanion.insert(
             nombreConteo: conteo.nombreConteo,
             fechaConteo: conteo.fechaConteo,
@@ -63,9 +65,9 @@ class InventarioFisicoRepositoryImpl
 
   @override
   Future<List<DiferenciaConteo>> listarDiferencias(int conteoId) async {
-    final registros = await (_db.select(_db.diferenciasConteo)
-          ..where((t) => t.conteoId.equals(conteoId)))
-        .get();
+    final registros = await (_db.select(
+      _db.diferenciasConteo,
+    )..where((t) => t.conteoId.equals(conteoId))).get();
     return registros
         .map(
           (r) => DiferenciaConteo(
@@ -93,16 +95,18 @@ class InventarioFisicoRepositoryImpl
       );
     }
 
-    final existing = await (_db.select(_db.diferenciasConteo)
-          ..where(
-            (t) =>
-                t.conteoId.equals(dif.conteoId) &
-                t.productoId.equals(dif.productoId),
-          ))
-        .getSingleOrNull();
+    final existing =
+        await (_db.select(_db.diferenciasConteo)..where(
+              (t) =>
+                  t.conteoId.equals(dif.conteoId) &
+                  t.productoId.equals(dif.productoId),
+            ))
+            .getSingleOrNull();
 
     if (existing == null) {
-      await _db.into(_db.diferenciasConteo).insert(
+      await _db
+          .into(_db.diferenciasConteo)
+          .insert(
             DiferenciasConteoCompanion.insert(
               conteoId: dif.conteoId,
               productoId: dif.productoId,
@@ -112,26 +116,22 @@ class InventarioFisicoRepositoryImpl
               stockFisico: dif.stockFisico,
               diferencia: dif.diferencia,
               motivo: Value(dif.motivo),
-              estado: Value(
-                dif.estado.isEmpty ? 'pendiente' : dif.estado,
-              ),
+              estado: Value(dif.estado.isEmpty ? 'pendiente' : dif.estado),
             ),
           );
     } else {
       if (existing.estado == 'aprobado') {
         throw StateError('Esta línea ya fue aprobada.');
       }
-      await (_db.update(_db.diferenciasConteo)
-            ..where((t) => t.id.equals(existing.id)))
-          .write(
+      await (_db.update(
+        _db.diferenciasConteo,
+      )..where((t) => t.id.equals(existing.id))).write(
         DiferenciasConteoCompanion(
           stockSistema: Value(dif.stockSistema),
           stockFisico: Value(dif.stockFisico),
           diferencia: Value(dif.diferencia),
           motivo: Value(dif.motivo),
-          estado: Value(
-            dif.estado.isEmpty ? 'pendiente' : dif.estado,
-          ),
+          estado: Value(dif.estado.isEmpty ? 'pendiente' : dif.estado),
         ),
       );
     }
@@ -140,12 +140,8 @@ class InventarioFisicoRepositoryImpl
   }
 
   @override
-  Future<void> actualizarEstadoConteo(
-    int conteoId,
-    EstadoConteo estado,
-  ) async {
-    await (_db.update(_db.conteosFisicos)
-          ..where((t) => t.id.equals(conteoId)))
+  Future<void> actualizarEstadoConteo(int conteoId, EstadoConteo estado) async {
+    await (_db.update(_db.conteosFisicos)..where((t) => t.id.equals(conteoId)))
         .write(ConteosFisicosCompanion(estado: Value(estado.name)));
   }
 
@@ -174,20 +170,20 @@ class InventarioFisicoRepositoryImpl
         // 1) Stock
         await (_db.update(_db.productosTable)
               ..where((t) => t.id.equals(d.productoId)))
-            .write(
-          ProductosTableCompanion(stock: Value(saldoNuevo)),
-        );
+            .write(ProductosTableCompanion(stock: Value(saldoNuevo)));
 
         // 2) Kardex (ajuste)
         double costo = 0.0;
-        final prod = await (_db.select(_db.productosTable)
-              ..where((t) => t.id.equals(d.productoId)))
-            .getSingleOrNull();
+        final prod = await (_db.select(
+          _db.productosTable,
+        )..where((t) => t.id.equals(d.productoId))).getSingleOrNull();
         if (prod != null) {
           costo = prod.precioCompra ?? 0.0;
         }
 
-        await _db.into(_db.kardexTable).insert(
+        await _db
+            .into(_db.kardexTable)
+            .insert(
               KardexTableCompanion(
                 productoId: Value(d.productoId),
                 tipoMovimiento: const Value('ajuste'),
@@ -213,7 +209,9 @@ class InventarioFisicoRepositoryImpl
         // 3) Lista de ajustes (auditoría)
         if (d.diferencia != 0) {
           final tipo = d.diferencia > 0 ? 'entrada' : 'salida';
-          await _db.into(_db.ajusteInventarioTable).insert(
+          await _db
+              .into(_db.ajusteInventarioTable)
+              .insert(
                 AjusteInventarioTableCompanion.insert(
                   productoId: d.productoId,
                   tipoAjuste: tipo,
@@ -233,17 +231,13 @@ class InventarioFisicoRepositoryImpl
         // 4) Línea aprobada
         await (_db.update(_db.diferenciasConteo)
               ..where((t) => t.id.equals(d.id)))
-            .write(
-          const DiferenciasConteoCompanion(estado: Value('aprobado')),
-        );
+            .write(const DiferenciasConteoCompanion(estado: Value('aprobado')));
       }
 
-      await (_db.update(_db.conteosFisicos)
-            ..where((t) => t.id.equals(conteoId)))
-          .write(
-        ConteosFisicosCompanion(
-          estado: Value(EstadoConteo.aprobado.name),
-        ),
+      await (_db.update(
+        _db.conteosFisicos,
+      )..where((t) => t.id.equals(conteoId))).write(
+        ConteosFisicosCompanion(estado: Value(EstadoConteo.aprobado.name)),
       );
     });
   }
@@ -296,7 +290,10 @@ class InventarioFisicoRepositoryImpl
                   d.estado,
                 ],
             ],
-            headerStyle: const pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9),
+            headerStyle: const pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 9,
+            ),
             cellStyle: const pw.TextStyle(fontSize: 8),
             cellAlignment: pw.Alignment.centerLeft,
           ),

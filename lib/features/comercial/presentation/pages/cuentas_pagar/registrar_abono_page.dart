@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/cuenta_pagar.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/cuentas_pagar_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class RegistrarAbonoPage extends ConsumerStatefulWidget {
   const RegistrarAbonoPage({super.key, required this.cuentaId});
@@ -72,20 +73,26 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
 
       if (ok) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Abono registrado ✅'), backgroundColor: Colors.green),
+        FiscoGestNotifications.show(
+          const SnackBar(
+            content: Text('Abono registrado ✅'),
+            backgroundColor: Colors.green,
+          ),
         );
         context.pop();
       } else {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo registrar el abono'), backgroundColor: Colors.red),
+        FiscoGestNotifications.show(
+          const SnackBar(
+            content: Text('No se pudo registrar el abono'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _cargando = false);
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     }
@@ -93,7 +100,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<CuentaPagar?> cuentaAsync = ref.watch(cuentaPagarPorIdProvider(_idNumerico));
+    final AsyncValue<CuentaPagar?> cuentaAsync = ref.watch(
+      cuentaPagarPorIdProvider(_idNumerico),
+    );
 
     return AppScaffold(
       title: 'Registrar Abono',
@@ -106,7 +115,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
               padding: AppLayout.pantallaPadding,
               child: Text(
                 'Error: $error',
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.error,
+                ),
               ),
             ),
           ),
@@ -123,7 +134,11 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.check_circle, size: 48, color: Colors.green),
+                      const Icon(
+                        Icons.check_circle,
+                        size: 48,
+                        color: Colors.green,
+                      ),
                       const SizedBox(height: 16),
                       const Text(
                         'Esta cuenta ya está pagada.',
@@ -154,13 +169,21 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                         padding: AppSpacing.allM,
                         child: Column(
                           children: [
-                            Text(cuenta.nombreProveedor, style: AppTypography.h4Bold),
+                            Text(
+                              cuenta.nombreProveedor,
+                              style: AppTypography.h4Bold,
+                            ),
                             const SizedBox(height: 8),
-                            const Text('Saldo pendiente a la fecha:', style: AppTypography.bodyMedium),
+                            const Text(
+                              'Saldo pendiente a la fecha:',
+                              style: AppTypography.bodyMedium,
+                            ),
                             const SizedBox(height: 4),
                             Text(
                               formatRd(saldoPendiente),
-                              style: AppTypography.h4Bold.copyWith(color: AppColors.primary),
+                              style: AppTypography.h4Bold.copyWith(
+                                color: AppColors.primary,
+                              ),
                             ),
                           ],
                         ),
@@ -179,7 +202,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                           context: context,
                           initialDate: _fecha,
                           firstDate: DateTime(2020),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
                         );
                         if (picked != null) setState(() => _fecha = picked);
                       },
@@ -187,14 +212,20 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _montoCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Monto del Abono',
                         prefixText: 'RD\$ ',
                       ),
                       validator: (String? value) {
-                        final double? v = double.tryParse(value?.replaceAll(',', '.') ?? '');
-                        if (v == null || v <= 0) return 'Ingrese un monto válido';
+                        final double? v = double.tryParse(
+                          value?.replaceAll(',', '.') ?? '',
+                        );
+                        if (v == null || v <= 0) {
+                          return 'Ingrese un monto válido';
+                        }
                         if (v > saldoPendiente) {
                           return 'Excede saldo pendiente (${formatRd(saldoPendiente).replaceFirst('RD\$ ', '')}  /*keep*/)';
                         }
@@ -204,14 +235,29 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: _formaPago,
-                      decoration: const InputDecoration(labelText: 'Forma de Pago'),
+                      decoration: const InputDecoration(
+                        labelText: 'Forma de Pago',
+                      ),
                       items: const [
-                        DropdownMenuItem<String>(value: 'efectivo', child: Text('Efectivo')),
-                        DropdownMenuItem<String>(value: 'transferencia', child: Text('Transferencia')),
-                        DropdownMenuItem<String>(value: 'cheque', child: Text('Cheque')),
-                        DropdownMenuItem<String>(value: 'tarjeta', child: Text('Tarjeta')),
+                        DropdownMenuItem<String>(
+                          value: 'efectivo',
+                          child: Text('Efectivo'),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: 'transferencia',
+                          child: Text('Transferencia'),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: 'cheque',
+                          child: Text('Cheque'),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: 'tarjeta',
+                          child: Text('Tarjeta'),
+                        ),
                       ],
-                      onChanged: (String? v) => setState(() => _formaPago = v ?? 'efectivo'),
+                      onChanged: (String? v) =>
+                          setState(() => _formaPago = v ?? 'efectivo'),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -248,8 +294,13 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             child: _cargando
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text('Registrar Abono', style: TextStyle(fontSize: 16)),
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Text(
+                                    'Registrar Abono',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
                           ),
                         ),
                       ],

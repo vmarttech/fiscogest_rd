@@ -1,12 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum FormaPago {
-  efectivo,
-  tarjeta,
-  transferencia,
-  credito,
-}
+enum FormaPago { efectivo, tarjeta, transferencia, credito }
 
 extension FormaPagoNombre on FormaPago {
   String get nombre => switch (this) {
@@ -63,7 +58,10 @@ class CajaNotifier extends StateNotifier<CajaState> {
   }
 
   void establecerAbono(double valor) {
-    state = state.copyWith(abono: valor, formasDePago: [(FormaPago.efectivo, valor)]);
+    state = state.copyWith(
+      abono: valor,
+      formasDePago: [(FormaPago.efectivo, valor)],
+    );
   }
 
   void agregarPago(FormaPago forma, double monto, String referencia) {

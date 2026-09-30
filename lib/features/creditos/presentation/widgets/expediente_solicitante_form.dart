@@ -74,15 +74,23 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
     _notas = TextEditingController(text: e.notasAnalista);
 
     final refs = e.referencias.isEmpty
-        ? const [ReferenciaSolicitante(orden: 1), ReferenciaSolicitante(orden: 2)]
+        ? const [
+            ReferenciaSolicitante(orden: 1),
+            ReferenciaSolicitante(orden: 2),
+          ]
         : e.referencias;
-    _refNombre = refs.map((r) => TextEditingController(text: r.nombre)).toList();
-    _refRelacion =
-        refs.map((r) => TextEditingController(text: r.relacion)).toList();
-    _refTelefono =
-        refs.map((r) => TextEditingController(text: r.telefono)).toList();
-    _refDireccion =
-        refs.map((r) => TextEditingController(text: r.direccion)).toList();
+    _refNombre = refs
+        .map((r) => TextEditingController(text: r.nombre))
+        .toList();
+    _refRelacion = refs
+        .map((r) => TextEditingController(text: r.relacion))
+        .toList();
+    _refTelefono = refs
+        .map((r) => TextEditingController(text: r.telefono))
+        .toList();
+    _refDireccion = refs
+        .map((r) => TextEditingController(text: r.direccion))
+        .toList();
     while (_refNombre.length < 2) {
       _refNombre.add(TextEditingController());
       _refRelacion.add(TextEditingController());
@@ -109,8 +117,9 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
     _empresa.text = e.empresa;
     _cargo.text = e.cargo;
     _telTrabajo.text = e.telefonoTrabajo;
-    _ingreso.text =
-        e.ingresoMensual > 0 ? e.ingresoMensual.toStringAsFixed(2) : '';
+    _ingreso.text = e.ingresoMensual > 0
+        ? e.ingresoMensual.toStringAsFixed(2)
+        : '';
     _tiempoLab.text = e.tiempoLaborando;
     _vivienda.text = e.tipoVivienda;
     _dependientes.text = '${e.dependientes}';
@@ -120,10 +129,28 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
   @override
   void dispose() {
     for (final c in [
-      _nombre, _cedula, _estadoCivil, _telefono, _celular, _email,
-      _direccion, _sector, _ciudad, _tiempoRes, _empresa, _cargo,
-      _telTrabajo, _ingreso, _tiempoLab, _vivienda, _dependientes, _notas,
-      ..._refNombre, ..._refRelacion, ..._refTelefono, ..._refDireccion,
+      _nombre,
+      _cedula,
+      _estadoCivil,
+      _telefono,
+      _celular,
+      _email,
+      _direccion,
+      _sector,
+      _ciudad,
+      _tiempoRes,
+      _empresa,
+      _cargo,
+      _telTrabajo,
+      _ingreso,
+      _tiempoLab,
+      _vivienda,
+      _dependientes,
+      _notas,
+      ..._refNombre,
+      ..._refRelacion,
+      ..._refTelefono,
+      ..._refDireccion,
     ]) {
       c.dispose();
     }
@@ -232,14 +259,23 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
             children: [
               _campo(_empresa, 'Empresa'),
               _campo(_cargo, 'Cargo'),
-              _campo(_telTrabajo, 'Teléfono trabajo',
-                  keyboard: TextInputType.phone),
-              _campo(_ingreso, 'Ingreso mensual',
-                  keyboard: const TextInputType.numberWithOptions(decimal: true)),
+              _campo(
+                _telTrabajo,
+                'Teléfono trabajo',
+                keyboard: TextInputType.phone,
+              ),
+              _campo(
+                _ingreso,
+                'Ingreso mensual',
+                keyboard: const TextInputType.numberWithOptions(decimal: true),
+              ),
               _campo(_tiempoLab, 'Tiempo laborando'),
               _campo(_vivienda, 'Tipo de vivienda (propia/alquilada)'),
-              _campo(_dependientes, 'Dependientes',
-                  keyboard: TextInputType.number),
+              _campo(
+                _dependientes,
+                'Dependientes',
+                keyboard: TextInputType.number,
+              ),
               _campo(_notas, 'Notas del analista', maxLines: 3),
             ],
           ),
@@ -257,14 +293,18 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
               children: [
                 Text(
                   'Referencia ${i + 1}',
-                  style: AppTypography.bodyMedium
-                      .copyWith(fontWeight: FontWeight.w700),
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 AppLayout.vS,
                 _campo(_refNombre[i], 'Nombre'),
                 _campo(_refRelacion[i], 'Relación / parentesco'),
-                _campo(_refTelefono[i], 'Teléfono',
-                    keyboard: TextInputType.phone),
+                _campo(
+                  _refTelefono[i],
+                  'Teléfono',
+                  keyboard: TextInputType.phone,
+                ),
                 _campo(_refDireccion[i], 'Dirección'),
               ],
             ),

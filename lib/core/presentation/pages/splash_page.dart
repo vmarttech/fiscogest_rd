@@ -27,9 +27,10 @@ class _SplashPageState extends State<SplashPage>
       duration: const Duration(milliseconds: 900),
     );
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _scale = Tween<double>(begin: 0.92, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack),
-    );
+    _scale = Tween<double>(
+      begin: 0.92,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
     _ctrl.forward();
     Future<void>.delayed(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
@@ -101,8 +102,9 @@ class _SplashPageState extends State<SplashPage>
                     SizedBox(
                       width: 140,
                       child: LinearProgressIndicator(
-                        backgroundColor:
-                            AppColors.white.withValues(alpha: 0.25),
+                        backgroundColor: AppColors.white.withValues(
+                          alpha: 0.25,
+                        ),
                         color: AppColors.white,
                         minHeight: 3,
                         borderRadius: BorderRadius.circular(2),

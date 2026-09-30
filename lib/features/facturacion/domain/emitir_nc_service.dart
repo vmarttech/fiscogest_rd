@@ -43,7 +43,8 @@ class EmitirNcService {
     // Idempotencia: una NC completa por factura origen
     final existentes = await notasDao.listar();
     final ya = existentes.any(
-      (n) => n.ncfFacturaOrigen == ncfOrigen || n.ventaIdOrigen == facturaVentaId,
+      (n) =>
+          n.ncfFacturaOrigen == ncfOrigen || n.ventaIdOrigen == facturaVentaId,
     );
     if (ya) {
       throw StateError(

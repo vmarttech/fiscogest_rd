@@ -93,17 +93,21 @@ class DashboardEconomicoPage extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('No se pudo cargar el dashboard',
-                      style: AppTypography.h4),
+                  const Text(
+                    'No se pudo cargar el dashboard',
+                    style: AppTypography.h4,
+                  ),
                   const SizedBox(height: 8),
-                  Text('$e',
-                      style: AppTypography.bodySmall
-                          .copyWith(color: AppColors.textSecondary),
-                      textAlign: TextAlign.center),
+                  Text(
+                    '$e',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: () =>
-                        ref.invalidate(dashboardSnapshotProvider),
+                    onPressed: () => ref.invalidate(dashboardSnapshotProvider),
                     child: const Text('Reintentar'),
                   ),
                 ],
@@ -130,7 +134,8 @@ class DashboardEconomicoPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _Hero(
-                        saludo: '${_saludo()}${nombre.isNotEmpty ? ', $nombre' : ''}',
+                        saludo:
+                            '${_saludo()}${nombre.isNotEmpty ? ', $nombre' : ''}',
                         periodoLabel: _labelPeriodo(periodo),
                         ventas: kpi.ventas,
                         delta: kpi.deltaVentasPct,
@@ -155,8 +160,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
                       if (mobile) ...[
                         _MixPagoCard(data: snap.porFormaPago, fmt: _fmt),
                         const SizedBox(height: 12),
-                        _TopProductosCard(
-                            items: snap.topProductos, fmt: _fmt),
+                        _TopProductosCard(items: snap.topProductos, fmt: _fmt),
                         const SizedBox(height: 12),
                         _SaludCard(kpi: kpi),
                       ] else
@@ -165,12 +169,16 @@ class DashboardEconomicoPage extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: _MixPagoCard(
-                                  data: snap.porFormaPago, fmt: _fmt),
+                                data: snap.porFormaPago,
+                                fmt: _fmt,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: _TopProductosCard(
-                                  items: snap.topProductos, fmt: _fmt),
+                                items: snap.topProductos,
+                                fmt: _fmt,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(child: _SaludCard(kpi: kpi)),
@@ -259,8 +267,10 @@ class _Hero extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -460,13 +470,16 @@ class _KpiCard extends StatelessWidget {
               const Spacer(),
               if (delta != null)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: (delta! >= 0
-                            ? const Color(0xFF059669)
-                            : const Color(0xFFDC2626))
-                        .withValues(alpha: 0.12),
+                    color:
+                        (delta! >= 0
+                                ? const Color(0xFF059669)
+                                : const Color(0xFFDC2626))
+                            .withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -585,9 +598,11 @@ class _ChartCard extends StatelessWidget {
                       borderData: FlBorderData(show: false),
                       titlesData: FlTitlesData(
                         topTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                         rightTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
@@ -709,19 +724,24 @@ class _MixPagoCard extends StatelessWidget {
         children: [
           Text(
             'Formas de pago',
-            style: AppTypography.labelLarge
-                .copyWith(fontWeight: FontWeight.w700),
+            style: AppTypography.labelLarge.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           Text(
             'Mes en curso',
-            style: AppTypography.labelSmall
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 14),
           if (entries.isEmpty)
-            Text('Sin datos',
-                style: AppTypography.bodySmall
-                    .copyWith(color: AppColors.textSecondary))
+            Text(
+              'Sin datos',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            )
           else
             ...List.generate(entries.length, (i) {
               final e = entries[i];
@@ -804,19 +824,24 @@ class _TopProductosCard extends StatelessWidget {
         children: [
           Text(
             'Top productos',
-            style: AppTypography.labelLarge
-                .copyWith(fontWeight: FontWeight.w700),
+            style: AppTypography.labelLarge.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           Text(
             'Mes en curso',
-            style: AppTypography.labelSmall
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 12),
           if (items.isEmpty)
-            Text('Sin datos',
-                style: AppTypography.bodySmall
-                    .copyWith(color: AppColors.textSecondary))
+            Text(
+              'Sin datos',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            )
           else
             ...items.asMap().entries.map((e) {
               final i = e.key;
@@ -889,8 +914,8 @@ class _SaludCard extends StatelessWidget {
     Color sem(bool ok, bool warn) => ok
         ? const Color(0xFF059669)
         : warn
-            ? const Color(0xFFD97706)
-            : const Color(0xFFDC2626);
+        ? const Color(0xFFD97706)
+        : const Color(0xFFDC2626);
 
     final margenOk = kpi.margenPct >= 20;
     final margenWarn = kpi.margenPct >= 10;
@@ -908,9 +933,7 @@ class _SaludCard extends StatelessWidget {
               decoration: BoxDecoration(color: c, shape: BoxShape.circle),
             ),
             const SizedBox(width: 10),
-            Expanded(
-              child: Text(label, style: AppTypography.labelMedium),
-            ),
+            Expanded(child: Text(label, style: AppTypography.labelMedium)),
             Text(
               value,
               style: AppTypography.labelMedium.copyWith(
@@ -941,13 +964,15 @@ class _SaludCard extends StatelessWidget {
         children: [
           Text(
             'Salud del negocio',
-            style: AppTypography.labelLarge
-                .copyWith(fontWeight: FontWeight.w700),
+            style: AppTypography.labelLarge.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           Text(
             'Periodo seleccionado',
-            style: AppTypography.labelSmall
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 14),
           row(

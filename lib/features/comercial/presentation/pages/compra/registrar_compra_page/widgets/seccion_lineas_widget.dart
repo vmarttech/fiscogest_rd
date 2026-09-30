@@ -24,7 +24,8 @@ class SeccionLineasWidget extends StatelessWidget {
   final void Function(int) onSeleccionarProducto;
   final void Function(int, String) onValorCambiado;
   final bool esPequena;
-  final Widget Function({required Widget child1, required Widget child2}) filaResponsiva;
+  final Widget Function({required Widget child1, required Widget child2})
+  filaResponsiva;
 
   @override
   Widget build(BuildContext context) {

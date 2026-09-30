@@ -43,64 +43,99 @@ class DashboardComprasPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-            const AppHubHero(
-              title: 'Centro de compras',
-              subtitle:
-                  'Registra compras, revisa actividad y controla cuentas por pagar.',
-              icon: Icons.shopping_cart_checkout_rounded,
-            ),
-            const SizedBox(height: 20),
-            kpisAsync.when(
-              data: (kpis) => _KpisGrid(
-                comprasEsteMes: formatRd(kpis.comprasEsteMes),
-                aCredito: formatRd(kpis.aCreditoEsteMes),
-                porPagar: formatRd(kpis.porPagar),
-                vencido: formatRd(kpis.vencido),
-                hayVencido: kpis.vencido > 0,
-                isMobile: isMobile,
-              ),
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
-                child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-              ),
-              error: (e, _) => AppCard(
-                child: Text(
-                  'Error cargando KPIs: $e',
-                  style: AppTypography.error,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const SectionHeader(
-              title: 'Accesos rápidos',
-              subtitle: 'Compra y pagos',
-            ),
-            const SizedBox(height: 8),
-            if (!isMobile)
-              Row(
-                children: [
-                  Expanded(
-                    child: AppAccessTile(
+                  const AppHubHero(
+                    title: 'Centro de compras',
+                    subtitle:
+                        'Registra compras, revisa actividad y controla cuentas por pagar.',
+                    icon: Icons.shopping_cart_checkout_rounded,
+                  ),
+                  const SizedBox(height: 20),
+                  kpisAsync.when(
+                    data: (kpis) => _KpisGrid(
+                      comprasEsteMes: formatRd(kpis.comprasEsteMes),
+                      aCredito: formatRd(kpis.aCreditoEsteMes),
+                      porPagar: formatRd(kpis.porPagar),
+                      vencido: formatRd(kpis.vencido),
+                      hayVencido: kpis.vencido > 0,
+                      isMobile: isMobile,
+                    ),
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    error: (e, _) => AppCard(
+                      child: Text(
+                        'Error cargando KPIs: $e',
+                        style: AppTypography.error,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const SectionHeader(
+                    title: 'Accesos rápidos',
+                    subtitle: 'Compra y pagos',
+                  ),
+                  const SizedBox(height: 8),
+                  if (!isMobile)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppAccessTile(
+                            icon: Icons.add_shopping_cart_rounded,
+                            title: 'Registrar compra',
+                            subtitle: 'Nueva orden de compra',
+                            color: AppColors.primary,
+                            onTap: () => context.push('/compras/registrar'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppAccessTile(
+                            icon: Icons.list_alt_rounded,
+                            title: 'Lista de compras',
+                            subtitle: 'Historial y seguimiento',
+                            color: AppColors.info,
+                            onTap: () => context.push('/compras/lista'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppAccessTile(
+                            icon: Icons.account_balance_wallet_outlined,
+                            title: 'Cuentas por pagar',
+                            subtitle: alertas > 0
+                                ? '$alertas alerta(s)'
+                                : 'Saldos a proveedores',
+                            color: AppColors.warning,
+                            onTap: () => context.goNamed(
+                              ListaCuentasPagarPage.routeName,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else ...[
+                    AppAccessTile(
                       icon: Icons.add_shopping_cart_rounded,
                       title: 'Registrar compra',
                       subtitle: 'Nueva orden de compra',
                       color: AppColors.primary,
                       onTap: () => context.push('/compras/registrar'),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppAccessTile(
+                    const SizedBox(height: 10),
+                    AppAccessTile(
                       icon: Icons.list_alt_rounded,
                       title: 'Lista de compras',
                       subtitle: 'Historial y seguimiento',
                       color: AppColors.info,
                       onTap: () => context.push('/compras/lista'),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppAccessTile(
+                    const SizedBox(height: 10),
+                    AppAccessTile(
                       icon: Icons.account_balance_wallet_outlined,
                       title: 'Cuentas por pagar',
                       subtitle: alertas > 0
@@ -110,166 +145,178 @@ class DashboardComprasPage extends ConsumerWidget {
                       onTap: () =>
                           context.goNamed(ListaCuentasPagarPage.routeName),
                     ),
-                  ),
-                ],
-              )
-            else ...[
-              AppAccessTile(
-                icon: Icons.add_shopping_cart_rounded,
-                title: 'Registrar compra',
-                subtitle: 'Nueva orden de compra',
-                color: AppColors.primary,
-                onTap: () => context.push('/compras/registrar'),
-              ),
-              const SizedBox(height: 10),
-              AppAccessTile(
-                icon: Icons.list_alt_rounded,
-                title: 'Lista de compras',
-                subtitle: 'Historial y seguimiento',
-                color: AppColors.info,
-                onTap: () => context.push('/compras/lista'),
-              ),
-              const SizedBox(height: 10),
-              AppAccessTile(
-                icon: Icons.account_balance_wallet_outlined,
-                title: 'Cuentas por pagar',
-                subtitle: alertas > 0
-                    ? '$alertas alerta(s)'
-                    : 'Saldos a proveedores',
-                color: AppColors.warning,
-                onTap: () => context.goNamed(ListaCuentasPagarPage.routeName),
-              ),
-            ],
-            const SizedBox(height: 28),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Actividad reciente',
-                  style: AppTypography.h4.copyWith(fontWeight: FontWeight.w600),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/compras/lista'),
-                  child: Text(
-                    'Ver todas',
-                    style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            actividadAsync.when(
-              data: (items) {
-                if (items.isEmpty) {
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: AppRadius.allL,
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.shopping_bag_outlined, size: 40, color: AppColors.grey300),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No hay compras registradas aún',
-                          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  ],
+                  const SizedBox(height: 28),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Actividad reciente',
+                        style: AppTypography.h4.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    ),
-                  );
-                }
-                return Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: AppRadius.allL,
-                    border: Border.all(color: AppColors.border),
+                      ),
+                      TextButton(
+                        onPressed: () => context.push('/compras/lista'),
+                        child: Text(
+                          'Ver todas',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Column(
-                    children: items.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final item = entry.value;
-                      final fechaStr = _formatearFechaRelativa(item.fecha);
-                      final isLast = index == items.length - 1;
-                      return Column(
-                        children: [
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () => context.push('/compras/detalle/${item.compraId}'),
-                              borderRadius: BorderRadius.vertical(
-                                top: index == 0 ? const Radius.circular(12) : Radius.zero,
-                                bottom: isLast ? const Radius.circular(12) : Radius.zero,
+                  const SizedBox(height: 8),
+                  actividadAsync.when(
+                    data: (items) {
+                      if (items.isEmpty) {
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 40),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: AppRadius.allL,
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.shopping_bag_outlined,
+                                size: 40,
+                                color: AppColors.grey300,
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: const Icon(
-                                        Icons.shopping_bag_outlined,
-                                        color: AppColors.primary,
-                                        size: 22,
-                                      ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'No hay compras registradas aún',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: AppRadius.allL,
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Column(
+                          children: items.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final item = entry.value;
+                            final fechaStr = _formatearFechaRelativa(
+                              item.fecha,
+                            );
+                            final isLast = index == items.length - 1;
+                            return Column(
+                              children: [
+                                Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () => context.push(
+                                      '/compras/detalle/${item.compraId}',
                                     ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                    borderRadius: BorderRadius.vertical(
+                                      top: index == 0
+                                          ? const Radius.circular(12)
+                                          : Radius.zero,
+                                      bottom: isLast
+                                          ? const Radius.circular(12)
+                                          : Radius.zero,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 14,
+                                      ),
+                                      child: Row(
                                         children: [
-                                          Text(
-                                            item.proveedorNombre,
-                                            style: AppTypography.bodyMedium.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
+                                          Container(
+                                            width: 42,
+                                            height: 42,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary
+                                                  .withValues(alpha: 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                             ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                            child: const Icon(
+                                              Icons.shopping_bag_outlined,
+                                              color: AppColors.primary,
+                                              size: 22,
+                                            ),
                                           ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            '$fechaStr · ${_estadoLabel(item.estado)}',
-                                            style: AppTypography.bodySmall.copyWith(
-                                              color: AppColors.textSecondary,
+                                          const SizedBox(width: 14),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  item.proveedorNombre,
+                                                  style: AppTypography
+                                                      .bodyMedium
+                                                      .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: AppColors
+                                                            .textPrimary,
+                                                      ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  '$fechaStr · ${_estadoLabel(item.estado)}',
+                                                  style: AppTypography.bodySmall
+                                                      .copyWith(
+                                                        color: AppColors
+                                                            .textSecondary,
+                                                      ),
+                                                ),
+                                              ],
                                             ),
+                                          ),
+                                          Text(
+                                            formatRd(item.total),
+                                            style: AppTypography.bodyMedium
+                                                .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: AppColors.textPrimary,
+                                                ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Text(
-                                      formatRd(item.total),
-                                      style: AppTypography.bodyMedium.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                          if (!isLast)
-                            const Divider(height: 1, color: AppColors.border, indent: 72),
-                        ],
+                                if (!isLast)
+                                  const Divider(
+                                    height: 1,
+                                    color: AppColors.border,
+                                    indent: 72,
+                                  ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
                       );
-                    }).toList(),
+                    },
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    error: (e, _) =>
+                        Text('Error: $e', style: AppTypography.error),
                   ),
-                );
-              },
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
-                child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-              ),
-              error: (e, _) => Text('Error: $e', style: AppTypography.error),
-            ),
                 ], // Column children
               ), // Column
             ), // centerConstrained
@@ -352,22 +399,26 @@ class _KpisGrid extends StatelessWidget {
     if (isMobile) {
       return Column(
         children: cards
-            .map((c) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _KpiCard(data: c),
-                ))
+            .map(
+              (c) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _KpiCard(data: c),
+              ),
+            )
             .toList(),
       );
     }
 
     return Row(
       children: cards
-          .map((c) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: _KpiCard(data: c),
-                ),
-              ))
+          .map(
+            (c) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: _KpiCard(data: c),
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -425,7 +476,9 @@ class _KpiCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   data.titulo,
-                  style: AppTypography.labelMedium.copyWith(color: AppColors.textSecondary),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -446,4 +499,3 @@ class _KpiCard extends StatelessWidget {
     );
   }
 }
-

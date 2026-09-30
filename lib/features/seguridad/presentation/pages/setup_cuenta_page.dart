@@ -105,8 +105,11 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.security_rounded,
-                        size: 48, color: AppColors.primary),
+                    const Icon(
+                      Icons.security_rounded,
+                      size: 48,
+                      color: AppColors.primary,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Configure su cuenta',
@@ -143,11 +146,12 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                         labelText: 'Nueva contraseña *',
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
-                          icon: Icon(_ocultar
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined),
-                          onPressed: () =>
-                              setState(() => _ocultar = !_ocultar),
+                          icon: Icon(
+                            _ocultar
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () => setState(() => _ocultar = !_ocultar),
                         ),
                       ),
                     ),

@@ -3,7 +3,6 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 
 class BotonesAccionWidget extends StatelessWidget {
-
   const BotonesAccionWidget({
     super.key,
     required this.onGuardarBorrador,

@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 /// Hub de reportes DGII 606 (compras) y 607 (ventas).
 class ReportsPage extends StatelessWidget {
@@ -157,11 +158,9 @@ class ReportsPage extends StatelessWidget {
   }
 
   static void _aviso(BuildContext context, String codigo) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    FiscoGestNotifications.show(
       SnackBar(
-        content: Text(
-          'Reporte $codigo: generación en construcción. UI lista.',
-        ),
+        content: Text('Reporte $codigo: generación en construcción. UI lista.'),
         backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
       ),

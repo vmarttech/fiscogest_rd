@@ -3,7 +3,6 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 
 @immutable
 class CuentaPagar {
-
   const CuentaPagar({
     required this.id,
     required this.compraId,

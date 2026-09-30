@@ -7,13 +7,11 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
-typedef AgregarProductoCallback = Future<void> Function(Producto producto, double cantidad);
+typedef AgregarProductoCallback =
+    Future<void> Function(Producto producto, double cantidad);
 
 class PanelProductos extends ConsumerStatefulWidget {
-  const PanelProductos({
-    super.key,
-    required this.alAgregar,
-  });
+  const PanelProductos({super.key, required this.alAgregar});
 
   final AgregarProductoCallback alAgregar;
 

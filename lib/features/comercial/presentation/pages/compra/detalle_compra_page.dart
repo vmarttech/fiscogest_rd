@@ -13,8 +13,10 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/compra_usecase_providers.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' as repo;
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart'
+    as repo;
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class DetalleCompraPage extends ConsumerStatefulWidget {
   const DetalleCompraPage({super.key, required this.compraId});
@@ -67,7 +69,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
           _detalles = [];
           _cargandoDetalles = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error cargando detalles: $e'),
             backgroundColor: AppColors.error,
@@ -114,11 +116,22 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: AppColors.error,
+                        ),
                         const SizedBox(height: AppSpacing.m),
-                        const Text('Error al cargar la compra', style: AppTypography.h4Bold),
+                        const Text(
+                          'Error al cargar la compra',
+                          style: AppTypography.h4Bold,
+                        ),
                         const SizedBox(height: AppSpacing.s),
-                        Text('$error', textAlign: TextAlign.center, style: AppTypography.bodyMedium),
+                        Text(
+                          '$error',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodyMedium,
+                        ),
                       ],
                     ),
                   ),
@@ -129,11 +142,17 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.inbox_outlined, size: 48, color: AppColors.grey500),
+                          const Icon(
+                            Icons.inbox_outlined,
+                            size: 48,
+                            color: AppColors.grey500,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'Compra no encontrada',
-                            style: AppTypography.bodyMedium.copyWith(color: AppColors.grey500),
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.grey500,
+                            ),
                           ),
                         ],
                       ),
@@ -227,7 +246,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
             if (vencida) ...[
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -269,7 +291,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
               _datoInformacion('Tipo', compra.tipoComprobante, esPequena),
               _datoInformacion(
                 'Condición',
-                compra.esCredito ? 'Crédito (${compra.diasCredito} días)' : 'Contado',
+                compra.esCredito
+                    ? 'Crédito (${compra.diasCredito} días)'
+                    : 'Contado',
                 esPequena,
               ),
               if (compra.esCredito && compra.fechaVencimiento != null)
@@ -299,21 +323,21 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                 ),
             ],
           ),
-          if (compra.observaciones != null && compra.observaciones!.isNotEmpty) ...[
+          if (compra.observaciones != null &&
+              compra.observaciones!.isNotEmpty) ...[
             const SizedBox(height: 12),
             const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: 8),
             const Text(
               'Observaciones',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 2),
             Text(
               compra.observaciones!,
-              style: AppTypography.bodyMedium.copyWith(fontStyle: FontStyle.italic),
+              style: AppTypography.bodyMedium.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ],
@@ -332,10 +356,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          etiqueta,
-          style: TextStyle(fontSize: 11, color: colorEtiqueta),
-        ),
+        Text(etiqueta, style: TextStyle(fontSize: 11, color: colorEtiqueta)),
         const SizedBox(height: 2),
         Text(
           valor,
@@ -466,7 +487,8 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Text(
@@ -539,11 +561,17 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                               ),
                               Expanded(
                                 flex: 2,
-                                child: Text(detalle.cantidad.toString(), textAlign: TextAlign.center),
+                                child: Text(
+                                  detalle.cantidad.toString(),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                               Expanded(
                                 flex: 3,
-                                child: Text(_formatearMonto(detalle.costoUnitario), textAlign: TextAlign.right),
+                                child: Text(
+                                  _formatearMonto(detalle.costoUnitario),
+                                  textAlign: TextAlign.right,
+                                ),
                               ),
                               Expanded(
                                 flex: 3,
@@ -606,7 +634,8 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     Future<void> ejecutarConfirmar() async {
       final ok = await confirmarDialogo(
         titulo: 'Confirmar Compra',
-        contenido: '¿Confirmar esta compra?\n\nSe actualizará inventario, Kardex, costos de producto y el saldo del proveedor.',
+        contenido:
+            '¿Confirmar esta compra?\n\nSe actualizará inventario, Kardex, costos de producto y el saldo del proveedor.',
         etiquetaBoton: 'Sí, Confirmar',
         colorBoton: AppColors.success,
       );
@@ -614,7 +643,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       if (!mounted) return;
       try {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(content: Text('Confirmando compra...')),
           );
         }
@@ -623,7 +652,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         if (!mounted) return;
         ref.invalidate(compraPorIdProvider(_compraId));
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(
               content: Text('Compra confirmada ✅'),
               backgroundColor: AppColors.success,
@@ -633,8 +662,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       } catch (e) {
         if (!mounted) return;
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          FiscoGestNotifications.show(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: AppColors.error,
+            ),
           );
         }
       }
@@ -643,7 +675,8 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     Future<void> ejecutarMarcarComoRecibida() async {
       final ok = await confirmarDialogo(
         titulo: 'Marcar como Recibida',
-        contenido: '¿Confirmas que los productos de esta compra han sido recibidos?\n\nSe registrará la fecha de recepción.',
+        contenido:
+            '¿Confirmas que los productos de esta compra han sido recibidos?\n\nSe registrará la fecha de recepción.',
         etiquetaBoton: 'Sí, Recibida',
         colorBoton: AppColors.secondary,
       );
@@ -651,7 +684,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       if (!mounted) return;
       try {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(content: Text('Registrando recepción...')),
           );
         }
@@ -659,7 +692,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         if (!mounted) return;
         ref.invalidate(compraPorIdProvider(_compraId));
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(
               content: Text('Compra marcada como Recibida ✅'),
               backgroundColor: AppColors.secondary,
@@ -669,8 +702,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       } catch (e) {
         if (!mounted) return;
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          FiscoGestNotifications.show(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: AppColors.error,
+            ),
           );
         }
       }
@@ -679,7 +715,8 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     Future<void> ejecutarMarcarComoPagada() async {
       final ok = await confirmarDialogo(
         titulo: 'Marcar como Pagada',
-        contenido: '¿Marcar esta compra como Pagada?\n\nSe registrará la fecha de pago y pasará a estado Pagada.',
+        contenido:
+            '¿Marcar esta compra como Pagada?\n\nSe registrará la fecha de pago y pasará a estado Pagada.',
         etiquetaBoton: 'Sí, Pagada',
         colorBoton: AppColors.primaryDark,
       );
@@ -687,7 +724,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       if (!mounted) return;
       try {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(content: Text('Registrando pago...')),
           );
         }
@@ -695,7 +732,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         if (!mounted) return;
         ref.invalidate(compraPorIdProvider(_compraId));
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(
               content: Text('Compra marcada como Pagada ✅'),
               backgroundColor: AppColors.primaryDark,
@@ -705,8 +742,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       } catch (e) {
         if (!mounted) return;
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          FiscoGestNotifications.show(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: AppColors.error,
+            ),
           );
         }
       }
@@ -723,7 +763,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       if (!mounted) return;
       try {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(content: Text('Anulando compra...')),
           );
         }
@@ -731,7 +771,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         if (!mounted) return;
         ref.invalidate(compraPorIdProvider(_compraId));
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(
               content: Text('Compra anulada ✅'),
               backgroundColor: AppColors.error,
@@ -741,8 +781,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       } catch (e) {
         if (!mounted) return;
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          FiscoGestNotifications.show(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: AppColors.error,
+            ),
           );
         }
       }

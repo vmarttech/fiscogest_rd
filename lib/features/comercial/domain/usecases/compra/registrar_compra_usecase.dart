@@ -4,10 +4,7 @@ import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_rep
 import 'package:fiscogest_rd/features/comercial/domain/usecases/compra/calcular_totales_compra_usecase.dart';
 
 class RegistrarCompraUseCase {
-  RegistrarCompraUseCase(
-    this._compraRepository,
-    this._calcularTotales,
-  );
+  RegistrarCompraUseCase(this._compraRepository, this._calcularTotales);
 
   final ICompraRepository _compraRepository;
   final CalcularTotalesCompraUseCase _calcularTotales;
@@ -20,8 +17,12 @@ class RegistrarCompraUseCase {
       throw Exception('La compra debe contener al menos un producto.');
     }
 
-    final detallesCalculados = _calcularTotales.calcularTodasLasLineas(detalles);
-    final totales = _calcularTotales.calcularTotalesGenerales(detallesCalculados);
+    final detallesCalculados = _calcularTotales.calcularTodasLasLineas(
+      detalles,
+    );
+    final totales = _calcularTotales.calcularTotalesGenerales(
+      detallesCalculados,
+    );
 
     final compraActualizada = compra.copyWith(
       subtotalSinImpuestos: totales.subtotalSinImpuestos,

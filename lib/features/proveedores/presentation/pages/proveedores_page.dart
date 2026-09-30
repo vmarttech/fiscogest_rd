@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/providers/proveedor_providers.dart';
 import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class ProveedoresPage extends ConsumerStatefulWidget {
   const ProveedoresPage({super.key});
@@ -89,9 +90,11 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                 ),
                 child: AppTextField(
                   controller: _searchController,
-                  hint: 'Buscar proveedor por nombre, RNC, contacto o correo...',
+                  hint:
+                      'Buscar proveedor por nombre, RNC, contacto o correo...',
                   prefixIcon: Icons.search,
-                  onChanged: (value) => setState(() => _filtroBusqueda = value.toLowerCase()),
+                  onChanged: (value) =>
+                      setState(() => _filtroBusqueda = value.toLowerCase()),
                 ),
               ),
               AppLayout.vM,
@@ -128,9 +131,12 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         itemBuilder: (context, index) {
                           final proveedor = filtrados[index];
                           final direccionCompleta = [
-                            if (proveedor.direccion?.isNotEmpty ?? false) proveedor.direccion,
-                            if (proveedor.ciudad?.isNotEmpty ?? false) proveedor.ciudad,
-                            if (proveedor.provincia?.isNotEmpty ?? false) proveedor.provincia,
+                            if (proveedor.direccion?.isNotEmpty ?? false)
+                              proveedor.direccion,
+                            if (proveedor.ciudad?.isNotEmpty ?? false)
+                              proveedor.ciudad,
+                            if (proveedor.provincia?.isNotEmpty ?? false)
+                              proveedor.provincia,
                           ].join(', ');
 
                           return Padding(
@@ -154,7 +160,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                 Expanded(
                                   flex: 2,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         proveedor.nombreEmpresa,
@@ -171,7 +178,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                 Expanded(
                                   flex: 2,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Tel: ${proveedor.telefono ?? '—'} | ${proveedor.email ?? '—'}',
@@ -179,7 +187,9 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                       ),
                                       AppLayout.vXs,
                                       Text(
-                                        direccionCompleta.isNotEmpty ? direccionCompleta : 'Sin dirección',
+                                        direccionCompleta.isNotEmpty
+                                            ? direccionCompleta
+                                            : 'Sin dirección',
                                         style: AppTypography.bodySmall,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -217,7 +227,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                               '¿Está seguro de eliminar al proveedor "${proveedor.nombreEmpresa}"?',
                                           actions: [
                                             TextButton(
-                                              onPressed: () => Navigator.pop(context),
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
                                               child: const Text('Cancelar'),
                                             ),
                                             AppButton(
@@ -246,7 +257,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         },
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                     error: (e, st) => Center(
                       child: Text('Error: $e', style: AppTypography.bodyMedium),
                     ),
@@ -337,30 +349,18 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                   controller: direccionController,
                 ),
                 AppLayout.vM,
-                AppTextField(
-                  label: 'Ciudad',
-                  controller: ciudadController,
-                ),
+                AppTextField(label: 'Ciudad', controller: ciudadController),
                 AppLayout.vM,
                 AppTextField(
                   label: 'Provincia',
                   controller: provinciaController,
                 ),
                 AppLayout.vM,
-                AppTextField(
-                  label: 'Teléfono',
-                  controller: telefonoController,
-                ),
+                AppTextField(label: 'Teléfono', controller: telefonoController),
                 AppLayout.vM,
-                AppTextField(
-                  label: 'Celular',
-                  controller: celularController,
-                ),
+                AppTextField(label: 'Celular', controller: celularController),
                 AppLayout.vM,
-                AppTextField(
-                  label: 'WhatsApp',
-                  controller: whatsAppController,
-                ),
+                AppTextField(label: 'WhatsApp', controller: whatsAppController),
                 AppLayout.vM,
                 AppTextField(
                   label: 'Correo Electrónico',
@@ -399,7 +399,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                 final prov = Proveedor(
                   id: proveedorToEdit?.id,
                   nombreEmpresa: nombreEmpresaController.text.trim(),
-                  nombreContacto: nombreContactoController.text.trim().isNotEmpty
+                  nombreContacto:
+                      nombreContactoController.text.trim().isNotEmpty
                       ? nombreContactoController.text.trim()
                       : null,
                   rnc: rncController.text.trim().isNotEmpty
@@ -426,13 +427,17 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                   email: emailController.text.trim().isNotEmpty
                       ? emailController.text.trim()
                       : null,
-                  limiteCredito: double.tryParse(limiteCreditoController.text.trim()) ?? 0.0,
-                  diasCredito: int.tryParse(diasCreditoController.text.trim()) ?? 0,
+                  limiteCredito:
+                      double.tryParse(limiteCreditoController.text.trim()) ??
+                      0.0,
+                  diasCredito:
+                      int.tryParse(diasCreditoController.text.trim()) ?? 0,
                   condicionesNota: condicionesController.text.trim().isNotEmpty
                       ? condicionesController.text.trim()
                       : null,
                   estado: 'Activo',
-                  fechaCreacion: proveedorToEdit?.fechaCreacion ?? DateTime.now(),
+                  fechaCreacion:
+                      proveedorToEdit?.fechaCreacion ?? DateTime.now(),
                   fechaActualizacion: DateTime.now(),
                 );
 
@@ -445,7 +450,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                 }
                 Navigator.pop(context);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                FiscoGestNotifications.show(
                   SnackBar(
                     content: Text(e.toString().replaceAll('Exception: ', '')),
                   ),

@@ -54,7 +54,10 @@ class VentasRepositoryImpl implements IVentasRepository {
     return out;
   }
 
-  Future<void> _guardarDetalles(int ventaId, List<DetalleVenta> detalles) async {
+  Future<void> _guardarDetalles(
+    int ventaId,
+    List<DetalleVenta> detalles,
+  ) async {
     await _ventasDao.eliminarDetallesDeVenta(ventaId);
     for (final d in detalles) {
       if (d.productoId <= 0) {
@@ -75,16 +78,15 @@ class VentasRepositoryImpl implements IVentasRepository {
     }
   }
 
-
   EstadoDocumento _parsearEstado(String valor) => switch (valor) {
-        'borrador' => EstadoDocumento.borrador,
-        'cotizado' => EstadoDocumento.cotizado,
-        'enCredito' => EstadoDocumento.enCredito,
-        'aprobado' => EstadoDocumento.aprobado,
-        'anulado' => EstadoDocumento.anulado,
-        'facturado' => EstadoDocumento.facturado,
-        _ => EstadoDocumento.borrador,
-      };
+    'borrador' => EstadoDocumento.borrador,
+    'cotizado' => EstadoDocumento.cotizado,
+    'enCredito' => EstadoDocumento.enCredito,
+    'aprobado' => EstadoDocumento.aprobado,
+    'anulado' => EstadoDocumento.anulado,
+    'facturado' => EstadoDocumento.facturado,
+    _ => EstadoDocumento.borrador,
+  };
 
   Venta _mapearDesdeVentaConCliente(
     VentaConCliente registro, {
@@ -198,7 +200,9 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<Venta?> obtenerVentaPorId(int ventaId) async {
     final registro = await _ventasDao.obtenerVentaPorId(ventaId);
     if (registro == null) return null;
-    final dets = await _mapearDetalles(await _ventasDao.listarDetalles(ventaId));
+    final dets = await _mapearDetalles(
+      await _ventasDao.listarDetalles(ventaId),
+    );
     return _mapearDesdeVentasTableData(registro, detalles: dets);
   }
 
@@ -206,7 +210,9 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<Venta?> obtenerVentaBorradorPorId(int cotizacionId) async {
     final registro = await _ventasDao.obtenerVentaPorId(cotizacionId);
     if (registro == null) return null;
-    final dets = await _mapearDetalles(await _ventasDao.listarDetalles(cotizacionId));
+    final dets = await _mapearDetalles(
+      await _ventasDao.listarDetalles(cotizacionId),
+    );
     return _mapearDesdeVentasTableData(
       registro,
       esCotizacion: true,
@@ -275,9 +281,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   ) async {
     await _ventasDao.actualizarVenta(
       ventaId,
-      VentasTableCompanion(
-        estadoDocumento: Value(nuevoEstado.name),
-      ),
+      VentasTableCompanion(estadoDocumento: Value(nuevoEstado.name)),
     );
     final registro = await _ventasDao.obtenerVentaPorId(ventaId);
     return _mapearDesdeVentasTableData(registro!);
@@ -405,7 +409,10 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   /// Solo Caja: asigna numeroFactura fiscal y estado FACTURADO.
   @override
-  Future<Venta> confirmarVentaBorrador(int cotizacionId, {String? formaPago}) async {
+  Future<Venta> confirmarVentaBorrador(
+    int cotizacionId, {
+    String? formaPago,
+  }) async {
     final actual = await _ventasDao.obtenerVentaPorId(cotizacionId);
     final ya = (actual?.numeroFactura ?? '').trim();
     /* NCF lo emite Caja con emitirNcfFiscal antes/durante cobro */
@@ -427,9 +434,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   Future<Venta> actualizarAbonoInicial(int ventaId, double montoAbono) async {
     await _ventasDao.actualizarVenta(
       ventaId,
-      VentasTableCompanion(
-        abonoInicial: Value(montoAbono),
-      ),
+      VentasTableCompanion(abonoInicial: Value(montoAbono)),
     );
     final registro = await _ventasDao.obtenerVentaPorId(ventaId);
     return _mapearDesdeVentasTableData(registro!);
@@ -458,7 +463,6 @@ class VentasRepositoryImpl implements IVentasRepository {
     return _mapearDesdeVentasTableData(registro!);
   }
 
-
   /// Solo Caja (crédito): asigna numeroFactura, abono y estado FACTURADO.
   @override
   Future<Venta> registrarVentaConAbono(
@@ -484,11 +488,14 @@ class VentasRepositoryImpl implements IVentasRepository {
     return _mapearDesdeVentasTableData(registro!);
   }
 
-
   /// Facturación: asigna NCF (B01/B02…) ya generado y marca FACTURADO.
   /// No genera secuencia interna B03; el NCF viene de SecuenciasNcfDao.
   @override
-  Future<Venta> emitirNcfFiscal(int ventaId, String ncf, {String? formaPago}) async {
+  Future<Venta> emitirNcfFiscal(
+    int ventaId,
+    String ncf, {
+    String? formaPago,
+  }) async {
     final actual = await _ventasDao.obtenerVentaPorId(ventaId);
     if (actual == null) {
       throw StateError('Documento $ventaId no encontrado');
@@ -552,8 +559,8 @@ class VentasRepositoryImpl implements IVentasRepository {
     if (reg == null) return false;
     if (reg.comprobanteEntregaImpreso) return false;
     final ncf = (reg.numeroFactura ?? '').trim();
-    final facturado = ncf.isNotEmpty ||
-        reg.estadoDocumento == EstadoDocumento.facturado.name;
+    final facturado =
+        ncf.isNotEmpty || reg.estadoDocumento == EstadoDocumento.facturado.name;
     if (!facturado) return false;
     return _ventasDao.actualizarVenta(
       ventaId,
@@ -563,5 +570,4 @@ class VentasRepositoryImpl implements IVentasRepository {
       ),
     );
   }
-
 }

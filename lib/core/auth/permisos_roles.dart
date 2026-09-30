@@ -1,4 +1,3 @@
-
 /// API global de autorización.
 /// Nuevos módulos = nuevo código de permiso + asignarlo a roles.
 /// Nuevos perfiles = entrada en [permisosPorRol] + [rutaInicioPorRol].

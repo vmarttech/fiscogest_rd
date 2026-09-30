@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/features/creditos/domain/entities/estado_credito.da
 import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class ResultadoFormularioCredito {
   const ResultadoFormularioCredito({
@@ -101,7 +102,6 @@ class _FormularioCreditoVistaState
     }
   }
 
-
   @override
   void dispose() {
     _abonoInicialController.dispose();
@@ -146,7 +146,7 @@ class _FormularioCreditoVistaState
   Future<void> _confirmar() async {
     if (_saldoFinanciado <= 0) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text('El saldo financiado debe ser mayor a RD\$ 0.00'),
             backgroundColor: AppColors.error,
@@ -212,7 +212,7 @@ class _FormularioCreditoVistaState
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: AppColors.error,
@@ -684,9 +684,7 @@ class _FormularioCreditoVistaState
                     () => _mostrarTablaCuotas = !_mostrarTablaCuotas,
                   ),
                   icon: Icon(
-                    _mostrarTablaCuotas
-                        ? Icons.expand_less
-                        : Icons.expand_more,
+                    _mostrarTablaCuotas ? Icons.expand_less : Icons.expand_more,
                     color: AppColors.primary,
                   ),
                   label: Text(

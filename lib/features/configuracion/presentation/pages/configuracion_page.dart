@@ -17,6 +17,7 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 enum _SeccionConfig {
   empresa,
@@ -135,8 +136,6 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     return true;
   }
 
-
-
   Future<void> _elegirLogo() async {
     try {
       String? sourcePath;
@@ -156,25 +155,25 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       if (!await logosDir.exists()) {
         await logosDir.create(recursive: true);
       }
-      final ext =
-          p.extension(sourcePath).isEmpty ? '.jpg' : p.extension(sourcePath);
+      final ext = p.extension(sourcePath).isEmpty
+          ? '.jpg'
+          : p.extension(sourcePath);
       final dest = File(p.join(logosDir.path, 'logo_negocio$ext'));
       await File(sourcePath).copy(dest.path);
       if (!mounted) return;
       setState(() => _logoPath = dest.path);
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Logo listo. Pulsa Guardar para persistirlo.'),
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(content: Text('No se pudo cargar el logo: $e')),
       );
     }
   }
-
 
   Future<void> _guardarEmpresa() async {
     // Form solo existe en sección Empresa; en Ventas/Documentos no validar Form
@@ -224,7 +223,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     try {
       await ref.read(configuracionControllerProvider.notifier).guardar(entity);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: const Text('Configuración de empresa guardada'),
           backgroundColor: AppColors.success,
@@ -234,7 +233,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error: $e'),
           backgroundColor: AppColors.error,
@@ -366,9 +365,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     return secciones.map((s) {
       final sel = s == _seccion;
       return Material(
-        color: sel
-            ? AppColors.primary.withValues(alpha: 0.12)
-            : null,
+        color: sel ? AppColors.primary.withValues(alpha: 0.12) : null,
         type: sel ? MaterialType.canvas : MaterialType.transparency,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
@@ -531,12 +528,14 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                         child: CircleAvatar(
                           radius: 48,
                           backgroundColor: AppColors.grey300,
-                          backgroundImage: (_logoPath != null &&
+                          backgroundImage:
+                              (_logoPath != null &&
                                   _logoPath!.isNotEmpty &&
                                   File(_logoPath!).existsSync())
                               ? FileImage(File(_logoPath!))
                               : null,
-                          child: (_logoPath == null ||
+                          child:
+                              (_logoPath == null ||
                                   _logoPath!.isEmpty ||
                                   !File(_logoPath!).existsSync())
                               ? const Icon(Icons.add_a_photo, size: 32)
@@ -852,8 +851,6 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     );
   }
 
-
-
   Widget _seccionCaja() {
     Widget filaSwitch(String titulo, bool valor, ValueChanged<bool> onChanged) {
       return Padding(
@@ -887,7 +884,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         AppLayout.vS,
         Text(
           'Formas de pago y reglas al cobrar en caja.',
-          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
         ),
         AppLayout.vL,
         AppCard(
@@ -907,7 +906,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                     ChoiceChip(
                       label: Text(e.$2),
                       selected: _cajaFormaPagoDefault == e.$1,
-                      onSelected: (_) => setState(() => _cajaFormaPagoDefault = e.$1),
+                      onSelected: (_) =>
+                          setState(() => _cajaFormaPagoDefault = e.$1),
                     ),
                 ],
               ),
@@ -1077,7 +1077,6 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       ),
     );
   }
-
 
   Widget _seccionEnlace({
     required String titulo,

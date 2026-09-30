@@ -3,10 +3,7 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
 
 class EmitirFacturaService {
-  EmitirFacturaService({
-    required this.ventasRepo,
-    required this.secuenciasDao,
-  });
+  EmitirFacturaService({required this.ventasRepo, required this.secuenciasDao});
 
   final VentasRepositoryImpl ventasRepo;
   final SecuenciasNcfDao secuenciasDao;
@@ -18,7 +15,8 @@ class EmitirFacturaService {
     if (consumidorFinal) return 'B02';
     if (rncCliente.trim().isEmpty) return 'B02';
     final rnc = rncCliente.trim();
-    final esRnc = (rnc.length == 9 || rnc.length == 11) && RegExp(r'^\d+$').hasMatch(rnc);
+    final esRnc =
+        (rnc.length == 9 || rnc.length == 11) && RegExp(r'^\d+$').hasMatch(rnc);
     return esRnc ? 'B01' : 'B02';
   }
 
@@ -38,7 +36,8 @@ class EmitirFacturaService {
       throw StateError('Ya tiene NCF fiscal: $ncfActual');
     }
     final est = venta.estadoDocumento;
-    final okEstado = est == EstadoDocumento.cotizado ||
+    final okEstado =
+        est == EstadoDocumento.cotizado ||
         est == EstadoDocumento.aprobado ||
         est == EstadoDocumento.facturado ||
         est == EstadoDocumento.enCredito;
@@ -50,7 +49,9 @@ class EmitirFacturaService {
     }
     if (tipoNcf == 'B01') {
       final rnc = rncCliente.trim();
-      final okRnc = (rnc.length == 9 || rnc.length == 11) && RegExp(r'^\d+$').hasMatch(rnc);
+      final okRnc =
+          (rnc.length == 9 || rnc.length == 11) &&
+          RegExp(r'^\d+$').hasMatch(rnc);
       if (!okRnc) {
         throw StateError(
           'B01 (crédito fiscal) requiere RNC (9) o cédula (11 dígitos) del cliente',

@@ -38,7 +38,8 @@ class LineaProductoWidget extends StatelessWidget {
   final ValueChanged<String> onGastosChanged;
   final ValueChanged<String> onDescuentoChanged;
   final bool esPequena;
-  final Widget Function({required Widget child1, required Widget child2}) filaResponsiva;
+  final Widget Function({required Widget child1, required Widget child2})
+  filaResponsiva;
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +53,7 @@ class LineaProductoWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Línea ${index + 1}',
-                  style: AppTypography.labelMedium,
-                ),
+                Text('Línea ${index + 1}', style: AppTypography.labelMedium),
                 IconButton(
                   icon: const Icon(
                     Icons.delete_outline,
@@ -91,23 +89,17 @@ class LineaProductoWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Costos',
-              style: AppTypography.labelMedium,
-            ),
+            const Text('Costos', style: AppTypography.labelMedium),
             const SizedBox(height: 4),
             filaResponsiva(
               child1: AppTextField(
                 controller: ctrl.cantidad,
                 label: 'Cantidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d+\.?\d{0,4}'),
-                  ),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,4}')),
                 ],
                 onChanged: onCantidadChanged,
               ),
@@ -115,14 +107,11 @@ class LineaProductoWidget extends StatelessWidget {
                 controller: ctrl.costoUnitario,
                 label: 'Costo Compra (RD\$)',
                 prefixIcon: Icons.payments_outlined,
-                keyboardType:
-                    const TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d+\.?\d{0,2}'),
-                  ),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 onChanged: onCostoChanged,
               ),
@@ -132,28 +121,22 @@ class LineaProductoWidget extends StatelessWidget {
               child1: AppTextField(
                 controller: ctrl.fleteUnitario,
                 label: 'Flete por unidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d+\.?\d{0,2}'),
-                  ),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 onChanged: onFleteChanged,
               ),
               child2: AppTextField(
                 controller: ctrl.seguroUnitario,
                 label: 'Seguro por unidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d+\.?\d{0,2}'),
-                  ),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 onChanged: onSeguroChanged,
               ),
@@ -163,28 +146,22 @@ class LineaProductoWidget extends StatelessWidget {
               child1: AppTextField(
                 controller: ctrl.arancelesUnitario,
                 label: 'Aranceles por unidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d+\.?\d{0,2}'),
-                  ),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 onChanged: onArancelesChanged,
               ),
               child2: AppTextField(
                 controller: ctrl.gastosUnitario,
                 label: 'Otros Gastos por unidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d+\.?\d{0,2}'),
-                  ),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 onChanged: onGastosChanged,
               ),
@@ -193,14 +170,11 @@ class LineaProductoWidget extends StatelessWidget {
             AppTextField(
               controller: ctrl.descuento,
               label: 'Descuento (%)',
-              keyboardType:
-                  const TextInputType.numberWithOptions(
+              keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d+\.?\d{0,2}'),
-                ),
+                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
               onChanged: onDescuentoChanged,
             ),

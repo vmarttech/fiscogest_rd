@@ -45,18 +45,24 @@ VentaBorradorState _ventaABorradorState(Venta v) {
     montoTotal: v.total,
     tipoPago: v.tipoPago,
     esCredito: v.esCredito,
-    detalles: v.detalles.map((det) => <String, dynamic>{
-      'productoId': det.productoId,
-      'productoNombre': det.nombreProducto,
-      'cantidad': det.cantidad,
-      'precioUnitario': det.precioUnitario,
-      'subtotal': det.subtotal,
-    }).toList(),
+    detalles: v.detalles
+        .map(
+          (det) => <String, dynamic>{
+            'productoId': det.productoId,
+            'productoNombre': det.nombreProducto,
+            'cantidad': det.cantidad,
+            'precioUnitario': det.precioUnitario,
+            'subtotal': det.subtotal,
+          },
+        )
+        .toList(),
     estadoDocumento: v.estadoDocumento,
   );
 }
 
-final listaVentasBorradorProvider = FutureProvider<List<VentaBorradorState>>((ref) async {
+final listaVentasBorradorProvider = FutureProvider<List<VentaBorradorState>>((
+  ref,
+) async {
   final lista = await ref.watch(listaCotizacionesProvider.future);
   return lista.map((v) => _ventaABorradorState(v)).toList();
 });

@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/fios_provider.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class FiosListaPage extends ConsumerWidget {
   const FiosListaPage({super.key});
@@ -33,8 +34,11 @@ class FiosListaPage extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.edit_note_rounded,
-                        size: 48, color: AppColors.grey300),
+                    const Icon(
+                      Icons.edit_note_rounded,
+                      size: 48,
+                      color: AppColors.grey300,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'No hay fiao pendiente',
@@ -76,8 +80,10 @@ class FiosListaPage extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.account_balance_wallet_outlined,
-                        color: AppColors.warning),
+                    const Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: AppColors.warning,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -133,7 +139,7 @@ class FiosListaPage extends ConsumerWidget {
       builder: (_) => _SheetAbonarFiao(fio: fio),
     );
     if (ok == true && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Abono registrado'),
           backgroundColor: AppColors.success,
@@ -180,8 +186,11 @@ class _FioTile extends StatelessWidget {
                   color: AppColors.warning.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.person_outline,
-                    color: AppColors.warning, size: 22),
+                child: const Icon(
+                  Icons.person_outline,
+                  color: AppColors.warning,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -273,7 +282,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
     final raw = _monto.text.trim().replaceAll(',', '');
     final valor = double.tryParse(raw);
     if (valor == null || valor <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Ingrese un monto válido'),
           backgroundColor: AppColors.error,
@@ -283,7 +292,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
       return;
     }
     if (valor > widget.fio.saldoPendiente + 0.01) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('El abono no puede ser mayor al saldo'),
           backgroundColor: AppColors.error,
@@ -300,7 +309,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error: $e'),
           backgroundColor: AppColors.error,
@@ -362,8 +371,9 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
             const SizedBox(height: 14),
             TextField(
               controller: _monto,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Monto a abonar',

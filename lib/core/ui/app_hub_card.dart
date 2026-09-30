@@ -47,15 +47,10 @@ class _AppHubCardState extends State<AppHubCard> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white,
-                    Color.lerp(Colors.white, c, 0.04)!,
-                  ],
+                  colors: [Colors.white, Color.lerp(Colors.white, c, 0.04)!],
                 ),
                 border: Border.all(
-                  color: _hover
-                      ? c.withValues(alpha: 0.45)
-                      : AppColors.border,
+                  color: _hover ? c.withValues(alpha: 0.45) : AppColors.border,
                   width: _hover ? 1.5 : 1,
                 ),
                 boxShadow: [

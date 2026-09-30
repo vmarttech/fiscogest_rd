@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class _DatosDescuento {
   const _DatosDescuento({required this.valor, required this.esPorcentaje});
@@ -69,9 +70,11 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_advertenciaMostrada) {
           _advertenciaMostrada = true;
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(
-              content: Text('El descuento máximo permitido es 35%. Requiere autorización para más.'),
+              content: Text(
+                'El descuento máximo permitido es 35%. Requiere autorización para más.',
+              ),
               backgroundColor: AppColors.warning,
               duration: Duration(seconds: 3),
             ),
@@ -128,7 +131,9 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
         style: AppTypography.bodyMedium.copyWith(fontSize: 14),
         decoration: InputDecoration(
           labelText: _esPorcentaje ? 'Desc %' : 'Desc RD\$',
-          labelStyle: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
+          labelStyle: AppTypography.labelSmall.copyWith(
+            color: AppColors.textSecondary,
+          ),
           hintText: '0,00',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
@@ -143,7 +148,10 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
             borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
           ),
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 12,
+          ),
           suffixIcon: PopupMenuButton<bool>(
             onSelected: _cambiarTipo,
             padding: EdgeInsets.zero,
@@ -156,7 +164,11 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.attach_money, size: 16, color: AppColors.primary),
+                    Icon(
+                      Icons.attach_money,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
                     SizedBox(width: 4),
                     Text('RD\$', style: AppTypography.labelMedium),
                   ],
@@ -204,7 +216,8 @@ class PanelCarrito extends ConsumerWidget {
       final precioConCantidad = linea.subtotalLinea ?? linea.subtotal;
       double despuesDescLinea = precioConCantidad;
       if (linea.descuentoPorcentaje > 0) {
-        despuesDescLinea = precioConCantidad * (100 - linea.descuentoPorcentaje) / 100;
+        despuesDescLinea =
+            precioConCantidad * (100 - linea.descuentoPorcentaje) / 100;
       } else if (linea.montoDescuento > 0) {
         despuesDescLinea = precioConCantidad - linea.montoDescuento;
       }
@@ -215,12 +228,16 @@ class PanelCarrito extends ConsumerWidget {
     return (baseConDescLinea, totalDescLinea);
   }
 
-  void _aplicarDescuento(_DatosDescuento datos, WidgetRef ref, BuildContext context) {
+  void _aplicarDescuento(
+    _DatosDescuento datos,
+    WidgetRef ref,
+    BuildContext context,
+  ) {
     final estado = ref.read(registrarVentaProvider);
     final notifier = ref.read(registrarVentaProvider.notifier);
     final error = notifier.puedeAplicarDescuentoGeneral();
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(error),
           backgroundColor: AppColors.error,
@@ -242,7 +259,9 @@ class PanelCarrito extends ConsumerWidget {
     final isMobile = AppBreakpoints.isMobile(context);
     final estado = ref.watch(registrarVentaProvider);
     final hayDescuentoGeneral = estado.montoDescuento > 0;
-    final anchoCampoDescuento = isMobile ? MediaQuery.of(context).size.width * 0.38 : 130.0;
+    final anchoCampoDescuento = isMobile
+        ? MediaQuery.of(context).size.width * 0.38
+        : 130.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -285,7 +304,10 @@ class PanelCarrito extends ConsumerWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -325,7 +347,9 @@ class PanelCarrito extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       'Busca un producto para comenzar',
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -340,8 +364,9 @@ class PanelCarrito extends ConsumerWidget {
                     child: ItemCarrito(
                       detalle: detalle,
                       indice: indice,
-                      alEliminar: () =>
-                          ref.read(registrarVentaProvider.notifier).quitarProducto(indice),
+                      alEliminar: () => ref
+                          .read(registrarVentaProvider.notifier)
+                          .quitarProducto(indice),
                     ),
                   );
                 }).toList(),

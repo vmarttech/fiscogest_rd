@@ -114,24 +114,25 @@ class VentaBorradorState {
 
 class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
   VentaBorradorNotifier(this._ref)
-      : super(
-          VentaBorradorState(
-            numero: '',
-            fecha: DateTime.now(),
-            subtotal: 0.0,
-            itbis: 0.0,
-            costoEnvio: 0.0,
-            descuento: 0.0,
-            montoDescuento: 0.0,
-            montoTotal: 0.0,
-          ),
-        );
+    : super(
+        VentaBorradorState(
+          numero: '',
+          fecha: DateTime.now(),
+          subtotal: 0.0,
+          itbis: 0.0,
+          costoEnvio: 0.0,
+          descuento: 0.0,
+          montoDescuento: 0.0,
+          montoTotal: 0.0,
+        ),
+      );
 
   final Ref _ref;
 
   /// 0 en modo simplificado; 18% en operación fiscal.
   double get _tasaItbis {
-    final simp = _ref
+    final simp =
+        _ref
             .read(configuracionControllerProvider)
             .valueOrNull
             ?.modoSimplificado ??
@@ -301,7 +302,8 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
   }
 
   bool validarAntesDeGuardar() {
-    final bool tieneCliente = state.clienteId != null &&
+    final bool tieneCliente =
+        state.clienteId != null &&
         state.clienteId! >= 0 &&
         (state.clienteNombre?.trim().isNotEmpty ?? false);
     final bool tieneProductos =
@@ -364,5 +366,5 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
 
 final ventaBorradorProvider =
     StateNotifierProvider<VentaBorradorNotifier, VentaBorradorState>((ref) {
-  return VentaBorradorNotifier(ref);
-});
+      return VentaBorradorNotifier(ref);
+    });

@@ -30,7 +30,11 @@ class DetalleRecepcion {
   final String? motivoDiferencia;
 
   double get costoAdquisicion =>
-      (costoUnitario ?? 0) + fleteUnitario + seguroUnitario + arancelesUnitario + gastosUnitario;
+      (costoUnitario ?? 0) +
+      fleteUnitario +
+      seguroUnitario +
+      arancelesUnitario +
+      gastosUnitario;
 
   DetalleRecepcion copyWith({
     int? id,
@@ -117,7 +121,11 @@ class RecepcionElemento {
   final String? observaciones;
 
   double get costoAdquisicion =>
-      (precioUnitario ?? 0) + fleteUnitario + seguroUnitario + arancelesUnitario + gastosUnitario;
+      (precioUnitario ?? 0) +
+      fleteUnitario +
+      seguroUnitario +
+      arancelesUnitario +
+      gastosUnitario;
 
   RecepcionElemento copyWith({
     int? id,

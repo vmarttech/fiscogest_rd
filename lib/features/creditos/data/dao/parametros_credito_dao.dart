@@ -16,11 +16,12 @@ class ParametrosCreditoDao extends DatabaseAccessor<AppDatabase>
   Future<ParametroCreditoData> obtenerOCrear() async {
     final actual = await obtener();
     if (actual != null) return actual;
-    final id = await into(parametrosCreditoTable).insert(
-      ParametrosCreditoTableCompanion.insert(),
-    );
-    return (select(parametrosCreditoTable)..where((t) => t.id.equals(id)))
-        .getSingle();
+    final id = await into(
+      parametrosCreditoTable,
+    ).insert(ParametrosCreditoTableCompanion.insert());
+    return (select(
+      parametrosCreditoTable,
+    )..where((t) => t.id.equals(id))).getSingle();
   }
 
   Future<void> guardar({
@@ -33,9 +34,9 @@ class ParametrosCreditoDao extends DatabaseAccessor<AppDatabase>
     required String plantillaContrato,
   }) async {
     final actual = await obtenerOCrear();
-    await (update(parametrosCreditoTable)
-          ..where((t) => t.id.equals(actual.id)))
-        .write(
+    await (update(
+      parametrosCreditoTable,
+    )..where((t) => t.id.equals(actual.id))).write(
       ParametrosCreditoTableCompanion(
         tasaMensualDefault: Value(tasaMensualDefault),
         cuotasDefault: Value(cuotasDefault),

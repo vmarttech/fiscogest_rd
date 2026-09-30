@@ -10,9 +10,9 @@ class SecuenciasNcfDao extends DatabaseAccessor<AppDatabase>
   SecuenciasNcfDao(super.db);
 
   Future<List<SecuenciasNcfTableData>> listar() {
-    return (select(secuenciasNcfTable)
-          ..orderBy([(t) => OrderingTerm.asc(t.tipo)]))
-        .get();
+    return (select(
+      secuenciasNcfTable,
+    )..orderBy([(t) => OrderingTerm.asc(t.tipo)])).get();
   }
 
   Future<SecuenciasNcfTableData?> porTipo(String tipo) {
@@ -60,8 +60,9 @@ class SecuenciasNcfDao extends DatabaseAccessor<AppDatabase>
     if (row == null) {
       await into(secuenciasNcfTable).insert(companion);
     } else {
-      await (update(secuenciasNcfTable)..where((t) => t.id.equals(row.id)))
-          .write(companion);
+      await (update(
+        secuenciasNcfTable,
+      )..where((t) => t.id.equals(row.id))).write(companion);
     }
   }
 
@@ -87,8 +88,9 @@ class SecuenciasNcfDao extends DatabaseAccessor<AppDatabase>
           'Secuencia $tipo agotada (hasta ${row.secuenciaHasta})',
         );
       }
-      await (update(secuenciasNcfTable)..where((t) => t.id.equals(row.id)))
-          .write(
+      await (update(
+        secuenciasNcfTable,
+      )..where((t) => t.id.equals(row.id))).write(
         SecuenciasNcfTableCompanion(
           secuenciaActual: Value(siguiente),
           actualizadoEn: Value(DateTime.now()),

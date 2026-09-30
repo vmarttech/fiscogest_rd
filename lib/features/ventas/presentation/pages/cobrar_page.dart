@@ -12,45 +12,46 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 
-final listadoCuentasCobrarProvider = FutureProvider.family<List<CuentaCobrarItem>, int>((
-  ref,
-  clienteIdFiltro,
-) async {
-  final db = ref.watch<AppDatabase>(appDatabaseProvider);
-  final dao = CuentasCobrarDao(db);
-  final registros = await dao.listarCuentasPorCobrar();
-  final registrosFiltrados = clienteIdFiltro > 0
-      ? registros.where((r) => r.clienteId == clienteIdFiltro).toList()
-      : registros;
-  final idsClientes = registrosFiltrados.map((r) => r.clienteId).toSet();
-  final List<ClientesTableData> registrosClientes = idsClientes.isNotEmpty
-      ? await (db.select(db.clientesTable)
-            ..where((t) => t.id.isIn(idsClientes)))
-          .get()
-      : <ClientesTableData>[];
-  final mapaClientes = <int, String>{
-    for (final row in registrosClientes) row.id: row.nombre,
-  };
-  return registrosFiltrados.map((reg) {
-    final nombreCliente =
-        mapaClientes[reg.clienteId] ?? 'Cliente #${reg.clienteId}';
-    final estadoTexto = switch (reg.estado) {
-      CobrarEstado.pagado => 'Pagado',
-      CobrarEstado.vencido => 'Vencido',
-      CobrarEstado.parcial => 'Parcial',
-      _ => 'Pendiente',
-    };
-    return CuentaCobrarItem(
-      clienteId: reg.clienteId,
-      clienteNombre: nombreCliente,
-      montoOriginal: reg.montoOriginal,
-      montoAbonado: reg.montoAbonado,
-      saldoPendiente: reg.saldoPendiente,
-      fechaVencimiento: reg.fechaVencimiento,
-      estado: estadoTexto,
-    );
-  }).toList();
-});
+final listadoCuentasCobrarProvider =
+    FutureProvider.family<List<CuentaCobrarItem>, int>((
+      ref,
+      clienteIdFiltro,
+    ) async {
+      final db = ref.watch<AppDatabase>(appDatabaseProvider);
+      final dao = CuentasCobrarDao(db);
+      final registros = await dao.listarCuentasPorCobrar();
+      final registrosFiltrados = clienteIdFiltro > 0
+          ? registros.where((r) => r.clienteId == clienteIdFiltro).toList()
+          : registros;
+      final idsClientes = registrosFiltrados.map((r) => r.clienteId).toSet();
+      final List<ClientesTableData> registrosClientes = idsClientes.isNotEmpty
+          ? await (db.select(
+              db.clientesTable,
+            )..where((t) => t.id.isIn(idsClientes))).get()
+          : <ClientesTableData>[];
+      final mapaClientes = <int, String>{
+        for (final row in registrosClientes) row.id: row.nombre,
+      };
+      return registrosFiltrados.map((reg) {
+        final nombreCliente =
+            mapaClientes[reg.clienteId] ?? 'Cliente #${reg.clienteId}';
+        final estadoTexto = switch (reg.estado) {
+          CobrarEstado.pagado => 'Pagado',
+          CobrarEstado.vencido => 'Vencido',
+          CobrarEstado.parcial => 'Parcial',
+          _ => 'Pendiente',
+        };
+        return CuentaCobrarItem(
+          clienteId: reg.clienteId,
+          clienteNombre: nombreCliente,
+          montoOriginal: reg.montoOriginal,
+          montoAbonado: reg.montoAbonado,
+          saldoPendiente: reg.saldoPendiente,
+          fechaVencimiento: reg.fechaVencimiento,
+          estado: estadoTexto,
+        );
+      }).toList();
+    });
 
 class CuentaCobrarItem {
   const CuentaCobrarItem({
@@ -98,7 +99,9 @@ class CobrarPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cuentasAsync = ref.watch(listadoCuentasCobrarProvider(clienteIdFiltro));
+    final cuentasAsync = ref.watch(
+      listadoCuentasCobrarProvider(clienteIdFiltro),
+    );
     final esPantallaPequena = MediaQuery.of(context).size.width < 600;
     final paddingTexto = esPantallaPequena ? 12.0 : 16.0;
     final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
@@ -145,7 +148,9 @@ class CobrarPage extends ConsumerWidget {
               padding: EdgeInsets.all(paddingTexto),
               child: Text(
                 'Error: $e',
-                style: AppTypography.bodyMedium.copyWith(fontSize: tamanoCuerpo),
+                style: AppTypography.bodyMedium.copyWith(
+                  fontSize: tamanoCuerpo,
+                ),
               ),
             ),
           ),
@@ -207,23 +212,31 @@ class CobrarPage extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           'Total: ${formatRd(c.montoOriginal)}',
-                          style: AppTypography.bodyMedium.copyWith(fontSize: tamanoCuerpo),
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontSize: tamanoCuerpo,
+                          ),
                         ),
                         Text(
                           'Abonado: ${formatRd(c.montoAbonado)}',
-                          style: AppTypography.bodyMedium.copyWith(fontSize: tamanoCuerpo),
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontSize: tamanoCuerpo,
+                          ),
                         ),
                         Text(
                           'Saldo pendiente: ${formatRd(c.saldoPendiente)}',
                           style: AppTypography.bodyMedium.copyWith(
                             fontSize: tamanoCuerpo,
                             fontWeight: FontWeight.w600,
-                            color: vencida ? AppColors.error : AppColors.primary,
+                            color: vencida
+                                ? AppColors.error
+                                : AppColors.primary,
                           ),
                         ),
                         Text(
                           'Vence: ${_formatoFecha.format(c.fechaVencimiento)}',
-                          style: AppTypography.bodyMedium.copyWith(fontSize: tamanoCuerpo),
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontSize: tamanoCuerpo,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Container(

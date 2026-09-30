@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 class TotalesCompraWidget extends StatelessWidget {
-
   const TotalesCompraWidget({
     super.key,
     required this.subtotalSinImpuestos,

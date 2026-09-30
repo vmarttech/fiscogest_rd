@@ -28,13 +28,16 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       throw Exception('No se pudo guardar la venta');
     }
 
-
     for (final elemento in venta.detalles) {
       final detalle = elemento;
 
-      final saldoAnterior = await kardexRepository.obtenerSaldoActual(detalle.productoId);
+      final saldoAnterior = await kardexRepository.obtenerSaldoActual(
+        detalle.productoId,
+      );
       if (saldoAnterior < detalle.cantidad) {
-        throw Exception('Stock insuficiente: producto ${detalle.nombreProducto}, disponible=$saldoAnterior, vendiendo=${detalle.cantidad}');
+        throw Exception(
+          'Stock insuficiente: producto ${detalle.nombreProducto}, disponible=$saldoAnterior, vendiendo=${detalle.cantidad}',
+        );
       }
 
       final producto = await productosDao.obtenerPorId(detalle.productoId);
@@ -56,7 +59,10 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       );
 
       await kardexRepository.registrarMovimiento(movimientoKardex);
-      await inventarioService.restarStock(detalle.productoId, detalle.cantidad.toDouble());
+      await inventarioService.restarStock(
+        detalle.productoId,
+        detalle.cantidad.toDouble(),
+      );
     }
 
     if (ventaRegistrada.id != null) {
@@ -76,17 +82,20 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         'La venta no tiene líneas de detalle. No se puede descontar inventario.',
       );
     }
-    final refDoc = (venta.numeroFactura != null && venta.numeroFactura!.isNotEmpty)
+    final refDoc =
+        (venta.numeroFactura != null && venta.numeroFactura!.isNotEmpty)
         ? 'Factura ${venta.numeroFactura}'
         : 'Venta #${venta.numeroCotizacion}';
     for (final detalle in venta.detalles) {
       final producto = await productosDao.obtenerPorId(detalle.productoId);
-      final nombre = (detalle.nombreProducto != null &&
+      final nombre =
+          (detalle.nombreProducto != null &&
               detalle.nombreProducto!.trim().isNotEmpty)
           ? detalle.nombreProducto!.trim()
           : (producto?.nombre ?? 'Producto ${detalle.productoId}');
-      final saldoAnterior =
-          await kardexRepository.obtenerSaldoActual(detalle.productoId);
+      final saldoAnterior = await kardexRepository.obtenerSaldoActual(
+        detalle.productoId,
+      );
       final cant = detalle.cantidad.toDouble();
       if (saldoAnterior < cant) {
         throw Exception(
@@ -130,12 +139,14 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     final refDoc = 'NC $ncfNc / Factura $ncfFact';
     for (final detalle in venta.detalles) {
       final producto = await productosDao.obtenerPorId(detalle.productoId);
-      final nombre = (detalle.nombreProducto != null &&
+      final nombre =
+          (detalle.nombreProducto != null &&
               detalle.nombreProducto!.trim().isNotEmpty)
           ? detalle.nombreProducto!.trim()
           : (producto?.nombre ?? 'Producto ${detalle.productoId}');
-      final saldoAnterior =
-          await kardexRepository.obtenerSaldoActual(detalle.productoId);
+      final saldoAnterior = await kardexRepository.obtenerSaldoActual(
+        detalle.productoId,
+      );
       final cant = detalle.cantidad.toDouble();
       final costoUnitario = producto?.precioCompra ?? 0.0;
       final saldoNuevo = saldoAnterior + cant;
@@ -156,5 +167,4 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       await inventarioService.sumarStock(detalle.productoId, cant);
     }
   }
-
 }

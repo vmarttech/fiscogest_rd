@@ -107,7 +107,10 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     return state.clienteId == 0 || state.clienteNombre == 'Consumidor Final';
   }
 
-  double precioConOferta({required double? precioEspecial, required double precioVenta}) {
+  double precioConOferta({
+    required double? precioEspecial,
+    required double precioVenta,
+  }) {
     if (precioEspecial != null && precioEspecial > 0) {
       return precioEspecial;
     }
@@ -123,20 +126,28 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 
   bool tieneDescuentoAplicado() {
-    return state.detalles.any((linea) => linea.descuentoPorcentaje > 0 || linea.montoDescuento > 0);
+    return state.detalles.any(
+      (linea) => linea.descuentoPorcentaje > 0 || linea.montoDescuento > 0,
+    );
   }
 
   bool productoTieneOferta(DetalleVenta linea) {
-    return linea.ofertaId != null && linea.ofertaNombre != null && linea.ofertaNombre!.isNotEmpty;
+    return linea.ofertaId != null &&
+        linea.ofertaNombre != null &&
+        linea.ofertaNombre!.isNotEmpty;
   }
 
   String? puedeAplicarDescuentoLinea(DetalleVenta linea) {
-    if (state.detalles.isEmpty) return 'Agregue productos antes de aplicar descuento';
+    if (state.detalles.isEmpty) {
+      return 'Agregue productos antes de aplicar descuento';
+    }
     return null;
   }
 
   String? puedeAplicarDescuentoGeneral() {
-    if (state.detalles.isEmpty) return 'Agregue productos antes de aplicar descuento';
+    if (state.detalles.isEmpty) {
+      return 'Agregue productos antes de aplicar descuento';
+    }
     return null;
   }
 
@@ -155,7 +166,10 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     if (indice >= 0) {
       final existente = lista[indice];
       final nuevaCantidad = existente.cantidad + linea.cantidad;
-      final mensajeStock = validarStockAlAgregar(linea, nuevaCantidad.toDouble());
+      final mensajeStock = validarStockAlAgregar(
+        linea,
+        nuevaCantidad.toDouble(),
+      );
       if (mensajeStock != null) return mensajeStock;
       final nuevoSubtotal = existente.precioUnitario * nuevaCantidad;
       lista[indice] = existente.copyWith(
@@ -164,7 +178,10 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
         subtotalLinea: nuevoSubtotal,
       );
     } else {
-      final mensajeStock = validarStockAlAgregar(linea, linea.cantidad.toDouble());
+      final mensajeStock = validarStockAlAgregar(
+        linea,
+        linea.cantidad.toDouble(),
+      );
       if (mensajeStock != null) return mensajeStock;
       lista.add(linea);
     }
@@ -222,19 +239,32 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       double nuevoSubtotal;
       if (esPorcentaje) {
         nuevoSubtotal = precioBase * (100 - valor) / 100;
-        lista[indice] = linea.copyWith(descuentoPorcentaje: valor, montoDescuento: 0);
+        lista[indice] = linea.copyWith(
+          descuentoPorcentaje: valor,
+          montoDescuento: 0,
+        );
       } else {
         nuevoSubtotal = precioBase - valor;
-        lista[indice] = linea.copyWith(montoDescuento: valor, descuentoPorcentaje: 0);
+        lista[indice] = linea.copyWith(
+          montoDescuento: valor,
+          descuentoPorcentaje: 0,
+        );
       }
       if (nuevoSubtotal < 0) nuevoSubtotal = 0;
-      lista[indice] = linea.copyWith(subtotal: nuevoSubtotal, subtotalLinea: nuevoSubtotal);
+      lista[indice] = linea.copyWith(
+        subtotal: nuevoSubtotal,
+        subtotalLinea: nuevoSubtotal,
+      );
       recalcularTotales(lista);
     }
     return null;
   }
 
-  void cambiarDescuentoPorLinea(int indice, double valor, {bool esPorcentaje = false}) {
+  void cambiarDescuentoPorLinea(
+    int indice,
+    double valor, {
+    bool esPorcentaje = false,
+  }) {
     aplicarDescuentoLinea(indice, valor, esPorcentaje);
   }
 
@@ -245,7 +275,11 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 
   void quitarDescuento() {
-    state = state.copyWith(descuentoId: null, descuentoNombre: null, montoDescuento: 0.0);
+    state = state.copyWith(
+      descuentoId: null,
+      descuentoNombre: null,
+      montoDescuento: 0.0,
+    );
   }
 
   void seleccionarCliente(int id, String nombre) {
@@ -278,7 +312,9 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 
   bool validarAntesDeGuardar() {
-    return state.detalles.isNotEmpty && state.tipoPago.isNotEmpty && state.total > 0;
+    return state.detalles.isNotEmpty &&
+        state.tipoPago.isNotEmpty &&
+        state.total > 0;
   }
 
   double? obtenerStock(DetalleVenta linea) => linea.subtotalLinea;
@@ -305,8 +341,10 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     final coinciden = todos.where((Producto p) {
       final coincideCodigo = p.codigo.toLowerCase().contains(textoBusqueda);
       final coincideNombre = p.nombre.toLowerCase().contains(textoBusqueda);
-      final coincideCodigoBarras = p.codigoBarras?.toLowerCase().contains(textoBusqueda) ?? false;
-      return p.activo && (coincideCodigo || coincideNombre || coincideCodigoBarras);
+      final coincideCodigoBarras =
+          p.codigoBarras?.toLowerCase().contains(textoBusqueda) ?? false;
+      return p.activo &&
+          (coincideCodigo || coincideNombre || coincideCodigoBarras);
     }).toList();
     final resultados = coinciden.map((Producto producto) {
       final precioFinal = precioConOferta(
@@ -330,4 +368,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 }
 
-final registrarVentaProvider = NotifierProvider<RegistrarVentaNotifier, RegistrarVentaState>(RegistrarVentaNotifier.new);
+final registrarVentaProvider =
+    NotifierProvider<RegistrarVentaNotifier, RegistrarVentaState>(
+      RegistrarVentaNotifier.new,
+    );

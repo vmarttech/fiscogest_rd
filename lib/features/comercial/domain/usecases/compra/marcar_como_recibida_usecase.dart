@@ -3,9 +3,7 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
 
 class MarcarComoRecibidaUseCase {
-  MarcarComoRecibidaUseCase({
-    required this.compraRepository,
-  });
+  MarcarComoRecibidaUseCase({required this.compraRepository});
 
   final ICompraRepository compraRepository;
 

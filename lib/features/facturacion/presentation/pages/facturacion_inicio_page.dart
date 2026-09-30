@@ -12,15 +12,18 @@ class FacturacionInicioPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final simple = ref.watch(configuracionControllerProvider)
-            .valueOrNull?.modoSimplificado == true;
-
+    final simple =
+        ref
+            .watch(configuracionControllerProvider)
+            .valueOrNull
+            ?.modoSimplificado ==
+        true;
 
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
 
     return AppScaffold(
-      title: simple ? 'VENTAS / COMPROBANTES' : 'FACTURACIÓN Y NC',  // not const
+      title: simple ? 'VENTAS / COMPROBANTES' : 'FACTURACIÓN Y NC', // not const
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -94,64 +97,69 @@ class FacturacionInicioPage extends ConsumerWidget {
                           ),
                         ),
                         Row(
-                      children: [
-                        Container(
-                          width: mobile ? 56 : 64,
-                          height: mobile ? 56 : 64,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.95),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.12),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
+                          children: [
+                            Container(
+                              width: mobile ? 56 : 64,
+                              height: mobile ? 56 : 64,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.95),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.12),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.receipt_long_rounded,
-                            color: AppColors.primary,
-                            size: mobile ? 30 : 34,
-                          ),
+                              child: Icon(
+                                Icons.receipt_long_rounded,
+                                color: AppColors.primary,
+                                size: mobile ? 30 : 34,
+                              ),
+                            ),
+                            const SizedBox(width: 18),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Facturación y NC',
+                                    style:
+                                        (mobile
+                                                ? AppTypography.h4
+                                                : AppTypography.h3)
+                                            .copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: -0.3,
+                                            ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Emite, gestiona y consulta comprobantes '
+                                    'con NCF e historial.',
+                                    style: AppTypography.bodyMedium.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Facturación y NC',
-                                style: (mobile
-                                        ? AppTypography.h4
-                                        : AppTypography.h3)
-                                    .copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Emite, gestiona y consulta comprobantes '
-                                'con NCF e historial.',
-                                style: AppTypography.bodyMedium.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  height: 1.35,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 28),
                   SectionHeader(
                     title: 'Operaciones',
-                    subtitle: simple ? 'Comprobantes de venta' : 'Comprobantes fiscales',
+                    subtitle: simple
+                        ? 'Comprobantes de venta'
+                        : 'Comprobantes fiscales',
                   ),
                   const SizedBox(height: 14),
                   AppAccessGrid(
@@ -163,21 +171,22 @@ class FacturacionInicioPage extends ConsumerWidget {
                     children: [
                       if (!simple)
                         AppHubCard(
-                        icon: Icons.note_add_outlined,
-                        title: 'Emitir factura',
-                        subtitle:
-                            'Crea una factura con NCF de consumo o crédito fiscal',
-                        color: AppColors.primary,
-                        onTap: () => context.push('/sales/emitir-factura'),
-                      ),
+                          icon: Icons.note_add_outlined,
+                          title: 'Emitir factura',
+                          subtitle:
+                              'Crea una factura con NCF de consumo o crédito fiscal',
+                          color: AppColors.primary,
+                          onTap: () => context.push('/sales/emitir-factura'),
+                        ),
                       if (!simple)
                         AppHubCard(
-                        icon: Icons.assignment_return_outlined,
-                        title: 'Emitir NC',
-                        subtitle: 'Emite una nota de crédito sobre una factura',
-                        color: AppColors.info,
-                        onTap: () => context.push('/sales/emitir-nc'),
-                      ),
+                          icon: Icons.assignment_return_outlined,
+                          title: 'Emitir NC',
+                          subtitle:
+                              'Emite una nota de crédito sobre una factura',
+                          color: AppColors.info,
+                          onTap: () => context.push('/sales/emitir-nc'),
+                        ),
                       AppHubCard(
                         icon: Icons.history_outlined,
                         title: 'Historial',
@@ -187,12 +196,12 @@ class FacturacionInicioPage extends ConsumerWidget {
                       ),
                       if (!simple)
                         AppHubCard(
-                        icon: Icons.pin_outlined,
-                        title: 'Secuencias NCF',
-                        subtitle: 'Gestiona secuencias y rangos autorizados',
-                        color: AppColors.primary,
-                        onTap: () => context.push('/sales/secuencias-ncf'),
-                      ),
+                          icon: Icons.pin_outlined,
+                          title: 'Secuencias NCF',
+                          subtitle: 'Gestiona secuencias y rangos autorizados',
+                          color: AppColors.primary,
+                          onTap: () => context.push('/sales/secuencias-ncf'),
+                        ),
                     ],
                   ),
                 ],

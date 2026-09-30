@@ -1,5 +1,6 @@
 /// Índice y exportaciones del módulo comercial
 library;
+
 export 'data/dao/compras_table.dart';
 export 'data/dao/detalle_compra_table.dart';
 export 'data/dao/detalle_compra_dao.dart';

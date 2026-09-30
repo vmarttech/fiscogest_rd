@@ -22,6 +22,7 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_p
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 final _fmtMontoCobro = NumberFormat.currency(
   locale: 'es_DO',
@@ -29,11 +30,11 @@ final _fmtMontoCobro = NumberFormat.currency(
   decimalDigits: 2,
 );
 
-
 class CobroVentaPage extends ConsumerStatefulWidget {
-const CobroVentaPage({super.key});
+  const CobroVentaPage({super.key});
 
   static const String routeName = 'cobro-venta-operacion';
+
   /// Operación: buscar cotización y cobrar (no es el home de Caja).
   static const String path = '/ventas/cobro';
   static const String pathOperacion = '/ventas/cobro/operacion';
@@ -48,6 +49,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   final TextEditingController _busquedaController = TextEditingController();
 
   int ventaId = 0;
+
   /// Comprobante fiscal en Caja (antes de cobrar).
   String _tipoNcf = 'B02';
   final TextEditingController _rncFiscalController = TextEditingController();
@@ -96,7 +98,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       _cargarPendientes();
     }
   }
-Future<void> _cargarDocumento({
+
+  Future<void> _cargarDocumento({
     required int id,
     required double monto,
     required bool credito,
@@ -132,8 +135,10 @@ Future<void> _cargarDocumento({
     ref.read(cajaProvider.notifier).inicializarVenta(montoTotal, esCredito);
     if (esCredito) {
       // Abono pactado en cotización / crédito (no regla comercial del 30% en caja)
-      final abonoPactado =
-          (abonoDesdeDoc > 0 ? abonoDesdeDoc : 0.0).clamp(0.0, montoTotal);
+      final abonoPactado = (abonoDesdeDoc > 0 ? abonoDesdeDoc : 0.0).clamp(
+        0.0,
+        montoTotal,
+      );
       _abonoController.text = abonoPactado.toStringAsFixed(2);
       ref.read(cajaProvider.notifier).establecerAbono(abonoPactado);
     } else {
@@ -220,7 +225,7 @@ Future<void> _cargarDocumento({
   void _seleccionarVenta(Venta v) {
     if (v.id == null) return;
     if (!_listaParaCobrar(v)) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             v.estadoDocumento == EstadoDocumento.enCredito
@@ -252,14 +257,13 @@ Future<void> _cargarDocumento({
     super.dispose();
   }
 
-
   Future<void> _opcionesComprobantePdf(Venta ventaConDetalle) async {
     final emp = ref.read(configuracionControllerProvider).valueOrNull;
     final simple = emp?.modoSimplificado == true;
     final ncf = (ventaConDetalle.numeroFactura ?? '').trim();
     if (ncf.isEmpty && !simple) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Sin NCF fiscal: no se puede generar el PDF'),
           backgroundColor: AppColors.warning,
@@ -272,7 +276,9 @@ Future<void> _cargarDocumento({
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(simple ? 'Comprobante' : 'Comprobante fiscal'),
-        content: Text('NCF: $ncf\n\nElija imprimir o enviar (WhatsApp, correo, etc.).'),
+        content: Text(
+          'NCF: $ncf\n\nElija imprimir o enviar (WhatsApp, correo, etc.).',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -313,7 +319,7 @@ Future<void> _cargarDocumento({
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('PDF: $e'),
           backgroundColor: AppColors.error,
@@ -322,8 +328,6 @@ Future<void> _cargarDocumento({
       );
     }
   }
-
-
 
   double? _parseMontoCobro(String raw) {
     final s = raw.trim().replaceAll(' ', '').replaceAll(',', '.');
@@ -381,15 +385,18 @@ Future<void> _cargarDocumento({
   Future<bool> _exigirCajaAbierta() async {
     // Solo exige sesión si el switch está explícitamente ON.
     // cfg null o false → permitir cobrar.
-    final cfg = ref.read(configuracionControllerProvider).valueOrNull
-        ?? ref.read(configuracionControllerProvider).asData?.value;
+    final cfg =
+        ref.read(configuracionControllerProvider).valueOrNull ??
+        ref.read(configuracionControllerProvider).asData?.value;
     final exige = cfg?.cajaExigirSesion ?? false;
     if (!exige) return true;
 
-    final sesion = await ref.read(cajaRepositoryProvider).obtenerSesionAbierta();
+    final sesion = await ref
+        .read(cajaRepositoryProvider)
+        .obtenerSesionAbierta();
     if (sesion == null || !sesion.estaAbierta) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(
             content: Text(
               'La caja está cerrada. Ábrala desde el menú Caja '
@@ -404,8 +411,6 @@ Future<void> _cargarDocumento({
     }
     return true;
   }
-
-
 
   Future<void> _cargarRncCliente(int clienteId) async {
     try {
@@ -450,9 +455,10 @@ Future<void> _cargarDocumento({
     if (yaFiscal) return;
 
     if (_tipoNcf == 'B01') {
-      final rnc = _rncFiscalController.text
-          .trim()
-          .replaceAll(RegExp(r'[^0-9]'), '');
+      final rnc = _rncFiscalController.text.trim().replaceAll(
+        RegExp(r'[^0-9]'),
+        '',
+      );
       if (rnc.length != 9 && rnc.length != 11) {
         throw StateError(
           'B01 (crédito fiscal) requiere RNC (9) o cédula (11 dígitos)',
@@ -473,7 +479,7 @@ Future<void> _cargarDocumento({
       esCredito: esCredito,
     );
     if (errMonto != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(errMonto),
           backgroundColor: AppColors.error,
@@ -489,7 +495,7 @@ Future<void> _cargarDocumento({
     final estado = ref.read(cajaProvider);
 
     if (!cajaNotifier.validarCobroCompleto()) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             esCredito
@@ -504,7 +510,7 @@ Future<void> _cargarDocumento({
     }
 
     if (ventaId <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Seleccione una cotización'),
           backgroundColor: AppColors.error,
@@ -520,13 +526,14 @@ Future<void> _cargarDocumento({
     final repoCheck = ref.read(venta_providers.ventasRepositoryProvider);
     final doc = await repoCheck.obtenerVentaPorId(ventaId);
     if (doc != null) {
-      final esCr = doc.numeroCotizacion.startsWith('CR-') ||
+      final esCr =
+          doc.numeroCotizacion.startsWith('CR-') ||
           doc.estadoDocumento == EstadoDocumento.enCredito ||
           (doc.formaPago.toLowerCase().contains('credito') ||
               doc.formaPago.toLowerCase().contains('crédito'));
       if (esCr && doc.estadoDocumento == EstadoDocumento.enCredito) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             const SnackBar(
               content: Text(
                 'Pendiente de aprobación en Crédito. No se puede facturar aún.',
@@ -542,7 +549,7 @@ Future<void> _cargarDocumento({
           doc.estadoDocumento != EstadoDocumento.aprobado &&
           doc.estadoDocumento != EstadoDocumento.facturado) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FiscoGestNotifications.show(
             SnackBar(
               content: Text(
                 'Estado ${doc.estadoDocumento.name}: no listo para cobro a crédito',
@@ -555,7 +562,6 @@ Future<void> _cargarDocumento({
         return;
       }
     }
-
 
     // NCF fiscal se asigna en Caja (B01/B02) justo antes de cobrar
     setState(() => _procesando = true);
@@ -580,8 +586,9 @@ Future<void> _cargarDocumento({
       }
 
       // Inventario + Kardex
-      final ventaConDetalle =
-          await repositorio.obtenerVentaPorId(venta.id ?? ventaId);
+      final ventaConDetalle = await repositorio.obtenerVentaPorId(
+        venta.id ?? ventaId,
+      );
       if (ventaConDetalle == null) {
         throw Exception('No se pudo recargar la venta facturada');
       }
@@ -597,8 +604,9 @@ Future<void> _cargarDocumento({
       await inv.aplicarSalidaInventario(ventaConDetalle);
       // Refrescar listados de inventario / kárdex en UI
       ref.invalidate(productoControllerProvider);
-      try { ref.invalidate(kardexPorProductoProvider); } catch (_) {}
-
+      try {
+        ref.invalidate(kardexPorProductoProvider);
+      } catch (_) {}
 
       // Ingreso módulo Caja
       final montoCaja = esCredito ? estado.abono : montoTotal;
@@ -637,8 +645,9 @@ Future<void> _cargarDocumento({
               children: [
                 Text(
                   'N° Factura: $numeroFactura',
-                  style: AppTypography.bodyMedium
-                      .copyWith(fontWeight: FontWeight.bold),
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text('Ref. Cotización: ${venta.numeroCotizacion}'),
@@ -692,13 +701,13 @@ Future<void> _cargarDocumento({
                 ),
                 child: const Text('Aceptar'),
               ),
-            ]
+            ],
           );
         },
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al cobrar: $e'),
             backgroundColor: AppColors.error,
@@ -710,7 +719,6 @@ Future<void> _cargarDocumento({
       if (mounted) setState(() => _procesando = false);
     }
   }
-
 
   void _aplicarConfigCaja() {
     final cfg = ref.read(configuracionControllerProvider).valueOrNull;
@@ -750,8 +758,9 @@ Future<void> _cargarDocumento({
     final tamanoCuerpo = esPequena ? 13.0 : 14.0;
     final tamanoEtiqueta = esPequena ? 11.0 : 12.0;
 
-    final lista =
-        _busquedaController.text.trim().isEmpty ? _pendientes : _resultados;
+    final lista = _busquedaController.text.trim().isEmpty
+        ? _pendientes
+        : _resultados;
 
     return AppScaffold(
       title: 'CAJA — BUSCAR COTIZACIÓN',
@@ -830,138 +839,135 @@ Future<void> _cargarDocumento({
                   child: _cargandoLista
                       ? const Center(child: CircularProgressIndicator())
                       : lista.isEmpty
-                          ? Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(padding),
-                                child: Text(
-                                  _busquedaController.text.trim().isEmpty
-                                      ? 'No hay cotizaciones pendientes de cobro'
-                                      : 'Sin resultados',
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontSize: tamanoCuerpo,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                      ? Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(padding),
+                            child: Text(
+                              _busquedaController.text.trim().isEmpty
+                                  ? 'No hay cotizaciones pendientes de cobro'
+                                  : 'Sin resultados',
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: tamanoCuerpo,
                               ),
-                            )
-                          : RefreshIndicator(
-                              onRefresh: _cargarPendientes,
-                              child: ListView.separated(
-                                padding: EdgeInsets.fromLTRB(
-                                  padding,
-                                  0,
-                                  padding,
-                                  padding + 16,
-                                ),
-                                itemCount: lista.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 10),
-                                itemBuilder: (_, i) {
-                                  final v = lista[i];
-                                  final credito = _esCreditoVenta(v);
-                                  final listaOk = _listaParaCobrar(v);
-                                  final colorEstado = credito
-                                      ? AppColors.warning
-                                      : AppColors.primary;
-                                  return Material(
-                                    color: AppColors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: InkWell(
-                                      onTap: listaOk
-                                          ? () => _seleccionarVenta(v)
-                                          : null,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: _cargarPendientes,
+                          child: ListView.separated(
+                            padding: EdgeInsets.fromLTRB(
+                              padding,
+                              0,
+                              padding,
+                              padding + 16,
+                            ),
+                            itemCount: lista.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 10),
+                            itemBuilder: (_, i) {
+                              final v = lista[i];
+                              final credito = _esCreditoVenta(v);
+                              final listaOk = _listaParaCobrar(v);
+                              final colorEstado = credito
+                                  ? AppColors.warning
+                                  : AppColors.primary;
+                              return Material(
+                                color: AppColors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                child: InkWell(
+                                  onTap: listaOk
+                                      ? () => _seleccionarVenta(v)
+                                      : null,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: EdgeInsets.all(
+                                      esPequena ? 14 : 16,
+                                    ),
+                                    decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
-                                      child: Container(
-                                        padding: EdgeInsets.all(
-                                            esPequena ? 14 : 16),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border: Border.all(
-                                              color: AppColors.border),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'N° ${v.numeroCotizacion}',
-                                                    style: AppTypography
-                                                        .labelMedium
-                                                        .copyWith(
+                                      border: Border.all(
+                                        color: AppColors.border,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'N° ${v.numeroCotizacion}',
+                                                style: AppTypography.labelMedium
+                                                    .copyWith(
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      fontSize:
-                                                          tamanoCuerpo,
+                                                      fontSize: tamanoCuerpo,
                                                     ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    v.nombreCliente ??
-                                                        'Sin cliente',
-                                                    style: AppTypography
-                                                        .bodySmall
-                                                        .copyWith(
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                v.nombreCliente ??
+                                                    'Sin cliente',
+                                                style: AppTypography.bodySmall
+                                                    .copyWith(
                                                       color: AppColors
                                                           .textSecondary,
                                                       fontSize: tamanoCuerpo,
                                                     ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
                                                       horizontal: 8,
                                                       vertical: 2,
                                                     ),
-                                                    decoration: BoxDecoration(
-                                                      color: colorEstado
-                                                          .withValues(
-                                                              alpha: 0.12),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              6),
-                                                    ),
-                                                    child: Text(
-                                                      credito
-                                                          ? 'Crédito · ${v.estadoDocumento.name}'
-                                                          : 'Contado · ${v.estadoDocumento.name}',
-                                                      style: AppTypography
-                                                          .labelSmall
-                                                          .copyWith(
+                                                decoration: BoxDecoration(
+                                                  color: colorEstado.withValues(
+                                                    alpha: 0.12,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  credito
+                                                      ? 'Crédito · ${v.estadoDocumento.name}'
+                                                      : 'Contado · ${v.estadoDocumento.name}',
+                                                  style: AppTypography
+                                                      .labelSmall
+                                                      .copyWith(
                                                         color: colorEstado,
                                                         fontSize:
                                                             tamanoEtiqueta,
                                                         fontWeight:
                                                             FontWeight.w600,
                                                       ),
-                                                    ),
-                                                  ),
-                                                ],
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Text(
-                                              _fmtMontoCobro.format(v.montoTotal),
-                                              style: AppTypography.bodyMedium
-                                                  .copyWith(
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          _fmtMontoCobro.format(v.montoTotal),
+                                          style: AppTypography.bodyMedium
+                                              .copyWith(
                                                 fontWeight: FontWeight.bold,
                                                 color: AppColors.primary,
                                                 fontSize: tamanoCuerpo + 1,
                                               ),
-                                            ),
-                                          ],
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -1079,8 +1085,9 @@ Future<void> _cargarDocumento({
                                   final subtotal =
                                       d.subtotalLinea ?? d.subtotal;
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 3),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 3,
+                                    ),
                                     child: Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -1090,8 +1097,8 @@ Future<void> _cargarDocumento({
                                             '${d.cantidad} × ${d.nombreProducto ?? "Producto"}',
                                             style: AppTypography.bodySmall
                                                 .copyWith(
-                                              fontSize: tamanoCuerpo,
-                                            ),
+                                                  fontSize: tamanoCuerpo,
+                                                ),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
@@ -1099,9 +1106,9 @@ Future<void> _cargarDocumento({
                                           _fmtMontoCobro.format(subtotal),
                                           style: AppTypography.bodySmall
                                               .copyWith(
-                                            fontSize: tamanoCuerpo,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                                fontSize: tamanoCuerpo,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -1161,11 +1168,11 @@ Future<void> _cargarDocumento({
                                         'TOTAL A COBRAR',
                                         style: AppTypography.labelSmall
                                             .copyWith(
-                                          color: AppColors.textSecondary,
-                                          fontSize: tamanoEtiqueta,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.5,
-                                        ),
+                                              color: AppColors.textSecondary,
+                                              fontSize: tamanoEtiqueta,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.5,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -1188,7 +1195,8 @@ Future<void> _cargarDocumento({
 
                         // === COMPROBANTE FISCAL (Caja) ===
                         if (ventaId > 0 &&
-                            (ref.watch(configuracionControllerProvider)
+                            (ref
+                                    .watch(configuracionControllerProvider)
                                     .valueOrNull
                                     ?.modoSimplificado !=
                                 true)) ...[
@@ -1246,38 +1254,49 @@ Future<void> _cargarDocumento({
                           spacing: 8,
                           runSpacing: 8,
                           children: _formasDisponibles(esCredito: esCredito)
-                            .map((forma) {
-                          final sel = _formaPago == forma;
-                          return ChoiceChip(
-                            label: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 4, vertical: 2),
-                              child: Text(
-                                forma.nombre,
-                                style: TextStyle(
-                                  fontSize: tamanoCuerpo,
-                                  fontWeight:
-                                      sel ? FontWeight.w600 : FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                            selected: sel,
-                            selectedColor:
-                                AppColors.primary.withValues(alpha: 0.15),
-                            onSelected: (_) =>
-                                setState(() => _formaPago = forma),
-                            side: sel
-                                ? const BorderSide(color: AppColors.primary)
-                                : const BorderSide(color: AppColors.border),
-                          );
-                        }).toList(),
+                              .map((forma) {
+                                final sel = _formaPago == forma;
+                                return ChoiceChip(
+                                  label: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 2,
+                                    ),
+                                    child: Text(
+                                      forma.nombre,
+                                      style: TextStyle(
+                                        fontSize: tamanoCuerpo,
+                                        fontWeight: sel
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                  selected: sel,
+                                  selectedColor: AppColors.primary.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  onSelected: (_) =>
+                                      setState(() => _formaPago = forma),
+                                  side: sel
+                                      ? const BorderSide(
+                                          color: AppColors.primary,
+                                        )
+                                      : const BorderSide(
+                                          color: AppColors.border,
+                                        ),
+                                );
+                              })
+                              .toList(),
                         ),
 
                         SizedBox(height: esPequena ? 16 : 20),
 
                         // === MONTO / ABONO ===
                         Text(
-                          esCredito ? 'Abono inicial (según crédito)' : 'Monto a pagar',
+                          esCredito
+                              ? 'Abono inicial (según crédito)'
+                              : 'Monto a pagar',
                           style: AppTypography.labelMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: tamanoCuerpo,
@@ -1320,7 +1339,9 @@ Future<void> _cargarDocumento({
                               color: AppColors.warning.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: AppColors.warning.withValues(alpha: 0.30),
+                                color: AppColors.warning.withValues(
+                                  alpha: 0.30,
+                                ),
                               ),
                             ),
                             child: Row(
@@ -1396,8 +1417,7 @@ Future<void> _cargarDocumento({
                       width: double.infinity,
                       height: alturaBoton,
                       child: ElevatedButton.icon(
-                        onPressed:
-                            _procesando ? null : _cobrarYGenerarFactura,
+                        onPressed: _procesando ? null : _cobrarYGenerarFactura,
                         icon: _procesando
                             ? const SizedBox(
                                 width: 22,

@@ -53,15 +53,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
     try {
       final db = ref.read(databaseProvider);
-      final res = await AuthService(db).login(
-        _userCtrl.text,
-        _passCtrl.text,
-      );
+      final res = await AuthService(db).login(_userCtrl.text, _passCtrl.text);
       if (res == null) {
         setState(() => _error = 'Usuario o contraseña incorrectos');
         return;
       }
-            ref.read(sesionProvider.notifier).state = UsuarioSesion(
+      ref.read(sesionProvider.notifier).state = UsuarioSesion(
         id: res.usuarioId,
         username: res.username,
         nombre: res.nombre,
@@ -159,7 +156,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       onPressed: () => setState(() => _ocultar = !_ocultar),
                       child: Text(_ocultar ? 'Mostrar contraseña' : 'Ocultar'),
                     ),
-                    
+
                     TextButton(
                       onPressed: () => context.push('/recuperar-clave'),
                       child: const Text('¿Olvidaste tu contraseña?'),

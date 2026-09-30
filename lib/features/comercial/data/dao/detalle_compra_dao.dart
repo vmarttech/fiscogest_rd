@@ -5,7 +5,8 @@ import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.da
 part 'detalle_compra_dao.g.dart';
 
 @DriftAccessor(tables: [DetalleCompraTable, ComprasTable])
-class DetalleCompraDao extends DatabaseAccessor<AppDatabase> with _$DetalleCompraDaoMixin {
+class DetalleCompraDao extends DatabaseAccessor<AppDatabase>
+    with _$DetalleCompraDaoMixin {
   DetalleCompraDao(super.db);
 
   static ({double montoDescuento, double subtotal}) calcularLinea({
@@ -25,7 +26,9 @@ class DetalleCompraDao extends DatabaseAccessor<AppDatabase> with _$DetalleCompr
       costoUnitario: detalle.costoUnitario.value ?? 0.0,
       descuentoPorcentaje: detalle.descuentoPorcentaje.value ?? 0.0,
     );
-    return await into<DetalleCompraTable, DetalleCompraTableData>(detalleCompraTable).insert(
+    return await into<DetalleCompraTable, DetalleCompraTableData>(
+      detalleCompraTable,
+    ).insert(
       detalle.copyWith(
         montoDescuentoLinea: Value(calculado.montoDescuento),
         subtotalLinea: Value(calculado.subtotal),
@@ -33,8 +36,12 @@ class DetalleCompraDao extends DatabaseAccessor<AppDatabase> with _$DetalleCompr
     );
   }
 
-  Future<List<DetalleCompraTableData>> obtenerDetallesPorCompra(int compraId) async {
-    return await (select<DetalleCompraTable, DetalleCompraTableData>(detalleCompraTable)
+  Future<List<DetalleCompraTableData>> obtenerDetallesPorCompra(
+    int compraId,
+  ) async {
+    return await (select<DetalleCompraTable, DetalleCompraTableData>(
+            detalleCompraTable,
+          )
           ..where((t) => t.compraId.equals(compraId))
           ..orderBy([(t) => OrderingTerm.asc(t.id)]))
         .get();
@@ -49,8 +56,10 @@ class DetalleCompraDao extends DatabaseAccessor<AppDatabase> with _$DetalleCompr
         costoUnitario: fila.costoUnitario ?? 0.0,
         descuentoPorcentaje: fila.descuentoPorcentaje ?? 0.0,
       );
-      final afectadas = await update<DetalleCompraTable, DetalleCompraTableData>(detalleCompraTable)
-          .replace(
+      final afectadas =
+          await update<DetalleCompraTable, DetalleCompraTableData>(
+            detalleCompraTable,
+          ).replace(
             DetalleCompraTableCompanion(
               id: Value(fila.id),
               compraId: Value(fila.compraId),

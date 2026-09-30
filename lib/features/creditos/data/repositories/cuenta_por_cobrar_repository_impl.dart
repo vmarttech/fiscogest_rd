@@ -276,8 +276,10 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
 
   @override
   Future<double> totalPorVencerEnRango(DateTime desde, DateTime hasta) async {
-    final lista =
-        await _dao.listarCuentas(venceDesde: desde, venceHasta: hasta);
+    final lista = await _dao.listarCuentas(
+      venceDesde: desde,
+      venceHasta: hasta,
+    );
     return lista.fold<double>(0.0, (s, c) => s + c.saldoPendiente);
   }
 

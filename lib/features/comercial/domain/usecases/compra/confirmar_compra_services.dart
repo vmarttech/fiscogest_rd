@@ -30,7 +30,9 @@ class ConfirmarCompraServices {
   Future<void> calcularCostoAdquisicion(Compra compra) async {
     final detalles = await _obtenerDetalles(compra.id);
     for (final detalle in detalles) {
-      final producto = await productoRepo.obtenerProductoPorId(detalle.productoId);
+      final producto = await productoRepo.obtenerProductoPorId(
+        detalle.productoId,
+      );
       if (producto == null) continue;
 
       final stockAnterior = producto.stock ?? 0.0;
@@ -48,13 +50,15 @@ class ConfirmarCompraServices {
       final nuevoCostoPromedio = stockAnterior <= 0
           ? costoAdq
           : ((stockAnterior * costoPromAnterior) + (cantidadNueva * costoAdq)) /
-              (stockAnterior + cantidadNueva);
-      await productoRepo.actualizarProducto(producto.copyWith(
-        precioCompra: costoLimpio,
-        gastosAsociados: gastosUnit,
-        costoPromedio: nuevoCostoPromedio,
-        stock: stockAnterior + cantidadNueva,
-      ));
+                (stockAnterior + cantidadNueva);
+      await productoRepo.actualizarProducto(
+        producto.copyWith(
+          precioCompra: costoLimpio,
+          gastosAsociados: gastosUnit,
+          costoPromedio: nuevoCostoPromedio,
+          stock: stockAnterior + cantidadNueva,
+        ),
+      );
     }
   }
 
@@ -63,29 +67,35 @@ class ConfirmarCompraServices {
     final documento = 'Compra #${compra.id} | ${compra.nombreProveedor}';
 
     for (final detalle in detalles) {
-      final saldoAnterior = await kardexRepo.obtenerSaldoActual(detalle.productoId);
+      final saldoAnterior = await kardexRepo.obtenerSaldoActual(
+        detalle.productoId,
+      );
       final saldoNuevo = saldoAnterior + detalle.cantidad;
 
-      await kardexRepo.registrarMovimiento(Kardex(
-        productoId: detalle.productoId,
-        tipoMovimiento: TipoMovimiento.entrada,
-        cantidad: detalle.cantidad,
-        saldoAnterior: saldoAnterior,
-        saldoNuevo: saldoNuevo,
-        costoUnitario: detalle.costoAdquisicion,
-        totalMovimiento: detalle.cantidad * detalle.costoAdquisicion,
-        fechaMovimiento: DateTime.now(),
-        documentoReferencia: documento,
-        observacion: 'Confirmación de compra — ${compra.numeroComprobante}',
-        usuarioId: idUsuarioSistema,
-      ));
+      await kardexRepo.registrarMovimiento(
+        Kardex(
+          productoId: detalle.productoId,
+          tipoMovimiento: TipoMovimiento.entrada,
+          cantidad: detalle.cantidad,
+          saldoAnterior: saldoAnterior,
+          saldoNuevo: saldoNuevo,
+          costoUnitario: detalle.costoAdquisicion,
+          totalMovimiento: detalle.cantidad * detalle.costoAdquisicion,
+          fechaMovimiento: DateTime.now(),
+          documentoReferencia: documento,
+          observacion: 'Confirmación de compra — ${compra.numeroComprobante}',
+          usuarioId: idUsuarioSistema,
+        ),
+      );
     }
   }
 
   Future<void> actualizarSaldoProveedor(Compra compra) async {
     if (!compra.esCredito) return;
 
-    final proveedor = await proveedorRepo.obtenerProveedorPorId(compra.proveedorId);
+    final proveedor = await proveedorRepo.obtenerProveedorPorId(
+      compra.proveedorId,
+    );
     if (proveedor == null) return;
 
     final saldoActual = await proveedorRepo.obtenerSaldo(compra.proveedorId);
@@ -131,7 +141,9 @@ class ConfirmarCompraServices {
     final detalles = await _obtenerDetalles(compra.id);
 
     for (final detalle in detalles) {
-      final producto = await productoRepo.obtenerProductoPorId(detalle.productoId);
+      final producto = await productoRepo.obtenerProductoPorId(
+        detalle.productoId,
+      );
       if (producto == null) continue;
 
       final stockActual = producto.stock ?? 0.0;
@@ -154,23 +166,26 @@ class ConfirmarCompraServices {
       if (nuevoStock > 0 && stockActual > 0) {
         final valorTotalAnterior = stockActual * producto.costoPromedio;
         final valorEstaCompra = cantidad * detalle.costoAdquisicion;
-        nuevoCostoPromedio = (valorTotalAnterior - valorEstaCompra) / nuevoStock;
+        nuevoCostoPromedio =
+            (valorTotalAnterior - valorEstaCompra) / nuevoStock;
         if (nuevoCostoPromedio < 0) nuevoCostoPromedio = 0;
       }
 
-      await productoRepo.actualizarProducto(producto.copyWith(
-        stock: nuevoStock,
-        costoPromedio: nuevoCostoPromedio,
-      ));
+      await productoRepo.actualizarProducto(
+        producto.copyWith(stock: nuevoStock, costoPromedio: nuevoCostoPromedio),
+      );
     }
   }
 
   Future<void> _revertirMovimientoKardex(Compra compra) async {
     final detalles = await _obtenerDetalles(compra.id);
-    final documento = 'Anulación Compra #${compra.id} | ${compra.nombreProveedor}';
+    final documento =
+        'Anulación Compra #${compra.id} | ${compra.nombreProveedor}';
 
     for (final detalle in detalles) {
-      final saldoAnterior = await kardexRepo.obtenerSaldoActual(detalle.productoId);
+      final saldoAnterior = await kardexRepo.obtenerSaldoActual(
+        detalle.productoId,
+      );
       final saldoNuevo = saldoAnterior - detalle.cantidad;
 
       if (saldoNuevo < 0) {
@@ -180,26 +195,30 @@ class ConfirmarCompraServices {
         );
       }
 
-      await kardexRepo.registrarMovimiento(Kardex(
-        productoId: detalle.productoId,
-        tipoMovimiento: TipoMovimiento.salida,
-        cantidad: detalle.cantidad,
-        saldoAnterior: saldoAnterior,
-        saldoNuevo: saldoNuevo,
-        costoUnitario: detalle.costoAdquisicion,
-        totalMovimiento: detalle.cantidad * detalle.costoAdquisicion,
-        fechaMovimiento: DateTime.now(),
-        documentoReferencia: documento,
-        observacion: 'Anulación de compra — ${compra.numeroComprobante}',
-        usuarioId: idUsuarioSistema,
-      ));
+      await kardexRepo.registrarMovimiento(
+        Kardex(
+          productoId: detalle.productoId,
+          tipoMovimiento: TipoMovimiento.salida,
+          cantidad: detalle.cantidad,
+          saldoAnterior: saldoAnterior,
+          saldoNuevo: saldoNuevo,
+          costoUnitario: detalle.costoAdquisicion,
+          totalMovimiento: detalle.cantidad * detalle.costoAdquisicion,
+          fechaMovimiento: DateTime.now(),
+          documentoReferencia: documento,
+          observacion: 'Anulación de compra — ${compra.numeroComprobante}',
+          usuarioId: idUsuarioSistema,
+        ),
+      );
     }
   }
 
   Future<void> _revertirSaldoProveedor(Compra compra) async {
     if (!compra.esCredito) return;
 
-    final proveedor = await proveedorRepo.obtenerProveedorPorId(compra.proveedorId);
+    final proveedor = await proveedorRepo.obtenerProveedorPorId(
+      compra.proveedorId,
+    );
     if (proveedor == null) return;
 
     // Restar el monto de la compra del saldo del proveedor

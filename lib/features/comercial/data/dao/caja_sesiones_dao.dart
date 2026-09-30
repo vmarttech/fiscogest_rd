@@ -14,18 +14,15 @@ class CajaSesionesDao extends DatabaseAccessor<AppDatabase>
           ..where((t) => t.estado.equals('abierta'))
           ..orderBy([
             (t) => OrderingTerm(
-                  expression: t.fechaApertura,
-                  mode: OrderingMode.desc,
-                ),
+              expression: t.fechaApertura,
+              mode: OrderingMode.desc,
+            ),
           ])
           ..limit(1))
         .getSingleOrNull();
   }
 
-  Future<int> abrirSesion({
-    required double fondoInicial,
-    int usuarioId = 1,
-  }) {
+  Future<int> abrirSesion({required double fondoInicial, int usuarioId = 1}) {
     return into(cajaSesionesTable).insert(
       CajaSesionesTableCompanion.insert(
         fechaApertura: DateTime.now(),
@@ -43,23 +40,25 @@ class CajaSesionesDao extends DatabaseAccessor<AppDatabase>
     String? observacion,
   }) async {
     final diferencia = montoContado - saldoTeorico;
-    final n = await (update(cajaSesionesTable)
-          ..where((t) => t.id.equals(sesionId)))
-        .write(
-      CajaSesionesTableCompanion(
-        estado: const Value('cerrada'),
-        fechaCierre: Value(DateTime.now()),
-        saldoTeorico: Value(saldoTeorico),
-        montoContado: Value(montoContado),
-        diferencia: Value(diferencia),
-        observacion: Value(observacion),
-      ),
-    );
+    final n =
+        await (update(
+          cajaSesionesTable,
+        )..where((t) => t.id.equals(sesionId))).write(
+          CajaSesionesTableCompanion(
+            estado: const Value('cerrada'),
+            fechaCierre: Value(DateTime.now()),
+            saldoTeorico: Value(saldoTeorico),
+            montoContado: Value(montoContado),
+            diferencia: Value(diferencia),
+            observacion: Value(observacion),
+          ),
+        );
     return n > 0;
   }
 
   Future<CajaSesionData?> obtenerPorId(int id) {
-    return (select(cajaSesionesTable)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    return (select(
+      cajaSesionesTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 }

@@ -1,5 +1,5 @@
 /// 📦 RUTA CENTRAL DE UI — UNA SOLA LÍNEA LO TRAE TODO
-/// 
+///
 /// ✅ USO EN CUALQUIER PANTALLA:
 /// import 'package:fiscogest_rd/core/ui/ui.dart';
 library;

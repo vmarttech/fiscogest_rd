@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class CotizacionesHistorialPage extends ConsumerStatefulWidget {
   const CotizacionesHistorialPage({super.key});
@@ -18,33 +19,33 @@ class CotizacionesHistorialPage extends ConsumerStatefulWidget {
 class _CotizacionesHistorialPageState
     extends ConsumerState<CotizacionesHistorialPage> {
   String _etiquetaEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.borrador => 'Borrador',
-        EstadoDocumento.cotizado => 'Vigente',
-        EstadoDocumento.enCredito => 'En aprobación',
-        EstadoDocumento.aprobado => 'Aprobado',
-        EstadoDocumento.anulado => 'Rechazado',
-        EstadoDocumento.facturado => 'Facturada',
-      };
+    EstadoDocumento.borrador => 'Borrador',
+    EstadoDocumento.cotizado => 'Vigente',
+    EstadoDocumento.enCredito => 'En aprobación',
+    EstadoDocumento.aprobado => 'Aprobado',
+    EstadoDocumento.anulado => 'Rechazado',
+    EstadoDocumento.facturado => 'Facturada',
+  };
 
   Color _colorEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.borrador => AppColors.textSecondary,
-        EstadoDocumento.cotizado => AppColors.primary,
-        EstadoDocumento.enCredito => const Color(0xFFE65100),
-        EstadoDocumento.aprobado => AppColors.success,
-        EstadoDocumento.anulado => AppColors.error,
-        EstadoDocumento.facturado => AppColors.success,
-      };
+    EstadoDocumento.borrador => AppColors.textSecondary,
+    EstadoDocumento.cotizado => AppColors.primary,
+    EstadoDocumento.enCredito => const Color(0xFFE65100),
+    EstadoDocumento.aprobado => AppColors.success,
+    EstadoDocumento.anulado => AppColors.error,
+    EstadoDocumento.facturado => AppColors.success,
+  };
 
   Color _colorFondoEstado(EstadoDocumento estado) => switch (estado) {
-        EstadoDocumento.borrador =>
-          AppColors.textSecondary.withValues(alpha: 0.12),
-        EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
-        EstadoDocumento.enCredito =>
-          const Color(0xFFE65100).withValues(alpha: 0.12),
-        EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
-        EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
-        EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
-      };
+    EstadoDocumento.borrador => AppColors.textSecondary.withValues(alpha: 0.12),
+    EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
+    EstadoDocumento.enCredito => const Color(
+      0xFFE65100,
+    ).withValues(alpha: 0.12),
+    EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
+    EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
+    EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -83,13 +84,17 @@ class _CotizacionesHistorialPageState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline,
-                      size: 48, color: AppColors.error),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: AppColors.error,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Error al cargar cotizaciones:\n$e',
-                    style: AppTypography.bodyMedium
-                        .copyWith(color: AppColors.error),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.error,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -180,7 +185,9 @@ class _CotizacionesHistorialPageState
   Widget _buildTarjetaCotizacion(Venta cot, bool esPantallaPequena) {
     final numero = cot.numeroCotizacion;
     final estado = cot.estadoDocumento;
-    final esCotizacionActiva = estado != EstadoDocumento.facturado && estado != EstadoDocumento.anulado;
+    final esCotizacionActiva =
+        estado != EstadoDocumento.facturado &&
+        estado != EstadoDocumento.anulado;
     final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
     final tamanoTotal = esPantallaPequena ? 16.0 : 18.0;
     final tamanoEtiqueta = esPantallaPequena ? 11.0 : 12.0;
@@ -304,12 +311,13 @@ class _CotizacionesHistorialPageState
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  if (esCotizacionActiva) _chipAccion(
-                    icon: Icons.print_outlined,
-                    label: 'Imprimir',
-                    onTap: () => _imprimirCotizacion(numero),
-                    esPantallaPequena: esPantallaPequena,
-                  ),
+                  if (esCotizacionActiva)
+                    _chipAccion(
+                      icon: Icons.print_outlined,
+                      label: 'Imprimir',
+                      onTap: () => _imprimirCotizacion(numero),
+                      esPantallaPequena: esPantallaPequena,
+                    ),
                   _chipAccion(
                     icon: Icons.picture_as_pdf_outlined,
                     label: 'PDF',
@@ -385,7 +393,7 @@ class _CotizacionesHistorialPageState
   }
 
   void _imprimirCotizacion(String numero) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    FiscoGestNotifications.show(
       SnackBar(
         content: Text('Imprimiendo cotización N° $numero...'),
         backgroundColor: AppColors.info,
@@ -395,7 +403,7 @@ class _CotizacionesHistorialPageState
   }
 
   void _exportarPDF(String numero) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    FiscoGestNotifications.show(
       SnackBar(
         content: Text('Generando PDF de $numero...'),
         backgroundColor: AppColors.info,
@@ -405,7 +413,7 @@ class _CotizacionesHistorialPageState
   }
 
   void _enviarPorCorreo(String numero) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    FiscoGestNotifications.show(
       SnackBar(
         content: Text('Enviando $numero por correo...'),
         backgroundColor: AppColors.info,
@@ -454,7 +462,7 @@ class _CotizacionesHistorialPageState
         ? '$numero convertida en Venta de Contado.'
         : '$numero enviada a Crédito.';
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    FiscoGestNotifications.show(
       SnackBar(
         content: Text(msg),
         backgroundColor: AppColors.success,
@@ -463,5 +471,4 @@ class _CotizacionesHistorialPageState
     );
     ref.invalidate(listaCotizacionesProvider);
   }
-
 }

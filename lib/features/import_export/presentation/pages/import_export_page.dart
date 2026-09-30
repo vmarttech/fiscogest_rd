@@ -56,8 +56,9 @@ class ImportExportPage extends ConsumerWidget {
                         Expanded(
                           child: _ExportCard(
                             onProductos: () async {
-                              final csv = await controller
-                                  .exportarDatosEntidad('productos');
+                              final csv = await controller.exportarDatosEntidad(
+                                'productos',
+                              );
                               if (!context.mounted) return;
                               _mostrarResultadoExportacion(
                                 context,
@@ -66,8 +67,9 @@ class ImportExportPage extends ConsumerWidget {
                               );
                             },
                             onClientes: () async {
-                              final csv = await controller
-                                  .exportarDatosEntidad('clientes');
+                              final csv = await controller.exportarDatosEntidad(
+                                'clientes',
+                              );
                               if (!context.mounted) return;
                               _mostrarResultadoExportacion(
                                 context,
@@ -76,8 +78,9 @@ class ImportExportPage extends ConsumerWidget {
                               );
                             },
                             onProveedores: () async {
-                              final csv = await controller
-                                  .exportarDatosEntidad('proveedores');
+                              final csv = await controller.exportarDatosEntidad(
+                                'proveedores',
+                              );
                               if (!context.mounted) return;
                               _mostrarResultadoExportacion(
                                 context,
@@ -99,8 +102,9 @@ class ImportExportPage extends ConsumerWidget {
                   else ...[
                     _ExportCard(
                       onProductos: () async {
-                        final csv =
-                            await controller.exportarDatosEntidad('productos');
+                        final csv = await controller.exportarDatosEntidad(
+                          'productos',
+                        );
                         if (!context.mounted) return;
                         _mostrarResultadoExportacion(
                           context,
@@ -109,8 +113,9 @@ class ImportExportPage extends ConsumerWidget {
                         );
                       },
                       onClientes: () async {
-                        final csv =
-                            await controller.exportarDatosEntidad('clientes');
+                        final csv = await controller.exportarDatosEntidad(
+                          'clientes',
+                        );
                         if (!context.mounted) return;
                         _mostrarResultadoExportacion(
                           context,
@@ -119,8 +124,9 @@ class ImportExportPage extends ConsumerWidget {
                         );
                       },
                       onProveedores: () async {
-                        final csv = await controller
-                            .exportarDatosEntidad('proveedores');
+                        final csv = await controller.exportarDatosEntidad(
+                          'proveedores',
+                        );
                         if (!context.mounted) return;
                         _mostrarResultadoExportacion(
                           context,
@@ -151,11 +157,7 @@ class ImportExportPage extends ConsumerWidget {
     );
   }
 
-
-  Future<void> _elegirYImportar(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<void> _elegirYImportar(BuildContext context, WidgetRef ref) async {
     final controller = ref.read(importExportControllerProvider.notifier);
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -305,21 +307,26 @@ class _ExportCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.cloud_download_outlined,
-                  color: AppColors.primary, size: 22),
+              const Icon(
+                Icons.cloud_download_outlined,
+                color: AppColors.primary,
+                size: 22,
+              ),
               const SizedBox(width: 10),
               Text(
                 'Exportar',
-                style: AppTypography.labelLarge
-                    .copyWith(fontWeight: FontWeight.w700),
+                style: AppTypography.labelLarge.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Catálogos en CSV (compatible con Excel).',
-            style: AppTypography.bodySmall
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
@@ -351,10 +358,7 @@ class _ExportCard extends StatelessWidget {
 }
 
 class _ImportCard extends StatelessWidget {
-  const _ImportCard({
-    required this.estadoAsync,
-    required this.onSimular,
-  });
+  const _ImportCard({required this.estadoAsync, required this.onSimular});
 
   final AsyncValue<String> estadoAsync;
   final VoidCallback onSimular;
@@ -368,13 +372,17 @@ class _ImportCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.cloud_upload_outlined,
-                  color: AppColors.info, size: 22),
+              const Icon(
+                Icons.cloud_upload_outlined,
+                color: AppColors.info,
+                size: 22,
+              ),
               const SizedBox(width: 10),
               Text(
                 'Importar productos',
-                style: AppTypography.labelLarge
-                    .copyWith(fontWeight: FontWeight.w700),
+                style: AppTypography.labelLarge.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -382,8 +390,9 @@ class _ImportCard extends StatelessWidget {
           Text(
             'CSV con validación de código, precio y stock. '
             'Selecciona un archivo .csv del equipo.',
-            style: AppTypography.bodySmall
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
@@ -434,13 +443,17 @@ class _ErroresPanel extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
               child: Column(
                 children: [
-                  const Icon(Icons.check_circle_outline,
-                      size: 40, color: AppColors.grey300),
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: 40,
+                    color: AppColors.grey300,
+                  ),
                   const SizedBox(height: 10),
                   Text(
                     'Sin errores en el último proceso.',
-                    style: AppTypography.bodySmall
-                        .copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -456,18 +469,23 @@ class _ErroresPanel extends StatelessWidget {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor: AppColors.error.withValues(alpha: 0.12),
-                    child: const Icon(Icons.error_outline,
-                        color: AppColors.error, size: 18),
+                    child: const Icon(
+                      Icons.error_outline,
+                      color: AppColors.error,
+                      size: 18,
+                    ),
                   ),
                   title: Text(
                     'Fila ${err.fila} · ${err.entidad}',
-                    style: AppTypography.labelMedium
-                        .copyWith(fontWeight: FontWeight.w700),
+                    style: AppTypography.labelMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   subtitle: Text(
                     err.mensajeError,
-                    style: AppTypography.bodySmall
-                        .copyWith(color: AppColors.error),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.error,
+                    ),
                   ),
                 );
               },

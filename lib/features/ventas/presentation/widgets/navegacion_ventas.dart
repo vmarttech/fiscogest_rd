@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 // Enums y providers
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class NavegacionVentas extends ConsumerWidget {
   const NavegacionVentas({super.key});
@@ -108,11 +109,13 @@ class NavegacionVentas extends ConsumerWidget {
             isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
+              FiscoGestNotifications.show(
                 SnackBar(
                   content: Text(
                     'Pagar — Próximamente',
-                    style: AppTypography.bodyMedium.copyWith(color: AppColors.white),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.white,
+                    ),
                   ),
                   backgroundColor: AppColors.primary,
                   behavior: SnackBarBehavior.floating,
@@ -128,11 +131,13 @@ class NavegacionVentas extends ConsumerWidget {
             isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
+              FiscoGestNotifications.show(
                 SnackBar(
                   content: Text(
                     'Descuentos — Próximamente',
-                    style: AppTypography.bodyMedium.copyWith(color: AppColors.white),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.white,
+                    ),
                   ),
                   backgroundColor: AppColors.primary,
                   behavior: SnackBarBehavior.floating,
@@ -148,11 +153,13 @@ class NavegacionVentas extends ConsumerWidget {
             isMobile: isMobile,
             onTap: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
+              FiscoGestNotifications.show(
                 SnackBar(
                   content: Text(
                     'Ofertas — Próximamente',
-                    style: AppTypography.bodyMedium.copyWith(color: AppColors.white),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.white,
+                    ),
                   ),
                   backgroundColor: AppColors.primary,
                   behavior: SnackBarBehavior.floating,
@@ -179,11 +186,7 @@ class NavegacionVentas extends ConsumerWidget {
         vertical: AppSpacing.xs,
       ),
       child: ListTile(
-        leading: Icon(
-          icon,
-          size: isMobile ? 18 : 20,
-          color: AppColors.primary,
-        ),
+        leading: Icon(icon, size: isMobile ? 18 : 20, color: AppColors.primary),
         title: Text(
           title,
           style: AppTypography.bodyMedium.copyWith(

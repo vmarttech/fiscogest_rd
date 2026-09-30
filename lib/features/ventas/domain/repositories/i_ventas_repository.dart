@@ -36,7 +36,10 @@ abstract class IVentasRepository {
 
   Future<String> siguienteNumeroFactura();
 
-  Future<Venta> cambiarEstadoDocumento(int ventaId, EstadoDocumento nuevoEstado);
+  Future<Venta> cambiarEstadoDocumento(
+    int ventaId,
+    EstadoDocumento nuevoEstado,
+  );
 
   Future<Venta> registrarVenta(Venta venta);
 
@@ -85,5 +88,4 @@ abstract class IVentasRepository {
   Future<void> actualizarEnCascada(int ventaId);
 
   Future<bool> marcarComprobanteEntregaImpreso(int ventaId);
-
 }

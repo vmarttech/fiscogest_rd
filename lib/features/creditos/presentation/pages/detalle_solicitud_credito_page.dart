@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_c
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class DetalleSolicitudCreditoPage extends ConsumerStatefulWidget {
   const DetalleSolicitudCreditoPage({super.key, required this.ventaId});
@@ -113,7 +114,7 @@ class _DetalleSolicitudCreditoPageState
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             'No se pudo armar el estado del formulario: $e\n'
@@ -133,7 +134,9 @@ class _DetalleSolicitudCreditoPageState
     });
   }
 
-  Future<void> _onCreditoConfirmado(ResultadoFormularioCredito resultado) async {
+  Future<void> _onCreditoConfirmado(
+    ResultadoFormularioCredito resultado,
+  ) async {
     final cuenta = resultado.cuenta;
     setState(() {
       _modoFormularioCredito = false;
@@ -143,8 +146,7 @@ class _DetalleSolicitudCreditoPageState
       _numeroCuotas = cuenta.numeroCuotas < 1 ? 1 : cuenta.numeroCuotas;
       _tasaMensual = cuenta.tasaInteres;
       _primerVencimiento = cuenta.fechaVencimiento;
-      if (resultado.planPago != null &&
-          resultado.planPago!.cuotas.isNotEmpty) {
+      if (resultado.planPago != null && resultado.planPago!.cuotas.isNotEmpty) {
         _primerVencimiento = resultado.planPago!.cuotas.first.fechaVencimiento;
       }
     });
@@ -166,7 +168,7 @@ class _DetalleSolicitudCreditoPageState
           .read(ventasRepositoryProvider)
           .actualizarVentaBorrador(actualizada);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             'Condiciones guardadas'
@@ -181,7 +183,7 @@ class _DetalleSolicitudCreditoPageState
       await _cargar();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error al guardar: $e'),
           backgroundColor: AppColors.error,
@@ -211,17 +213,19 @@ class _DetalleSolicitudCreditoPageState
 
         // Registrar cuenta por cobrar (DAO comercial vía repo de créditos)
         final cuenta = _cuentaBorrador;
-        final nCuotas =
-            _numeroCuotas > 0 ? _numeroCuotas : (cuenta?.numeroCuotas ?? 1);
+        final nCuotas = _numeroCuotas > 0
+            ? _numeroCuotas
+            : (cuenta?.numeroCuotas ?? 1);
         if (cuenta != null) {
           final conVenta = cuenta.copyWith(
             ventaId: v.id,
             numeroCuotas: nCuotas,
-            abonoInicial:
-                _abono > 0 ? _abono : cuenta.abonoInicial,
+            abonoInicial: _abono > 0 ? _abono : cuenta.abonoInicial,
             fechaVencimiento: _primerVencimiento ?? cuenta.fechaVencimiento,
           );
-          await ref.read(cuentaPorCobrarRepositoryProvider).registrarCredito(
+          await ref
+              .read(cuentaPorCobrarRepositoryProvider)
+              .registrarCredito(
                 cuenta: conVenta,
                 planPago: () {
                   final abono = _abono > 0 ? _abono : conVenta.abonoInicial;
@@ -252,10 +256,13 @@ class _DetalleSolicitudCreditoPageState
             numeroCuotas: nCuotas,
             tasaInteres: _tasaMensual,
             fechaCreacion: DateTime.now(),
-            fechaVencimiento: conCond.vencimiento ??
+            fechaVencimiento:
+                conCond.vencimiento ??
                 DateTime.now().add(const Duration(days: 30)),
           );
-          await ref.read(cuentaPorCobrarRepositoryProvider).registrarCredito(
+          await ref
+              .read(cuentaPorCobrarRepositoryProvider)
+              .registrarCredito(
                 cuenta: minima,
                 planPago: nCuotas > 1
                     ? CalculadoraCreditoService.generarPlanPago(
@@ -274,7 +281,7 @@ class _DetalleSolicitudCreditoPageState
           .cambiarEstadoDocumento(v.id!, nuevo);
       if (!mounted) return;
       ref.invalidate(solicitudesCreditoProvider);
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text(
             nuevo == EstadoDocumento.aprobado
@@ -290,7 +297,7 @@ class _DetalleSolicitudCreditoPageState
       await _cargar();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('$e'.replaceAll('Exception: ', '')),
           backgroundColor: AppColors.error,
@@ -301,7 +308,6 @@ class _DetalleSolicitudCreditoPageState
       if (mounted) setState(() => _procesando = false);
     }
   }
-
 
   CuentaPorCobrar? get _condicionesEfectivas {
     if (_cuentaBorrador != null) return _cuentaBorrador;
@@ -317,7 +323,8 @@ class _DetalleSolicitudCreditoPageState
       numeroCuotas: _numeroCuotas,
       tasaInteres: _tasaMensual,
       fechaCreacion: DateTime.now(),
-      fechaVencimiento: _primerVencimiento ??
+      fechaVencimiento:
+          _primerVencimiento ??
           v.vencimiento ??
           DateTime.now().add(const Duration(days: 30)),
     );
@@ -328,13 +335,12 @@ class _DetalleSolicitudCreditoPageState
     if (v == null) return;
     setState(() => _procesando = true);
     try {
-      await (await ref.read(creditoDocumentoServiceProvider.future)).imprimirSolicitud(
-            venta: v,
-            condiciones: _condicionesEfectivas,
-          );
+      await (await ref.read(
+        creditoDocumentoServiceProvider.future,
+      )).imprimirSolicitud(venta: v, condiciones: _condicionesEfectivas);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error solicitud: $e'),
           backgroundColor: AppColors.error,
@@ -351,7 +357,7 @@ class _DetalleSolicitudCreditoPageState
     final cond = _condicionesEfectivas;
     if (v == null) return;
     if (cond == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Defina condiciones (abono/cuotas) antes del contrato'),
           backgroundColor: AppColors.warning,
@@ -362,13 +368,12 @@ class _DetalleSolicitudCreditoPageState
     }
     setState(() => _procesando = true);
     try {
-      await (await ref.read(creditoDocumentoServiceProvider.future)).imprimirContrato(
-            venta: v,
-            condiciones: cond,
-          );
+      await (await ref.read(
+        creditoDocumentoServiceProvider.future,
+      )).imprimirContrato(venta: v, condiciones: cond);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error contrato: $e'),
           backgroundColor: AppColors.error,
@@ -379,7 +384,6 @@ class _DetalleSolicitudCreditoPageState
       if (mounted) setState(() => _procesando = false);
     }
   }
-
 
   Future<void> _enviarSolicitud() async {
     final v = _venta;
@@ -393,7 +397,7 @@ class _DetalleSolicitudCreditoPageState
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error al enviar solicitud: $e'),
           backgroundColor: AppColors.error,
@@ -410,7 +414,7 @@ class _DetalleSolicitudCreditoPageState
     final cond = _condicionesEfectivas;
     if (v == null) return;
     if (cond == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Defina condiciones antes de enviar el contrato'),
           backgroundColor: AppColors.warning,
@@ -425,7 +429,7 @@ class _DetalleSolicitudCreditoPageState
       await svc.enviarContratoPorCorreo(venta: v, condiciones: cond);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FiscoGestNotifications.show(
         SnackBar(
           content: Text('Error al enviar contrato: $e'),
           backgroundColor: AppColors.error,
@@ -455,25 +459,24 @@ class _DetalleSolicitudCreditoPageState
         child: _cargando
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-                ? Center(child: Text(_error!))
-                : _venta == null
-                    ? const Center(child: Text('Sin datos'))
-                    : _modoFormularioCredito &&
-                            _estadoFormularioCredito != null
-                        ? Container(
-                            padding: AppSpacing.allM,
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: AppRadius.allL,
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: FormularioCreditoVista(
-                              estadoVenta: _estadoFormularioCredito!,
-                              onVolver: _cerrarFormularioCredito,
-                              onConfirmado: _onCreditoConfirmado,
-                            ),
-                          )
-                        : _buildBody(_venta!),
+            ? Center(child: Text(_error!))
+            : _venta == null
+            ? const Center(child: Text('Sin datos'))
+            : _modoFormularioCredito && _estadoFormularioCredito != null
+            ? Container(
+                padding: AppSpacing.allM,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: AppRadius.allL,
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: FormularioCreditoVista(
+                  estadoVenta: _estadoFormularioCredito!,
+                  onVolver: _cerrarFormularioCredito,
+                  onConfirmado: _onCreditoConfirmado,
+                ),
+              )
+            : _buildBody(_venta!),
       ),
     );
   }
@@ -481,11 +484,9 @@ class _DetalleSolicitudCreditoPageState
   Widget _buildBody(Venta v) {
     final puedeEditar = v.estadoDocumento == EstadoDocumento.enCredito;
     final esCr = v.numeroCotizacion.startsWith('CR-');
-    final puedeReabrir =
-        esCr && v.estadoDocumento == EstadoDocumento.cotizado;
+    final puedeReabrir = esCr && v.estadoDocumento == EstadoDocumento.cotizado;
     final abonoMostrar = _abono > 0 ? _abono : v.abonoInicial;
-    final saldo =
-        (v.montoTotal - abonoMostrar).clamp(0.0, double.infinity);
+    final saldo = (v.montoTotal - abonoMostrar).clamp(0.0, double.infinity);
 
     final maxW = AppBreakpoints.isDesktop(context)
         ? 1200
@@ -507,8 +508,9 @@ class _DetalleSolicitudCreditoPageState
           ),
           Text(
             'Total: RD\$ ${_fmt.format(v.montoTotal)}',
-            style: AppTypography.bodyMedium
-                .copyWith(fontWeight: FontWeight.w600),
+            style: AppTypography.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           AppLayout.vS,
           StatusChip(
@@ -516,8 +518,8 @@ class _DetalleSolicitudCreditoPageState
             type: v.estadoDocumento == EstadoDocumento.aprobado
                 ? StatusChipType.success
                 : v.estadoDocumento == EstadoDocumento.enCredito
-                    ? StatusChipType.warning
-                    : StatusChipType.neutral,
+                ? StatusChipType.warning
+                : StatusChipType.neutral,
           ),
         ],
       ),
@@ -531,8 +533,8 @@ class _DetalleSolicitudCreditoPageState
                 expedienteCreditoPorVentaProvider((
                   ventaId: v.id!,
                   nombre: v.nombreCliente ?? '',
-                      clienteId: v.clienteId,
-                    )),
+                  clienteId: v.clienteId,
+                )),
               );
               return asyncExp.when(
                 loading: () => const Padding(
@@ -543,8 +545,9 @@ class _DetalleSolicitudCreditoPageState
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     'Error expediente: $e',
-                    style: AppTypography.bodySmall
-                        .copyWith(color: AppColors.error),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.error,
+                    ),
                   ),
                 ),
                 data: (expediente) => ExpedienteSolicitanteForm(
@@ -563,7 +566,7 @@ class _DetalleSolicitudCreditoPageState
                         )),
                       );
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      FiscoGestNotifications.show(
                         const SnackBar(
                           content: Text('Expediente guardado'),
                           backgroundColor: AppColors.success,
@@ -572,7 +575,7 @@ class _DetalleSolicitudCreditoPageState
                       );
                     } catch (err) {
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      FiscoGestNotifications.show(
                         SnackBar(
                           content: Text('Error al guardar: $err'),
                           backgroundColor: AppColors.error,
@@ -622,11 +625,7 @@ class _DetalleSolicitudCreditoPageState
               AppLayout.filaDato(
                 etiqueta: 'Cuota mensual',
                 valor: _numeroCuotas > 0 && saldo > 0
-                    ? 'RD\$ ${_fmt.format(CalculadoraCreditoService.calcularCuotaFija(
-                        capital: saldo,
-                        tasaMensual: _tasaMensual,
-                        numeroCuotas: _numeroCuotas,
-                      ))}'
+                    ? 'RD\$ ${_fmt.format(CalculadoraCreditoService.calcularCuotaFija(capital: saldo, tasaMensual: _tasaMensual, numeroCuotas: _numeroCuotas))}'
                     : '—',
               ),
               AppLayout.filaDato(
@@ -718,8 +717,9 @@ class _DetalleSolicitudCreditoPageState
           AppLayout.vS,
           Text(
             'Este CR- está en estado cotizado. Pásalo a análisis para editar condiciones y aprobar.',
-            style: AppTypography.bodySmall
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -730,8 +730,9 @@ class _DetalleSolicitudCreditoPageState
                 ? 'Aprobado. El cajero puede facturar en Caja.'
                 : 'Esta solicitud ya no está en análisis.',
             textAlign: TextAlign.center,
-            style: AppTypography.bodyMedium
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ],
@@ -778,5 +779,4 @@ class _DetalleSolicitudCreditoPageState
       ),
     );
   }
-
 }

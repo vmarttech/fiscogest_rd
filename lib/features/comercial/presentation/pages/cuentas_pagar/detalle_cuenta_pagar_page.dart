@@ -19,10 +19,12 @@ class DetalleCuentaPagarPage extends ConsumerStatefulWidget {
   final Object cuentaId;
 
   @override
-  ConsumerState<DetalleCuentaPagarPage> createState() => _DetalleCuentaPagarPageState();
+  ConsumerState<DetalleCuentaPagarPage> createState() =>
+      _DetalleCuentaPagarPageState();
 }
 
-class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage> {
+class _DetalleCuentaPagarPageState
+    extends ConsumerState<DetalleCuentaPagarPage> {
   late final int _idNumerico;
 
   @override
@@ -42,8 +44,12 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<CuentaPagar?> cuentaAsync = ref.watch(cuentaPagarPorIdProvider(_idNumerico));
-    final AsyncValue<List<Abono>> abonosAsync = ref.watch(historialAbonosProvider(_idNumerico));
+    final AsyncValue<CuentaPagar?> cuentaAsync = ref.watch(
+      cuentaPagarPorIdProvider(_idNumerico),
+    );
+    final AsyncValue<List<Abono>> abonosAsync = ref.watch(
+      historialAbonosProvider(_idNumerico),
+    );
     final double ancho = MediaQuery.of(context).size.width;
     final bool esPequena = ancho < 768;
 
@@ -61,7 +67,9 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                 child: Text(
                   'Error al cargar cuenta: $error',
                   textAlign: TextAlign.center,
-                  style: AppTypography.labelMedium.copyWith(color: AppColors.error),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.error,
+                  ),
                 ),
               ),
             ),
@@ -91,7 +99,10 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                   _ => (Colors.grey, 'Desconocido'),
                 };
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
@@ -134,12 +145,19 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                       ),
                       child: const Row(
                         children: <Widget>[
-                          Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.red,
+                            size: 20,
+                          ),
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Esta cuenta está vencida.',
-                              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ],
@@ -176,18 +194,29 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              const Text('Monto Total:', style: AppTypography.bodyMedium),
-                              Text(formatRd(cuenta.montoTotal), style: AppTypography.bodyMediumBold),
+                              const Text(
+                                'Monto Total:',
+                                style: AppTypography.bodyMedium,
+                              ),
+                              Text(
+                                formatRd(cuenta.montoTotal),
+                                style: AppTypography.bodyMediumBold,
+                              ),
                             ],
                           ),
                           const SizedBox(height: 4),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              const Text('Total Abonado:', style: AppTypography.bodyMedium),
+                              const Text(
+                                'Total Abonado:',
+                                style: AppTypography.bodyMedium,
+                              ),
                               Text(
                                 formatRd(cuenta.montoAbonado),
-                                style: AppTypography.bodyMediumBold.copyWith(color: Colors.green.shade700),
+                                style: AppTypography.bodyMediumBold.copyWith(
+                                  color: Colors.green.shade700,
+                                ),
                               ),
                             ],
                           ),
@@ -197,14 +226,19 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                             children: <Widget>[
                               Text(
                                 'Saldo Pendiente:',
-                                style: AppTypography.bodyMediumSemiBold.copyWith(
-                                  color: vencida ? Colors.red.shade700 : AppColors.primary,
-                                ),
+                                style: AppTypography.bodyMediumSemiBold
+                                    .copyWith(
+                                      color: vencida
+                                          ? Colors.red.shade700
+                                          : AppColors.primary,
+                                    ),
                               ),
                               Text(
                                 formatRd(saldoPendiente),
                                 style: AppTypography.h4Bold.copyWith(
-                                  color: vencida ? Colors.red.shade700 : AppColors.primary,
+                                  color: vencida
+                                      ? Colors.red.shade700
+                                      : AppColors.primary,
                                 ),
                               ),
                             ],
@@ -230,7 +264,9 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                       padding: AppSpacing.allM,
                       child: Text(
                         'No se pudo cargar el historial: $error',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.error,
+                        ),
                       ),
                     ),
                     data: (List<Abono> abonos) {
@@ -251,10 +287,12 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                             child: Padding(
                               padding: AppSpacing.allM,
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: <Widget>[
                                       Text(
                                         _formatearFecha(abono.fecha),
@@ -273,9 +311,8 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                                   ),
                                   Text(
                                     formatRd(abono.monto),
-                                    style: AppTypography.bodyMediumBold.copyWith(
-                                      color: Colors.green.shade700,
-                                    ),
+                                    style: AppTypography.bodyMediumBold
+                                        .copyWith(color: Colors.green.shade700),
                                   ),
                                 ],
                               ),
@@ -304,7 +341,9 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                           ),
                           onPressed: () => context.goNamed(
                             RegistrarAbonoPage.routeName,
-                            pathParameters: <String, String>{'cuentaId': _idNumerico.toString()},
+                            pathParameters: <String, String>{
+                              'cuentaId': _idNumerico.toString(),
+                            },
                           ),
                         ),
                     ],
@@ -322,7 +361,9 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                         ),
                         onPressed: () => context.goNamed(
                           RegistrarAbonoPage.routeName,
-                          pathParameters: <String, String>{'cuentaId': _idNumerico.toString()},
+                          pathParameters: <String, String>{
+                            'cuentaId': _idNumerico.toString(),
+                          },
                         ),
                       ),
                     ),

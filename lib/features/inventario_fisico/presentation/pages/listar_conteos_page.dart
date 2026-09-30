@@ -45,8 +45,9 @@ class ListarConteosPage extends ConsumerWidget {
                 error: (e, _) => Center(
                   child: Text(
                     'Error: $e',
-                    style: AppTypography.bodyMedium
-                        .copyWith(color: AppColors.error),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.error,
+                    ),
                   ),
                 ),
                 data: (lista) {
@@ -168,17 +169,18 @@ class ListarConteosPage extends ConsumerWidget {
                                                 c.nombreConteo,
                                                 style: AppTypography.labelLarge
                                                     .copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
                                                 'Fecha: $fecha · Estado: $estado',
                                                 style: AppTypography.bodySmall
                                                     .copyWith(
-                                                  color:
-                                                      AppColors.textSecondary,
-                                                ),
+                                                      color: AppColors
+                                                          .textSecondary,
+                                                    ),
                                               ),
                                             ],
                                           )
@@ -191,8 +193,9 @@ class ListarConteosPage extends ConsumerWidget {
                                                   style: AppTypography
                                                       .bodyMedium
                                                       .copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                 ),
                                               ),
                                               Expanded(
@@ -209,8 +212,9 @@ class ListarConteosPage extends ConsumerWidget {
                                                   estado,
                                                   style: AppTypography.bodySmall
                                                       .copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                 ),
                                               ),
                                               const Icon(

@@ -13,7 +13,7 @@ final importExportServiceProvider = Provider<ImportExportService>((ref) {
 
 class ImportExportNotifier extends StateNotifier<AsyncValue<String>> {
   ImportExportNotifier(this._ref, this._service)
-      : super(const AsyncValue.data('Módulo listo para procesar datos.'));
+    : super(const AsyncValue.data('Módulo listo para procesar datos.'));
 
   final Ref _ref;
   final ImportExportService _service;
@@ -59,7 +59,8 @@ class ImportExportNotifier extends StateNotifier<AsyncValue<String>> {
             },
         ]);
       case 'clientes':
-        final list = _ref.read(clientesControllerProvider).valueOrNull ??
+        final list =
+            _ref.read(clientesControllerProvider).valueOrNull ??
             <ClienteEntity>[];
         return _service.exportarClientes([
           for (final c in list)
@@ -73,8 +74,8 @@ class ImportExportNotifier extends StateNotifier<AsyncValue<String>> {
             },
         ]);
       default:
-        final list = _ref.read(proveedorControllerProvider).valueOrNull ??
-            <Proveedor>[];
+        final list =
+            _ref.read(proveedorControllerProvider).valueOrNull ?? <Proveedor>[];
         return _service.exportarProveedores([
           for (final p in list)
             {
@@ -93,5 +94,5 @@ class ImportExportNotifier extends StateNotifier<AsyncValue<String>> {
 
 final importExportControllerProvider =
     StateNotifierProvider<ImportExportNotifier, AsyncValue<String>>((ref) {
-  return ImportExportNotifier(ref, ref.watch(importExportServiceProvider));
-});
+      return ImportExportNotifier(ref, ref.watch(importExportServiceProvider));
+    });

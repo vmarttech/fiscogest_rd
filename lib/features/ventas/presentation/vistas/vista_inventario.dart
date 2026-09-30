@@ -38,9 +38,11 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
     if (_terminoBusqueda != null && _terminoBusqueda!.isNotEmpty) {
       final String termino = _terminoBusqueda!.toLowerCase().trim();
       resultados = resultados
-          .where((Producto p) =>
-              p.nombre.toLowerCase().contains(termino) ||
-              p.codigo.toLowerCase().contains(termino))
+          .where(
+            (Producto p) =>
+                p.nombre.toLowerCase().contains(termino) ||
+                p.codigo.toLowerCase().contains(termino),
+          )
           .toList();
     }
     switch (categoria) {
@@ -48,11 +50,15 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
         return resultados;
       case CategoriaProducto.manufactura:
         return resultados
-            .where((Producto p) =>
-                p.descripcion?.toLowerCase().contains('manufactura') == true)
+            .where(
+              (Producto p) =>
+                  p.descripcion?.toLowerCase().contains('manufactura') == true,
+            )
             .toList();
       case CategoriaProducto.servicios:
-        return resultados.where((Producto p) => p.unidadMedidaId == 99).toList();
+        return resultados
+            .where((Producto p) => p.unidadMedidaId == 99)
+            .toList();
       case CategoriaProducto.scanner:
         return resultados
             .where((Producto p) => p.codigoBarras?.isNotEmpty == true)
@@ -81,12 +87,11 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<List<Producto>> estadoProductos =
-        ref.watch(productoControllerProvider);
+    final AsyncValue<List<Producto>> estadoProductos = ref.watch(
+      productoControllerProvider,
+    );
     final CategoriaProducto categoria = ref.watch(
-      ventasNavegacionProvider.select(
-        (e) => e.categoriaSeleccionada,
-      ),
+      ventasNavegacionProvider.select((e) => e.categoriaSeleccionada),
     );
 
     return Column(
@@ -108,33 +113,45 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _filtroEtiqueta('Todos',
-                    categoria == CategoriaProducto.productos, () {
-                  ref
-                      .read(ventasNavegacionProvider.notifier)
-                      .cambiarCategoria(CategoriaProducto.productos);
-                }),
+                _filtroEtiqueta(
+                  'Todos',
+                  categoria == CategoriaProducto.productos,
+                  () {
+                    ref
+                        .read(ventasNavegacionProvider.notifier)
+                        .cambiarCategoria(CategoriaProducto.productos);
+                  },
+                ),
                 const SizedBox(width: AppSpacing.s),
-                _filtroEtiqueta('Manufactura',
-                    categoria == CategoriaProducto.manufactura, () {
-                  ref
-                      .read(ventasNavegacionProvider.notifier)
-                      .cambiarCategoria(CategoriaProducto.manufactura);
-                }),
+                _filtroEtiqueta(
+                  'Manufactura',
+                  categoria == CategoriaProducto.manufactura,
+                  () {
+                    ref
+                        .read(ventasNavegacionProvider.notifier)
+                        .cambiarCategoria(CategoriaProducto.manufactura);
+                  },
+                ),
                 const SizedBox(width: AppSpacing.s),
-                _filtroEtiqueta('Servicios',
-                    categoria == CategoriaProducto.servicios, () {
-                  ref
-                      .read(ventasNavegacionProvider.notifier)
-                      .cambiarCategoria(CategoriaProducto.servicios);
-                }),
+                _filtroEtiqueta(
+                  'Servicios',
+                  categoria == CategoriaProducto.servicios,
+                  () {
+                    ref
+                        .read(ventasNavegacionProvider.notifier)
+                        .cambiarCategoria(CategoriaProducto.servicios);
+                  },
+                ),
                 const SizedBox(width: AppSpacing.s),
-                _filtroEtiqueta('Escanear',
-                    categoria == CategoriaProducto.scanner, () {
-                  ref
-                      .read(ventasNavegacionProvider.notifier)
-                      .cambiarCategoria(CategoriaProducto.scanner);
-                }),
+                _filtroEtiqueta(
+                  'Escanear',
+                  categoria == CategoriaProducto.scanner,
+                  () {
+                    ref
+                        .read(ventasNavegacionProvider.notifier)
+                        .cambiarCategoria(CategoriaProducto.scanner);
+                  },
+                ),
               ],
             ),
           ),
@@ -188,8 +205,9 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
               return GridView.builder(
                 padding: AppSpacing.allM,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:
-                      MediaQuery.of(context).size.width < 400 ? 1 : 2,
+                  crossAxisCount: MediaQuery.of(context).size.width < 400
+                      ? 1
+                      : 2,
                   crossAxisSpacing: AppSpacing.s,
                   mainAxisSpacing: AppSpacing.s,
                   childAspectRatio: 1.5,
@@ -242,8 +260,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                             alignment: Alignment.bottomRight,
                             child: AppButton(
                               text: 'AGREGAR',
-                              onPressed: () =>
-                                  _seleccionarProducto(producto),
+                              onPressed: () => _seleccionarProducto(producto),
                               icon: Icons.add,
                               height: AppSizes.buttonHeightSm,
                             ),

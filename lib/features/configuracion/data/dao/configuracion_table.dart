@@ -23,26 +23,22 @@ class ConfiguracionTable extends Table {
 
   BoolColumn get docMostrarLogo =>
       boolean().withDefault(const Constant(true))();
-  BoolColumn get docMostrarRnc =>
-      boolean().withDefault(const Constant(true))();
+  BoolColumn get docMostrarRnc => boolean().withDefault(const Constant(true))();
   BoolColumn get docMostrarDireccion =>
       boolean().withDefault(const Constant(true))();
   BoolColumn get docMostrarTelefono =>
       boolean().withDefault(const Constant(true))();
   BoolColumn get docMostrarCorreo =>
       boolean().withDefault(const Constant(true))();
-  BoolColumn get docMostrarNcf =>
-      boolean().withDefault(const Constant(true))();
+  BoolColumn get docMostrarNcf => boolean().withDefault(const Constant(true))();
   BoolColumn get docMostrarCliente =>
       boolean().withDefault(const Constant(true))();
   BoolColumn get docMostrarItbisDesglose =>
       boolean().withDefault(const Constant(true))();
   TextColumn get docPiePagina =>
       text().withDefault(const Constant('Gracias por su preferencia'))();
-  TextColumn get prefijoContado =>
-      text().withDefault(const Constant('C'))();
-  TextColumn get prefijoCredito =>
-      text().withDefault(const Constant('CR'))();
+  TextColumn get prefijoContado => text().withDefault(const Constant('C'))();
+  TextColumn get prefijoCredito => text().withDefault(const Constant('CR'))();
 
   TextColumn get cajaFormaPagoDefault =>
       text().withDefault(const Constant('efectivo'))();

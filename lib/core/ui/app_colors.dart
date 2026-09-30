@@ -4,27 +4,27 @@ abstract class AppColors {
   // ─────────────────────────────────────────────
   // PRIMARY (Teal institucional - NO azul)
   // ─────────────────────────────────────────────
-  static const Color primary = Color(0xFF0F766E);       // Teal-700
-  static const Color primaryDark = Color(0xFF115E59);   // Teal-800
-  static const Color primaryLight = Color(0xFF14B8A6);  // Teal-500
+  static const Color primary = Color(0xFF0F766E); // Teal-700
+  static const Color primaryDark = Color(0xFF115E59); // Teal-800
+  static const Color primaryLight = Color(0xFF14B8A6); // Teal-500
   static const Color primaryContainer = Color(0xFFCCFBF1); // Teal-100
 
   // ─────────────────────────────────────────────
   // SECONDARY
   // ─────────────────────────────────────────────
-  static const Color secondary = Color(0xFF334155);     // Slate-700
+  static const Color secondary = Color(0xFF334155); // Slate-700
   static const Color secondaryLight = Color(0xFF64748B); // Slate-500
 
   // ─────────────────────────────────────────────
   // SEMÁNTICOS
   // ─────────────────────────────────────────────
-  static const Color success = Color(0xFF10B981);       // Emerald-500
+  static const Color success = Color(0xFF10B981); // Emerald-500
   static const Color successDark = Color(0xFF059669);
-  static const Color warning = Color(0xFFF59E0B);       // Amber-500
+  static const Color warning = Color(0xFFF59E0B); // Amber-500
   static const Color warningDark = Color(0xFFD97706);
-  static const Color error = Color(0xFFEF4444);         // Red-500
+  static const Color error = Color(0xFFEF4444); // Red-500
   static const Color errorDark = Color(0xFFDC2626);
-  static const Color info = Color(0xFF6366F1);          // Indigo-500 (solo info)
+  static const Color info = Color(0xFF6366F1); // Indigo-500 (solo info)
 
   // ─────────────────────────────────────────────
   // NEUTRALES

@@ -43,10 +43,15 @@ class BuscadorProductosVenta extends ConsumerWidget {
             controller: controlador,
             decoration: InputDecoration(
               hintText: 'Buscar por nombre, código o escanear...',
-              hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+              hintStyle: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
               prefixIcon: const Icon(Icons.search, color: AppColors.primary),
               suffixIcon: IconButton(
-                icon: const Icon(Icons.add_circle_rounded, color: AppColors.primary),
+                icon: const Icon(
+                  Icons.add_circle_rounded,
+                  color: AppColors.primary,
+                ),
                 tooltip: 'Agregar / Ir a inventario',
                 onPressed: () async {
                   final valor = controlador.text.trim();
@@ -76,9 +81,15 @@ class BuscadorProductosVenta extends ConsumerWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
             ),
             textInputAction: TextInputAction.search,
             onSubmitted: (valor) async {

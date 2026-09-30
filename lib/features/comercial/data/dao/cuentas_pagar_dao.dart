@@ -37,8 +37,9 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<CuentaPagarData?> obtenerCuentaPorId(int cuentaId) async {
-    return await (select(cuentasPagarTable)..where((t) => t.id.equals(cuentaId)))
-        .getSingleOrNull();
+    return await (select(
+      cuentasPagarTable,
+    )..where((t) => t.id.equals(cuentaId))).getSingleOrNull();
   }
 
   Future<int> registrarCuentaPagar({
@@ -118,10 +119,15 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  Future<List<PagoProveedorData>> listarPagosPorCuenta(int cuentaPagarId) async {
+  Future<List<PagoProveedorData>> listarPagosPorCuenta(
+    int cuentaPagarId,
+  ) async {
     return await (select(pagosProveedorTable)
           ..where((t) => t.cuentaPagarId.equals(cuentaPagarId))
-          ..orderBy([(t) => OrderingTerm(expression: t.fechaPago, mode: OrderingMode.desc)]))
+          ..orderBy([
+            (t) =>
+                OrderingTerm(expression: t.fechaPago, mode: OrderingMode.desc),
+          ]))
         .get();
   }
 
@@ -135,25 +141,35 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
     String? conceptoContiene,
   }) async {
     return await transaction(() async {
-      final inicio = DateTime(fechaEmision.year, fechaEmision.month, fechaEmision.day);
+      final inicio = DateTime(
+        fechaEmision.year,
+        fechaEmision.month,
+        fechaEmision.day,
+      );
       final fin = inicio.add(const Duration(days: 1));
 
       final query = select(cuentasPagarTable)
-        ..where((t) =>
-            t.proveedorId.equals(proveedorId) &
-            t.monto.equals(monto) &
-            t.fechaEmision.isBiggerOrEqualValue(inicio) &
-            t.fechaEmision.isSmallerThanValue(fin) &
-            t.estado.isIn([PagarEstado.pendiente.name, PagarEstado.parcial.name, PagarEstado.vencido.name]));
+        ..where(
+          (t) =>
+              t.proveedorId.equals(proveedorId) &
+              t.monto.equals(monto) &
+              t.fechaEmision.isBiggerOrEqualValue(inicio) &
+              t.fechaEmision.isSmallerThanValue(fin) &
+              t.estado.isIn([
+                PagarEstado.pendiente.name,
+                PagarEstado.parcial.name,
+                PagarEstado.vencido.name,
+              ]),
+        );
 
       final candidatas = await query.get();
 
       CuentaPagarData? cuenta;
       if (conceptoContiene != null && conceptoContiene.isNotEmpty) {
         cuenta = candidatas.cast<CuentaPagarData?>().firstWhere(
-              (c) => c!.concepto.contains(conceptoContiene),
-              orElse: () => candidatas.isNotEmpty ? candidatas.first : null,
-            );
+          (c) => c!.concepto.contains(conceptoContiene),
+          orElse: () => candidatas.isNotEmpty ? candidatas.first : null,
+        );
       } else if (candidatas.isNotEmpty) {
         cuenta = candidatas.first;
       }
@@ -171,7 +187,9 @@ class CuentasPagarDao extends DatabaseAccessor<AppDatabase>
       }
 
       // Eliminar la cuenta (no hay estado "anulado" en el enum actual)
-      await (delete(cuentasPagarTable)..where((t) => t.id.equals(cuenta!.id))).go();
+      await (delete(
+        cuentasPagarTable,
+      )..where((t) => t.id.equals(cuenta!.id))).go();
       return true;
     });
   }

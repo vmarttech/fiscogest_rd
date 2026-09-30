@@ -101,22 +101,24 @@ class CreditoInicioPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Gestión de crédito',
-                                    style: (mobile
-                                            ? AppTypography.h4
-                                            : AppTypography.h3)
-                                        .copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.3,
-                                    ),
+                                    style:
+                                        (mobile
+                                                ? AppTypography.h4
+                                                : AppTypography.h3)
+                                            .copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: -0.3,
+                                            ),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
                                     'Solicitudes, aprobación y cuentas por cobrar. '
                                     'Flujo: cotización → crédito → caja.',
                                     style: AppTypography.bodyMedium.copyWith(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.9),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
                                       height: 1.35,
                                     ),
                                   ),

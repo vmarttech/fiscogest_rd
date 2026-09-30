@@ -18,8 +18,9 @@ final cuentasCobrarDaoCreditoProvider = Provider<CuentasCobrarDao>((ref) {
   return CuentasCobrarDao(db);
 });
 
-final cuentaPorCobrarRepositoryProvider =
-    Provider<ICuentaPorCobrarRepository>((ref) {
+final cuentaPorCobrarRepositoryProvider = Provider<ICuentaPorCobrarRepository>((
+  ref,
+) {
   final dao = ref.watch(cuentasCobrarDaoCreditoProvider);
   return CuentaPorCobrarRepositoryImpl(dao);
 });
@@ -29,20 +30,19 @@ final parametrosCreditoDaoProvider = Provider<ParametrosCreditoDao>((ref) {
   return ParametrosCreditoDao(db);
 });
 
-final parametrosCreditoProvider =
-    FutureProvider.autoDispose((ref) async {
+final parametrosCreditoProvider = FutureProvider.autoDispose((ref) async {
   final dao = ref.watch(parametrosCreditoDaoProvider);
   return dao.obtenerOCrear();
 });
 
 final creditoDocumentoServiceProvider =
     FutureProvider.autoDispose<ICreditoDocumentoService>((ref) async {
-  final params = await ref.watch(parametrosCreditoProvider.future);
-  return CreditoDocumentoServiceImpl(
-    plantillaSolicitudExtra: params.plantillaSolicitud,
-    plantillaContratoExtra: params.plantillaContrato,
-  );
-});
+      final params = await ref.watch(parametrosCreditoProvider.future);
+      return CreditoDocumentoServiceImpl(
+        plantillaSolicitudExtra: params.plantillaSolicitud,
+        plantillaContratoExtra: params.plantillaContrato,
+      );
+    });
 
 final solicitudCreditoDaoProvider = Provider<SolicitudCreditoDao>((ref) {
   final AppDatabase db = ref.watch(databaseProvider);
@@ -51,18 +51,21 @@ final solicitudCreditoDaoProvider = Provider<SolicitudCreditoDao>((ref) {
 
 final solicitudCreditoRepositoryProvider =
     Provider<ISolicitudCreditoRepository>((ref) {
-  return SolicitudCreditoRepositoryImpl(
-    ref.watch(solicitudCreditoDaoProvider),
-    ref.watch(clienteRepositoryProvider),
-  );
-});
+      return SolicitudCreditoRepositoryImpl(
+        ref.watch(solicitudCreditoDaoProvider),
+        ref.watch(clienteRepositoryProvider),
+      );
+    });
 
 final expedienteCreditoPorVentaProvider = FutureProvider.autoDispose
-    .family<SolicitudCreditoExpediente, ({int ventaId, String nombre, int? clienteId})>((ref, args) async {
-  final repo = ref.watch(solicitudCreditoRepositoryProvider);
-  return repo.obtenerOCrearPorVenta(
-    ventaId: args.ventaId,
-    nombreInicial: args.nombre,
-    clienteId: args.clienteId,
-  );
-});
+    .family<
+      SolicitudCreditoExpediente,
+      ({int ventaId, String nombre, int? clienteId})
+    >((ref, args) async {
+      final repo = ref.watch(solicitudCreditoRepositoryProvider);
+      return repo.obtenerOCrearPorVenta(
+        ventaId: args.ventaId,
+        nombreInicial: args.nombre,
+        clienteId: args.clienteId,
+      );
+    });

@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class ProductosPage extends ConsumerStatefulWidget {
   const ProductosPage({super.key});
@@ -47,7 +48,8 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       barrierDismissible: false,
       builder: (ctx) => AppDialog(
         title: 'Eliminar Producto',
-        message: '¿Eliminar "${producto.nombre}"? Esta acción no se puede deshacer.',
+        message:
+            '¿Eliminar "${producto.nombre}"? Esta acción no se puede deshacer.',
         actions: [
           TextButton(
             onPressed: () => ctx.pop(false),
@@ -62,9 +64,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       ),
     );
     if (confirmado == true && producto.id != null) {
-      await ref.read(productoControllerProvider.notifier).eliminar(producto.id!);
+      await ref
+          .read(productoControllerProvider.notifier)
+          .eliminar(producto.id!);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FiscoGestNotifications.show(
           const SnackBar(content: Text('Producto eliminado correctamente')),
         );
       }
@@ -104,10 +108,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               child: const Icon(Icons.add),
             )
           : null,
-      body: SafeArea(
-        bottom: true,
-        child: _construirVistaActual(),
-      ),
+      body: SafeArea(bottom: true, child: _construirVistaActual()),
     );
   }
 
@@ -171,68 +172,94 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ref.watch(productoControllerProvider).when(
-              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-              error: (e, _) => Center(
-                child: Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
-              ),
-              data: (productos) {
-                final filtrados = productos.where((p) {
-                  final matchTexto = p.codigo.toLowerCase().contains(_filtroProductos.toLowerCase()) ||
-                      p.nombre.toLowerCase().contains(_filtroProductos.toLowerCase());
-                  if (!matchTexto) return false;
-                  final stock = p.stock ?? 0;
-                  return switch (_filtroEstado) {
-                    'en_stock' => stock > 10,
-                    'bajo' => stock > 0 && stock <= 10,
-                    'agotado' => stock <= 0,
-                    _ => true,
-                  };
-                }).toList();
-
-                if (filtrados.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 60),
-                      child: Column(
-                        children: [
-                          const Icon(Icons.inventory_2_outlined, size: 48, color: AppColors.grey300),
-                          const SizedBox(height: 12),
-                          Text(
-                            'No se encontraron productos',
-                            style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            isMobile
-                                ? 'Presiona el botón + para registrar el primero'
-                                : 'Usa "Nuevo Producto" en la barra superior para registrar el primero',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                          ),
-                        ],
+            child: ref
+                .watch(productoControllerProvider)
+                .when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                  error: (e, _) => Center(
+                    child: Text(
+                      'Error: $e',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.error,
                       ),
                     ),
-                  );
-                }
+                  ),
+                  data: (productos) {
+                    final filtrados = productos.where((p) {
+                      final matchTexto =
+                          p.codigo.toLowerCase().contains(
+                            _filtroProductos.toLowerCase(),
+                          ) ||
+                          p.nombre.toLowerCase().contains(
+                            _filtroProductos.toLowerCase(),
+                          );
+                      if (!matchTexto) return false;
+                      final stock = p.stock ?? 0;
+                      return switch (_filtroEstado) {
+                        'en_stock' => stock > 10,
+                        'bajo' => stock > 0 && stock <= 10,
+                        'agotado' => stock <= 0,
+                        _ => true,
+                      };
+                    }).toList();
 
-                if (isMobile) {
-                  return ListView.separated(
-                    padding: EdgeInsets.zero,
-                    itemCount: filtrados.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) => _ProductoCardMobile(
-                      producto: filtrados[i],
-                      puedeVerCostos: puedeVerCostos,
-                      puedeEliminar: puedeEliminar,
-                      onEditar: () => _editarProducto(filtrados[i]),
-                      onEliminar: () => _confirmarEliminar(filtrados[i]),
-                    ),
-                  );
-                }
+                    if (filtrados.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 60),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.inventory_2_outlined,
+                                size: 48,
+                                color: AppColors.grey300,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'No se encontraron productos',
+                                style: AppTypography.bodyLarge.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                isMobile
+                                    ? 'Presiona el botón + para registrar el primero'
+                                    : 'Usa "Nuevo Producto" en la barra superior para registrar el primero',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
 
-                return _buildTablaDesktop(filtrados, puedeVerCostos, puedeEliminar);
-              },
-            ),
+                    if (isMobile) {
+                      return ListView.separated(
+                        padding: EdgeInsets.zero,
+                        itemCount: filtrados.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (_, i) => _ProductoCardMobile(
+                          producto: filtrados[i],
+                          puedeVerCostos: puedeVerCostos,
+                          puedeEliminar: puedeEliminar,
+                          onEditar: () => _editarProducto(filtrados[i]),
+                          onEliminar: () => _confirmarEliminar(filtrados[i]),
+                        ),
+                      );
+                    }
+
+                    return _buildTablaDesktop(
+                      filtrados,
+                      puedeVerCostos,
+                      puedeEliminar,
+                    );
+                  },
+                ),
           ),
         ],
       ),
@@ -455,9 +482,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   }
 
   TextStyle get _headerStyle => AppTypography.labelSmall.copyWith(
-        color: AppColors.textSecondary,
-        fontWeight: FontWeight.w600,
-      );
+    color: AppColors.textSecondary,
+    fontWeight: FontWeight.w600,
+  );
 
   // ─────────────────────────────────────────────
   // SECCIÓN KÁRDEX
@@ -497,55 +524,77 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ref.watch(kardexPorProductoProvider(int.tryParse(_filtroKardex) ?? 0)).when(
-              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-              error: (e, _) => Center(
-                child: Text('Error: $e', style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
-              ),
-              data: (movimientos) {
-                if (movimientos.isEmpty) {
-                  return Center(
+            child: ref
+                .watch(
+                  kardexPorProductoProvider(int.tryParse(_filtroKardex) ?? 0),
+                )
+                .when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                  error: (e, _) => Center(
                     child: Text(
-                      'No hay movimientos registrados.',
-                      style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
-                    ),
-                  );
-                }
-                return ListView.separated(
-                  itemCount: movimientos.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) {
-                    final mov = movimientos[i];
-                    return AppCard(
-                      padding: AppSpacing.allM,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Producto ID: ${mov.productoId}',
-                            style: AppTypography.h4.copyWith(color: AppColors.textPrimary, fontSize: 15),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Cantidad: ${mov.cantidad}  •  Saldo: ${mov.saldoNuevo}',
-                            style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                          ),
-                          Text(
-                            'Costo: ${formatRd(mov.costoUnitario)}  •  Total: ${formatRd(mov.totalMovimiento)}',
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                          ),
-                          if (mov.fechaMovimiento != null)
-                            Text(
-                              'Fecha: ${mov.fechaMovimiento}',
-                              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                            ),
-                        ],
+                      'Error: $e',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.error,
                       ),
+                    ),
+                  ),
+                  data: (movimientos) {
+                    if (movimientos.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No hay movimientos registrados.',
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      itemCount: movimientos.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (_, i) {
+                        final mov = movimientos[i];
+                        return AppCard(
+                          padding: AppSpacing.allM,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Producto ID: ${mov.productoId}',
+                                style: AppTypography.h4.copyWith(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Cantidad: ${mov.cantidad}  •  Saldo: ${mov.saldoNuevo}',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                'Costo: ${formatRd(mov.costoUnitario)}  •  Total: ${formatRd(mov.totalMovimiento)}',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              if (mov.fechaMovimiento != null)
+                                Text(
+                                  'Fecha: ${mov.fechaMovimiento}',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
-                );
-              },
-            ),
+                ),
           ),
         ],
       ),
@@ -577,11 +626,11 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? activeColor.withValues(alpha: 0.12) : AppColors.white,
+          color: selected
+              ? activeColor.withValues(alpha: 0.12)
+              : AppColors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? activeColor : AppColors.border,
-          ),
+          border: Border.all(color: selected ? activeColor : AppColors.border),
         ),
         child: Text(
           label,
@@ -615,8 +664,8 @@ class _ProductoCardMobile extends StatelessWidget {
     final (statusText, statusColor) = stock <= 0
         ? ('Agotado', AppColors.error)
         : stock <= 10
-            ? ('Bajo', AppColors.warning)
-            : ('En Stock', AppColors.success);
+        ? ('Bajo', AppColors.warning)
+        : ('En Stock', AppColors.success);
 
     return AppCard(
       padding: AppSpacing.allM,
@@ -632,7 +681,11 @@ class _ProductoCardMobile extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.inventory_2_outlined, color: AppColors.primary, size: 22),
+                child: const Icon(
+                  Icons.inventory_2_outlined,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -641,19 +694,27 @@ class _ProductoCardMobile extends StatelessWidget {
                   children: [
                     Text(
                       producto.nombre,
-                      style: AppTypography.h4.copyWith(color: AppColors.textPrimary, fontSize: 15),
+                      style: AppTypography.h4.copyWith(
+                        color: AppColors.textPrimary,
+                        fontSize: 15,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       'Código: ${producto.codigo}',
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
@@ -682,12 +743,16 @@ class _ProductoCardMobile extends StatelessWidget {
               if (puedeVerCostos) ...[
                 Text(
                   'C: ${formatRd(producto.precioCompra)}',
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.success),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.success,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   'V: ${formatRd(producto.precioVenta)}',
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ],
             ],
