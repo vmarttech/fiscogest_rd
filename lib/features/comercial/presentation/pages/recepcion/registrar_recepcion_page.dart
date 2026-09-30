@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
@@ -244,7 +245,7 @@ class _RegistrarRecepcionPageState
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'Costo Adquisición: RD\$ ${det.costoAdquisicion.toStringAsFixed(2)}',
+                              'Costo Adquisición: ${formatRd(det.costoAdquisicion).replaceFirst('RD\$ ', '')}  /*keep*/',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.blue,

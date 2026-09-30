@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 class TotalesCompraWidget extends StatelessWidget {
@@ -30,14 +31,14 @@ class TotalesCompraWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Subtotal:'),
-                Text('RD\$ ${subtotalSinImpuestos.toStringAsFixed(2)}'),
+                Text(formatRd(subtotalSinImpuestos)),
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Descuentos:'),
-                Text('RD\$ ${descuentoGlobal.toStringAsFixed(2)}'),
+                Text(formatRd(descuentoGlobal)),
               ],
             ),
             if (!modoSimplificado)
@@ -45,7 +46,7 @@ class TotalesCompraWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('ITBIS (18%):'),
-                  Text('RD\$ ${montoImpuesto.toStringAsFixed(2)}'),
+                  Text(formatRd(montoImpuesto)),
                 ],
               ),
             const Divider(),
@@ -54,7 +55,7 @@ class TotalesCompraWidget extends StatelessWidget {
               children: [
                 const Text('TOTAL COMPRA:', style: AppTypography.labelLarge),
                 Text(
-                  'RD\$ ${totalCompra.toStringAsFixed(2)}',
+                  formatRd(totalCompra),
                   style: AppTypography.labelLarge.copyWith(
                     color: Colors.green.shade700,
                   ),

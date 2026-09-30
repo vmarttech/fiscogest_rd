@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -394,7 +395,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
                 ),
               ),
               Text(
-                'RD\$ ${cotizacion.montoTotal.toStringAsFixed(2)}',
+                formatRd(cotizacion.montoTotal),
                 style: AppTypography.h4.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,

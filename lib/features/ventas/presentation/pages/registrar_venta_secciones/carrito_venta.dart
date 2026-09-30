@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
@@ -50,7 +51,7 @@ class CarritoVenta extends ConsumerWidget {
                     style: AppTypography.bodyMedium,
                   ),
                   subtitle: Text(
-                    'Cant: ${detalle.cantidad} • RD\$ ${(detalle.subtotalLinea ?? detalle.subtotal).toStringAsFixed(2)}',
+                    'Cant: ${detalle.cantidad} • ${formatRd((detalle.subtotalLinea ?? detalle.subtotal))}',
                     style: AppTypography.bodySmall,
                   ),
                   trailing: IconButton(

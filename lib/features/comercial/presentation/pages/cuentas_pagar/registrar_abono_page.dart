@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -158,7 +159,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                             const Text('Saldo pendiente a la fecha:', style: AppTypography.bodyMedium),
                             const SizedBox(height: 4),
                             Text(
-                              'RD\$ ${saldoPendiente.toStringAsFixed(2)}',
+                              formatRd(saldoPendiente),
                               style: AppTypography.h4Bold.copyWith(color: AppColors.primary),
                             ),
                           ],
@@ -195,7 +196,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                         final double? v = double.tryParse(value?.replaceAll(',', '.') ?? '');
                         if (v == null || v <= 0) return 'Ingrese un monto válido';
                         if (v > saldoPendiente) {
-                          return 'Excede saldo pendiente (RD\$ ${saldoPendiente.toStringAsFixed(2)})';
+                          return 'Excede saldo pendiente (${formatRd(saldoPendiente).replaceFirst('RD\$ ', '')}  /*keep*/)';
                         }
                         return null;
                       },

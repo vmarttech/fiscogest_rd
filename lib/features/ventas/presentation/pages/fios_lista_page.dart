@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -352,7 +353,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
               ),
             ),
             Text(
-              'Saldo: RD\$ ${saldo.toStringAsFixed(2)}',
+              'Saldo: ${formatRd(saldo)}',
               style: AppTypography.bodyMedium.copyWith(
                 color: AppColors.warning,
                 fontWeight: FontWeight.w700,

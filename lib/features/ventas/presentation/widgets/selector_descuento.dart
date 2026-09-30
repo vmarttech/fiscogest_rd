@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_borrador_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
@@ -35,7 +36,7 @@ class _SelectorDescuentoDialogState extends ConsumerState<SelectorDescuentoDialo
         children: [
           Text('Nombre: ${descuentoNombre ?? "Ninguno"}'),
           const SizedBox(height: 8),
-          Text('Monto: RD\$ ${montoDescuento.toStringAsFixed(2)}'),
+          Text('Monto: ${formatRd(montoDescuento)}'),
         ],
       ),
       actions: [

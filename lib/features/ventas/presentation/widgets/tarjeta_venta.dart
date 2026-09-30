@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
@@ -114,7 +115,7 @@ class TarjetaVenta extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    'RD\$ ${total.toStringAsFixed(2)}',
+                    formatRd(total),
                     style: AppTypography.bodyMedium.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: tamanoTotal,

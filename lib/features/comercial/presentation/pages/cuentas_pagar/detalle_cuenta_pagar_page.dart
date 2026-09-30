@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -176,7 +177,7 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
                               const Text('Monto Total:', style: AppTypography.bodyMedium),
-                              Text('RD\$ ${cuenta.montoTotal.toStringAsFixed(2)}', style: AppTypography.bodyMediumBold),
+                              Text(formatRd(cuenta.montoTotal), style: AppTypography.bodyMediumBold),
                             ],
                           ),
                           const SizedBox(height: 4),
@@ -185,7 +186,7 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                             children: <Widget>[
                               const Text('Total Abonado:', style: AppTypography.bodyMedium),
                               Text(
-                                'RD\$ ${cuenta.montoAbonado.toStringAsFixed(2)}',
+                                formatRd(cuenta.montoAbonado),
                                 style: AppTypography.bodyMediumBold.copyWith(color: Colors.green.shade700),
                               ),
                             ],
@@ -201,7 +202,7 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                                 ),
                               ),
                               Text(
-                                'RD\$ ${saldoPendiente.toStringAsFixed(2)}',
+                                formatRd(saldoPendiente),
                                 style: AppTypography.h4Bold.copyWith(
                                   color: vencida ? Colors.red.shade700 : AppColors.primary,
                                 ),
@@ -271,7 +272,7 @@ class _DetalleCuentaPagarPageState extends ConsumerState<DetalleCuentaPagarPage>
                                     ],
                                   ),
                                   Text(
-                                    'RD\$ ${abono.monto.toStringAsFixed(2)}',
+                                    formatRd(abono.monto),
                                     style: AppTypography.bodyMediumBold.copyWith(
                                       color: Colors.green.shade700,
                                     ),

@@ -1,5 +1,6 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -222,7 +223,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'RD\$ ${producto.precioVenta.toStringAsFixed(2)}',
+                                formatRd(producto.precioVenta),
                                 style: AppTypography.labelMedium.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,

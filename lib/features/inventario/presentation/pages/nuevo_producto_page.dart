@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -161,7 +162,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     if (precioMin != null && precioMin > 0 && precioVenta < precioMin) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('El precio de venta (RD\$${precioVenta.toStringAsFixed(2)}) no puede ser menor al mínimo (RD\$${precioMin.toStringAsFixed(2)})'),
+          content: Text('El precio de venta (${formatRd(precioVenta)}) no puede ser menor al mínimo (${formatRd(precioMin)})'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -357,7 +358,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'RD\$ ${costoReal.toStringAsFixed(2)}',
+                            formatRd(costoReal),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,

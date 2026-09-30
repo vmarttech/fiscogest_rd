@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/tipos_linea.dart';
@@ -215,16 +216,16 @@ class LineaProductoWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Subtotal: RD\$ ${linea.subtotalLinea.toStringAsFixed(2)}',
+                    'Subtotal: ${formatRd(linea.subtotalLinea).replaceFirst('RD\$ ', '')}  /*keep*/',
                     style: AppTypography.bodyMedium,
                   ),
                   Text(
-                    'ITBIS (18%): RD\$ ${linea.itbisLinea.toStringAsFixed(2)}',
+                    'ITBIS (18%): ${formatRd(linea.itbisLinea).replaceFirst('RD\$ ', '')}  /*keep*/',
                     style: AppTypography.bodyMedium,
                   ),
                   const Divider(height: 8),
                   Text(
-                    'Total Línea: RD\$ ${linea.totalLinea.toStringAsFixed(2)}',
+                    'Total Línea: ${formatRd(linea.totalLinea).replaceFirst('RD\$ ', '')}  /*keep*/',
                     style: AppTypography.labelLarge,
                   ),
                 ],

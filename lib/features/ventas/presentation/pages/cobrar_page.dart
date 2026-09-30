@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -205,15 +206,15 @@ class CobrarPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          'Total: RD\$ ${c.montoOriginal.toStringAsFixed(2)}',
+                          'Total: ${formatRd(c.montoOriginal)}',
                           style: AppTypography.bodyMedium.copyWith(fontSize: tamanoCuerpo),
                         ),
                         Text(
-                          'Abonado: RD\$ ${c.montoAbonado.toStringAsFixed(2)}',
+                          'Abonado: ${formatRd(c.montoAbonado)}',
                           style: AppTypography.bodyMedium.copyWith(fontSize: tamanoCuerpo),
                         ),
                         Text(
-                          'Saldo pendiente: RD\$ ${c.saldoPendiente.toStringAsFixed(2)}',
+                          'Saldo pendiente: ${formatRd(c.saldoPendiente)}',
                           style: AppTypography.bodyMedium.copyWith(
                             fontSize: tamanoCuerpo,
                             fontWeight: FontWeight.w600,

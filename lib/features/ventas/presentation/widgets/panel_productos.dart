@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -96,7 +97,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                   child: ListTile(
                     title: Text(prod.nombre),
                     subtitle: Text(
-                      'Precio: RD\$ ${prod.precioVenta.toStringAsFixed(2)}'
+                      'Precio: ${formatRd(prod.precioVenta)}'
                       '${prod.stock != null ? ' • Stock: ${prod.stock}' : ''}',
                       style: AppTypography.bodySmall,
                     ),

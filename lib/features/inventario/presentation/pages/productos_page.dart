@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
@@ -393,7 +394,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                           Expanded(
                             flex: 1,
                             child: Text(
-                              '\$${p.precioCompra.toStringAsFixed(2)}',
+                              formatRd(p.precioCompra),
                               style: AppTypography.bodySmall.copyWith(
                                 color: AppColors.success,
                               ),
@@ -403,7 +404,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                           Expanded(
                             flex: 1,
                             child: Text(
-                              '\$${p.precioVenta.toStringAsFixed(2)}',
+                              formatRd(p.precioVenta),
                               style: AppTypography.bodySmall.copyWith(
                                 color: AppColors.textPrimary,
                               ),
@@ -530,7 +531,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                             style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
                           ),
                           Text(
-                            'Costo: \$${mov.costoUnitario.toStringAsFixed(2)}  •  Total: \$${mov.totalMovimiento.toStringAsFixed(2)}',
+                            'Costo: ${formatRd(mov.costoUnitario)}  •  Total: ${formatRd(mov.totalMovimiento)}',
                             style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                           ),
                           if (mov.fechaMovimiento != null)
@@ -680,12 +681,12 @@ class _ProductoCardMobile extends StatelessWidget {
               const Spacer(),
               if (puedeVerCostos) ...[
                 Text(
-                  'C: \$${producto.precioCompra.toStringAsFixed(2)}',
+                  'C: ${formatRd(producto.precioCompra)}',
                   style: AppTypography.bodySmall.copyWith(color: AppColors.success),
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'V: \$${producto.precioVenta.toStringAsFixed(2)}',
+                  'V: ${formatRd(producto.precioVenta)}',
                   style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
                 ),
               ],

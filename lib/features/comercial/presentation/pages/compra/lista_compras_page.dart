@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -574,10 +575,10 @@ class ListaComprasPage extends ConsumerWidget {
                               buffer.writeln('Pago: ${compra.esCredito ? 'Crédito (${compra.diasCredito} días)' : 'Contado'}');
                               buffer.writeln('Estado: ${compra.estado.name}');
                               buffer.writeln('──────────────────────────────────');
-                              buffer.writeln('Subtotal:  RD\$ ${compra.subtotalSinImpuestos.toStringAsFixed(2)}');
-                              buffer.writeln('Descuento: RD\$ ${compra.montoDescuentoGlobal.toStringAsFixed(2)}');
-                              buffer.writeln('ITBIS:     RD\$ ${compra.montoImpuesto.toStringAsFixed(2)}');
-                              buffer.writeln('TOTAL:     RD\$ ${compra.totalCompra.toStringAsFixed(2)}');
+                              buffer.writeln('Subtotal:  ${formatRd(compra.subtotalSinImpuestos).replaceFirst('RD\$ ', '')}  /*keep*/');
+                              buffer.writeln('Descuento: ${formatRd(compra.montoDescuentoGlobal).replaceFirst('RD\$ ', '')}  /*keep*/');
+                              buffer.writeln('ITBIS:     ${formatRd(compra.montoImpuesto).replaceFirst('RD\$ ', '')}  /*keep*/');
+                              buffer.writeln('TOTAL:     ${formatRd(compra.totalCompra).replaceFirst('RD\$ ', '')}  /*keep*/');
                               buffer.writeln('══════════════════════════════════');
                               buffer.writeln(ref.read(configuracionControllerProvider).valueOrNull?.nombreComercial ?? 'FiscoGest RD');
                               await Share.share(
@@ -752,7 +753,7 @@ class ListaComprasPage extends ConsumerWidget {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              'Total: RD\$ ${compra.totalCompra.toStringAsFixed(2)}',
+                                              'Total: ${formatRd(compra.totalCompra).replaceFirst('RD\$ ', '')}  /*keep*/',
                                               style: AppTypography.bodyMedium.copyWith(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 15,

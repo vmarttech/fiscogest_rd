@@ -278,7 +278,7 @@ class _CotizacionesHistorialPageState
                     ),
                   ),
                   Text(
-                    'RD\$ ${cot.montoTotal.toStringAsFixed(2)}',
+                    formatRd(cot.montoTotal),
                     style: AppTypography.h4.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: tamanoTotal,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
@@ -111,7 +112,7 @@ class DatosVenta extends ConsumerWidget {
                 : AppTypography.bodyMedium,
           ),
           Text(
-            'RD\$ ${monto.toStringAsFixed(2)}',
+            formatRd(monto),
             style: esTotal
                 ? AppTypography.h3.copyWith(
                     fontWeight: FontWeight.bold,

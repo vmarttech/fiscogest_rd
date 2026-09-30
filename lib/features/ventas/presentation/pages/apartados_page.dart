@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_section.dart';
@@ -150,13 +151,13 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
                                   ),
                                   DataCell(
                                     Text(
-                                      'RD\$ ${apt.montoTotal.toStringAsFixed(2)}',
+                                      formatRd(apt.montoTotal),
                                       style: AppTypography.bodySmall,
                                     ),
                                   ),
                                   DataCell(
                                     Text(
-                                      'RD\$ ${apt.montoAbonado.toStringAsFixed(2)}',
+                                      formatRd(apt.montoAbonado),
                                       style: AppTypography.bodySmall,
                                     ),
                                   ),

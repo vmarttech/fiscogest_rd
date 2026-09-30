@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -127,7 +128,7 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
-    final totalTxt = 'RD\$ ${widget.total.toStringAsFixed(2)}';
+    final totalTxt = formatRd(widget.total);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),

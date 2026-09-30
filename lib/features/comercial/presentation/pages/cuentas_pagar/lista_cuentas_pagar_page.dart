@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
@@ -173,18 +174,18 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Total: RD\$ ${cuenta.montoTotal.toStringAsFixed(2)}',
+                                    'Total: ${formatRd(cuenta.montoTotal).replaceFirst('RD\$ ', '')}  /*keep*/',
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   Text(
-                                    'Abonado: RD\$ ${cuenta.montoAbonado.toStringAsFixed(2)}',
+                                    'Abonado: ${formatRd(cuenta.montoAbonado).replaceFirst('RD\$ ', '')}  /*keep*/',
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.green.shade700,
                                     ),
                                   ),
                                   Text(
-                                    'Pendiente: RD\$ ${cuenta.saldoPendiente.toStringAsFixed(2)}',
+                                    'Pendiente: ${formatRd(cuenta.saldoPendiente).replaceFirst('RD\$ ', '')}  /*keep*/',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,

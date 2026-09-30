@@ -180,7 +180,7 @@ class _NuevaVentaBorradorPageState
     }
 
     final totalTexto =
-        'RD\$ ${estado.montoTotal.toStringAsFixed(2)}';
+        formatRd(estado.montoTotal);
     final nombre = (estado.clienteNombre ?? '').trim();
 
     final resultado = await SheetContadoFiao.show(
@@ -206,7 +206,7 @@ class _NuevaVentaBorradorPageState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Fiao anotado: RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
+                'Fiao anotado: ${formatRd(estado.montoTotal)}',
               ),
               backgroundColor: AppColors.success,
               behavior: SnackBarBehavior.floating,
@@ -347,7 +347,7 @@ class _NuevaVentaBorradorPageState
 
       final mensaje = _esCredito
           ? 'Cotización N° $numeroGuardado en crédito.\n'
-              'Abono: RD\$ ${abonoDesdeFormulario.toStringAsFixed(2)}\n'
+              'Abono: ${formatRd(abonoDesdeFormulario)}\n'
               'Pendiente de aprobación → luego Caja.'
           : 'Cotización N° $numeroGuardado generada.\n'
               'Lista para cobrar en Caja.';
@@ -444,7 +444,7 @@ class _NuevaVentaBorradorPageState
         SnackBar(
           content: Text(
             'Cotización N° $numeroGuardado en crédito.\n'
-            'Abono: RD\$ ${abonoDesdeFormulario.toStringAsFixed(2)}\n'
+            'Abono: ${formatRd(abonoDesdeFormulario)}\n'
             'Pendiente de aprobación → luego Caja.',
           ),
           backgroundColor: AppColors.success,
@@ -853,7 +853,7 @@ class _NuevaVentaBorradorPageState
                     ),
                     Text(
                       tieneEnvio
-                          ? 'RD\$ ${estado.costoEnvio.toStringAsFixed(2)}'
+                          ? formatRd(estado.costoEnvio)
                           : 'Sin envío (tocar para elegir)',
                       style: AppTypography.bodySmall.copyWith(
                         fontSize: esPantallaPequena ? 11 : 12,
@@ -1034,7 +1034,7 @@ class _NuevaVentaBorradorPageState
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Cant: ${cantidad % 1 == 0 ? cantidad.toInt() : cantidad}  ×  RD\$ ${precioUnitario.toStringAsFixed(2)}',
+                              'Cant: ${cantidad % 1 == 0 ? cantidad.toInt() : cantidad}  ×  ${formatRd(precioUnitario)}',
                               style: AppTypography.bodySmall.copyWith(
                                 fontSize: tamanoEtiqueta,
                                 color: AppColors.textSecondary,
@@ -1045,7 +1045,7 @@ class _NuevaVentaBorradorPageState
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'RD\$ ${subtotal.toStringAsFixed(2)}',
+                        formatRd(subtotal),
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
                           fontSize: tamanoCuerpo,
@@ -1114,25 +1114,25 @@ class _NuevaVentaBorradorPageState
           const SizedBox(height: 12),
           _filaResumen(
             'Subtotal',
-            'RD\$ ${estado.subtotal.toStringAsFixed(2)}',
+            formatRd(estado.subtotal),
             tamanoCuerpo,
           ),
           if (!(ref.watch(modoColmadoProvider)))
             _filaResumen(
               'ITBIS (18%)',
-              'RD\$ ${estado.itbis.toStringAsFixed(2)}',
+              formatRd(estado.itbis),
               tamanoCuerpo,
             ),
           if (estado.costoEnvio > 0)
             _filaResumen(
               'Envío / Delivery',
-              'RD\$ ${estado.costoEnvio.toStringAsFixed(2)}',
+              formatRd(estado.costoEnvio),
               tamanoCuerpo,
             ),
           if (estado.montoDescuento > 0)
             _filaResumen(
               'Descuento',
-              '- RD\$ ${estado.montoDescuento.toStringAsFixed(2)}',
+              '- ${formatRd(estado.montoDescuento)}',
               tamanoCuerpo,
               colorValor: AppColors.error,
             ),
@@ -1152,7 +1152,7 @@ class _NuevaVentaBorradorPageState
                 ),
               ),
               Text(
-                'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
+                formatRd(estado.montoTotal),
                 style: AppTypography.h3.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: tamanoTotal,
@@ -1258,7 +1258,7 @@ class _NuevaVentaBorradorPageState
                     ),
                   ),
                   Text(
-                    'RD\$ ${estado.montoTotal.toStringAsFixed(2)}',
+                    formatRd(estado.montoTotal),
                     style: AppTypography.h3.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: tamanoTotal,

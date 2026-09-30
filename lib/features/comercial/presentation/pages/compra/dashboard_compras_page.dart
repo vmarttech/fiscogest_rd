@@ -16,11 +16,6 @@ class DashboardComprasPage extends ConsumerWidget {
     final kpisAsync = ref.watch(dashboardComprasKpisProvider);
     final actividadAsync = ref.watch(actividadRecienteComprasProvider);
     final isMobile = AppBreakpoints.isMobile(context);
-    final currency = NumberFormat.currency(
-      locale: 'es_DO',
-      symbol: 'RD\$ ',
-      decimalDigits: 0,
-    );
     final alertas = kpisAsync.maybeWhen(
       data: (k) => k.vencido > 0 ? 1 : 0,
       orElse: () => 0,
@@ -57,10 +52,10 @@ class DashboardComprasPage extends ConsumerWidget {
             const SizedBox(height: 20),
             kpisAsync.when(
               data: (kpis) => _KpisGrid(
-                comprasEsteMes: currency.format(kpis.comprasEsteMes),
-                aCredito: currency.format(kpis.aCreditoEsteMes),
-                porPagar: currency.format(kpis.porPagar),
-                vencido: currency.format(kpis.vencido),
+                comprasEsteMes: formatRd(kpis.comprasEsteMes),
+                aCredito: formatRd(kpis.aCreditoEsteMes),
+                porPagar: formatRd(kpis.porPagar),
+                vencido: formatRd(kpis.vencido),
                 hayVencido: kpis.vencido > 0,
                 isMobile: isMobile,
               ),
@@ -250,7 +245,7 @@ class DashboardComprasPage extends ConsumerWidget {
                                       ),
                                     ),
                                     Text(
-                                      currency.format(item.total),
+                                      formatRd(item.total),
                                       style: AppTypography.bodyMedium.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.textPrimary,

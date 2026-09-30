@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -213,14 +214,14 @@ class _TarjetaApartado extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'RD\$ ${montoAbonado.toStringAsFixed(2)} / RD\$ ${montoTotal.toStringAsFixed(2)}',
+                            '${formatRd(montoAbonado)} / ${formatRd(montoTotal)}',
                             style: AppTypography.bodySmall.copyWith(
                               color: AppColors.textSecondary,
                             ),
                           ),
                         ),
                         Text(
-                          'Saldo: RD\$ ${saldoPendiente.toStringAsFixed(2)}',
+                          'Saldo: ${formatRd(saldoPendiente)}',
                           style: AppTypography.labelMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             color: saldoPendiente > 0
