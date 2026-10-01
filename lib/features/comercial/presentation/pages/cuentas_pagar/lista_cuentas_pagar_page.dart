@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -36,7 +38,7 @@ class ListaCuentasPagarPage extends ConsumerWidget {
         PagarEstado.pendiente => (Colors.orange, 'Pendiente'),
         PagarEstado.parcial => (Colors.blue, 'Parcial'),
         PagarEstado.pagado => (Colors.green, 'Pagada'),
-        _ => (Colors.grey, 'Desconocido'),
+        _ => (AppColors.textSecondary, 'Desconocido'),
       };
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -81,26 +83,26 @@ class ListaCuentasPagarPage extends ConsumerWidget {
           ),
           data: (List<CuentaPagar> cuentas) {
             if (cuentas.isEmpty) {
-              return const Center(
+              return Center(
                 child: Padding(
                   padding: AppLayout.pantallaPadding,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.account_balance_wallet_outlined,
                         size: 48,
-                        color: Colors.grey,
+                        color: AppColors.textSecondary,
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
                         'No hay cuentas por pagar registradas.',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         'Al confirmar una compra a crédito, aparecerá aquí.',
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
+                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -152,7 +154,7 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                                           : 'Cuenta #${cuenta.id}',
                                       style: const TextStyle(
                                         fontSize: 13,
-                                        color: Colors.grey,
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -188,18 +190,18 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Total: ${formatRd(cuenta.montoTotal).replaceFirst('RD\$ ', '')}  /*keep*/',
+                                    'Total: ${formatRdNumero(cuenta.montoTotal)}  ',
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   Text(
-                                    'Abonado: ${formatRd(cuenta.montoAbonado).replaceFirst('RD\$ ', '')}  /*keep*/',
+                                    'Abonado: ${formatRdNumero(cuenta.montoAbonado)}  ',
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.green.shade700,
                                     ),
                                   ),
                                   Text(
-                                    'Pendiente: ${formatRd(cuenta.saldoPendiente).replaceFirst('RD\$ ', '')}  /*keep*/',
+                                    'Pendiente: ${formatRdNumero(cuenta.saldoPendiente)}  ',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
@@ -217,7 +219,7 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                                       'Ver →',
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: Colors.grey,
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ],

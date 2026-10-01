@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_sizes.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/historial_costos_providers.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/historial_costo.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class HistorialCostosPage extends ConsumerWidget {
   const HistorialCostosPage({super.key, required this.productoId});
@@ -22,11 +23,6 @@ class HistorialCostosPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(historialCostosProvider(productoId));
-    final currency = NumberFormat.currency(
-      locale: 'es_DO',
-      symbol: 'RD\$ ',
-      decimalDigits: 2,
-    );
 
     return AppScaffold(
       title: 'Historial de Costos',
@@ -60,11 +56,10 @@ class HistorialCostosPage extends ConsumerWidget {
               Text(resumen.nombreProducto, style: AppTypography.h4Bold),
               AppLayout.vM,
               _ResumenCostos(
-                ultimo: currency.format(resumen.ultimoCosto),
-                promedio: currency.format(resumen.costoPromedio),
+                ultimo: formatRd(resumen.ultimoCosto),
+                promedio: formatRd(resumen.costoPromedio),
                 variacion: resumen.variacion,
                 variacionPct: resumen.variacionPorcentaje,
-                currency: currency,
               ),
               AppLayout.vL,
               const AppSection(title: 'Historial', children: []),
@@ -89,7 +84,7 @@ class HistorialCostosPage extends ConsumerWidget {
                         ),
                       ),
                       title: Text(
-                        currency.format(item.costoAdquisicion),
+                        formatRd(item.costoAdquisicion),
                         style: AppTypography.bodyMediumBold,
                       ),
                       subtitle: Text(
@@ -123,14 +118,12 @@ class _ResumenCostos extends StatelessWidget {
     required this.promedio,
     required this.variacion,
     required this.variacionPct,
-    required this.currency,
   });
 
   final String ultimo;
   final String promedio;
   final double variacion;
   final double variacionPct;
-  final NumberFormat currency;
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +165,7 @@ class _ResumenCostos extends StatelessWidget {
               Icon(iconVar, color: colorVar, size: AppSizes.iconMd),
               AppLayout.hS,
               Text(
-                'Variación: ${currency.format(variacion)} '
+                'Variación: ${formatRd(variacion)} '
                 '(${variacionPct.toStringAsFixed(1)}%)',
                 style: AppTypography.bodyMediumSemiBold.copyWith(
                   color: colorVar,

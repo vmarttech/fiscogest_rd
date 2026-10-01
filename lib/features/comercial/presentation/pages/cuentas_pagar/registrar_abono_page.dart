@@ -227,7 +227,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                           return 'Ingrese un monto válido';
                         }
                         if (v > saldoPendiente) {
-                          return 'Excede saldo pendiente (${formatRd(saldoPendiente).replaceFirst('RD\$ ', '')}  /*keep*/)';
+                          return 'Excede saldo pendiente (${formatRdNumero(saldoPendiente)}  )';
                         }
                         return null;
                       },

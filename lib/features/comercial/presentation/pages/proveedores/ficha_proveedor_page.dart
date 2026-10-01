@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +19,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/registrar_abono_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/detalle_cuenta_pagar_page.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class FichaProveedorPage extends ConsumerStatefulWidget {
   const FichaProveedorPage({super.key, required this.proveedorId});
@@ -166,9 +168,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
     });
   }
 
-  String _formatearMonto(double valor) {
-    return NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$').format(valor);
-  }
+  String _formatearMonto(double valor) => formatRd(valor);
 
   String _formatearFecha(DateTime f) => DateFormat('dd/MM/yyyy').format(f);
   void _irADetalleCompra(int compraId) {
@@ -420,7 +420,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 4),
-              const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+              const Icon(Icons.chevron_right, size: 20, color: AppColors.textSecondary),
             ],
           ),
         );
@@ -442,11 +442,11 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
           ),
           const SizedBox(height: AppSpacing.s),
           if (_cuentasPendientes.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'No hay cuentas pendientes',
-                style: TextStyle(color: Colors.grey),
+                style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
               ),
             )
           else
@@ -525,11 +525,11 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
           ),
           const SizedBox(height: AppSpacing.s),
           if (_pagosRealizados.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'No hay pagos registrados',
-                style: TextStyle(color: Colors.grey),
+                style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
               ),
             )
           else

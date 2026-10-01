@@ -109,12 +109,27 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
         .write(CuentasCobrarTableCompanion(estado: Value(estado)));
   }
 
-  Future<int> registrarCobro(CobrosTableCompanion cobro) async {
-    final cobroId = await into(cobrosTable).insert(cobro);
-    if (cobro.cuentaCobrarId.present) {
-      await actualizarSaldoYEstado(cobro.cuentaCobrarId.value);
-    }
-    return cobroId;
+  /// Registra el pago, distribuye el monto entre cuotas y actualiza el saldo
+  /// dentro de una sola transacción.
+  Future<int> registrarPago({
+    required int cuentaId,
+    required double montoPago,
+    required CobrosTableCompanion cobro,
+  }) async {
+    return transaction(() async {
+      final cuenta = await obtenerCuentaPorId(cuentaId);
+      if (cuenta == null) throw StateError('La cuenta por cobrar no existe');
+      if (montoPago <= 0) {
+        throw StateError('El monto del pago debe ser mayor a cero');
+      }
+      if (montoPago > cuenta.saldoPendiente + 0.001) {
+        throw StateError('El pago excede el saldo pendiente');
+      }
+      final cobroId = await into(cobrosTable).insert(cobro);
+      await aplicarPagoACuotas(cuentaId, montoPago);
+      await actualizarSaldoYEstado(cuentaId);
+      return cobroId;
+    });
   }
 
   Future<List<CobroData>> listarCobros(int cuentaId) async {

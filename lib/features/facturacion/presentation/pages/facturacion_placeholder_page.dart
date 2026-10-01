@@ -9,10 +9,13 @@ class FacturacionPlaceholderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return AppScaffold(
+      // design system
+
       title: titulo.toUpperCase(),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back, color: AppColors.primary),
         onPressed: () {
           if (context.canPop()) {
             context.pop();

@@ -93,7 +93,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
           child: SingleChildScrollView(
             padding: AppLayout.pantallaPadding,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
+              constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width < 768 ? 720 : 900),
               child: AppCard(
                 padding: AppSpacing.allXl,
                 elevation: 2,

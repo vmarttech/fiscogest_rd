@@ -16,6 +16,11 @@ class ClienteDao extends DatabaseAccessor<AppDatabase> with _$ClienteDaoMixin {
   Future<int> insertarOActualizar(ClientesTableCompanion cliente) =>
       into(clientesTable).insertOnConflictUpdate(cliente);
 
+  /// Actualiza solo las columnas indicadas del cliente con [id].
+  Future<int> actualizarPorId(int id, ClientesTableCompanion datos) {
+    return (update(clientesTable)..where((t) => t.id.equals(id))).write(datos);
+  }
+
   Future<bool> eliminar(int id) async {
     final filasAfectadas = await (delete(
       clientesTable,

@@ -122,24 +122,64 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        isMobile ? 16 : 8,
-        isMobile ? 12 : 16,
-        isMobile ? 16 : 8,
-        12,
+        isMobile ? 16 : 24,
+        isMobile ? 12 : 20,
+        isMobile ? 16 : 24,
+        24,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Buscador + Filtros
-          Row(
-            children: [
-              Expanded(
-                child: AppTextField(
-                  hint: 'Buscar por código, nombre...',
-                  onChanged: (v) => setState(() => _filtroProductos = v),
-                ),
+          if (isMobile) ...[
+            AppTextField(
+              hint: 'Buscar por código, nombre...',
+              onChanged: (v) => setState(() => _filtroProductos = v),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _FilterChip(
+                    label: 'Todos',
+                    selected: _filtroEstado == 'todos',
+                    onTap: () => setState(() => _filtroEstado = 'todos'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'En Stock',
+                    selected: _filtroEstado == 'en_stock',
+                    color: AppColors.success,
+                    onTap: () => setState(() => _filtroEstado = 'en_stock'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Bajo',
+                    selected: _filtroEstado == 'bajo',
+                    color: AppColors.warning,
+                    onTap: () => setState(() => _filtroEstado = 'bajo'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Agotado',
+                    selected: _filtroEstado == 'agotado',
+                    color: AppColors.error,
+                    onTap: () => setState(() => _filtroEstado = 'agotado'),
+                  ),
+                ],
               ),
-              if (!isMobile) ...[
+            ),
+          ] else
+            Row(
+              children: [
+                Expanded(
+                  child: AppTextField(
+                    hint: 'Buscar por código, nombre...',
+                    onChanged: (v) => setState(() => _filtroProductos = v),
+                  ),
+                ),
                 const SizedBox(width: 12),
                 _FilterChip(
                   label: 'Todos',
@@ -168,9 +208,8 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                   onTap: () => setState(() => _filtroEstado = 'agotado'),
                 ),
               ],
-            ],
-          ),
-          const SizedBox(height: 16),
+            ),
+          SizedBox(height: isMobile ? 14 : 20),
           Expanded(
             child: ref
                 .watch(productoControllerProvider)
@@ -273,14 +312,14 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.94),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.10)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.grey900.withValues(alpha: 0.05),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -289,9 +328,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF8FAFC),
-              border: Border(bottom: BorderSide(color: AppColors.border)),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.04),
+              border: const Border(bottom: BorderSide(color: AppColors.border)),
             ),
             child: Row(
               children: [
@@ -440,11 +479,13 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                           ),
                         ],
                         SizedBox(
-                          width: 100,
+                          width: 96,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
+                                visualDensity: VisualDensity.compact,
                                 icon: const Icon(Icons.edit_outlined, size: 18),
                                 color: AppColors.primary,
                                 onPressed: () => _editarProducto(p),
@@ -452,6 +493,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                               ),
                               if (puedeEliminar)
                                 IconButton(
+                                  visualDensity: VisualDensity.compact,
                                   icon: const Icon(
                                     Icons.delete_outline,
                                     size: 18,
@@ -627,16 +669,29 @@ class _FilterChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? activeColor.withValues(alpha: 0.12)
-              : AppColors.white,
+              ? activeColor.withValues(alpha: 0.14)
+              : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? activeColor : AppColors.border),
+          border: Border.all(
+            color: selected
+                ? activeColor.withValues(alpha: 0.45)
+                : AppColors.border,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: activeColor.withValues(alpha: 0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           style: AppTypography.labelMedium.copyWith(
             color: selected ? activeColor : AppColors.textSecondary,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
       ),
@@ -664,82 +719,106 @@ class _ProductoCardMobile extends StatelessWidget {
     final (statusText, statusColor) = stock <= 0
         ? ('Agotado', AppColors.error)
         : stock <= 10
-        ? ('Bajo', AppColors.warning)
-        : ('En Stock', AppColors.success);
+            ? ('Bajo', AppColors.warning)
+            : ('En Stock', AppColors.success);
 
-    return AppCard(
-      padding: AppSpacing.allM,
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.inventory_2_outlined,
                   color: AppColors.primary,
-                  size: 22,
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       producto.nombre,
-                      style: AppTypography.h4.copyWith(
+                      style: AppTypography.bodyLarge.copyWith(
                         color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w800,
                         fontSize: 15,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 2),
                     Text(
-                      'Código: ${producto.codigo}',
+                      producto.codigo,
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  statusText,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w600,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    statusText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Row(
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
-                'Stock: ${stock.toStringAsFixed(2)}',
+                'Stock: ${stock.toStringAsFixed(stock.truncateToDouble() == stock ? 0 : 2)}',
                 style: AppTypography.labelLarge.copyWith(
                   color: statusColor,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const Spacer(),
               if (puedeVerCostos) ...[
                 Text(
                   'C: ${formatRd(producto.precioCompra)}',
@@ -747,33 +826,55 @@ class _ProductoCardMobile extends StatelessWidget {
                     color: AppColors.success,
                   ),
                 ),
-                const SizedBox(width: 12),
                 Text(
                   'V: ${formatRd(producto.precioVenta)}',
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ],
           ),
           const SizedBox(height: 12),
+          // Iconos: no desbordan como AppButton con texto
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              AppButton(
-                text: 'Editar',
-                icon: Icons.edit_outlined,
-                height: 36,
-                onPressed: onEditar,
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: onEditar,
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Editar'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: BorderSide(
+                      color: AppColors.primary.withValues(alpha: 0.35),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
               ),
               if (puedeEliminar) ...[
                 const SizedBox(width: 8),
-                AppButton(
-                  text: 'Eliminar',
-                  icon: Icons.delete_outline,
-                  height: 36,
-                  onPressed: onEliminar,
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onEliminar,
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    label: const Text('Eliminar'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: BorderSide(
+                        color: AppColors.error.withValues(alpha: 0.35),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ],

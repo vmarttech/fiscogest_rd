@@ -101,7 +101,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
               24,
             ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
+              constraints: BoxConstraints(maxWidth: isMobile ? 520 : 760),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),

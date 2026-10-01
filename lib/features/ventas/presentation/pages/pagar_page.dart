@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 class PagarPage extends ConsumerStatefulWidget {
   const PagarPage({super.key});
@@ -15,7 +16,11 @@ class PagarPage extends ConsumerStatefulWidget {
 class _PagarPageState extends ConsumerState<PagarPage> {
   @override
   Widget build(BuildContext context) {
+    
     return const AppScaffold(
+      backgroundColor: AppColors.pageBackground,
+      // design system
+
       title: 'Cuentas por Pagar',
       body: SingleChildScrollView(
         padding: AppLayout.pantallaPadding,

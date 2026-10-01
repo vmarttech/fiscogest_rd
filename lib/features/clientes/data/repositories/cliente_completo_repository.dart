@@ -43,11 +43,12 @@ class ClienteCompletoRepository {
   Future<void> actualizarCliente(ClienteCompleto cliente) async {
     final identificador = cliente.id;
     if (identificador == null) {
-      return;
+      throw Exception('No se puede actualizar el cliente: ID nulo');
     }
-    await _dao.insertarOActualizar(
+    // Update explícito por PK (no insertOnConflict: evita fallos con codigo unique)
+    final filas = await _dao.actualizarPorId(
+      identificador,
       ClientesTableCompanion(
-        id: Value(identificador),
         nombre: Value(cliente.nombre),
         direccion: Value(cliente.direccion),
         telefono: Value(cliente.telefono),
@@ -56,6 +57,9 @@ class ClienteCompletoRepository {
         activo: Value(cliente.activo),
       ),
     );
+    if (filas == 0) {
+      throw Exception('No se encontró el cliente a actualizar (id=$identificador)');
+    }
   }
 
   Future<void> eliminarCliente(int identificador) async {

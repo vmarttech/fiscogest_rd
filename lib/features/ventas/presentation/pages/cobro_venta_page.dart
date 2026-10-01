@@ -1,6 +1,5 @@
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
@@ -23,12 +22,8 @@ import 'package:fiscogest_rd/features/facturacion/presentation/providers/factura
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
-final _fmtMontoCobro = NumberFormat.currency(
-  locale: 'es_DO',
-  symbol: 'RD\$ ',
-  decimalDigits: 2,
-);
 
 class CobroVentaPage extends ConsumerStatefulWidget {
   const CobroVentaPage({super.key});
@@ -356,16 +351,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       }
       if (v > montoTotal + 0.009) {
         return 'El abono no puede exceder el total '
-            '(${_fmtMontoCobro.format(montoTotal)})';
+            '(${formatRd(montoTotal)})';
       }
     } else {
       // Contado: debe cubrir el total (tolerancia 1 centavo)
       if (v + 0.009 < montoTotal) {
-        return 'Debe cubrir el total: ${_fmtMontoCobro.format(montoTotal)}';
+        return 'Debe cubrir el total: ${formatRd(montoTotal)}';
       }
       if (v > montoTotal + 0.05) {
         // opcional: permitir sobrante pequeño como cambio; bloquear exceso grande
-        // return 'Monto mayor al total. Ajuste a ${_fmtMontoCobro.format(montoTotal)}';
+        // return 'Monto mayor al total. Ajuste a ${formatRd(montoTotal)}';
       }
     }
     return null;
@@ -653,8 +648,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                 Text('Ref. Cotización: ${venta.numeroCotizacion}'),
                 if (esCredito) ...[
                   const SizedBox(height: 8),
-                  Text('Abono: ${_fmtMontoCobro.format(estado.abono)}'),
-                  Text('Saldo: ${_fmtMontoCobro.format(saldo)}'),
+                  Text('Abono: ${formatRd(estado.abono)}'),
+                  Text('Saldo: ${formatRd(saldo)}'),
                 ],
               ],
             ),
@@ -952,7 +947,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                         ),
                                         const SizedBox(width: 12),
                                         Text(
-                                          _fmtMontoCobro.format(v.montoTotal),
+                                          formatRd(v.montoTotal),
                                           style: AppTypography.bodyMedium
                                               .copyWith(
                                                 fontWeight: FontWeight.bold,
@@ -1103,7 +1098,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          _fmtMontoCobro.format(subtotal),
+                                          formatRd(subtotal),
                                           style: AppTypography.bodySmall
                                               .copyWith(
                                                 fontSize: tamanoCuerpo,
@@ -1144,7 +1139,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       ),
                                     ),
                                     Text(
-                                      _fmtMontoCobro.format(_costoEnvio),
+                                      formatRd(_costoEnvio),
                                       style: AppTypography.bodySmall.copyWith(
                                         fontSize: tamanoCuerpo,
                                         fontWeight: FontWeight.w600,
@@ -1177,7 +1172,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     ],
                                   ),
                                   Text(
-                                    _fmtMontoCobro.format(montoTotal),
+                                    formatRd(montoTotal),
                                     style: AppTypography.h3.copyWith(
                                       fontWeight: FontWeight.bold,
                                       fontSize: tamanoTotal,
@@ -1355,7 +1350,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                   ),
                                 ),
                                 Text(
-                                  _fmtMontoCobro.format(estado.saldoPendiente),
+                                  formatRd(estado.saldoPendiente),
                                   style: AppTypography.bodyMedium.copyWith(
                                     fontSize: tamanoCuerpo + 1,
                                     fontWeight: FontWeight.bold,
@@ -1413,40 +1408,43 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                   ),
                   child: SafeArea(
                     top: false,
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: alturaBoton,
-                      child: ElevatedButton.icon(
-                        onPressed: _procesando ? null : _cobrarYGenerarFactura,
-                        icon: _procesando
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
-                                ),
-                              )
-                            : const Icon(Icons.receipt_long, size: 22),
-                        label: Text(
-                          _procesando
-                              ? 'Procesando...'
-                              : 'COBRAR Y GENERAR FACTURA',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: esPequena ? 14 : 16,
-                            letterSpacing: 0.3,
+                    child: Align(
+                      alignment: esPequena ? Alignment.center : Alignment.centerRight,
+                      child: SizedBox(
+                        width: esPequena ? double.infinity : 360,
+                        height: alturaBoton,
+                        child: ElevatedButton.icon(
+                          onPressed: _procesando ? null : _cobrarYGenerarFactura,
+                          icon: _procesando
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Icon(Icons.receipt_long, size: 22),
+                          label: Text(
+                            _procesando
+                                ? 'Procesando...'
+                                : 'COBRAR Y GENERAR FACTURA',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: esPequena ? 14 : 16,
+                              letterSpacing: 0.3,
+                            ),
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.success,
-                          foregroundColor: AppColors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.success,
+                            foregroundColor: AppColors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
                           ),
-                          elevation: 2,
-                        ),
                       ),
+                    ),
                     ),
                   ),
                 ),

@@ -17,6 +17,7 @@ import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class ResultadoFormularioCredito {
   const ResultadoFormularioCredito({
@@ -70,8 +71,7 @@ class FormularioCreditoDialog extends ConsumerStatefulWidget {
 class _FormularioCreditoDialogState
     extends ConsumerState<FormularioCreditoDialog> {
   // ✅ Reemplazado NumberFormat.currency por formateador sin símbolo
-  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
-  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
+  String _formatearMonto(double valor) => formatRd(valor);
 
   static final DateFormat _formatoFecha = DateFormat('dd/MM/yyyy');
   late final TextEditingController _abonoInicialController;

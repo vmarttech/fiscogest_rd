@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/recepcion/recepcion_provider.dart';
@@ -263,7 +264,7 @@ class _RegistrarRecepcionPageState
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'Costo Adquisición: ${formatRd(det.costoAdquisicion).replaceFirst('RD\$ ', '')}  /*keep*/',
+                              'Costo Adquisición: ${formatRdNumero(det.costoAdquisicion)}  ',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.blue,
@@ -335,7 +336,7 @@ class _RegistrarRecepcionPageState
                 border: Border.all(
                   color: seleccionado
                       ? Theme.of(context).primaryColor
-                      : Colors.grey.shade400,
+                      : AppColors.grey300,
                   width: 2,
                 ),
               ),

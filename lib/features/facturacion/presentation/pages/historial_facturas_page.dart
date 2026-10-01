@@ -44,7 +44,6 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
     final async = ref.watch(historialFacturasProvider);
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
-    final fmt = NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$');
     final fechaFmt = DateFormat('dd/MM/yyyy HH:mm');
 
     return AppScaffold(
@@ -124,7 +123,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                                     ),
                                   ),
                                   Text(
-                                    fmt.format(d.montoTotal),
+                                    formatRd(d.montoTotal),
                                     style: AppTypography.labelMedium.copyWith(
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -199,7 +198,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          fmt.format(_sel!.montoTotal),
+                          formatRd(_sel!.montoTotal),
                           style: AppTypography.h3.copyWith(
                             fontWeight: FontWeight.w800,
                             color: AppColors.primary,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class FacturaImprimible extends StatelessWidget {
   const FacturaImprimible({
@@ -14,9 +15,7 @@ class FacturaImprimible extends StatelessWidget {
   final Venta venta;
   final VoidCallback onCerrar;
 
-  String _formatearMonto(double valor) {
-    return 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
-  }
+  String _formatearMonto(double valor) => formatRd(valor);
 
   String _formatearFecha(DateTime fecha) {
     return DateFormat('dd/MM/yyyy HH:mm').format(fecha);

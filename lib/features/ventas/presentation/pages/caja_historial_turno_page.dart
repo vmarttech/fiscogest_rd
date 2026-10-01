@@ -27,7 +27,6 @@ class _CajaHistorialTurnoPageState
   DateTime? _desdeUsado;
 
   static final _fmt = DateFormat('dd/MM/yyyy HH:mm');
-  static final _fmtMonto = NumberFormat('#,##0.00', 'es_DO');
 
   @override
   void initState() {
@@ -201,7 +200,7 @@ class _CajaHistorialTurnoPageState
                                             CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            'RD\$ ${_fmtMonto.format(m.monto)}',
+                                            formatRd(m.monto),
                                             style: AppTypography.labelMedium
                                                 .copyWith(
                                                   fontWeight: FontWeight.w800,
@@ -211,7 +210,7 @@ class _CajaHistorialTurnoPageState
                                                 ),
                                           ),
                                           Text(
-                                            'Saldo ${_fmtMonto.format(m.saldoNuevo)}',
+                                            'Saldo ${formatRd(m.saldoNuevo)}',
                                             style: AppTypography.bodySmall
                                                 .copyWith(
                                                   color: AppColors.grey600,

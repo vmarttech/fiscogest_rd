@@ -40,8 +40,8 @@ class _DetalleCuentaCobrarPageState
   String? _error;
   bool _pagando = false;
   bool _imprimiendoCronograma = false;
+  bool _imprimiendoEstadoCuenta = false;
 
-  static final _fmt = NumberFormat('#,##0.00', 'es_DO');
   static final _fmtFecha = DateFormat('dd/MM/yyyy');
 
   @override
@@ -49,7 +49,6 @@ class _DetalleCuentaCobrarPageState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _cargar());
   }
-
 
   Future<void> _imprimirCronograma(CuentaPorCobrar c) async {
     if (c.planPago == null || c.planPago!.cuotas.isEmpty) {
@@ -74,6 +73,22 @@ class _DetalleCuentaCobrarPageState
     }
   }
 
+  Future<void> _imprimirEstadoCuenta(CuentaPorCobrar c) async {
+    setState(() => _imprimiendoEstadoCuenta = true);
+    try {
+      final svc = await ref.read(creditoDocumentoServiceProvider.future);
+      await svc.imprimirEstadoCuenta(cuenta: c);
+    } catch (e) {
+      if (mounted) {
+        FiscoGestNotifications.show(
+          SnackBar(content: Text('Error al imprimir estado de cuenta: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _imprimiendoEstadoCuenta = false);
+    }
+  }
+
   Future<void> _cargar() async {
     setState(() {
       _cargando = true;
@@ -94,8 +109,9 @@ class _DetalleCuentaCobrarPageState
       CuentaPorCobrar cuenta = c;
       if (cuenta.clienteNombre == null || cuenta.clienteNombre!.isEmpty) {
         try {
-          final IClienteRepository cliRepo =
-              ref.read(clienteRepositoryProvider);
+          final IClienteRepository cliRepo = ref.read(
+            clienteRepositoryProvider,
+          );
           final cli = await cliRepo.obtenerClientePorId(cuenta.clienteId);
           if (cli != null) {
             cuenta = cuenta.copyWith(clienteNombre: cli.nombre);
@@ -105,16 +121,21 @@ class _DetalleCuentaCobrarPageState
       final int? ventaId = cuenta.ventaId;
       if (ventaId != null && ventaId > 0) {
         try {
-          final IVentasRepository vRepo =
-              ref.read(venta_providers.ventasRepositoryProvider);
+          final IVentasRepository vRepo = ref.read(
+            venta_providers.ventasRepositoryProvider,
+          );
           final venta = await vRepo.obtenerVentaPorId(ventaId);
           if (venta != null) {
             for (final d in venta.detalles) {
-              final total = d.subtotal > 0 ? d.subtotal : (d.cantidad * d.precioUnitario);
+              final total = d.subtotal > 0
+                  ? d.subtotal
+                  : (d.cantidad * d.precioUnitario);
               _lineas.add((
-                nombre: (d.nombreProducto != null && d.nombreProducto!.trim().isNotEmpty)
-                  ? d.nombreProducto!.trim()
-                  : 'Producto #${d.productoId}',
+                nombre:
+                    (d.nombreProducto != null &&
+                        d.nombreProducto!.trim().isNotEmpty)
+                    ? d.nombreProducto!.trim()
+                    : 'Producto #${d.productoId}',
                 cantidad: d.cantidad,
                 total: total,
               ));
@@ -136,186 +157,86 @@ class _DetalleCuentaCobrarPageState
     }
   }
 
-
-
   Future<void> _dialogoRegistrarPago() async {
     final c = _cuenta;
     if (c == null || c.id == null) return;
-    final plan = c.planPago;
+
     final pendientes =
-        plan?.cuotas.where((q) => !q.pagada).toList() ?? <Cuota>[];
+        c.planPago?.cuotas.where((q) => !q.pagada).toList() ?? <Cuota>[];
     final nCuotas = pendientes.isNotEmpty
         ? pendientes.length
         : (c.numeroCuotas > 1 ? c.numeroCuotas : 1);
-    final aPagar = pendientes.isNotEmpty
-        ? pendientes.first.montoTotal.clamp(0.01, c.saldoPendiente)
-        : (nCuotas > 1
-            ? c.saldoPendiente / nCuotas
-            : c.saldoPendiente);
-    final controller = TextEditingController(
-      text: aPagar.toStringAsFixed(2),
-    );
-    final notaController = TextEditingController();
-    var metodo = 'efectivo';
+    final sugerido = pendientes.isNotEmpty
+        ? pendientes.first.saldoDespues.clamp(0.01, c.saldoPendiente).toDouble()
+        : (nCuotas > 1 ? c.saldoPendiente / nCuotas : c.saldoPendiente);
 
-    final confirmed = await showDialog<bool>(
+    final pago = await showDialog<_PagoCuotaResultado>(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setLocal) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-              title: const Text('Registrar pago', style: AppTypography.h4),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Saldo pendiente: RD\$ ${_fmt.format(c.saldoPendiente)}',
-                      style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    AppLayout.vS,
-                    Text(
-                      pendientes.isNotEmpty
-                          ? 'Próxima cuota #${pendientes.first.numeroCuota}: RD\$ ${_fmt.format(aPagar)}'
-                          : 'Monto sugerido: RD\$ ${_fmt.format(aPagar)}',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    AppLayout.vM,
-                    TextField(
-                      controller: controller,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Monto a pagar',
-                        prefixText: 'RD\$ ',
-                        border: OutlineInputBorder(),
-                      ),
-                      autofocus: true,
-                    ),
-                    AppLayout.vM,
-                    DropdownButtonFormField<String>(
-                      initialValue: metodo,
-                      decoration: const InputDecoration(
-                        labelText: 'Forma de pago',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'efectivo',
-                          child: Text('Efectivo'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'transferencia',
-                          child: Text('Transferencia'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'tarjeta',
-                          child: Text('Tarjeta'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'otro',
-                          child: Text('Otro'),
-                        ),
-                      ],
-                      onChanged: (v) {
-                        if (v != null) setLocal(() => metodo = v);
-                      },
-                    ),
-                    AppLayout.vM,
-                    TextField(
-                      controller: notaController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nota (opcional)',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 2,
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    final raw = controller.text
-                        .trim()
-                        .replaceAll(' ', '')
-                        .replaceAll(',', '.');
-                    final v = double.tryParse(raw);
-                    if (v == null || v <= 0) return;
-                    if (v > c.saldoPendiente + 0.05) return;
-                    Navigator.pop(ctx, true);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
-                    foregroundColor: AppColors.white,
-                  ),
-                  child: const Text('Registrar'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      barrierDismissible: false,
+      builder: (dialogContext) => _PagoCuotaDialog(
+        saldoPendiente: c.saldoPendiente,
+        montoSugerido: sugerido,
+        numeroProximaCuota: pendientes.isEmpty
+            ? null
+            : pendientes.first.numeroCuota,
+      ),
     );
-
-    final raw =
-        controller.text.trim().replaceAll(' ', '').replaceAll(',', '.');
-    final monto = double.tryParse(raw) ?? 0;
-    final nota = notaController.text.trim();
-    controller.dispose();
-    notaController.dispose();
-    if (confirmed != true || !mounted || monto <= 0) return;
+    // Un frame: el diálogo ya se desmontó
+    await Future<void>.delayed(Duration.zero);
+    if (pago == null || !mounted) return;
 
     setState(() => _pagando = true);
     try {
-      final notaAuto = nota.isEmpty
+      final notaAuto = pago.nota.isEmpty
           ? (pendientes.isNotEmpty
-              ? 'Cuota #${pendientes.first.numeroCuota}'
-                  '${c.ventaId != null ? ' · Venta #${c.ventaId}' : ''}'
-              : (c.ventaId != null ? 'Venta #${c.ventaId}' : null))
-          : nota;
-      await ref.read(cuentaPorCobrarRepositoryProvider).registrarAbono(
+                ? 'Cuota #${pendientes.first.numeroCuota}'
+                      '${c.ventaId != null ? ' · Venta #${c.ventaId}' : ''}'
+                : (c.ventaId != null ? 'Venta #${c.ventaId}' : null))
+          : pago.nota;
+      await ref
+          .read(cuentaPorCobrarRepositoryProvider)
+          .registrarAbono(
             AbonoCredito(
               cuentaId: c.id!,
-              monto: monto,
-              metodoPago: metodo,
+              monto: pago.monto,
+              metodoPago: pago.metodo,
               fecha: DateTime.now(),
               nota: notaAuto,
             ),
           );
+      var movimientoCajaRegistrado = true;
       try {
-        await ref.read(cajaRepositoryProvider).registrarMovimiento(
+        await ref
+            .read(cajaRepositoryProvider)
+            .registrarMovimiento(
               referencia: c.numero ?? 'CXC-${c.id}',
-              monto: monto,
+              monto: pago.monto,
               tipo: 'ingreso',
               descripcion:
                   'Abono ${c.numero ?? c.id} · ${c.clienteNombre ?? ''}',
-              formaPago: metodo,
+              formaPago: pago.metodo,
             );
-      } catch (_) {}
+      } catch (_) {
+        movimientoCajaRegistrado = false;
+      }
       if (!mounted) return;
-      FiscoGestNotifications.show(
-        SnackBar(
-          content: Text('Pago registrado: RD\$ ${_fmt.format(monto)}'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
       ref.invalidate(cuentasCobrarListaProvider);
       ref.invalidate(creditoTotalesProvider);
       await _cargar();
+      if (!mounted) return;
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(
+            movimientoCajaRegistrado
+                ? 'Pago registrado: ${formatRd(pago.monto)}'
+                : 'La cuenta se actualizó, pero no se pudo registrar el ingreso en caja.',
+          ),
+          backgroundColor: movimientoCajaRegistrado
+              ? AppColors.success
+              : AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(
@@ -330,12 +251,28 @@ class _DetalleCuentaCobrarPageState
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final c = _cuenta;
     return AppScaffold(
       title: 'DETALLE DE CUENTA',
+      actions: c == null
+          ? null
+          : [
+              IconButton(
+                tooltip: 'Imprimir estado de cuenta',
+                onPressed: _imprimiendoEstadoCuenta
+                    ? null
+                    : () => _imprimirEstadoCuenta(c),
+                icon: _imprimiendoEstadoCuenta
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.print_outlined),
+              ),
+            ],
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
@@ -349,59 +286,60 @@ class _DetalleCuentaCobrarPageState
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: AppLayout.pantallaPadding,
-                    child: Text(
-                      _error!,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.error,
-                      ),
-                    ),
+          ? Center(
+              child: Padding(
+                padding: AppLayout.pantallaPadding,
+                child: Text(
+                  _error!,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.error,
                   ),
-                )
-              : c == null
-                  ? const Center(child: Text('Cuenta no encontrada'))
-                  : Column(
-                      children: [
-                        Expanded(child: _buildBody(c)),
-                        if (!c.estaPagada)
-                          SafeArea(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: FilledButton.icon(
-                                  onPressed: _pagando
-                                      ? null
-                                      : _dialogoRegistrarPago,
-                                  icon:
-                                      const Icon(Icons.payments_outlined),
-                                  label: Text(
-                                    _pagando
-                                        ? 'Registrando…'
-                                        : 'Registrar pago / cuota',
-                                  ),
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: AppColors.success,
-                                    foregroundColor: Colors.white,
-                                    minimumSize:
-                                        const Size.fromHeight(52),
-                                  ),
-                                ),
+                ),
+              ),
+            )
+          : c == null
+          ? const Center(child: Text('Cuenta no encontrada'))
+          : Column(
+              children: [
+                Expanded(child: _buildBody(c)),
+                if (!c.estaPagada)
+                  SafeArea(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 360),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed: _pagando
+                                  ? null
+                                  : _dialogoRegistrarPago,
+                              icon: const Icon(Icons.payments_outlined),
+                              label: Text(
+                                _pagando
+                                    ? 'Registrando…'
+                                    : 'Registrar pago / cuota',
+                              ),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.success,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size.fromHeight(52),
                               ),
                             ),
                           ),
-                      ],
+                        ),
+                      ),
                     ),
+                  ),
+              ],
+            ),
     );
   }
 
-
   Widget _buildBody(CuentaPorCobrar c) {
-    final desktop = AppBreakpoints.isDesktop(context);
+    final desktop = !AppBreakpoints.isMobile(context);
     final mobile = AppBreakpoints.isMobile(context);
 
     return Align(
@@ -415,7 +353,7 @@ class _DetalleCuentaCobrarPageState
         ),
         children: [
           AppLayout.centerConstrained(
-            maxWidth: desktop ? 720 : 560,
+            maxWidth: desktop ? 940 : 560,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -484,25 +422,23 @@ class _DetalleCuentaCobrarPageState
                   borderColor: AppColors.border,
                   child: Column(
                     children: [
-                      _fila('Total original',
-                          'RD\$ ${_fmt.format(c.totalOriginal)}'),
+                      _fila('Total original', formatRd(c.totalOriginal)),
                       const Divider(height: 16, color: AppColors.border),
                       _fila(
                         'Abonado',
-                        'RD\$ ${_fmt.format(c.totalAbonado > 0 ? c.totalAbonado : c.abonoInicial)}',
+                        formatRd(
+                          c.totalAbonado > 0 ? c.totalAbonado : c.abonoInicial,
+                        ),
                       ),
                       const Divider(height: 16, color: AppColors.border),
                       _fila(
                         'Saldo pendiente',
-                        'RD\$ ${_fmt.format(c.saldoPendiente)}',
+                        formatRd(c.saldoPendiente),
                         bold: true,
                         valueColor: AppColors.primary,
                       ),
                       const Divider(height: 16, color: AppColors.border),
-                      _fila(
-                        'Vence',
-                        _fmtFecha.format(c.fechaVencimiento),
-                      ),
+                      _fila('Vence', _fmtFecha.format(c.fechaVencimiento)),
                       if (c.ventaId != null) ...[
                         const Divider(height: 16, color: AppColors.border),
                         _fila('Venta', '#${c.ventaId}'),
@@ -544,7 +480,7 @@ class _DetalleCuentaCobrarPageState
                                   ),
                                 ),
                                 Text(
-                                  'RD\$ ${_fmt.format(_lineas[i].total)}',
+                                  formatRd(_lineas[i].total),
                                   style: AppTypography.labelMedium.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -558,8 +494,7 @@ class _DetalleCuentaCobrarPageState
                     ),
                   ),
                 ],
-                if (c.planPago != null &&
-                    c.planPago!.cuotas.isNotEmpty) ...[
+                if (c.planPago != null && c.planPago!.cuotas.isNotEmpty) ...[
                   const SizedBox(height: 20),
                   Row(
                     children: [
@@ -580,7 +515,9 @@ class _DetalleCuentaCobrarPageState
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.print_outlined, size: 18),
                         label: const Text('Imprimir'),
@@ -593,9 +530,7 @@ class _DetalleCuentaCobrarPageState
                     padding: EdgeInsets.zero,
                     child: Column(
                       children: [
-                        for (var i = 0;
-                            i < c.planPago!.cuotas.length;
-                            i++) ...[
+                        for (var i = 0; i < c.planPago!.cuotas.length; i++) ...[
                           if (i > 0)
                             const Divider(height: 1, color: AppColors.border),
                           Builder(
@@ -611,16 +546,15 @@ class _DetalleCuentaCobrarPageState
                                     Expanded(
                                       child: Text(
                                         'Cuota ${q.numeroCuota} · ${_fmtFecha.format(q.fechaVencimiento)}',
-                                        style:
-                                            AppTypography.bodyMedium.copyWith(
-                                          color: AppColors.textPrimary,
-                                        ),
+                                        style: AppTypography.bodyMedium
+                                            .copyWith(
+                                              color: AppColors.textPrimary,
+                                            ),
                                       ),
                                     ),
                                     Text(
-                                      'RD\$ ${_fmt.format(q.montoTotal)}',
-                                      style:
-                                          AppTypography.labelMedium.copyWith(
+                                      formatRd(q.montoTotal),
+                                      style: AppTypography.labelMedium.copyWith(
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.textPrimary,
                                       ),
@@ -628,8 +562,7 @@ class _DetalleCuentaCobrarPageState
                                     const SizedBox(width: 10),
                                     Text(
                                       q.pagada ? 'PAGADA' : 'PENDIENTE',
-                                      style:
-                                          AppTypography.labelSmall.copyWith(
+                                      style: AppTypography.labelSmall.copyWith(
                                         color: q.pagada
                                             ? AppColors.success
                                             : AppColors.warning,
@@ -692,7 +625,7 @@ class _DetalleCuentaCobrarPageState
                                   ),
                                 ),
                                 trailing: Text(
-                                  'RD\$ ${_fmt.format(c.abonos[i].monto)}',
+                                  formatRd(c.abonos[i].monto),
                                   style: AppTypography.labelLarge.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.textPrimary,
@@ -711,7 +644,6 @@ class _DetalleCuentaCobrarPageState
       ),
     );
   }
-
 
   Widget _fila(
     String label,
@@ -738,6 +670,196 @@ class _DetalleCuentaCobrarPageState
               color: valueColor ?? AppColors.textPrimary,
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PagoCuotaResultado {
+  const _PagoCuotaResultado({
+    required this.monto,
+    required this.metodo,
+    required this.nota,
+  });
+
+  final double monto;
+  final String metodo;
+  final String nota;
+}
+
+class _PagoCuotaDialog extends StatefulWidget {
+  const _PagoCuotaDialog({
+    required this.saldoPendiente,
+    required this.montoSugerido,
+    required this.numeroProximaCuota,
+  });
+
+  final double saldoPendiente;
+  final double montoSugerido;
+  final int? numeroProximaCuota;
+
+  @override
+  State<_PagoCuotaDialog> createState() => _PagoCuotaDialogState();
+}
+
+class _PagoCuotaDialogState extends State<_PagoCuotaDialog> {
+  late final TextEditingController _montoController;
+  final _notaController = TextEditingController();
+  String _metodo = 'efectivo';
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _montoController = TextEditingController(
+      text: widget.montoSugerido.toStringAsFixed(2),
+    );
+  }
+
+  @override
+  void dispose() {
+    _montoController.dispose();
+    _notaController.dispose();
+    super.dispose();
+  }
+
+  void _registrar() {
+    if (!mounted) return;
+    final raw = _montoController.text
+        .trim()
+        .replaceAll(' ', '')
+        .replaceAll(',', '.');
+    final monto = double.tryParse(raw);
+    if (monto == null || monto <= 0) {
+      setState(() => _error = 'Indique un monto válido mayor que cero.');
+      return;
+    }
+    if (monto > widget.saldoPendiente + 0.001) {
+      setState(() => _error = 'El monto supera el saldo pendiente.');
+      return;
+    }
+    final resultado = _PagoCuotaResultado(
+      monto: monto,
+      metodo: _metodo,
+      nota: _notaController.text.trim(),
+    );
+    // Cerrar solo el diálogo (no la ruta padre)
+    final nav = Navigator.of(context, rootNavigator: false);
+    if (nav.canPop()) {
+      nav.pop(resultado);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final numeroCuota = widget.numeroProximaCuota;
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
+      title: const Text('Registrar pago', style: AppTypography.h4),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Saldo pendiente: ${formatRd(widget.saldoPendiente)}',
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            AppLayout.vS,
+            Text(
+              numeroCuota == null
+                  ? 'Monto sugerido: ${formatRd(widget.montoSugerido)}'
+                  : 'Próxima cuota #$numeroCuota: '
+                        '${formatRd(widget.montoSugerido)}',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Puedes pagar más de una cuota, hasta cubrir el saldo pendiente.',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            AppLayout.vM,
+            TextField(
+              controller: _montoController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Monto a pagar',
+                prefixText: 'RD\$ ',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+              onChanged: (_) {
+                if (_error != null) setState(() => _error = null);
+              },
+            ),
+            AppLayout.vM,
+            DropdownButtonFormField<String>(
+              key: ValueKey<String>(_metodo),
+              initialValue: _metodo,
+              decoration: const InputDecoration(
+                labelText: 'Forma de pago',
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'efectivo', child: Text('Efectivo')),
+                DropdownMenuItem(
+                  value: 'transferencia',
+                  child: Text('Transferencia'),
+                ),
+                DropdownMenuItem(value: 'tarjeta', child: Text('Tarjeta')),
+                DropdownMenuItem(value: 'otro', child: Text('Otro')),
+              ],
+              onChanged: (value) {
+                if (value != null && mounted) {
+                  setState(() => _metodo = value);
+                }
+              },
+            ),
+            AppLayout.vM,
+            TextField(
+              controller: _notaController,
+              decoration: const InputDecoration(
+                labelText: 'Nota (opcional)',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+            if (_error != null) ...[
+              AppLayout.vS,
+              Text(
+                _error!,
+                style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+          },
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _registrar,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.success,
+            foregroundColor: AppColors.white,
+          ),
+          child: const Text('Registrar'),
         ),
       ],
     );

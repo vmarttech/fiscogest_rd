@@ -72,7 +72,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
       body: SingleChildScrollView(
         child: Center(
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 850),
+            constraints: BoxConstraints(maxWidth: pantallaPequena ? 850 : 1080),
             child: AppCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

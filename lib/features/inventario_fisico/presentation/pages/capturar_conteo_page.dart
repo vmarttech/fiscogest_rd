@@ -130,7 +130,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
+            constraints: BoxConstraints(maxWidth: isMobile ? 720 : 960),
             child: ListView(
               padding: EdgeInsets.fromLTRB(
                 isMobile ? 16 : 24,

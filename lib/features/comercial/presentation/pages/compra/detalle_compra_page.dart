@@ -17,6 +17,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
     as repo;
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class DetalleCompraPage extends ConsumerStatefulWidget {
   const DetalleCompraPage({super.key, required this.compraId});
@@ -83,9 +84,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     return DateFormat('dd/MM/yyyy').format(fecha);
   }
 
-  String _formatearMonto(double valor) {
-    return NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$').format(valor);
-  }
+  String _formatearMonto(double valor) => formatRd(valor);
 
   @override
   Widget build(BuildContext context) {

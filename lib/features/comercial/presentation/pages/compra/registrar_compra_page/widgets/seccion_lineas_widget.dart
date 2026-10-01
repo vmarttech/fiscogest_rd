@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/tipos_linea.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/linea_producto_widget.dart';
 
@@ -29,36 +28,42 @@ class SeccionLineasWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Productos / Líneas', style: AppTypography.h4),
-            ElevatedButton.icon(
-              onPressed: onAgregarLinea,
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Agregar'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+    final mobile = AppBreakpoints.isMobile(context);
+    return AppCard(
+      borderColor: AppColors.border,
+      padding: AppSpacing.allM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: mobile
+              ? SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    text: 'Agregar producto',
+                    icon: Icons.add,
+                    onPressed: onAgregarLinea,
+                  ),
+                )
+              : AppButton(
+                  text: 'Agregar',
+                  icon: Icons.add,
+                  onPressed: onAgregarLinea,
+                  width: 140,
                 ),
-              ),
-            ),
-          ],
         ),
         AppLayout.vS,
         if (lineas.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(24.0),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: mobile ? 20 : 28),
             child: Center(
               child: Text(
                 'No hay productos. Presione "Agregar" para iniciar.',
-                style: TextStyle(
+                textAlign: TextAlign.center,
+                style: AppTypography.bodySmall.copyWith(
                   fontStyle: FontStyle.italic,
-                  color: Colors.grey,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),
@@ -84,6 +89,7 @@ class SeccionLineasWidget extends StatelessWidget {
             );
           }),
       ],
+      ),
     );
   }
 }

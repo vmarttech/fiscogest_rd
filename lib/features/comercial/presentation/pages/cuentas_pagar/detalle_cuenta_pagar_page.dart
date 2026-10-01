@@ -96,7 +96,7 @@ class _DetalleCuentaPagarPageState
                   PagarEstado.pendiente => (Colors.orange, 'Pendiente'),
                   PagarEstado.parcial => (Colors.blue, 'Parcial'),
                   PagarEstado.pagado => (Colors.green, 'Pagada'),
-                  _ => (Colors.grey, 'Desconocido'),
+                  _ => (AppColors.textSecondary, 'Desconocido'),
                 };
                 return Container(
                   padding: const EdgeInsets.symmetric(

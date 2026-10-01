@@ -49,4 +49,8 @@ abstract class ICreditoDocumentoService {
   Future<Uint8List> generarPdfCronograma({required CuentaPorCobrar cuenta});
 
   Future<void> imprimirCronograma({required CuentaPorCobrar cuenta});
+
+  Future<Uint8List> generarPdfEstadoCuenta({required CuentaPorCobrar cuenta});
+
+  Future<void> imprimirEstadoCuenta({required CuentaPorCobrar cuenta});
 }

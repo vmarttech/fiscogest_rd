@@ -39,7 +39,7 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
     cajaPermitirTransferencia: true,
     cajaPermitirCheque: false,
     cajaExigirSesion: false,
-    modoSimplificado: false,
+    modoSimplificado: true,
   );
 
   @override

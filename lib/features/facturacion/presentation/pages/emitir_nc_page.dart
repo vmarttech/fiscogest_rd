@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -30,7 +29,7 @@ class EmitirNcPage extends ConsumerStatefulWidget {
 }
 
 class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
-  final _fmt = NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$');
+  final String Function(num) _fmt = formatRd;
   final _motivo = TextEditingController();
   Venta? _sel;
   bool _busy = false;
@@ -195,7 +194,7 @@ class _ListaFacturasNc extends StatelessWidget {
     required this.onTap,
   });
   final List<Venta> docs;
-  final NumberFormat fmt;
+  final String Function(num) fmt;
   final int? seleccionadoId;
   final void Function(Venta) onTap;
 
@@ -267,7 +266,7 @@ class _ListaFacturasNc extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      fmt.format(d.montoTotal),
+                      fmt(d.montoTotal),
                       style: AppTypography.labelMedium.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -327,7 +326,7 @@ class _NcPanelEmitir extends StatelessWidget {
   final Venta venta;
   final TextEditingController motivo;
   final bool busy;
-  final NumberFormat fmt;
+  final String Function(num) fmt;
   final VoidCallback onEmitir;
 
   @override
@@ -361,7 +360,7 @@ class _NcPanelEmitir extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${venta.numeroFactura} · ${fmt.format(venta.montoTotal)}',
+                      '${venta.numeroFactura} · ${fmt(venta.montoTotal)}',
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                       ),

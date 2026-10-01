@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
@@ -21,7 +20,7 @@ class EmitirFacturaPage extends ConsumerStatefulWidget {
 }
 
 class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
-  final _fmt = NumberFormat.currency(locale: 'es_DO', symbol: 'RD\$');
+  final String Function(num) _fmt = formatRd;
   Venta? _seleccion;
   String _tipoNcf = 'B02';
   String _rncCliente = '';
@@ -267,7 +266,7 @@ class _ListaDocs extends StatelessWidget {
     required this.onTap,
   });
   final List<Venta> docs;
-  final NumberFormat fmt;
+  final String Function(num) fmt;
   final int? seleccionadoId;
   final void Function(Venta) onTap;
 
@@ -339,7 +338,7 @@ class _ListaDocs extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      fmt.format(d.montoTotal),
+                      fmt(d.montoTotal),
                       style: AppTypography.labelMedium.copyWith(
                         fontWeight: FontWeight.w700,
                       ),

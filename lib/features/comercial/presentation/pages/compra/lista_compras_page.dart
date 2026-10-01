@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
-import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
-import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
@@ -224,7 +219,7 @@ class ListaComprasPage extends ConsumerWidget {
                             labelText: 'Buscar (proveedor, NCF, n°)',
                             prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: AppRadius.allM,
                             ),
                             isDense: true,
                           ),
@@ -253,7 +248,7 @@ class ListaComprasPage extends ConsumerWidget {
                           decoration: InputDecoration(
                             labelText: 'Estado',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: AppRadius.allM,
                             ),
                             isDense: true,
                           ),
@@ -279,7 +274,7 @@ class ListaComprasPage extends ConsumerWidget {
                           decoration: InputDecoration(
                             labelText: 'Tipo de comprobante',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: AppRadius.allM,
                             ),
                             isDense: true,
                           ),
@@ -314,7 +309,7 @@ class ListaComprasPage extends ConsumerWidget {
                                 decoration: InputDecoration(
                                   labelText: 'Monto mín.',
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: AppRadius.allM,
                                   ),
                                   isDense: true,
                                   prefixText: 'RD\$ ',
@@ -329,7 +324,7 @@ class ListaComprasPage extends ConsumerWidget {
                                 decoration: InputDecoration(
                                   labelText: 'Monto máx.',
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: AppRadius.allM,
                                   ),
                                   isDense: true,
                                   prefixText: 'RD\$ ',
@@ -476,8 +471,10 @@ class ListaComprasPage extends ConsumerWidget {
       ],
       backgroundColor: AppColors.pageBackground,
       body: SafeArea(
-        child: Column(
-          children: [
+        child: AppLayout.centerConstrained(
+          maxWidth: isMobile ? 640 : 800,
+          child: Column(
+            children: [
             Expanded(
               child: comprasAsync.when(
                 loading: () => const Center(
@@ -778,16 +775,16 @@ class ListaComprasPage extends ConsumerWidget {
                                 '──────────────────────────────────',
                               );
                               buffer.writeln(
-                                'Subtotal:  ${formatRd(compra.subtotalSinImpuestos).replaceFirst('RD\$ ', '')}  /*keep*/',
+                                'Subtotal:  ${formatRd(compra.subtotalSinImpuestos)}  ',
                               );
                               buffer.writeln(
-                                'Descuento: ${formatRd(compra.montoDescuentoGlobal).replaceFirst('RD\$ ', '')}  /*keep*/',
+                                'Descuento: ${formatRd(compra.montoDescuentoGlobal)}  ',
                               );
                               buffer.writeln(
-                                'ITBIS:     ${formatRd(compra.montoImpuesto).replaceFirst('RD\$ ', '')}  /*keep*/',
+                                'ITBIS:     ${formatRd(compra.montoImpuesto)}  ',
                               );
                               buffer.writeln(
-                                'TOTAL:     ${formatRd(compra.totalCompra).replaceFirst('RD\$ ', '')}  /*keep*/',
+                                'TOTAL:     ${formatRd(compra.totalCompra)}  ',
                               );
                               buffer.writeln(
                                 '══════════════════════════════════',
@@ -935,7 +932,7 @@ class ListaComprasPage extends ConsumerWidget {
                                                   alpha: 0.12,
                                                 ),
                                                 borderRadius:
-                                                    BorderRadius.circular(20),
+                                                    AppRadius.allL,
                                               ),
                                               child: Text(
                                                 estadoTexto,
@@ -1069,7 +1066,7 @@ class ListaComprasPage extends ConsumerWidget {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              'Total: ${formatRd(compra.totalCompra).replaceFirst('RD\$ ', '')}  /*keep*/',
+                                              'Total: ${formatRd(compra.totalCompra)}  ',
                                               style: AppTypography.bodyMedium
                                                   .copyWith(
                                                     fontWeight: FontWeight.bold,
@@ -1104,6 +1101,7 @@ class ListaComprasPage extends ConsumerWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -1111,9 +1109,9 @@ class ListaComprasPage extends ConsumerWidget {
         onPressed: () => context.goNamed(RegistrarCompraPage.routeName),
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.white),
-        label: const Text(
+        label: Text(
           'Nueva Compra',
-          style: TextStyle(color: AppColors.white),
+          style: AppTypography.button.copyWith(color: AppColors.white),
         ),
       ),
     );

@@ -1010,7 +1010,14 @@ class _NuevaVentaBorradorPageState
                 (item['precioUnitario'] as num?)?.toDouble() ?? 0.0;
             final subtotal = (item['subtotal'] as num?)?.toDouble() ?? 0.0;
             final productoId = item['productoId'] as int?;
-
+            final descPct =
+                (item['descuentoPorcentaje'] as num?)?.toDouble() ?? 0.0;
+            final descMonto =
+                (item['montoDescuento'] as num?)?.toDouble() ?? 0.0;
+            final tieneDescLinea = descPct > 0 || descMonto > 0;
+            final cantLabel = cantidad % 1 == 0
+                ? cantidad.toInt().toString()
+                : cantidad.toStringAsFixed(2);
             return Column(
               children: [
                 Padding(
@@ -1018,61 +1025,138 @@ class _NuevaVentaBorradorPageState
                     horizontal: esPantallaPequena ? 12 : 14,
                     vertical: esPantallaPequena ? 10 : 12,
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              nombre,
-                              style: AppTypography.bodyMedium.copyWith(
-                                fontWeight: FontWeight.w500,
-                                fontSize: tamanoCuerpo,
-                                color: AppColors.textPrimary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  nombre,
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: tamanoCuerpo,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '$cantLabel  ×  ${formatRd(precioUnitario)}',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    fontSize: tamanoEtiqueta,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                if (tieneDescLinea)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      descPct > 0
+                                          ? 'Desc. línea: ${descPct.toStringAsFixed(1)}%'
+                                          : 'Desc. línea: ${formatRd(descMonto)}',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.success,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Cant: ${cantidad % 1 == 0 ? cantidad.toInt() : cantidad}  ×  ${formatRd(precioUnitario)}',
-                              style: AppTypography.bodySmall.copyWith(
-                                fontSize: tamanoEtiqueta,
-                                color: AppColors.textSecondary,
-                              ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            formatRd(subtotal),
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: tamanoCuerpo,
+                              color: AppColors.textPrimary,
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        formatRd(subtotal),
-                        style: AppTypography.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: tamanoCuerpo,
-                          color: AppColors.textPrimary,
-                        ),
+                          ),
+                        ],
                       ),
                       if (productoId != null) ...[
-                        const SizedBox(width: 4),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            size: 20,
-                            color: AppColors.error,
-                          ),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                          onPressed: () {
-                            ref
-                                .read(ventaBorradorProvider.notifier)
-                                .quitarProducto(productoId);
-                          },
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _QtyChip(
+                              icon: Icons.remove,
+                              onTap: () {
+                                final n = cantidad <= 1
+                                    ? (cantidad > 0.001 ? cantidad - 0.5 : 0)
+                                    : cantidad - 1;
+                                ref
+                                    .read(ventaBorradorProvider.notifier)
+                                    .cambiarCantidad(
+                                      productoId,
+                                      (n < 0.001 ? 0 : n).toDouble(),
+                                    );
+                              },
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: Text(
+                                cantLabel,
+                                style: AppTypography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            _QtyChip(
+                              icon: Icons.add,
+                              onTap: () {
+                                ref
+                                    .read(ventaBorradorProvider.notifier)
+                                    .cambiarCantidad(productoId, cantidad + 1);
+                              },
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              tooltip: 'Descuento de línea',
+                              icon: Icon(
+                                Icons.percent,
+                                size: 20,
+                                color: tieneDescLinea
+                                    ? AppColors.success
+                                    : AppColors.textSecondary,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              onPressed: () => _abrirDescuentoLineaCotizacion(
+                                context,
+                                ref,
+                                productoId,
+                                item,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 20,
+                                color: AppColors.error,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              onPressed: () {
+                                ref
+                                    .read(ventaBorradorProvider.notifier)
+                                    .quitarProducto(productoId);
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ],
@@ -1126,11 +1210,34 @@ class _NuevaVentaBorradorPageState
             ),
           if (estado.montoDescuento > 0)
             _filaResumen(
-              'Descuento',
+              'Descuento general',
               '- ${formatRd(estado.montoDescuento)}',
               tamanoCuerpo,
               colorValor: AppColors.error,
             ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _abrirDescuentoGeneralCotizacion(context, ref),
+              icon: Icon(
+                estado.montoDescuento > 0
+                    ? Icons.discount
+                    : Icons.discount_outlined,
+                size: 18,
+                color: AppColors.primary,
+              ),
+              label: Text(
+                estado.montoDescuento > 0
+                    ? 'Editar / quitar descuento general'
+                    : 'Aplicar descuento general',
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Divider(height: 1),
@@ -1208,6 +1315,118 @@ class _NuevaVentaBorradorPageState
     bool puedeGenerar,
     bool esPantallaPequena,
   ) {
+    if (!esPantallaPequena) {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 24, 12),
+          child: SafeArea(
+            top: false,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                border: Border.all(color: AppColors.border),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 190,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'TOTAL',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          formatRd(estado.montoTotal),
+                          style: AppTypography.h3.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 280,
+                    height: 52,
+                    child: Builder(
+                      builder: (context) {
+                        final simplificado = ref.watch(modoColmadoProvider);
+                        final onTap = !puedeGenerar || _guardando
+                            ? null
+                            : simplificado
+                            ? _onGenerarVentaSimplificada
+                            : () => _guardarCotizacion(esCredito: _esCredito);
+                        final label = simplificado
+                            ? 'GENERAR VENTA'
+                            : (_esCredito
+                                  ? 'Crear cotización (CR)'
+                                  : 'Crear cotización (C)');
+                        final bg = simplificado
+                            ? AppColors.primary
+                            : (_esCredito
+                                  ? AppColors.warning
+                                  : AppColors.primary);
+                        return ElevatedButton(
+                          onPressed: onTap,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: bg,
+                            foregroundColor: AppColors.white,
+                            disabledBackgroundColor: AppColors.grey300,
+                            disabledForegroundColor: AppColors.grey500,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: _guardando
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : Text(
+                                  label,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final alturaBoton = esPantallaPequena ? 52.0 : 56.0;
     final tamanoTotal = esPantallaPequena ? 18.0 : 20.0;
     final tamanoBoton = esPantallaPequena ? 14.0 : 15.0;
@@ -1318,6 +1537,262 @@ class _NuevaVentaBorradorPageState
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _abrirDescuentoLineaCotizacion(
+    BuildContext context,
+    WidgetRef ref,
+    int productoId,
+    Map<String, dynamic> item,
+  ) async {
+    final notifier = ref.read(ventaBorradorProvider.notifier);
+    final bloqueo = notifier.puedeAplicarDescuentoLinea(item);
+    final yaTiene =
+        ((item['descuentoPorcentaje'] as num?)?.toDouble() ?? 0) > 0 ||
+        ((item['montoDescuento'] as num?)?.toDouble() ?? 0) > 0;
+    if (bloqueo != null && !yaTiene) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(bloqueo),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final tienePorcentaje =
+        ((item['descuentoPorcentaje'] as num?)?.toDouble() ?? 0) > 0;
+    final controller = TextEditingController(
+      text: tienePorcentaje
+          ? ((item['descuentoPorcentaje'] as num?)?.toDouble() ?? 0)
+                .toStringAsFixed(2)
+          : ((item['montoDescuento'] as num?)?.toDouble() ?? 0) > 0
+          ? ((item['montoDescuento'] as num?)?.toDouble() ?? 0).toStringAsFixed(
+              2,
+            )
+          : '',
+    );
+    var esPorcentaje = tienePorcentaje;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Descuento de línea'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Text('RD\$'),
+                      selected: !esPorcentaje,
+                      onSelected: (_) => setLocal(() => esPorcentaje = false),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Text('%'),
+                      selected: esPorcentaje,
+                      onSelected: (_) => setLocal(() => esPorcentaje = true),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  hintText: '0.00',
+                  suffixText: esPorcentaje ? '%' : null,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                notifier.aplicarDescuentoLinea(productoId, 0);
+                Navigator.pop(ctx);
+              },
+              child: const Text('Sin descuento'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                final valor =
+                    double.tryParse(controller.text.replaceAll(',', '.')) ?? 0;
+                final err = notifier.aplicarDescuentoLinea(
+                  productoId,
+                  valor,
+                  esPorcentaje: esPorcentaje,
+                );
+                if (err != null && context.mounted) {
+                  FiscoGestNotifications.show(
+                    SnackBar(
+                      content: Text(err),
+                      backgroundColor: AppColors.error,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } else {
+                  Navigator.pop(ctx);
+                }
+              },
+              child: const Text('Aplicar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _abrirDescuentoGeneralCotizacion(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final notifier = ref.read(ventaBorradorProvider.notifier);
+    final estado = ref.read(ventaBorradorProvider);
+    final bloqueo = notifier.puedeAplicarDescuentoGeneral();
+    if (bloqueo != null && estado.montoDescuento <= 0) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(bloqueo),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final controller = TextEditingController(
+      text: estado.montoDescuento > 0
+          ? estado.montoDescuento.toStringAsFixed(2)
+          : '',
+    );
+    var esPorcentaje = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Descuento general'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Text('RD\$'),
+                      selected: !esPorcentaje,
+                      onSelected: (_) => setLocal(() => esPorcentaje = false),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Text('%'),
+                      selected: esPorcentaje,
+                      onSelected: (_) => setLocal(() => esPorcentaje = true),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  hintText: '0.00',
+                  suffixText: esPorcentaje ? '%' : null,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                notifier.aplicarDescuento(0);
+                Navigator.pop(ctx);
+              },
+              child: const Text('Sin descuento'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                final raw =
+                    double.tryParse(controller.text.replaceAll(',', '.')) ?? 0;
+                double monto = raw;
+                if (esPorcentaje) {
+                  monto = estado.subtotal * (raw / 100);
+                }
+                final err = notifier.aplicarDescuento(monto);
+                if (err != null && context.mounted) {
+                  FiscoGestNotifications.show(
+                    SnackBar(
+                      content: Text(err),
+                      backgroundColor: AppColors.error,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } else {
+                  Navigator.pop(ctx);
+                }
+              },
+              child: const Text('Aplicar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QtyChip extends StatelessWidget {
+  const _QtyChip({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: Icon(icon, size: 18, color: AppColors.primary),
         ),
       ),
     );

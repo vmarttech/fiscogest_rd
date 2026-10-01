@@ -42,8 +42,7 @@ class FormularioCreditoVista extends ConsumerStatefulWidget {
 class _FormularioCreditoVistaState
     extends ConsumerState<FormularioCreditoVista> {
   // ✅ Reemplazado NumberFormat.currency por formateador sin símbolo
-  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
-  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
+  String _formatearMonto(double valor) => formatRd(valor);
 
   static final DateFormat _formatoFecha = DateFormat('dd/MM/yyyy');
   late final TextEditingController _abonoInicialController;

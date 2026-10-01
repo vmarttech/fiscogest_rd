@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
@@ -14,8 +15,12 @@ class DevolucionesPage extends ConsumerStatefulWidget {
 class _DevolucionesPageState extends ConsumerState<DevolucionesPage> {
   @override
   Widget build(BuildContext context) {
+    
     ref.watch(registrarVentaProvider);
     return const AppScaffold(
+      backgroundColor: AppColors.pageBackground,
+      // design system
+
       title: 'Devoluciones',
       body: SafeArea(
         bottom: true,

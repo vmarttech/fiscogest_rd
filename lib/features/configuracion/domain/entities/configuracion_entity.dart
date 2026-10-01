@@ -30,7 +30,7 @@ class ConfiguracionEntity {
     this.cajaPermitirTransferencia = true,
     this.cajaPermitirCheque = false,
     this.cajaExigirSesion = false,
-    this.modoSimplificado = false,
+    this.modoSimplificado = true,
   });
 
   final String id;

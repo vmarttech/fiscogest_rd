@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/item_carrito.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
@@ -62,7 +63,7 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
   }
 
   static String _formatear(double valor) {
-    return valor.toStringAsFixed(2).replaceAll('.', ',');
+    return formatRdNumero(valor);
   }
 
   double _validarYLimitarValor(double valor) {
@@ -251,7 +252,20 @@ class PanelCarrito extends ConsumerWidget {
     final montoFinal = datos.esPorcentaje
         ? (baseCalculo * datos.valor / 100).clamp(0.0, baseCalculo)
         : datos.valor.clamp(0.0, baseCalculo);
-    notifier.aplicarDescuentoManual(montoFinal);
+    final errGen = notifier.aplicarDescuentoGeneral(
+      montoFinal,
+      esPorcentaje: false,
+    );
+    if (errGen != null && context.mounted) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(errGen),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
@@ -394,7 +408,7 @@ class PanelCarrito extends ConsumerWidget {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    '- RD\$ ${estado.montoDescuento.toStringAsFixed(2).replaceAll('.', ',')} (general)',
+                    '- ${formatRd(estado.montoDescuento)} (general)',
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.success,
                       fontWeight: FontWeight.w600,

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 /// [onAsignarCosto] si se pasa, se usa ese callback (ej. cotización).
 /// Si es null, escribe en registrarVentaProvider (flujo legacy / apartado).
@@ -28,8 +28,7 @@ class _SelectorDeliveryDialogState
   late final TextEditingController _montoController;
   String? _opcionSeleccionada;
 
-  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
-  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
+  String _formatearMonto(double valor) => formatRd(valor);
 
   static const List<Map<String, dynamic>> _opciones = [
     {'nombre': 'Santo Domingo', 'monto': 50.0},

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
-import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
@@ -9,13 +8,12 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart'
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class VistaCarrito extends ConsumerWidget {
   const VistaCarrito({super.key});
 
-  String formatearMonto(double valor) {
-    return 'RD\$ ${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
-  }
+  String formatearMonto(double valor) => formatRd(valor);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -303,7 +301,7 @@ class _FilaProducto extends ConsumerWidget {
   final Color colorPrincipal;
 
   String formatearMonto(double valor) =>
-      'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
+      formatRd(valor);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/lista_precios.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/lista_precios_provider.dart';
@@ -108,13 +109,15 @@ class _EditarPreciosProductoPageState
     });
 
     return AppScaffold(
+      // design system
+
       title: 'Precios de Venta',
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(
           padding: AppLayout.pantallaPadding,
           child: datosPrecios.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary, )),
             error: (error, _) => Center(child: Text('Error: $error')),
             data: (datos) {
               if (datos != null) {

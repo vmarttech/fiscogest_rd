@@ -120,7 +120,7 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
                 child: AppLayout.centerConstrained(
-                  maxWidth: 640,
+                  maxWidth: MediaQuery.sizeOf(context).width < 768 ? 640 : 900,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [

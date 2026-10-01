@@ -109,7 +109,7 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
+            constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width < 768 ? 720 : 900),
             child: SingleChildScrollView(
               padding: AppLayout.pantallaPadding.add(
                 const EdgeInsets.only(bottom: 24),

@@ -130,6 +130,26 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
   @override
   Widget build(BuildContext context) {
     final mobile = AppBreakpoints.isMobile(context);
+    final accionGuardar = SizedBox(
+      width: mobile ? double.infinity : 240,
+      height: 48,
+      child: ElevatedButton.icon(
+        onPressed: _guardar,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        icon: const Icon(Icons.save_rounded, size: 20),
+        label: Text(
+          _esEdicion ? 'ACTUALIZAR' : 'GUARDAR CLIENTE',
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
+    );
 
     return AppScaffold(
       title: _esEdicion ? 'EDITAR CLIENTE' : 'NUEVO CLIENTE',
@@ -146,7 +166,7 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 640),
+                    constraints: BoxConstraints(maxWidth: mobile ? 640 : 900),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -276,49 +296,33 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                 ),
               ),
             ),
-            // Botón fijo abajo (móvil)
-            Container(
-              padding: EdgeInsets.fromLTRB(
-                mobile ? 16 : 24,
-                10,
-                mobile ? 16 : 24,
-                mobile ? 12 : 16,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                border: const Border(top: BorderSide(color: AppColors.border)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                top: false,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton.icon(
-                    onPressed: _guardar,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+            if (mobile)
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  border: const Border(top: BorderSide(color: AppColors.border)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, -2),
                     ),
-                    icon: const Icon(Icons.save_rounded, size: 20),
-                    label: Text(
-                      _esEdicion ? 'ACTUALIZAR' : 'GUARDAR CLIENTE',
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
+                  ],
+                ),
+                child: SafeArea(top: false, child: accionGuardar),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
+                child: SafeArea(
+                  top: false,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: accionGuardar,
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

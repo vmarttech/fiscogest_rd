@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
-import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
-import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/dashboard_compras_providers.dart';
+import 'package:fiscogest_rd/features/reportes/domain/kpi_models.dart';
+import 'package:fiscogest_rd/features/reportes/presentation/providers/dashboard_providers.dart';
 
 /// Hub de inicio — layout denso y atmósfera premium en desktop.
 class InicioPage extends ConsumerWidget {
@@ -86,330 +86,448 @@ class InicioPage extends ConsumerWidget {
 
     return AppScaffold(
       title: 'INICIO',
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              mobile ? 16 : 8,
-              mobile ? 16 : 20,
-              mobile ? 16 : 8,
-              32,
-            ),
-            child: AppLayout.centerConstrained(
-              maxWidth: desktop ? 1320 : (mobile ? 520 : 960),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Builder(
-                    builder: (_) {
-                      final cfg = ref
-                          .watch(configuracionControllerProvider)
-                          .valueOrNull;
-                      final n1 = cfg?.nombreComercial.trim() ?? '';
-                      final n2 = cfg?.razonSocial.trim() ?? '';
-                      final nombre = n1.isNotEmpty
-                          ? n1
-                          : (n2.isNotEmpty ? n2 : 'Mi negocio');
-                      return _HeroBanner(
-                        saludo: _saludo(),
-                        fecha: fecha,
-                        nombreNegocio: nombre,
-                        onNuevaVenta: () =>
-                            _go(context, '/ventas/cotizaciones/nueva'),
+      body: _FondoFuturista(
+        child: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                mobile ? 16 : 8,
+                mobile ? 16 : 20,
+                mobile ? 16 : 8,
+                32,
+              ),
+              child: AppLayout.centerConstrained(
+                maxWidth: desktop ? 1320 : (mobile ? 520 : 960),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Builder(
+                      builder: (_) {
+                        final cfg = ref
+                            .watch(configuracionControllerProvider)
+                            .valueOrNull;
+                        final n1 = cfg?.nombreComercial.trim() ?? '';
+                        final n2 = cfg?.razonSocial.trim() ?? '';
+                        final nombre = n1.isNotEmpty
+                            ? n1
+                            : (n2.isNotEmpty ? n2 : 'Mi negocio');
+                        return _HeroBanner(
+                          saludo: _saludo(),
+                          fecha: fecha,
+                          nombreNegocio: nombre,
+                          onNuevaVenta: () =>
+                              _go(context, '/ventas/cotizaciones/nueva'),
+                          onCaja: () => _go(context, '/ventas/cobro'),
+                          compact: mobile,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    // KPIs
+                    if (simplificado)
+                      _KpisSimplificado(
+                        mobile: mobile,
+                        desktop: desktop,
                         onCaja: () => _go(context, '/ventas/cobro'),
-                        compact: mobile,
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  // KPIs
-                  if (simplificado)
-                    _KpisSimplificado(
-                      mobile: mobile,
-                      desktop: desktop,
-                      onCaja: () => _go(context, '/ventas/cobro'),
-                      onFiao: () => _go(context, '/ventas/fios'),
-                      onStock: () => _go(context, '/inventario'),
-                    )
-                  else if (desktop)
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: _KpiTile(
-                            label: 'Operación',
-                            value: 'Hoy',
-                            hint: 'Cotiza · Factura · Cobra',
-                            icon: Icons.bolt_outlined,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _KpiTile(
-                            label: 'Caja',
-                            value: 'Turno',
-                            hint: 'Cobros y cierre',
-                            icon: Icons.payments_outlined,
-                            color: AppColors.success,
-                            onTap: () => _go(context, '/ventas/cobro'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _KpiTile(
-                            label: 'Crédito',
-                            value: 'CxC',
-                            hint: 'Solicitudes y cobro',
-                            icon: Icons.credit_score_outlined,
-                            color: AppColors.warning,
-                            onTap: () => _go(context, '/creditos'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _KpiTile(
-                            label: 'Stock',
-                            value: 'Inv.',
-                            hint: 'Existencias y kárdex',
-                            icon: Icons.inventory_2_outlined,
-                            color: AppColors.info,
-                            onTap: () => _go(context, '/inventario'),
-                          ),
-                        ),
-                      ],
-                    )
-                  else
-                    SizedBox(
-                      height: 104,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
+                        onFiao: () => _go(context, '/ventas/fios'),
+                        onStock: () => _go(context, '/inventario'),
+                      )
+                    else if (desktop)
+                      Row(
                         children: [
-                          SizedBox(
-                            width: 160,
+                          const Expanded(
+                            child: _KpiTile(
+                              label: 'Operación',
+                              value: 'Hoy',
+                              hint: 'Cotiza · Factura · Cobra',
+                              icon: Icons.bolt_outlined,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
                             child: _KpiTile(
                               label: 'Caja',
                               value: 'Turno',
-                              hint: 'Cobros',
+                              hint: 'Cobros y cierre',
                               icon: Icons.payments_outlined,
                               color: AppColors.success,
                               onTap: () => _go(context, '/ventas/cobro'),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 160,
+                          const SizedBox(width: 12),
+                          Expanded(
                             child: _KpiTile(
                               label: 'Crédito',
                               value: 'CxC',
-                              hint: 'Cartera',
+                              hint: 'Solicitudes y cobro',
                               icon: Icons.credit_score_outlined,
                               color: AppColors.warning,
                               onTap: () => _go(context, '/creditos'),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 160,
+                          const SizedBox(width: 12),
+                          Expanded(
                             child: _KpiTile(
                               label: 'Stock',
                               value: 'Inv.',
-                              hint: 'Existencias',
+                              hint: 'Existencias y kárdex',
                               icon: Icons.inventory_2_outlined,
                               color: AppColors.info,
                               onTap: () => _go(context, '/inventario'),
                             ),
                           ),
                         ],
+                      )
+                    else
+                      // Móvil: 2+1 evita ancho <30px y overflow vertical
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _KpiTile(
+                                  label: 'Caja',
+                                  value: 'Turno',
+                                  hint: 'Cobros',
+                                  icon: Icons.payments_outlined,
+                                  color: AppColors.success,
+                                  onTap: () => _go(context, '/ventas/cobro'),
+                                  compact: true,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _KpiTile(
+                                  label: 'Crédito',
+                                  value: 'CxC',
+                                  hint: 'Cartera',
+                                  icon: Icons.credit_score_outlined,
+                                  color: AppColors.warning,
+                                  onTap: () => _go(context, '/creditos'),
+                                  compact: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          _KpiTile(
+                            label: 'Stock',
+                            value: 'Inventario',
+                            hint: 'Existencias y kárdex',
+                            icon: Icons.inventory_2_outlined,
+                            color: AppColors.info,
+                            onTap: () => _go(context, '/inventario'),
+                            compact: true,
+                          ),
+                        ],
                       ),
-                    ),
-                  const SizedBox(height: 24),
-                  // Accesos
-                  if (simplificado)
-                    _AccesosSimplificado(
-                      mobile: mobile,
-                      desktop: desktop,
-                      onProveedores: () => _go(context, '/proveedores'),
-                      onCaja: () => _go(context, '/ventas/cobro'),
-                      onFiao: () => _go(context, '/ventas/fios'),
-                      onProductos: () => _go(context, '/inventario'),
-                      onCompras: () => _go(context, '/compras'),
-                      onClientes: () => _go(context, '/clientes'),
-                      onNuevaVenta: () =>
-                          _go(context, '/ventas/cotizaciones/nueva'),
-                    )
-                  else if (desktop)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SectionHeader(
-                                title: 'Accesos rápidos',
-                                subtitle: 'Operación del día',
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _Acceso(
-                                      icon: Icons.point_of_sale,
-                                      titulo: 'Ventas',
-                                      sub: 'Cotizaciones y pedidos',
-                                      color: AppColors.primary,
-                                      onTap: () => _go(context, '/ventas'),
+                    const SizedBox(height: 24),
+                    // Accesos
+                    if (simplificado)
+                      _AccesosSimplificado(
+                        mobile: mobile,
+                        desktop: desktop,
+                        onProveedores: () => _go(context, '/proveedores'),
+                        onCaja: () => _go(context, '/ventas/cobro'),
+                        onFiao: () => _go(context, '/ventas/fios'),
+                        onProductos: () => _go(context, '/inventario'),
+                        onCompras: () => _go(context, '/compras'),
+                        onClientes: () => _go(context, '/clientes'),
+                        onNuevaVenta: () =>
+                            _go(context, '/ventas/cotizaciones/nueva'),
+                      )
+                    else if (desktop)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const SectionHeader(
+                                  title: 'Accesos rápidos',
+                                  subtitle: 'Operación del día',
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _Acceso(
+                                        icon: Icons.point_of_sale,
+                                        titulo: 'Ventas',
+                                        sub: 'Cotizaciones y pedidos',
+                                        color: AppColors.primary,
+                                        onTap: () => _go(context, '/ventas'),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _Acceso(
-                                      icon: Icons.payments_outlined,
-                                      titulo: 'Caja',
-                                      sub: 'Cobrar y turnos',
-                                      color: AppColors.success,
-                                      onTap: () =>
-                                          _go(context, '/ventas/cobro'),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _Acceso(
+                                        icon: Icons.payments_outlined,
+                                        titulo: 'Caja',
+                                        sub: 'Cobrar y turnos',
+                                        color: AppColors.success,
+                                        onTap: () =>
+                                            _go(context, '/ventas/cobro'),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _Acceso(
-                                      icon: Icons.receipt_long_outlined,
-                                      titulo: 'Facturación',
-                                      sub: 'NCF B01 / B02 / B04',
-                                      color: AppColors.info,
-                                      onTap: () => _go(context, '/sales'),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _Acceso(
+                                        icon: Icons.receipt_long_outlined,
+                                        titulo: 'Facturación',
+                                        sub: 'NCF B01 / B02 / B04',
+                                        color: AppColors.info,
+                                        onTap: () => _go(context, '/sales'),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _Acceso(
-                                      icon: Icons.credit_score_outlined,
-                                      titulo: 'Crédito',
-                                      sub: 'Solicitudes y CxC',
-                                      color: AppColors.warning,
-                                      onTap: () => _go(context, '/creditos'),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _Acceso(
+                                        icon: Icons.credit_score_outlined,
+                                        titulo: 'Crédito',
+                                        sub: 'Solicitudes y CxC',
+                                        color: AppColors.warning,
+                                        onTap: () => _go(context, '/creditos'),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _Acceso(
-                                      icon: Icons.people_outline,
-                                      titulo: 'Clientes',
-                                      sub: 'Cartera',
-                                      color: AppColors.primary,
-                                      onTap: () => _go(context, '/clientes'),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _Acceso(
+                                        icon: Icons.people_outline,
+                                        titulo: 'Clientes',
+                                        sub: 'Cartera',
+                                        color: AppColors.primary,
+                                        onTap: () => _go(context, '/clientes'),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _Acceso(
-                                      icon: Icons.inventory_2_outlined,
-                                      titulo: 'Inventario',
-                                      sub: 'Existencias',
-                                      color: AppColors.info,
-                                      onTap: () => _go(context, '/inventario'),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _Acceso(
+                                        icon: Icons.inventory_2_outlined,
+                                        titulo: 'Inventario',
+                                        sub: 'Existencias',
+                                        color: AppColors.info,
+                                        onTap: () =>
+                                            _go(context, '/inventario'),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SectionHeader(
-                                title: 'Hoy en el negocio',
-                                subtitle: 'Indicadores en vivo',
-                              ),
-                              const SizedBox(height: 8),
-                              _InsightsCarousel(
-                                onNuevaCotizacion: () =>
-                                    _go(context, '/ventas/cotizaciones/nueva'),
-                              ),
-                            ],
+                          const SizedBox(width: 16),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const SectionHeader(
+                                  title: 'Hoy en el negocio',
+                                  subtitle: 'Indicadores en vivo',
+                                ),
+                                const SizedBox(height: 8),
+                                _InsightsCarousel(
+                                  onNuevaCotizacion: () => _go(
+                                    context,
+                                    '/ventas/cotizaciones/nueva',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                        ],
+                      )
+                    else ...[
+                      Text(
+                        'Operación del día',
+                        style: AppTypography.h4.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
                         ),
-                      ],
-                    )
-                  else ...[
-                    const SectionHeader(title: 'Accesos rápidos'),
-                    const SizedBox(height: 8),
-                    _Acceso(
-                      icon: Icons.point_of_sale,
-                      titulo: 'Ventas',
-                      sub: 'Cotizaciones y pedidos',
-                      color: AppColors.primary,
-                      onTap: () => _go(context, '/ventas'),
-                    ),
-                    const SizedBox(height: 10),
-                    _Acceso(
-                      icon: Icons.payments_outlined,
-                      titulo: 'Caja',
-                      sub: 'Cobrar y turnos',
-                      color: AppColors.success,
-                      onTap: () => _go(context, '/ventas/cobro'),
-                    ),
-                    const SizedBox(height: 10),
-                    _Acceso(
-                      icon: Icons.receipt_long_outlined,
-                      titulo: 'Facturación',
-                      sub: 'NCF B01 / B02 / B04',
-                      color: AppColors.info,
-                      onTap: () => _go(context, '/sales'),
-                    ),
-                    const SizedBox(height: 10),
-                    _Acceso(
-                      icon: Icons.credit_score_outlined,
-                      titulo: 'Crédito',
-                      sub: 'Solicitudes y CxC',
-                      color: AppColors.warning,
-                      onTap: () => _go(context, '/creditos'),
-                    ),
-                    const SizedBox(height: 10),
-                    _Acceso(
-                      icon: Icons.people_outline,
-                      titulo: 'Clientes',
-                      sub: 'Cartera',
-                      color: AppColors.primary,
-                      onTap: () => _go(context, '/clientes'),
-                    ),
-                    const SizedBox(height: 10),
-                    _Acceso(
-                      icon: Icons.inventory_2_outlined,
-                      titulo: 'Inventario',
-                      sub: 'Existencias',
-                      color: AppColors.info,
-                      onTap: () => _go(context, '/inventario'),
-                    ),
-                    const SizedBox(height: 20),
-                    const SectionHeader(
-                      title: 'Hoy en el negocio',
-                      subtitle: 'Indicadores en vivo',
-                    ),
-                    const SizedBox(height: 8),
-                    _InsightsCarousel(
-                      onNuevaCotizacion: () =>
-                          _go(context, '/ventas/cotizaciones/nueva'),
-                    ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Lo esencial, al alcance',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Grilla 2×2 (mismo ritmo que modo simplificado)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _Acceso(
+                              icon: Icons.point_of_sale,
+                              titulo: 'Ventas',
+                              sub: 'Cotizar y cobrar',
+                              color: AppColors.primary,
+                              onTap: () => _go(context, '/ventas'),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _Acceso(
+                              icon: Icons.payments_outlined,
+                              titulo: 'Caja',
+                              sub: 'Turno y cobros',
+                              color: AppColors.success,
+                              onTap: () => _go(context, '/ventas/cobro'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _Acceso(
+                              icon: Icons.receipt_long_outlined,
+                              titulo: 'Facturación',
+                              sub: 'NCF y docs',
+                              color: AppColors.info,
+                              onTap: () => _go(context, '/sales'),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _Acceso(
+                              icon: Icons.inventory_2_outlined,
+                              titulo: 'Inventario',
+                              sub: 'Stock',
+                              color: AppColors.warning,
+                              onTap: () => _go(context, '/inventario'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      _Acceso(
+                        icon: Icons.more_horiz_rounded,
+                        titulo: 'Más acciones',
+                        sub: 'Crédito · Clientes · Proveedores',
+                        color: const Color(0xFF64748B),
+                        onTap: () => _mostrarMasAccionesNormal(context),
+                      ),
+                      const SizedBox(height: 20),
+                      const SectionHeader(
+                        title: 'Hoy en el negocio',
+                        subtitle: 'Indicadores en vivo',
+                      ),
+                      const SizedBox(height: 8),
+                      _InsightsCarousel(
+                        onNuevaCotizacion: () =>
+                            _go(context, '/ventas/cotizaciones/nueva'),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  void _mostrarMasAccionesNormal(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        Widget tile(
+          IconData icon,
+          String title,
+          String sub,
+          Color color,
+          String route,
+        ) {
+          return ListTile(
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            title: Text(
+              title,
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            subtitle: Text(
+              sub,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            onTap: () {
+              Navigator.pop(ctx);
+              context.go(route);
+            },
+          );
+        }
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 12, 8, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Más acciones',
+                  style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 8),
+                tile(
+                  Icons.credit_score_outlined,
+                  'Crédito',
+                  'Solicitudes y CxC',
+                  AppColors.warning,
+                  '/creditos',
+                ),
+                tile(
+                  Icons.people_outline,
+                  'Clientes',
+                  'Cartera y fichas',
+                  AppColors.primary,
+                  '/clientes',
+                ),
+                tile(
+                  Icons.local_shipping_outlined,
+                  'Proveedores',
+                  'Compras y CxP',
+                  AppColors.info,
+                  '/proveedores',
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -903,7 +1021,7 @@ class _HeroBanner extends StatelessWidget {
     required this.nombreNegocio,
     required this.onNuevaVenta,
     required this.onCaja,
-    required this.compact,
+    this.compact = false,
   });
 
   final String saludo;
@@ -1057,6 +1175,93 @@ class _HeroBanner extends StatelessWidget {
   }
 }
 
+/// Fondo sutil “futuro”: malla + glow sin saturar el contenido.
+class _FondoFuturista extends StatelessWidget {
+  const _FondoFuturista({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Base
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFF0F4FF), Color(0xFFF8FAFC), Color(0xFFEEF2FF)],
+            ),
+          ),
+        ),
+        // Glow superior
+        Positioned(
+          top: -80,
+          right: -60,
+          child: IgnorePointer(
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.18),
+                    AppColors.primary.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Glow inferior
+        Positioned(
+          bottom: 40,
+          left: -40,
+          child: IgnorePointer(
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.info.withValues(alpha: 0.12),
+                    AppColors.info.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Línea “tech” superior
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: Container(
+              height: 3,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.0),
+                    AppColors.primary.withValues(alpha: 0.55),
+                    AppColors.info.withValues(alpha: 0.45),
+                    AppColors.primary.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
 class _KpiTile extends StatelessWidget {
   const _KpiTile({
     required this.label,
@@ -1065,6 +1270,8 @@ class _KpiTile extends StatelessWidget {
     required this.icon,
     required this.color,
     this.onTap,
+
+    this.compact = false,
   });
 
   final String label;
@@ -1073,56 +1280,90 @@ class _KpiTile extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback? onTap;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    final pad = compact ? 10.0 : 14.0;
+    final iconSize = compact ? 18.0 : 22.0;
+    final box = compact ? 32.0 : 40.0;
+
+    final child = Container(
+      padding: EdgeInsets.all(pad),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: box,
+            height: box,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 22),
+            child: Icon(icon, color: color, size: iconSize),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: compact ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  label.toUpperCase(),
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelSmall.copyWith(
                     color: AppColors.textSecondary,
-                    letterSpacing: 0.6,
                     fontWeight: FontWeight.w600,
+                    fontSize: compact ? 10 : 11,
                   ),
                 ),
                 Text(
                   value,
-                  style: AppTypography.h4.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                Text(
-                  hint,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                    fontSize: 11,
+                  style: AppTypography.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: compact ? 14 : 16,
+                    color: AppColors.textPrimary,
                   ),
                 ),
+                if (!compact && hint.isNotEmpty)
+                  Text(
+                    hint,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
               ],
             ),
           ),
         ],
+      ),
+    );
+
+    if (onTap == null) return child;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: child,
       ),
     );
   }
@@ -1209,11 +1450,6 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
 
   late final AnimationController _progress;
 
-  static final _money = NumberFormat.currency(
-    locale: 'es_DO',
-    symbol: 'RD\$ ',
-    decimalDigits: 0,
-  );
 
   @override
   void initState() {
@@ -1263,62 +1499,85 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
     super.dispose();
   }
 
-  List<_InsightSlide> _buildSlides(
-    DashboardComprasKpis? kpis,
-    int productos,
-    int bajoStock,
-  ) {
+  List<_InsightSlide> _buildSlides(DashboardSnapshot? snapshot) {
+    final hoy = snapshot?.hoy;
+    final mes = snapshot?.mes;
+    final formasPago = snapshot?.porFormaPago.entries.toList() ?? [];
+    formasPago.sort((a, b) => b.value.compareTo(a.value));
+    final topProducto = snapshot?.topProductos.isNotEmpty == true
+        ? snapshot!.topProductos.first
+        : null;
+
     return [
-      const _InsightSlide(
-        icon: Icons.route_outlined,
+      _InsightSlide(
+        icon: Icons.point_of_sale_rounded,
         color: AppColors.primary,
-        badge: 'FLUJO',
-        title: 'Ruta del día',
-        body: 'Cotiza → crédito → factura NCF → cobra en caja.',
-        value: '4 pasos',
-        footer: 'Operación recomendada',
+        badge: 'VENTAS · HOY',
+        title: 'Ventas de hoy',
+        body: hoy == null
+            ? 'Resumen de ventas del día.'
+            : '${hoy.numFacturas} factura(s) registradas hoy.',
+        value: hoy == null ? '—' : formatRd(hoy.ventas),
+        footer: hoy == null ? 'Cargando reportes…' : 'Fuente: Reportes · Hoy',
       ),
       _InsightSlide(
-        icon: Icons.shopping_cart_checkout_rounded,
+        icon: Icons.trending_up_rounded,
         color: AppColors.info,
-        badge: 'COMPRAS',
-        title: 'Compras del mes',
-        body: 'Total de compras válidas en el mes en curso.',
-        value: kpis == null ? '—' : _money.format(kpis.comprasEsteMes),
-        footer: kpis == null ? 'Cargando…' : 'Incluye crédito y contado',
+        badge: 'GANANCIA · HOY',
+        title: 'Ganancia estimada',
+        body: 'Ventas menos costo de los productos vendidos hoy.',
+        value: hoy == null ? '—' : formatRd(hoy.ganancia),
+        footer: hoy == null ? 'Cargando reportes…' : 'Fuente: Reportes · Hoy',
       ),
       _InsightSlide(
-        icon: Icons.account_balance_wallet_outlined,
+        icon: Icons.receipt_long_outlined,
         color: AppColors.warning,
-        badge: 'CxP',
-        title: 'Por pagar',
-        body: 'Saldos a proveedores aún no vencidos.',
-        value: kpis == null ? '—' : _money.format(kpis.porPagar),
-        footer: 'Cuentas por pagar',
+        badge: 'TICKET · HOY',
+        title: 'Ticket promedio',
+        body: 'Promedio vendido por factura registrada hoy.',
+        value: hoy == null ? '—' : formatRd(hoy.ticketPromedio),
+        footer: hoy == null ? 'Cargando reportes…' : 'Fuente: Reportes · Hoy',
       ),
       _InsightSlide(
-        icon: Icons.warning_amber_rounded,
-        color: AppColors.error,
-        badge: 'ALERTA',
-        title: 'CxP vencido',
-        body: (kpis != null && kpis.vencido > 0)
-            ? 'Revisa saldos vencidos con proveedores.'
-            : 'Sin saldos vencidos por ahora.',
-        value: kpis == null ? '—' : _money.format(kpis.vencido),
-        footer: (kpis != null && kpis.vencido > 0)
-            ? 'Requiere atención'
-            : 'Al día',
-      ),
-      _InsightSlide(
-        icon: Icons.inventory_2_outlined,
+        icon: Icons.calendar_month_outlined,
         color: AppColors.success,
-        badge: 'STOCK',
-        title: 'Inventario',
-        body: bajoStock > 0
-            ? '$bajoStock ítem(s) con stock ≤ 10 unidades.'
-            : 'Catálogo estable · $productos producto(s).',
-        value: '$productos',
-        footer: bajoStock > 0 ? 'Revisar bajo stock' : 'Sin alertas fuertes',
+        badge: 'VENTAS · MES',
+        title: 'Ventas del mes',
+        body: mes == null
+            ? 'Resumen de ventas del mes en curso.'
+            : '${mes.numFacturas} factura(s) registradas este mes.',
+        value: mes == null ? '—' : formatRd(mes.ventas),
+        footer: mes == null ? 'Cargando reportes…' : 'Fuente: Reportes · Mes',
+      ),
+      _InsightSlide(
+        icon: Icons.payments_outlined,
+        color: AppColors.primary,
+        badge: 'COBROS · MES',
+        title: 'Forma de pago principal',
+        body: formasPago.isEmpty
+            ? 'Aún no hay pagos reportados este mes.'
+            : 'Método con mayor volumen de ventas este mes.',
+        value: formasPago.isEmpty ? '—' : formasPago.first.key,
+        footer: snapshot == null
+            ? 'Cargando reportes…'
+            : formasPago.isEmpty
+            ? 'Fuente: Reportes · Mes'
+            : formatRd(formasPago.first.value),
+      ),
+      _InsightSlide(
+        icon: Icons.star_outline_rounded,
+        color: AppColors.warning,
+        badge: 'PRODUCTO · MES',
+        title: topProducto?.nombre ?? 'Productos destacados',
+        body: topProducto == null
+            ? 'Los productos más vendidos del mes aparecerán aquí.'
+            : 'Producto con mayor venta acumulada este mes.',
+        value: topProducto == null ? '—' : formatRd(topProducto.monto),
+        footer: snapshot == null
+            ? 'Cargando reportes…'
+            : topProducto == null
+            ? 'Fuente: Reportes · Mes'
+            : '${topProducto.cantidad} unidades · Reportes · Mes',
       ),
       const _InsightSlide(
         icon: Icons.bolt_outlined,
@@ -1335,10 +1594,8 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
 
   @override
   Widget build(BuildContext context) {
-    final kpis = ref.watch(dashboardComprasKpisProvider).valueOrNull;
-    final productos = ref.watch(productoControllerProvider).valueOrNull ?? [];
-    final bajo = productos.where((p) => (p.stock ?? 0) <= 10).length;
-    _slides = _buildSlides(kpis, productos.length, bajo);
+    final snapshot = ref.watch(dashboardSnapshotProvider).valueOrNull;
+    _slides = _buildSlides(snapshot);
     final s = _slides[_index.clamp(0, _slides.length - 1)];
 
     return MouseRegion(

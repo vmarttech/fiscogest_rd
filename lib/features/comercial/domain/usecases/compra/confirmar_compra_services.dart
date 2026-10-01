@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
@@ -103,10 +104,10 @@ class ConfirmarCompraServices {
 
     if (limite > 0 && (saldoActual + compra.totalCompra) > limite) {
       throw StateError(
-        'El monto de la compra (RD\$${compra.totalCompra.toStringAsFixed(2)}) '
+        'El monto de la compra (${formatRd(compra.totalCompra)}) '
         'excede el límite de crédito del proveedor.\n'
-        'Saldo actual: RD\$${saldoActual.toStringAsFixed(2)}\n'
-        'Límite: RD\$${limite.toStringAsFixed(2)}',
+        'Saldo actual: ${formatRd(saldoActual)}\n'
+        'Límite: ${formatRd(limite)}',
       );
     }
 

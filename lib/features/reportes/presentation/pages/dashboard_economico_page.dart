@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
@@ -12,12 +11,11 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/reportes/domain/kpi_models.dart';
 import 'package:fiscogest_rd/features/reportes/presentation/providers/dashboard_providers.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class DashboardEconomicoPage extends ConsumerWidget {
   const DashboardEconomicoPage({super.key});
 
-  static final _fmt = NumberFormat('#,##0.00', 'es_DO');
-  static final _fmtEntero = NumberFormat('#,##0', 'es_DO');
 
   String _saludo() {
     final h = DateTime.now().hour;
@@ -139,7 +137,6 @@ class DashboardEconomicoPage extends ConsumerWidget {
                         periodoLabel: _labelPeriodo(periodo),
                         ventas: kpi.ventas,
                         delta: kpi.deltaVentasPct,
-                        fmt: _fmt,
                       ),
                       const SizedBox(height: 16),
                       _PeriodoChips(
@@ -151,16 +148,14 @@ class DashboardEconomicoPage extends ConsumerWidget {
                       _KpiGrid(
                         kpi: kpi,
                         mobile: mobile,
-                        fmt: _fmt,
-                        fmtEntero: _fmtEntero,
                       ),
                       const SizedBox(height: 20),
-                      _ChartCard(serie: snap.serie30Dias, fmt: _fmt),
+                      _ChartCard(serie: snap.serie30Dias),
                       const SizedBox(height: 16),
                       if (mobile) ...[
-                        _MixPagoCard(data: snap.porFormaPago, fmt: _fmt),
+                        _MixPagoCard(data: snap.porFormaPago),
                         const SizedBox(height: 12),
-                        _TopProductosCard(items: snap.topProductos, fmt: _fmt),
+                        _TopProductosCard(items: snap.topProductos),
                         const SizedBox(height: 12),
                         _SaludCard(kpi: kpi),
                       ] else
@@ -170,15 +165,13 @@ class DashboardEconomicoPage extends ConsumerWidget {
                             Expanded(
                               child: _MixPagoCard(
                                 data: snap.porFormaPago,
-                                fmt: _fmt,
-                              ),
+                                      ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: _TopProductosCard(
                                 items: snap.topProductos,
-                                fmt: _fmt,
-                              ),
+                                      ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(child: _SaludCard(kpi: kpi)),
@@ -203,13 +196,11 @@ class _Hero extends StatelessWidget {
     required this.periodoLabel,
     required this.ventas,
     required this.delta,
-    required this.fmt,
   });
   final String saludo;
   final String periodoLabel;
   final double ventas;
   final double delta;
-  final NumberFormat fmt;
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +249,7 @@ class _Hero extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'RD\$ ${fmt.format(ventas)}',
+                  formatRd(ventas),
                   style: AppTypography.h2.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -347,41 +338,37 @@ class _KpiGrid extends StatelessWidget {
   const _KpiGrid({
     required this.kpi,
     required this.mobile,
-    required this.fmt,
-    required this.fmtEntero,
   });
   final KpiPeriodo kpi;
   final bool mobile;
-  final NumberFormat fmt;
-  final NumberFormat fmtEntero;
 
   @override
   Widget build(BuildContext context) {
     final cards = [
       _KpiCard(
         label: 'Ventas',
-        value: 'RD\$ ${fmt.format(kpi.ventas)}',
+        value: formatRd(kpi.ventas),
         delta: kpi.deltaVentasPct,
         icon: Icons.payments_outlined,
         color: AppColors.primary,
       ),
       _KpiCard(
         label: 'Ganancia bruta',
-        value: 'RD\$ ${fmt.format(kpi.ganancia)}',
+        value: formatRd(kpi.ganancia),
         delta: kpi.deltaGananciaPct,
         icon: Icons.savings_outlined,
         color: const Color(0xFF059669),
       ),
       _KpiCard(
         label: 'Facturas',
-        value: fmtEntero.format(kpi.numFacturas),
+        value: formatEntero(kpi.numFacturas),
         delta: null,
         icon: Icons.receipt_long_outlined,
         color: const Color(0xFF7C3AED),
       ),
       _KpiCard(
         label: 'Ticket promedio',
-        value: 'RD\$ ${fmt.format(kpi.ticketPromedio)}',
+        value: formatRd(kpi.ticketPromedio),
         delta: null,
         icon: Icons.shopping_bag_outlined,
         color: const Color(0xFFD97706),
@@ -528,9 +515,8 @@ class _KpiCard extends StatelessWidget {
 
 // ─── Chart ──────────────────────────────────────────────
 class _ChartCard extends StatelessWidget {
-  const _ChartCard({required this.serie, required this.fmt});
+  const _ChartCard({required this.serie});
   final List<SeriePunto> serie;
-  final NumberFormat fmt;
 
   @override
   Widget build(BuildContext context) {
@@ -646,7 +632,7 @@ class _ChartCard extends StatelessWidget {
                           getTooltipItems: (spots) => spots
                               .map(
                                 (s) => LineTooltipItem(
-                                  'RD\$ ${fmt.format(s.y)}',
+                                  formatRd(s.y),
                                   const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -689,9 +675,8 @@ class _ChartCard extends StatelessWidget {
 
 // ─── Mix pago ───────────────────────────────────────────
 class _MixPagoCard extends StatelessWidget {
-  const _MixPagoCard({required this.data, required this.fmt});
+  const _MixPagoCard({required this.data});
   final Map<String, double> data;
-  final NumberFormat fmt;
 
   static const _colors = [
     Color(0xFF0D9488),
@@ -800,9 +785,8 @@ class _MixPagoCard extends StatelessWidget {
 
 // ─── Top productos ──────────────────────────────────────
 class _TopProductosCard extends StatelessWidget {
-  const _TopProductosCard({required this.items, required this.fmt});
+  const _TopProductosCard({required this.items});
   final List<TopProducto> items;
-  final NumberFormat fmt;
 
   @override
   Widget build(BuildContext context) {
@@ -889,7 +873,7 @@ class _TopProductosCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'RD\$ ${fmt.format(p.monto)}',
+                      formatRd(p.monto),
                       style: AppTypography.labelMedium.copyWith(
                         fontWeight: FontWeight.w700,
                       ),

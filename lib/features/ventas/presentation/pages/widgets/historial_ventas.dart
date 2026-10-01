@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_venta
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_cargada_desde_historial_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class HistorialVentas extends ConsumerWidget {
   const HistorialVentas({super.key});
@@ -16,8 +17,7 @@ class HistorialVentas extends ConsumerWidget {
   String formatearFecha(DateTime fecha) =>
       DateFormat('dd/MM · HH:mm').format(fecha);
 
-  String formatearMonto(double valor) =>
-      'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
+  String formatearMonto(double valor) => formatRd(valor);
 
   String obtenerEtiquetaTipo(Venta v) {
     if (v.numero.startsWith('C')) return 'Cotización';

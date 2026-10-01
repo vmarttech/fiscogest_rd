@@ -8,6 +8,7 @@ import 'package:printing/printing.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 /// Comprobante fiscal impreso (B01 crédito fiscal · B02 consumidor final).
 /// Estructura orientada a uso comercial en RD (DGII serie B).
@@ -30,8 +31,7 @@ class ComprobantePdf {
   static String emisorTel = '';
   static String emisorEmail = '';
 
-  static final _moneyFmt = NumberFormat('#,##0.00', 'en_US');
-  static String _money(double v) => 'RD\$ ${_moneyFmt.format(v)}';
+  static String _money(double v) => formatRd(v);
   static final _fecha = DateFormat('dd/MM/yyyy HH:mm');
 
   /// [modo]: null = solo layout; true = compartir; false = imprimir.

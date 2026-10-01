@@ -28,7 +28,6 @@ class SolicitudesCreditoPage extends ConsumerWidget {
   static const String routeName = 'credito-solicitudes';
   static const String path = '/creditos/solicitudes';
 
-  static final _fmt = NumberFormat('#,##0.00', 'es_DO');
   static final _fmtFecha = DateFormat('dd/MM/yyyy');
 
   @override
@@ -207,7 +206,7 @@ class SolicitudesCreditoPage extends ConsumerWidget {
                                                               .end,
                                                       children: [
                                                         Text(
-                                                          'RD\$ ${_fmt.format(v.montoTotal)}',
+                                                          formatRd(v.montoTotal),
                                                           style: AppTypography
                                                               .labelMedium
                                                               .copyWith(

@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class MostrarDetalleVenta extends ConsumerWidget {
   const MostrarDetalleVenta({super.key, required this.venta});
@@ -18,9 +19,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
     return DateFormat.yMd().add_Hm().format(fecha);
   }
 
-  String _formatearMonto(double valor) {
-    return 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
-  }
+  String _formatearMonto(double valor) => formatRd(valor);
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {

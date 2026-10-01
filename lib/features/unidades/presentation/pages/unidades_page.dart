@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
-import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
@@ -24,37 +23,12 @@ class UnidadesPage extends ConsumerStatefulWidget {
 class _UnidadesPageState extends ConsumerState<UnidadesPage> {
   String _filtroBusqueda = '';
 
-  void _mostrarBusqueda(BuildContext context) async {
-    final control = TextEditingController(text: _filtroBusqueda);
-    final resultado = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Buscar Unidad'),
-        content: AppTextField(
-          controller: control,
-          hint: 'Nombre o abreviatura...',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          AppButton(
-            text: 'Buscar',
-            onPressed: () => Navigator.pop(ctx, control.text),
-          ),
-        ],
-      ),
-    );
-    if (resultado != null) {
-      setState(() => _filtroBusqueda = resultado.toLowerCase());
-    }
-  }
 
+  @override
   @override
   Widget build(BuildContext context) {
     final isMobile = AppBreakpoints.isMobile(context);
-    final unidadesAsync = ref.watch(unidadMedidaControllerProvider);
+    final asyncList = ref.watch(unidadMedidaControllerProvider);
 
     return AppScaffold(
       title: 'Unidades de Medida',
@@ -63,339 +37,323 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
-      actions: const [],
+      actions: [
+        if (!isMobile)
+          AppButton(
+            text: 'Nueva unidad',
+            icon: Icons.add,
+            onPressed: () => _mostrarModalRegistro(context),
+          ),
+      ],
+      floatingActionButton: isMobile
+          ? FloatingActionButton(
+              onPressed: () => _mostrarModalRegistro(context),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: SafeArea(
-        bottom: true,
-        child: Stack(
-          children: [
-            Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 1320),
-                padding: EdgeInsets.fromLTRB(
-                  isMobile ? 16 : 8,
-                  isMobile ? 12 : 16,
-                  isMobile ? 16 : 8,
-                  100,
-                ),
-                child: unidadesAsync.when(
-                  data: (unidades) {
-                    final filtradas = _filtroBusqueda.isEmpty
-                        ? unidades
-                        : unidades
-                              .where(
-                                (u) =>
-                                    u.nombre.toLowerCase().contains(
-                                      _filtroBusqueda,
-                                    ) ||
-                                    (u.abreviatura?.toLowerCase().contains(
-                                          _filtroBusqueda,
-                                        ) ??
-                                        false) ||
-                                    (u.descripcion?.toLowerCase().contains(
-                                          _filtroBusqueda,
-                                        ) ??
-                                        false),
-                              )
-                              .toList();
-
-                    if (filtradas.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No hay unidades registradas o coincidentes.',
-                          style: AppTypography.bodyMedium,
-                        ),
-                      );
-                    }
-
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.94),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.grey900.withValues(alpha: 0.05),
-                            blurRadius: 18,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: isMobile ? 560 : 920),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                isMobile ? 16 : 24,
+                isMobile ? 12 : 20,
+                isMobile ? 16 : 24,
+                isMobile ? 88 : 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.12),
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        children: [
-                          if (!isMobile)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 11,
-                              ),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF8FAFC),
-                                border: Border(
-                                  bottom: BorderSide(color: AppColors.border),
-                                ),
-                              ),
-                              child: Row(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: AppTextField(
+                      hint: 'Buscar...',
+                      prefixIcon: Icons.search,
+                      onChanged: (v) =>
+                          setState(() => _filtroBusqueda = v.toLowerCase()),
+                    ),
+                  ),
+                  SizedBox(height: isMobile ? 14 : 18),
+                  Expanded(
+                    child: asyncList.when(
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(color: AppColors.primary),
+                      ),
+                      error: (e, _) => Center(
+                        child: Text(
+                          'Error: $e',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
+                      ),
+                      data: (items) {
+                        final filtradas = _filtroBusqueda.isEmpty
+                            ? items
+                            : items.where((u) => u.nombre.toLowerCase().contains(_filtroBusqueda) || (u.abreviatura?.toLowerCase().contains(_filtroBusqueda) ?? false) || (u.descripcion?.toLowerCase().contains(_filtroBusqueda) ?? false)).toList();
+
+                        if (filtradas.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const SizedBox(width: 54),
-                                  Expanded(
-                                    child: Text(
-                                      'UNIDAD',
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.4,
-                                      ),
+                                  Container(
+                                    width: 64,
+                                    height: 64,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.straighten,
+                                      size: 32,
+                                      color: AppColors.primary,
                                     ),
                                   ),
-                                  SizedBox(
-                                    width: 96,
-                                    child: Text(
-                                      'ACCIONES',
-                                      textAlign: TextAlign.center,
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.4,
-                                      ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    _filtroBusqueda.isEmpty
+                                        ? 'Sin unidades aún'
+                                        : 'Sin resultados',
+                                    style: AppTypography.h4.copyWith(
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    _filtroBusqueda.isEmpty
+                                        ? 'Define la primera unidad de medida\npara usarla en productos y compras.'
+                                        : 'Prueba con otro término de búsqueda.',
+                                    textAlign: TextAlign.center,
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                  if (_filtroBusqueda.isEmpty) ...[
+                                    const SizedBox(height: 18),
+                                    AppButton(
+                                      text: 'Nueva unidad',
+                                      icon: Icons.add,
+                                      onPressed: () =>
+                                          _mostrarModalRegistro(context),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
-                          Expanded(
-                            child: ListView.separated(
-                              itemCount: filtradas.length,
-                              separatorBuilder: (context, index) =>
-                                  const Divider(
-                                    color: AppColors.border,
-                                    height: 1,
-                                  ),
-                              itemBuilder: (context, index) {
-                                final unidad = filtradas[index];
-                                final subtitulo =
-                                    unidad.abreviatura != null &&
-                                        unidad.abreviatura!.isNotEmpty
-                                    ? 'Abreviatura: ${unidad.abreviatura}'
-                                    : unidad.descripcion?.isNotEmpty ?? true
-                                    ? 'Sin descripción'
-                                    : unidad.descripcion!;
+                          );
+                        }
 
-                                return Material(
-                                  color: index.isEven
-                                      ? AppColors.white
-                                      : AppColors.grey50.withValues(
-                                          alpha: 0.55,
-                                        ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 10,
-                                    ),
-                                    child: isMobile
-                                        ? Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Container(
-                                                    width: 42,
-                                                    height: 42,
-                                                    decoration: BoxDecoration(
-                                                      color: AppColors.grey50,
-                                                      borderRadius:
-                                                          AppRadius.allM,
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        unidad.abreviatura ??
-                                                            '---',
-                                                        style: AppTypography
-                                                            .labelMedium
-                                                            .copyWith(
-                                                              color: AppColors
-                                                                  .textPrimary,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  AppLayout.hM,
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          unidad.nombre,
-                                                          style: AppTypography
-                                                              .labelLarge,
-                                                        ),
-                                                        AppLayout.vXs,
-                                                        Text(
-                                                          subtitulo,
-                                                          style: AppTypography
-                                                              .bodySmall,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.edit_outlined,
-                                                      color: AppColors.primary,
-                                                      size: 20,
-                                                    ),
-                                                    tooltip: 'Editar Unidad',
-                                                    onPressed: () =>
-                                                        _mostrarModalRegistro(
-                                                          context,
-                                                          unidadToEdit: unidad,
-                                                        ),
-                                                  ),
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.delete_outline,
-                                                      color: AppColors.error,
-                                                      size: 20,
-                                                    ),
-                                                    tooltip: 'Eliminar Unidad',
-                                                    onPressed: () =>
-                                                        _confirmarEliminacion(
-                                                          context,
-                                                          unidad,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          )
-                                        : Row(
-                                            children: [
-                                              Container(
-                                                width: 42,
-                                                height: 42,
-                                                decoration: BoxDecoration(
-                                                  color: AppColors.grey50,
-                                                  borderRadius: AppRadius.allM,
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    unidad.abreviatura ?? '---',
-                                                    style: AppTypography
-                                                        .labelMedium
-                                                        .copyWith(
-                                                          color: AppColors
-                                                              .textPrimary,
-                                                        ),
-                                                  ),
-                                                ),
-                                              ),
-                                              AppLayout.hM,
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      unidad.nombre,
-                                                      style: AppTypography
-                                                          .labelLarge,
-                                                    ),
-                                                    AppLayout.vXs,
-                                                    Text(
-                                                      subtitulo,
-                                                      style: AppTypography
-                                                          .bodySmall,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.edit_outlined,
-                                                      color: AppColors.primary,
-                                                      size: 20,
-                                                    ),
-                                                    tooltip: 'Editar Unidad',
-                                                    onPressed: () =>
-                                                        _mostrarModalRegistro(
-                                                          context,
-                                                          unidadToEdit: unidad,
-                                                        ),
-                                                  ),
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.delete_outline,
-                                                      color: AppColors.error,
-                                                      size: 20,
-                                                    ),
-                                                    tooltip: 'Eliminar Unidad',
-                                                    onPressed: () =>
-                                                        _confirmarEliminacion(
-                                                          context,
-                                                          unidad,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
+                        if (isMobile) {
+                          return ListView.separated(
+                            itemCount: filtradas.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 10),
+                            itemBuilder: (_, i) {
+                              final u = filtradas[i];
+                              return _UnidadCard(
+                                item: u,
+                                badge: (u.abreviatura != null && u.abreviatura!.isNotEmpty) ? u.abreviatura! : '—',
+                                title: u.nombre,
+                                subtitle: (u.abreviatura != null && u.abreviatura!.isNotEmpty) ? 'Abreviatura: ${u.abreviatura}' : ((u.descripcion?.isNotEmpty ?? false) ? u.descripcion! : 'Sin descripción'),
+                                onEdit: () => _mostrarModalRegistro(
+                                  context,
+                                  unidadToEdit: u,
+                                ),
+                                onDelete: () => _onDelete(context, u),
+                              );
+                            },
+                          );
+                        }
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.10),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.04),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.04),
+                                  border: const Border(
+                                    bottom: BorderSide(color: AppColors.border),
                                   ),
-                                );
-                              },
-                            ), // ListView
-                          ), // Expanded
-                        ], // Column children
-                      ), // Column
-                    ); // Container
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => Center(
-                    child: Text('Error: $e', style: AppTypography.bodyMedium),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: isMobile ? 16 : 24,
-              right: isMobile ? 16 : 24,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FloatingActionButton(
-                    mini: true,
-                    heroTag: 'buscar_unidad',
-                    onPressed: () => _mostrarBusqueda(context),
-                    backgroundColor: const Color(0xFF64748B),
-                    child: const Icon(Icons.search, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  FloatingActionButton(
-                    heroTag: 'nueva_unidad',
-                    onPressed: () => _mostrarModalRegistro(context),
-                    backgroundColor: const Color(0xFF3B82F6),
-                    child: const Icon(Icons.add, color: Colors.white),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 52),
+                                    Expanded(
+                                      child: Text(
+                                        'NOMBRE',
+                                        style: AppTypography.labelSmall.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        'ACCIONES',
+                                        textAlign: TextAlign.center,
+                                        style: AppTypography.labelSmall.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView.separated(
+                                  itemCount: filtradas.length,
+                                  separatorBuilder: (_, __) => const Divider(
+                                    height: 1,
+                                    color: AppColors.border,
+                                  ),
+                                  itemBuilder: (_, i) {
+                                    final u = filtradas[i];
+                                    return Material(
+                                      color: i.isEven
+                                          ? Colors.white
+                                          : AppColors.grey50.withValues(alpha: 0.55),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 10,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primary
+                                                    .withValues(alpha: 0.12),
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  (u.abreviatura != null && u.abreviatura!.isNotEmpty) ? u.abreviatura! : '—',
+                                                  style: AppTypography.labelSmall
+                                                      .copyWith(
+                                                    color: AppColors.primary,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    u.nombre,
+                                                    style: AppTypography.bodyLarge
+                                                        .copyWith(
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    (u.abreviatura != null && u.abreviatura!.isNotEmpty) ? 'Abreviatura: ${u.abreviatura}' : ((u.descripcion?.isNotEmpty ?? false) ? u.descripcion! : 'Sin descripción'),
+                                                    style: AppTypography.bodySmall
+                                                        .copyWith(
+                                                      color:
+                                                          AppColors.textSecondary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.edit_outlined,
+                                                color: AppColors.primary,
+                                                size: 20,
+                                              ),
+                                              onPressed: () =>
+                                                  _mostrarModalRegistro(
+                                                context,
+                                                unidadToEdit: u,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.delete_outline,
+                                                color: AppColors.error,
+                                                size: 20,
+                                              ),
+                                              onPressed: () =>
+                                                  _onDelete(context, u),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  void _onDelete(BuildContext context, UnidadMedida item) {
+    _confirmarEliminacion(context, item);
   }
 
   void _confirmarEliminacion(BuildContext context, UnidadMedida unidad) {
@@ -693,6 +651,96 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+
+class _UnidadCard extends StatelessWidget {
+  const _UnidadCard({
+    required this.item,
+    required this.badge,
+    required this.title,
+    required this.subtitle,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final dynamic item;
+  final String badge;
+  final String title;
+  final String subtitle;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                badge,
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTypography.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+            onPressed: onEdit,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            onPressed: onDelete,
+          ),
+        ],
       ),
     );
   }

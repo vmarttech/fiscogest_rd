@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
@@ -127,12 +126,12 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     await showDialog<Proveedor>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
+        title: Text(
           'Seleccionar Proveedor',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
         ),
         content: SizedBox(
-          width: double.maxFinite,
+          width: 360,
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: listaProveedores!.length,
@@ -173,20 +172,31 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     await showDialog<Producto>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Seleccionar Producto',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          'Seleccionar producto',
+          style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
         ),
+        contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
         content: SizedBox(
-          width: double.maxFinite,
+          width: 360,
+          height: 320,
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: listaProductos!.length,
             itemBuilder: (context, index) {
               final prod = listaProductos[index];
               return ListTile(
-                title: Text(prod.nombre),
-                subtitle: Text('Código: ${prod.codigo} | ID: ${prod.id ?? ''}'),
+                dense: true,
+                title: Text(
+                  prod.nombre,
+                  style: AppTypography.bodyMedium,
+                ),
+                subtitle: Text(
+                  'Código: ${prod.codigo} | ID: ${prod.id ?? ''}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 onTap: () {
                   setState(() {
                     final ctrl = _controladores[indexLinea];
@@ -203,7 +213,10 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: Text(
+              'Cancelar',
+              style: AppTypography.button.copyWith(color: AppColors.primary),
+            ),
           ),
         ],
       ),
@@ -360,12 +373,16 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
 
   @override
   Widget build(BuildContext context) {
-    final anchoPantalla = MediaQuery.of(context).size.width;
-    final esPequena = anchoPantalla < 700;
+    final esPequena = AppBreakpoints.isMobile(context);
+    final desktop = AppBreakpoints.isDesktop(context);
+    final maxW = desktop ? 720 : (esPequena ? 520 : 640);
 
     Widget filaResponsiva({required Widget child1, required Widget child2}) {
       if (esPequena) {
-        return Column(children: [child1, AppLayout.vM, child2]);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [child1, AppLayout.vM, child2],
+        );
       }
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,23 +395,26 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     }
 
     return AppScaffold(
-      title: 'Registrar Compra',
+      backgroundColor: AppColors.pageBackground,
+      title: 'REGISTRAR COMPRA',
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(
-          padding: AppLayout.pantallaPadding,
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          padding: AppLayout.pantallaPadding.add(
+            const EdgeInsets.only(bottom: 24),
+          ),
+          child: AppLayout.centerConstrained(
+            maxWidth: maxW,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SectionHeader(
+                    title: 'Datos de la compra',
+                    subtitle: 'Proveedor, comprobante y forma de pago',
+                  ),
                 CabeceraCompraWidget(
-                  modoSimplificado:
-                      ref
-                          .watch(configuracionControllerProvider)
-                          .valueOrNull
-                          ?.modoSimplificado ??
-                      false,
                   fechaController: _fechaController,
                   proveedorIdController: _proveedorIdController,
                   proveedorNombreController: _proveedorNombreController,
@@ -414,6 +434,10 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   filaResponsiva: filaResponsiva,
                 ),
                 AppLayout.vL,
+                const SectionHeader(
+                  title: 'Productos',
+                  subtitle: 'Líneas de la compra',
+                ),
                 SeccionLineasWidget(
                   lineas: _lineas,
                   controladores: _controladores,
@@ -425,19 +449,15 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   filaResponsiva: filaResponsiva,
                 ),
                 AppLayout.vL,
-                const Divider(height: 1),
-                AppLayout.vM,
+                const SectionHeader(
+                  title: 'Resumen',
+                  subtitle: 'Totales de la compra',
+                ),
                 TotalesCompraWidget(
                   subtotalSinImpuestos: _subtotalSinImpuestos,
                   descuentoGlobal: _descuentoGlobal,
                   montoImpuesto: _montoImpuesto,
                   totalCompra: _totalCompra,
-                  modoSimplificado:
-                      ref
-                          .watch(configuracionControllerProvider)
-                          .valueOrNull
-                          ?.modoSimplificado ??
-                      false,
                 ),
                 AppLayout.vL,
                 BotonesAccionWidget(
@@ -446,6 +466,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

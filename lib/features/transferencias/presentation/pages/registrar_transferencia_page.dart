@@ -2,6 +2,7 @@
 // Pantalla Registrar Transferencia
 // CUMPLIMIENTO ESTRICTO A AMBOS DOCUMENTOS OFICIALES
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_form.dart';
@@ -18,9 +19,13 @@ class RegistrarTransferenciaPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    
     final formState = ref.watch(transferenciaFormProvider);
 
     return AppScaffold(
+      backgroundColor: AppColors.pageBackground,
+      // design system
+
       title: 'Registrar Transferencia',
       body: SingleChildScrollView(
         padding: AppSpacing.allL,

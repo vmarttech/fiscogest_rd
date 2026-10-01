@@ -188,29 +188,167 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     );
   }
 
+
+  bool _lineaTieneOferta(Map<String, dynamic> item) {
+    if (item['esOferta'] == true) return true;
+    final oid = item['ofertaId'];
+    final oname = item['ofertaNombre'] as String?;
+    return oid != null && oname != null && oname.isNotEmpty;
+  }
+
+  ({double precio, bool esOferta}) _resolverPrecio({
+    required double precioVenta,
+    required double? precioMayorista,
+    required double? precioEspecial,
+    required double? precioMinimo,
+    required bool ofertaVigente,
+    required double cantidad,
+    required bool permitirOferta,
+  }) {
+    var precio = precioVenta;
+    var esOferta = false;
+
+    if (permitirOferta &&
+        ofertaVigente &&
+        precioEspecial != null &&
+        precioEspecial > 0 &&
+        precioEspecial <= precio) {
+      precio = precioEspecial;
+      esOferta = true;
+    }
+    if (cantidad >= 2 &&
+        precioMayorista != null &&
+        precioMayorista > 0 &&
+        precioMayorista < precio) {
+      precio = precioMayorista;
+      esOferta = false;
+    }
+
+    final minimo = precioMinimo ?? 0;
+    if (minimo > precio) precio = minimo;
+    return (precio: precio, esOferta: esOferta);
+  }
+
+  ({double precio, bool esOferta}) _resolverPrecioDeLinea(
+    Map<String, dynamic> item,
+    double cantidad, {
+    required bool permitirOferta,
+  }) {
+    return _resolverPrecio(
+      precioVenta:
+          (item['precioVentaBase'] as num?)?.toDouble() ??
+          (item['precioUnitario'] as num?)?.toDouble() ??
+          0,
+      precioMayorista: (item['precioMayorista'] as num?)?.toDouble(),
+      precioEspecial: (item['precioEspecial'] as num?)?.toDouble(),
+      precioMinimo: (item['precioMinimo'] as num?)?.toDouble(),
+      ofertaVigente: item['ofertaVigente'] == true,
+      cantidad: cantidad,
+      permitirOferta: permitirOferta,
+    );
+  }
+
+  bool _lineaTieneDesc(Map<String, dynamic> item) {
+    final pct = (item['descuentoPorcentaje'] as num?)?.toDouble() ?? 0;
+    final mon = (item['montoDescuento'] as num?)?.toDouble() ?? 0;
+    return pct > 0 || mon > 0;
+  }
+
+  double _subtotalLineaNeto(Map<String, dynamic> item) {
+    final cant = (item['cantidad'] as num?)?.toDouble() ?? 0;
+    final precio = (item['precioUnitario'] as num?)?.toDouble() ?? 0;
+    final bruto = cant * precio;
+    final pct = (item['descuentoPorcentaje'] as num?)?.toDouble() ?? 0;
+    final mon = (item['montoDescuento'] as num?)?.toDouble() ?? 0;
+    if (pct > 0) return (bruto * (100 - pct) / 100).clamp(0.0, double.infinity);
+    if (mon > 0) return (bruto - mon).clamp(0.0, double.infinity);
+    return bruto;
+  }
+
+  bool get tieneDescuentoPorLinea =>
+      state.detalles.any(_lineaTieneDesc);
+
+  bool get tieneOfertaEnLineas =>
+      state.detalles.any(_lineaTieneOferta);
+
+  bool get tieneDescuentoGeneral => state.montoDescuento > 0.001;
+
+  String? puedeAplicarDescuentoLinea(Map<String, dynamic> item) {
+    if (state.detalles.isEmpty) {
+      return 'Agregue productos antes de aplicar descuento';
+    }
+    if (_lineaTieneOferta(item)) {
+      return 'Esta línea tiene oferta. No se puede aplicar otro descuento';
+    }
+    if (tieneDescuentoGeneral) {
+      return 'Ya hay descuento general. Quítelo para aplicar descuento por línea';
+    }
+    if (tieneOfertaEnLineas) {
+      return 'Hay productos en oferta. No se pueden combinar con descuentos adicionales';
+    }
+    return null;
+  }
+
+  String? puedeAplicarDescuentoGeneral() {
+    if (state.detalles.isEmpty) {
+      return 'Agregue productos antes de aplicar descuento';
+    }
+    if (tieneOfertaEnLineas) {
+      return 'Hay productos en oferta. No se puede aplicar descuento general';
+    }
+    if (tieneDescuentoPorLinea) {
+      return 'Ya hay descuento por línea. Quítelo para aplicar descuento general';
+    }
+    return null;
+  }
+
   void agregarProducto(Producto producto, double cantidad) {
     final nuevosDetalles = List<Map<String, dynamic>>.from(state.detalles);
-    final precioUnitario = producto.precioVenta;
     final indice = nuevosDetalles.indexWhere(
       (item) => item['productoId'] == producto.id,
     );
+    final cantidadActual = indice >= 0
+        ? (nuevosDetalles[indice]['cantidad'] as num?)?.toDouble() ?? 0
+        : 0.0;
+    final cantidadFinal = cantidadActual + cantidad;
+    final precio = _resolverPrecio(
+      precioVenta: producto.precioVenta,
+      precioMayorista: producto.precioMayorista,
+      precioEspecial: producto.precioEspecial,
+      precioMinimo: producto.precioMinimo,
+      ofertaVigente: producto.ofertaVigente,
+      cantidad: cantidadFinal,
+      permitirOferta: !tieneDescuentoGeneral && !tieneDescuentoPorLinea,
+    );
+
+    final detalle = indice >= 0
+        ? Map<String, dynamic>.from(nuevosDetalles[indice])
+        : <String, dynamic>{
+            'productoId': producto.id,
+            'productoNombre': producto.nombre,
+            'descuentoPorcentaje': 0.0,
+            'montoDescuento': 0.0,
+          };
+    detalle.addAll({
+      'cantidad': cantidadFinal,
+      'precioUnitario': precio.precio,
+      'precioVentaBase': producto.precioVenta,
+      'precioMayorista': producto.precioMayorista,
+      'precioEspecial': producto.precioEspecial,
+      'precioMinimo': producto.precioMinimo,
+      'ofertaVigente': producto.ofertaVigente,
+      'esOferta': precio.esOferta,
+    });
+    detalle['subtotal'] = _subtotalLineaNeto(detalle);
+
     if (indice >= 0) {
-      nuevosDetalles[indice]['cantidad'] =
-          (nuevosDetalles[indice]['cantidad'] as double) + cantidad;
-      nuevosDetalles[indice]['subtotal'] =
-          (nuevosDetalles[indice]['cantidad'] as double) * precioUnitario;
+      nuevosDetalles[indice] = detalle;
     } else {
-      nuevosDetalles.add({
-        'productoId': producto.id,
-        'productoNombre': producto.nombre,
-        'cantidad': cantidad,
-        'precioUnitario': precioUnitario,
-        'subtotal': cantidad * precioUnitario,
-      });
+      nuevosDetalles.add(detalle);
     }
     final nuevoSubtotal = nuevosDetalles.fold<double>(
       0.0,
-      (sum, item) => sum + (item['subtotal'] as double),
+      (sum, item) => sum + _subtotalLineaNeto(item),
     );
     _recalcularTotal(nuevoSubtotal: nuevoSubtotal, detalles: nuevosDetalles);
   }
@@ -224,6 +362,111 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       (sum, item) => sum + (item['subtotal'] as double),
     );
     _recalcularTotal(nuevoSubtotal: nuevoSubtotal, detalles: nuevosDetalles);
+  }
+
+
+  void cambiarCantidad(int productoId, double nuevaCantidad) {
+    if (nuevaCantidad <= 0) {
+      quitarProducto(productoId);
+      return;
+    }
+    final nuevosDetalles = List<Map<String, dynamic>>.from(state.detalles);
+    final indice = nuevosDetalles.indexWhere(
+      (item) => item['productoId'] == productoId,
+    );
+    if (indice < 0) return;
+    final detalle = Map<String, dynamic>.from(nuevosDetalles[indice]);
+    final precio = _resolverPrecioDeLinea(
+      detalle,
+      nuevaCantidad,
+      permitirOferta: !tieneDescuentoGeneral && !tieneDescuentoPorLinea,
+    );
+    detalle['cantidad'] = nuevaCantidad;
+    detalle['precioUnitario'] = precio.precio;
+    detalle['esOferta'] = precio.esOferta;
+    detalle['subtotal'] = _subtotalLineaNeto(detalle);
+    nuevosDetalles[indice] = detalle;
+    final nuevoSubtotal = nuevosDetalles.fold<double>(
+      0.0,
+      (sum, item) => sum + _subtotalLineaNeto(item),
+    );
+    // Si hay desc general y ahora hay desc línea, quitar general (exclusividad)
+    double descGen = state.montoDescuento;
+    if (tieneDescuentoPorLinea || nuevosDetalles.any(_lineaTieneDesc)) {
+      // recalcular flag sobre nuevosDetalles
+      final hayLinea = nuevosDetalles.any(_lineaTieneDesc);
+      if (hayLinea) descGen = 0;
+    }
+    _recalcularTotal(
+      nuevoSubtotal: nuevoSubtotal,
+      nuevoDescuento: descGen,
+      detalles: nuevosDetalles,
+    );
+  }
+
+  /// valor <= 0 quita el descuento de línea.
+  String? aplicarDescuentoLinea(
+    int productoId,
+    double valor, {
+    bool esPorcentaje = false,
+  }) {
+    final nuevosDetalles = List<Map<String, dynamic>>.from(state.detalles);
+    final indice = nuevosDetalles.indexWhere(
+      (item) => item['productoId'] == productoId,
+    );
+    if (indice < 0) return 'Línea no encontrada';
+    final item = Map<String, dynamic>.from(nuevosDetalles[indice]);
+    final quitando = valor <= 0;
+
+    if (!quitando) {
+      final yaTiene = _lineaTieneDesc(item);
+      final bloqueo = puedeAplicarDescuentoLinea(item);
+      if (bloqueo != null && !yaTiene) return bloqueo;
+    }
+
+    final cant = (item['cantidad'] as num?)?.toDouble() ?? 0;
+    final precio = (item['precioUnitario'] as num?)?.toDouble() ?? 0;
+    final bruto = cant * precio;
+    double pct = 0;
+    double mon = 0;
+    double neto = bruto;
+
+    if (!quitando) {
+      if (esPorcentaje) {
+        if (valor > 100) return 'El descuento no puede superar el 100%';
+        pct = valor;
+        neto = bruto * (100 - valor) / 100;
+      } else {
+        if (valor > bruto) {
+          return 'El descuento no puede superar el subtotal de la línea';
+        }
+        mon = valor;
+        neto = bruto - valor;
+      }
+    }
+    if (neto < 0) neto = 0;
+    item['descuentoPorcentaje'] = pct;
+    item['montoDescuento'] = mon;
+    item['subtotal'] = neto;
+    nuevosDetalles[indice] = item;
+
+    final nuevoSubtotal = nuevosDetalles.fold<double>(
+      0.0,
+      (sum, it) => sum + _subtotalLineaNeto(it),
+    );
+    // Exclusividad: al poner desc línea, limpiar general
+    state = state.copyWith(
+      descuento: 0,
+      descuentoId: null,
+      descuentoNombre: null,
+      montoDescuento: 0,
+    );
+    _recalcularTotal(
+      nuevoSubtotal: nuevoSubtotal,
+      nuevoDescuento: 0,
+      detalles: nuevosDetalles,
+    );
+    return null;
   }
 
   void _recalcularTotal({
@@ -253,7 +496,16 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     _recalcularTotal(nuevoEnvio: valor);
   }
 
-  void aplicarDescuento(double valor) {
+  /// Descuento general. [valor] <= 0 lo quita.
+  /// Devuelve mensaje de error o null.
+  String? aplicarDescuento(double valor) {
+    if (valor <= 0) {
+      quitarDescuento();
+      return null;
+    }
+    final bloqueo = puedeAplicarDescuentoGeneral();
+    if (bloqueo != null) return bloqueo;
+    if (valor > state.subtotal) valor = state.subtotal;
     final baseImponible = state.subtotal - valor;
     final tasaItbis = _tasaItbis;
     final nuevoItbis = baseImponible * tasaItbis;
@@ -265,6 +517,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       itbis: nuevoItbis,
       montoTotal: nuevoTotal,
     );
+    return null;
   }
 
   void quitarDescuento() {

@@ -17,6 +17,7 @@ import 'package:fiscogest_rd/features/configuracion/presentation/providers/confi
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class VistaDetalle extends ConsumerWidget {
   const VistaDetalle({super.key});
@@ -41,8 +42,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         '${fecha.year} · ${DateFormat.Hm().format(fecha)}';
   }
 
-  String _formatearMonto(double valor) =>
-      'RD\$${NumberFormat('#,##0.00', 'es_DO').format(valor)}';
+  String _formatearMonto(double valor) => formatRd(valor);
 
   String _etiquetaEstado(EstadoDocumento estado) => switch (estado) {
     EstadoDocumento.cotizado => 'Vigente',
@@ -898,6 +898,90 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     required bool puedeIrACaja,
     required bool esPantallaPequena,
   }) {
+    if (!esPantallaPequena) {
+      final botonAccion = puedeEnviarAprobacion || puedeIrACaja;
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 24, 12),
+          child: SafeArea(
+            top: false,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (puedeAprobarRechazar) ...[
+                  SizedBox(
+                    width: 150,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _rechazarCredito(context, ref),
+                      icon: const Icon(Icons.cancel_outlined, size: 18),
+                      label: const Text('Rechazar'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        side: const BorderSide(color: AppColors.error),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 210,
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _aprobarCredito(context, ref),
+                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      label: const Text('APROBAR CRÉDITO'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.success,
+                        foregroundColor: AppColors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ] else if (botonAccion)
+                  SizedBox(
+                    width: 280,
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      onPressed: puedeEnviarAprobacion
+                          ? () => _enviarAprobacion(context, ref)
+                          : () => _irACaja(context, ref),
+                      icon: Icon(
+                        puedeEnviarAprobacion
+                            ? Icons.send_outlined
+                            : Icons.point_of_sale,
+                        size: 18,
+                      ),
+                      label: Text(
+                        puedeEnviarAprobacion
+                            ? 'ENVIAR A APROBACIÓN'
+                            : 'IR A CAJA / COBRAR',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: puedeIrACaja
+                            ? AppColors.success
+                            : AppColors.primary,
+                        foregroundColor: AppColors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final altura = esPantallaPequena ? 48.0 : 52.0;
 
     return Container(

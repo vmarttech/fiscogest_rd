@@ -18,7 +18,6 @@ class FiosListaPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(fiosPendientesProvider);
-    final formato = NumberFormat('#,##0.00', 'es_DO');
     final fechaFmt = DateFormat('dd/MM/yyyy');
 
     return AppScaffold(
@@ -87,7 +86,7 @@ class FiosListaPage extends ConsumerWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Por cobrar: RD\$ ${formato.format(totalDeuda)}',
+                        'Por cobrar: ${formatRd(totalDeuda)}',
                         style: AppTypography.bodyLarge.copyWith(
                           fontWeight: FontWeight.w800,
                           color: AppColors.warning,
@@ -113,7 +112,6 @@ class FiosListaPage extends ConsumerWidget {
                     final f = lista[i];
                     return _FioTile(
                       fio: f,
-                      formato: formato,
                       fechaFmt: fechaFmt,
                       onAbonar: () => _abrirAbonar(context, ref, f),
                     );
@@ -153,13 +151,11 @@ class FiosListaPage extends ConsumerWidget {
 class _FioTile extends StatelessWidget {
   const _FioTile({
     required this.fio,
-    required this.formato,
     required this.fechaFmt,
     required this.onAbonar,
   });
 
   final FioData fio;
-  final NumberFormat formato;
   final DateFormat fechaFmt;
   final VoidCallback onAbonar;
 
@@ -229,7 +225,7 @@ class _FioTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'RD\$ ${formato.format(fio.saldoPendiente)}',
+                    formatRd(fio.saldoPendiente),
                     style: AppTypography.bodyLarge.copyWith(
                       fontWeight: FontWeight.w800,
                       color: AppColors.warning,

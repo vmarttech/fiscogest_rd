@@ -29,7 +29,6 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   bool _procesando = false;
 
   static final _fmtFecha = DateFormat('dd/MM/yyyy HH:mm');
-  static final _fmtMonto = NumberFormat('#,##0.00', 'es_DO');
 
   @override
   void initState() {
@@ -185,7 +184,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       if (!mounted) return;
       FiscoGestNotifications.show(
         SnackBar(
-          content: Text('Caja abierta. Fondo: RD\$ ${_fmtMonto.format(fondo)}'),
+          content: Text('Caja abierta. Fondo: ${formatRd(fondo)}'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
@@ -262,7 +261,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Sesión #${_sesion!.id} · Fondo inicial RD\$ ${_fmtMonto.format(_sesion!.fondoInicial)}',
+                          'Sesión #${_sesion!.id} · Fondo inicial ${formatRd(_sesion!.fondoInicial)}',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -282,7 +281,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 style: AppTypography.labelMedium,
                               ),
                               Text(
-                                'RD\$ ${_fmtMonto.format(teorico)}',
+                                formatRd(teorico),
                                 style: AppTypography.h4.copyWith(
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -326,7 +325,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 ),
                               ),
                               Text(
-                                'RD\$ ${_fmtMonto.format(dif)}',
+                                formatRd(dif),
                                 style: AppTypography.h4.copyWith(
                                   color: difColor,
                                   fontWeight: FontWeight.w700,
@@ -411,9 +410,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       } else if (dif.abs() < 0.005) {
         msg = 'Caja cerrada. Cuadre exacto.';
       } else if (dif > 0) {
-        msg = 'Caja cerrada. Sobrante: RD\$ ${_fmtMonto.format(dif)}';
+        msg = 'Caja cerrada. Sobrante: ${formatRd(dif)}';
       } else {
-        msg = 'Caja cerrada. Faltante: RD\$ ${_fmtMonto.format(dif.abs())}';
+        msg = 'Caja cerrada. Faltante: ${formatRd(dif.abs())}';
       }
       FiscoGestNotifications.show(
         SnackBar(
@@ -581,7 +580,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         AppHubCard(
                           icon: Icons.account_balance_wallet_outlined,
                           title: 'Cuentas por cobrar',
-                          subtitle: 'Saldos y abonos de clientes',
+                          subtitle: 'Cuotas, pagos e impresión de estados de cuenta',
                           color: AppColors.info,
                           onTap: _irACuentasPorCobrar,
                         ),
@@ -633,7 +632,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 _CajaOpTile(
                                   icon: Icons.account_balance_wallet_outlined,
                                   title: 'Cuentas por cobrar',
-                                  subtitle: 'Saldos y abonos de clientes',
+                                  subtitle: 'Cuotas, pagos e impresión de estados de cuenta',
                                   color: AppColors.info,
                                   onTap: _irACuentasPorCobrar,
                                 ),
@@ -718,7 +717,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             )
           else
             Text(
-              'RD\$ ${_fmtMonto.format(_saldo ?? 0)}',
+              formatRd(_saldo ?? 0),
               style: AppTypography.h2.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
@@ -728,7 +727,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           if (abierta && _sesion != null) ...[
             AppLayout.vS,
             Text(
-              'Fondo inicial: RD\$ ${_fmtMonto.format(_sesion!.fondoInicial)}'
+              'Fondo inicial: ${formatRd(_sesion!.fondoInicial)}'
               '  ·  Apertura: ${_fmtFecha.format(_sesion!.fechaApertura)}'
               '  ·  Sesión #${_sesion!.id}',
               style: AppTypography.bodySmall.copyWith(

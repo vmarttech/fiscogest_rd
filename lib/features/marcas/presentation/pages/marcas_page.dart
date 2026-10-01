@@ -4,7 +4,6 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
-import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
@@ -24,33 +23,8 @@ class MarcasPage extends ConsumerStatefulWidget {
 class _MarcasPageState extends ConsumerState<MarcasPage> {
   String _filtroBusqueda = '';
 
-  void _mostrarBusqueda(BuildContext context) async {
-    final control = TextEditingController(text: _filtroBusqueda);
-    final resultado = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Buscar Marca'),
-        content: AppTextField(
-          controller: control,
-          hint: 'Nombre de la marca...',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          AppButton(
-            text: 'Buscar',
-            onPressed: () => Navigator.pop(ctx, control.text),
-          ),
-        ],
-      ),
-    );
-    if (resultado != null) {
-      setState(() => _filtroBusqueda = resultado.toLowerCase());
-    }
-  }
 
+  @override
   @override
   Widget build(BuildContext context) {
     final isMobile = AppBreakpoints.isMobile(context);
@@ -63,323 +37,339 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
-      actions: const [],
+      actions: [
+        if (!isMobile)
+          AppButton(
+            text: 'Nueva marca',
+            icon: Icons.add,
+            onPressed: () => _mostrarModalRegistro(context),
+          ),
+      ],
+      floatingActionButton: isMobile
+          ? FloatingActionButton(
+              onPressed: () => _mostrarModalRegistro(context),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: SafeArea(
-        bottom: true,
-        child: Stack(
-          children: [
-            Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 1320),
-                padding: EdgeInsets.fromLTRB(
-                  isMobile ? 16 : 8,
-                  isMobile ? 12 : 16,
-                  isMobile ? 16 : 8,
-                  100,
-                ),
-                child: marcasAsync.when(
-                  data: (marcas) {
-                    final filtradas = _filtroBusqueda.isEmpty
-                        ? marcas
-                        : marcas
-                              .where(
-                                (m) =>
-                                    m.nombre.toLowerCase().contains(
-                                      _filtroBusqueda,
-                                    ) ||
-                                    (m.descripcion?.toLowerCase().contains(
-                                          _filtroBusqueda,
-                                        ) ??
-                                        false),
-                              )
-                              .toList();
-
-                    if (filtradas.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No hay marcas registradas o coincidentes.',
-                          style: AppTypography.bodyMedium,
-                        ),
-                      );
-                    }
-
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.94),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.grey900.withValues(alpha: 0.05),
-                            blurRadius: 18,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isMobile ? 560 : 920,
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                isMobile ? 16 : 24,
+                isMobile ? 12 : 20,
+                isMobile ? 16 : 24,
+                isMobile ? 88 : 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.12),
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        children: [
-                          if (!isMobile)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 11,
-                              ),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF8FAFC),
-                                border: Border(
-                                  bottom: BorderSide(color: AppColors.border),
-                                ),
-                              ),
-                              child: Row(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: AppTextField(
+                      hint: 'Buscar por nombre o descripción...',
+                      prefixIcon: Icons.search,
+                      onChanged: (v) =>
+                          setState(() => _filtroBusqueda = v.toLowerCase()),
+                    ),
+                  ),
+                  SizedBox(height: isMobile ? 14 : 18),
+                  Expanded(
+                    child: marcasAsync.when(
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(color: AppColors.primary),
+                      ),
+                      error: (e, _) => Center(
+                        child: Text(
+                          'Error: $e',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
+                      ),
+                      data: (marcas) {
+                        final filtradas = _filtroBusqueda.isEmpty
+                            ? marcas
+                            : marcas
+                                .where(
+                                  (m) =>
+                                      m.nombre.toLowerCase().contains(
+                                        _filtroBusqueda,
+                                      ) ||
+                                      (m.descripcion?.toLowerCase().contains(
+                                            _filtroBusqueda,
+                                          ) ??
+                                          false),
+                                )
+                                .toList();
+
+                        if (filtradas.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const SizedBox(width: 54),
-                                  Expanded(
-                                    child: Text(
-                                      'MARCA',
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.4,
+                                  Container(
+                                    width: 64,
+                                    height: 64,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.10,
                                       ),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.verified_outlined,
+                                      size: 32,
+                                      color: AppColors.primary,
                                     ),
                                   ),
-                                  SizedBox(
-                                    width: 96,
-                                    child: Text(
-                                      'ACCIONES',
-                                      textAlign: TextAlign.center,
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.4,
-                                      ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    _filtroBusqueda.isEmpty
+                                        ? 'Sin marcas aún'
+                                        : 'Sin resultados',
+                                    style: AppTypography.h4.copyWith(
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    _filtroBusqueda.isEmpty
+                                        ? 'Registra la primera marca comercial\npara organizar tus productos.'
+                                        : 'Prueba con otro nombre o descripción.',
+                                    textAlign: TextAlign.center,
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                  if (_filtroBusqueda.isEmpty) ...[
+                                    const SizedBox(height: 18),
+                                    AppButton(
+                                      text: 'Nueva marca',
+                                      icon: Icons.add,
+                                      onPressed: () =>
+                                          _mostrarModalRegistro(context),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
-                          Expanded(
-                            child: ListView.separated(
-                              itemCount: filtradas.length,
-                              separatorBuilder: (context, index) =>
-                                  const Divider(
-                                    color: AppColors.border,
-                                    height: 1,
+                          );
+                        }
+
+                        if (isMobile) {
+                          return ListView.separated(
+                            itemCount: filtradas.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 10),
+                            itemBuilder: (_, i) {
+                              final m = filtradas[i];
+                              return _MarcaCard(
+                                marca: m,
+                                onEdit: () => _mostrarModalRegistro(
+                                  context,
+                                  marcaToEdit: m,
+                                ),
+                                onDelete: () =>
+                                    _confirmarEliminacion(context, m),
+                              );
+                            },
+                          );
+                        }
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.10),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.04),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.04,
                                   ),
-                              itemBuilder: (context, index) {
-                                final marca = filtradas[index];
-                                return Material(
-                                  color: index.isEven
-                                      ? AppColors.white
-                                      : AppColors.grey50.withValues(
-                                          alpha: 0.55,
+                                  border: const Border(
+                                    bottom: BorderSide(color: AppColors.border),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 52),
+                                    Expanded(
+                                      child: Text(
+                                        'MARCA',
+                                        style: AppTypography.labelSmall.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.4,
                                         ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 10,
+                                      ),
                                     ),
-                                    child: isMobile
-                                        ? Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Container(
-                                                    width: 42,
-                                                    height: 42,
-                                                    decoration: BoxDecoration(
-                                                      color: AppColors.grey50,
-                                                      borderRadius:
-                                                          AppRadius.allM,
-                                                    ),
-                                                    child: const Icon(
-                                                      Icons.verified_outlined,
-                                                      color:
-                                                          AppColors.textPrimary,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                  AppLayout.hM,
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          marca.nombre,
-                                                          style: AppTypography
-                                                              .labelLarge,
-                                                        ),
-                                                        AppLayout.vXs,
-                                                        Text(
-                                                          marca
-                                                                      .descripcion
-                                                                      ?.isEmpty ??
-                                                                  true
-                                                              ? 'Sin descripción'
-                                                              : marca
-                                                                    .descripcion!,
-                                                          style: AppTypography
-                                                              .bodySmall,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.edit_outlined,
-                                                      color: AppColors.primary,
-                                                      size: 20,
-                                                    ),
-                                                    tooltip: 'Editar Marca',
-                                                    onPressed: () =>
-                                                        _mostrarModalRegistro(
-                                                          context,
-                                                          marcaToEdit: marca,
-                                                        ),
-                                                  ),
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.delete_outline,
-                                                      color: AppColors.error,
-                                                      size: 20,
-                                                    ),
-                                                    tooltip: 'Eliminar Marca',
-                                                    onPressed: () =>
-                                                        _confirmarEliminacion(
-                                                          context,
-                                                          marca,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          )
-                                        : Row(
-                                            children: [
-                                              Container(
-                                                width: 42,
-                                                height: 42,
-                                                decoration: BoxDecoration(
-                                                  color: AppColors.grey50,
-                                                  borderRadius: AppRadius.allM,
-                                                ),
-                                                child: const Icon(
-                                                  Icons.verified_outlined,
-                                                  color: AppColors.textPrimary,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                              AppLayout.hM,
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      marca.nombre,
-                                                      style: AppTypography
-                                                          .labelLarge,
-                                                    ),
-                                                    AppLayout.vXs,
-                                                    Text(
-                                                      marca
-                                                                  .descripcion
-                                                                  ?.isEmpty ??
-                                                              true
-                                                          ? 'Sin descripción'
-                                                          : marca.descripcion!,
-                                                      style: AppTypography
-                                                          .bodySmall,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.edit_outlined,
-                                                      color: AppColors.primary,
-                                                      size: 20,
-                                                    ),
-                                                    tooltip: 'Editar Marca',
-                                                    onPressed: () =>
-                                                        _mostrarModalRegistro(
-                                                          context,
-                                                          marcaToEdit: marca,
-                                                        ),
-                                                  ),
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.delete_outline,
-                                                      color: AppColors.error,
-                                                      size: 20,
-                                                    ),
-                                                    tooltip: 'Eliminar Marca',
-                                                    onPressed: () =>
-                                                        _confirmarEliminacion(
-                                                          context,
-                                                          marca,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        'ACCIONES',
+                                        textAlign: TextAlign.center,
+                                        style: AppTypography.labelSmall.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView.separated(
+                                  itemCount: filtradas.length,
+                                  separatorBuilder: (_, __) => const Divider(
+                                    height: 1,
+                                    color: AppColors.border,
                                   ),
-                                );
-                              },
-                            ), // ListView
-                          ), // Expanded
-                        ], // Column children
-                      ), // Column
-                    ); // Container
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => Center(
-                    child: Text('Error: $e', style: AppTypography.bodyMedium),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: isMobile ? 16 : 24,
-              right: isMobile ? 16 : 24,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FloatingActionButton(
-                    mini: true,
-                    heroTag: 'buscar_marca',
-                    onPressed: () => _mostrarBusqueda(context),
-                    backgroundColor: const Color(0xFF64748B),
-                    child: const Icon(Icons.search, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  FloatingActionButton(
-                    heroTag: 'nueva_marca',
-                    onPressed: () => _mostrarModalRegistro(context),
-                    backgroundColor: const Color(0xFF3B82F6),
-                    child: const Icon(Icons.add, color: Colors.white),
+                                  itemBuilder: (_, i) {
+                                    final m = filtradas[i];
+                                    return Material(
+                                      color: i.isEven
+                                          ? Colors.white
+                                          : AppColors.grey50.withValues(
+                                              alpha: 0.55,
+                                            ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 10,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primary
+                                                    .withValues(alpha: 0.12),
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: const Icon(
+                                                Icons.verified_outlined,
+                                                color: AppColors.primary,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    m.nombre,
+                                                    style: AppTypography
+                                                        .bodyLarge
+                                                        .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    (m.descripcion?.isEmpty ??
+                                                            true)
+                                                        ? 'Sin descripción'
+                                                        : m.descripcion!,
+                                                    style: AppTypography
+                                                        .bodySmall
+                                                        .copyWith(
+                                                      color: AppColors
+                                                          .textSecondary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.edit_outlined,
+                                                color: AppColors.primary,
+                                                size: 20,
+                                              ),
+                                              tooltip: 'Editar',
+                                              onPressed: () =>
+                                                  _mostrarModalRegistro(
+                                                context,
+                                                marcaToEdit: m,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.delete_outline,
+                                                color: AppColors.error,
+                                                size: 20,
+                                              ),
+                                              tooltip: 'Eliminar',
+                                              onPressed: () =>
+                                                  _confirmarEliminacion(
+                                                context,
+                                                m,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -610,6 +600,90 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+
+class _MarcaCard extends StatelessWidget {
+  const _MarcaCard({
+    required this.marca,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final Marca marca;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final desc = (marca.descripcion?.isEmpty ?? true)
+        ? 'Sin descripción'
+        : marca.descripcion!;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.verified_outlined,
+              color: AppColors.primary,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  marca.nombre,
+                  style: AppTypography.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  desc,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+            onPressed: onEdit,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            onPressed: onDelete,
+          ),
+        ],
       ),
     );
   }

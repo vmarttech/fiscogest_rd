@@ -46,7 +46,7 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       clienteId: row.clienteId,
       ventaId: row.ventaId,
       totalOriginal: row.montoOriginal,
-      abonoInicial: row.montoAbonado,
+      abonoInicial: 0.0,
       fechaCreacion: row.fechaVencimiento,
       fechaVencimiento: row.fechaVencimiento,
       estado: _desdeCobrarEstado(row.estado, row.fechaVencimiento),
@@ -107,19 +107,6 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       montoAbonado: 0.0,
       fechaVencimiento: cuenta.fechaVencimiento,
     );
-
-    if (abono > 0.001) {
-      await _dao.registrarCobro(
-        CobrosTableCompanion.insert(
-          cuentaCobrarId: id,
-          fecha: DateTime.now(),
-          montoAbonado: abono,
-          formaPago: _parseFormaPago(abonoInicial?.metodoPago),
-          saldoAnterior: capital,
-          saldoActual: capital,
-        ),
-      );
-    }
 
     if (plan.cuotas.isNotEmpty) {
       await _dao.insertarCuotasPlan(
@@ -203,27 +190,40 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       montoMinimo: montoMinimo,
       montoMaximo: montoMaximo,
     );
-    return rows.map<CuentaPorCobrar>(_mapear).toList();
+    return Future.wait(
+      rows.map(
+        (row) async => _mapear(
+          row,
+          abonos: await listarAbonos(row.id),
+        ),
+      ),
+    );
   }
 
   @override
   Future<int> registrarAbono(AbonoCredito abono) async {
     final cuenta = await _dao.obtenerCuentaPorId(abono.cuentaId);
-    final saldoAnt = cuenta?.saldoPendiente ?? 0.0;
-    final saldoAct = (saldoAnt - abono.monto).clamp(0.0, double.infinity);
+    if (cuenta == null) throw StateError('La cuenta por cobrar no existe');
+    final saldoAnt = cuenta.saldoPendiente;
+    if (abono.monto <= 0) {
+      throw StateError('El monto del pago debe ser mayor a cero');
+    }
+    if (abono.monto > saldoAnt + 0.001) {
+      throw StateError('El pago excede el saldo pendiente');
+    }
 
-    final cobroId = await _dao.registrarCobro(
-      CobrosTableCompanion.insert(
+    return _dao.registrarPago(
+      cuentaId: abono.cuentaId,
+      montoPago: abono.monto,
+      cobro: CobrosTableCompanion.insert(
         cuentaCobrarId: abono.cuentaId,
         fecha: abono.fecha,
         montoAbonado: abono.monto,
         formaPago: _parseFormaPago(abono.metodoPago),
         saldoAnterior: saldoAnt,
-        saldoActual: saldoAct,
+        saldoActual: (saldoAnt - abono.monto).clamp(0.0, double.infinity),
       ),
     );
-    await _dao.aplicarPagoACuotas(abono.cuentaId, abono.monto);
-    return cobroId;
   }
 
   @override
@@ -286,7 +286,14 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
   @override
   Future<List<CuentaPorCobrar>> listarVencidas({int? limite}) async {
     final rows = await _dao.listarVencidas(limite: limite);
-    return rows.map<CuentaPorCobrar>(_mapear).toList();
+    return Future.wait(
+      rows.map(
+        (row) async => _mapear(
+          row,
+          abonos: await listarAbonos(row.id),
+        ),
+      ),
+    );
   }
 
   @override
@@ -298,7 +305,14 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       diasAnticipacion: diasAnticipacion,
       limite: limite,
     );
-    return rows.map<CuentaPorCobrar>(_mapear).toList();
+    return Future.wait(
+      rows.map(
+        (row) async => _mapear(
+          row,
+          abonos: await listarAbonos(row.id),
+        ),
+      ),
+    );
   }
 
   @override

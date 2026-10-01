@@ -52,5 +52,5 @@ class ConfiguracionTable extends Table {
       boolean().withDefault(const Constant(false))();
 
   BoolColumn get modoSimplificado =>
-      boolean().withDefault(const Constant(false))();
+      boolean().withDefault(const Constant(true))();
 }

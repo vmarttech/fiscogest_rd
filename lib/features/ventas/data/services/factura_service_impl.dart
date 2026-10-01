@@ -9,14 +9,13 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_factura_service.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class FacturaServiceImpl implements IFacturaService {
   FacturaServiceImpl();
 
   static final _fmtFecha = DateFormat('dd/MM/yyyy HH:mm');
-  static final _fmtMonto = NumberFormat('#,##0.00', 'es_DO');
-
-  String _monto(double v) => 'RD\$ ${_fmtMonto.format(v)}';
+  String _monto(double v) => formatRd(v);
 
   @override
   String generarTextoFactura(Venta venta) {

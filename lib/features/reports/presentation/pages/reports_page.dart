@@ -30,7 +30,7 @@ class ReportsPage extends StatelessWidget {
               32,
             ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
+              constraints: BoxConstraints(maxWidth: mobile ? 720 : 1000),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

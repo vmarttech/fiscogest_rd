@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fiscogest_rd/core/ui/app_textfield.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
 
 class CabeceraCompraWidget extends StatelessWidget {
   const CabeceraCompraWidget({
@@ -52,24 +49,24 @@ class CabeceraCompraWidget extends StatelessWidget {
     final seleccionado = tipoComprobante == valor;
     return InkWell(
       onTap: () => onTipoComprobanteChanged(valor),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: AppRadius.allM,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: seleccionado
-              ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
-              : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(16),
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : AppColors.grey50,
+          borderRadius: AppRadius.allM,
           border: Border.all(
             color: seleccionado
-                ? Theme.of(context).primaryColor
-                : Colors.transparent,
+                ? AppColors.primary
+                : AppColors.border,
           ),
         ),
         child: Text(
           '$valor • $etiqueta',
           style: AppTypography.bodySmall.copyWith(
-            color: seleccionado ? Theme.of(context).primaryColor : null,
+            color: seleccionado ? AppColors.primary : null,
             fontWeight: seleccionado ? FontWeight.w500 : null,
           ),
         ),
@@ -85,7 +82,7 @@ class CabeceraCompraWidget extends StatelessWidget {
     final seleccionado = formaPago == valor;
     return InkWell(
       onTap: () => onFormaPagoChanged(valor),
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: AppRadius.allL,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Row(
@@ -98,8 +95,8 @@ class CabeceraCompraWidget extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: seleccionado
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey.shade400,
+                      ? AppColors.primary
+                      : AppColors.grey300,
                   width: 2,
                 ),
               ),
@@ -108,9 +105,9 @@ class CabeceraCompraWidget extends StatelessWidget {
                       child: Container(
                         width: 9,
                         height: 9,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Theme.of(context).primaryColor,
+                          color: AppColors.primary,
                         ),
                       ),
                     )
@@ -120,7 +117,7 @@ class CabeceraCompraWidget extends StatelessWidget {
             Text(
               etiqueta,
               style: AppTypography.bodyMedium.copyWith(
-                color: seleccionado ? Theme.of(context).primaryColor : null,
+                color: seleccionado ? AppColors.primary : null,
                 fontWeight: seleccionado ? FontWeight.w500 : null,
               ),
             ),
@@ -132,11 +129,12 @@ class CabeceraCompraWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Datos de la Compra', style: AppTypography.h4),
-        AppLayout.vS,
+    return AppCard(
+      borderColor: AppColors.border,
+      padding: AppSpacing.allM,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
         AppTextField(
           controller: fechaController,
           label: 'Fecha Emisión',
@@ -234,6 +232,7 @@ class CabeceraCompraWidget extends StatelessWidget {
           prefixIcon: Icons.notes_outlined,
         ),
       ],
+      ),
     );
   }
 }

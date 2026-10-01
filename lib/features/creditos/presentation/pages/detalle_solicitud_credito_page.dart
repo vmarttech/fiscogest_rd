@@ -41,7 +41,6 @@ class _DetalleSolicitudCreditoPageState
   DateTime? _primerVencimiento;
   CuentaPorCobrar? _cuentaBorrador;
 
-  static final _fmt = NumberFormat('#,##0.00', 'es_DO');
   static final _fmtFecha = DateFormat('dd/MM/yyyy');
 
   @override
@@ -507,7 +506,7 @@ class _DetalleSolicitudCreditoPageState
             style: AppTypography.bodyMedium,
           ),
           Text(
-            'Total: RD\$ ${_fmt.format(v.montoTotal)}',
+            'Total: ${formatRd(v.montoTotal)}',
             style: AppTypography.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -606,11 +605,11 @@ class _DetalleSolicitudCreditoPageState
             children: [
               AppLayout.filaDato(
                 etiqueta: 'Abono inicial',
-                valor: 'RD\$ ${_fmt.format(abonoMostrar)}',
+                valor: formatRd(abonoMostrar),
               ),
               AppLayout.filaDato(
                 etiqueta: 'Saldo a financiar',
-                valor: 'RD\$ ${_fmt.format(saldo)}',
+                valor: formatRd(saldo),
               ),
               AppLayout.filaDato(
                 etiqueta: 'N° cuotas',
@@ -625,7 +624,7 @@ class _DetalleSolicitudCreditoPageState
               AppLayout.filaDato(
                 etiqueta: 'Cuota mensual',
                 valor: _numeroCuotas > 0 && saldo > 0
-                    ? 'RD\$ ${_fmt.format(CalculadoraCreditoService.calcularCuotaFija(capital: saldo, tasaMensual: _tasaMensual, numeroCuotas: _numeroCuotas))}'
+                    ? formatRd(CalculadoraCreditoService.calcularCuotaFija(capital: saldo, tasaMensual: _tasaMensual, numeroCuotas: _numeroCuotas))
                     : '—',
               ),
               AppLayout.filaDato(

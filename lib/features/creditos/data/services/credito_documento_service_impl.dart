@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/i_credito_documento_service.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   CreditoDocumentoServiceImpl({
@@ -22,9 +23,8 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   final String plantillaContratoExtra;
 
   static final _fmtFecha = DateFormat('dd/MM/yyyy');
-  static final _fmtMonto = NumberFormat('#,##0.00', 'es_DO');
 
-  String _m(double v) => 'RD\$ ${_fmtMonto.format(v)}';
+  String _m(double v) => formatRd(v);
 
   pw.Widget _titulo(String t) => pw.Text(
     t,
@@ -524,7 +524,6 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   Future<Uint8List> generarPdfCronograma({
     required CuentaPorCobrar cuenta,
   }) async {
-    final fmt = NumberFormat('#,##0.00', 'es_DO');
     final fmtFecha = DateFormat('dd/MM/yyyy');
     final cuotas = cuenta.planPago?.cuotas ?? const [];
     final doc = pw.Document();
@@ -570,7 +569,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
                     _celda('${q.numeroCuota}'),
                     _celda(fmtFecha.format(q.fechaVencimiento)),
                     _celda(
-                      'RD\$ ${fmt.format(q.montoTotal)}',
+                      formatRd(q.montoTotal),
                       align: pw.TextAlign.right,
                     ),
                     _celda(q.pagada ? 'Pagada' : 'Pendiente'),
@@ -599,6 +598,119 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
         ),
       ),
+    );
+  }
+
+  @override
+  Future<Uint8List> generarPdfEstadoCuenta({
+    required CuentaPorCobrar cuenta,
+  }) async {
+    final fmtFecha = DateFormat('dd/MM/yyyy');
+    final cuotas = cuenta.planPago?.cuotas ?? const [];
+    final doc = pw.Document();
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (ctx) => [
+          _titulo('ESTADO DE CUENTA'),
+          pw.SizedBox(height: 6),
+          pw.Text(
+            '${cuenta.clienteNombre ?? 'Cliente #${cuenta.clienteId}'}  ·  ${cuenta.numero ?? 'CXC-${cuenta.id ?? ''}'}',
+            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+          ),
+          pw.Text(
+            'Fecha de emisión: ${fmtFecha.format(DateTime.now())}'
+            '${cuenta.ventaId != null ? '  ·  Venta #${cuenta.ventaId}' : ''}',
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+          ),
+          pw.SizedBox(height: 12),
+          pw.Table(
+            border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
+            children: [
+              pw.TableRow(children: [
+                _celda('Monto financiado', bold: true),
+                _celda(formatRd(cuenta.totalOriginal), align: pw.TextAlign.right),
+              ]),
+              pw.TableRow(children: [
+                _celda('Total abonado', bold: true),
+                _celda(formatRd(cuenta.totalAbonado), align: pw.TextAlign.right),
+              ]),
+              pw.TableRow(children: [
+                _celda('Saldo pendiente', bold: true),
+                _celda(formatRd(cuenta.saldoPendiente), align: pw.TextAlign.right),
+              ]),
+              pw.TableRow(children: [
+                _celda('Vencimiento', bold: true),
+                _celda(fmtFecha.format(cuenta.fechaVencimiento)),
+              ]),
+            ],
+          ),
+          if (cuotas.isNotEmpty) ...[
+            pw.SizedBox(height: 18),
+            pw.Text('Detalle de cuotas', style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 6),
+            pw.Table(
+              border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
+              children: [
+                pw.TableRow(
+                  decoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                  children: [
+                    _celda('Cuota', bold: true),
+                    _celda('Vencimiento', bold: true),
+                    _celda('Monto', bold: true, align: pw.TextAlign.right),
+                    _celda('Pendiente', bold: true, align: pw.TextAlign.right),
+                    _celda('Estado', bold: true),
+                  ],
+                ),
+                for (final cuota in cuotas)
+                  pw.TableRow(children: [
+                    _celda('${cuota.numeroCuota}'),
+                    _celda(fmtFecha.format(cuota.fechaVencimiento)),
+                    _celda(formatRd(cuota.montoTotal), align: pw.TextAlign.right),
+                    _celda(formatRd(cuota.saldoDespues), align: pw.TextAlign.right),
+                    _celda(cuota.pagada ? 'Pagada' : 'Pendiente'),
+                  ]),
+              ],
+            ),
+          ],
+          pw.SizedBox(height: 18),
+          pw.Text('Historial de pagos', style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 6),
+          if (cuenta.abonos.isEmpty)
+            _celda('No hay pagos registrados')
+          else
+            pw.Table(
+              border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
+              children: [
+                pw.TableRow(
+                  decoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                  children: [
+                    _celda('Fecha', bold: true),
+                    _celda('Forma de pago', bold: true),
+                    _celda('Monto', bold: true, align: pw.TextAlign.right),
+                  ],
+                ),
+                for (final abono in cuenta.abonos)
+                  pw.TableRow(children: [
+                    _celda(fmtFecha.format(abono.fecha)),
+                    _celda(abono.metodoPago),
+                    _celda(formatRd(abono.monto), align: pw.TextAlign.right),
+                  ]),
+              ],
+            ),
+        ],
+      ),
+    );
+    return doc.save();
+  }
+
+  @override
+  Future<void> imprimirEstadoCuenta({required CuentaPorCobrar cuenta}) async {
+    final bytes = await generarPdfEstadoCuenta(cuenta: cuenta);
+    await Printing.layoutPdf(
+      onLayout: (_) async => bytes,
+      name: 'Estado_Cuenta_${cuenta.id ?? 'cliente'}',
     );
   }
 

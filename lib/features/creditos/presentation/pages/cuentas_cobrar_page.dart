@@ -47,7 +47,6 @@ class CuentasCobrarPage extends ConsumerWidget {
   static const String routeName = 'credito-cuentas';
   static const String path = '/creditos/cuentas';
 
-  static final _fmt = NumberFormat('#,##0.00', 'es_DO');
   static final _fmtFecha = DateFormat('dd/MM/yyyy');
 
   StatusChipType _chipType(EstadoCredito e) {
@@ -117,14 +116,14 @@ class CuentasCobrarPage extends ConsumerWidget {
                                     width: tileW,
                                     child: _Kpi(
                                       label: 'Por cobrar',
-                                      value: 'RD\$ ${_fmt.format(t.porCobrar)}',
+                                      value: formatRd(t.porCobrar),
                                     ),
                                   ),
                                   SizedBox(
                                     width: tileW,
                                     child: _Kpi(
                                       label: 'Vencido',
-                                      value: 'RD\$ ${_fmt.format(t.vencido)}',
+                                      value: formatRd(t.vencido),
                                     ),
                                   ),
                                   SizedBox(
@@ -257,7 +256,7 @@ class CuentasCobrarPage extends ConsumerWidget {
                                                     CrossAxisAlignment.end,
                                                 children: [
                                                   Text(
-                                                    'RD\$ ${_fmt.format(c.saldoPendiente)}',
+                                                    formatRd(c.saldoPendiente),
                                                     style: AppTypography
                                                         .labelMedium
                                                         .copyWith(

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fiscogest_rd/core/ui/app_textfield.dart';
-import 'package:fiscogest_rd/core/ui/app_formatters.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/tipos_linea.dart';
+import 'package:fiscogest_rd/core/ui/ui.dart';
 
 class LineaProductoWidget extends StatelessWidget {
   const LineaProductoWidget({
@@ -43,9 +40,10 @@ class LineaProductoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.m),
-      child: Padding(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.m),
+      child: AppCard(
+        borderColor: AppColors.border,
         padding: AppSpacing.allM,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,7 +55,7 @@ class LineaProductoWidget extends StatelessWidget {
                 IconButton(
                   icon: const Icon(
                     Icons.delete_outline,
-                    color: Colors.red,
+                    color: AppColors.error,
                     size: 20,
                   ),
                   onPressed: onEliminar,
@@ -69,7 +67,7 @@ class LineaProductoWidget extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            AppLayout.vXs,
             filaResponsiva(
               child1: AppTextField(
                 controller: ctrl.productoId,
@@ -88,9 +86,9 @@ class LineaProductoWidget extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            AppLayout.vS,
             const Text('Costos', style: AppTypography.labelMedium),
-            const SizedBox(height: 4),
+            AppLayout.vXs,
             filaResponsiva(
               child1: AppTextField(
                 controller: ctrl.cantidad,
@@ -116,7 +114,7 @@ class LineaProductoWidget extends StatelessWidget {
                 onChanged: onCostoChanged,
               ),
             ),
-            const SizedBox(height: 8),
+            AppLayout.vS,
             filaResponsiva(
               child1: AppTextField(
                 controller: ctrl.fleteUnitario,
@@ -141,7 +139,7 @@ class LineaProductoWidget extends StatelessWidget {
                 onChanged: onSeguroChanged,
               ),
             ),
-            const SizedBox(height: 8),
+            AppLayout.vS,
             filaResponsiva(
               child1: AppTextField(
                 controller: ctrl.arancelesUnitario,
@@ -166,7 +164,7 @@ class LineaProductoWidget extends StatelessWidget {
                 onChanged: onGastosChanged,
               ),
             ),
-            const SizedBox(height: 8),
+            AppLayout.vS,
             AppTextField(
               controller: ctrl.descuento,
               label: 'Descuento (%)',
@@ -178,31 +176,48 @@ class LineaProductoWidget extends StatelessWidget {
               ],
               onChanged: onDescuentoChanged,
             ),
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Subtotal: ${formatRd(linea.subtotalLinea).replaceFirst('RD\$ ', '')}  /*keep*/',
-                    style: AppTypography.bodyMedium,
+            AppLayout.vM,
+            Align(
+              alignment: Alignment.centerRight,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 240),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
                   ),
-                  Text(
-                    'ITBIS (18%): ${formatRd(linea.itbisLinea).replaceFirst('RD\$ ', '')}  /*keep*/',
-                    style: AppTypography.bodyMedium,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryContainer.withValues(alpha: 0.35),
+                    borderRadius: AppRadius.allM,
+                    border: Border.all(color: AppColors.border),
                   ),
-                  const Divider(height: 8),
-                  Text(
-                    'Total Línea: ${formatRd(linea.totalLinea).replaceFirst('RD\$ ', '')}  /*keep*/',
-                    style: AppTypography.labelLarge,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Subtotal: ${formatRdNumero(linea.subtotalLinea)}',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        'ITBIS (18%): ${formatRdNumero(linea.itbisLinea)}',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const Divider(height: 12, color: AppColors.border),
+                      Text(
+                        'Total línea: ${formatRdNumero(linea.totalLinea)}',
+                        style: AppTypography.labelLarge.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ],

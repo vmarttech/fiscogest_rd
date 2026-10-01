@@ -75,7 +75,7 @@ class ConfiguracionController extends AsyncNotifier<ConfiguracionEntity?> {
 }
 
 /// Último valor conocido (no vuelve a false en loading).
-final modoSimplificadoCacheProvider = StateProvider<bool>((ref) => false);
+final modoSimplificadoCacheProvider = StateProvider<bool>((ref) => true);
 
 /// Lectura estable para dashboard / menú / ventas.
 final modoSimplificadoProvider = Provider<bool>((ref) {

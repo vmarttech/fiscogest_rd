@@ -75,7 +75,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   bool _cajaPermitirTransferencia = true;
   bool _cajaPermitirCheque = false;
   bool _cajaExigirSesion = false;
-  bool _modoSimplificado = false;
+  bool _modoSimplificado = true;
 
   @override
   void dispose() {
@@ -289,35 +289,49 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          width: 240,
-          child: Material(
-            color: AppColors.surface,
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                  child: Text(
-                    'SECCIONES',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.textSecondary,
-                      letterSpacing: 1.1,
-                    ),
+        // Sidebar unificada
+        Container(
+          width: 248,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              right: BorderSide(color: AppColors.border.withValues(alpha: 0.9)),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 8,
+                offset: const Offset(2, 0),
+              ),
+            ],
+          ),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+                child: Text(
+                  'SECCIONES',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.textSecondary,
+                    letterSpacing: 1.0,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                ..._itemsMenu(),
-              ],
-            ),
+              ),
+              ..._itemsMenu(),
+            ],
           ),
         ),
-        const VerticalDivider(width: 1),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: _contenidoSeccion(),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(28, 24, 28, 40),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 820),
+                child: _contenidoSeccion(),
+              ),
             ),
           ),
         ),
@@ -326,30 +340,60 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   }
 
   Widget _buildMobile() {
+    final secciones = _SeccionConfig.values.where((s) {
+      if (!_modoSimplificado) return true;
+      return s != _SeccionConfig.ncf && s != _SeccionConfig.impuestos;
+    }).toList();
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: 52,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            children: _SeccionConfig.values.map((s) {
-              final sel = s == _seccion;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(_tituloSeccion(s)),
+        // Chips de sección (misma identidad que el resto de la app)
+        Container(
+          color: Colors.white,
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          child: SizedBox(
+            height: 40,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: secciones.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final s = secciones[i];
+                final sel = s == _seccion;
+                return FilterChip(
                   selected: sel,
+                  showCheckmark: false,
+                  avatar: Icon(
+                    _iconoSeccion(s),
+                    size: 16,
+                    color: sel ? AppColors.primary : AppColors.textSecondary,
+                  ),
+                  label: Text(_tituloSeccion(s)),
+                  labelStyle: AppTypography.labelMedium.copyWith(
+                    color: sel ? AppColors.primary : AppColors.textSecondary,
+                    fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                  selectedColor: AppColors.primary.withValues(alpha: 0.14),
+                  backgroundColor: Colors.white,
+                  side: BorderSide(
+                    color: sel
+                        ? AppColors.primary.withValues(alpha: 0.45)
+                        : AppColors.border,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   onSelected: (_) => setState(() => _seccion = s),
-                ),
-              );
-            }).toList(),
+                );
+              },
+            ),
           ),
         ),
-        const Divider(height: 1),
+        Divider(height: 1, color: AppColors.border.withValues(alpha: 0.8)),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             child: _contenidoSeccion(),
           ),
         ),
@@ -364,33 +408,51 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     });
     return secciones.map((s) {
       final sel = s == _seccion;
-      return Material(
-        color: sel ? AppColors.primary.withValues(alpha: 0.12) : null,
-        type: sel ? MaterialType.canvas : MaterialType.transparency,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () => setState(() => _seccion = s),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Icon(
-                  _iconoSeccion(s),
-                  color: sel ? AppColors.primary : AppColors.grey600,
-                  size: 22,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    _tituloSeccion(s),
-                    style: AppTypography.labelMedium.copyWith(
-                      color: sel ? AppColors.primary : AppColors.textPrimary,
-                      fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Material(
+          color: sel ? AppColors.primary.withValues(alpha: 0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => setState(() => _seccion = s),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: sel
+                    ? Border.all(color: AppColors.primary.withValues(alpha: 0.25))
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: sel
+                          ? AppColors.primary.withValues(alpha: 0.15)
+                          : AppColors.grey50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      _iconoSeccion(s),
+                      color: sel ? AppColors.primary : AppColors.grey600,
+                      size: 18,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _tituloSeccion(s),
+                      style: AppTypography.labelMedium.copyWith(
+                        color: sel ? AppColors.primary : AppColors.textPrimary,
+                        fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -462,7 +524,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           titulo: 'Crédito / Cuentas por cobrar',
           descripcion:
               'Tasa, cuotas, plazo máximo, días de gracia, mora y plantillas PDF.',
-          boton: 'Abrir configuración de crédito',
+          boton: 'Configuración de crédito',
           onTap: () => context.push('/creditos/config'),
         );
       case _SeccionConfig.ncf:
@@ -492,19 +554,37 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text('Empresa y fiscal', style: AppTypography.h3),
-              ),
-              AppButton(
+          LayoutBuilder(
+            builder: (context, c) {
+              final narrow = c.maxWidth < 480;
+              final title = Text(
+                'Empresa y fiscal',
+                style: AppTypography.h3.copyWith(fontWeight: FontWeight.w800),
+              );
+              final btn = AppButton(
                 text: _guardando ? 'Guardando...' : 'Guardar',
                 icon: Icons.save_rounded,
                 onPressed: _validarEmpresa() && !_guardando
                     ? _guardarEmpresa
                     : null,
-              ),
-            ],
+              );
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    title,
+                    const SizedBox(height: 12),
+                    btn,
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: title),
+                  btn,
+                ],
+              );
+            },
           ),
           AppLayout.vS,
           Text(
@@ -643,7 +723,14 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            Expanded(child: Text(titulo, style: AppTypography.labelMedium)),
+            Expanded(
+              child: Text(
+                titulo,
+                style: AppTypography.labelMedium,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             Switch.adaptive(
               value: valor,
               activeThumbColor: AppColors.primary,
@@ -657,18 +744,37 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            const Expanded(
-              child: Text('Documentos e impresión', style: AppTypography.h3),
-            ),
-            AppButton(
-              text: _guardando ? 'Guardando...' : 'Guardar',
-              icon: Icons.save_rounded,
-              onPressed: _guardando ? null : _guardarDocumentos,
-            ),
-          ],
-        ),
+          LayoutBuilder(
+            builder: (context, c) {
+              final narrow = c.maxWidth < 420;
+              final titleW = Text(
+                'Documentos e impresión',
+                style: AppTypography.h3.copyWith(fontWeight: FontWeight.w800),
+              );
+              final btn = AppButton(
+                text: _guardando ? 'Guardando...' : 'Guardar',
+                icon: Icons.save_rounded,
+                onPressed: _guardando ? null : _guardarDocumentos,
+              );
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    titleW,
+                    const SizedBox(height: 12),
+                    btn,
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: titleW),
+                  const SizedBox(width: 12),
+                  Flexible(child: btn),
+                ],
+              );
+            },
+          ),
         AppLayout.vS,
         Text(
           'Campos visibles en la factura / ticket que emite caja. '
@@ -857,7 +963,14 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            Expanded(child: Text(titulo, style: AppTypography.labelMedium)),
+            Expanded(
+              child: Text(
+                titulo,
+                style: AppTypography.labelMedium,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             Switch.adaptive(
               value: valor,
               activeThumbColor: AppColors.primary,
@@ -871,16 +984,37 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            const Expanded(child: Text('Caja', style: AppTypography.h3)),
-            AppButton(
-              text: _guardando ? 'Guardando...' : 'Guardar',
-              icon: Icons.save_rounded,
-              onPressed: _guardando ? null : _guardarEmpresa,
-            ),
-          ],
-        ),
+          LayoutBuilder(
+            builder: (context, c) {
+              final narrow = c.maxWidth < 420;
+              final titleW = Text(
+                'Caja',
+                style: AppTypography.h3.copyWith(fontWeight: FontWeight.w800),
+              );
+              final btn = AppButton(
+                text: _guardando ? 'Guardando...' : 'Guardar',
+                icon: Icons.save_rounded,
+                onPressed: _guardando ? null : _guardarEmpresa,
+              );
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    titleW,
+                    const SizedBox(height: 12),
+                    btn,
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: titleW),
+                  const SizedBox(width: 12),
+                  Flexible(child: btn),
+                ],
+              );
+            },
+          ),
         AppLayout.vS,
         Text(
           'Formas de pago y reglas al cobrar en caja.',
@@ -956,18 +1090,37 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            const Expanded(
-              child: Text('Ventas y cotizaciones', style: AppTypography.h3),
-            ),
-            AppButton(
-              text: _guardando ? 'Guardando...' : 'Guardar',
-              icon: Icons.save_rounded,
-              onPressed: _guardando ? null : _guardarEmpresa,
-            ),
-          ],
-        ),
+          LayoutBuilder(
+            builder: (context, c) {
+              final narrow = c.maxWidth < 420;
+              final titleW = Text(
+                'Ventas y cotizaciones',
+                style: AppTypography.h3.copyWith(fontWeight: FontWeight.w800),
+              );
+              final btn = AppButton(
+                text: _guardando ? 'Guardando...' : 'Guardar',
+                icon: Icons.save_rounded,
+                onPressed: _guardando ? null : _guardarEmpresa,
+              );
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    titleW,
+                    const SizedBox(height: 12),
+                    btn,
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: titleW),
+                  const SizedBox(width: 12),
+                  Flexible(child: btn),
+                ],
+              );
+            },
+          ),
         AppLayout.vS,
         Text(
           'Prefijos del número de cotización (Contado / Crédito).',
@@ -1086,13 +1239,21 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   }) {
     return AppCard(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(titulo, style: AppTypography.h3),
           AppLayout.vS,
           Text(descripcion, style: AppTypography.bodyMedium),
           AppLayout.vL,
-          AppButton(text: boton, icon: Icons.open_in_new, onPressed: onTap),
+          // Ancho completo evita overflow del Row interno del AppButton en móvil
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              text: boton,
+              icon: Icons.open_in_new,
+              onPressed: onTap,
+            ),
+          ),
         ],
       ),
     );

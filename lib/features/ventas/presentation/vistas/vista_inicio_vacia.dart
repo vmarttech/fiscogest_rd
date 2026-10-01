@@ -24,6 +24,7 @@ import 'package:fiscogest_rd/features/apartados/presentation/providers/apartado_
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
@@ -33,8 +34,7 @@ class VistaInicioVacia extends ConsumerStatefulWidget {
 }
 
 class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
-  static final NumberFormat _formatoNumero = NumberFormat('#,##0.00', 'es_DO');
-  String _formatearMonto(double valor) => 'RD\$${_formatoNumero.format(valor)}';
+  String _formatearMonto(double valor) => formatRd(valor);
 
   bool _guardando = false;
   bool _mostrarFormularioCredito = false;

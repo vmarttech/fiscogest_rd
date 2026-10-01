@@ -5,15 +5,14 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_cotizacion_service.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
 class CotizacionServiceImpl implements ICotizacionService {
   CotizacionServiceImpl();
 
   String _generarTextoCotizacion(Venta cotizacion) {
     final formatoFecha = DateFormat('dd/MM/yyyy HH:mm');
-    final formatoNumero = NumberFormat('#,##0.00', 'es_DO');
-
-    String formatearMonto(double valor) => 'RD\$${formatoNumero.format(valor)}';
+    String formatearMonto(double valor) => formatRd(valor);
 
     final texto = StringBuffer();
     texto.writeln('========================================');

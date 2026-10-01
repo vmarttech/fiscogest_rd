@@ -1,17 +1,15 @@
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/status_chip.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
-String _formatearMonto(double monto) {
-  return 'RD\$${NumberFormat('#,##0.00', 'es_DO').format(monto)}';
-}
+String _formatearMonto(double monto) => formatRd(monto);
 
 class ItemCarrito extends ConsumerWidget {
   const ItemCarrito({

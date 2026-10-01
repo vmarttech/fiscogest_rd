@@ -137,9 +137,31 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
         linea.ofertaNombre!.isNotEmpty;
   }
 
+  bool get tieneDescuentoPorLinea {
+    return state.detalles.any(
+      (l) => l.descuentoPorcentaje > 0 || l.montoDescuento > 0,
+    );
+  }
+
+  bool get tieneOfertaEnLineas {
+    return state.detalles.any(productoTieneOferta);
+  }
+
+  bool get tieneDescuentoGeneral => state.montoDescuento > 0.001;
+
+  /// Un solo tipo a la vez: oferta | descuento de línea | descuento general.
   String? puedeAplicarDescuentoLinea(DetalleVenta linea) {
     if (state.detalles.isEmpty) {
       return 'Agregue productos antes de aplicar descuento';
+    }
+    if (productoTieneOferta(linea)) {
+      return 'Esta línea tiene oferta. No se puede aplicar otro descuento';
+    }
+    if (tieneDescuentoGeneral) {
+      return 'Ya hay descuento general. Quítelo para aplicar descuento por línea';
+    }
+    if (tieneOfertaEnLineas) {
+      return 'Hay productos en oferta. No se pueden combinar con descuentos adicionales';
     }
     return null;
   }
@@ -147,6 +169,12 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   String? puedeAplicarDescuentoGeneral() {
     if (state.detalles.isEmpty) {
       return 'Agregue productos antes de aplicar descuento';
+    }
+    if (tieneOfertaEnLineas) {
+      return 'Hay productos en oferta. No se puede aplicar descuento general';
+    }
+    if (tieneDescuentoPorLinea) {
+      return 'Ya hay descuento por línea. Quítelo para aplicar descuento general';
     }
     return null;
   }
@@ -162,7 +190,6 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   String? agregarProducto(DetalleVenta linea) {
     final lista = List<DetalleVenta>.from(state.detalles);
     final indice = lista.indexWhere((p) => p.productoId == linea.productoId);
-
     if (indice >= 0) {
       final existente = lista[indice];
       final nuevaCantidad = existente.cantidad + linea.cantidad;
@@ -185,7 +212,6 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
       if (mensajeStock != null) return mensajeStock;
       lista.add(linea);
     }
-
     recalcularTotales(lista);
     return null;
   }
@@ -216,15 +242,29 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     }
   }
 
-  void aplicarDescuentoGeneral(double monto, {bool esPorcentaje = false}) {
-    double nuevoMontoDescuento = 0.0;
+  /// Aplica descuento general. [monto] <= 0 lo quita.
+  String? aplicarDescuentoGeneral(double monto, {bool esPorcentaje = false}) {
+    if (monto <= 0) {
+      quitarDescuento();
+      recalcularTotales(state.detalles);
+      return null;
+    }
+    final bloqueo = puedeAplicarDescuentoGeneral();
+    if (bloqueo != null) return bloqueo;
+
+    double nuevoMontoDescuento;
     if (esPorcentaje) {
+      if (monto > 100) return 'El descuento no puede superar el 100%';
       nuevoMontoDescuento = state.subtotal * (monto / 100.0);
     } else {
       nuevoMontoDescuento = monto;
     }
+    if (nuevoMontoDescuento > state.subtotal) {
+      nuevoMontoDescuento = state.subtotal;
+    }
     state = state.copyWith(montoDescuento: nuevoMontoDescuento);
     recalcularTotales(state.detalles);
+    return null;
   }
 
   void aplicarDescuentoManual(double monto) {
@@ -233,30 +273,56 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
 
   String? aplicarDescuentoLinea(int indice, double valor, bool esPorcentaje) {
     final lista = List<DetalleVenta>.from(state.detalles);
-    if (indice >= 0 && indice < lista.length) {
-      final linea = lista[indice];
-      final precioBase = linea.precioUnitario * linea.cantidad;
-      double nuevoSubtotal;
-      if (esPorcentaje) {
-        nuevoSubtotal = precioBase * (100 - valor) / 100;
-        lista[indice] = linea.copyWith(
-          descuentoPorcentaje: valor,
-          montoDescuento: 0,
-        );
-      } else {
-        nuevoSubtotal = precioBase - valor;
-        lista[indice] = linea.copyWith(
-          montoDescuento: valor,
-          descuentoPorcentaje: 0,
-        );
-      }
-      if (nuevoSubtotal < 0) nuevoSubtotal = 0;
-      lista[indice] = linea.copyWith(
-        subtotal: nuevoSubtotal,
-        subtotalLinea: nuevoSubtotal,
-      );
-      recalcularTotales(lista);
+    if (indice < 0 || indice >= lista.length) {
+      return 'Línea inválida';
     }
+    final linea = lista[indice];
+    final quitando = valor <= 0;
+
+    if (!quitando) {
+      final estaLineaYaTieneDesc =
+          linea.descuentoPorcentaje > 0 || linea.montoDescuento > 0;
+      final bloqueo = puedeAplicarDescuentoLinea(linea);
+      if (bloqueo != null && !estaLineaYaTieneDesc) {
+        return bloqueo;
+      }
+      if (productoTieneOferta(linea)) {
+        return 'Esta línea tiene oferta. No se puede aplicar otro descuento';
+      }
+      if (tieneDescuentoGeneral) {
+        return 'Ya hay descuento general. Quítelo para aplicar descuento por línea';
+      }
+    }
+
+    final precioBase = linea.precioUnitario * linea.cantidad;
+    double descPct = 0;
+    double descMonto = 0;
+    double nuevoSubtotal = precioBase;
+
+    if (!quitando) {
+      if (esPorcentaje) {
+        if (valor > 100) {
+          return 'El descuento no puede superar el 100%';
+        }
+        descPct = valor;
+        nuevoSubtotal = precioBase * (100 - valor) / 100;
+      } else {
+        if (valor > precioBase) {
+          return 'El descuento no puede superar el subtotal de la línea';
+        }
+        descMonto = valor;
+        nuevoSubtotal = precioBase - valor;
+      }
+    }
+    if (nuevoSubtotal < 0) nuevoSubtotal = 0;
+
+    lista[indice] = linea.copyWith(
+      descuentoPorcentaje: descPct,
+      montoDescuento: descMonto,
+      subtotal: nuevoSubtotal,
+      subtotalLinea: nuevoSubtotal,
+    );
+    recalcularTotales(lista);
     return null;
   }
 
@@ -269,10 +335,12 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 
   String? seleccionarDescuento(int id, String nombre, double valor) {
+    final bloqueo = puedeAplicarDescuentoGeneral();
+    if (bloqueo != null) return bloqueo;
     state = state.copyWith(descuentoId: id, descuentoNombre: nombre);
-    aplicarDescuentoGeneral(valor, esPorcentaje: true);
-    return null;
+    return aplicarDescuentoGeneral(valor, esPorcentaje: true);
   }
+
 
   void quitarDescuento() {
     state = state.copyWith(

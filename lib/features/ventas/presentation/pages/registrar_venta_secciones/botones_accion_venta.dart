@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 
 enum ModoOperacionVenta { venta, cotizacion, apartado }
@@ -36,28 +37,44 @@ class BotonesAccionVenta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: alLimpiar,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Limpiar'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.m),
-        Expanded(
-          child: AppButton(
-            text: cargando ? 'Procesando...' : _textoBotonPrincipal,
-            onPressed: cargando ? null : alGuardar,
-            isLoading: cargando,
-            icon: _iconoBotonPrincipal,
-          ),
-        ),
-      ],
+    final movil = AppBreakpoints.isMobile(context);
+    final limpiar = OutlinedButton.icon(
+      onPressed: alLimpiar,
+      icon: const Icon(Icons.refresh),
+      label: const Text('Limpiar'),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+      ),
+    );
+    final guardar = AppButton(
+      text: cargando ? 'Procesando...' : _textoBotonPrincipal,
+      onPressed: cargando ? null : alGuardar,
+      isLoading: cargando,
+      icon: _iconoBotonPrincipal,
+    );
+
+    if (movil) {
+      return Row(
+        children: [
+          Expanded(child: limpiar),
+          const SizedBox(width: AppSpacing.m),
+          Expanded(child: guardar),
+        ],
+      );
+    }
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(width: 140, child: limpiar),
+          const SizedBox(width: AppSpacing.m),
+          SizedBox(width: 220, child: guardar),
+        ],
+      ),
     );
   }
 }
+
+// design: AppColors.primary available
