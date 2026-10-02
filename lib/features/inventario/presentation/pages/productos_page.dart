@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:drift/drift.dart' hide Column;
+import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +19,52 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+
+final indicadoresReposicionProvider =
+    FutureProvider.autoDispose<
+      Map<int, ({double vendidos30Dias, double compraPendiente})>
+    >((ref) async {
+      final db = ref.watch(databaseProvider);
+      final desde =
+          DateTime.now()
+              .subtract(const Duration(days: 30))
+              .millisecondsSinceEpoch ~/
+          1000;
+      final filas = await db
+          .customSelect(
+            '''
+        SELECT
+          p.id AS producto_id,
+          COALESCE((
+            SELECT SUM(d.cantidad)
+            FROM ventas_detalle_table d
+            INNER JOIN ventas_table v ON v.id = d.venta_id
+            WHERE d.producto_id = p.id
+              AND v.fecha >= ?
+              AND v.estado_documento IN ('facturado', 'enCredito')
+          ), 0) AS vendidos_30_dias,
+          COALESCE((
+            SELECT SUM(dc.cantidad)
+            FROM detalle_compra_table dc
+            INNER JOIN compras_table c ON c.id = dc.compra_id
+            WHERE dc.producto_id = p.id
+              AND c.estado NOT IN ('borrador', 'recibida', 'anulada')
+          ), 0) AS compra_pendiente
+        FROM productos_table p
+        ''',
+            variables: [Variable.withInt(desde)],
+          )
+          .get();
+      return {
+        for (final fila in filas)
+          (fila.data['producto_id'] as num).toInt(): (
+            vendidos30Dias:
+                (fila.data['vendidos_30_dias'] as num?)?.toDouble() ?? 0,
+            compraPendiente:
+                (fila.data['compra_pendiente'] as num?)?.toDouble() ?? 0,
+          ),
+      };
+    });
 
 class ProductosPage extends ConsumerStatefulWidget {
   const ProductosPage({super.key});
@@ -237,8 +285,8 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       if (!matchTexto) return false;
                       final stock = p.stock ?? 0;
                       return switch (_filtroEstado) {
-                        'en_stock' => stock > 10,
-                        'bajo' => stock > 0 && stock <= 10,
+                        'en_stock' => stock > (p.stockMinimo ?? 10),
+                        'bajo' => stock > 0 && stock <= (p.stockMinimo ?? 10),
                         'agotado' => stock <= 0,
                         _ => true,
                       };
@@ -310,6 +358,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     bool puedeVerCostos,
     bool puedeEliminar,
   ) {
+    final indicadores = ref.watch(indicadoresReposicionProvider).valueOrNull;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -389,7 +438,28 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               itemBuilder: (_, i) {
                 final p = productos[i];
                 final stock = p.stock ?? 0;
-                final (statusText, statusColor) = _getStatus(stock);
+                final minimo = p.stockMinimo ?? 10;
+                final indicadoresProducto = p.id == null
+                    ? null
+                    : indicadores?[p.id!];
+                final vendidos30Dias = indicadoresProducto?.vendidos30Dias ?? 0;
+                final compraPendiente =
+                    indicadoresProducto?.compraPendiente ?? 0;
+                var objetivoReposicion = vendidos30Dias + minimo;
+                if (objetivoReposicion < minimo) {
+                  objetivoReposicion = minimo;
+                }
+                if (p.stockMaximo != null &&
+                    p.stockMaximo! >= minimo &&
+                    objetivoReposicion > p.stockMaximo!) {
+                  objetivoReposicion = p.stockMaximo!;
+                }
+                final cantidadSugerida =
+                    (objetivoReposicion - stock - compraPendiente).clamp(
+                      0.0,
+                      double.infinity,
+                    );
+                final (statusText, statusColor) = _getStatus(stock, minimo);
                 return Material(
                   color: i.isEven
                       ? AppColors.white
@@ -423,15 +493,33 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                         ),
                         Expanded(
                           flex: 1,
-                          child: Text(
-                            stock.toStringAsFixed(
-                              stock.truncateToDouble() == stock ? 0 : 2,
-                            ),
-                            style: AppTypography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                            textAlign: TextAlign.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                stock.toStringAsFixed(
+                                  stock.truncateToDouble() == stock ? 0 : 2,
+                                ),
+                                style: AppTypography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              if (indicadores != null && cantidadSugerida > 0)
+                                Tooltip(
+                                  message:
+                                      'Sugerencia con ventas de 30 días y compras pendientes; respeta el stock máximo configurado.',
+                                  child: Text(
+                                    'Reponer ${cantidadSugerida.toStringAsFixed(cantidadSugerida.truncateToDouble() == cantidadSugerida ? 0 : 2)}',
+                                    style: AppTypography.labelSmall.copyWith(
+                                      color: AppColors.warning,
+                                      fontSize: 10,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                         Expanded(
@@ -517,9 +605,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     );
   }
 
-  (String, Color) _getStatus(double stock) {
+  (String, Color) _getStatus(double stock, double stockMinimo) {
     if (stock <= 0) return ('Agotado', AppColors.error);
-    if (stock <= 10) return ('Bajo', AppColors.warning);
+    if (stock <= stockMinimo) return ('Bajo', AppColors.warning);
     return ('En Stock', AppColors.success);
   }
 
@@ -668,9 +756,7 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected
-              ? activeColor.withValues(alpha: 0.14)
-              : Colors.white,
+          color: selected ? activeColor.withValues(alpha: 0.14) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
@@ -719,8 +805,8 @@ class _ProductoCardMobile extends StatelessWidget {
     final (statusText, statusColor) = stock <= 0
         ? ('Agotado', AppColors.error)
         : stock <= 10
-            ? ('Bajo', AppColors.warning)
-            : ('En Stock', AppColors.success);
+        ? ('Bajo', AppColors.warning)
+        : ('En Stock', AppColors.success);
 
     return Container(
       padding: const EdgeInsets.all(14),

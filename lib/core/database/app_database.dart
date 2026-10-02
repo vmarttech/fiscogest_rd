@@ -103,11 +103,19 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 44;
+  int get schemaVersion => 45;
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (Migrator m) async => await m.createAll(),
+    onCreate: (Migrator m) async {
+      await m.createAll();
+      await m.database.customStatement(_crearTablaBitacora);
+      await m.database.customStatement(_crearColaSincronizacion);
+    },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 45) {
+        await m.database.customStatement(_crearTablaBitacora);
+        await m.database.customStatement(_crearColaSincronizacion);
+      }
       if (from < 43) {
         await m.createTable(fiosTable);
       }
@@ -546,6 +554,33 @@ class AppDatabase extends _$AppDatabase {
     },
   );
 }
+
+const _crearTablaBitacora = '''
+  CREATE TABLE IF NOT EXISTS bitacora_operaciones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL,
+    usuario_id INTEGER NOT NULL DEFAULT 0,
+    accion TEXT NOT NULL,
+    entidad TEXT NOT NULL,
+    entidad_id INTEGER,
+    resumen TEXT NOT NULL,
+    datos TEXT
+  )
+  ''';
+
+const _crearColaSincronizacion = '''
+  CREATE TABLE IF NOT EXISTS cola_sincronizacion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha_creacion TEXT NOT NULL,
+    entidad TEXT NOT NULL,
+    entidad_id INTEGER NOT NULL DEFAULT 0,
+    accion TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    estado TEXT NOT NULL DEFAULT 'pendiente',
+    intentos INTEGER NOT NULL DEFAULT 0,
+    ultimo_error TEXT
+  )
+  ''';
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'dart:convert';
@@ -55,6 +57,7 @@ class ImportExportPage extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _ExportCard(
+                            onRespaldar: () => _crearRespaldo(context, ref),
                             onProductos: () async {
                               final csv = await controller.exportarDatosEntidad(
                                 'productos',
@@ -101,6 +104,7 @@ class ImportExportPage extends ConsumerWidget {
                     )
                   else ...[
                     _ExportCard(
+                      onRespaldar: () => _crearRespaldo(context, ref),
                       onProductos: () async {
                         final csv = await controller.exportarDatosEntidad(
                           'productos',
@@ -155,6 +159,39 @@ class ImportExportPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _crearRespaldo(BuildContext context, WidgetRef ref) async {
+    final marcaTiempo = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
+    final ruta = await FilePicker.platform.saveFile(
+      dialogTitle: 'Guardar respaldo completo de FiscoGest',
+      fileName: 'FiscoGest_RD_respaldo_$marcaTiempo.sqlite',
+      type: FileType.custom,
+      allowedExtensions: const ['sqlite'],
+    );
+    if (ruta == null) return;
+
+    try {
+      final db = ref.read(databaseProvider);
+      await db.customStatement('VACUUM INTO ?', [ruta]);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Respaldo guardado en $ruta'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No se pudo crear el respaldo: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _elegirYImportar(BuildContext context, WidgetRef ref) async {
@@ -289,11 +326,13 @@ class _HubHero extends StatelessWidget {
 
 class _ExportCard extends StatelessWidget {
   const _ExportCard({
+    required this.onRespaldar,
     required this.onProductos,
     required this.onClientes,
     required this.onProveedores,
   });
 
+  final VoidCallback onRespaldar;
   final VoidCallback onProductos;
   final VoidCallback onClientes;
   final VoidCallback onProveedores;
@@ -323,12 +362,18 @@ class _ExportCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Catálogos en CSV (compatible con Excel).',
+            'Crea un respaldo completo o exporta catálogos CSV para Excel.',
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: onRespaldar,
+            icon: const Icon(Icons.backup_outlined, size: 18),
+            label: const Text('Respaldo completo de la base de datos'),
+          ),
+          const SizedBox(height: 8),
           FilledButton.icon(
             onPressed: onProductos,
             icon: const Icon(Icons.inventory_2_outlined, size: 18),

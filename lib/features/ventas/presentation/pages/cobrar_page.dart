@@ -33,43 +33,48 @@ final listadoCuentasCobrarProvider =
               db.clientesTable,
             )..where((t) => t.id.isIn(idsClientes))).get()
           : <ClientesTableData>[];
-      final mapaClientes = <int, String>{
-        for (final row in registrosClientes) row.id: row.nombre,
+      final mapaClientes = <int, ClientesTableData>{
+        for (final row in registrosClientes) row.id: row,
       };
-      return Future.wait(registrosFiltrados.map((reg) async {
-        final nombreCliente =
-            mapaClientes[reg.clienteId] ?? 'Cliente #${reg.clienteId}';
-        final estadoTexto = switch (reg.estado) {
-          CobrarEstado.pagado => 'Pagado',
-          CobrarEstado.vencido => 'Vencido',
-          CobrarEstado.parcial => 'Parcial',
-          _ => 'Pendiente',
-        };
-        final cuotas = await dao.listarCuotas(reg.id);
-        CuotaCobrarItem? proximaCuota;
-        for (final cuota in cuotas) {
-          if (cuota.estado != 'pagada') {
-            proximaCuota = CuotaCobrarItem(
-              monto: (cuota.monto - cuota.montoPagado)
-                  .clamp(0.0, double.infinity),
-              fecha: cuota.fechaVencimiento,
-            );
-            break;
+      return Future.wait(
+        registrosFiltrados.map((reg) async {
+          final cliente = mapaClientes[reg.clienteId];
+          final nombreCliente = cliente?.nombre ?? 'Cliente #${reg.clienteId}';
+          final estadoTexto = switch (reg.estado) {
+            CobrarEstado.pagado => 'Pagado',
+            CobrarEstado.vencido => 'Vencido',
+            CobrarEstado.parcial => 'Parcial',
+            _ => 'Pendiente',
+          };
+          final cuotas = await dao.listarCuotas(reg.id);
+          CuotaCobrarItem? proximaCuota;
+          for (final cuota in cuotas) {
+            if (cuota.estado != 'pagada') {
+              proximaCuota = CuotaCobrarItem(
+                monto: (cuota.monto - cuota.montoPagado).clamp(
+                  0.0,
+                  double.infinity,
+                ),
+                fecha: cuota.fechaVencimiento,
+              );
+              break;
+            }
           }
-        }
-        return CuentaCobrarItem(
-          id: reg.id,
-          ventaId: reg.ventaId,
-          proximaCuota: proximaCuota,
-          clienteId: reg.clienteId,
-          clienteNombre: nombreCliente,
-          montoOriginal: reg.montoOriginal,
-          montoAbonado: reg.montoAbonado,
-          saldoPendiente: reg.saldoPendiente,
-          fechaVencimiento: reg.fechaVencimiento,
-          estado: estadoTexto,
-        );
-      }));
+          return CuentaCobrarItem(
+            id: reg.id,
+            ventaId: reg.ventaId,
+            proximaCuota: proximaCuota,
+            clienteId: reg.clienteId,
+            clienteNombre: nombreCliente,
+            clienteDocumento: cliente?.rncCedula ?? '',
+            montoOriginal: reg.montoOriginal,
+            montoAbonado: reg.montoAbonado,
+            saldoPendiente: reg.saldoPendiente,
+            fechaVencimiento: reg.fechaVencimiento,
+            estado: estadoTexto,
+          );
+        }),
+      );
     });
 
 class CuentaCobrarItem {
@@ -79,6 +84,7 @@ class CuentaCobrarItem {
     this.ventaId,
     this.proximaCuota,
     required this.clienteNombre,
+    this.clienteDocumento = '',
     required this.montoOriginal,
     required this.montoAbonado,
     required this.saldoPendiente,
@@ -90,6 +96,7 @@ class CuentaCobrarItem {
   final int? ventaId;
   final CuotaCobrarItem? proximaCuota;
   final String clienteNombre;
+  final String clienteDocumento;
   final double montoOriginal;
   final double montoAbonado;
   final double saldoPendiente;
@@ -104,7 +111,7 @@ class CuotaCobrarItem {
   final DateTime fecha;
 }
 
-class CobrarPage extends ConsumerWidget {
+class CobrarPage extends ConsumerStatefulWidget {
   const CobrarPage({
     super.key,
     this.clienteIdFiltro = 0,
@@ -117,7 +124,24 @@ class CobrarPage extends ConsumerWidget {
   final VoidCallback? onIrACredito;
 
   static const String routeName = 'cobrar';
+
+  @override
+  ConsumerState<CobrarPage> createState() => _CobrarPageState();
+}
+
+class _CobrarPageState extends ConsumerState<CobrarPage> {
   static final DateFormat _formatoFecha = DateFormat('dd/MM/yyyy');
+  final TextEditingController _busquedaController = TextEditingController();
+  String _textoBusqueda = '';
+
+  @override
+  void dispose() {
+    _busquedaController.dispose();
+    super.dispose();
+  }
+
+  String _normalizarDocumento(String valor) =>
+      valor.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
   Color _colorEstado(String estado) {
     return switch (estado) {
@@ -130,9 +154,9 @@ class CobrarPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final cuentasAsync = ref.watch(
-      listadoCuentasCobrarProvider(clienteIdFiltro),
+      listadoCuentasCobrarProvider(widget.clienteIdFiltro),
     );
     final esPantallaPequena = MediaQuery.of(context).size.width < 600;
     final paddingTexto = esPantallaPequena ? 12.0 : 16.0;
@@ -141,25 +165,25 @@ class CobrarPage extends ConsumerWidget {
     final espaciadoTarjeta = esPantallaPequena ? 8.0 : 12.0;
 
     return AppScaffold(
-      title: clienteIdFiltro > 0
+      title: widget.clienteIdFiltro > 0
           ? 'Cuentas por Cobrar — Cliente'
           : 'Cuentas por Cobrar',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
-          if (onVolver != null) {
-            onVolver!();
+          if (widget.onVolver != null) {
+            widget.onVolver!();
           } else if (Navigator.canPop(context)) {
             Navigator.pop(context);
           }
         },
       ),
       actions: [
-        if (onIrACredito != null)
+        if (widget.onIrACredito != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: ElevatedButton(
-              onPressed: onIrACredito,
+              onPressed: widget.onIrACredito,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
@@ -171,7 +195,7 @@ class CobrarPage extends ConsumerWidget {
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
-          ref.invalidate(listadoCuentasCobrarProvider(clienteIdFiltro));
+          ref.invalidate(listadoCuentasCobrarProvider(widget.clienteIdFiltro));
         },
         child: cuentasAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -187,6 +211,19 @@ class CobrarPage extends ConsumerWidget {
             ),
           ),
           data: (cuentas) {
+            final consulta = _textoBusqueda.trim().toLowerCase();
+            final consultaDocumento = _normalizarDocumento(consulta);
+            final cuentasFiltradas = consulta.isEmpty
+                ? cuentas
+                : cuentas.where((cuenta) {
+                    final nombre = cuenta.clienteNombre.toLowerCase();
+                    final documento = _normalizarDocumento(
+                      cuenta.clienteDocumento,
+                    );
+                    return nombre.contains(consulta) ||
+                        (consultaDocumento.isNotEmpty &&
+                            documento.contains(consultaDocumento));
+                  }).toList();
             if (cuentas.isEmpty) {
               return Center(
                 child: SingleChildScrollView(
@@ -202,7 +239,7 @@ class CobrarPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        clienteIdFiltro > 0
+                        widget.clienteIdFiltro > 0
                             ? 'Este cliente no tiene cuentas por cobrar'
                             : 'No hay cuentas por cobrar',
                         style: AppTypography.bodyLarge.copyWith(
@@ -223,108 +260,169 @@ class CobrarPage extends ConsumerWidget {
                 ),
               );
             }
-            return ListView.builder(
-              padding: AppLayout.pantallaPadding,
-              itemCount: cuentas.length,
-              itemBuilder: (context, i) {
-                final c = cuentas[i];
-                final vencida = c.estado == 'Vencido';
-                return Padding(
-                  padding: EdgeInsets.only(bottom: espaciadoTarjeta),
-                  child: InkWell(
-                    borderRadius: AppRadius.allM,
-                    onTap: () async {
-                      await context.push('/creditos/cuentas/${c.id}');
-                      ref.invalidate(
-                        listadoCuentasCobrarProvider(clienteIdFiltro),
-                      );
-                    },
-                    child: Container(
-                      color: vencida ? AppColors.grey100 : null,
-                      padding: EdgeInsets.all(paddingTexto),
-                      child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          c.clienteNombre,
-                          style: AppTypography.bodyMediumSemiBold,
+            return Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: esPantallaPequena ? 280 : 340,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: TextField(
+                        controller: _busquedaController,
+                        onChanged: (valor) =>
+                            setState(() => _textoBusqueda = valor),
+                        decoration: InputDecoration(
+                          hintText: 'Buscar nombre, RNC o cédula',
+                          isDense: true,
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          suffixIcon: _textoBusqueda.isEmpty
+                              ? null
+                              : IconButton(
+                                  tooltip: 'Limpiar búsqueda',
+                                  onPressed: () {
+                                    _busquedaController.clear();
+                                    setState(() => _textoBusqueda = '');
+                                  },
+                                  icon: const Icon(Icons.clear, size: 18),
+                                ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          border: const OutlineInputBorder(),
                         ),
-                        const SizedBox(height: AppSpacing.xs),
-                        if (c.ventaId != null)
-                          Text(
-                            'Venta relacionada: #${c.ventaId}',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        Text(
-                          'Total: ${formatRd(c.montoOriginal)}',
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontSize: tamanoCuerpo,
-                          ),
-                        ),
-                        Text(
-                          'Abonado: ${formatRd(c.montoAbonado)}',
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontSize: tamanoCuerpo,
-                          ),
-                        ),
-                        Text(
-                          'Saldo pendiente: ${formatRd(c.saldoPendiente)}',
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontSize: tamanoCuerpo,
-                            fontWeight: FontWeight.w600,
-                            color: vencida
-                                ? AppColors.error
-                                : AppColors.primary,
-                          ),
-                        ),
-                        Text(
-                          'Vence: ${_formatoFecha.format(c.fechaVencimiento)}',
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontSize: tamanoCuerpo,
-                          ),
-                        ),
-                        if (c.proximaCuota != null)
-                          Text(
-                            'Próxima cuota: ${formatRd(c.proximaCuota!.monto)} · ${_formatoFecha.format(c.proximaCuota!.fecha)}',
-                            style: AppTypography.bodyMedium.copyWith(
-                              fontSize: tamanoCuerpo,
-                              color: AppColors.info,
-                            ),
-                          ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _colorEstado(c.estado),
-                            borderRadius: AppRadius.allM,
-                          ),
-                          child: Text(
-                            c.estado,
-                            style: AppTypography.labelSmall.copyWith(
-                              fontSize: tamanoEtiqueta,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          'Ver cuotas, pagos y estado de cuenta  ›',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
                       ),
                     ),
                   ),
-                );
-              },
+                ),
+                Expanded(
+                  child: cuentasFiltradas.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No hay clientes que coincidan con la búsqueda.',
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: AppLayout.pantallaPadding,
+                          itemCount: cuentasFiltradas.length,
+                          itemBuilder: (context, i) {
+                            final c = cuentasFiltradas[i];
+                            final vencida = c.estado == 'Vencido';
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom: espaciadoTarjeta,
+                              ),
+                              child: InkWell(
+                                borderRadius: AppRadius.allM,
+                                onTap: () async {
+                                  await context.push(
+                                    '/creditos/cuentas/${c.id}',
+                                  );
+                                  ref.invalidate(
+                                    listadoCuentasCobrarProvider(
+                                      widget.clienteIdFiltro,
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  color: vencida ? AppColors.grey100 : null,
+                                  padding: EdgeInsets.all(paddingTexto),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        c.clienteNombre,
+                                        style: AppTypography.bodyMediumSemiBold,
+                                      ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      if (c.ventaId != null)
+                                        Text(
+                                          'Venta relacionada: #${c.ventaId}',
+                                          style: AppTypography.bodySmall
+                                              .copyWith(
+                                                color: AppColors.textSecondary,
+                                              ),
+                                        ),
+                                      Text(
+                                        'Total: ${formatRd(c.montoOriginal)}',
+                                        style: AppTypography.bodyMedium
+                                            .copyWith(fontSize: tamanoCuerpo),
+                                      ),
+                                      Text(
+                                        'Abonado: ${formatRd(c.montoAbonado)}',
+                                        style: AppTypography.bodyMedium
+                                            .copyWith(fontSize: tamanoCuerpo),
+                                      ),
+                                      Text(
+                                        'Saldo pendiente: ${formatRd(c.saldoPendiente)}',
+                                        style: AppTypography.bodyMedium
+                                            .copyWith(
+                                              fontSize: tamanoCuerpo,
+                                              fontWeight: FontWeight.w600,
+                                              color: vencida
+                                                  ? AppColors.error
+                                                  : AppColors.primary,
+                                            ),
+                                      ),
+                                      Text(
+                                        'Vence: ${_formatoFecha.format(c.fechaVencimiento)}',
+                                        style: AppTypography.bodyMedium
+                                            .copyWith(fontSize: tamanoCuerpo),
+                                      ),
+                                      if (c.proximaCuota != null)
+                                        Text(
+                                          'Próxima cuota: ${formatRd(c.proximaCuota!.monto)} · ${_formatoFecha.format(c.proximaCuota!.fecha)}',
+                                          style: AppTypography.bodyMedium
+                                              .copyWith(
+                                                fontSize: tamanoCuerpo,
+                                                color: AppColors.info,
+                                              ),
+                                        ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.s,
+                                          vertical: AppSpacing.xs,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _colorEstado(c.estado),
+                                          borderRadius: AppRadius.allM,
+                                        ),
+                                        child: Text(
+                                          c.estado,
+                                          style: AppTypography.labelSmall
+                                              .copyWith(
+                                                fontSize: tamanoEtiqueta,
+                                                color: AppColors.white,
+                                              ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Text(
+                                        'Ver cuotas, pagos y estado de cuenta  ›',
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
             );
           },
         ),

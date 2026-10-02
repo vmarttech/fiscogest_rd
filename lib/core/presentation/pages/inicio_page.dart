@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/features/reportes/domain/kpi_models.dart';
 import 'package:fiscogest_rd/features/reportes/presentation/providers/dashboard_providers.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
 /// Hub de inicio — layout denso y atmósfera premium en desktop.
 class InicioPage extends ConsumerWidget {
@@ -340,6 +344,18 @@ class InicioPage extends ConsumerWidget {
                                     context,
                                     '/ventas/cotizaciones/nueva',
                                   ),
+                                  onVerCobros: () =>
+                                      _go(context, CuentasCobrarPage.path),
+                                  puedeVerCobros:
+                                      sesion?.puede(
+                                        Permiso.creditosGestionar,
+                                      ) ??
+                                      false,
+                                  puedeVerInventario:
+                                      sesion?.puede(Permiso.inventarioVer) ??
+                                      false,
+                                  onVerInventario: () =>
+                                      _go(context, '/inventario'),
                                 ),
                               ],
                             ),
@@ -427,6 +443,12 @@ class InicioPage extends ConsumerWidget {
                       _InsightsCarousel(
                         onNuevaCotizacion: () =>
                             _go(context, '/ventas/cotizaciones/nueva'),
+                        onVerCobros: () => _go(context, CuentasCobrarPage.path),
+                        puedeVerCobros:
+                            sesion?.puede(Permiso.creditosGestionar) ?? false,
+                        puedeVerInventario:
+                            sesion?.puede(Permiso.inventarioVer) ?? false,
+                        onVerInventario: () => _go(context, '/inventario'),
                       ),
                     ],
                   ],
@@ -1386,6 +1408,15 @@ class _Acceso extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mobile = MediaQuery.of(context).size.width < 600;
+    final tituloWidget = Text(
+      titulo,
+      maxLines: 1,
+      softWrap: false,
+      style: AppTypography.labelLarge.copyWith(
+        fontWeight: FontWeight.w700,
+      ),
+    );
     return AppCard(
       onTap: onTap,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -1404,12 +1435,14 @@ class _Acceso extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  titulo,
-                  style: AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                if (mobile)
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: tituloWidget,
+                  )
+                else
+                  tituloWidget,
                 Text(
                   sub,
                   style: AppTypography.bodySmall.copyWith(
@@ -1432,9 +1465,19 @@ class _Acceso extends StatelessWidget {
 
 /// Carrusel tipo panel bancario: rota indicadores con progreso y fade.
 class _InsightsCarousel extends ConsumerStatefulWidget {
-  const _InsightsCarousel({required this.onNuevaCotizacion});
+  const _InsightsCarousel({
+    required this.onNuevaCotizacion,
+    required this.onVerCobros,
+    required this.puedeVerCobros,
+    required this.puedeVerInventario,
+    required this.onVerInventario,
+  });
 
   final VoidCallback onNuevaCotizacion;
+  final VoidCallback onVerCobros;
+  final bool puedeVerCobros;
+  final bool puedeVerInventario;
+  final VoidCallback onVerInventario;
 
   @override
   ConsumerState<_InsightsCarousel> createState() => _InsightsCarouselState();
@@ -1449,7 +1492,6 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
   List<_InsightSlide> _slides = const [];
 
   late final AnimationController _progress;
-
 
   @override
   void initState() {
@@ -1499,7 +1541,11 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
     super.dispose();
   }
 
-  List<_InsightSlide> _buildSlides(DashboardSnapshot? snapshot) {
+  List<_InsightSlide> _buildSlides(
+    DashboardSnapshot? snapshot, {
+    required int productosBajoMinimo,
+    required double? saldoVencido,
+  }) {
     final hoy = snapshot?.hoy;
     final mes = snapshot?.mes;
     final formasPago = snapshot?.porFormaPago.entries.toList() ?? [];
@@ -1579,6 +1625,38 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
             ? 'Fuente: Reportes · Mes'
             : '${topProducto.cantidad} unidades · Reportes · Mes',
       ),
+      if (widget.puedeVerInventario)
+        _InsightSlide(
+          icon: Icons.inventory_2_outlined,
+          color: AppColors.warning,
+          badge: 'REPOSICIÓN',
+          title: 'Productos bajo mínimo',
+          body: productosBajoMinimo == 0
+              ? 'No hay productos por debajo de su stock mínimo.'
+              : 'Revisa existencias y prepara la reposición de estos productos.',
+          value: '$productosBajoMinimo producto(s)',
+          footer: 'Mínimos configurados por producto',
+          showCta: true,
+          actionLabel: 'Ver inventario',
+          onAction: widget.onVerInventario,
+        ),
+      if (widget.puedeVerCobros)
+        _InsightSlide(
+          icon: Icons.account_balance_wallet_outlined,
+          color: AppColors.error,
+          badge: 'CARTERA VENCIDA',
+          title: 'Saldo vencido por cobrar',
+          body: saldoVencido == null
+              ? 'Consultando cuentas por cobrar.'
+              : saldoVencido <= 0
+              ? 'No hay saldo vencido registrado.'
+              : 'Da seguimiento a los pagos atrasados de tus clientes.',
+          value: saldoVencido == null ? '—' : formatRd(saldoVencido),
+          footer: 'Fuente: cuentas por cobrar',
+          showCta: true,
+          actionLabel: 'Ver cuentas',
+          onAction: widget.onVerCobros,
+        ),
       const _InsightSlide(
         icon: Icons.bolt_outlined,
         color: AppColors.primary,
@@ -1595,7 +1673,21 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
   @override
   Widget build(BuildContext context) {
     final snapshot = ref.watch(dashboardSnapshotProvider).valueOrNull;
-    _slides = _buildSlides(snapshot);
+    final List<Producto> productos = widget.puedeVerInventario
+        ? ref.watch(productoControllerProvider).valueOrNull ?? <Producto>[]
+        : <Producto>[];
+    final productosBajoMinimo = productos.where((producto) {
+      final stock = producto.stock ?? 0;
+      return producto.activo && stock <= (producto.stockMinimo ?? 10);
+    }).length;
+    final saldoVencido = widget.puedeVerCobros
+        ? ref.watch(creditoTotalesProvider).valueOrNull?.vencido
+        : null;
+    _slides = _buildSlides(
+      snapshot,
+      productosBajoMinimo: productosBajoMinimo,
+      saldoVencido: saldoVencido,
+    );
     final s = _slides[_index.clamp(0, _slides.length - 1)];
 
     return MouseRegion(
@@ -1735,9 +1827,14 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
                                     SizedBox(
                                       width: double.infinity,
                                       child: FilledButton.icon(
-                                        onPressed: widget.onNuevaCotizacion,
-                                        icon: const Icon(Icons.add, size: 18),
-                                        label: const Text('Nueva cotización'),
+                                        onPressed:
+                                            s.onAction ??
+                                            widget.onNuevaCotizacion,
+                                        icon: const Icon(
+                                          Icons.open_in_new,
+                                          size: 18,
+                                        ),
+                                        label: Text(s.actionLabel),
                                         style: FilledButton.styleFrom(
                                           backgroundColor: AppColors.primary,
                                           foregroundColor: Colors.white,
@@ -1802,6 +1899,8 @@ class _InsightSlide {
     required this.value,
     required this.footer,
     this.showCta = false,
+    this.actionLabel = 'Nueva cotización',
+    this.onAction,
   });
 
   final IconData icon;
@@ -1812,6 +1911,8 @@ class _InsightSlide {
   final String value;
   final String footer;
   final bool showCta;
+  final String actionLabel;
+  final VoidCallback? onAction;
 }
 
 class _FondoPuntosPainter extends CustomPainter {

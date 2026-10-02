@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+
 typedef AgregarProductoCallback =
     Future<void> Function(Producto producto, double cantidad);
 
@@ -53,9 +54,8 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
         return StatefulBuilder(
           builder: (ctx, setLocal) {
             void syncFromField() {
-              final v = double.tryParse(
-                    controller.text.replaceAll(',', '.'),
-                  ) ??
+              final v =
+                  double.tryParse(controller.text.replaceAll(',', '.')) ??
                   cantidad;
               cantidad = v < 0.001 ? 0.001 : v;
             }
@@ -161,6 +161,10 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
       final v = double.tryParse(controller.text.replaceAll(',', '.')) ?? 1;
       if (v > 0) {
         await widget.alAgregar(prod, v);
+        if (mounted) {
+          _buscador.clear();
+          _buscar('');
+        }
       }
     }
     controller.dispose();

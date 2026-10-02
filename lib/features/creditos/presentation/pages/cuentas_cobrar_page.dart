@@ -9,24 +9,40 @@ import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_pr
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 
 final cuentasCobrarListaProvider =
-    FutureProvider.autoDispose<List<CuentaPorCobrar>>((ref) async {
+    FutureProvider.autoDispose<List<CuentaPorCobrarBusqueda>>((ref) async {
       final repo = ref.watch(cuentaPorCobrarRepositoryProvider);
       final lista = await repo.listarCuentas();
       try {
         final clientesRepo = ref.watch(clienteRepositoryProvider);
-        final out = <CuentaPorCobrar>[];
-        for (final c in lista) {
-          if (c.clienteNombre != null && c.clienteNombre!.isNotEmpty) {
-            out.add(c);
-            continue;
+        final idsClientes = lista.map((c) => c.clienteId).toSet().toList();
+        final clientes = await Future.wait(
+          idsClientes.map(clientesRepo.obtenerClientePorId),
+        );
+        final documentos = <int, String>{};
+        final nombres = <int, String>{};
+        for (var i = 0; i < idsClientes.length; i++) {
+          final cliente = clientes[i];
+          if (cliente != null) {
+            documentos[idsClientes[i]] = cliente.rncCedula;
+            nombres[idsClientes[i]] = cliente.nombre;
           }
-          final cli = await clientesRepo.obtenerClientePorId(c.clienteId);
-          final nombre = cli?.nombre ?? 'Cliente #${c.clienteId}';
-          out.add(c.copyWith(clienteNombre: nombre));
         }
-        return out;
+        return lista.map((cuenta) {
+          final nombre = cuenta.clienteNombre?.trim().isNotEmpty == true
+              ? cuenta.clienteNombre!
+              : nombres[cuenta.clienteId] ?? 'Cliente #${cuenta.clienteId}';
+          return CuentaPorCobrarBusqueda(
+            cuenta: cuenta.copyWith(clienteNombre: nombre),
+            documentoCliente: documentos[cuenta.clienteId] ?? '',
+          );
+        }).toList();
       } catch (_) {
-        return lista;
+        return lista
+            .map(
+              (cuenta) =>
+                  CuentaPorCobrarBusqueda(cuenta: cuenta, documentoCliente: ''),
+            )
+            .toList();
       }
     });
 
@@ -41,13 +57,39 @@ final creditoTotalesProvider =
       return (porCobrar: porCobrar, vencido: vencido, clientes: clientes);
     });
 
-class CuentasCobrarPage extends ConsumerWidget {
+class CuentaPorCobrarBusqueda {
+  const CuentaPorCobrarBusqueda({
+    required this.cuenta,
+    required this.documentoCliente,
+  });
+
+  final CuentaPorCobrar cuenta;
+  final String documentoCliente;
+}
+
+class CuentasCobrarPage extends ConsumerStatefulWidget {
   const CuentasCobrarPage({super.key});
 
   static const String routeName = 'credito-cuentas';
   static const String path = '/creditos/cuentas';
 
+  @override
+  ConsumerState<CuentasCobrarPage> createState() => _CuentasCobrarPageState();
+}
+
+class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
   static final _fmtFecha = DateFormat('dd/MM/yyyy');
+  final _busquedaController = TextEditingController();
+  String _textoBusqueda = '';
+
+  @override
+  void dispose() {
+    _busquedaController.dispose();
+    super.dispose();
+  }
+
+  String _normalizarDocumento(String valor) =>
+      valor.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
   StatusChipType _chipType(EstadoCredito e) {
     return switch (e) {
@@ -59,7 +101,7 @@ class CuentasCobrarPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final async = ref.watch(cuentasCobrarListaProvider);
     final totales = ref.watch(creditoTotalesProvider);
     final mobile = AppBreakpoints.isMobile(context);
@@ -154,6 +196,49 @@ class CuentasCobrarPage extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: mobile ? 280 : 340,
+                            ),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: TextField(
+                                controller: _busquedaController,
+                                onChanged: (valor) =>
+                                    setState(() => _textoBusqueda = valor),
+                                decoration: InputDecoration(
+                                  hintText: 'Buscar nombre, RNC o cédula',
+                                  isDense: true,
+                                  prefixIcon: const Icon(
+                                    Icons.search,
+                                    size: 20,
+                                  ),
+                                  suffixIcon: _textoBusqueda.isEmpty
+                                      ? null
+                                      : IconButton(
+                                          tooltip: 'Limpiar búsqueda',
+                                          onPressed: () {
+                                            _busquedaController.clear();
+                                            setState(() => _textoBusqueda = '');
+                                          },
+                                          icon: const Icon(
+                                            Icons.clear,
+                                            size: 18,
+                                          ),
+                                        ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  border: const OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         Expanded(
                           child: async.when(
                             loading: () => const Center(
@@ -168,6 +253,23 @@ class CuentasCobrarPage extends ConsumerWidget {
                               ),
                             ),
                             data: (lista) {
+                              final consulta = _textoBusqueda
+                                  .trim()
+                                  .toLowerCase();
+                              final consultaDocumento = _normalizarDocumento(
+                                consulta,
+                              );
+                              final filtradas = lista.where((item) {
+                                final nombre = (item.cuenta.clienteNombre ?? '')
+                                    .toLowerCase();
+                                final documento = _normalizarDocumento(
+                                  item.documentoCliente,
+                                );
+                                return consulta.isEmpty ||
+                                    nombre.contains(consulta) ||
+                                    (consultaDocumento.isNotEmpty &&
+                                        documento.contains(consultaDocumento));
+                              }).toList();
                               if (lista.isEmpty) {
                                 return AppCard(
                                   child: Center(
@@ -180,6 +282,19 @@ class CuentasCobrarPage extends ConsumerWidget {
                                   ),
                                 );
                               }
+                              if (filtradas.isEmpty) {
+                                return AppCard(
+                                  child: Center(
+                                    child: Text(
+                                      'No hay clientes que coincidan con la búsqueda.',
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                );
+                              }
                               return AppCard(
                                 padding: EdgeInsets.zero,
                                 child: RefreshIndicator(
@@ -188,13 +303,13 @@ class CuentasCobrarPage extends ConsumerWidget {
                                     ref.invalidate(creditoTotalesProvider);
                                   },
                                   child: ListView.separated(
-                                    itemCount: lista.length,
+                                    itemCount: filtradas.length,
                                     separatorBuilder: (_, __) => const Divider(
                                       height: 1,
                                       color: AppColors.border,
                                     ),
                                     itemBuilder: (_, i) {
-                                      final c = lista[i];
+                                      final c = filtradas[i].cuenta;
                                       return InkWell(
                                         onTap: () {
                                           final id = c.id;

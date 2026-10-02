@@ -9,6 +9,8 @@ import 'package:fiscogest_rd/features/caja/domain/repositories/i_caja_repository
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/services/bitacora_operaciones_service.dart';
 
 /// Hub de la estación de Caja — responsive PC / tablet / móvil.
 class CajaInicioPage extends ConsumerStatefulWidget {
@@ -180,7 +182,21 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
     setState(() => _procesando = true);
     try {
-      await ref.read(cajaRepositoryProvider).abrirSesion(fondoInicial: fondo);
+      final sesionId = await ref
+          .read(cajaRepositoryProvider)
+          .abrirSesion(fondoInicial: fondo);
+      try {
+        await ref
+            .read(bitacoraOperacionesServiceProvider)
+            .registrar(
+              accion: 'caja_abierta',
+              entidad: 'sesion_caja',
+              entidadId: sesionId,
+              usuarioId: ref.read(sesionUsuarioIdProvider),
+              resumen: 'Caja abierta con fondo de ${formatRd(fondo)}',
+              datos: {'fondoInicial': fondo},
+            );
+      } catch (_) {}
       if (!mounted) return;
       FiscoGestNotifications.show(
         SnackBar(
@@ -372,6 +388,18 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     }
                     final v = _parseMonto(controller.text)!;
                     final obs = obsController.text.trim();
+                    if ((v - teorico).abs() >= 0.005 && obs.isEmpty) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Explique el faltante o sobrante antes de cerrar.',
+                          ),
+                          backgroundColor: AppColors.warning,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      return;
+                    }
                     Navigator.pop(ctx, (
                       contado: v,
                       obs: obs.isEmpty ? null : obs,
@@ -404,6 +432,26 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           );
       if (!mounted) return;
       final dif = result.contado - teorico;
+      if (ok) {
+        try {
+          await ref
+              .read(bitacoraOperacionesServiceProvider)
+              .registrar(
+                accion: 'caja_cerrada',
+                entidad: 'sesion_caja',
+                entidadId: _sesion!.id,
+                usuarioId: ref.read(sesionUsuarioIdProvider),
+                resumen: 'Cierre de caja con diferencia ${formatRd(dif)}',
+                datos: {
+                  'saldoTeorico': teorico,
+                  'montoContado': result.contado,
+                  'diferencia': dif,
+                  'observacion': result.obs,
+                },
+              );
+        } catch (_) {}
+      }
+      if (!mounted) return;
       String msg;
       if (!ok) {
         msg = 'No se pudo cerrar la sesión';
@@ -580,7 +628,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         AppHubCard(
                           icon: Icons.account_balance_wallet_outlined,
                           title: 'Cuentas por cobrar',
-                          subtitle: 'Cuotas, pagos e impresión de estados de cuenta',
+                          subtitle:
+                              'Cuotas, pagos e impresión de estados de cuenta',
                           color: AppColors.info,
                           onTap: _irACuentasPorCobrar,
                         ),
@@ -632,7 +681,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 _CajaOpTile(
                                   icon: Icons.account_balance_wallet_outlined,
                                   title: 'Cuentas por cobrar',
-                                  subtitle: 'Cuotas, pagos e impresión de estados de cuenta',
+                                  subtitle:
+                                      'Cuotas, pagos e impresión de estados de cuenta',
                                   color: AppColors.info,
                                   onTap: _irACuentasPorCobrar,
                                 ),

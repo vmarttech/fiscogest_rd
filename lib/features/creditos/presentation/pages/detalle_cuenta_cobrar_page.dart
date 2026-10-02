@@ -18,6 +18,9 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_provid
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart'
     show cajaRepositoryProvider;
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/services/bitacora_operaciones_service.dart';
 
 class DetalleCuentaCobrarPage extends ConsumerStatefulWidget {
   const DetalleCuentaCobrarPage({super.key, required this.cuentaId});
@@ -193,19 +196,18 @@ class _DetalleCuentaCobrarPageState
                       '${c.ventaId != null ? ' · Venta #${c.ventaId}' : ''}'
                 : (c.ventaId != null ? 'Venta #${c.ventaId}' : null))
           : pago.nota;
-      await ref
-          .read(cuentaPorCobrarRepositoryProvider)
-          .registrarAbono(
-            AbonoCredito(
-              cuentaId: c.id!,
-              monto: pago.monto,
-              metodoPago: pago.metodo,
-              fecha: DateTime.now(),
-              nota: notaAuto,
-            ),
-          );
-      var movimientoCajaRegistrado = true;
-      try {
+      await ref.read(databaseProvider).transaction(() async {
+        await ref
+            .read(cuentaPorCobrarRepositoryProvider)
+            .registrarAbono(
+              AbonoCredito(
+                cuentaId: c.id!,
+                monto: pago.monto,
+                metodoPago: pago.metodo,
+                fecha: DateTime.now(),
+                nota: notaAuto,
+              ),
+            );
         await ref
             .read(cajaRepositoryProvider)
             .registrarMovimiento(
@@ -216,8 +218,22 @@ class _DetalleCuentaCobrarPageState
                   'Abono ${c.numero ?? c.id} · ${c.clienteNombre ?? ''}',
               formaPago: pago.metodo,
             );
+      });
+      var bitacoraRegistrada = true;
+      try {
+        await ref
+            .read(bitacoraOperacionesServiceProvider)
+            .registrar(
+              accion: 'pago_registrado',
+              entidad: 'cuenta_por_cobrar',
+              entidadId: c.id,
+              usuarioId: ref.read(sesionUsuarioIdProvider),
+              resumen:
+                  'Pago de ${formatRd(pago.monto)} registrado para ${c.clienteNombre ?? 'cliente #${c.clienteId}'}',
+              datos: {'ventaId': c.ventaId, 'metodoPago': pago.metodo},
+            );
       } catch (_) {
-        movimientoCajaRegistrado = false;
+        bitacoraRegistrada = false;
       }
       if (!mounted) return;
       ref.invalidate(cuentasCobrarListaProvider);
@@ -227,11 +243,11 @@ class _DetalleCuentaCobrarPageState
       FiscoGestNotifications.show(
         SnackBar(
           content: Text(
-            movimientoCajaRegistrado
+            bitacoraRegistrada
                 ? 'Pago registrado: ${formatRd(pago.monto)}'
-                : 'La cuenta se actualizó, pero no se pudo registrar el ingreso en caja.',
+                : 'Pago registrado: ${formatRd(pago.monto)}. No se pudo guardar en la bitácora.',
           ),
-          backgroundColor: movimientoCajaRegistrado
+          backgroundColor: bitacoraRegistrada
               ? AppColors.success
               : AppColors.warning,
           behavior: SnackBarBehavior.floating,
