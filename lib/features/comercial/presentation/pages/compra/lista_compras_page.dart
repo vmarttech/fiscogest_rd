@@ -166,6 +166,9 @@ class ListaComprasPage extends ConsumerWidget {
     final confirmarCompra = ref.read(confirmarCompraUseCaseProvider);
     final anularCompra = ref.read(anularCompraProvider);
     final isMobile = AppBreakpoints.isMobile(context);
+    final modoSimplificado =
+        ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ??
+        false;
 
     Future<void> mostrarFiltros() async {
       final actual = ref.read(_filtrosComprasProvider);
@@ -216,7 +219,9 @@ class ListaComprasPage extends ConsumerWidget {
                         TextField(
                           controller: textoCtrl,
                           decoration: InputDecoration(
-                            labelText: 'Buscar (proveedor, NCF, n°)',
+                            labelText: modoSimplificado
+                                ? 'Buscar proveedor o número'
+                                : 'Buscar (proveedor, NCF, n°)',
                             prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
                               borderRadius: AppRadius.allM,
@@ -269,7 +274,8 @@ class ListaComprasPage extends ConsumerWidget {
                           onChanged: (v) => setModalState(() => estadoSel = v),
                         ),
                         const SizedBox(height: 12),
-                        DropdownButtonFormField<String?>(
+                        if (!modoSimplificado)
+                          DropdownButtonFormField<String?>(
                           initialValue: tipoSel,
                           decoration: InputDecoration(
                             labelText: 'Tipo de comprobante',
@@ -763,10 +769,12 @@ class ListaComprasPage extends ConsumerWidget {
                               buffer.writeln(
                                 'Proveedor: ${compra.nombreProveedor}',
                               );
-                              if (compra.ncf.isNotEmpty) {
-                                buffer.writeln('NCF: ${compra.ncf}');
+                              if (!modoSimplificado) {
+                                if (compra.ncf.isNotEmpty) {
+                                  buffer.writeln('NCF: ${compra.ncf}');
+                                }
+                                buffer.writeln('Tipo: ${compra.tipoComprobante}');
                               }
-                              buffer.writeln('Tipo: ${compra.tipoComprobante}');
                               buffer.writeln(
                                 'Pago: ${compra.esCredito ? 'Crédito (${compra.diasCredito} días)' : 'Contado'}',
                               );
@@ -774,15 +782,19 @@ class ListaComprasPage extends ConsumerWidget {
                               buffer.writeln(
                                 '──────────────────────────────────',
                               );
-                              buffer.writeln(
-                                'Subtotal:  ${formatRd(compra.subtotalSinImpuestos)}  ',
-                              );
+                              if (!modoSimplificado) {
+                                buffer.writeln(
+                                  'Subtotal:  ${formatRd(compra.subtotalSinImpuestos)}  ',
+                                );
+                              }
                               buffer.writeln(
                                 'Descuento: ${formatRd(compra.montoDescuentoGlobal)}  ',
                               );
-                              buffer.writeln(
-                                'ITBIS:     ${formatRd(compra.montoImpuesto)}  ',
-                              );
+                              if (!modoSimplificado) {
+                                buffer.writeln(
+                                  'ITBIS:     ${formatRd(compra.montoImpuesto)}  ',
+                                );
+                              }
                               buffer.writeln(
                                 'TOTAL:     ${formatRd(compra.totalCompra)}  ',
                               );
@@ -1028,15 +1040,17 @@ class ListaComprasPage extends ConsumerWidget {
                                                 compra.fechaEmision,
                                               ),
                                             ),
-                                            if (compra.ncf.isNotEmpty)
+                                            if (!modoSimplificado &&
+                                                compra.ncf.isNotEmpty)
                                               _InfoChip(
                                                 label: 'NCF',
                                                 value: compra.ncf,
                                               ),
-                                            _InfoChip(
-                                              label: 'Tipo',
-                                              value: compra.tipoComprobante,
-                                            ),
+                                            if (!modoSimplificado)
+                                              _InfoChip(
+                                                label: 'Tipo',
+                                                value: compra.tipoComprobante,
+                                              ),
                                             _InfoChip(
                                               label: 'Pago',
                                               value: compra.esCredito

@@ -137,7 +137,7 @@ class CabeceraCompraWidget extends StatelessWidget {
         children: [
         AppTextField(
           controller: fechaController,
-          label: 'Fecha Emisión',
+          label: 'Fecha de compra',
           enabled: false,
           prefixIcon: Icons.calendar_today_outlined,
         ),

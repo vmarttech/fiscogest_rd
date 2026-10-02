@@ -71,11 +71,16 @@ class DashboardEconomicoPage extends ConsumerWidget {
         onPressed: () => ShellDrawerScope.open(context),
       ),
       actions: [
+        IconButton(
+          tooltip: 'Todos los reportes',
+          icon: const Icon(Icons.folder_open_outlined),
+          onPressed: () => context.push('/reports/hub'),
+        ),
         if (!modoSimplificado)
           IconButton(
             icon: const Icon(Icons.description_outlined),
             tooltip: 'DGII 606/607',
-            onPressed: () => context.push('/reports/dgii'),
+            onPressed: () => context.push('/reports/hub'),
           ),
       ],
       body: RefreshIndicator(
@@ -360,19 +365,19 @@ class _KpiGrid extends StatelessWidget {
         color: const Color(0xFF059669),
       ),
       _KpiCard(
-        label: 'Facturas',
-        value: formatEntero(kpi.numFacturas),
-        delta: null,
-        icon: Icons.receipt_long_outlined,
-        color: const Color(0xFF7C3AED),
+        label: 'Gastos',
+        value: formatRd(kpi.gastos),
+        delta: kpi.deltaGastosPct,
+        icon: Icons.money_off_csred_outlined,
+        color: AppColors.error,
       ),
       _KpiCard(
-        label: 'Ticket promedio',
-        value: formatRd(kpi.ticketPromedio),
-        delta: null,
-        icon: Icons.shopping_bag_outlined,
-        color: const Color(0xFFD97706),
-        subtitle: 'Margen ${kpi.margenPct.toStringAsFixed(1)}%',
+        label: 'Ganancia neta',
+        value: formatRd(kpi.gananciaNeta),
+        delta: kpi.deltaGananciaNetaPct,
+        icon: Icons.account_balance_wallet_outlined,
+        color: const Color(0xFF0EA5E9),
+        subtitle: 'Margen ${kpi.margenNetoPct.toStringAsFixed(1)}%',
       ),
     ];
 

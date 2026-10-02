@@ -43,6 +43,8 @@ import 'package:fiscogest_rd/features/clientes/presentation/pages/clientes_gesti
 import 'package:fiscogest_rd/features/clientes/presentation/pages/nuevo_cliente_page.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/pages/proveedores_page.dart';
 import 'package:fiscogest_rd/features/reports/presentation/pages/reports_page.dart';
+import 'package:fiscogest_rd/features/gastos/presentation/pages/gastos_page.dart';
+import 'package:fiscogest_rd/features/reportes/presentation/pages/detalle_reporte_page.dart';
 import 'package:fiscogest_rd/features/reportes/presentation/pages/dashboard_economico_page.dart';
 import 'package:fiscogest_rd/features/impuestos/presentation/pages/impuestos_page.dart';
 import 'package:fiscogest_rd/features/import_export/presentation/pages/import_export_page.dart';
@@ -538,14 +540,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const AppShell(child: UnidadesPage()),
       ),
       GoRoute(
+        path: '/gastos',
+        name: GastosPage.routeName,
+        builder: (_, __) => const AppShell(child: GastosPage()),
+      ),
+      GoRoute(
         path: '/reports',
         name: 'dashboard-reportes',
         builder: (_, __) => const AppShell(child: DashboardEconomicoPage()),
         routes: [
           GoRoute(
-            path: 'dgii',
+            path: 'hub',
             name: ReportsPage.routeName,
             builder: (_, __) => const AppShell(child: ReportsPage()),
+          ),
+          GoRoute(
+            path: 'detalle/:tipo',
+            name: DetalleReportePage.routeName,
+            builder: (context, state) {
+              final tipo = state.pathParameters['tipo'] ?? 'ventas';
+              return AppShell(child: DetalleReportePage(tipo: tipo));
+            },
           ),
         ],
       ),

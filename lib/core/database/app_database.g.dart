@@ -2085,7 +2085,7 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("modo_simplificado" IN (0, 1))',
     ),
-    defaultValue: const Constant(false),
+    defaultValue: const Constant(true),
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -25896,6 +25896,561 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
   }
 }
 
+class $GastosTableTable extends GastosTable
+    with TableInfo<$GastosTableTable, GastosTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GastosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _fechaMeta = const VerificationMeta('fecha');
+  @override
+  late final GeneratedColumn<DateTime> fecha = GeneratedColumn<DateTime>(
+    'fecha',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoriaMeta = const VerificationMeta(
+    'categoria',
+  );
+  @override
+  late final GeneratedColumn<String> categoria = GeneratedColumn<String>(
+    'categoria',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('General'),
+  );
+  static const VerificationMeta _descripcionMeta = const VerificationMeta(
+    'descripcion',
+  );
+  @override
+  late final GeneratedColumn<String> descripcion = GeneratedColumn<String>(
+    'descripcion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _montoMeta = const VerificationMeta('monto');
+  @override
+  late final GeneratedColumn<double> monto = GeneratedColumn<double>(
+    'monto',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _formaPagoMeta = const VerificationMeta(
+    'formaPago',
+  );
+  @override
+  late final GeneratedColumn<String> formaPago = GeneratedColumn<String>(
+    'forma_pago',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('efectivo'),
+  );
+  static const VerificationMeta _notasMeta = const VerificationMeta('notas');
+  @override
+  late final GeneratedColumn<String> notas = GeneratedColumn<String>(
+    'notas',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    fecha,
+    categoria,
+    descripcion,
+    monto,
+    formaPago,
+    notas,
+    creadoEn,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'gastos_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GastosTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('fecha')) {
+      context.handle(
+        _fechaMeta,
+        fecha.isAcceptableOrUnknown(data['fecha']!, _fechaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaMeta);
+    }
+    if (data.containsKey('categoria')) {
+      context.handle(
+        _categoriaMeta,
+        categoria.isAcceptableOrUnknown(data['categoria']!, _categoriaMeta),
+      );
+    }
+    if (data.containsKey('descripcion')) {
+      context.handle(
+        _descripcionMeta,
+        descripcion.isAcceptableOrUnknown(
+          data['descripcion']!,
+          _descripcionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descripcionMeta);
+    }
+    if (data.containsKey('monto')) {
+      context.handle(
+        _montoMeta,
+        monto.isAcceptableOrUnknown(data['monto']!, _montoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_montoMeta);
+    }
+    if (data.containsKey('forma_pago')) {
+      context.handle(
+        _formaPagoMeta,
+        formaPago.isAcceptableOrUnknown(data['forma_pago']!, _formaPagoMeta),
+      );
+    }
+    if (data.containsKey('notas')) {
+      context.handle(
+        _notasMeta,
+        notas.isAcceptableOrUnknown(data['notas']!, _notasMeta),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_creadoEnMeta);
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GastosTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GastosTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      fecha: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha'],
+      )!,
+      categoria: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}categoria'],
+      )!,
+      descripcion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}descripcion'],
+      )!,
+      monto: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto'],
+      )!,
+      formaPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}forma_pago'],
+      )!,
+      notas: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notas'],
+      ),
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      ),
+    );
+  }
+
+  @override
+  $GastosTableTable createAlias(String alias) {
+    return $GastosTableTable(attachedDatabase, alias);
+  }
+}
+
+class GastosTableData extends DataClass implements Insertable<GastosTableData> {
+  final int id;
+  final DateTime fecha;
+  final String categoria;
+  final String descripcion;
+  final double monto;
+  final String formaPago;
+  final String? notas;
+  final DateTime creadoEn;
+  final DateTime? actualizadoEn;
+  const GastosTableData({
+    required this.id,
+    required this.fecha,
+    required this.categoria,
+    required this.descripcion,
+    required this.monto,
+    required this.formaPago,
+    this.notas,
+    required this.creadoEn,
+    this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['fecha'] = Variable<DateTime>(fecha);
+    map['categoria'] = Variable<String>(categoria);
+    map['descripcion'] = Variable<String>(descripcion);
+    map['monto'] = Variable<double>(monto);
+    map['forma_pago'] = Variable<String>(formaPago);
+    if (!nullToAbsent || notas != null) {
+      map['notas'] = Variable<String>(notas);
+    }
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || actualizadoEn != null) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    }
+    return map;
+  }
+
+  GastosTableCompanion toCompanion(bool nullToAbsent) {
+    return GastosTableCompanion(
+      id: Value(id),
+      fecha: Value(fecha),
+      categoria: Value(categoria),
+      descripcion: Value(descripcion),
+      monto: Value(monto),
+      formaPago: Value(formaPago),
+      notas: notas == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notas),
+      creadoEn: Value(creadoEn),
+      actualizadoEn: actualizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualizadoEn),
+    );
+  }
+
+  factory GastosTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GastosTableData(
+      id: serializer.fromJson<int>(json['id']),
+      fecha: serializer.fromJson<DateTime>(json['fecha']),
+      categoria: serializer.fromJson<String>(json['categoria']),
+      descripcion: serializer.fromJson<String>(json['descripcion']),
+      monto: serializer.fromJson<double>(json['monto']),
+      formaPago: serializer.fromJson<String>(json['formaPago']),
+      notas: serializer.fromJson<String?>(json['notas']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'fecha': serializer.toJson<DateTime>(fecha),
+      'categoria': serializer.toJson<String>(categoria),
+      'descripcion': serializer.toJson<String>(descripcion),
+      'monto': serializer.toJson<double>(monto),
+      'formaPago': serializer.toJson<String>(formaPago),
+      'notas': serializer.toJson<String?>(notas),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+    };
+  }
+
+  GastosTableData copyWith({
+    int? id,
+    DateTime? fecha,
+    String? categoria,
+    String? descripcion,
+    double? monto,
+    String? formaPago,
+    Value<String?> notas = const Value.absent(),
+    DateTime? creadoEn,
+    Value<DateTime?> actualizadoEn = const Value.absent(),
+  }) => GastosTableData(
+    id: id ?? this.id,
+    fecha: fecha ?? this.fecha,
+    categoria: categoria ?? this.categoria,
+    descripcion: descripcion ?? this.descripcion,
+    monto: monto ?? this.monto,
+    formaPago: formaPago ?? this.formaPago,
+    notas: notas.present ? notas.value : this.notas,
+    creadoEn: creadoEn ?? this.creadoEn,
+    actualizadoEn: actualizadoEn.present
+        ? actualizadoEn.value
+        : this.actualizadoEn,
+  );
+  GastosTableData copyWithCompanion(GastosTableCompanion data) {
+    return GastosTableData(
+      id: data.id.present ? data.id.value : this.id,
+      fecha: data.fecha.present ? data.fecha.value : this.fecha,
+      categoria: data.categoria.present ? data.categoria.value : this.categoria,
+      descripcion: data.descripcion.present
+          ? data.descripcion.value
+          : this.descripcion,
+      monto: data.monto.present ? data.monto.value : this.monto,
+      formaPago: data.formaPago.present ? data.formaPago.value : this.formaPago,
+      notas: data.notas.present ? data.notas.value : this.notas,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GastosTableData(')
+          ..write('id: $id, ')
+          ..write('fecha: $fecha, ')
+          ..write('categoria: $categoria, ')
+          ..write('descripcion: $descripcion, ')
+          ..write('monto: $monto, ')
+          ..write('formaPago: $formaPago, ')
+          ..write('notas: $notas, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    fecha,
+    categoria,
+    descripcion,
+    monto,
+    formaPago,
+    notas,
+    creadoEn,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GastosTableData &&
+          other.id == this.id &&
+          other.fecha == this.fecha &&
+          other.categoria == this.categoria &&
+          other.descripcion == this.descripcion &&
+          other.monto == this.monto &&
+          other.formaPago == this.formaPago &&
+          other.notas == this.notas &&
+          other.creadoEn == this.creadoEn &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class GastosTableCompanion extends UpdateCompanion<GastosTableData> {
+  final Value<int> id;
+  final Value<DateTime> fecha;
+  final Value<String> categoria;
+  final Value<String> descripcion;
+  final Value<double> monto;
+  final Value<String> formaPago;
+  final Value<String?> notas;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> actualizadoEn;
+  const GastosTableCompanion({
+    this.id = const Value.absent(),
+    this.fecha = const Value.absent(),
+    this.categoria = const Value.absent(),
+    this.descripcion = const Value.absent(),
+    this.monto = const Value.absent(),
+    this.formaPago = const Value.absent(),
+    this.notas = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  GastosTableCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime fecha,
+    this.categoria = const Value.absent(),
+    required String descripcion,
+    required double monto,
+    this.formaPago = const Value.absent(),
+    this.notas = const Value.absent(),
+    required DateTime creadoEn,
+    this.actualizadoEn = const Value.absent(),
+  }) : fecha = Value(fecha),
+       descripcion = Value(descripcion),
+       monto = Value(monto),
+       creadoEn = Value(creadoEn);
+  static Insertable<GastosTableData> custom({
+    Expression<int>? id,
+    Expression<DateTime>? fecha,
+    Expression<String>? categoria,
+    Expression<String>? descripcion,
+    Expression<double>? monto,
+    Expression<String>? formaPago,
+    Expression<String>? notas,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (fecha != null) 'fecha': fecha,
+      if (categoria != null) 'categoria': categoria,
+      if (descripcion != null) 'descripcion': descripcion,
+      if (monto != null) 'monto': monto,
+      if (formaPago != null) 'forma_pago': formaPago,
+      if (notas != null) 'notas': notas,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  GastosTableCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? fecha,
+    Value<String>? categoria,
+    Value<String>? descripcion,
+    Value<double>? monto,
+    Value<String>? formaPago,
+    Value<String?>? notas,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? actualizadoEn,
+  }) {
+    return GastosTableCompanion(
+      id: id ?? this.id,
+      fecha: fecha ?? this.fecha,
+      categoria: categoria ?? this.categoria,
+      descripcion: descripcion ?? this.descripcion,
+      monto: monto ?? this.monto,
+      formaPago: formaPago ?? this.formaPago,
+      notas: notas ?? this.notas,
+      creadoEn: creadoEn ?? this.creadoEn,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (fecha.present) {
+      map['fecha'] = Variable<DateTime>(fecha.value);
+    }
+    if (categoria.present) {
+      map['categoria'] = Variable<String>(categoria.value);
+    }
+    if (descripcion.present) {
+      map['descripcion'] = Variable<String>(descripcion.value);
+    }
+    if (monto.present) {
+      map['monto'] = Variable<double>(monto.value);
+    }
+    if (formaPago.present) {
+      map['forma_pago'] = Variable<String>(formaPago.value);
+    }
+    if (notas.present) {
+      map['notas'] = Variable<String>(notas.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GastosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('fecha: $fecha, ')
+          ..write('categoria: $categoria, ')
+          ..write('descripcion: $descripcion, ')
+          ..write('monto: $monto, ')
+          ..write('formaPago: $formaPago, ')
+          ..write('notas: $notas, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $DetalleCompraTableTable extends DetalleCompraTable
     with TableInfo<$DetalleCompraTableTable, DetalleCompraTableData> {
   @override
@@ -27591,6 +28146,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CajaSesionesTableTable cajaSesionesTable =
       $CajaSesionesTableTable(this);
   late final $ComprasTableTable comprasTable = $ComprasTableTable(this);
+  late final $GastosTableTable gastosTable = $GastosTableTable(this);
   late final $DetalleCompraTableTable detalleCompraTable =
       $DetalleCompraTableTable(this);
   late final $FiosTableTable fiosTable = $FiosTableTable(this);
@@ -27638,6 +28194,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cajaMovimientosTable,
     cajaSesionesTable,
     comprasTable,
+    gastosTable,
     detalleCompraTable,
     fiosTable,
   ];
@@ -45806,6 +46363,280 @@ typedef $$ComprasTableTableProcessedTableManager =
       ComprasTableData,
       PrefetchHooks Function({bool proveedorId})
     >;
+typedef $$GastosTableTableCreateCompanionBuilder =
+    GastosTableCompanion Function({
+      Value<int> id,
+      required DateTime fecha,
+      Value<String> categoria,
+      required String descripcion,
+      required double monto,
+      Value<String> formaPago,
+      Value<String?> notas,
+      required DateTime creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+typedef $$GastosTableTableUpdateCompanionBuilder =
+    GastosTableCompanion Function({
+      Value<int> id,
+      Value<DateTime> fecha,
+      Value<String> categoria,
+      Value<String> descripcion,
+      Value<double> monto,
+      Value<String> formaPago,
+      Value<String?> notas,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+
+class $$GastosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $GastosTableTable> {
+  $$GastosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fecha => $composableBuilder(
+    column: $table.fecha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoria => $composableBuilder(
+    column: $table.categoria,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get formaPago => $composableBuilder(
+    column: $table.formaPago,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notas => $composableBuilder(
+    column: $table.notas,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GastosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $GastosTableTable> {
+  $$GastosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fecha => $composableBuilder(
+    column: $table.fecha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoria => $composableBuilder(
+    column: $table.categoria,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get formaPago => $composableBuilder(
+    column: $table.formaPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notas => $composableBuilder(
+    column: $table.notas,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GastosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GastosTableTable> {
+  $$GastosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fecha =>
+      $composableBuilder(column: $table.fecha, builder: (column) => column);
+
+  GeneratedColumn<String> get categoria =>
+      $composableBuilder(column: $table.categoria, builder: (column) => column);
+
+  GeneratedColumn<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get monto =>
+      $composableBuilder(column: $table.monto, builder: (column) => column);
+
+  GeneratedColumn<String> get formaPago =>
+      $composableBuilder(column: $table.formaPago, builder: (column) => column);
+
+  GeneratedColumn<String> get notas =>
+      $composableBuilder(column: $table.notas, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$GastosTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GastosTableTable,
+          GastosTableData,
+          $$GastosTableTableFilterComposer,
+          $$GastosTableTableOrderingComposer,
+          $$GastosTableTableAnnotationComposer,
+          $$GastosTableTableCreateCompanionBuilder,
+          $$GastosTableTableUpdateCompanionBuilder,
+          (
+            GastosTableData,
+            BaseReferences<_$AppDatabase, $GastosTableTable, GastosTableData>,
+          ),
+          GastosTableData,
+          PrefetchHooks Function()
+        > {
+  $$GastosTableTableTableManager(_$AppDatabase db, $GastosTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GastosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GastosTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GastosTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> fecha = const Value.absent(),
+                Value<String> categoria = const Value.absent(),
+                Value<String> descripcion = const Value.absent(),
+                Value<double> monto = const Value.absent(),
+                Value<String> formaPago = const Value.absent(),
+                Value<String?> notas = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => GastosTableCompanion(
+                id: id,
+                fecha: fecha,
+                categoria: categoria,
+                descripcion: descripcion,
+                monto: monto,
+                formaPago: formaPago,
+                notas: notas,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime fecha,
+                Value<String> categoria = const Value.absent(),
+                required String descripcion,
+                required double monto,
+                Value<String> formaPago = const Value.absent(),
+                Value<String?> notas = const Value.absent(),
+                required DateTime creadoEn,
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => GastosTableCompanion.insert(
+                id: id,
+                fecha: fecha,
+                categoria: categoria,
+                descripcion: descripcion,
+                monto: monto,
+                formaPago: formaPago,
+                notas: notas,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GastosTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GastosTableTable,
+      GastosTableData,
+      $$GastosTableTableFilterComposer,
+      $$GastosTableTableOrderingComposer,
+      $$GastosTableTableAnnotationComposer,
+      $$GastosTableTableCreateCompanionBuilder,
+      $$GastosTableTableUpdateCompanionBuilder,
+      (
+        GastosTableData,
+        BaseReferences<_$AppDatabase, $GastosTableTable, GastosTableData>,
+      ),
+      GastosTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$DetalleCompraTableTableCreateCompanionBuilder =
     DetalleCompraTableCompanion Function({
       required String id,
@@ -46644,6 +47475,8 @@ class $AppDatabaseManager {
       $$CajaSesionesTableTableTableManager(_db, _db.cajaSesionesTable);
   $$ComprasTableTableTableManager get comprasTable =>
       $$ComprasTableTableTableManager(_db, _db.comprasTable);
+  $$GastosTableTableTableManager get gastosTable =>
+      $$GastosTableTableTableManager(_db, _db.gastosTable);
   $$DetalleCompraTableTableTableManager get detalleCompraTable =>
       $$DetalleCompraTableTableTableManager(_db, _db.detalleCompraTable);
   $$FiosTableTableTableManager get fiosTable =>

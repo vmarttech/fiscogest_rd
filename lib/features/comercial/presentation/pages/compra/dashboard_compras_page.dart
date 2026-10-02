@@ -119,22 +119,30 @@ class DashboardComprasPage extends ConsumerWidget {
                       ],
                     )
                   else ...[
-                    AppAccessTile(
-                      icon: Icons.add_shopping_cart_rounded,
-                      title: 'Registrar compra',
-                      subtitle: 'Nueva orden de compra',
-                      color: AppColors.primary,
-                      onTap: () => context.push('/compras/registrar'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppAccessTile(
+                            icon: Icons.add_shopping_cart_rounded,
+                            title: 'Registrar compra',
+                            subtitle: 'Nueva compra',
+                            color: AppColors.primary,
+                            onTap: () => context.push('/compras/registrar'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppAccessTile(
+                            icon: Icons.list_alt_rounded,
+                            title: 'Lista de compras',
+                            subtitle: 'Historial',
+                            color: AppColors.info,
+                            onTap: () => context.push('/compras/lista'),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    AppAccessTile(
-                      icon: Icons.list_alt_rounded,
-                      title: 'Lista de compras',
-                      subtitle: 'Historial y seguimiento',
-                      color: AppColors.info,
-                      onTap: () => context.push('/compras/lista'),
-                    ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     AppAccessTile(
                       icon: Icons.account_balance_wallet_outlined,
                       title: 'Cuentas por pagar',

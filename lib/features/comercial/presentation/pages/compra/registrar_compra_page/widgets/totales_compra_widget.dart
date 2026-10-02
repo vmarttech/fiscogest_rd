@@ -8,12 +8,14 @@ class TotalesCompraWidget extends StatelessWidget {
     required this.descuentoGlobal,
     required this.montoImpuesto,
     required this.totalCompra,
+    this.mostrarImpuesto = true,
   });
 
   final double subtotalSinImpuestos;
   final double descuentoGlobal;
   final double montoImpuesto;
   final double totalCompra;
+  final bool mostrarImpuesto;
 
 
   @override
@@ -30,7 +32,8 @@ class TotalesCompraWidget extends StatelessWidget {
           _fila('Subtotal', formatRd(subtotalSinImpuestos)),
           if (descuentoGlobal > 0)
             _fila('Descuento', formatRd(descuentoGlobal)),
-          _fila('ITBIS / impuesto', formatRd(montoImpuesto)),
+          if (mostrarImpuesto)
+            _fila('ITBIS / impuesto', formatRd(montoImpuesto)),
           AppLayout.vS,
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

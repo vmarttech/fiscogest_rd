@@ -207,6 +207,14 @@ class AppShell extends ConsumerWidget {
                         Icons.shopping_cart_outlined,
                         currentPath,
                       ),
+                    if (puede(Permiso.reportesVer) || esAdmin)
+                      _buildNavItem(
+                        context,
+                        '/gastos',
+                        'Gastos',
+                        Icons.money_off_csred_outlined,
+                        currentPath,
+                      ),
                     const SizedBox(height: 18),
                     _buildSectionTitle('INVENTARIO'),
                     if (puede(Permiso.inventarioVer))

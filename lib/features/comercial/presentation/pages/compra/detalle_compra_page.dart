@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -91,6 +92,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     final compraAsync = ref.watch(compraPorIdProvider(_compraId));
     final ancho = MediaQuery.of(context).size.width;
     final esPequena = ancho < 768;
+    final modoSimplificado =
+        ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ??
+        false;
 
     return AppScaffold(
       title: 'Detalle de Compra',
@@ -171,11 +175,15 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                         children: [
                           _buildCabecera(compra, vencida, esPequena),
                           const SizedBox(height: AppSpacing.m),
-                          _buildTarjetaInformacion(compra, vencida, esPequena),
+                          _buildTarjetaInformacion(
+                            compra, vencida, esPequena, modoSimplificado,
+                          ),
                           const SizedBox(height: AppSpacing.m),
-                          _buildTarjetaTotales(compra, esPequena),
+                          _buildTarjetaTotales(compra, esPequena, modoSimplificado),
                           const SizedBox(height: AppSpacing.m),
-                          _buildSeccionDetalles(compra, esPequena),
+                          _buildSeccionDetalles(
+                            compra, esPequena, modoSimplificado,
+                          ),
                           const SizedBox(height: AppSpacing.l),
                           _buildBotonesAccion(compra, esPequena),
                           const SizedBox(height: AppSpacing.xl),
@@ -269,7 +277,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     );
   }
 
-  Widget _buildTarjetaInformacion(Compra compra, bool vencida, bool esPequena) {
+  Widget _buildTarjetaInformacion(
+    Compra compra, bool vencida, bool esPequena, bool modoSimplificado,
+  ) {
     return AppCard(
       color: vencida ? AppColors.error.withValues(alpha: 0.05) : null,
       padding: const EdgeInsets.all(AppSpacing.m),
@@ -285,9 +295,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                 _formatearFecha(compra.fechaEmision),
                 esPequena,
               ),
-              if (compra.ncf.isNotEmpty)
+              if (!modoSimplificado && compra.ncf.isNotEmpty)
                 _datoInformacion('NCF', compra.ncf, esPequena),
-              _datoInformacion('Tipo', compra.tipoComprobante, esPequena),
+              if (!modoSimplificado)
+                _datoInformacion('Tipo', compra.tipoComprobante, esPequena),
               _datoInformacion(
                 'Condición',
                 compra.esCredito
@@ -369,7 +380,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     );
   }
 
-  Widget _buildTarjetaTotales(Compra compra, bool esPequena) {
+  Widget _buildTarjetaTotales(
+    Compra compra, bool esPequena, bool modoSimplificado,
+  ) {
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.m),
       child: Column(
@@ -386,11 +399,12 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
             esPequena,
           ),
           const SizedBox(height: 4),
-          _filaTotal(
-            'ITBIS / Impuesto',
-            _formatearMonto(compra.montoImpuesto),
-            esPequena,
-          ),
+          if (!modoSimplificado)
+            _filaTotal(
+              'ITBIS / Impuesto',
+              _formatearMonto(compra.montoImpuesto),
+              esPequena,
+            ),
           const Divider(height: 16, color: AppColors.border),
           _filaTotal(
             'TOTAL',
@@ -430,7 +444,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
     );
   }
 
-  Widget _buildSeccionDetalles(Compra compra, bool esPequena) {
+  Widget _buildSeccionDetalles(
+    Compra compra, bool esPequena, bool modoSimplificado,
+  ) {
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.m),
       child: Column(
@@ -530,10 +546,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                                     'Subtotal: ${_formatearMonto(detalle.subtotalLinea)}',
                                     style: AppTypography.labelMedium,
                                   ),
-                                  Text(
-                                    'Base: ${_formatearMonto(detalle.baseImponibleLinea)} · ITBIS: ${_formatearMonto(detalle.itbisLinea)}',
-                                    style: AppTypography.bodySmall,
-                                  ),
+                                  if (!modoSimplificado)
+                                    Text(
+                                      'Base: ${_formatearMonto(detalle.baseImponibleLinea)} · ITBIS: ${_formatearMonto(detalle.itbisLinea)}',
+                                      style: AppTypography.bodySmall,
+                                    ),
                                 ],
                               ),
                             ],

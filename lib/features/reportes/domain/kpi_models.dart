@@ -5,18 +5,22 @@ class KpiPeriodo {
     required this.ganancia,
     required this.ventasAnterior,
     required this.gananciaAnterior,
+    this.gastos = 0,
+    this.gastosAnterior = 0,
   });
-
   final double ventas;
   final int numFacturas;
   final double ganancia;
   final double ventasAnterior;
   final double gananciaAnterior;
+  final double gastos;
+  final double gastosAnterior;
 
+  double get gananciaNeta => ganancia - gastos;
   double get ticketPromedio => numFacturas == 0 ? 0.0 : ventas / numFacturas;
-
   double get margenPct => ventas <= 0 ? 0.0 : (ganancia / ventas) * 100.0;
-
+  double get margenNetoPct =>
+      ventas <= 0 ? 0.0 : (gananciaNeta / ventas) * 100.0;
   double get deltaVentasPct {
     if (ventasAnterior <= 0) return ventas > 0 ? 100.0 : 0.0;
     return ((ventas - ventasAnterior) / ventasAnterior) * 100.0;
@@ -27,12 +31,25 @@ class KpiPeriodo {
     return ((ganancia - gananciaAnterior) / gananciaAnterior) * 100.0;
   }
 
+  double get deltaGastosPct {
+    if (gastosAnterior <= 0) return gastos > 0 ? 100.0 : 0.0;
+    return ((gastos - gastosAnterior) / gastosAnterior) * 100.0;
+  }
+
+  double get deltaGananciaNetaPct {
+    final ant = gananciaAnterior - gastosAnterior;
+    if (ant <= 0) return gananciaNeta > 0 ? 100.0 : 0.0;
+    return ((gananciaNeta - ant) / ant) * 100.0;
+  }
+
   static const empty = KpiPeriodo(
     ventas: 0,
     numFacturas: 0,
     ganancia: 0,
     ventasAnterior: 0,
     gananciaAnterior: 0,
+    gastos: 0,
+    gastosAnterior: 0,
   );
 }
 

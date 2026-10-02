@@ -69,13 +69,38 @@ class ReportesRepository {
   ) async {
     final actual = await _agregado(desde, hasta);
     final ant = await _agregado(desdeAnt, hastaAnt);
+    final gastos = await _sumGastos(desde, hasta);
+    final gastosAnt = await _sumGastos(desdeAnt, hastaAnt);
     return KpiPeriodo(
       ventas: actual.$1,
       numFacturas: actual.$2,
       ganancia: actual.$3,
       ventasAnterior: ant.$1,
       gananciaAnterior: ant.$3,
+      gastos: gastos,
+      gastosAnterior: gastosAnt,
     );
+  }
+
+  Future<double> _sumGastos(DateTime desde, DateTime hasta) async {
+    try {
+      final rows = await _db.customSelect(
+        '''
+        SELECT COALESCE(SUM(monto), 0.0) AS total
+        FROM gastos_table
+        WHERE fecha >= ? AND fecha < ?
+        ''',
+        variables: [
+          Variable.withString(desde.toIso8601String()),
+          Variable.withString(hasta.toIso8601String()),
+        ],
+        readsFrom: {_db.gastosTable},
+      ).get();
+      if (rows.isEmpty) return 0.0;
+      return (rows.first.data['total'] as num?)?.toDouble() ?? 0.0;
+    } catch (_) {
+      return 0.0;
+    }
   }
 
   /// (ventas, num, ganancia)
@@ -237,4 +262,306 @@ class ReportesRepository {
         )
         .toList();
   }
+
+  Future<Map<String, dynamic>> reporteVentas(DateTime desde, DateTime hasta) async {
+    final ds = desde.toIso8601String();
+    final hs = hasta.toIso8601String();
+    final rows = await _db.customSelect(
+      '''
+      SELECT v.id, v.fecha, v.nombre_cliente, v.numero_factura, v.numero_cotizacion,
+             v.monto_total, v.itbis, v.monto_subtotal, v.forma_pago, v.estado_documento
+      FROM ventas_table v
+      WHERE v.fecha >= ? AND v.fecha < ?
+        AND v.estado_documento IN $_estadosVenta
+      ORDER BY v.fecha DESC
+      ''',
+      variables: [Variable.withString(ds), Variable.withString(hs)],
+      readsFrom: {_db.ventasTable},
+    ).get();
+
+    double total = 0, itbis = 0;
+    final registros = <Map<String, dynamic>>[];
+    for (final r in rows) {
+      final m = (r.data['monto_total'] as num?)?.toDouble() ?? 0.0;
+      final i = (r.data['itbis'] as num?)?.toDouble() ?? 0.0;
+      total += m;
+      itbis += i;
+      final ncf = r.data['numero_factura']?.toString() ?? '';
+      final cot = r.data['numero_cotizacion']?.toString() ?? '';
+      registros.add({
+        'id': r.data['id'],
+        'fecha': r.data['fecha']?.toString() ?? '',
+        'cliente': r.data['nombre_cliente']?.toString() ?? 'Consumidor Final',
+        'documento': ncf.isNotEmpty ? ncf : cot,
+        'total': m,
+        'itbis': i,
+        'formaPago': r.data['forma_pago']?.toString() ?? '',
+        'estado': r.data['estado_documento']?.toString() ?? '',
+      });
+    }
+    return {
+      'titulo': 'Ventas',
+      'total': total,
+      'itbis': itbis,
+      'cantidad': registros.length,
+      'registros': registros,
+      'columnas': ['Fecha', 'Cliente', 'Documento', 'Total', 'Forma pago'],
+    };
+  }
+
+  Future<Map<String, dynamic>> reporteCompras(DateTime desde, DateTime hasta) async {
+    final ds = desde.toIso8601String();
+    final hs = hasta.toIso8601String();
+    final rows = await _db.customSelect(
+      '''
+      SELECT c.id, c.fecha_emision, c.nombre_proveedor, c.numero_comprobante, c.ncf,
+             c.total_compra, c.monto_impuesto, c.forma_pago, c.estado
+      FROM compras_table c
+      WHERE c.fecha_emision >= ? AND c.fecha_emision < ?
+        AND lower(c.estado) NOT IN ('borrador','anulada','anulado')
+      ORDER BY c.fecha_emision DESC
+      ''',
+      variables: [Variable.withString(ds), Variable.withString(hs)],
+      readsFrom: {_db.comprasTable},
+    ).get();
+
+    double total = 0, itbis = 0;
+    final registros = <Map<String, dynamic>>[];
+    for (final r in rows) {
+      final m = (r.data['total_compra'] as num?)?.toDouble() ?? 0.0;
+      final i = (r.data['monto_impuesto'] as num?)?.toDouble() ?? 0.0;
+      total += m;
+      itbis += i;
+      registros.add({
+        'id': r.data['id'],
+        'fecha': r.data['fecha_emision']?.toString() ?? '',
+        'proveedor': r.data['nombre_proveedor']?.toString() ?? '',
+        'documento': r.data['numero_comprobante']?.toString() ?? '',
+        'ncf': r.data['ncf']?.toString() ?? '',
+        'total': m,
+        'itbis': i,
+        'formaPago': r.data['forma_pago']?.toString() ?? '',
+        'estado': r.data['estado']?.toString() ?? '',
+      });
+    }
+    return {
+      'titulo': 'Compras',
+      'total': total,
+      'itbis': itbis,
+      'cantidad': registros.length,
+      'registros': registros,
+      'columnas': ['Fecha', 'Proveedor', 'Comprobante', 'NCF', 'Total'],
+    };
+  }
+
+  Future<Map<String, dynamic>> reporteUtilidades(DateTime desde, DateTime hasta) async {
+    final actual = await _agregado(desde, hasta);
+    final gastos = await _sumGastos(desde, hasta);
+    final top = await _topProductos(desde, hasta, 20);
+    final gananciaBruta = actual.$3;
+    final gananciaNeta = gananciaBruta - gastos;
+    final listaGastos = await _listarGastosResumen(desde, hasta);
+    return {
+      'titulo': 'Utilidades',
+      'total': actual.$1,
+      'ganancia': gananciaBruta,
+      'gastos': gastos,
+      'gananciaNeta': gananciaNeta,
+      'costo': actual.$1 - gananciaBruta,
+      'cantidad': actual.$2,
+      'margenPct': actual.$1 <= 0 ? 0.0 : (gananciaBruta / actual.$1) * 100,
+      'margenNetoPct': actual.$1 <= 0 ? 0.0 : (gananciaNeta / actual.$1) * 100,
+      'registros': [
+        ...top.map((p) => {
+              'nombre': p.nombre,
+              'cantidad': p.cantidad,
+              'monto': p.monto,
+              'tipo': 'producto',
+            }),
+        ...listaGastos,
+      ],
+      'columnas': ['Concepto', 'Cant./Cat.', 'Monto'],
+    };
+  }
+
+  Future<List<Map<String, dynamic>>> _listarGastosResumen(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
+    try {
+      final rows = await _db.customSelect(
+        '''
+        SELECT categoria,
+               COUNT(*) AS cant,
+               COALESCE(SUM(monto), 0.0) AS monto
+        FROM gastos_table
+        WHERE fecha >= ? AND fecha < ?
+        GROUP BY categoria
+        ORDER BY monto DESC
+        ''',
+        variables: [
+          Variable.withString(desde.toIso8601String()),
+          Variable.withString(hasta.toIso8601String()),
+        ],
+        readsFrom: {_db.gastosTable},
+      ).get();
+      return rows
+          .map(
+            (r) => {
+              'nombre': 'Gasto · ${r.data['categoria'] ?? 'General'}',
+              'cantidad': (r.data['cant'] as num?)?.toDouble() ?? 0,
+              'monto': (r.data['monto'] as num?)?.toDouble() ?? 0,
+              'tipo': 'gasto',
+            },
+          )
+          .toList();
+    } catch (_) {
+      return <Map<String, dynamic>>[];
+    }
+  }
+
+  Future<Map<String, dynamic>> reporteProductos(DateTime desde, DateTime hasta) async {
+    final top = await _topProductos(desde, hasta, 50);
+    double total = 0;
+    for (final p in top) {
+      total += p.monto;
+    }
+    return {
+      'titulo': 'Productos',
+      'total': total,
+      'cantidad': top.length,
+      'registros': top
+          .map((p) => {
+                'nombre': p.nombre,
+                'cantidad': p.cantidad,
+                'monto': p.monto,
+              })
+          .toList(),
+      'columnas': ['Producto', 'Cant. vendida', 'Monto'],
+    };
+  }
+
+  Future<Map<String, dynamic>> reporteClientes(DateTime desde, DateTime hasta) async {
+    final ds = desde.toIso8601String();
+    final hs = hasta.toIso8601String();
+    final rows = await _db.customSelect(
+      '''
+      SELECT COALESCE(v.nombre_cliente, 'Consumidor Final') AS cliente,
+             COUNT(*) AS facturas,
+             COALESCE(SUM(v.monto_total), 0.0) AS total
+      FROM ventas_table v
+      WHERE v.fecha >= ? AND v.fecha < ?
+        AND v.estado_documento IN $_estadosVenta
+      GROUP BY COALESCE(v.nombre_cliente, 'Consumidor Final')
+      ORDER BY total DESC
+      LIMIT 100
+      ''',
+      variables: [Variable.withString(ds), Variable.withString(hs)],
+      readsFrom: {_db.ventasTable},
+    ).get();
+
+    double total = 0;
+    final registros = <Map<String, dynamic>>[];
+    for (final r in rows) {
+      final m = (r.data['total'] as num?)?.toDouble() ?? 0.0;
+      total += m;
+      registros.add({
+        'cliente': r.data['cliente']?.toString() ?? '',
+        'facturas': (r.data['facturas'] as num?)?.toInt() ?? 0,
+        'total': m,
+      });
+    }
+    return {
+      'titulo': 'Clientes',
+      'total': total,
+      'cantidad': registros.length,
+      'registros': registros,
+      'columnas': ['Cliente', 'Facturas', 'Total'],
+    };
+  }
+
+  Future<Map<String, dynamic>> reporteProveedores(DateTime desde, DateTime hasta) async {
+    final ds = desde.toIso8601String();
+    final hs = hasta.toIso8601String();
+    final rows = await _db.customSelect(
+      '''
+      SELECT COALESCE(c.nombre_proveedor, 'Proveedor') AS proveedor,
+             COUNT(*) AS compras,
+             COALESCE(SUM(c.total_compra), 0.0) AS total
+      FROM compras_table c
+      WHERE c.fecha_emision >= ? AND c.fecha_emision < ?
+        AND lower(c.estado) NOT IN ('borrador','anulada','anulado')
+      GROUP BY COALESCE(c.nombre_proveedor, 'Proveedor')
+      ORDER BY total DESC
+      LIMIT 100
+      ''',
+      variables: [Variable.withString(ds), Variable.withString(hs)],
+      readsFrom: {_db.comprasTable},
+    ).get();
+
+    double total = 0;
+    final registros = <Map<String, dynamic>>[];
+    for (final r in rows) {
+      final m = (r.data['total'] as num?)?.toDouble() ?? 0.0;
+      total += m;
+      registros.add({
+        'proveedor': r.data['proveedor']?.toString() ?? '',
+        'compras': (r.data['compras'] as num?)?.toInt() ?? 0,
+        'total': m,
+      });
+    }
+    return {
+      'titulo': 'Proveedores',
+      'total': total,
+      'cantidad': registros.length,
+      'registros': registros,
+      'columnas': ['Proveedor', 'Compras', 'Total'],
+    };
+  }
+
+  Future<Map<String, dynamic>> reporte607(DateTime desde, DateTime hasta) async {
+    final base = await reporteVentas(desde, hasta);
+    return {
+      ...base,
+      'titulo': '607 · Ventas DGII',
+      'codigoDgii': '607',
+      'columnas': ['Fecha', 'Cliente', 'Documento', 'Total', 'ITBIS'],
+    };
+  }
+
+  Future<Map<String, dynamic>> reporte606(DateTime desde, DateTime hasta) async {
+    final base = await reporteCompras(desde, hasta);
+    return {
+      ...base,
+      'titulo': '606 · Compras DGII',
+      'codigoDgii': '606',
+      'columnas': ['Fecha', 'Proveedor', 'NCF', 'Total', 'ITBIS'],
+    };
+  }
+
+  Future<Map<String, dynamic>> generarPorTipo(
+    String tipo,
+    DateTime desde,
+    DateTime hasta,
+  ) async {
+    return switch (tipo) {
+      'ventas' => reporteVentas(desde, hasta),
+      'compras' => reporteCompras(desde, hasta),
+      'utilidades' => reporteUtilidades(desde, hasta),
+      'productos' => reporteProductos(desde, hasta),
+      'clientes' => reporteClientes(desde, hasta),
+      'proveedores' => reporteProveedores(desde, hasta),
+      '606' => reporte606(desde, hasta),
+      '607' => reporte607(desde, hasta),
+      _ => {
+          'titulo': tipo,
+          'total': 0.0,
+          'cantidad': 0,
+          'registros': <Map<String, dynamic>>[],
+          'columnas': <String>[],
+          'error': 'Tipo de reporte no soportado',
+        },
+    };
+  }
+
 }

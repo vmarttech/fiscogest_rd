@@ -14,6 +14,7 @@ class SeccionLineasWidget extends StatelessWidget {
     required this.onValorCambiado,
     required this.esPequena,
     required this.filaResponsiva,
+    this.modoSimplificado = false,
   });
 
   final List<DetalleLinea> lineas;
@@ -25,6 +26,7 @@ class SeccionLineasWidget extends StatelessWidget {
   final bool esPequena;
   final Widget Function({required Widget child1, required Widget child2})
   filaResponsiva;
+  final bool modoSimplificado;
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +88,7 @@ class SeccionLineasWidget extends StatelessWidget {
               onDescuentoChanged: (_) => onValorCambiado(index, 'descuento'),
               esPequena: esPequena,
               filaResponsiva: filaResponsiva,
+              modoSimplificado: modoSimplificado,
             );
           }),
       ],

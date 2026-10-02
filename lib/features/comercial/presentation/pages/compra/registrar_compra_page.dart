@@ -374,8 +374,11 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   @override
   Widget build(BuildContext context) {
     final esPequena = AppBreakpoints.isMobile(context);
+    final modoSimplificado =
+        ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ??
+        false;
     final desktop = AppBreakpoints.isDesktop(context);
-    final maxW = desktop ? 720 : (esPequena ? 520 : 640);
+    final maxW = desktop ? 900 : (esPequena ? 640 : 760);
 
     Widget filaResponsiva({required Widget child1, required Widget child2}) {
       if (esPequena) {
@@ -400,8 +403,11 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(
-          padding: AppLayout.pantallaPadding.add(
-            const EdgeInsets.only(bottom: 24),
+          padding: EdgeInsets.fromLTRB(
+            esPequena ? 16 : AppSpacing.l,
+            esPequena ? 16 : AppSpacing.m,
+            esPequena ? 16 : AppSpacing.l,
+            32,
           ),
           child: AppLayout.centerConstrained(
             maxWidth: maxW,
@@ -410,9 +416,11 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SectionHeader(
+                  SectionHeader(
                     title: 'Datos de la compra',
-                    subtitle: 'Proveedor, comprobante y forma de pago',
+                    subtitle: modoSimplificado
+                        ? 'Proveedor, recibo y forma de pago'
+                        : 'Proveedor, comprobante y forma de pago',
                   ),
                 CabeceraCompraWidget(
                   fechaController: _fechaController,
@@ -432,6 +440,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   observacionesController: _observacionesController,
                   esPequena: esPequena,
                   filaResponsiva: filaResponsiva,
+                  modoSimplificado: modoSimplificado,
                 ),
                 AppLayout.vL,
                 const SectionHeader(
@@ -447,6 +456,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   onValorCambiado: _actualizarLineaEnTiempoReal, // ✅ CONECTADO
                   esPequena: esPequena,
                   filaResponsiva: filaResponsiva,
+                  modoSimplificado: modoSimplificado,
                 ),
                 AppLayout.vL,
                 const SectionHeader(
@@ -458,6 +468,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                   descuentoGlobal: _descuentoGlobal,
                   montoImpuesto: _montoImpuesto,
                   totalCompra: _totalCompra,
+                  mostrarImpuesto: !modoSimplificado,
                 ),
                 AppLayout.vL,
                 BotonesAccionWidget(

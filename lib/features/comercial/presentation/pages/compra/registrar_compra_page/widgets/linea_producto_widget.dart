@@ -20,6 +20,7 @@ class LineaProductoWidget extends StatelessWidget {
     required this.onDescuentoChanged,
     required this.esPequena,
     required this.filaResponsiva,
+    this.modoSimplificado = false,
   });
 
   final int index;
@@ -37,6 +38,7 @@ class LineaProductoWidget extends StatelessWidget {
   final bool esPequena;
   final Widget Function({required Widget child1, required Widget child2})
   filaResponsiva;
+  final bool modoSimplificado;
 
   @override
   Widget build(BuildContext context) {
@@ -201,12 +203,13 @@ class LineaProductoWidget extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                       ),
-                      Text(
-                        'ITBIS (18%): ${formatRdNumero(linea.itbisLinea)}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                      if (!modoSimplificado)
+                        Text(
+                          'ITBIS (18%): ${formatRdNumero(linea.itbisLinea)}',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                      ),
                       const Divider(height: 12, color: AppColors.border),
                       Text(
                         'Total línea: ${formatRdNumero(linea.totalLinea)}',
