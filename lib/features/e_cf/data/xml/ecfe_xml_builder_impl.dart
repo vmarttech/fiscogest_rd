@@ -1,0 +1,122 @@
+import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_documento.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/ports/ecfe_xml_builder.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/value_objects/ecfe_payload.dart';
+import 'package:xml/xml.dart';
+
+class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
+  @override
+  Future<String> construir(
+    EcfeDocumento doc,
+    Map<String, dynamic> payloadNegocio,
+  ) async {
+    final payload = payloadNegocio['payload'];
+    if (payload is! EcfePayload) {
+      throw StateError('payloadNegocio["payload"] debe ser EcfePayload');
+    }
+    return construirDesdePayload(payload);
+  }
+
+  String construirDesdePayload(EcfePayload p) {
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0" encoding="utf-8"');
+    builder.element('ECF', nest: () {
+      builder.element('Encabezado', nest: () {
+        builder.element('Version', nest: '1.0');
+        builder.element('IdDoc', nest: () {
+          builder.element('TipoeCF', nest: p.tipoEcfCodigo.toString());
+          builder.element('eNCF', nest: p.encf);
+          builder.element(
+            'FechaVencimientoSecuencia',
+            nest: p.fechaVencimientoSecuencia,
+          );
+          builder.element('IndicadorMontoGravado', nest: '0');
+          builder.element('TipoIngresos', nest: p.tipoIngresos);
+          builder.element('TipoPago', nest: p.tipoPago);
+          builder.element('TablaFormasPago', nest: () {
+            builder.element('FormaDePago', nest: () {
+              builder.element('FormaPago', nest: p.formaPagoCodigo);
+              builder.element(
+                'MontoPago',
+                nest: _money(p.montoPago ?? p.montoTotal),
+              );
+            });
+          });
+        });
+        builder.element('Emisor', nest: () {
+          builder.element('RNCEmisor', nest: p.rncEmisor);
+          builder.element('RazonSocialEmisor', nest: _safe(p.razonSocialEmisor));
+          builder.element('DireccionEmisor', nest: _safe(p.direccionEmisor));
+          if ((p.telefonoEmisor ?? '').isNotEmpty) {
+            builder.element('TelefonoEmisor', nest: p.telefonoEmisor!);
+          }
+          if ((p.correoEmisor ?? '').isNotEmpty) {
+            builder.element('CorreoEmisor', nest: p.correoEmisor!);
+          }
+          builder.element('FechaEmision', nest: p.fechaEmision);
+        });
+        builder.element('Comprador', nest: () {
+          if ((p.rncComprador ?? '').isNotEmpty) {
+            builder.element('RNCComprador', nest: p.rncComprador!);
+          }
+          builder.element(
+            'RazonSocialComprador',
+            nest: _safe(
+              (p.razonSocialComprador ?? '').isEmpty
+                  ? 'CONSUMIDOR FINAL'
+                  : p.razonSocialComprador!,
+            ),
+          );
+          if ((p.direccionComprador ?? '').isNotEmpty) {
+            builder.element(
+              'DireccionComprador',
+              nest: _safe(p.direccionComprador!),
+            );
+          }
+        });
+        builder.element('Totales', nest: () {
+          builder.element('MontoGravadoTotal', nest: _money(p.montoGravadoTotal));
+          builder.element('MontoGravadoI1', nest: _money(p.montoGravadoTotal));
+          builder.element('ITBIS1', nest: _rate(p.tasaItbis));
+          builder.element('TotalITBIS', nest: _money(p.totalItbis));
+          builder.element('TotalITBIS1', nest: _money(p.totalItbis));
+          builder.element('MontoTotal', nest: _money(p.montoTotal));
+        });
+      });
+      builder.element('DetallesItems', nest: () {
+        for (final it in p.items) {
+          builder.element('Item', nest: () {
+            builder.element('NumeroLinea', nest: it.numeroLinea.toString());
+            builder.element('IndicadorFacturacion', nest: it.indicadorFacturacion);
+            builder.element('NombreItem', nest: _safe(it.nombreItem));
+            builder.element(
+              'IndicadorBienoServicio',
+              nest: it.indicadorBienoServicio,
+            );
+            builder.element('CantidadItem', nest: _qty(it.cantidad));
+            builder.element('UnidadMedida', nest: it.unidadMedida);
+            builder.element(
+              'PrecioUnitarioItem',
+              nest: _money(it.precioUnitario),
+            );
+            builder.element('MontoItem', nest: _money(it.montoItem));
+          });
+        }
+      });
+    });
+    return builder.buildDocument().toXmlString(pretty: true);
+  }
+
+  static String _money(double v) => v.toStringAsFixed(2);
+  static String _qty(double v) =>
+      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+  static String _rate(double v) => v.toStringAsFixed(2);
+
+  static String _safe(String s) {
+    return s
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;');
+  }
+}

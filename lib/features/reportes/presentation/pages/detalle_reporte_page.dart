@@ -237,7 +237,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
           build: (ctx) => [
             pw.Text(
               _titulo,
-              style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 4),
             pw.Text(
@@ -247,14 +247,14 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
             pw.SizedBox(height: 8),
             pw.Text(
               'Registros: $cant   ·   Total: ${formatRd(total)}',
-              style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 12),
             if (filas.isNotEmpty)
               pw.TableHelper.fromTextArray(
                 headers: filas.first,
                 data: filas.length > 1 ? filas.sublist(1) : <List<String>>[],
-                headerStyle: const pw.TextStyle(
+                headerStyle: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
                   fontSize: 9,
                 ),

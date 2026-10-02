@@ -570,4 +570,9 @@ class VentasRepositoryImpl implements IVentasRepository {
       ),
     );
   }
+
+  /// Uso lateral (e-CF, reportes). No altera la venta.
+  Future<List<DetalleVenta>> listarDetallesVenta(int ventaId) async {
+    return _mapearDetalles(await _ventasDao.listarDetalles(ventaId));
+  }
 }

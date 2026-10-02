@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_dao.dar
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_dao.dart';
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
+import 'package:fiscogest_rd/features/facturacion/domain/emitir_factura_service.dart';
 
 class EmitirNcService {
   EmitirNcService({
@@ -13,6 +14,7 @@ class EmitirNcService {
     required this.notasDao,
     required this.inventarioService,
     required this.cuentasCobrarDao,
+    this.onPostEmision,
   });
 
   final VentasRepositoryImpl ventasRepo;
@@ -20,6 +22,7 @@ class EmitirNcService {
   final NotasCreditoDao notasDao;
   final IVentaInventarioService inventarioService;
   final CuentasCobrarDao cuentasCobrarDao;
+  final EcfePostEmisionHook? onPostEmision;
 
   Future<EmitirNcResultado> emitir({
     required int facturaVentaId,
@@ -88,6 +91,18 @@ class EmitirNcService {
       ),
     );
 
+        // Hook e-CF (B04→E34), aislado
+    final hook = onPostEmision;
+    if (hook != null) {
+      try {
+        final ventaNc = await ventasRepo.obtenerVentaPorId(facturaVentaId) ?? venta;
+        await hook(
+          venta: ventaNc,
+          tipoNcf: 'B04',
+          rncCliente: '',
+        );
+      } catch (_) {}
+    }
     return EmitirNcResultado(
       ncfNc: ncfNc,
       ncfFacturaOrigen: ncfOrigen,

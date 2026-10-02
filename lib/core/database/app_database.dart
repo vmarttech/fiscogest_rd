@@ -48,6 +48,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/caja_sesiones_table.dar
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/gastos/data/dao/gastos_table.dart';
+import 'package:fiscogest_rd/features/e_cf/data/dao/ecfe_tables.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_table.dart';
@@ -95,6 +96,11 @@ part 'app_database.g.dart';
     CajaSesionesTable,
     ComprasTable,
     GastosTable,
+    EcfeConfigTable,
+    EcfeDocumentosTable,
+    EcfeEventosTable,
+    EcfeSecuenciasTable,
+    EcfeSpecVersionTable,
     DetalleCompraTable,
     FiosTable,
   ],
@@ -105,7 +111,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 46;
+  int get schemaVersion => 52;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -114,6 +120,88 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 52) {
+        await customStatement(
+          'CREATE TABLE IF NOT EXISTS ecfe_spec_version_table ('
+          'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
+          'codigo TEXT NOT NULL, '
+          'nombre TEXT NOT NULL, '
+          'circular_dgii TEXT NULL, '
+          "xsd_version TEXT NOT NULL DEFAULT '', "
+          'notas TEXT NULL, '
+          'activa_precert INTEGER NOT NULL DEFAULT 0, '
+          'activa_cert INTEGER NOT NULL DEFAULT 0, '
+          'activa_produccion INTEGER NOT NULL DEFAULT 0, '
+          "checklist_json TEXT NOT NULL DEFAULT '[]', "
+          'creado_en INTEGER NOT NULL, '
+          'activado_en INTEGER NULL'
+          ');',
+        );
+      }
+
+      if (from < 50) {
+        await customStatement(
+          'CREATE TABLE IF NOT EXISTS ecfe_config_table ('
+          'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
+          'habilitado INTEGER NOT NULL DEFAULT 0, '
+          "ambiente TEXT NOT NULL DEFAULT 'deshabilitado', "
+          "rnc_emisor TEXT NOT NULL DEFAULT '', "
+          "razon_social_emisor TEXT NOT NULL DEFAULT '', "
+          "ruta_certificado TEXT NOT NULL DEFAULT '', "
+          "alias_certificado TEXT NOT NULL DEFAULT '', "
+          "clave_certificado TEXT NOT NULL DEFAULT '', "
+          "xsd_version TEXT NOT NULL DEFAULT '', "
+          'actualizado_en INTEGER NOT NULL'
+          ');',
+        );
+        await customStatement(
+          'CREATE TABLE IF NOT EXISTS ecfe_documentos_table ('
+          'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
+          'venta_id INTEGER NULL, '
+          'tipo_ecf INTEGER NOT NULL, '
+          'encf TEXT NULL, '
+          "estado TEXT NOT NULL DEFAULT 'borrador', "
+          'track_id TEXT NULL, '
+          'codigo_respuesta TEXT NULL, '
+          'mensaje_dgii TEXT NULL, '
+          'ultimo_error TEXT NULL, '
+          'xml_sin_firma TEXT NULL, '
+          'xml_firmado TEXT NULL, '
+          'creado_en INTEGER NOT NULL, '
+          'actualizado_en INTEGER NULL'
+          ');',
+        );
+        await customStatement(
+          'CREATE TABLE IF NOT EXISTS ecfe_eventos_table ('
+          'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
+          'documento_id INTEGER NOT NULL, '
+          'paso TEXT NOT NULL, '
+          'detalle TEXT NULL, '
+          'ok INTEGER NOT NULL DEFAULT 1, '
+          'creado_en INTEGER NOT NULL'
+          ');',
+        );
+        await customStatement(
+          'CREATE TABLE IF NOT EXISTS ecfe_secuencias_table ('
+          'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
+          'tipo_ecf INTEGER NOT NULL, '
+          'secuencia_actual INTEGER NOT NULL DEFAULT 0, '
+          'secuencia_desde INTEGER NOT NULL DEFAULT 1, '
+          'secuencia_hasta INTEGER NOT NULL DEFAULT 9999999999, '
+          'fecha_vencimiento INTEGER NULL, '
+          'activo INTEGER NOT NULL DEFAULT 1'
+          ');',
+        );
+      }
+
+      if (from < 48) {
+        await m.createTable(ecfeSecuenciasTable);
+      }
+      if (from < 47) {
+        await m.createTable(ecfeConfigTable);
+        await m.createTable(ecfeDocumentosTable);
+        await m.createTable(ecfeEventosTable);
+      }
       if (from < 46) {
         await m.createTable(gastosTable);
       }

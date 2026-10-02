@@ -1,12 +1,25 @@
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_dao.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+
+/// Callback opcional post-NCF. Debe ser a prueba de fallos (el caller también lo envuelve).
+typedef EcfePostEmisionHook = Future<void> Function({
+  required Venta venta,
+  required String tipoNcf,
+  required String rncCliente,
+});
 
 class EmitirFacturaService {
-  EmitirFacturaService({required this.ventasRepo, required this.secuenciasDao});
+  EmitirFacturaService({
+    required this.ventasRepo,
+    required this.secuenciasDao,
+    this.onPostEmision,
+  });
 
   final VentasRepositoryImpl ventasRepo;
   final SecuenciasNcfDao secuenciasDao;
+  final EcfePostEmisionHook? onPostEmision;
 
   static String tipoNcfSugerido({
     required bool consumidorFinal,
@@ -30,7 +43,6 @@ class EmitirFacturaService {
       throw StateError('Documento no encontrado');
     }
     final ncfActual = (venta.numeroFactura ?? '').trim();
-    // B03-… es correlativo interno de Caja (legado), no NCF DGII B01/B02
     final yaFiscal = ncfActual.startsWith('B01') || ncfActual.startsWith('B02');
     if (yaFiscal) {
       throw StateError('Ya tiene NCF fiscal: $ncfActual');
@@ -58,9 +70,21 @@ class EmitirFacturaService {
         );
       }
     }
-
     final ncf = await secuenciasDao.siguienteNcf(tipoNcf);
-    await ventasRepo.emitirNcfFiscal(ventaId, ncf);
+    final ventaActualizada = await ventasRepo.emitirNcfFiscal(ventaId, ncf);
+
+    // Hook e-CF: aislado; no puede invalidar la emisión local
+    final hook = onPostEmision;
+    if (hook != null) {
+      try {
+        await hook(
+          venta: ventaActualizada,
+          tipoNcf: tipoNcf,
+          rncCliente: rncCliente,
+        );
+      } catch (_) {}
+    }
+
     return ncf;
   }
 }

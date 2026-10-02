@@ -44,6 +44,9 @@ import 'package:fiscogest_rd/features/clientes/presentation/pages/nuevo_cliente_
 import 'package:fiscogest_rd/features/proveedores/presentation/pages/proveedores_page.dart';
 import 'package:fiscogest_rd/features/reports/presentation/pages/reports_page.dart';
 import 'package:fiscogest_rd/features/gastos/presentation/pages/gastos_page.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/pages/ecfe_hub_page.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/pages/ecfe_detalle_page.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/pages/ecfe_spec_page.dart';
 import 'package:fiscogest_rd/features/reportes/presentation/pages/detalle_reporte_page.dart';
 import 'package:fiscogest_rd/features/reportes/presentation/pages/dashboard_economico_page.dart';
 import 'package:fiscogest_rd/features/impuestos/presentation/pages/impuestos_page.dart';
@@ -538,6 +541,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/unidades',
         name: UnidadesPage.routeName,
         builder: (_, __) => const AppShell(child: UnidadesPage()),
+      ),
+      GoRoute(
+        path: '/ecfe',
+        name: EcfeHubPage.routeName,
+        builder: (_, __) => const AppShell(child: EcfeHubPage()),
+      ),
+      GoRoute(
+        path: '/ecfe/spec',
+        name: EcfeSpecPage.routeName,
+        builder: (_, __) => const AppShell(child: EcfeSpecPage()),
+      ),
+      GoRoute(
+        path: '/ecfe/:id',
+        name: EcfeDetallePage.routeName,
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+          return AppShell(child: EcfeDetallePage(documentoId: id));
+        },
       ),
       GoRoute(
         path: '/gastos',

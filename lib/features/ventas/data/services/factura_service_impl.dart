@@ -99,7 +99,7 @@ class FacturaServiceImpl implements IFacturaService {
               children: [
                 pw.Text(
                   'FISCOGEST RD',
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                     fontSize: 18,
                     fontWeight: pw.FontWeight.bold,
                   ),
@@ -107,7 +107,7 @@ class FacturaServiceImpl implements IFacturaService {
                 pw.SizedBox(height: 4),
                 pw.Text(
                   'FACTURA DE VENTA',
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                     fontSize: 14,
                     fontWeight: pw.FontWeight.bold,
                   ),
@@ -138,7 +138,7 @@ class FacturaServiceImpl implements IFacturaService {
           pw.SizedBox(height: 16),
           pw.Text(
             'Detalle',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 12,
             ),
@@ -147,7 +147,7 @@ class FacturaServiceImpl implements IFacturaService {
           pw.TableHelper.fromTextArray(
             headers: ['Producto', 'Cant.', 'P. unit.', 'Subtotal'],
             data: filas,
-            headerStyle: const pw.TextStyle(
+            headerStyle: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 10,
             ),
@@ -184,7 +184,7 @@ class FacturaServiceImpl implements IFacturaService {
           pw.Center(
             child: pw.Text(
               '¡Gracias por su compra!',
-              style: const pw.TextStyle(
+              style: pw.TextStyle(
                 fontSize: 11,
                 fontStyle: pw.FontStyle.italic,
               ),
@@ -214,7 +214,7 @@ class FacturaServiceImpl implements IFacturaService {
             width: 120,
             child: pw.Text(
               k,
-              style: const pw.TextStyle(
+              style: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
                 fontSize: 10,
               ),

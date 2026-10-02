@@ -1,5 +1,6 @@
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:go_router/go_router.dart';
@@ -463,6 +464,21 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
 
     final ncf = await ref.read(secuenciasNcfDaoProvider).siguienteNcf(_tipoNcf);
     await repo.emitirNcfFiscal(ventaIdDoc, ncf);
+    // e-CF: encolado opt-in; no afecta cobro
+    try {
+      final ventaEcfe = await repo.obtenerVentaPorId(ventaIdDoc);
+      if (ventaEcfe != null) {
+        final tipo = ncf.startsWith('B01') ? 'B01' : 'B02';
+        await ref.read(encolarEcfeDesdeVentaProvider)(
+          venta: ventaEcfe,
+          tipoNcf: tipo,
+          rncCliente: '',
+          nombreCliente: ventaEcfe.nombreCliente ?? '',
+        );
+        ref.invalidate(ecfeColaProvider);
+      }
+    } catch (_) {}
+
   }
 
   Future<void> _cobrarYGenerarFactura() async {

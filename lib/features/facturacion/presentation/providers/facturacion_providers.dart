@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_dao.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_dao.dart';
 import 'package:fiscogest_rd/features/facturacion/domain/emitir_factura_service.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 import 'package:fiscogest_rd/features/facturacion/domain/emitir_nc_service.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
@@ -25,6 +26,22 @@ final emitirFacturaServiceProvider = Provider<EmitirFacturaService>((ref) {
   return EmitirFacturaService(
     ventasRepo: ref.watch(ventasRepositoryProvider),
     secuenciasDao: ref.watch(secuenciasNcfDaoProvider),
+    onPostEmision: ({
+      required Venta venta,
+      required String tipoNcf,
+      required String rncCliente,
+    }) async {
+      try {
+        final encolar = ref.read(encolarEcfeDesdeVentaProvider);
+        await encolar(
+          venta: venta,
+          tipoNcf: tipoNcf,
+          rncCliente: rncCliente,
+          nombreCliente: venta.nombreCliente ?? '',
+        );
+        ref.invalidate(ecfeColaProvider);
+      } catch (_) {}
+    },
   );
 });
 
@@ -55,6 +72,22 @@ final emitirNcServiceProvider = Provider<EmitirNcService>((ref) {
     notasDao: ref.watch(notasCreditoDaoProvider),
     inventarioService: ref.watch(ventaInventarioServiceProvider),
     cuentasCobrarDao: ref.watch(_cuentasCobrarDaoFactProvider),
+    onPostEmision: ({
+      required Venta venta,
+      required String tipoNcf,
+      required String rncCliente,
+    }) async {
+      try {
+        final encolar = ref.read(encolarEcfeDesdeVentaProvider);
+        await encolar(
+          venta: venta,
+          tipoNcf: tipoNcf,
+          rncCliente: rncCliente,
+          nombreCliente: venta.nombreCliente ?? '',
+        );
+        ref.invalidate(ecfeColaProvider);
+      } catch (_) {}
+    },
   );
 });
 

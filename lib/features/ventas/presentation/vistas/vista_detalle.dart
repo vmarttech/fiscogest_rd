@@ -1,4 +1,6 @@
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/widgets/ecfe_estado_chip.dart';
+
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -524,6 +526,10 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          if (venta.id != null) ...[
+                            const SizedBox(height: 6),
+                            EcfeEstadoChip(ventaId: venta.id!),
+                          ],
                         ],
                       ),
                     ),

@@ -219,7 +219,7 @@ class ComprobantePdf {
                 children: [
                   pw.Text(
                     emisorNombre,
-                    style: const pw.TextStyle(
+                    style: pw.TextStyle(
                       fontSize: 16,
                       fontWeight: pw.FontWeight.bold,
                     ),
@@ -260,7 +260,7 @@ class ComprobantePdf {
                 children: [
                   pw.Text(
                     titulo,
-                    style: const pw.TextStyle(
+                    style: pw.TextStyle(
                       fontSize: 10,
                       fontWeight: pw.FontWeight.bold,
                     ),
@@ -279,7 +279,7 @@ class ComprobantePdf {
                     ),
                     pw.Text(
                       ncf,
-                      style: const pw.TextStyle(
+                      style: pw.TextStyle(
                         fontSize: 12,
                         fontWeight: pw.FontWeight.bold,
                       ),
@@ -321,7 +321,7 @@ class ComprobantePdf {
               children: [
                 pw.Text(
                   'CLIENTE',
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                     fontSize: 8,
                     fontWeight: pw.FontWeight.bold,
                     color: PdfColors.grey700,
@@ -330,7 +330,7 @@ class ComprobantePdf {
                 pw.SizedBox(height: 4),
                 pw.Text(
                   cliente,
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                     fontSize: 11,
                     fontWeight: pw.FontWeight.bold,
                   ),
@@ -421,7 +421,7 @@ class ComprobantePdf {
           pw.Expanded(
             child: pw.Text(
               val,
-              style: const pw.TextStyle(
+              style: pw.TextStyle(
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
               ),
@@ -457,7 +457,7 @@ class ComprobantePdf {
     return pw.TableHelper.fromTextArray(
       headers: headers,
       data: rows,
-      headerStyle: const pw.TextStyle(
+      headerStyle: pw.TextStyle(
         fontWeight: pw.FontWeight.bold,
         fontSize: 9,
         color: PdfColors.white,
@@ -653,7 +653,7 @@ class ComprobantePdf {
         build: (ctx) => [
           pw.Text(
             'NOTA DE CRÉDITO',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 16,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -666,14 +666,14 @@ class ComprobantePdf {
           pw.SizedBox(height: 12),
           pw.Text(
             'NCF Nota de crédito: $ncfNc',
-            style: const pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
           ),
           pw.Text('NCF afectado: $ncfAfectado'),
           pw.Text('Cliente: $nombreCliente'),
           pw.SizedBox(height: 8),
           pw.Text(
             'Monto: ${_money(monto)}',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -733,7 +733,7 @@ class ComprobantePdf {
         build: (ctx) => [
           pw.Text(
             emisorNombre,
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -744,7 +744,7 @@ class ComprobantePdf {
           pw.Center(
             child: pw.Text(
               'COMPROBANTE DE ENTREGA',
-              style: const pw.TextStyle(
+              style: pw.TextStyle(
                 fontSize: 16,
                 fontWeight: pw.FontWeight.bold,
               ),
@@ -775,7 +775,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 12),
           pw.Text(
             'ENTREGAR A',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 11,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -783,7 +783,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 4),
           pw.Text(
             cliente,
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -795,7 +795,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 6),
           pw.Text(
             'Dirección de entrega:',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 10,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -809,7 +809,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 14),
           pw.Text(
             'ARTÍCULOS A ENTREGAR',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 11,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -824,7 +824,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 28),
           pw.Text(
             'CONFIRMACIÓN DE ENTREGA',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 11,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -941,7 +941,7 @@ class ComprobantePdf {
       children: [
         pw.Text(
           titulo,
-          style: const pw.TextStyle(
+          style: pw.TextStyle(
             fontSize: 9,
             fontWeight: pw.FontWeight.bold,
           ),
@@ -1027,7 +1027,7 @@ class ComprobantePdf {
         children: [
           pw.Text(
             k,
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 8,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -1076,7 +1076,7 @@ class ComprobantePdf {
       final kids = <pw.Widget>[
         pw.Text(
           desc,
-          style: const pw.TextStyle(
+          style: pw.TextStyle(
             fontSize: 8,
             fontWeight: pw.FontWeight.bold,
           ),
@@ -1134,7 +1134,7 @@ class ComprobantePdf {
             children: [
               pw.Text(
                 'ENVÍO / DELIVERY',
-                style: const pw.TextStyle(
+                style: pw.TextStyle(
                   fontSize: 8,
                   fontWeight: pw.FontWeight.bold,
                 ),
@@ -1188,7 +1188,7 @@ class ComprobantePdf {
         if (showCliente) ...[
           pw.Text(
             'Cliente',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 9,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -1214,7 +1214,7 @@ class ComprobantePdf {
         sep(),
         pw.Text(
           'Descripción',
-          style: const pw.TextStyle(
+          style: pw.TextStyle(
             fontSize: 8,
             fontWeight: pw.FontWeight.bold,
           ),

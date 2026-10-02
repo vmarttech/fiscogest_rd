@@ -28,7 +28,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
 
   pw.Widget _titulo(String t) => pw.Text(
     t,
-    style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+    style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
     textAlign: pw.TextAlign.center,
   );
 
@@ -41,7 +41,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           width: 140,
           child: pw.Text(
             k,
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 10,
             ),
@@ -143,7 +143,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
               _m(d.subtotalLinea ?? d.subtotal),
             ],
         ],
-        headerStyle: const pw.TextStyle(
+        headerStyle: pw.TextStyle(
           fontWeight: pw.FontWeight.bold,
           fontSize: 9,
         ),
@@ -172,7 +172,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 8),
           pw.Text(
             'Datos del solicitante / operación',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -182,7 +182,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 12),
           pw.Text(
             'Condiciones propuestas',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -192,7 +192,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 12),
           pw.Text(
             'Detalle de la cotización',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -202,7 +202,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 16),
           pw.Text(
             'Declaración del solicitante',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -227,7 +227,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 12),
           pw.Text(
             'Referencias (completar a mano si aplica)',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 10,
             ),
@@ -292,7 +292,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 12),
           pw.Text(
             '1. Identificación',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -302,7 +302,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             '2. Objeto y monto',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -320,7 +320,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             '3. Condiciones de pago',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -339,7 +339,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             '4. Obligaciones del DEUDOR',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -356,7 +356,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             '5. Incumplimiento',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -374,7 +374,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
             pw.SizedBox(height: 10),
             pw.Text(
               'Cláusulas adicionales',
-              style: const pw.TextStyle(
+              style: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
                 fontSize: 11,
               ),
@@ -388,7 +388,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           ],
           pw.Text(
             '6. Aceptación',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
             ),
@@ -534,7 +534,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
         build: (ctx) => [
           pw.Text(
             'CRONOGRAMA DE PAGOS',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 14,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -648,7 +648,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           ),
           if (cuotas.isNotEmpty) ...[
             pw.SizedBox(height: 18),
-            pw.Text('Detalle de cuotas', style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            pw.Text('Detalle de cuotas', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 6),
             pw.Table(
               border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
@@ -675,7 +675,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
             ),
           ],
           pw.SizedBox(height: 18),
-          pw.Text('Historial de pagos', style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+          pw.Text('Historial de pagos', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
           pw.SizedBox(height: 6),
           if (cuenta.abonos.isEmpty)
             _celda('No hay pagos registrados')

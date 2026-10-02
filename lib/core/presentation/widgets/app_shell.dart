@@ -320,6 +320,13 @@ class AppShell extends ConsumerWidget {
                     if (!modoColmadoFlag && esAdmin) ...[
                       _buildNavItem(
                         context,
+                        '/ecfe',
+                        'e-CF · DGII',
+                        Icons.cloud_sync_outlined,
+                        currentPath,
+                      ),
+                      _buildNavItem(
+                        context,
                         '/impuestos',
                         'Impuestos',
                         Icons.calculate_outlined,

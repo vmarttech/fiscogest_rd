@@ -26451,6 +26451,3007 @@ class GastosTableCompanion extends UpdateCompanion<GastosTableData> {
   }
 }
 
+class $EcfeConfigTableTable extends EcfeConfigTable
+    with TableInfo<$EcfeConfigTableTable, EcfeConfigTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EcfeConfigTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _habilitadoMeta = const VerificationMeta(
+    'habilitado',
+  );
+  @override
+  late final GeneratedColumn<bool> habilitado = GeneratedColumn<bool>(
+    'habilitado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("habilitado" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _ambienteMeta = const VerificationMeta(
+    'ambiente',
+  );
+  @override
+  late final GeneratedColumn<String> ambiente = GeneratedColumn<String>(
+    'ambiente',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('deshabilitado'),
+  );
+  static const VerificationMeta _rncEmisorMeta = const VerificationMeta(
+    'rncEmisor',
+  );
+  @override
+  late final GeneratedColumn<String> rncEmisor = GeneratedColumn<String>(
+    'rnc_emisor',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _razonSocialEmisorMeta = const VerificationMeta(
+    'razonSocialEmisor',
+  );
+  @override
+  late final GeneratedColumn<String> razonSocialEmisor =
+      GeneratedColumn<String>(
+        'razon_social_emisor',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _rutaCertificadoMeta = const VerificationMeta(
+    'rutaCertificado',
+  );
+  @override
+  late final GeneratedColumn<String> rutaCertificado = GeneratedColumn<String>(
+    'ruta_certificado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _aliasCertificadoMeta = const VerificationMeta(
+    'aliasCertificado',
+  );
+  @override
+  late final GeneratedColumn<String> aliasCertificado = GeneratedColumn<String>(
+    'alias_certificado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _claveCertificadoMeta = const VerificationMeta(
+    'claveCertificado',
+  );
+  @override
+  late final GeneratedColumn<String> claveCertificado = GeneratedColumn<String>(
+    'clave_certificado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _xsdVersionMeta = const VerificationMeta(
+    'xsdVersion',
+  );
+  @override
+  late final GeneratedColumn<String> xsdVersion = GeneratedColumn<String>(
+    'xsd_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    habilitado,
+    ambiente,
+    rncEmisor,
+    razonSocialEmisor,
+    rutaCertificado,
+    aliasCertificado,
+    claveCertificado,
+    xsdVersion,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ecfe_config_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EcfeConfigTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('habilitado')) {
+      context.handle(
+        _habilitadoMeta,
+        habilitado.isAcceptableOrUnknown(data['habilitado']!, _habilitadoMeta),
+      );
+    }
+    if (data.containsKey('ambiente')) {
+      context.handle(
+        _ambienteMeta,
+        ambiente.isAcceptableOrUnknown(data['ambiente']!, _ambienteMeta),
+      );
+    }
+    if (data.containsKey('rnc_emisor')) {
+      context.handle(
+        _rncEmisorMeta,
+        rncEmisor.isAcceptableOrUnknown(data['rnc_emisor']!, _rncEmisorMeta),
+      );
+    }
+    if (data.containsKey('razon_social_emisor')) {
+      context.handle(
+        _razonSocialEmisorMeta,
+        razonSocialEmisor.isAcceptableOrUnknown(
+          data['razon_social_emisor']!,
+          _razonSocialEmisorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('ruta_certificado')) {
+      context.handle(
+        _rutaCertificadoMeta,
+        rutaCertificado.isAcceptableOrUnknown(
+          data['ruta_certificado']!,
+          _rutaCertificadoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('alias_certificado')) {
+      context.handle(
+        _aliasCertificadoMeta,
+        aliasCertificado.isAcceptableOrUnknown(
+          data['alias_certificado']!,
+          _aliasCertificadoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('clave_certificado')) {
+      context.handle(
+        _claveCertificadoMeta,
+        claveCertificado.isAcceptableOrUnknown(
+          data['clave_certificado']!,
+          _claveCertificadoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('xsd_version')) {
+      context.handle(
+        _xsdVersionMeta,
+        xsdVersion.isAcceptableOrUnknown(data['xsd_version']!, _xsdVersionMeta),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EcfeConfigTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EcfeConfigTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      habilitado: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}habilitado'],
+      )!,
+      ambiente: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ambiente'],
+      )!,
+      rncEmisor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rnc_emisor'],
+      )!,
+      razonSocialEmisor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}razon_social_emisor'],
+      )!,
+      rutaCertificado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ruta_certificado'],
+      )!,
+      aliasCertificado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}alias_certificado'],
+      )!,
+      claveCertificado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}clave_certificado'],
+      )!,
+      xsdVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}xsd_version'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      )!,
+    );
+  }
+
+  @override
+  $EcfeConfigTableTable createAlias(String alias) {
+    return $EcfeConfigTableTable(attachedDatabase, alias);
+  }
+}
+
+class EcfeConfigTableData extends DataClass
+    implements Insertable<EcfeConfigTableData> {
+  final int id;
+  final bool habilitado;
+
+  /// deshabilitado | precertificacion | certificacion | produccion
+  final String ambiente;
+  final String rncEmisor;
+  final String razonSocialEmisor;
+  final String rutaCertificado;
+  final String aliasCertificado;
+  final String claveCertificado;
+  final String xsdVersion;
+  final DateTime actualizadoEn;
+  const EcfeConfigTableData({
+    required this.id,
+    required this.habilitado,
+    required this.ambiente,
+    required this.rncEmisor,
+    required this.razonSocialEmisor,
+    required this.rutaCertificado,
+    required this.aliasCertificado,
+    required this.claveCertificado,
+    required this.xsdVersion,
+    required this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['habilitado'] = Variable<bool>(habilitado);
+    map['ambiente'] = Variable<String>(ambiente);
+    map['rnc_emisor'] = Variable<String>(rncEmisor);
+    map['razon_social_emisor'] = Variable<String>(razonSocialEmisor);
+    map['ruta_certificado'] = Variable<String>(rutaCertificado);
+    map['alias_certificado'] = Variable<String>(aliasCertificado);
+    map['clave_certificado'] = Variable<String>(claveCertificado);
+    map['xsd_version'] = Variable<String>(xsdVersion);
+    map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    return map;
+  }
+
+  EcfeConfigTableCompanion toCompanion(bool nullToAbsent) {
+    return EcfeConfigTableCompanion(
+      id: Value(id),
+      habilitado: Value(habilitado),
+      ambiente: Value(ambiente),
+      rncEmisor: Value(rncEmisor),
+      razonSocialEmisor: Value(razonSocialEmisor),
+      rutaCertificado: Value(rutaCertificado),
+      aliasCertificado: Value(aliasCertificado),
+      claveCertificado: Value(claveCertificado),
+      xsdVersion: Value(xsdVersion),
+      actualizadoEn: Value(actualizadoEn),
+    );
+  }
+
+  factory EcfeConfigTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EcfeConfigTableData(
+      id: serializer.fromJson<int>(json['id']),
+      habilitado: serializer.fromJson<bool>(json['habilitado']),
+      ambiente: serializer.fromJson<String>(json['ambiente']),
+      rncEmisor: serializer.fromJson<String>(json['rncEmisor']),
+      razonSocialEmisor: serializer.fromJson<String>(json['razonSocialEmisor']),
+      rutaCertificado: serializer.fromJson<String>(json['rutaCertificado']),
+      aliasCertificado: serializer.fromJson<String>(json['aliasCertificado']),
+      claveCertificado: serializer.fromJson<String>(json['claveCertificado']),
+      xsdVersion: serializer.fromJson<String>(json['xsdVersion']),
+      actualizadoEn: serializer.fromJson<DateTime>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'habilitado': serializer.toJson<bool>(habilitado),
+      'ambiente': serializer.toJson<String>(ambiente),
+      'rncEmisor': serializer.toJson<String>(rncEmisor),
+      'razonSocialEmisor': serializer.toJson<String>(razonSocialEmisor),
+      'rutaCertificado': serializer.toJson<String>(rutaCertificado),
+      'aliasCertificado': serializer.toJson<String>(aliasCertificado),
+      'claveCertificado': serializer.toJson<String>(claveCertificado),
+      'xsdVersion': serializer.toJson<String>(xsdVersion),
+      'actualizadoEn': serializer.toJson<DateTime>(actualizadoEn),
+    };
+  }
+
+  EcfeConfigTableData copyWith({
+    int? id,
+    bool? habilitado,
+    String? ambiente,
+    String? rncEmisor,
+    String? razonSocialEmisor,
+    String? rutaCertificado,
+    String? aliasCertificado,
+    String? claveCertificado,
+    String? xsdVersion,
+    DateTime? actualizadoEn,
+  }) => EcfeConfigTableData(
+    id: id ?? this.id,
+    habilitado: habilitado ?? this.habilitado,
+    ambiente: ambiente ?? this.ambiente,
+    rncEmisor: rncEmisor ?? this.rncEmisor,
+    razonSocialEmisor: razonSocialEmisor ?? this.razonSocialEmisor,
+    rutaCertificado: rutaCertificado ?? this.rutaCertificado,
+    aliasCertificado: aliasCertificado ?? this.aliasCertificado,
+    claveCertificado: claveCertificado ?? this.claveCertificado,
+    xsdVersion: xsdVersion ?? this.xsdVersion,
+    actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+  );
+  EcfeConfigTableData copyWithCompanion(EcfeConfigTableCompanion data) {
+    return EcfeConfigTableData(
+      id: data.id.present ? data.id.value : this.id,
+      habilitado: data.habilitado.present
+          ? data.habilitado.value
+          : this.habilitado,
+      ambiente: data.ambiente.present ? data.ambiente.value : this.ambiente,
+      rncEmisor: data.rncEmisor.present ? data.rncEmisor.value : this.rncEmisor,
+      razonSocialEmisor: data.razonSocialEmisor.present
+          ? data.razonSocialEmisor.value
+          : this.razonSocialEmisor,
+      rutaCertificado: data.rutaCertificado.present
+          ? data.rutaCertificado.value
+          : this.rutaCertificado,
+      aliasCertificado: data.aliasCertificado.present
+          ? data.aliasCertificado.value
+          : this.aliasCertificado,
+      claveCertificado: data.claveCertificado.present
+          ? data.claveCertificado.value
+          : this.claveCertificado,
+      xsdVersion: data.xsdVersion.present
+          ? data.xsdVersion.value
+          : this.xsdVersion,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeConfigTableData(')
+          ..write('id: $id, ')
+          ..write('habilitado: $habilitado, ')
+          ..write('ambiente: $ambiente, ')
+          ..write('rncEmisor: $rncEmisor, ')
+          ..write('razonSocialEmisor: $razonSocialEmisor, ')
+          ..write('rutaCertificado: $rutaCertificado, ')
+          ..write('aliasCertificado: $aliasCertificado, ')
+          ..write('claveCertificado: $claveCertificado, ')
+          ..write('xsdVersion: $xsdVersion, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    habilitado,
+    ambiente,
+    rncEmisor,
+    razonSocialEmisor,
+    rutaCertificado,
+    aliasCertificado,
+    claveCertificado,
+    xsdVersion,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EcfeConfigTableData &&
+          other.id == this.id &&
+          other.habilitado == this.habilitado &&
+          other.ambiente == this.ambiente &&
+          other.rncEmisor == this.rncEmisor &&
+          other.razonSocialEmisor == this.razonSocialEmisor &&
+          other.rutaCertificado == this.rutaCertificado &&
+          other.aliasCertificado == this.aliasCertificado &&
+          other.claveCertificado == this.claveCertificado &&
+          other.xsdVersion == this.xsdVersion &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class EcfeConfigTableCompanion extends UpdateCompanion<EcfeConfigTableData> {
+  final Value<int> id;
+  final Value<bool> habilitado;
+  final Value<String> ambiente;
+  final Value<String> rncEmisor;
+  final Value<String> razonSocialEmisor;
+  final Value<String> rutaCertificado;
+  final Value<String> aliasCertificado;
+  final Value<String> claveCertificado;
+  final Value<String> xsdVersion;
+  final Value<DateTime> actualizadoEn;
+  const EcfeConfigTableCompanion({
+    this.id = const Value.absent(),
+    this.habilitado = const Value.absent(),
+    this.ambiente = const Value.absent(),
+    this.rncEmisor = const Value.absent(),
+    this.razonSocialEmisor = const Value.absent(),
+    this.rutaCertificado = const Value.absent(),
+    this.aliasCertificado = const Value.absent(),
+    this.claveCertificado = const Value.absent(),
+    this.xsdVersion = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  EcfeConfigTableCompanion.insert({
+    this.id = const Value.absent(),
+    this.habilitado = const Value.absent(),
+    this.ambiente = const Value.absent(),
+    this.rncEmisor = const Value.absent(),
+    this.razonSocialEmisor = const Value.absent(),
+    this.rutaCertificado = const Value.absent(),
+    this.aliasCertificado = const Value.absent(),
+    this.claveCertificado = const Value.absent(),
+    this.xsdVersion = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  static Insertable<EcfeConfigTableData> custom({
+    Expression<int>? id,
+    Expression<bool>? habilitado,
+    Expression<String>? ambiente,
+    Expression<String>? rncEmisor,
+    Expression<String>? razonSocialEmisor,
+    Expression<String>? rutaCertificado,
+    Expression<String>? aliasCertificado,
+    Expression<String>? claveCertificado,
+    Expression<String>? xsdVersion,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (habilitado != null) 'habilitado': habilitado,
+      if (ambiente != null) 'ambiente': ambiente,
+      if (rncEmisor != null) 'rnc_emisor': rncEmisor,
+      if (razonSocialEmisor != null) 'razon_social_emisor': razonSocialEmisor,
+      if (rutaCertificado != null) 'ruta_certificado': rutaCertificado,
+      if (aliasCertificado != null) 'alias_certificado': aliasCertificado,
+      if (claveCertificado != null) 'clave_certificado': claveCertificado,
+      if (xsdVersion != null) 'xsd_version': xsdVersion,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  EcfeConfigTableCompanion copyWith({
+    Value<int>? id,
+    Value<bool>? habilitado,
+    Value<String>? ambiente,
+    Value<String>? rncEmisor,
+    Value<String>? razonSocialEmisor,
+    Value<String>? rutaCertificado,
+    Value<String>? aliasCertificado,
+    Value<String>? claveCertificado,
+    Value<String>? xsdVersion,
+    Value<DateTime>? actualizadoEn,
+  }) {
+    return EcfeConfigTableCompanion(
+      id: id ?? this.id,
+      habilitado: habilitado ?? this.habilitado,
+      ambiente: ambiente ?? this.ambiente,
+      rncEmisor: rncEmisor ?? this.rncEmisor,
+      razonSocialEmisor: razonSocialEmisor ?? this.razonSocialEmisor,
+      rutaCertificado: rutaCertificado ?? this.rutaCertificado,
+      aliasCertificado: aliasCertificado ?? this.aliasCertificado,
+      claveCertificado: claveCertificado ?? this.claveCertificado,
+      xsdVersion: xsdVersion ?? this.xsdVersion,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (habilitado.present) {
+      map['habilitado'] = Variable<bool>(habilitado.value);
+    }
+    if (ambiente.present) {
+      map['ambiente'] = Variable<String>(ambiente.value);
+    }
+    if (rncEmisor.present) {
+      map['rnc_emisor'] = Variable<String>(rncEmisor.value);
+    }
+    if (razonSocialEmisor.present) {
+      map['razon_social_emisor'] = Variable<String>(razonSocialEmisor.value);
+    }
+    if (rutaCertificado.present) {
+      map['ruta_certificado'] = Variable<String>(rutaCertificado.value);
+    }
+    if (aliasCertificado.present) {
+      map['alias_certificado'] = Variable<String>(aliasCertificado.value);
+    }
+    if (claveCertificado.present) {
+      map['clave_certificado'] = Variable<String>(claveCertificado.value);
+    }
+    if (xsdVersion.present) {
+      map['xsd_version'] = Variable<String>(xsdVersion.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeConfigTableCompanion(')
+          ..write('id: $id, ')
+          ..write('habilitado: $habilitado, ')
+          ..write('ambiente: $ambiente, ')
+          ..write('rncEmisor: $rncEmisor, ')
+          ..write('razonSocialEmisor: $razonSocialEmisor, ')
+          ..write('rutaCertificado: $rutaCertificado, ')
+          ..write('aliasCertificado: $aliasCertificado, ')
+          ..write('claveCertificado: $claveCertificado, ')
+          ..write('xsdVersion: $xsdVersion, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EcfeDocumentosTableTable extends EcfeDocumentosTable
+    with TableInfo<$EcfeDocumentosTableTable, EcfeDocumentosTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EcfeDocumentosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _ventaIdMeta = const VerificationMeta(
+    'ventaId',
+  );
+  @override
+  late final GeneratedColumn<int> ventaId = GeneratedColumn<int>(
+    'venta_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _tipoEcfMeta = const VerificationMeta(
+    'tipoEcf',
+  );
+  @override
+  late final GeneratedColumn<int> tipoEcf = GeneratedColumn<int>(
+    'tipo_ecf',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _encfMeta = const VerificationMeta('encf');
+  @override
+  late final GeneratedColumn<String> encf = GeneratedColumn<String>(
+    'encf',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
+  @override
+  late final GeneratedColumn<String> estado = GeneratedColumn<String>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('borrador'),
+  );
+  static const VerificationMeta _trackIdMeta = const VerificationMeta(
+    'trackId',
+  );
+  @override
+  late final GeneratedColumn<String> trackId = GeneratedColumn<String>(
+    'track_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _codigoRespuestaMeta = const VerificationMeta(
+    'codigoRespuesta',
+  );
+  @override
+  late final GeneratedColumn<String> codigoRespuesta = GeneratedColumn<String>(
+    'codigo_respuesta',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _mensajeDgiiMeta = const VerificationMeta(
+    'mensajeDgii',
+  );
+  @override
+  late final GeneratedColumn<String> mensajeDgii = GeneratedColumn<String>(
+    'mensaje_dgii',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ultimoErrorMeta = const VerificationMeta(
+    'ultimoError',
+  );
+  @override
+  late final GeneratedColumn<String> ultimoError = GeneratedColumn<String>(
+    'ultimo_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _xmlSinFirmaMeta = const VerificationMeta(
+    'xmlSinFirma',
+  );
+  @override
+  late final GeneratedColumn<String> xmlSinFirma = GeneratedColumn<String>(
+    'xml_sin_firma',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _xmlFirmadoMeta = const VerificationMeta(
+    'xmlFirmado',
+  );
+  @override
+  late final GeneratedColumn<String> xmlFirmado = GeneratedColumn<String>(
+    'xml_firmado',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ventaId,
+    tipoEcf,
+    encf,
+    estado,
+    trackId,
+    codigoRespuesta,
+    mensajeDgii,
+    ultimoError,
+    xmlSinFirma,
+    xmlFirmado,
+    creadoEn,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ecfe_documentos_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EcfeDocumentosTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('venta_id')) {
+      context.handle(
+        _ventaIdMeta,
+        ventaId.isAcceptableOrUnknown(data['venta_id']!, _ventaIdMeta),
+      );
+    }
+    if (data.containsKey('tipo_ecf')) {
+      context.handle(
+        _tipoEcfMeta,
+        tipoEcf.isAcceptableOrUnknown(data['tipo_ecf']!, _tipoEcfMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tipoEcfMeta);
+    }
+    if (data.containsKey('encf')) {
+      context.handle(
+        _encfMeta,
+        encf.isAcceptableOrUnknown(data['encf']!, _encfMeta),
+      );
+    }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    }
+    if (data.containsKey('track_id')) {
+      context.handle(
+        _trackIdMeta,
+        trackId.isAcceptableOrUnknown(data['track_id']!, _trackIdMeta),
+      );
+    }
+    if (data.containsKey('codigo_respuesta')) {
+      context.handle(
+        _codigoRespuestaMeta,
+        codigoRespuesta.isAcceptableOrUnknown(
+          data['codigo_respuesta']!,
+          _codigoRespuestaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('mensaje_dgii')) {
+      context.handle(
+        _mensajeDgiiMeta,
+        mensajeDgii.isAcceptableOrUnknown(
+          data['mensaje_dgii']!,
+          _mensajeDgiiMeta,
+        ),
+      );
+    }
+    if (data.containsKey('ultimo_error')) {
+      context.handle(
+        _ultimoErrorMeta,
+        ultimoError.isAcceptableOrUnknown(
+          data['ultimo_error']!,
+          _ultimoErrorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('xml_sin_firma')) {
+      context.handle(
+        _xmlSinFirmaMeta,
+        xmlSinFirma.isAcceptableOrUnknown(
+          data['xml_sin_firma']!,
+          _xmlSinFirmaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('xml_firmado')) {
+      context.handle(
+        _xmlFirmadoMeta,
+        xmlFirmado.isAcceptableOrUnknown(data['xml_firmado']!, _xmlFirmadoMeta),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_creadoEnMeta);
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EcfeDocumentosTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EcfeDocumentosTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      ventaId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}venta_id'],
+      ),
+      tipoEcf: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tipo_ecf'],
+      )!,
+      encf: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}encf'],
+      ),
+      estado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}estado'],
+      )!,
+      trackId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}track_id'],
+      ),
+      codigoRespuesta: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo_respuesta'],
+      ),
+      mensajeDgii: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mensaje_dgii'],
+      ),
+      ultimoError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ultimo_error'],
+      ),
+      xmlSinFirma: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}xml_sin_firma'],
+      ),
+      xmlFirmado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}xml_firmado'],
+      ),
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      ),
+    );
+  }
+
+  @override
+  $EcfeDocumentosTableTable createAlias(String alias) {
+    return $EcfeDocumentosTableTable(attachedDatabase, alias);
+  }
+}
+
+class EcfeDocumentosTableData extends DataClass
+    implements Insertable<EcfeDocumentosTableData> {
+  final int id;
+
+  /// Solo referencia; no FK estricta para no acoplar borrados de ventas.
+  final int? ventaId;
+  final int tipoEcf;
+  final String? encf;
+  final String estado;
+  final String? trackId;
+  final String? codigoRespuesta;
+  final String? mensajeDgii;
+  final String? ultimoError;
+  final String? xmlSinFirma;
+  final String? xmlFirmado;
+  final DateTime creadoEn;
+  final DateTime? actualizadoEn;
+  const EcfeDocumentosTableData({
+    required this.id,
+    this.ventaId,
+    required this.tipoEcf,
+    this.encf,
+    required this.estado,
+    this.trackId,
+    this.codigoRespuesta,
+    this.mensajeDgii,
+    this.ultimoError,
+    this.xmlSinFirma,
+    this.xmlFirmado,
+    required this.creadoEn,
+    this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || ventaId != null) {
+      map['venta_id'] = Variable<int>(ventaId);
+    }
+    map['tipo_ecf'] = Variable<int>(tipoEcf);
+    if (!nullToAbsent || encf != null) {
+      map['encf'] = Variable<String>(encf);
+    }
+    map['estado'] = Variable<String>(estado);
+    if (!nullToAbsent || trackId != null) {
+      map['track_id'] = Variable<String>(trackId);
+    }
+    if (!nullToAbsent || codigoRespuesta != null) {
+      map['codigo_respuesta'] = Variable<String>(codigoRespuesta);
+    }
+    if (!nullToAbsent || mensajeDgii != null) {
+      map['mensaje_dgii'] = Variable<String>(mensajeDgii);
+    }
+    if (!nullToAbsent || ultimoError != null) {
+      map['ultimo_error'] = Variable<String>(ultimoError);
+    }
+    if (!nullToAbsent || xmlSinFirma != null) {
+      map['xml_sin_firma'] = Variable<String>(xmlSinFirma);
+    }
+    if (!nullToAbsent || xmlFirmado != null) {
+      map['xml_firmado'] = Variable<String>(xmlFirmado);
+    }
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || actualizadoEn != null) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    }
+    return map;
+  }
+
+  EcfeDocumentosTableCompanion toCompanion(bool nullToAbsent) {
+    return EcfeDocumentosTableCompanion(
+      id: Value(id),
+      ventaId: ventaId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ventaId),
+      tipoEcf: Value(tipoEcf),
+      encf: encf == null && nullToAbsent ? const Value.absent() : Value(encf),
+      estado: Value(estado),
+      trackId: trackId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(trackId),
+      codigoRespuesta: codigoRespuesta == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codigoRespuesta),
+      mensajeDgii: mensajeDgii == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mensajeDgii),
+      ultimoError: ultimoError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ultimoError),
+      xmlSinFirma: xmlSinFirma == null && nullToAbsent
+          ? const Value.absent()
+          : Value(xmlSinFirma),
+      xmlFirmado: xmlFirmado == null && nullToAbsent
+          ? const Value.absent()
+          : Value(xmlFirmado),
+      creadoEn: Value(creadoEn),
+      actualizadoEn: actualizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualizadoEn),
+    );
+  }
+
+  factory EcfeDocumentosTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EcfeDocumentosTableData(
+      id: serializer.fromJson<int>(json['id']),
+      ventaId: serializer.fromJson<int?>(json['ventaId']),
+      tipoEcf: serializer.fromJson<int>(json['tipoEcf']),
+      encf: serializer.fromJson<String?>(json['encf']),
+      estado: serializer.fromJson<String>(json['estado']),
+      trackId: serializer.fromJson<String?>(json['trackId']),
+      codigoRespuesta: serializer.fromJson<String?>(json['codigoRespuesta']),
+      mensajeDgii: serializer.fromJson<String?>(json['mensajeDgii']),
+      ultimoError: serializer.fromJson<String?>(json['ultimoError']),
+      xmlSinFirma: serializer.fromJson<String?>(json['xmlSinFirma']),
+      xmlFirmado: serializer.fromJson<String?>(json['xmlFirmado']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'ventaId': serializer.toJson<int?>(ventaId),
+      'tipoEcf': serializer.toJson<int>(tipoEcf),
+      'encf': serializer.toJson<String?>(encf),
+      'estado': serializer.toJson<String>(estado),
+      'trackId': serializer.toJson<String?>(trackId),
+      'codigoRespuesta': serializer.toJson<String?>(codigoRespuesta),
+      'mensajeDgii': serializer.toJson<String?>(mensajeDgii),
+      'ultimoError': serializer.toJson<String?>(ultimoError),
+      'xmlSinFirma': serializer.toJson<String?>(xmlSinFirma),
+      'xmlFirmado': serializer.toJson<String?>(xmlFirmado),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+    };
+  }
+
+  EcfeDocumentosTableData copyWith({
+    int? id,
+    Value<int?> ventaId = const Value.absent(),
+    int? tipoEcf,
+    Value<String?> encf = const Value.absent(),
+    String? estado,
+    Value<String?> trackId = const Value.absent(),
+    Value<String?> codigoRespuesta = const Value.absent(),
+    Value<String?> mensajeDgii = const Value.absent(),
+    Value<String?> ultimoError = const Value.absent(),
+    Value<String?> xmlSinFirma = const Value.absent(),
+    Value<String?> xmlFirmado = const Value.absent(),
+    DateTime? creadoEn,
+    Value<DateTime?> actualizadoEn = const Value.absent(),
+  }) => EcfeDocumentosTableData(
+    id: id ?? this.id,
+    ventaId: ventaId.present ? ventaId.value : this.ventaId,
+    tipoEcf: tipoEcf ?? this.tipoEcf,
+    encf: encf.present ? encf.value : this.encf,
+    estado: estado ?? this.estado,
+    trackId: trackId.present ? trackId.value : this.trackId,
+    codigoRespuesta: codigoRespuesta.present
+        ? codigoRespuesta.value
+        : this.codigoRespuesta,
+    mensajeDgii: mensajeDgii.present ? mensajeDgii.value : this.mensajeDgii,
+    ultimoError: ultimoError.present ? ultimoError.value : this.ultimoError,
+    xmlSinFirma: xmlSinFirma.present ? xmlSinFirma.value : this.xmlSinFirma,
+    xmlFirmado: xmlFirmado.present ? xmlFirmado.value : this.xmlFirmado,
+    creadoEn: creadoEn ?? this.creadoEn,
+    actualizadoEn: actualizadoEn.present
+        ? actualizadoEn.value
+        : this.actualizadoEn,
+  );
+  EcfeDocumentosTableData copyWithCompanion(EcfeDocumentosTableCompanion data) {
+    return EcfeDocumentosTableData(
+      id: data.id.present ? data.id.value : this.id,
+      ventaId: data.ventaId.present ? data.ventaId.value : this.ventaId,
+      tipoEcf: data.tipoEcf.present ? data.tipoEcf.value : this.tipoEcf,
+      encf: data.encf.present ? data.encf.value : this.encf,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      trackId: data.trackId.present ? data.trackId.value : this.trackId,
+      codigoRespuesta: data.codigoRespuesta.present
+          ? data.codigoRespuesta.value
+          : this.codigoRespuesta,
+      mensajeDgii: data.mensajeDgii.present
+          ? data.mensajeDgii.value
+          : this.mensajeDgii,
+      ultimoError: data.ultimoError.present
+          ? data.ultimoError.value
+          : this.ultimoError,
+      xmlSinFirma: data.xmlSinFirma.present
+          ? data.xmlSinFirma.value
+          : this.xmlSinFirma,
+      xmlFirmado: data.xmlFirmado.present
+          ? data.xmlFirmado.value
+          : this.xmlFirmado,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeDocumentosTableData(')
+          ..write('id: $id, ')
+          ..write('ventaId: $ventaId, ')
+          ..write('tipoEcf: $tipoEcf, ')
+          ..write('encf: $encf, ')
+          ..write('estado: $estado, ')
+          ..write('trackId: $trackId, ')
+          ..write('codigoRespuesta: $codigoRespuesta, ')
+          ..write('mensajeDgii: $mensajeDgii, ')
+          ..write('ultimoError: $ultimoError, ')
+          ..write('xmlSinFirma: $xmlSinFirma, ')
+          ..write('xmlFirmado: $xmlFirmado, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ventaId,
+    tipoEcf,
+    encf,
+    estado,
+    trackId,
+    codigoRespuesta,
+    mensajeDgii,
+    ultimoError,
+    xmlSinFirma,
+    xmlFirmado,
+    creadoEn,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EcfeDocumentosTableData &&
+          other.id == this.id &&
+          other.ventaId == this.ventaId &&
+          other.tipoEcf == this.tipoEcf &&
+          other.encf == this.encf &&
+          other.estado == this.estado &&
+          other.trackId == this.trackId &&
+          other.codigoRespuesta == this.codigoRespuesta &&
+          other.mensajeDgii == this.mensajeDgii &&
+          other.ultimoError == this.ultimoError &&
+          other.xmlSinFirma == this.xmlSinFirma &&
+          other.xmlFirmado == this.xmlFirmado &&
+          other.creadoEn == this.creadoEn &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class EcfeDocumentosTableCompanion
+    extends UpdateCompanion<EcfeDocumentosTableData> {
+  final Value<int> id;
+  final Value<int?> ventaId;
+  final Value<int> tipoEcf;
+  final Value<String?> encf;
+  final Value<String> estado;
+  final Value<String?> trackId;
+  final Value<String?> codigoRespuesta;
+  final Value<String?> mensajeDgii;
+  final Value<String?> ultimoError;
+  final Value<String?> xmlSinFirma;
+  final Value<String?> xmlFirmado;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> actualizadoEn;
+  const EcfeDocumentosTableCompanion({
+    this.id = const Value.absent(),
+    this.ventaId = const Value.absent(),
+    this.tipoEcf = const Value.absent(),
+    this.encf = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.trackId = const Value.absent(),
+    this.codigoRespuesta = const Value.absent(),
+    this.mensajeDgii = const Value.absent(),
+    this.ultimoError = const Value.absent(),
+    this.xmlSinFirma = const Value.absent(),
+    this.xmlFirmado = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  EcfeDocumentosTableCompanion.insert({
+    this.id = const Value.absent(),
+    this.ventaId = const Value.absent(),
+    required int tipoEcf,
+    this.encf = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.trackId = const Value.absent(),
+    this.codigoRespuesta = const Value.absent(),
+    this.mensajeDgii = const Value.absent(),
+    this.ultimoError = const Value.absent(),
+    this.xmlSinFirma = const Value.absent(),
+    this.xmlFirmado = const Value.absent(),
+    required DateTime creadoEn,
+    this.actualizadoEn = const Value.absent(),
+  }) : tipoEcf = Value(tipoEcf),
+       creadoEn = Value(creadoEn);
+  static Insertable<EcfeDocumentosTableData> custom({
+    Expression<int>? id,
+    Expression<int>? ventaId,
+    Expression<int>? tipoEcf,
+    Expression<String>? encf,
+    Expression<String>? estado,
+    Expression<String>? trackId,
+    Expression<String>? codigoRespuesta,
+    Expression<String>? mensajeDgii,
+    Expression<String>? ultimoError,
+    Expression<String>? xmlSinFirma,
+    Expression<String>? xmlFirmado,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ventaId != null) 'venta_id': ventaId,
+      if (tipoEcf != null) 'tipo_ecf': tipoEcf,
+      if (encf != null) 'encf': encf,
+      if (estado != null) 'estado': estado,
+      if (trackId != null) 'track_id': trackId,
+      if (codigoRespuesta != null) 'codigo_respuesta': codigoRespuesta,
+      if (mensajeDgii != null) 'mensaje_dgii': mensajeDgii,
+      if (ultimoError != null) 'ultimo_error': ultimoError,
+      if (xmlSinFirma != null) 'xml_sin_firma': xmlSinFirma,
+      if (xmlFirmado != null) 'xml_firmado': xmlFirmado,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  EcfeDocumentosTableCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? ventaId,
+    Value<int>? tipoEcf,
+    Value<String?>? encf,
+    Value<String>? estado,
+    Value<String?>? trackId,
+    Value<String?>? codigoRespuesta,
+    Value<String?>? mensajeDgii,
+    Value<String?>? ultimoError,
+    Value<String?>? xmlSinFirma,
+    Value<String?>? xmlFirmado,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? actualizadoEn,
+  }) {
+    return EcfeDocumentosTableCompanion(
+      id: id ?? this.id,
+      ventaId: ventaId ?? this.ventaId,
+      tipoEcf: tipoEcf ?? this.tipoEcf,
+      encf: encf ?? this.encf,
+      estado: estado ?? this.estado,
+      trackId: trackId ?? this.trackId,
+      codigoRespuesta: codigoRespuesta ?? this.codigoRespuesta,
+      mensajeDgii: mensajeDgii ?? this.mensajeDgii,
+      ultimoError: ultimoError ?? this.ultimoError,
+      xmlSinFirma: xmlSinFirma ?? this.xmlSinFirma,
+      xmlFirmado: xmlFirmado ?? this.xmlFirmado,
+      creadoEn: creadoEn ?? this.creadoEn,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (ventaId.present) {
+      map['venta_id'] = Variable<int>(ventaId.value);
+    }
+    if (tipoEcf.present) {
+      map['tipo_ecf'] = Variable<int>(tipoEcf.value);
+    }
+    if (encf.present) {
+      map['encf'] = Variable<String>(encf.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<String>(estado.value);
+    }
+    if (trackId.present) {
+      map['track_id'] = Variable<String>(trackId.value);
+    }
+    if (codigoRespuesta.present) {
+      map['codigo_respuesta'] = Variable<String>(codigoRespuesta.value);
+    }
+    if (mensajeDgii.present) {
+      map['mensaje_dgii'] = Variable<String>(mensajeDgii.value);
+    }
+    if (ultimoError.present) {
+      map['ultimo_error'] = Variable<String>(ultimoError.value);
+    }
+    if (xmlSinFirma.present) {
+      map['xml_sin_firma'] = Variable<String>(xmlSinFirma.value);
+    }
+    if (xmlFirmado.present) {
+      map['xml_firmado'] = Variable<String>(xmlFirmado.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeDocumentosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('ventaId: $ventaId, ')
+          ..write('tipoEcf: $tipoEcf, ')
+          ..write('encf: $encf, ')
+          ..write('estado: $estado, ')
+          ..write('trackId: $trackId, ')
+          ..write('codigoRespuesta: $codigoRespuesta, ')
+          ..write('mensajeDgii: $mensajeDgii, ')
+          ..write('ultimoError: $ultimoError, ')
+          ..write('xmlSinFirma: $xmlSinFirma, ')
+          ..write('xmlFirmado: $xmlFirmado, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EcfeEventosTableTable extends EcfeEventosTable
+    with TableInfo<$EcfeEventosTableTable, EcfeEventosTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EcfeEventosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _documentoIdMeta = const VerificationMeta(
+    'documentoId',
+  );
+  @override
+  late final GeneratedColumn<int> documentoId = GeneratedColumn<int>(
+    'documento_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pasoMeta = const VerificationMeta('paso');
+  @override
+  late final GeneratedColumn<String> paso = GeneratedColumn<String>(
+    'paso',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _detalleMeta = const VerificationMeta(
+    'detalle',
+  );
+  @override
+  late final GeneratedColumn<String> detalle = GeneratedColumn<String>(
+    'detalle',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _okMeta = const VerificationMeta('ok');
+  @override
+  late final GeneratedColumn<bool> ok = GeneratedColumn<bool>(
+    'ok',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("ok" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    documentoId,
+    paso,
+    detalle,
+    ok,
+    creadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ecfe_eventos_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EcfeEventosTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('documento_id')) {
+      context.handle(
+        _documentoIdMeta,
+        documentoId.isAcceptableOrUnknown(
+          data['documento_id']!,
+          _documentoIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_documentoIdMeta);
+    }
+    if (data.containsKey('paso')) {
+      context.handle(
+        _pasoMeta,
+        paso.isAcceptableOrUnknown(data['paso']!, _pasoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pasoMeta);
+    }
+    if (data.containsKey('detalle')) {
+      context.handle(
+        _detalleMeta,
+        detalle.isAcceptableOrUnknown(data['detalle']!, _detalleMeta),
+      );
+    }
+    if (data.containsKey('ok')) {
+      context.handle(_okMeta, ok.isAcceptableOrUnknown(data['ok']!, _okMeta));
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_creadoEnMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EcfeEventosTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EcfeEventosTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      documentoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}documento_id'],
+      )!,
+      paso: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}paso'],
+      )!,
+      detalle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}detalle'],
+      ),
+      ok: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}ok'],
+      )!,
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+    );
+  }
+
+  @override
+  $EcfeEventosTableTable createAlias(String alias) {
+    return $EcfeEventosTableTable(attachedDatabase, alias);
+  }
+}
+
+class EcfeEventosTableData extends DataClass
+    implements Insertable<EcfeEventosTableData> {
+  final int id;
+  final int documentoId;
+  final String paso;
+  final String? detalle;
+  final bool ok;
+  final DateTime creadoEn;
+  const EcfeEventosTableData({
+    required this.id,
+    required this.documentoId,
+    required this.paso,
+    this.detalle,
+    required this.ok,
+    required this.creadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['documento_id'] = Variable<int>(documentoId);
+    map['paso'] = Variable<String>(paso);
+    if (!nullToAbsent || detalle != null) {
+      map['detalle'] = Variable<String>(detalle);
+    }
+    map['ok'] = Variable<bool>(ok);
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    return map;
+  }
+
+  EcfeEventosTableCompanion toCompanion(bool nullToAbsent) {
+    return EcfeEventosTableCompanion(
+      id: Value(id),
+      documentoId: Value(documentoId),
+      paso: Value(paso),
+      detalle: detalle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(detalle),
+      ok: Value(ok),
+      creadoEn: Value(creadoEn),
+    );
+  }
+
+  factory EcfeEventosTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EcfeEventosTableData(
+      id: serializer.fromJson<int>(json['id']),
+      documentoId: serializer.fromJson<int>(json['documentoId']),
+      paso: serializer.fromJson<String>(json['paso']),
+      detalle: serializer.fromJson<String?>(json['detalle']),
+      ok: serializer.fromJson<bool>(json['ok']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'documentoId': serializer.toJson<int>(documentoId),
+      'paso': serializer.toJson<String>(paso),
+      'detalle': serializer.toJson<String?>(detalle),
+      'ok': serializer.toJson<bool>(ok),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+    };
+  }
+
+  EcfeEventosTableData copyWith({
+    int? id,
+    int? documentoId,
+    String? paso,
+    Value<String?> detalle = const Value.absent(),
+    bool? ok,
+    DateTime? creadoEn,
+  }) => EcfeEventosTableData(
+    id: id ?? this.id,
+    documentoId: documentoId ?? this.documentoId,
+    paso: paso ?? this.paso,
+    detalle: detalle.present ? detalle.value : this.detalle,
+    ok: ok ?? this.ok,
+    creadoEn: creadoEn ?? this.creadoEn,
+  );
+  EcfeEventosTableData copyWithCompanion(EcfeEventosTableCompanion data) {
+    return EcfeEventosTableData(
+      id: data.id.present ? data.id.value : this.id,
+      documentoId: data.documentoId.present
+          ? data.documentoId.value
+          : this.documentoId,
+      paso: data.paso.present ? data.paso.value : this.paso,
+      detalle: data.detalle.present ? data.detalle.value : this.detalle,
+      ok: data.ok.present ? data.ok.value : this.ok,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeEventosTableData(')
+          ..write('id: $id, ')
+          ..write('documentoId: $documentoId, ')
+          ..write('paso: $paso, ')
+          ..write('detalle: $detalle, ')
+          ..write('ok: $ok, ')
+          ..write('creadoEn: $creadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, documentoId, paso, detalle, ok, creadoEn);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EcfeEventosTableData &&
+          other.id == this.id &&
+          other.documentoId == this.documentoId &&
+          other.paso == this.paso &&
+          other.detalle == this.detalle &&
+          other.ok == this.ok &&
+          other.creadoEn == this.creadoEn);
+}
+
+class EcfeEventosTableCompanion extends UpdateCompanion<EcfeEventosTableData> {
+  final Value<int> id;
+  final Value<int> documentoId;
+  final Value<String> paso;
+  final Value<String?> detalle;
+  final Value<bool> ok;
+  final Value<DateTime> creadoEn;
+  const EcfeEventosTableCompanion({
+    this.id = const Value.absent(),
+    this.documentoId = const Value.absent(),
+    this.paso = const Value.absent(),
+    this.detalle = const Value.absent(),
+    this.ok = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+  });
+  EcfeEventosTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int documentoId,
+    required String paso,
+    this.detalle = const Value.absent(),
+    this.ok = const Value.absent(),
+    required DateTime creadoEn,
+  }) : documentoId = Value(documentoId),
+       paso = Value(paso),
+       creadoEn = Value(creadoEn);
+  static Insertable<EcfeEventosTableData> custom({
+    Expression<int>? id,
+    Expression<int>? documentoId,
+    Expression<String>? paso,
+    Expression<String>? detalle,
+    Expression<bool>? ok,
+    Expression<DateTime>? creadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (documentoId != null) 'documento_id': documentoId,
+      if (paso != null) 'paso': paso,
+      if (detalle != null) 'detalle': detalle,
+      if (ok != null) 'ok': ok,
+      if (creadoEn != null) 'creado_en': creadoEn,
+    });
+  }
+
+  EcfeEventosTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? documentoId,
+    Value<String>? paso,
+    Value<String?>? detalle,
+    Value<bool>? ok,
+    Value<DateTime>? creadoEn,
+  }) {
+    return EcfeEventosTableCompanion(
+      id: id ?? this.id,
+      documentoId: documentoId ?? this.documentoId,
+      paso: paso ?? this.paso,
+      detalle: detalle ?? this.detalle,
+      ok: ok ?? this.ok,
+      creadoEn: creadoEn ?? this.creadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (documentoId.present) {
+      map['documento_id'] = Variable<int>(documentoId.value);
+    }
+    if (paso.present) {
+      map['paso'] = Variable<String>(paso.value);
+    }
+    if (detalle.present) {
+      map['detalle'] = Variable<String>(detalle.value);
+    }
+    if (ok.present) {
+      map['ok'] = Variable<bool>(ok.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeEventosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('documentoId: $documentoId, ')
+          ..write('paso: $paso, ')
+          ..write('detalle: $detalle, ')
+          ..write('ok: $ok, ')
+          ..write('creadoEn: $creadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EcfeSecuenciasTableTable extends EcfeSecuenciasTable
+    with TableInfo<$EcfeSecuenciasTableTable, EcfeSecuenciasTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EcfeSecuenciasTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _tipoEcfMeta = const VerificationMeta(
+    'tipoEcf',
+  );
+  @override
+  late final GeneratedColumn<int> tipoEcf = GeneratedColumn<int>(
+    'tipo_ecf',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _secuenciaActualMeta = const VerificationMeta(
+    'secuenciaActual',
+  );
+  @override
+  late final GeneratedColumn<int> secuenciaActual = GeneratedColumn<int>(
+    'secuencia_actual',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _secuenciaDesdeMeta = const VerificationMeta(
+    'secuenciaDesde',
+  );
+  @override
+  late final GeneratedColumn<int> secuenciaDesde = GeneratedColumn<int>(
+    'secuencia_desde',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _secuenciaHastaMeta = const VerificationMeta(
+    'secuenciaHasta',
+  );
+  @override
+  late final GeneratedColumn<int> secuenciaHasta = GeneratedColumn<int>(
+    'secuencia_hasta',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(9999999999),
+  );
+  static const VerificationMeta _fechaVencimientoMeta = const VerificationMeta(
+    'fechaVencimiento',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaVencimiento =
+      GeneratedColumn<DateTime>(
+        'fecha_vencimiento',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tipoEcf,
+    secuenciaActual,
+    secuenciaDesde,
+    secuenciaHasta,
+    fechaVencimiento,
+    activo,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ecfe_secuencias_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EcfeSecuenciasTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tipo_ecf')) {
+      context.handle(
+        _tipoEcfMeta,
+        tipoEcf.isAcceptableOrUnknown(data['tipo_ecf']!, _tipoEcfMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tipoEcfMeta);
+    }
+    if (data.containsKey('secuencia_actual')) {
+      context.handle(
+        _secuenciaActualMeta,
+        secuenciaActual.isAcceptableOrUnknown(
+          data['secuencia_actual']!,
+          _secuenciaActualMeta,
+        ),
+      );
+    }
+    if (data.containsKey('secuencia_desde')) {
+      context.handle(
+        _secuenciaDesdeMeta,
+        secuenciaDesde.isAcceptableOrUnknown(
+          data['secuencia_desde']!,
+          _secuenciaDesdeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('secuencia_hasta')) {
+      context.handle(
+        _secuenciaHastaMeta,
+        secuenciaHasta.isAcceptableOrUnknown(
+          data['secuencia_hasta']!,
+          _secuenciaHastaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fecha_vencimiento')) {
+      context.handle(
+        _fechaVencimientoMeta,
+        fechaVencimiento.isAcceptableOrUnknown(
+          data['fecha_vencimiento']!,
+          _fechaVencimientoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EcfeSecuenciasTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EcfeSecuenciasTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      tipoEcf: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tipo_ecf'],
+      )!,
+      secuenciaActual: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}secuencia_actual'],
+      )!,
+      secuenciaDesde: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}secuencia_desde'],
+      )!,
+      secuenciaHasta: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}secuencia_hasta'],
+      )!,
+      fechaVencimiento: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_vencimiento'],
+      ),
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
+    );
+  }
+
+  @override
+  $EcfeSecuenciasTableTable createAlias(String alias) {
+    return $EcfeSecuenciasTableTable(attachedDatabase, alias);
+  }
+}
+
+class EcfeSecuenciasTableData extends DataClass
+    implements Insertable<EcfeSecuenciasTableData> {
+  final int id;
+  final int tipoEcf;
+  final int secuenciaActual;
+  final int secuenciaDesde;
+  final int secuenciaHasta;
+  final DateTime? fechaVencimiento;
+  final bool activo;
+  const EcfeSecuenciasTableData({
+    required this.id,
+    required this.tipoEcf,
+    required this.secuenciaActual,
+    required this.secuenciaDesde,
+    required this.secuenciaHasta,
+    this.fechaVencimiento,
+    required this.activo,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['tipo_ecf'] = Variable<int>(tipoEcf);
+    map['secuencia_actual'] = Variable<int>(secuenciaActual);
+    map['secuencia_desde'] = Variable<int>(secuenciaDesde);
+    map['secuencia_hasta'] = Variable<int>(secuenciaHasta);
+    if (!nullToAbsent || fechaVencimiento != null) {
+      map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento);
+    }
+    map['activo'] = Variable<bool>(activo);
+    return map;
+  }
+
+  EcfeSecuenciasTableCompanion toCompanion(bool nullToAbsent) {
+    return EcfeSecuenciasTableCompanion(
+      id: Value(id),
+      tipoEcf: Value(tipoEcf),
+      secuenciaActual: Value(secuenciaActual),
+      secuenciaDesde: Value(secuenciaDesde),
+      secuenciaHasta: Value(secuenciaHasta),
+      fechaVencimiento: fechaVencimiento == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaVencimiento),
+      activo: Value(activo),
+    );
+  }
+
+  factory EcfeSecuenciasTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EcfeSecuenciasTableData(
+      id: serializer.fromJson<int>(json['id']),
+      tipoEcf: serializer.fromJson<int>(json['tipoEcf']),
+      secuenciaActual: serializer.fromJson<int>(json['secuenciaActual']),
+      secuenciaDesde: serializer.fromJson<int>(json['secuenciaDesde']),
+      secuenciaHasta: serializer.fromJson<int>(json['secuenciaHasta']),
+      fechaVencimiento: serializer.fromJson<DateTime?>(
+        json['fechaVencimiento'],
+      ),
+      activo: serializer.fromJson<bool>(json['activo']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'tipoEcf': serializer.toJson<int>(tipoEcf),
+      'secuenciaActual': serializer.toJson<int>(secuenciaActual),
+      'secuenciaDesde': serializer.toJson<int>(secuenciaDesde),
+      'secuenciaHasta': serializer.toJson<int>(secuenciaHasta),
+      'fechaVencimiento': serializer.toJson<DateTime?>(fechaVencimiento),
+      'activo': serializer.toJson<bool>(activo),
+    };
+  }
+
+  EcfeSecuenciasTableData copyWith({
+    int? id,
+    int? tipoEcf,
+    int? secuenciaActual,
+    int? secuenciaDesde,
+    int? secuenciaHasta,
+    Value<DateTime?> fechaVencimiento = const Value.absent(),
+    bool? activo,
+  }) => EcfeSecuenciasTableData(
+    id: id ?? this.id,
+    tipoEcf: tipoEcf ?? this.tipoEcf,
+    secuenciaActual: secuenciaActual ?? this.secuenciaActual,
+    secuenciaDesde: secuenciaDesde ?? this.secuenciaDesde,
+    secuenciaHasta: secuenciaHasta ?? this.secuenciaHasta,
+    fechaVencimiento: fechaVencimiento.present
+        ? fechaVencimiento.value
+        : this.fechaVencimiento,
+    activo: activo ?? this.activo,
+  );
+  EcfeSecuenciasTableData copyWithCompanion(EcfeSecuenciasTableCompanion data) {
+    return EcfeSecuenciasTableData(
+      id: data.id.present ? data.id.value : this.id,
+      tipoEcf: data.tipoEcf.present ? data.tipoEcf.value : this.tipoEcf,
+      secuenciaActual: data.secuenciaActual.present
+          ? data.secuenciaActual.value
+          : this.secuenciaActual,
+      secuenciaDesde: data.secuenciaDesde.present
+          ? data.secuenciaDesde.value
+          : this.secuenciaDesde,
+      secuenciaHasta: data.secuenciaHasta.present
+          ? data.secuenciaHasta.value
+          : this.secuenciaHasta,
+      fechaVencimiento: data.fechaVencimiento.present
+          ? data.fechaVencimiento.value
+          : this.fechaVencimiento,
+      activo: data.activo.present ? data.activo.value : this.activo,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeSecuenciasTableData(')
+          ..write('id: $id, ')
+          ..write('tipoEcf: $tipoEcf, ')
+          ..write('secuenciaActual: $secuenciaActual, ')
+          ..write('secuenciaDesde: $secuenciaDesde, ')
+          ..write('secuenciaHasta: $secuenciaHasta, ')
+          ..write('fechaVencimiento: $fechaVencimiento, ')
+          ..write('activo: $activo')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tipoEcf,
+    secuenciaActual,
+    secuenciaDesde,
+    secuenciaHasta,
+    fechaVencimiento,
+    activo,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EcfeSecuenciasTableData &&
+          other.id == this.id &&
+          other.tipoEcf == this.tipoEcf &&
+          other.secuenciaActual == this.secuenciaActual &&
+          other.secuenciaDesde == this.secuenciaDesde &&
+          other.secuenciaHasta == this.secuenciaHasta &&
+          other.fechaVencimiento == this.fechaVencimiento &&
+          other.activo == this.activo);
+}
+
+class EcfeSecuenciasTableCompanion
+    extends UpdateCompanion<EcfeSecuenciasTableData> {
+  final Value<int> id;
+  final Value<int> tipoEcf;
+  final Value<int> secuenciaActual;
+  final Value<int> secuenciaDesde;
+  final Value<int> secuenciaHasta;
+  final Value<DateTime?> fechaVencimiento;
+  final Value<bool> activo;
+  const EcfeSecuenciasTableCompanion({
+    this.id = const Value.absent(),
+    this.tipoEcf = const Value.absent(),
+    this.secuenciaActual = const Value.absent(),
+    this.secuenciaDesde = const Value.absent(),
+    this.secuenciaHasta = const Value.absent(),
+    this.fechaVencimiento = const Value.absent(),
+    this.activo = const Value.absent(),
+  });
+  EcfeSecuenciasTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int tipoEcf,
+    this.secuenciaActual = const Value.absent(),
+    this.secuenciaDesde = const Value.absent(),
+    this.secuenciaHasta = const Value.absent(),
+    this.fechaVencimiento = const Value.absent(),
+    this.activo = const Value.absent(),
+  }) : tipoEcf = Value(tipoEcf);
+  static Insertable<EcfeSecuenciasTableData> custom({
+    Expression<int>? id,
+    Expression<int>? tipoEcf,
+    Expression<int>? secuenciaActual,
+    Expression<int>? secuenciaDesde,
+    Expression<int>? secuenciaHasta,
+    Expression<DateTime>? fechaVencimiento,
+    Expression<bool>? activo,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tipoEcf != null) 'tipo_ecf': tipoEcf,
+      if (secuenciaActual != null) 'secuencia_actual': secuenciaActual,
+      if (secuenciaDesde != null) 'secuencia_desde': secuenciaDesde,
+      if (secuenciaHasta != null) 'secuencia_hasta': secuenciaHasta,
+      if (fechaVencimiento != null) 'fecha_vencimiento': fechaVencimiento,
+      if (activo != null) 'activo': activo,
+    });
+  }
+
+  EcfeSecuenciasTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? tipoEcf,
+    Value<int>? secuenciaActual,
+    Value<int>? secuenciaDesde,
+    Value<int>? secuenciaHasta,
+    Value<DateTime?>? fechaVencimiento,
+    Value<bool>? activo,
+  }) {
+    return EcfeSecuenciasTableCompanion(
+      id: id ?? this.id,
+      tipoEcf: tipoEcf ?? this.tipoEcf,
+      secuenciaActual: secuenciaActual ?? this.secuenciaActual,
+      secuenciaDesde: secuenciaDesde ?? this.secuenciaDesde,
+      secuenciaHasta: secuenciaHasta ?? this.secuenciaHasta,
+      fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
+      activo: activo ?? this.activo,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (tipoEcf.present) {
+      map['tipo_ecf'] = Variable<int>(tipoEcf.value);
+    }
+    if (secuenciaActual.present) {
+      map['secuencia_actual'] = Variable<int>(secuenciaActual.value);
+    }
+    if (secuenciaDesde.present) {
+      map['secuencia_desde'] = Variable<int>(secuenciaDesde.value);
+    }
+    if (secuenciaHasta.present) {
+      map['secuencia_hasta'] = Variable<int>(secuenciaHasta.value);
+    }
+    if (fechaVencimiento.present) {
+      map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeSecuenciasTableCompanion(')
+          ..write('id: $id, ')
+          ..write('tipoEcf: $tipoEcf, ')
+          ..write('secuenciaActual: $secuenciaActual, ')
+          ..write('secuenciaDesde: $secuenciaDesde, ')
+          ..write('secuenciaHasta: $secuenciaHasta, ')
+          ..write('fechaVencimiento: $fechaVencimiento, ')
+          ..write('activo: $activo')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EcfeSpecVersionTableTable extends EcfeSpecVersionTable
+    with TableInfo<$EcfeSpecVersionTableTable, EcfeSpecVersionTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EcfeSpecVersionTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
+  @override
+  late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
+    'nombre',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _circularDgiiMeta = const VerificationMeta(
+    'circularDgii',
+  );
+  @override
+  late final GeneratedColumn<String> circularDgii = GeneratedColumn<String>(
+    'circular_dgii',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _xsdVersionMeta = const VerificationMeta(
+    'xsdVersion',
+  );
+  @override
+  late final GeneratedColumn<String> xsdVersion = GeneratedColumn<String>(
+    'xsd_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _notasMeta = const VerificationMeta('notas');
+  @override
+  late final GeneratedColumn<String> notas = GeneratedColumn<String>(
+    'notas',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _activaPrecertMeta = const VerificationMeta(
+    'activaPrecert',
+  );
+  @override
+  late final GeneratedColumn<bool> activaPrecert = GeneratedColumn<bool>(
+    'activa_precert',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activa_precert" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _activaCertMeta = const VerificationMeta(
+    'activaCert',
+  );
+  @override
+  late final GeneratedColumn<bool> activaCert = GeneratedColumn<bool>(
+    'activa_cert',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activa_cert" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _activaProduccionMeta = const VerificationMeta(
+    'activaProduccion',
+  );
+  @override
+  late final GeneratedColumn<bool> activaProduccion = GeneratedColumn<bool>(
+    'activa_produccion',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activa_produccion" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _checklistJsonMeta = const VerificationMeta(
+    'checklistJson',
+  );
+  @override
+  late final GeneratedColumn<String> checklistJson = GeneratedColumn<String>(
+    'checklist_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _activadoEnMeta = const VerificationMeta(
+    'activadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> activadoEn = GeneratedColumn<DateTime>(
+    'activado_en',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    codigo,
+    nombre,
+    circularDgii,
+    xsdVersion,
+    notas,
+    activaPrecert,
+    activaCert,
+    activaProduccion,
+    checklistJson,
+    creadoEn,
+    activadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ecfe_spec_version_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EcfeSpecVersionTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codigoMeta);
+    }
+    if (data.containsKey('nombre')) {
+      context.handle(
+        _nombreMeta,
+        nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nombreMeta);
+    }
+    if (data.containsKey('circular_dgii')) {
+      context.handle(
+        _circularDgiiMeta,
+        circularDgii.isAcceptableOrUnknown(
+          data['circular_dgii']!,
+          _circularDgiiMeta,
+        ),
+      );
+    }
+    if (data.containsKey('xsd_version')) {
+      context.handle(
+        _xsdVersionMeta,
+        xsdVersion.isAcceptableOrUnknown(data['xsd_version']!, _xsdVersionMeta),
+      );
+    }
+    if (data.containsKey('notas')) {
+      context.handle(
+        _notasMeta,
+        notas.isAcceptableOrUnknown(data['notas']!, _notasMeta),
+      );
+    }
+    if (data.containsKey('activa_precert')) {
+      context.handle(
+        _activaPrecertMeta,
+        activaPrecert.isAcceptableOrUnknown(
+          data['activa_precert']!,
+          _activaPrecertMeta,
+        ),
+      );
+    }
+    if (data.containsKey('activa_cert')) {
+      context.handle(
+        _activaCertMeta,
+        activaCert.isAcceptableOrUnknown(data['activa_cert']!, _activaCertMeta),
+      );
+    }
+    if (data.containsKey('activa_produccion')) {
+      context.handle(
+        _activaProduccionMeta,
+        activaProduccion.isAcceptableOrUnknown(
+          data['activa_produccion']!,
+          _activaProduccionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('checklist_json')) {
+      context.handle(
+        _checklistJsonMeta,
+        checklistJson.isAcceptableOrUnknown(
+          data['checklist_json']!,
+          _checklistJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_creadoEnMeta);
+    }
+    if (data.containsKey('activado_en')) {
+      context.handle(
+        _activadoEnMeta,
+        activadoEn.isAcceptableOrUnknown(data['activado_en']!, _activadoEnMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EcfeSpecVersionTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EcfeSpecVersionTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      nombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre'],
+      )!,
+      circularDgii: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}circular_dgii'],
+      ),
+      xsdVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}xsd_version'],
+      )!,
+      notas: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notas'],
+      ),
+      activaPrecert: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activa_precert'],
+      )!,
+      activaCert: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activa_cert'],
+      )!,
+      activaProduccion: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activa_produccion'],
+      )!,
+      checklistJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}checklist_json'],
+      )!,
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      activadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}activado_en'],
+      ),
+    );
+  }
+
+  @override
+  $EcfeSpecVersionTableTable createAlias(String alias) {
+    return $EcfeSpecVersionTableTable(attachedDatabase, alias);
+  }
+}
+
+class EcfeSpecVersionTableData extends DataClass
+    implements Insertable<EcfeSpecVersionTableData> {
+  final int id;
+  final String codigo;
+  final String nombre;
+  final String? circularDgii;
+  final String xsdVersion;
+  final String? notas;
+  final bool activaPrecert;
+  final bool activaCert;
+  final bool activaProduccion;
+  final String checklistJson;
+  final DateTime creadoEn;
+  final DateTime? activadoEn;
+  const EcfeSpecVersionTableData({
+    required this.id,
+    required this.codigo,
+    required this.nombre,
+    this.circularDgii,
+    required this.xsdVersion,
+    this.notas,
+    required this.activaPrecert,
+    required this.activaCert,
+    required this.activaProduccion,
+    required this.checklistJson,
+    required this.creadoEn,
+    this.activadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['codigo'] = Variable<String>(codigo);
+    map['nombre'] = Variable<String>(nombre);
+    if (!nullToAbsent || circularDgii != null) {
+      map['circular_dgii'] = Variable<String>(circularDgii);
+    }
+    map['xsd_version'] = Variable<String>(xsdVersion);
+    if (!nullToAbsent || notas != null) {
+      map['notas'] = Variable<String>(notas);
+    }
+    map['activa_precert'] = Variable<bool>(activaPrecert);
+    map['activa_cert'] = Variable<bool>(activaCert);
+    map['activa_produccion'] = Variable<bool>(activaProduccion);
+    map['checklist_json'] = Variable<String>(checklistJson);
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || activadoEn != null) {
+      map['activado_en'] = Variable<DateTime>(activadoEn);
+    }
+    return map;
+  }
+
+  EcfeSpecVersionTableCompanion toCompanion(bool nullToAbsent) {
+    return EcfeSpecVersionTableCompanion(
+      id: Value(id),
+      codigo: Value(codigo),
+      nombre: Value(nombre),
+      circularDgii: circularDgii == null && nullToAbsent
+          ? const Value.absent()
+          : Value(circularDgii),
+      xsdVersion: Value(xsdVersion),
+      notas: notas == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notas),
+      activaPrecert: Value(activaPrecert),
+      activaCert: Value(activaCert),
+      activaProduccion: Value(activaProduccion),
+      checklistJson: Value(checklistJson),
+      creadoEn: Value(creadoEn),
+      activadoEn: activadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(activadoEn),
+    );
+  }
+
+  factory EcfeSpecVersionTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EcfeSpecVersionTableData(
+      id: serializer.fromJson<int>(json['id']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      nombre: serializer.fromJson<String>(json['nombre']),
+      circularDgii: serializer.fromJson<String?>(json['circularDgii']),
+      xsdVersion: serializer.fromJson<String>(json['xsdVersion']),
+      notas: serializer.fromJson<String?>(json['notas']),
+      activaPrecert: serializer.fromJson<bool>(json['activaPrecert']),
+      activaCert: serializer.fromJson<bool>(json['activaCert']),
+      activaProduccion: serializer.fromJson<bool>(json['activaProduccion']),
+      checklistJson: serializer.fromJson<String>(json['checklistJson']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      activadoEn: serializer.fromJson<DateTime?>(json['activadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'codigo': serializer.toJson<String>(codigo),
+      'nombre': serializer.toJson<String>(nombre),
+      'circularDgii': serializer.toJson<String?>(circularDgii),
+      'xsdVersion': serializer.toJson<String>(xsdVersion),
+      'notas': serializer.toJson<String?>(notas),
+      'activaPrecert': serializer.toJson<bool>(activaPrecert),
+      'activaCert': serializer.toJson<bool>(activaCert),
+      'activaProduccion': serializer.toJson<bool>(activaProduccion),
+      'checklistJson': serializer.toJson<String>(checklistJson),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'activadoEn': serializer.toJson<DateTime?>(activadoEn),
+    };
+  }
+
+  EcfeSpecVersionTableData copyWith({
+    int? id,
+    String? codigo,
+    String? nombre,
+    Value<String?> circularDgii = const Value.absent(),
+    String? xsdVersion,
+    Value<String?> notas = const Value.absent(),
+    bool? activaPrecert,
+    bool? activaCert,
+    bool? activaProduccion,
+    String? checklistJson,
+    DateTime? creadoEn,
+    Value<DateTime?> activadoEn = const Value.absent(),
+  }) => EcfeSpecVersionTableData(
+    id: id ?? this.id,
+    codigo: codigo ?? this.codigo,
+    nombre: nombre ?? this.nombre,
+    circularDgii: circularDgii.present ? circularDgii.value : this.circularDgii,
+    xsdVersion: xsdVersion ?? this.xsdVersion,
+    notas: notas.present ? notas.value : this.notas,
+    activaPrecert: activaPrecert ?? this.activaPrecert,
+    activaCert: activaCert ?? this.activaCert,
+    activaProduccion: activaProduccion ?? this.activaProduccion,
+    checklistJson: checklistJson ?? this.checklistJson,
+    creadoEn: creadoEn ?? this.creadoEn,
+    activadoEn: activadoEn.present ? activadoEn.value : this.activadoEn,
+  );
+  EcfeSpecVersionTableData copyWithCompanion(
+    EcfeSpecVersionTableCompanion data,
+  ) {
+    return EcfeSpecVersionTableData(
+      id: data.id.present ? data.id.value : this.id,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      nombre: data.nombre.present ? data.nombre.value : this.nombre,
+      circularDgii: data.circularDgii.present
+          ? data.circularDgii.value
+          : this.circularDgii,
+      xsdVersion: data.xsdVersion.present
+          ? data.xsdVersion.value
+          : this.xsdVersion,
+      notas: data.notas.present ? data.notas.value : this.notas,
+      activaPrecert: data.activaPrecert.present
+          ? data.activaPrecert.value
+          : this.activaPrecert,
+      activaCert: data.activaCert.present
+          ? data.activaCert.value
+          : this.activaCert,
+      activaProduccion: data.activaProduccion.present
+          ? data.activaProduccion.value
+          : this.activaProduccion,
+      checklistJson: data.checklistJson.present
+          ? data.checklistJson.value
+          : this.checklistJson,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      activadoEn: data.activadoEn.present
+          ? data.activadoEn.value
+          : this.activadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeSpecVersionTableData(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('circularDgii: $circularDgii, ')
+          ..write('xsdVersion: $xsdVersion, ')
+          ..write('notas: $notas, ')
+          ..write('activaPrecert: $activaPrecert, ')
+          ..write('activaCert: $activaCert, ')
+          ..write('activaProduccion: $activaProduccion, ')
+          ..write('checklistJson: $checklistJson, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('activadoEn: $activadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    codigo,
+    nombre,
+    circularDgii,
+    xsdVersion,
+    notas,
+    activaPrecert,
+    activaCert,
+    activaProduccion,
+    checklistJson,
+    creadoEn,
+    activadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EcfeSpecVersionTableData &&
+          other.id == this.id &&
+          other.codigo == this.codigo &&
+          other.nombre == this.nombre &&
+          other.circularDgii == this.circularDgii &&
+          other.xsdVersion == this.xsdVersion &&
+          other.notas == this.notas &&
+          other.activaPrecert == this.activaPrecert &&
+          other.activaCert == this.activaCert &&
+          other.activaProduccion == this.activaProduccion &&
+          other.checklistJson == this.checklistJson &&
+          other.creadoEn == this.creadoEn &&
+          other.activadoEn == this.activadoEn);
+}
+
+class EcfeSpecVersionTableCompanion
+    extends UpdateCompanion<EcfeSpecVersionTableData> {
+  final Value<int> id;
+  final Value<String> codigo;
+  final Value<String> nombre;
+  final Value<String?> circularDgii;
+  final Value<String> xsdVersion;
+  final Value<String?> notas;
+  final Value<bool> activaPrecert;
+  final Value<bool> activaCert;
+  final Value<bool> activaProduccion;
+  final Value<String> checklistJson;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> activadoEn;
+  const EcfeSpecVersionTableCompanion({
+    this.id = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.nombre = const Value.absent(),
+    this.circularDgii = const Value.absent(),
+    this.xsdVersion = const Value.absent(),
+    this.notas = const Value.absent(),
+    this.activaPrecert = const Value.absent(),
+    this.activaCert = const Value.absent(),
+    this.activaProduccion = const Value.absent(),
+    this.checklistJson = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.activadoEn = const Value.absent(),
+  });
+  EcfeSpecVersionTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String codigo,
+    required String nombre,
+    this.circularDgii = const Value.absent(),
+    this.xsdVersion = const Value.absent(),
+    this.notas = const Value.absent(),
+    this.activaPrecert = const Value.absent(),
+    this.activaCert = const Value.absent(),
+    this.activaProduccion = const Value.absent(),
+    this.checklistJson = const Value.absent(),
+    required DateTime creadoEn,
+    this.activadoEn = const Value.absent(),
+  }) : codigo = Value(codigo),
+       nombre = Value(nombre),
+       creadoEn = Value(creadoEn);
+  static Insertable<EcfeSpecVersionTableData> custom({
+    Expression<int>? id,
+    Expression<String>? codigo,
+    Expression<String>? nombre,
+    Expression<String>? circularDgii,
+    Expression<String>? xsdVersion,
+    Expression<String>? notas,
+    Expression<bool>? activaPrecert,
+    Expression<bool>? activaCert,
+    Expression<bool>? activaProduccion,
+    Expression<String>? checklistJson,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? activadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (codigo != null) 'codigo': codigo,
+      if (nombre != null) 'nombre': nombre,
+      if (circularDgii != null) 'circular_dgii': circularDgii,
+      if (xsdVersion != null) 'xsd_version': xsdVersion,
+      if (notas != null) 'notas': notas,
+      if (activaPrecert != null) 'activa_precert': activaPrecert,
+      if (activaCert != null) 'activa_cert': activaCert,
+      if (activaProduccion != null) 'activa_produccion': activaProduccion,
+      if (checklistJson != null) 'checklist_json': checklistJson,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (activadoEn != null) 'activado_en': activadoEn,
+    });
+  }
+
+  EcfeSpecVersionTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? codigo,
+    Value<String>? nombre,
+    Value<String?>? circularDgii,
+    Value<String>? xsdVersion,
+    Value<String?>? notas,
+    Value<bool>? activaPrecert,
+    Value<bool>? activaCert,
+    Value<bool>? activaProduccion,
+    Value<String>? checklistJson,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? activadoEn,
+  }) {
+    return EcfeSpecVersionTableCompanion(
+      id: id ?? this.id,
+      codigo: codigo ?? this.codigo,
+      nombre: nombre ?? this.nombre,
+      circularDgii: circularDgii ?? this.circularDgii,
+      xsdVersion: xsdVersion ?? this.xsdVersion,
+      notas: notas ?? this.notas,
+      activaPrecert: activaPrecert ?? this.activaPrecert,
+      activaCert: activaCert ?? this.activaCert,
+      activaProduccion: activaProduccion ?? this.activaProduccion,
+      checklistJson: checklistJson ?? this.checklistJson,
+      creadoEn: creadoEn ?? this.creadoEn,
+      activadoEn: activadoEn ?? this.activadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (nombre.present) {
+      map['nombre'] = Variable<String>(nombre.value);
+    }
+    if (circularDgii.present) {
+      map['circular_dgii'] = Variable<String>(circularDgii.value);
+    }
+    if (xsdVersion.present) {
+      map['xsd_version'] = Variable<String>(xsdVersion.value);
+    }
+    if (notas.present) {
+      map['notas'] = Variable<String>(notas.value);
+    }
+    if (activaPrecert.present) {
+      map['activa_precert'] = Variable<bool>(activaPrecert.value);
+    }
+    if (activaCert.present) {
+      map['activa_cert'] = Variable<bool>(activaCert.value);
+    }
+    if (activaProduccion.present) {
+      map['activa_produccion'] = Variable<bool>(activaProduccion.value);
+    }
+    if (checklistJson.present) {
+      map['checklist_json'] = Variable<String>(checklistJson.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (activadoEn.present) {
+      map['activado_en'] = Variable<DateTime>(activadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EcfeSpecVersionTableCompanion(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('circularDgii: $circularDgii, ')
+          ..write('xsdVersion: $xsdVersion, ')
+          ..write('notas: $notas, ')
+          ..write('activaPrecert: $activaPrecert, ')
+          ..write('activaCert: $activaCert, ')
+          ..write('activaProduccion: $activaProduccion, ')
+          ..write('checklistJson: $checklistJson, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('activadoEn: $activadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $DetalleCompraTableTable extends DetalleCompraTable
     with TableInfo<$DetalleCompraTableTable, DetalleCompraTableData> {
   @override
@@ -28147,6 +31148,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CajaSesionesTableTable(this);
   late final $ComprasTableTable comprasTable = $ComprasTableTable(this);
   late final $GastosTableTable gastosTable = $GastosTableTable(this);
+  late final $EcfeConfigTableTable ecfeConfigTable = $EcfeConfigTableTable(
+    this,
+  );
+  late final $EcfeDocumentosTableTable ecfeDocumentosTable =
+      $EcfeDocumentosTableTable(this);
+  late final $EcfeEventosTableTable ecfeEventosTable = $EcfeEventosTableTable(
+    this,
+  );
+  late final $EcfeSecuenciasTableTable ecfeSecuenciasTable =
+      $EcfeSecuenciasTableTable(this);
+  late final $EcfeSpecVersionTableTable ecfeSpecVersionTable =
+      $EcfeSpecVersionTableTable(this);
   late final $DetalleCompraTableTable detalleCompraTable =
       $DetalleCompraTableTable(this);
   late final $FiosTableTable fiosTable = $FiosTableTable(this);
@@ -28195,6 +31208,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cajaSesionesTable,
     comprasTable,
     gastosTable,
+    ecfeConfigTable,
+    ecfeDocumentosTable,
+    ecfeEventosTable,
+    ecfeSecuenciasTable,
+    ecfeSpecVersionTable,
     detalleCompraTable,
     fiosTable,
   ];
@@ -46637,6 +49655,1531 @@ typedef $$GastosTableTableProcessedTableManager =
       GastosTableData,
       PrefetchHooks Function()
     >;
+typedef $$EcfeConfigTableTableCreateCompanionBuilder =
+    EcfeConfigTableCompanion Function({
+      Value<int> id,
+      Value<bool> habilitado,
+      Value<String> ambiente,
+      Value<String> rncEmisor,
+      Value<String> razonSocialEmisor,
+      Value<String> rutaCertificado,
+      Value<String> aliasCertificado,
+      Value<String> claveCertificado,
+      Value<String> xsdVersion,
+      Value<DateTime> actualizadoEn,
+    });
+typedef $$EcfeConfigTableTableUpdateCompanionBuilder =
+    EcfeConfigTableCompanion Function({
+      Value<int> id,
+      Value<bool> habilitado,
+      Value<String> ambiente,
+      Value<String> rncEmisor,
+      Value<String> razonSocialEmisor,
+      Value<String> rutaCertificado,
+      Value<String> aliasCertificado,
+      Value<String> claveCertificado,
+      Value<String> xsdVersion,
+      Value<DateTime> actualizadoEn,
+    });
+
+class $$EcfeConfigTableTableFilterComposer
+    extends Composer<_$AppDatabase, $EcfeConfigTableTable> {
+  $$EcfeConfigTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get habilitado => $composableBuilder(
+    column: $table.habilitado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ambiente => $composableBuilder(
+    column: $table.ambiente,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rncEmisor => $composableBuilder(
+    column: $table.rncEmisor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get razonSocialEmisor => $composableBuilder(
+    column: $table.razonSocialEmisor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rutaCertificado => $composableBuilder(
+    column: $table.rutaCertificado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get aliasCertificado => $composableBuilder(
+    column: $table.aliasCertificado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get claveCertificado => $composableBuilder(
+    column: $table.claveCertificado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get xsdVersion => $composableBuilder(
+    column: $table.xsdVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$EcfeConfigTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $EcfeConfigTableTable> {
+  $$EcfeConfigTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get habilitado => $composableBuilder(
+    column: $table.habilitado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ambiente => $composableBuilder(
+    column: $table.ambiente,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rncEmisor => $composableBuilder(
+    column: $table.rncEmisor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get razonSocialEmisor => $composableBuilder(
+    column: $table.razonSocialEmisor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rutaCertificado => $composableBuilder(
+    column: $table.rutaCertificado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get aliasCertificado => $composableBuilder(
+    column: $table.aliasCertificado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get claveCertificado => $composableBuilder(
+    column: $table.claveCertificado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get xsdVersion => $composableBuilder(
+    column: $table.xsdVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EcfeConfigTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EcfeConfigTableTable> {
+  $$EcfeConfigTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<bool> get habilitado => $composableBuilder(
+    column: $table.habilitado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ambiente =>
+      $composableBuilder(column: $table.ambiente, builder: (column) => column);
+
+  GeneratedColumn<String> get rncEmisor =>
+      $composableBuilder(column: $table.rncEmisor, builder: (column) => column);
+
+  GeneratedColumn<String> get razonSocialEmisor => $composableBuilder(
+    column: $table.razonSocialEmisor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rutaCertificado => $composableBuilder(
+    column: $table.rutaCertificado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get aliasCertificado => $composableBuilder(
+    column: $table.aliasCertificado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get claveCertificado => $composableBuilder(
+    column: $table.claveCertificado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get xsdVersion => $composableBuilder(
+    column: $table.xsdVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$EcfeConfigTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EcfeConfigTableTable,
+          EcfeConfigTableData,
+          $$EcfeConfigTableTableFilterComposer,
+          $$EcfeConfigTableTableOrderingComposer,
+          $$EcfeConfigTableTableAnnotationComposer,
+          $$EcfeConfigTableTableCreateCompanionBuilder,
+          $$EcfeConfigTableTableUpdateCompanionBuilder,
+          (
+            EcfeConfigTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $EcfeConfigTableTable,
+              EcfeConfigTableData
+            >,
+          ),
+          EcfeConfigTableData,
+          PrefetchHooks Function()
+        > {
+  $$EcfeConfigTableTableTableManager(
+    _$AppDatabase db,
+    $EcfeConfigTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EcfeConfigTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EcfeConfigTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EcfeConfigTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<bool> habilitado = const Value.absent(),
+                Value<String> ambiente = const Value.absent(),
+                Value<String> rncEmisor = const Value.absent(),
+                Value<String> razonSocialEmisor = const Value.absent(),
+                Value<String> rutaCertificado = const Value.absent(),
+                Value<String> aliasCertificado = const Value.absent(),
+                Value<String> claveCertificado = const Value.absent(),
+                Value<String> xsdVersion = const Value.absent(),
+                Value<DateTime> actualizadoEn = const Value.absent(),
+              }) => EcfeConfigTableCompanion(
+                id: id,
+                habilitado: habilitado,
+                ambiente: ambiente,
+                rncEmisor: rncEmisor,
+                razonSocialEmisor: razonSocialEmisor,
+                rutaCertificado: rutaCertificado,
+                aliasCertificado: aliasCertificado,
+                claveCertificado: claveCertificado,
+                xsdVersion: xsdVersion,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<bool> habilitado = const Value.absent(),
+                Value<String> ambiente = const Value.absent(),
+                Value<String> rncEmisor = const Value.absent(),
+                Value<String> razonSocialEmisor = const Value.absent(),
+                Value<String> rutaCertificado = const Value.absent(),
+                Value<String> aliasCertificado = const Value.absent(),
+                Value<String> claveCertificado = const Value.absent(),
+                Value<String> xsdVersion = const Value.absent(),
+                Value<DateTime> actualizadoEn = const Value.absent(),
+              }) => EcfeConfigTableCompanion.insert(
+                id: id,
+                habilitado: habilitado,
+                ambiente: ambiente,
+                rncEmisor: rncEmisor,
+                razonSocialEmisor: razonSocialEmisor,
+                rutaCertificado: rutaCertificado,
+                aliasCertificado: aliasCertificado,
+                claveCertificado: claveCertificado,
+                xsdVersion: xsdVersion,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$EcfeConfigTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EcfeConfigTableTable,
+      EcfeConfigTableData,
+      $$EcfeConfigTableTableFilterComposer,
+      $$EcfeConfigTableTableOrderingComposer,
+      $$EcfeConfigTableTableAnnotationComposer,
+      $$EcfeConfigTableTableCreateCompanionBuilder,
+      $$EcfeConfigTableTableUpdateCompanionBuilder,
+      (
+        EcfeConfigTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $EcfeConfigTableTable,
+          EcfeConfigTableData
+        >,
+      ),
+      EcfeConfigTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$EcfeDocumentosTableTableCreateCompanionBuilder =
+    EcfeDocumentosTableCompanion Function({
+      Value<int> id,
+      Value<int?> ventaId,
+      required int tipoEcf,
+      Value<String?> encf,
+      Value<String> estado,
+      Value<String?> trackId,
+      Value<String?> codigoRespuesta,
+      Value<String?> mensajeDgii,
+      Value<String?> ultimoError,
+      Value<String?> xmlSinFirma,
+      Value<String?> xmlFirmado,
+      required DateTime creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+typedef $$EcfeDocumentosTableTableUpdateCompanionBuilder =
+    EcfeDocumentosTableCompanion Function({
+      Value<int> id,
+      Value<int?> ventaId,
+      Value<int> tipoEcf,
+      Value<String?> encf,
+      Value<String> estado,
+      Value<String?> trackId,
+      Value<String?> codigoRespuesta,
+      Value<String?> mensajeDgii,
+      Value<String?> ultimoError,
+      Value<String?> xmlSinFirma,
+      Value<String?> xmlFirmado,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+
+class $$EcfeDocumentosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $EcfeDocumentosTableTable> {
+  $$EcfeDocumentosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get ventaId => $composableBuilder(
+    column: $table.ventaId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tipoEcf => $composableBuilder(
+    column: $table.tipoEcf,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get encf => $composableBuilder(
+    column: $table.encf,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get trackId => $composableBuilder(
+    column: $table.trackId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigoRespuesta => $composableBuilder(
+    column: $table.codigoRespuesta,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mensajeDgii => $composableBuilder(
+    column: $table.mensajeDgii,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ultimoError => $composableBuilder(
+    column: $table.ultimoError,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get xmlSinFirma => $composableBuilder(
+    column: $table.xmlSinFirma,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get xmlFirmado => $composableBuilder(
+    column: $table.xmlFirmado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$EcfeDocumentosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $EcfeDocumentosTableTable> {
+  $$EcfeDocumentosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get ventaId => $composableBuilder(
+    column: $table.ventaId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tipoEcf => $composableBuilder(
+    column: $table.tipoEcf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get encf => $composableBuilder(
+    column: $table.encf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get trackId => $composableBuilder(
+    column: $table.trackId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigoRespuesta => $composableBuilder(
+    column: $table.codigoRespuesta,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mensajeDgii => $composableBuilder(
+    column: $table.mensajeDgii,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ultimoError => $composableBuilder(
+    column: $table.ultimoError,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get xmlSinFirma => $composableBuilder(
+    column: $table.xmlSinFirma,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get xmlFirmado => $composableBuilder(
+    column: $table.xmlFirmado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EcfeDocumentosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EcfeDocumentosTableTable> {
+  $$EcfeDocumentosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get ventaId =>
+      $composableBuilder(column: $table.ventaId, builder: (column) => column);
+
+  GeneratedColumn<int> get tipoEcf =>
+      $composableBuilder(column: $table.tipoEcf, builder: (column) => column);
+
+  GeneratedColumn<String> get encf =>
+      $composableBuilder(column: $table.encf, builder: (column) => column);
+
+  GeneratedColumn<String> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<String> get trackId =>
+      $composableBuilder(column: $table.trackId, builder: (column) => column);
+
+  GeneratedColumn<String> get codigoRespuesta => $composableBuilder(
+    column: $table.codigoRespuesta,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get mensajeDgii => $composableBuilder(
+    column: $table.mensajeDgii,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ultimoError => $composableBuilder(
+    column: $table.ultimoError,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get xmlSinFirma => $composableBuilder(
+    column: $table.xmlSinFirma,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get xmlFirmado => $composableBuilder(
+    column: $table.xmlFirmado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$EcfeDocumentosTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EcfeDocumentosTableTable,
+          EcfeDocumentosTableData,
+          $$EcfeDocumentosTableTableFilterComposer,
+          $$EcfeDocumentosTableTableOrderingComposer,
+          $$EcfeDocumentosTableTableAnnotationComposer,
+          $$EcfeDocumentosTableTableCreateCompanionBuilder,
+          $$EcfeDocumentosTableTableUpdateCompanionBuilder,
+          (
+            EcfeDocumentosTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $EcfeDocumentosTableTable,
+              EcfeDocumentosTableData
+            >,
+          ),
+          EcfeDocumentosTableData,
+          PrefetchHooks Function()
+        > {
+  $$EcfeDocumentosTableTableTableManager(
+    _$AppDatabase db,
+    $EcfeDocumentosTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EcfeDocumentosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EcfeDocumentosTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$EcfeDocumentosTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> ventaId = const Value.absent(),
+                Value<int> tipoEcf = const Value.absent(),
+                Value<String?> encf = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+                Value<String?> trackId = const Value.absent(),
+                Value<String?> codigoRespuesta = const Value.absent(),
+                Value<String?> mensajeDgii = const Value.absent(),
+                Value<String?> ultimoError = const Value.absent(),
+                Value<String?> xmlSinFirma = const Value.absent(),
+                Value<String?> xmlFirmado = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => EcfeDocumentosTableCompanion(
+                id: id,
+                ventaId: ventaId,
+                tipoEcf: tipoEcf,
+                encf: encf,
+                estado: estado,
+                trackId: trackId,
+                codigoRespuesta: codigoRespuesta,
+                mensajeDgii: mensajeDgii,
+                ultimoError: ultimoError,
+                xmlSinFirma: xmlSinFirma,
+                xmlFirmado: xmlFirmado,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> ventaId = const Value.absent(),
+                required int tipoEcf,
+                Value<String?> encf = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+                Value<String?> trackId = const Value.absent(),
+                Value<String?> codigoRespuesta = const Value.absent(),
+                Value<String?> mensajeDgii = const Value.absent(),
+                Value<String?> ultimoError = const Value.absent(),
+                Value<String?> xmlSinFirma = const Value.absent(),
+                Value<String?> xmlFirmado = const Value.absent(),
+                required DateTime creadoEn,
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => EcfeDocumentosTableCompanion.insert(
+                id: id,
+                ventaId: ventaId,
+                tipoEcf: tipoEcf,
+                encf: encf,
+                estado: estado,
+                trackId: trackId,
+                codigoRespuesta: codigoRespuesta,
+                mensajeDgii: mensajeDgii,
+                ultimoError: ultimoError,
+                xmlSinFirma: xmlSinFirma,
+                xmlFirmado: xmlFirmado,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$EcfeDocumentosTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EcfeDocumentosTableTable,
+      EcfeDocumentosTableData,
+      $$EcfeDocumentosTableTableFilterComposer,
+      $$EcfeDocumentosTableTableOrderingComposer,
+      $$EcfeDocumentosTableTableAnnotationComposer,
+      $$EcfeDocumentosTableTableCreateCompanionBuilder,
+      $$EcfeDocumentosTableTableUpdateCompanionBuilder,
+      (
+        EcfeDocumentosTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $EcfeDocumentosTableTable,
+          EcfeDocumentosTableData
+        >,
+      ),
+      EcfeDocumentosTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$EcfeEventosTableTableCreateCompanionBuilder =
+    EcfeEventosTableCompanion Function({
+      Value<int> id,
+      required int documentoId,
+      required String paso,
+      Value<String?> detalle,
+      Value<bool> ok,
+      required DateTime creadoEn,
+    });
+typedef $$EcfeEventosTableTableUpdateCompanionBuilder =
+    EcfeEventosTableCompanion Function({
+      Value<int> id,
+      Value<int> documentoId,
+      Value<String> paso,
+      Value<String?> detalle,
+      Value<bool> ok,
+      Value<DateTime> creadoEn,
+    });
+
+class $$EcfeEventosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $EcfeEventosTableTable> {
+  $$EcfeEventosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get documentoId => $composableBuilder(
+    column: $table.documentoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paso => $composableBuilder(
+    column: $table.paso,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get detalle => $composableBuilder(
+    column: $table.detalle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ok => $composableBuilder(
+    column: $table.ok,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$EcfeEventosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $EcfeEventosTableTable> {
+  $$EcfeEventosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get documentoId => $composableBuilder(
+    column: $table.documentoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paso => $composableBuilder(
+    column: $table.paso,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get detalle => $composableBuilder(
+    column: $table.detalle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ok => $composableBuilder(
+    column: $table.ok,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EcfeEventosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EcfeEventosTableTable> {
+  $$EcfeEventosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get documentoId => $composableBuilder(
+    column: $table.documentoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paso =>
+      $composableBuilder(column: $table.paso, builder: (column) => column);
+
+  GeneratedColumn<String> get detalle =>
+      $composableBuilder(column: $table.detalle, builder: (column) => column);
+
+  GeneratedColumn<bool> get ok =>
+      $composableBuilder(column: $table.ok, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+}
+
+class $$EcfeEventosTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EcfeEventosTableTable,
+          EcfeEventosTableData,
+          $$EcfeEventosTableTableFilterComposer,
+          $$EcfeEventosTableTableOrderingComposer,
+          $$EcfeEventosTableTableAnnotationComposer,
+          $$EcfeEventosTableTableCreateCompanionBuilder,
+          $$EcfeEventosTableTableUpdateCompanionBuilder,
+          (
+            EcfeEventosTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $EcfeEventosTableTable,
+              EcfeEventosTableData
+            >,
+          ),
+          EcfeEventosTableData,
+          PrefetchHooks Function()
+        > {
+  $$EcfeEventosTableTableTableManager(
+    _$AppDatabase db,
+    $EcfeEventosTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EcfeEventosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EcfeEventosTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EcfeEventosTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> documentoId = const Value.absent(),
+                Value<String> paso = const Value.absent(),
+                Value<String?> detalle = const Value.absent(),
+                Value<bool> ok = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+              }) => EcfeEventosTableCompanion(
+                id: id,
+                documentoId: documentoId,
+                paso: paso,
+                detalle: detalle,
+                ok: ok,
+                creadoEn: creadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int documentoId,
+                required String paso,
+                Value<String?> detalle = const Value.absent(),
+                Value<bool> ok = const Value.absent(),
+                required DateTime creadoEn,
+              }) => EcfeEventosTableCompanion.insert(
+                id: id,
+                documentoId: documentoId,
+                paso: paso,
+                detalle: detalle,
+                ok: ok,
+                creadoEn: creadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$EcfeEventosTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EcfeEventosTableTable,
+      EcfeEventosTableData,
+      $$EcfeEventosTableTableFilterComposer,
+      $$EcfeEventosTableTableOrderingComposer,
+      $$EcfeEventosTableTableAnnotationComposer,
+      $$EcfeEventosTableTableCreateCompanionBuilder,
+      $$EcfeEventosTableTableUpdateCompanionBuilder,
+      (
+        EcfeEventosTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $EcfeEventosTableTable,
+          EcfeEventosTableData
+        >,
+      ),
+      EcfeEventosTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$EcfeSecuenciasTableTableCreateCompanionBuilder =
+    EcfeSecuenciasTableCompanion Function({
+      Value<int> id,
+      required int tipoEcf,
+      Value<int> secuenciaActual,
+      Value<int> secuenciaDesde,
+      Value<int> secuenciaHasta,
+      Value<DateTime?> fechaVencimiento,
+      Value<bool> activo,
+    });
+typedef $$EcfeSecuenciasTableTableUpdateCompanionBuilder =
+    EcfeSecuenciasTableCompanion Function({
+      Value<int> id,
+      Value<int> tipoEcf,
+      Value<int> secuenciaActual,
+      Value<int> secuenciaDesde,
+      Value<int> secuenciaHasta,
+      Value<DateTime?> fechaVencimiento,
+      Value<bool> activo,
+    });
+
+class $$EcfeSecuenciasTableTableFilterComposer
+    extends Composer<_$AppDatabase, $EcfeSecuenciasTableTable> {
+  $$EcfeSecuenciasTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tipoEcf => $composableBuilder(
+    column: $table.tipoEcf,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get secuenciaActual => $composableBuilder(
+    column: $table.secuenciaActual,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get secuenciaDesde => $composableBuilder(
+    column: $table.secuenciaDesde,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get secuenciaHasta => $composableBuilder(
+    column: $table.secuenciaHasta,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$EcfeSecuenciasTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $EcfeSecuenciasTableTable> {
+  $$EcfeSecuenciasTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tipoEcf => $composableBuilder(
+    column: $table.tipoEcf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get secuenciaActual => $composableBuilder(
+    column: $table.secuenciaActual,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get secuenciaDesde => $composableBuilder(
+    column: $table.secuenciaDesde,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get secuenciaHasta => $composableBuilder(
+    column: $table.secuenciaHasta,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EcfeSecuenciasTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EcfeSecuenciasTableTable> {
+  $$EcfeSecuenciasTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get tipoEcf =>
+      $composableBuilder(column: $table.tipoEcf, builder: (column) => column);
+
+  GeneratedColumn<int> get secuenciaActual => $composableBuilder(
+    column: $table.secuenciaActual,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get secuenciaDesde => $composableBuilder(
+    column: $table.secuenciaDesde,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get secuenciaHasta => $composableBuilder(
+    column: $table.secuenciaHasta,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fechaVencimiento => $composableBuilder(
+    column: $table.fechaVencimiento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
+}
+
+class $$EcfeSecuenciasTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EcfeSecuenciasTableTable,
+          EcfeSecuenciasTableData,
+          $$EcfeSecuenciasTableTableFilterComposer,
+          $$EcfeSecuenciasTableTableOrderingComposer,
+          $$EcfeSecuenciasTableTableAnnotationComposer,
+          $$EcfeSecuenciasTableTableCreateCompanionBuilder,
+          $$EcfeSecuenciasTableTableUpdateCompanionBuilder,
+          (
+            EcfeSecuenciasTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $EcfeSecuenciasTableTable,
+              EcfeSecuenciasTableData
+            >,
+          ),
+          EcfeSecuenciasTableData,
+          PrefetchHooks Function()
+        > {
+  $$EcfeSecuenciasTableTableTableManager(
+    _$AppDatabase db,
+    $EcfeSecuenciasTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EcfeSecuenciasTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EcfeSecuenciasTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$EcfeSecuenciasTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tipoEcf = const Value.absent(),
+                Value<int> secuenciaActual = const Value.absent(),
+                Value<int> secuenciaDesde = const Value.absent(),
+                Value<int> secuenciaHasta = const Value.absent(),
+                Value<DateTime?> fechaVencimiento = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+              }) => EcfeSecuenciasTableCompanion(
+                id: id,
+                tipoEcf: tipoEcf,
+                secuenciaActual: secuenciaActual,
+                secuenciaDesde: secuenciaDesde,
+                secuenciaHasta: secuenciaHasta,
+                fechaVencimiento: fechaVencimiento,
+                activo: activo,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int tipoEcf,
+                Value<int> secuenciaActual = const Value.absent(),
+                Value<int> secuenciaDesde = const Value.absent(),
+                Value<int> secuenciaHasta = const Value.absent(),
+                Value<DateTime?> fechaVencimiento = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+              }) => EcfeSecuenciasTableCompanion.insert(
+                id: id,
+                tipoEcf: tipoEcf,
+                secuenciaActual: secuenciaActual,
+                secuenciaDesde: secuenciaDesde,
+                secuenciaHasta: secuenciaHasta,
+                fechaVencimiento: fechaVencimiento,
+                activo: activo,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$EcfeSecuenciasTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EcfeSecuenciasTableTable,
+      EcfeSecuenciasTableData,
+      $$EcfeSecuenciasTableTableFilterComposer,
+      $$EcfeSecuenciasTableTableOrderingComposer,
+      $$EcfeSecuenciasTableTableAnnotationComposer,
+      $$EcfeSecuenciasTableTableCreateCompanionBuilder,
+      $$EcfeSecuenciasTableTableUpdateCompanionBuilder,
+      (
+        EcfeSecuenciasTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $EcfeSecuenciasTableTable,
+          EcfeSecuenciasTableData
+        >,
+      ),
+      EcfeSecuenciasTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$EcfeSpecVersionTableTableCreateCompanionBuilder =
+    EcfeSpecVersionTableCompanion Function({
+      Value<int> id,
+      required String codigo,
+      required String nombre,
+      Value<String?> circularDgii,
+      Value<String> xsdVersion,
+      Value<String?> notas,
+      Value<bool> activaPrecert,
+      Value<bool> activaCert,
+      Value<bool> activaProduccion,
+      Value<String> checklistJson,
+      required DateTime creadoEn,
+      Value<DateTime?> activadoEn,
+    });
+typedef $$EcfeSpecVersionTableTableUpdateCompanionBuilder =
+    EcfeSpecVersionTableCompanion Function({
+      Value<int> id,
+      Value<String> codigo,
+      Value<String> nombre,
+      Value<String?> circularDgii,
+      Value<String> xsdVersion,
+      Value<String?> notas,
+      Value<bool> activaPrecert,
+      Value<bool> activaCert,
+      Value<bool> activaProduccion,
+      Value<String> checklistJson,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> activadoEn,
+    });
+
+class $$EcfeSpecVersionTableTableFilterComposer
+    extends Composer<_$AppDatabase, $EcfeSpecVersionTableTable> {
+  $$EcfeSpecVersionTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get circularDgii => $composableBuilder(
+    column: $table.circularDgii,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get xsdVersion => $composableBuilder(
+    column: $table.xsdVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notas => $composableBuilder(
+    column: $table.notas,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activaPrecert => $composableBuilder(
+    column: $table.activaPrecert,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activaCert => $composableBuilder(
+    column: $table.activaCert,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activaProduccion => $composableBuilder(
+    column: $table.activaProduccion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get checklistJson => $composableBuilder(
+    column: $table.checklistJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get activadoEn => $composableBuilder(
+    column: $table.activadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$EcfeSpecVersionTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $EcfeSpecVersionTableTable> {
+  $$EcfeSpecVersionTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get circularDgii => $composableBuilder(
+    column: $table.circularDgii,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get xsdVersion => $composableBuilder(
+    column: $table.xsdVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notas => $composableBuilder(
+    column: $table.notas,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activaPrecert => $composableBuilder(
+    column: $table.activaPrecert,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activaCert => $composableBuilder(
+    column: $table.activaCert,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activaProduccion => $composableBuilder(
+    column: $table.activaProduccion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get checklistJson => $composableBuilder(
+    column: $table.checklistJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get activadoEn => $composableBuilder(
+    column: $table.activadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EcfeSpecVersionTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EcfeSpecVersionTableTable> {
+  $$EcfeSpecVersionTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<String> get nombre =>
+      $composableBuilder(column: $table.nombre, builder: (column) => column);
+
+  GeneratedColumn<String> get circularDgii => $composableBuilder(
+    column: $table.circularDgii,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get xsdVersion => $composableBuilder(
+    column: $table.xsdVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notas =>
+      $composableBuilder(column: $table.notas, builder: (column) => column);
+
+  GeneratedColumn<bool> get activaPrecert => $composableBuilder(
+    column: $table.activaPrecert,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activaCert => $composableBuilder(
+    column: $table.activaCert,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activaProduccion => $composableBuilder(
+    column: $table.activaProduccion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get checklistJson => $composableBuilder(
+    column: $table.checklistJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get activadoEn => $composableBuilder(
+    column: $table.activadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$EcfeSpecVersionTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EcfeSpecVersionTableTable,
+          EcfeSpecVersionTableData,
+          $$EcfeSpecVersionTableTableFilterComposer,
+          $$EcfeSpecVersionTableTableOrderingComposer,
+          $$EcfeSpecVersionTableTableAnnotationComposer,
+          $$EcfeSpecVersionTableTableCreateCompanionBuilder,
+          $$EcfeSpecVersionTableTableUpdateCompanionBuilder,
+          (
+            EcfeSpecVersionTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $EcfeSpecVersionTableTable,
+              EcfeSpecVersionTableData
+            >,
+          ),
+          EcfeSpecVersionTableData,
+          PrefetchHooks Function()
+        > {
+  $$EcfeSpecVersionTableTableTableManager(
+    _$AppDatabase db,
+    $EcfeSpecVersionTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EcfeSpecVersionTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EcfeSpecVersionTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$EcfeSpecVersionTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<String> nombre = const Value.absent(),
+                Value<String?> circularDgii = const Value.absent(),
+                Value<String> xsdVersion = const Value.absent(),
+                Value<String?> notas = const Value.absent(),
+                Value<bool> activaPrecert = const Value.absent(),
+                Value<bool> activaCert = const Value.absent(),
+                Value<bool> activaProduccion = const Value.absent(),
+                Value<String> checklistJson = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> activadoEn = const Value.absent(),
+              }) => EcfeSpecVersionTableCompanion(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                circularDgii: circularDgii,
+                xsdVersion: xsdVersion,
+                notas: notas,
+                activaPrecert: activaPrecert,
+                activaCert: activaCert,
+                activaProduccion: activaProduccion,
+                checklistJson: checklistJson,
+                creadoEn: creadoEn,
+                activadoEn: activadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String codigo,
+                required String nombre,
+                Value<String?> circularDgii = const Value.absent(),
+                Value<String> xsdVersion = const Value.absent(),
+                Value<String?> notas = const Value.absent(),
+                Value<bool> activaPrecert = const Value.absent(),
+                Value<bool> activaCert = const Value.absent(),
+                Value<bool> activaProduccion = const Value.absent(),
+                Value<String> checklistJson = const Value.absent(),
+                required DateTime creadoEn,
+                Value<DateTime?> activadoEn = const Value.absent(),
+              }) => EcfeSpecVersionTableCompanion.insert(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                circularDgii: circularDgii,
+                xsdVersion: xsdVersion,
+                notas: notas,
+                activaPrecert: activaPrecert,
+                activaCert: activaCert,
+                activaProduccion: activaProduccion,
+                checklistJson: checklistJson,
+                creadoEn: creadoEn,
+                activadoEn: activadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$EcfeSpecVersionTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EcfeSpecVersionTableTable,
+      EcfeSpecVersionTableData,
+      $$EcfeSpecVersionTableTableFilterComposer,
+      $$EcfeSpecVersionTableTableOrderingComposer,
+      $$EcfeSpecVersionTableTableAnnotationComposer,
+      $$EcfeSpecVersionTableTableCreateCompanionBuilder,
+      $$EcfeSpecVersionTableTableUpdateCompanionBuilder,
+      (
+        EcfeSpecVersionTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $EcfeSpecVersionTableTable,
+          EcfeSpecVersionTableData
+        >,
+      ),
+      EcfeSpecVersionTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$DetalleCompraTableTableCreateCompanionBuilder =
     DetalleCompraTableCompanion Function({
       required String id,
@@ -47477,6 +52020,16 @@ class $AppDatabaseManager {
       $$ComprasTableTableTableManager(_db, _db.comprasTable);
   $$GastosTableTableTableManager get gastosTable =>
       $$GastosTableTableTableManager(_db, _db.gastosTable);
+  $$EcfeConfigTableTableTableManager get ecfeConfigTable =>
+      $$EcfeConfigTableTableTableManager(_db, _db.ecfeConfigTable);
+  $$EcfeDocumentosTableTableTableManager get ecfeDocumentosTable =>
+      $$EcfeDocumentosTableTableTableManager(_db, _db.ecfeDocumentosTable);
+  $$EcfeEventosTableTableTableManager get ecfeEventosTable =>
+      $$EcfeEventosTableTableTableManager(_db, _db.ecfeEventosTable);
+  $$EcfeSecuenciasTableTableTableManager get ecfeSecuenciasTable =>
+      $$EcfeSecuenciasTableTableTableManager(_db, _db.ecfeSecuenciasTable);
+  $$EcfeSpecVersionTableTableTableManager get ecfeSpecVersionTable =>
+      $$EcfeSpecVersionTableTableTableManager(_db, _db.ecfeSpecVersionTable);
   $$DetalleCompraTableTableTableManager get detalleCompraTable =>
       $$DetalleCompraTableTableTableManager(_db, _db.detalleCompraTable);
   $$FiosTableTableTableManager get fiosTable =>

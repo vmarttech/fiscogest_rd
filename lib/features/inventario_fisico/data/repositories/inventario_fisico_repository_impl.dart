@@ -256,7 +256,7 @@ class InventarioFisicoRepositoryImpl
         build: (ctx) => [
           pw.Text(
             'REPORTE CONTEO FÍSICO #$conteoId',
-            style: const pw.TextStyle(
+            style: pw.TextStyle(
               fontSize: 16,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -290,7 +290,7 @@ class InventarioFisicoRepositoryImpl
                   d.estado,
                 ],
             ],
-            headerStyle: const pw.TextStyle(
+            headerStyle: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 9,
             ),
