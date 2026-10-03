@@ -208,21 +208,23 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
     if (xmllint == null) {
       if (exigirXsd) {
         errores.add(
-          'xmllint no está instalado (apt install libxml2-utils). '
+          'xmllint no está instalado o no está en el PATH. '
+          'Linux: apt install libxml2-utils. '
+          'Windows: instale xmllint (libxml2) y agréguelo al PATH. '
           'Requerido para validar XSD oficial.',
         );
       } else {
         errores.add(
           'Aviso: XSD encontrado (${xsd.path}) pero xmllint no está '
-          'instalado; solo se aplicó validación estructural interna. '
-          'Instala libxml2-utils para validación formal DGII.',
+          'en el PATH; solo validación estructural interna. '
+          'Instale xmllint (Linux: libxml2-utils · Windows: libxml2/xmllint).',
         );
         // Aviso no bloquea si no exigir — quitar de errores y usar info?
         // Para operación seria: si hay XSD configurado, exigir xmllint
         errores.clear();
         errores.add(
           'XSD configurado (${xsd.path}) pero falta xmllint. '
-          'Instala: sudo apt-get install -y libxml2-utils',
+          'Instala: xmllint en el PATH (Linux: apt install libxml2-utils; Windows: instalar xmllint)',
         );
       }
       return errores;
@@ -259,16 +261,44 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
   }
 
   Future<String?> _whichXmllint() async {
+    // Linux/macOS
     try {
       final r = await Process.run('which', ['xmllint']);
       if (r.exitCode == 0) {
-        final p = '${r.stdout}'.trim();
+        final p = '${r.stdout}'.trim().split('\n').first.trim();
         if (p.isNotEmpty) return p;
       }
     } catch (_) {}
-    for (final c in ['/usr/bin/xmllint', '/bin/xmllint']) {
+    // Windows
+    try {
+      final r = await Process.run('where', ['xmllint']);
+      if (r.exitCode == 0) {
+        final p = '${r.stdout}'.trim().split(RegExp(r'\r?\n')).first.trim();
+        if (p.isNotEmpty) return p;
+      }
+    } catch (_) {}
+    try {
+      final r = await Process.run('where', ['xmllint.exe']);
+      if (r.exitCode == 0) {
+        final p = '${r.stdout}'.trim().split(RegExp(r'\r?\n')).first.trim();
+        if (p.isNotEmpty) return p;
+      }
+    } catch (_) {}
+    for (final c in [
+      '/usr/bin/xmllint',
+      '/bin/xmllint',
+      r'C:\Program Files\libxml2\bin\xmllint.exe',
+      r'C:\tools\libxml2\bin\xmllint.exe',
+    ]) {
       if (await File(c).exists()) return c;
     }
+    // Último intento: comando en PATH
+    try {
+      final r = await Process.run('xmllint', ['--version']);
+      if (r.exitCode == 0 || '${r.stdout}${r.stderr}'.contains('libxml')) {
+        return 'xmllint';
+      }
+    } catch (_) {}
     return null;
   }
 

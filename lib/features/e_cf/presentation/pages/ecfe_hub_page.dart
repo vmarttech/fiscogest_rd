@@ -443,7 +443,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
             const SizedBox(height: 8),
             Text(
               'Descarga el paquete de esquemas e-CF de la DGII y apunta al .xsd raíz. '
-              'Requiere xmllint (sudo apt install libxml2-utils). '
+              'Validación XSD: xmllint/libxml2 en el PATH (Linux: apt install libxml2-utils · Windows: instale xmllint y agréguelo al PATH). '
               'Sin XSD solo aplica validación estructural interna.',
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textSecondary,
