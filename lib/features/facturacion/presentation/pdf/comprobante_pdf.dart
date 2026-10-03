@@ -14,14 +14,68 @@ import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 /// Estructura orientada a uso comercial en RD (DGII serie B).
 class ComprobantePdf {
   /// Ticket térmico 80 mm (ancho fijo, alto según contenido).
-  static const PdfPageFormat formatoTicket80 = PdfPageFormat(
-    80 * PdfPageFormat.mm,
-    double.infinity,
-    marginLeft: 4 * PdfPageFormat.mm,
-    marginRight: 4 * PdfPageFormat.mm,
-    marginTop: 4 * PdfPageFormat.mm,
-    marginBottom: 4 * PdfPageFormat.mm,
-  );
+  static const double _anchoTicket80 = 80 * PdfPageFormat.mm;
+  static const double _margenTicket80 = 3 * PdfPageFormat.mm;
+
+  // El alto de rollo no tiene límite fijo; cada comprobante genera su propia
+  // página finita según el contenido antes de enviarse a imprimir.
+  static const PdfPageFormat formatoTicket80 = PdfPageFormat.roll80;
+
+  /// Evita el alto infinito, que algunos controladores sustituyen por A4/Letter.
+  static PdfPageFormat _formatoTicketPara(
+    Venta venta,
+    ConfiguracionEntity? empresa,
+  ) {
+    final valores = <String>[
+      if ((empresa?.docMostrarLogo ?? true) && (empresa?.logoUrl ?? '').isNotEmpty)
+        'logo',
+      emisorNombre,
+      if ((empresa?.docMostrarRnc ?? true)) empresa?.rnc ?? '',
+      if ((empresa?.docMostrarTelefono ?? true)) empresa?.telefono ?? '',
+      if ((empresa?.docMostrarCorreo ?? true)) empresa?.correo ?? '',
+      if ((empresa?.docMostrarDireccion ?? true)) empresa?.direccion ?? '',
+      if (empresa?.docMostrarCliente ?? true) ...[
+        venta.nombreCliente ?? 'Consumidor Final',
+        venta.clienteTelefono ?? '',
+        venta.clienteDireccion ?? '',
+      ],
+      venta.numeroCotizacion,
+      venta.numeroFactura ?? '',
+      DateFormat('dd/MM/yyyy HH:mm').format(venta.fecha),
+      'Status: Pagado',
+      venta.formaPago,
+      'Descripción',
+      'Cant. Precio Subtotal',
+      ...venta.detalles.expand(
+        (d) => [
+          d.nombreProducto ?? 'Ítem',
+          d.ofertaNombre ?? '',
+          if (d.precioOriginal != null) _money(d.precioOriginal!),
+          _money(d.precioUnitario),
+          _money(d.subtotalLinea ?? d.subtotal),
+        ],
+      ),
+      _money(venta.montoSubtotal),
+      _money(venta.montoDescuento),
+      _money(venta.itbis),
+      _money(venta.costoEnvio),
+      _money(venta.montoTotal),
+      empresa?.docPiePagina ?? '',
+    ];
+    final lineas = valores.fold<int>(0, (total, texto) {
+      final largo = texto.trim().length;
+      return total + (largo == 0 ? 0 : (largo / 42).ceil());
+    });
+    final altoMm = 64 + lineas * 3.1 + venta.detalles.length * 1.5;
+    return PdfPageFormat(
+      _anchoTicket80,
+      altoMm * PdfPageFormat.mm,
+      marginLeft: _margenTicket80,
+      marginRight: _margenTicket80,
+      marginTop: _margenTicket80,
+      marginBottom: _margenTicket80,
+    );
+  }
 
   // Datos del emisor: los asigna imprimirFactura() con la configuración guardada.
   static ConfiguracionEntity? _empresa;
@@ -70,7 +124,7 @@ class ComprobantePdf {
       await Printing.layoutPdf(
         onLayout: (format) async => bytes,
         name: 'Factura_$ncf.pdf',
-        format: formatoTicket80,
+        format: _formatoTicketPara(v, empresa),
       );
     }
   }
@@ -173,7 +227,7 @@ class ComprobantePdf {
 
     doc.addPage(
       pw.Page(
-        pageFormat: formatoTicket80,
+        pageFormat: _formatoTicketPara(v, empresa),
         build: (ctx) => _ticketBody(
           v: v,
           empresa: empresa,

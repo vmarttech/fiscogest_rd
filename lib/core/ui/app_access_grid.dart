@@ -7,6 +7,7 @@ class AppAccessGrid extends StatelessWidget {
     required this.children,
     this.minTileWidth = 220,
     this.maxColumns = 4,
+    this.mobileColumns = 1,
     this.spacing = 16,
     this.runSpacing = 16,
     this.tileHeight = 200,
@@ -15,6 +16,7 @@ class AppAccessGrid extends StatelessWidget {
   final List<Widget> children;
   final double minTileWidth;
   final int maxColumns;
+  final int mobileColumns;
   final double spacing;
   final double runSpacing;
   final double tileHeight;
@@ -22,6 +24,33 @@ class AppAccessGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (AppBreakpoints.isMobile(context)) {
+      if (children.isEmpty) return const SizedBox.shrink();
+      final columns = mobileColumns.clamp(1, children.length).toInt();
+      if (columns > 1) {
+        return Column(
+          children: [
+            for (var start = 0; start < children.length; start += columns) ...[
+              if (start > 0) SizedBox(height: runSpacing),
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var column = 0; column < columns; column++) ...[
+                      if (column > 0) SizedBox(width: spacing),
+                      Expanded(
+                        child: start + column < children.length
+                            ? children[start + column]
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ],
+        );
+      }
+
       // Sin altura fija: evita overflow del AppHubCard en pantallas bajas
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -21,6 +21,7 @@ class AppTextField extends StatelessWidget {
     this.height,
     this.inputFormatters,
   });
+
   final String? label;
   final String? hint;
   final String? errorText;
@@ -35,8 +36,23 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final double? height;
   final List<TextInputFormatter>? inputFormatters;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor =
+        isDark ? Colors.white.withValues(alpha: 0.95) : AppColors.textPrimary;
+    final labelColor =
+        isDark ? Colors.white.withValues(alpha: 0.72) : AppColors.textSecondary;
+    final hintColor =
+        isDark ? Colors.white.withValues(alpha: 0.35) : AppColors.grey400;
+    final iconColor =
+        isDark ? Colors.white.withValues(alpha: 0.65) : AppColors.grey600;
+    final borderColor =
+        isDark ? Colors.white.withValues(alpha: 0.18) : AppColors.grey300;
+    final focusColor = isDark ? const Color(0xFF2DD4BF) : AppColors.primary;
+
     return SizedBox(
       height: height,
       child: TextFormField(
@@ -47,9 +63,12 @@ class AppTextField extends StatelessWidget {
         onChanged: onChanged,
         onFieldSubmitted: onSubmitted,
         inputFormatters: inputFormatters,
-        style: AppTypography.bodyMedium,
+        style: AppTypography.bodyMedium.copyWith(color: textColor),
+        cursorColor: focusColor,
         decoration: InputDecoration(
           isDense: true,
+          filled: isDark,
+          fillColor: isDark ? Colors.white.withValues(alpha: 0.06) : null,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 14,
@@ -59,22 +78,22 @@ class AppTextField extends StatelessWidget {
                   label!,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: AppTypography.labelMedium,
+                  style: AppTypography.labelMedium.copyWith(color: labelColor),
                 )
               : null,
           hintText: hint,
           hintStyle: AppTypography.bodyMedium.copyWith(
-            color: AppColors.grey400,
+            color: hintColor,
             overflow: TextOverflow.ellipsis,
           ),
           errorText: errorText,
           errorStyle: AppTypography.bodySmall.copyWith(color: AppColors.error),
           prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, size: 20, color: AppColors.grey600)
+              ? Icon(prefixIcon, size: 20, color: iconColor)
               : null,
           suffixIcon: suffixIcon != null
               ? IconButton(
-                  icon: Icon(suffixIcon, size: 20, color: AppColors.grey600),
+                  icon: Icon(suffixIcon, size: 20, color: iconColor),
                   onPressed: onSuffixTap,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
@@ -83,18 +102,25 @@ class AppTextField extends StatelessWidget {
                   ),
                 )
               : null,
-          border: const OutlineInputBorder(),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: AppColors.grey300),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: borderColor),
           ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: borderColor),
           ),
-          errorBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: AppColors.error),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: focusColor, width: 1.5),
           ),
-          focusedErrorBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: AppColors.error, width: 1.5),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.error),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.error, width: 1.5),
           ),
         ),
       ),

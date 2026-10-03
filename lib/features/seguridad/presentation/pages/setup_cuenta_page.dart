@@ -1,9 +1,9 @@
+import 'package:fiscogest_rd/core/ui/fisco_aurora_background.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
 
@@ -96,150 +96,184 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Icon(
-                      Icons.security_rounded,
-                      size: 48,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Configure su cuenta',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.h3.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Por seguridad debe cambiar el usuario y la contraseña '
-                      'de fábrica (admin). También configure una pregunta para '
-                      'recuperar la clave si la olvida.',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    TextField(
-                      controller: _userCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Nuevo usuario *',
-                        border: OutlineInputBorder(),
-                      ),
-                      textInputAction: TextInputAction.next,
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _passCtrl,
-                      obscureText: _ocultar,
-                      decoration: InputDecoration(
-                        labelText: 'Nueva contraseña *',
-                        border: const OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _ocultar
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+        backgroundColor: const Color(0xFF070B12),
+        body: FiscoAuroraBackground(
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: _glass(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Icon(
+                          Icons.security_rounded,
+                          size: 48,
+                          color: Colors.white.withValues(alpha: 0.96),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Configure su cuenta',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.h3.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white.withValues(alpha: 0.96),
                           ),
-                          onPressed: () => setState(() => _ocultar = !_ocultar),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _pass2Ctrl,
-                      obscureText: _ocultar,
-                      decoration: const InputDecoration(
-                        labelText: 'Confirmar contraseña *',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Recuperación de clave',
-                      style: AppTypography.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Pregunta *',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: _preguntas
-                          .map(
-                            (p) => DropdownMenuItem(
-                              value: p,
-                              child: Text(
-                                p,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Por seguridad debe cambiar el usuario y la contraseña '
+                          'de fábrica (admin). También configure una pregunta para '
+                          'recuperar la clave si la olvida.',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Colors.white.withValues(alpha: 0.55),
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        TextField(
+                          controller: _userCtrl,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _dec('Nuevo usuario *'),
+                          textInputAction: TextInputAction.next,
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _passCtrl,
+                          obscureText: _ocultar,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _dec(
+                            'Nueva contraseña *',
+                            suffix: IconButton(
+                              icon: Icon(
+                                _ocultar
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: Colors.white54,
                               ),
+                              onPressed: () =>
+                                  setState(() => _ocultar = !_ocultar),
                             ),
-                          )
-                          .toList(),
-                      onChanged: (v) {
-                        if (v != null) _preguntaCtrl.text = v;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _respuestaCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Respuesta *',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    if (_error != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        _error!,
-                        style: const TextStyle(color: AppColors.error),
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: _cargando ? null : _guardar,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          ),
                         ),
-                        child: _cargando
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'GUARDAR Y CONTINUAR',
-                                style: TextStyle(fontWeight: FontWeight.w800),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _pass2Ctrl,
+                          obscureText: _ocultar,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _dec('Confirmar contraseña *'),
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          initialValue:
+                              _preguntaCtrl.text.isNotEmpty &&
+                                  _preguntas.contains(_preguntaCtrl.text)
+                              ? _preguntaCtrl.text
+                              : null,
+                          dropdownColor: const Color(0xFF0F172A),
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _dec('Pregunta de seguridad *'),
+                          items: [
+                            for (final q in _preguntas)
+                              DropdownMenuItem(
+                                value: q,
+                                child: Text(q, overflow: TextOverflow.ellipsis),
                               ),
-                      ),
+                          ],
+                          onChanged: (v) {
+                            if (v != null) {
+                              _preguntaCtrl.text = v;
+                              setState(() {});
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _respuestaCtrl,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _dec('Respuesta *'),
+                        ),
+                        if (_error != null) ...[
+                          const SizedBox(height: 14),
+                          Text(
+                            _error!,
+                            textAlign: TextAlign.center,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: const Color(0xFFF87171),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 22),
+                        FilledButton(
+                          onPressed: _cargando ? null : _guardar,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF14B8A6),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: Text(
+                            _cargando ? 'Guardando…' : 'Guardar y continuar',
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _glass({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(28, 32, 28, 24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.12),
+            Colors.white.withValues(alpha: 0.05),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 40,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  InputDecoration _dec(String label, {Widget? suffix}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+      suffixIcon: suffix,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF2DD4BF)),
+      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }

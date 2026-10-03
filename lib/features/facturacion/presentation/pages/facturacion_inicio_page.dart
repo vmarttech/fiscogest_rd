@@ -39,121 +39,130 @@ class FacturacionInicioPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Hero más grueso (estilo referencia)
-                  Container(
-                    padding: EdgeInsets.fromLTRB(
-                      mobile ? 20 : 28,
-                      mobile ? 22 : 28,
-                      mobile ? 20 : 28,
-                      mobile ? 22 : 28,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          AppColors.primaryDark,
-                          AppColors.primary,
-                          AppColors.primaryLight.withValues(alpha: 0.95),
-                        ],
+                  if (mobile)
+                    const AppDashboardHero(
+                      title: 'Facturación y NC',
+                      subtitle:
+                          'Emite y consulta comprobantes con NCF e historial.',
+                      icon: Icons.receipt_long_rounded,
+                    )
+                  else
+                    Container(
+                      padding: EdgeInsets.fromLTRB(
+                        mobile ? 20 : 28,
+                        mobile ? 22 : 28,
+                        mobile ? 20 : 28,
+                        mobile ? 22 : 28,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.28),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: -30,
-                          top: -40,
-                          child: IgnorePointer(
-                            child: Container(
-                              width: 160,
-                              height: 160,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.07),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: 60,
-                          bottom: -50,
-                          child: IgnorePointer(
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.05),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              width: mobile ? 56 : 64,
-                              height: mobile ? 56 : 64,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.95),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.12),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.receipt_long_rounded,
-                                color: AppColors.primary,
-                                size: mobile ? 30 : 34,
-                              ),
-                            ),
-                            const SizedBox(width: 18),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Facturación y NC',
-                                    style:
-                                        (mobile
-                                                ? AppTypography.h4
-                                                : AppTypography.h3)
-                                            .copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: -0.3,
-                                            ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'Emite, gestiona y consulta comprobantes '
-                                    'con NCF e historial.',
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.9,
-                                      ),
-                                      height: 1.35,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            AppColors.primaryDark,
+                            AppColors.primary,
+                            AppColors.primaryLight.withValues(alpha: 0.95),
                           ],
                         ),
-                      ],
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.28),
+                            blurRadius: 24,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            right: -30,
+                            top: -40,
+                            child: IgnorePointer(
+                              child: Container(
+                                width: 160,
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.07),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 60,
+                            bottom: -50,
+                            child: IgnorePointer(
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.05),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                width: mobile ? 56 : 64,
+                                height: mobile ? 56 : 64,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.receipt_long_rounded,
+                                  color: AppColors.primary,
+                                  size: mobile ? 30 : 34,
+                                ),
+                              ),
+                              const SizedBox(width: 18),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Facturación y NC',
+                                      style:
+                                          (mobile
+                                                  ? AppTypography.h4
+                                                  : AppTypography.h3)
+                                              .copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: -0.3,
+                                              ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Emite, gestiona y consulta comprobantes '
+                                      'con NCF e historial.',
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
+                                        height: 1.35,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 28),
                   SectionHeader(
                     title: 'Operaciones',
@@ -163,8 +172,9 @@ class FacturacionInicioPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
                   AppAccessGrid(
-                    minTileWidth: 200,
+                    minTileWidth: mobile ? 150 : 200,
                     maxColumns: 4,
+                    mobileColumns: 2,
                     spacing: 16,
                     runSpacing: 16,
                     tileHeight: mobile ? 200 : 200,

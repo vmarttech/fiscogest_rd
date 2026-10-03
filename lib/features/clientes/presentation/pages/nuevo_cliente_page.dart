@@ -212,9 +212,13 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                                     controller: _telefonoController,
                                     keyboardType: TextInputType.phone,
                                     decoration: _deco(
-                                      'Teléfono / celular',
+                                      'Teléfono / celular *',
                                       hint: '809-000-0000',
                                     ),
+                                    validator: (v) =>
+                                        (v == null || v.trim().isEmpty)
+                                        ? 'Ingrese el teléfono'
+                                        : null,
                                   ),
                                   const SizedBox(height: 12),
                                   TextFormField(
@@ -243,9 +247,13 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                                           controller: _telefonoController,
                                           keyboardType: TextInputType.phone,
                                           decoration: _deco(
-                                            'Teléfono / celular',
+                                            'Teléfono / celular *',
                                             hint: '809-000-0000',
                                           ),
+                                          validator: (v) =>
+                                              (v == null || v.trim().isEmpty)
+                                              ? 'Ingrese el teléfono'
+                                              : null,
                                         ),
                                       ),
                                     ],

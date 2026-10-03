@@ -30,106 +30,115 @@ class CreditoInicioPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: EdgeInsets.fromLTRB(
-                      mobile ? 20 : 28,
-                      mobile ? 22 : 28,
-                      mobile ? 20 : 28,
-                      mobile ? 22 : 28,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          AppColors.primaryDark,
-                          AppColors.primary,
-                          AppColors.primaryLight.withValues(alpha: 0.95),
+                  if (mobile)
+                    const AppDashboardHero(
+                      title: 'Crédito',
+                      subtitle: 'Solicitudes, aprobación y cuentas por cobrar.',
+                      icon: Icons.credit_score_rounded,
+                    )
+                  else
+                    Container(
+                      padding: EdgeInsets.fromLTRB(
+                        mobile ? 20 : 28,
+                        mobile ? 22 : 28,
+                        mobile ? 20 : 28,
+                        mobile ? 22 : 28,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            AppColors.primaryDark,
+                            AppColors.primary,
+                            AppColors.primaryLight.withValues(alpha: 0.95),
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.28),
+                            blurRadius: 24,
+                            offset: const Offset(0, 10),
+                          ),
                         ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.28),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: -30,
-                          top: -40,
-                          child: IgnorePointer(
-                            child: Container(
-                              width: 160,
-                              height: 160,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.07),
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            right: -30,
+                            top: -40,
+                            child: IgnorePointer(
+                              child: Container(
+                                width: 160,
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.07),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              width: mobile ? 56 : 64,
-                              height: mobile ? 56 : 64,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.95),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.12),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.credit_score_rounded,
-                                color: AppColors.primary,
-                                size: mobile ? 30 : 34,
-                              ),
-                            ),
-                            const SizedBox(width: 18),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Gestión de crédito',
-                                    style:
-                                        (mobile
-                                                ? AppTypography.h4
-                                                : AppTypography.h3)
-                                            .copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: -0.3,
-                                            ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'Solicitudes, aprobación y cuentas por cobrar. '
-                                    'Flujo: cotización → crédito → caja.',
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.9,
+                          Row(
+                            children: [
+                              Container(
+                                width: mobile ? 56 : 64,
+                                height: mobile ? 56 : 64,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.12,
                                       ),
-                                      height: 1.35,
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.credit_score_rounded,
+                                  color: AppColors.primary,
+                                  size: mobile ? 30 : 34,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              const SizedBox(width: 18),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Gestión de crédito',
+                                      style:
+                                          (mobile
+                                                  ? AppTypography.h4
+                                                  : AppTypography.h3)
+                                              .copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: -0.3,
+                                              ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Solicitudes, aprobación y cuentas por cobrar. '
+                                      'Flujo: cotización → crédito → caja.',
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
+                                        height: 1.35,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 28),
                   const SectionHeader(
                     title: 'Operaciones',
@@ -137,8 +146,9 @@ class CreditoInicioPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   AppAccessGrid(
-                    minTileWidth: 200,
+                    minTileWidth: mobile ? 150 : 200,
                     maxColumns: 3,
+                    mobileColumns: 2,
                     spacing: 16,
                     runSpacing: 16,
                     tileHeight: mobile ? 200 : 200,

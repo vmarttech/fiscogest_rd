@@ -23,6 +23,7 @@ export 'app_access_tile.dart';
 export 'app_hub_card.dart';
 export 'app_access_grid.dart';
 export 'app_hub_hero.dart';
+export 'app_dashboard_hero.dart';
 export 'app_panel.dart';
 export 'app_radius.dart';
 export 'app_sizes.dart';

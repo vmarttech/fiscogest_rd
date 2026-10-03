@@ -46,128 +46,127 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
   }
 
   Future<void> _pedirCantidadYAgregar(Producto prod) async {
-    double cantidad = 1;
+    double cantidadActual = 1;
     final controller = TextEditingController(text: '1');
-    final ok = await showDialog<bool>(
+    final cantidadSeleccionada = await showDialog<double>(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setLocal) {
-            void syncFromField() {
-              final v =
-                  double.tryParse(controller.text.replaceAll(',', '.')) ??
-                  cantidad;
-              cantidad = v < 0.001 ? 0.001 : v;
-            }
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) {
+          void sincronizarCantidad() {
+            final valor =
+                double.tryParse(controller.text.replaceAll(',', '.')) ?? 1;
+            cantidadActual = valor < 0.001 ? 0.001 : valor;
+          }
 
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(
-                'Cantidad',
-                style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    prod.nombre,
-                    style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+          void actualizarCampo() {
+            controller.text = cantidadActual % 1 == 0
+                ? cantidadActual.toInt().toString()
+                : cantidadActual.toStringAsFixed(2);
+          }
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text(
+              'Cantidad',
+              style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  prod.nombre,
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Precio: ${formatRd(prod.precioVenta)}',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          syncFromField();
-                          if (cantidad > 1) {
-                            cantidad -= 1;
-                          } else if (cantidad > 0.001) {
-                            cantidad = (cantidad - 0.5).clamp(0.001, 999999);
-                          }
-                          controller.text = cantidad % 1 == 0
-                              ? cantidad.toInt().toString()
-                              : cantidad.toStringAsFixed(2);
-                          setLocal(() {});
-                        },
-                        icon: const Icon(Icons.remove),
-                      ),
-                      SizedBox(
-                        width: 88,
-                        child: TextField(
-                          controller: controller,
-                          textAlign: TextAlign.center,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (_) => setLocal(() {}),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          syncFromField();
-                          cantidad += 1;
-                          controller.text = cantidad % 1 == 0
-                              ? cantidad.toInt().toString()
-                              : cantidad.toStringAsFixed(2);
-                          setLocal(() {});
-                        },
-                        icon: const Icon(Icons.add),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                const SizedBox(height: 4),
+                Text(
+                  'Precio: ${formatRd(prod.precioVenta)}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
-                  onPressed: () {
-                    syncFromField();
-                    if (cantidad <= 0) return;
-                    Navigator.pop(ctx, true);
-                  },
-                  child: const Text('Agregar'),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        sincronizarCantidad();
+                        if (cantidadActual > 1) {
+                          cantidadActual -= 1;
+                        } else if (cantidadActual > 0.001) {
+                          cantidadActual = (cantidadActual - 0.5)
+                              .clamp(0.001, 999999)
+                              .toDouble();
+                        }
+                        actualizarCampo();
+                        setLocal(() {});
+                      },
+                      icon: const Icon(Icons.remove),
+                    ),
+                    SizedBox(
+                      width: 88,
+                      child: TextField(
+                        controller: controller,
+                        textAlign: TextAlign.center,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (_) => setLocal(() {}),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        sincronizarCantidad();
+                        cantidadActual += 1;
+                        actualizarCampo();
+                        setLocal(() {});
+                      },
+                      icon: const Icon(Icons.add),
+                    ),
+                  ],
                 ),
               ],
-            );
-          },
-        );
-      },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  sincronizarCantidad();
+                  if (cantidadActual > 0) {
+                    Navigator.pop(ctx, cantidadActual);
+                  }
+                },
+                child: const Text('Agregar'),
+              ),
+            ],
+          );
+        },
+      ),
     );
-    if (ok == true && mounted) {
-      final v = double.tryParse(controller.text.replaceAll(',', '.')) ?? 1;
-      if (v > 0) {
-        await widget.alAgregar(prod, v);
-        if (mounted) {
-          _buscador.clear();
-          _buscar('');
-        }
+    controller.dispose();
+    if (cantidadSeleccionada != null && cantidadSeleccionada > 0 && mounted) {
+      await widget.alAgregar(prod, cantidadSeleccionada);
+      if (mounted) {
+        _buscador.clear();
+        _buscar('');
       }
     }
-    controller.dispose();
   }
 
   @override

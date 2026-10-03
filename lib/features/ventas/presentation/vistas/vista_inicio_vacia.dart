@@ -608,11 +608,20 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
     final atajos = AppAccessGrid(
       minTileWidth: isMobile ? 150 : 180,
-      maxColumns: isMobile ? 1 : 2,
+      maxColumns: 2,
+      mobileColumns: 2,
       spacing: isMobile ? 8 : 12,
       runSpacing: isMobile ? 8 : 12,
       tileHeight: isMobile ? 72 : 168,
       children: [
+        if (isMobile)
+          AppHubCard(
+            icon: Icons.history_rounded,
+            title: 'Historial',
+            subtitle: 'Cotizaciones y ventas',
+            color: AppColors.info,
+            onTap: irHistorial,
+          ),
         AppHubCard(
           icon: Icons.inventory_2_outlined,
           title: 'Consultar stock',
@@ -664,8 +673,10 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
             )
           else ...[
             cta,
-            SizedBox(height: isMobile ? 8 : 14),
-            _PosContextoCard(onHistorial: irHistorial, isMobile: isMobile),
+            if (!isMobile) ...[
+              const SizedBox(height: 14),
+              _PosContextoCard(onHistorial: irHistorial),
+            ],
           ],
           SizedBox(height: isMobile ? 14 : 22),
           Text(

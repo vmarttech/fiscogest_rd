@@ -25,6 +25,8 @@ class AppScaffold extends StatelessWidget {
     this.centerTitle = false,
     this.showAppBar = true,
     this.useAppPage = true,
+    this.bottomBar,
+    this.contentMaxWidth,
   });
 
   final String? title;
@@ -43,6 +45,12 @@ class AppScaffold extends StatelessWidget {
 
   /// Limita y centra el body (PC con menú oculto).
   final bool useAppPage;
+
+  /// Barra inferior (acciones Guardar/Cancelar).
+  final Widget? bottomBar;
+
+  /// Si se indica, AppPage usa este maxWidth (formularios ~720).
+  final double? contentMaxWidth;
 
   /// Rutas de módulo: menú sándwich, sin flecha atrás.
   static const rutasPrincipales = {
@@ -80,13 +88,16 @@ class AppScaffold extends StatelessWidget {
 
     final Widget? bodyWidget = contenido == null
         ? null
-        : (useAppPage ? AppPage(child: contenido) : contenido);
+        : (useAppPage
+            ? AppPage(maxWidth: contentMaxWidth, child: contenido)
+            : contenido);
 
     return Scaffold(
       backgroundColor: backgroundColor ?? const Color(0xFFEEF2F6),
       appBar: showAppBar ? (appBar ?? _buildAppBar(context)) : null,
       body: bodyWidget == null ? null : AppAtmosphere(child: bodyWidget),
       floatingActionButton: floatingActionButton,
+      bottomNavigationBar: bottomBar,
     );
   }
 

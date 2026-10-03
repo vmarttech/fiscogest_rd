@@ -8,6 +8,8 @@ abstract class AppSizes {
   static const double cardMinHeight = 80;
   static const double cardMaxWidth = 600;
   static const double maxContentWidth = 1180;
+  static const double formMaxWidth = 720;
+  static const double formMaxWidthWide = 880;
   static const double drawerWidth = 280;
   static const double appBarHeight = 48;
   static const double iconXs = 12;

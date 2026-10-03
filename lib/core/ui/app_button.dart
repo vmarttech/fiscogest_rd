@@ -66,12 +66,22 @@ class AppButton extends StatelessWidget {
         : const SizedBox.shrink();
     final textWidget = Text(text);
 
-    return Row(
+    final content = Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
-      children: iconRight
+      children: icon == null
+          ? [textWidget]
+          : iconRight
           ? [textWidget, const SizedBox(width: 8), iconWidget]
           : [iconWidget, const SizedBox(width: 8), textWidget],
+    );
+
+    // En barras de acción estrechas (móvil), conserva la etiqueta en una línea
+    // reduciéndola suavemente dentro del ancho disponible.
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.hasBoundedWidth
+          ? FittedBox(fit: BoxFit.scaleDown, child: content)
+          : content,
     );
   }
 }

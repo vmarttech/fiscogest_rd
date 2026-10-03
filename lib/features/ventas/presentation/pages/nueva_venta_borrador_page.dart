@@ -232,19 +232,6 @@ class _NuevaVentaBorradorPageState
       // Crédito → mismo formulario que Apartado (antes de guardar)
       if (esCredito) {
         final estadoBorrador = ref.read(ventaBorradorProvider);
-        final clienteId = estadoBorrador.clienteId ?? 0;
-        if (clienteId <= 0) {
-          if (mounted) {
-            FiscoGestNotifications.show(
-              const SnackBar(
-                content: Text('Seleccione o registre un cliente para crédito'),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-          return;
-        }
         if (estadoBorrador.detalles.isEmpty || estadoBorrador.montoTotal <= 0) {
           if (mounted) {
             FiscoGestNotifications.show(
@@ -730,9 +717,12 @@ class _NuevaVentaBorradorPageState
     VentaBorradorState estado,
     bool esPantallaPequena,
   ) {
-    final nombreCliente = estado.clienteNombre?.isNotEmpty == true
-        ? estado.clienteNombre!
-        : 'Consumidor Final';
+    final clienteSeleccionado =
+        (estado.clienteId ?? 0) > 0 &&
+        (estado.clienteNombre?.trim().isNotEmpty ?? false);
+    final nombreCliente = clienteSeleccionado
+        ? estado.clienteNombre!.trim()
+        : 'Agregar cliente';
     final tamanoCuerpo = esPantallaPequena ? 14.0 : 15.0;
     return Material(
       color: AppColors.white,

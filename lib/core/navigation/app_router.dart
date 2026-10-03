@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/core/ui/fisco_splash.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,7 +75,6 @@ import 'package:fiscogest_rd/features/facturacion/presentation/pages/secuencias_
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_factura_page.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/historial_facturas_page.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_nc_page.dart';
-import 'package:fiscogest_rd/core/presentation/pages/splash_page.dart';
 import 'package:fiscogest_rd/core/presentation/pages/inicio_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -99,6 +99,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+
+      GoRoute(
+        path: '/splash',
+        name: FiscoSplashPage.routeName,
+        builder: (_, __) => const FiscoSplashPage(),
+      ),
       GoRoute(
         path: '/login',
         name: LoginPage.routeName,
@@ -120,11 +126,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const AppShell(child: UsuariosPage()),
       ),
 
-      GoRoute(
-        path: '/splash',
-        name: 'splash',
-        builder: (context, state) => const SplashPage(),
-      ),
       GoRoute(
         path: '/',
         name: 'inicio',

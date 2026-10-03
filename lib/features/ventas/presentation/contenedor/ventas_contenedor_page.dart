@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_hub_hero.dart';
+import 'package:fiscogest_rd/core/ui/app_dashboard_hero.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/vistas/vista_inicio_vacia.dart';
@@ -90,9 +91,8 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
       VistaActual.historial => const HistorialVentas(),
     };
 
-    // En historial / detalle no mostramos hero (más espacio de lista)
-    // En móvil tampoco: el hero ocupa demasiado y ya está el título en el AppBar
-    final showHero = vistaActual == VistaActual.inicio && !mobile;
+    // El encabezado de dashboard también orienta la pantalla inicial en móvil.
+    final showHero = vistaActual == VistaActual.inicio;
 
     return AppScaffold(
       title: tituloApp,
@@ -118,11 +118,17 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
                           padding: AppLayout.pantallaPadding.add(
                             EdgeInsets.only(top: mobile ? 8 : 12, bottom: 0),
                           ),
-                          child: AppHubHero(
-                            title: heroTitulo,
-                            subtitle: heroSub,
-                            icon: heroIcon,
-                          ),
+                          child: mobile
+                              ? AppDashboardHero(
+                                  title: tituloApp,
+                                  subtitle: heroSub,
+                                  icon: heroIcon,
+                                )
+                              : AppHubHero(
+                                  title: heroTitulo,
+                                  subtitle: heroSub,
+                                  icon: heroIcon,
+                                ),
                         ),
                         const SizedBox(height: 12),
                         Expanded(child: vistaActiva),

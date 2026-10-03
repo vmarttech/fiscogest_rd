@@ -84,18 +84,20 @@ class ReportesRepository {
 
   Future<double> _sumGastos(DateTime desde, DateTime hasta) async {
     try {
-      final rows = await _db.customSelect(
-        '''
+      final rows = await _db
+          .customSelect(
+            '''
         SELECT COALESCE(SUM(monto), 0.0) AS total
         FROM gastos_table
         WHERE fecha >= ? AND fecha < ?
         ''',
-        variables: [
-          Variable.withString(desde.toIso8601String()),
-          Variable.withString(hasta.toIso8601String()),
-        ],
-        readsFrom: {_db.gastosTable},
-      ).get();
+            variables: [
+              Variable.withDateTime(desde),
+              Variable.withDateTime(hasta),
+            ],
+            readsFrom: {_db.gastosTable},
+          )
+          .get();
       if (rows.isEmpty) return 0.0;
       return (rows.first.data['total'] as num?)?.toDouble() ?? 0.0;
     } catch (_) {
@@ -108,9 +110,6 @@ class ReportesRepository {
     DateTime desde,
     DateTime hasta,
   ) async {
-    final ds = desde.toIso8601String();
-    final hs = hasta.toIso8601String();
-
     final rows = await _db
         .customSelect(
           '''
@@ -129,7 +128,10 @@ class ReportesRepository {
       WHERE v.fecha >= ? AND v.fecha < ?
         AND v.estado_documento IN $_estadosVenta
       ''',
-          variables: [Variable.withString(ds), Variable.withString(hs)],
+          variables: [
+            Variable.withDateTime(desde),
+            Variable.withDateTime(hasta),
+          ],
           readsFrom: {
             _db.ventasTable,
             _db.ventasDetalleTable,
@@ -150,17 +152,17 @@ class ReportesRepository {
     final rows = await _db
         .customSelect(
           '''
-      SELECT date(v.fecha) AS dia,
+      SELECT date(v.fecha, 'unixepoch') AS dia,
              COALESCE(SUM(v.monto_total), 0.0) AS total
       FROM ventas_table v
       WHERE v.fecha >= ? AND v.fecha < ?
         AND v.estado_documento IN $_estadosVenta
-      GROUP BY date(v.fecha)
+      GROUP BY date(v.fecha, 'unixepoch')
       ORDER BY dia
       ''',
           variables: [
-            Variable.withString(desde.toIso8601String()),
-            Variable.withString(hasta.toIso8601String()),
+            Variable.withDateTime(desde),
+            Variable.withDateTime(hasta),
           ],
           readsFrom: {_db.ventasTable},
         )
@@ -204,8 +206,8 @@ class ReportesRepository {
       ORDER BY total DESC
       ''',
           variables: [
-            Variable.withString(desde.toIso8601String()),
-            Variable.withString(hasta.toIso8601String()),
+            Variable.withDateTime(desde),
+            Variable.withDateTime(hasta),
           ],
           readsFrom: {_db.ventasTable},
         )
@@ -240,8 +242,8 @@ class ReportesRepository {
       LIMIT ?
       ''',
           variables: [
-            Variable.withString(desde.toIso8601String()),
-            Variable.withString(hasta.toIso8601String()),
+            Variable.withDateTime(desde),
+            Variable.withDateTime(hasta),
             Variable.withInt(limit),
           ],
           readsFrom: {
@@ -263,11 +265,13 @@ class ReportesRepository {
         .toList();
   }
 
-  Future<Map<String, dynamic>> reporteVentas(DateTime desde, DateTime hasta) async {
-    final ds = desde.toIso8601String();
-    final hs = hasta.toIso8601String();
-    final rows = await _db.customSelect(
-      '''
+  Future<Map<String, dynamic>> reporteVentas(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
+    final rows = await _db
+        .customSelect(
+          '''
       SELECT v.id, v.fecha, v.nombre_cliente, v.numero_factura, v.numero_cotizacion,
              v.monto_total, v.itbis, v.monto_subtotal, v.forma_pago, v.estado_documento
       FROM ventas_table v
@@ -275,9 +279,13 @@ class ReportesRepository {
         AND v.estado_documento IN $_estadosVenta
       ORDER BY v.fecha DESC
       ''',
-      variables: [Variable.withString(ds), Variable.withString(hs)],
-      readsFrom: {_db.ventasTable},
-    ).get();
+          variables: [
+            Variable.withDateTime(desde),
+            Variable.withDateTime(hasta),
+          ],
+          readsFrom: {_db.ventasTable},
+        )
+        .get();
 
     double total = 0, itbis = 0;
     final registros = <Map<String, dynamic>>[];
@@ -309,11 +317,13 @@ class ReportesRepository {
     };
   }
 
-  Future<Map<String, dynamic>> reporteCompras(DateTime desde, DateTime hasta) async {
-    final ds = desde.toIso8601String();
-    final hs = hasta.toIso8601String();
-    final rows = await _db.customSelect(
-      '''
+  Future<Map<String, dynamic>> reporteCompras(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
+    final rows = await _db
+        .customSelect(
+          '''
       SELECT c.id, c.fecha_emision, c.nombre_proveedor, c.numero_comprobante, c.ncf,
              c.total_compra, c.monto_impuesto, c.forma_pago, c.estado
       FROM compras_table c
@@ -321,9 +331,13 @@ class ReportesRepository {
         AND lower(c.estado) NOT IN ('borrador','anulada','anulado')
       ORDER BY c.fecha_emision DESC
       ''',
-      variables: [Variable.withString(ds), Variable.withString(hs)],
-      readsFrom: {_db.comprasTable},
-    ).get();
+          variables: [
+            Variable.withDateTime(desde),
+            Variable.withDateTime(hasta),
+          ],
+          readsFrom: {_db.comprasTable},
+        )
+        .get();
 
     double total = 0, itbis = 0;
     final registros = <Map<String, dynamic>>[];
@@ -354,7 +368,10 @@ class ReportesRepository {
     };
   }
 
-  Future<Map<String, dynamic>> reporteUtilidades(DateTime desde, DateTime hasta) async {
+  Future<Map<String, dynamic>> reporteUtilidades(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
     final actual = await _agregado(desde, hasta);
     final gastos = await _sumGastos(desde, hasta);
     final top = await _topProductos(desde, hasta, 20);
@@ -372,12 +389,14 @@ class ReportesRepository {
       'margenPct': actual.$1 <= 0 ? 0.0 : (gananciaBruta / actual.$1) * 100,
       'margenNetoPct': actual.$1 <= 0 ? 0.0 : (gananciaNeta / actual.$1) * 100,
       'registros': [
-        ...top.map((p) => {
-              'nombre': p.nombre,
-              'cantidad': p.cantidad,
-              'monto': p.monto,
-              'tipo': 'producto',
-            }),
+        ...top.map(
+          (p) => {
+            'nombre': p.nombre,
+            'cantidad': p.cantidad,
+            'monto': p.monto,
+            'tipo': 'producto',
+          },
+        ),
         ...listaGastos,
       ],
       'columnas': ['Concepto', 'Cant./Cat.', 'Monto'],
@@ -389,8 +408,9 @@ class ReportesRepository {
     DateTime hasta,
   ) async {
     try {
-      final rows = await _db.customSelect(
-        '''
+      final rows = await _db
+          .customSelect(
+            '''
         SELECT categoria,
                COUNT(*) AS cant,
                COALESCE(SUM(monto), 0.0) AS monto
@@ -399,12 +419,13 @@ class ReportesRepository {
         GROUP BY categoria
         ORDER BY monto DESC
         ''',
-        variables: [
-          Variable.withString(desde.toIso8601String()),
-          Variable.withString(hasta.toIso8601String()),
-        ],
-        readsFrom: {_db.gastosTable},
-      ).get();
+            variables: [
+              Variable.withDateTime(desde),
+              Variable.withDateTime(hasta),
+            ],
+            readsFrom: {_db.gastosTable},
+          )
+          .get();
       return rows
           .map(
             (r) => {
@@ -420,7 +441,10 @@ class ReportesRepository {
     }
   }
 
-  Future<Map<String, dynamic>> reporteProductos(DateTime desde, DateTime hasta) async {
+  Future<Map<String, dynamic>> reporteProductos(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
     final top = await _topProductos(desde, hasta, 50);
     double total = 0;
     for (final p in top) {
@@ -431,21 +455,25 @@ class ReportesRepository {
       'total': total,
       'cantidad': top.length,
       'registros': top
-          .map((p) => {
-                'nombre': p.nombre,
-                'cantidad': p.cantidad,
-                'monto': p.monto,
-              })
+          .map(
+            (p) => {
+              'nombre': p.nombre,
+              'cantidad': p.cantidad,
+              'monto': p.monto,
+            },
+          )
           .toList(),
       'columnas': ['Producto', 'Cant. vendida', 'Monto'],
     };
   }
 
-  Future<Map<String, dynamic>> reporteClientes(DateTime desde, DateTime hasta) async {
-    final ds = desde.toIso8601String();
-    final hs = hasta.toIso8601String();
-    final rows = await _db.customSelect(
-      '''
+  Future<Map<String, dynamic>> reporteClientes(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
+    final rows = await _db
+        .customSelect(
+          '''
       SELECT COALESCE(v.nombre_cliente, 'Consumidor Final') AS cliente,
              COUNT(*) AS facturas,
              COALESCE(SUM(v.monto_total), 0.0) AS total
@@ -456,9 +484,13 @@ class ReportesRepository {
       ORDER BY total DESC
       LIMIT 100
       ''',
-      variables: [Variable.withString(ds), Variable.withString(hs)],
-      readsFrom: {_db.ventasTable},
-    ).get();
+          variables: [
+            Variable.withDateTime(desde),
+            Variable.withDateTime(hasta),
+          ],
+          readsFrom: {_db.ventasTable},
+        )
+        .get();
 
     double total = 0;
     final registros = <Map<String, dynamic>>[];
@@ -480,11 +512,13 @@ class ReportesRepository {
     };
   }
 
-  Future<Map<String, dynamic>> reporteProveedores(DateTime desde, DateTime hasta) async {
-    final ds = desde.toIso8601String();
-    final hs = hasta.toIso8601String();
-    final rows = await _db.customSelect(
-      '''
+  Future<Map<String, dynamic>> reporteProveedores(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
+    final rows = await _db
+        .customSelect(
+          '''
       SELECT COALESCE(c.nombre_proveedor, 'Proveedor') AS proveedor,
              COUNT(*) AS compras,
              COALESCE(SUM(c.total_compra), 0.0) AS total
@@ -495,9 +529,13 @@ class ReportesRepository {
       ORDER BY total DESC
       LIMIT 100
       ''',
-      variables: [Variable.withString(ds), Variable.withString(hs)],
-      readsFrom: {_db.comprasTable},
-    ).get();
+          variables: [
+            Variable.withDateTime(desde),
+            Variable.withDateTime(hasta),
+          ],
+          readsFrom: {_db.comprasTable},
+        )
+        .get();
 
     double total = 0;
     final registros = <Map<String, dynamic>>[];
@@ -519,7 +557,10 @@ class ReportesRepository {
     };
   }
 
-  Future<Map<String, dynamic>> reporte607(DateTime desde, DateTime hasta) async {
+  Future<Map<String, dynamic>> reporte607(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
     final base = await reporteVentas(desde, hasta);
     return {
       ...base,
@@ -529,7 +570,10 @@ class ReportesRepository {
     };
   }
 
-  Future<Map<String, dynamic>> reporte606(DateTime desde, DateTime hasta) async {
+  Future<Map<String, dynamic>> reporte606(
+    DateTime desde,
+    DateTime hasta,
+  ) async {
     final base = await reporteCompras(desde, hasta);
     return {
       ...base,
@@ -554,14 +598,13 @@ class ReportesRepository {
       '606' => reporte606(desde, hasta),
       '607' => reporte607(desde, hasta),
       _ => {
-          'titulo': tipo,
-          'total': 0.0,
-          'cantidad': 0,
-          'registros': <Map<String, dynamic>>[],
-          'columnas': <String>[],
-          'error': 'Tipo de reporte no soportado',
-        },
+        'titulo': tipo,
+        'total': 0.0,
+        'cantidad': 0,
+        'registros': <Map<String, dynamic>>[],
+        'columnas': <String>[],
+        'error': 'Tipo de reporte no soportado',
+      },
     };
   }
-
 }

@@ -517,87 +517,97 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     ? CrossAxisAlignment.stretch
                     : CrossAxisAlignment.start,
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: mobile ? double.infinity : 640,
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(
-                          mobile ? 20 : 28,
-                          mobile ? 22 : 28,
-                          mobile ? 20 : 28,
-                          mobile ? 22 : 28,
+                  if (mobile)
+                    const AppDashboardHero(
+                      title: 'Caja',
+                      subtitle:
+                          'Apertura, cobros, arqueo y movimientos del turno.',
+                      icon: Icons.point_of_sale_rounded,
+                    )
+                  else
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: mobile ? double.infinity : 640,
                         ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              AppColors.primaryDark,
-                              AppColors.primary,
-                              AppColors.primaryLight.withValues(alpha: 0.95),
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(
+                            mobile ? 20 : 28,
+                            mobile ? 22 : 28,
+                            mobile ? 20 : 28,
+                            mobile ? 22 : 28,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            gradient: LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [
+                                AppColors.primaryDark,
+                                AppColors.primary,
+                                AppColors.primaryLight.withValues(alpha: 0.95),
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.28,
+                                ),
+                                blurRadius: 24,
+                                offset: const Offset(0, 10),
+                              ),
                             ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.28),
-                              blurRadius: 24,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: mobile ? 56 : 64,
-                              height: mobile ? 56 : 64,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.95),
-                                borderRadius: BorderRadius.circular(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: mobile ? 56 : 64,
+                                height: mobile ? 56 : 64,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Icon(
+                                  Icons.point_of_sale_rounded,
+                                  color: AppColors.primary,
+                                  size: mobile ? 30 : 34,
+                                ),
                               ),
-                              child: Icon(
-                                Icons.point_of_sale_rounded,
-                                color: AppColors.primary,
-                                size: mobile ? 30 : 34,
-                              ),
-                            ),
-                            const SizedBox(width: 18),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Estación de caja',
-                                    style:
-                                        (mobile
-                                                ? AppTypography.h4
-                                                : AppTypography.h3)
-                                            .copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Apertura, cobros, arqueo y movimientos del turno.',
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.9,
-                                      ),
-                                      height: 1.3,
+                              const SizedBox(width: 18),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Estación de caja',
+                                      style:
+                                          (mobile
+                                                  ? AppTypography.h4
+                                                  : AppTypography.h3)
+                                              .copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w800,
+                                              ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Apertura, cobros, arqueo y movimientos del turno.',
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   const SizedBox(height: 20),
                   if (mobile) ...[
                     _buildEstadoTurno(mobile, abierta),
@@ -609,7 +619,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     const SizedBox(height: 12),
                     AppAccessGrid(
                       minTileWidth: 200,
-                      maxColumns: 1,
+                      maxColumns: 2,
+                      mobileColumns: 2,
                       spacing: 16,
                       runSpacing: 16,
                       tileHeight: 200,

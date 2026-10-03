@@ -23,7 +23,7 @@ class DashboardComprasPage extends ConsumerWidget {
 
     final desktop = !isMobile;
     return AppScaffold(
-      title: 'Compras',
+      title: 'COMPRAS',
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
@@ -43,12 +43,20 @@ class DashboardComprasPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const AppHubHero(
-                    title: 'Centro de compras',
-                    subtitle:
-                        'Registra compras, revisa actividad y controla cuentas por pagar.',
-                    icon: Icons.shopping_cart_checkout_rounded,
-                  ),
+                  if (isMobile)
+                    const AppDashboardHero(
+                      title: 'Compras',
+                      subtitle:
+                          'Registra compras y controla cuentas por pagar.',
+                      icon: Icons.shopping_cart_checkout_rounded,
+                    )
+                  else
+                    const AppHubHero(
+                      title: 'Centro de compras',
+                      subtitle:
+                          'Registra compras, revisa actividad y controla cuentas por pagar.',
+                      icon: Icons.shopping_cart_checkout_rounded,
+                    ),
                   const SizedBox(height: 20),
                   kpisAsync.when(
                     data: (kpis) => _KpisGrid(
@@ -119,39 +127,38 @@ class DashboardComprasPage extends ConsumerWidget {
                       ],
                     )
                   else ...[
-                    Row(
+                    AppAccessGrid(
+                      minTileWidth: 150,
+                      maxColumns: 2,
+                      mobileColumns: 2,
+                      spacing: 12,
+                      runSpacing: 12,
                       children: [
-                        Expanded(
-                          child: AppAccessTile(
-                            icon: Icons.add_shopping_cart_rounded,
-                            title: 'Registrar compra',
-                            subtitle: 'Nueva compra',
-                            color: AppColors.primary,
-                            onTap: () => context.push('/compras/registrar'),
-                          ),
+                        AppHubCard(
+                          icon: Icons.add_shopping_cart_rounded,
+                          title: 'Registrar compra',
+                          subtitle: 'Nueva compra',
+                          color: AppColors.primary,
+                          onTap: () => context.push('/compras/registrar'),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: AppAccessTile(
-                            icon: Icons.list_alt_rounded,
-                            title: 'Lista de compras',
-                            subtitle: 'Historial',
-                            color: AppColors.info,
-                            onTap: () => context.push('/compras/lista'),
-                          ),
+                        AppHubCard(
+                          icon: Icons.list_alt_rounded,
+                          title: 'Lista de compras',
+                          subtitle: 'Historial',
+                          color: AppColors.info,
+                          onTap: () => context.push('/compras/lista'),
+                        ),
+                        AppHubCard(
+                          icon: Icons.account_balance_wallet_outlined,
+                          title: 'Cuentas por pagar',
+                          subtitle: alertas > 0
+                              ? '$alertas alerta(s)'
+                              : 'Saldos a proveedores',
+                          color: AppColors.warning,
+                          onTap: () =>
+                              context.goNamed(ListaCuentasPagarPage.routeName),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 12),
-                    AppAccessTile(
-                      icon: Icons.account_balance_wallet_outlined,
-                      title: 'Cuentas por pagar',
-                      subtitle: alertas > 0
-                          ? '$alertas alerta(s)'
-                          : 'Saldos a proveedores',
-                      color: AppColors.warning,
-                      onTap: () =>
-                          context.goNamed(ListaCuentasPagarPage.routeName),
                     ),
                   ],
                   const SizedBox(height: 28),
@@ -405,15 +412,11 @@ class _KpisGrid extends StatelessWidget {
     ];
 
     if (isMobile) {
-      return Column(
-        children: cards
-            .map(
-              (c) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _KpiCard(data: c),
-              ),
-            )
-            .toList(),
+      return AppAccessGrid(
+        mobileColumns: 2,
+        spacing: 12,
+        runSpacing: 12,
+        children: cards.map((card) => _KpiCard(data: card)).toList(),
       );
     }
 
@@ -455,6 +458,7 @@ class _KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = AppBreakpoints.isMobile(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -495,7 +499,7 @@ class _KpiCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             data.valor,
-            style: AppTypography.h3.copyWith(
+            style: (isMobile ? AppTypography.h4 : AppTypography.h3).copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),

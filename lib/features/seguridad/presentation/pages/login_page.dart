@@ -4,17 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/fisco_aurora_background.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
-
   static const routeName = 'login';
-
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
 }
@@ -46,7 +44,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _entrar() async {
+Future<void> _entrar() async {
     setState(() {
       _cargando = true;
       _error = null;
@@ -86,99 +84,165 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary.withValues(alpha: 0.12),
-              AppColors.grey50,
-            ],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Container(
-                padding: const EdgeInsets.all(28),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.grey900.withValues(alpha: 0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
+      backgroundColor: const Color(0xFF070B12),
+      body: FiscoAuroraBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    brightness: Brightness.dark,
+                    textTheme: Theme.of(context).textTheme.apply(
+                      bodyColor: Colors.white,
+                      displayColor: Colors.white,
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'FiscoGest RD',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.h3.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                    inputDecorationTheme: InputDecorationTheme(
+                      filled: true,
+                      fillColor: Colors.white.withValues(alpha: 0.06),
+                      labelStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                      hintStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.35),
+                      ),
+                      prefixIconColor: Colors.white.withValues(alpha: 0.65),
+                      suffixIconColor: Colors.white.withValues(alpha: 0.65),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.18),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF2DD4BF)),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Iniciar sesión',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
+                  ),
+                  child: Container(
+                  padding: const EdgeInsets.fromLTRB(28, 32, 28, 24),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.12),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.12),
+                        Colors.white.withValues(alpha: 0.05),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        blurRadius: 40,
+                        offset: const Offset(0, 18),
                       ),
-                    ),
-                    const SizedBox(height: 28),
-                    AppTextField(
-                      controller: _userCtrl,
-                      label: 'Usuario',
-                      hint: 'admin',
-                      prefixIcon: Icons.person_outline,
-                    ),
-                    const SizedBox(height: 14),
-                    AppTextField(
-                      controller: _passCtrl,
-                      label: 'Contraseña',
-                      hint: 'admin',
-                      obscureText: _ocultar,
-                      prefixIcon: Icons.lock_outline,
-                    ),
-                    TextButton(
-                      onPressed: () => setState(() => _ocultar = !_ocultar),
-                      child: Text(_ocultar ? 'Mostrar contraseña' : 'Ocultar'),
-                    ),
-
-                    TextButton(
-                      onPressed: () => context.push('/recuperar-clave'),
-                      child: const Text('¿Olvidaste tu contraseña?'),
-                    ),
-                    if (_error != null) ...[
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'FiscoGest',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.h3.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white.withValues(alpha: 0.96),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Tu negocio, en orden',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: const Color(0xFF5EEAD4).withValues(alpha: 0.9),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       Text(
-                        _error!,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.error,
+                        'Iniciar sesión',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Colors.white.withValues(alpha: 0.55),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      AppTextField(
+                        controller: _userCtrl,
+                        label: 'Usuario',
+                        hint: 'admin',
+                        prefixIcon: Icons.person_outline,
+                      ),
+                      const SizedBox(height: 14),
+                      AppTextField(
+                        controller: _passCtrl,
+                        label: 'Contraseña',
+                        hint: '••••••••',
+                        prefixIcon: Icons.lock_outline,
+                        suffixIcon: _ocultar
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        obscureText: _ocultar,
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () => setState(() => _ocultar = !_ocultar),
+                          child: Text(
+                            _ocultar ? 'Mostrar' : 'Ocultar',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 14),
+                        Text(
+                          _error!,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: const Color(0xFFF87171),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 22),
+                      AppButton(
+                        text: _cargando ? 'Entrando…' : 'Entrar',
+                        onPressed: _cargando ? null : _entrar,
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () => context.push('/recuperar-clave'),
+                        child: Text(
+                          '¿Olvidaste tu clave?',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.65),
+                          ),
                         ),
                       ),
                     ],
-                    const SizedBox(height: 16),
-                    AppButton(
-                      text: 'Entrar',
-                      onPressed: _cargando ? null : _entrar,
-                      isLoading: _cargando,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                  ),
                 ),
+                ), // Theme
               ),
             ),
           ),
