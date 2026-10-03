@@ -40,6 +40,9 @@ class EcfeRepository {
       codigoRespuesta: r.codigoRespuesta,
       mensajeDgii: r.mensajeDgii,
       ultimoError: r.ultimoError,
+      codigoSeguridad: r.codigoSeguridad,
+      encfReferencia: r.encfReferencia,
+      motivoAnulacion: r.motivoAnulacion,
       creadoEn: r.creadoEn,
       actualizadoEn: r.actualizadoEn,
     );
@@ -96,11 +99,17 @@ class EcfeRepository {
     }
   }
 
-  Future<List<EcfeDocumento>> listarDocumentos({int limit = 100}) async {
-    final rows = await (_db.select(_db.ecfeDocumentosTable)
-          ..orderBy([(t) => OrderingTerm.desc(t.id)])
-          ..limit(limit))
-        .get();
+  Future<List<EcfeDocumento>> listarDocumentos({
+    int limit = 200,
+    List<String>? estados,
+  }) async {
+    final q = _db.select(_db.ecfeDocumentosTable)
+      ..orderBy([(t) => OrderingTerm.desc(t.id)])
+      ..limit(limit);
+    if (estados != null && estados.isNotEmpty) {
+      q.where((t) => t.estado.isIn(estados));
+    }
+    final rows = await q.get();
     return rows.map(_mapDoc).toList();
   }
 
@@ -125,13 +134,15 @@ class EcfeRepository {
     required EstadoEcfInterno estado,
     String? ncfLocal,
     String? ultimoError,
+    String? encfReferencia,
   }) async {
     final now = DateTime.now();
     return _db.into(_db.ecfeDocumentosTable).insert(
           EcfeDocumentosTableCompanion.insert(
             ventaId: Value(ventaId),
             tipoEcf: tipoEcf.codigo,
-            encf: Value(ncfLocal), // placeholder hasta e-NCF real
+            encf: const Value(null), // e-NCF se asigna al generar XML
+            encfReferencia: Value(encfReferencia),
             estado: Value(estado.name),
             ultimoError: Value(ultimoError),
             creadoEn: now,
@@ -227,6 +238,7 @@ class EcfeRepository {
     required String xmlFirmado,
     required EstadoEcfInterno estado,
     String? ultimoError,
+    String? codigoSeguridad,
   }) async {
     await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
         .write(
@@ -234,6 +246,9 @@ class EcfeRepository {
         xmlFirmado: Value(xmlFirmado),
         estado: Value(estado.name),
         ultimoError: Value(ultimoError),
+        codigoSeguridad: codigoSeguridad != null
+            ? Value(codigoSeguridad)
+            : const Value.absent(),
         actualizadoEn: Value(DateTime.now()),
       ),
     );
@@ -408,6 +423,50 @@ class EcfeRepository {
         .write(
       EcfeSpecVersionTableCompanion(
         checklistJson: Value(jsonEncode(items.map((e) => e.toJson()).toList())),
+      ),
+    );
+  }
+
+  Future<void> guardarCodigoSeguridad({
+    required int id,
+    required String codigoSeguridad,
+  }) async {
+    final c = codigoSeguridad.trim().toUpperCase();
+    if (c.isEmpty) return;
+    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
+        .write(
+      EcfeDocumentosTableCompanion(
+        codigoSeguridad: Value(c),
+        actualizadoEn: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> anularDocumento({
+    required int id,
+    required String motivo,
+  }) async {
+    final m = motivo.trim();
+    if (m.isEmpty) throw ArgumentError('Indica el motivo de anulación');
+    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
+        .write(
+      EcfeDocumentosTableCompanion(
+        estado: Value(EstadoEcfInterno.anulado.name),
+        motivoAnulacion: Value(m),
+        actualizadoEn: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> guardarEncfReferencia({
+    required int id,
+    required String encfReferencia,
+  }) async {
+    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
+        .write(
+      EcfeDocumentosTableCompanion(
+        encfReferencia: Value(encfReferencia.trim().toUpperCase()),
+        actualizadoEn: Value(DateTime.now()),
       ),
     );
   }

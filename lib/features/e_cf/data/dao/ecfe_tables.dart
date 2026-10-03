@@ -32,6 +32,11 @@ class EcfeDocumentosTable extends Table {
   TextColumn get ultimoError => text().nullable()();
   TextColumn get xmlSinFirma => text().nullable()();
   TextColumn get xmlFirmado => text().nullable()();
+  /// Código de seguridad RI (6 chars). Persistido al firmar / consulta DGII.
+  TextColumn get codigoSeguridad => text().nullable()();
+  /// e-NCF del comprobante modificado (NC/ND).
+  TextColumn get encfReferencia => text().nullable()();
+  TextColumn get motivoAnulacion => text().nullable()();
   DateTimeColumn get creadoEn => dateTime()();
   DateTimeColumn get actualizadoEn => dateTime().nullable()();
 }

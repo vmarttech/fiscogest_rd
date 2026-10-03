@@ -23,11 +23,13 @@ class RepresentacionImpresaPdf {
     required AmbienteDgii ambiente,
     String? xmlFirmado,
     String? trackId,
+    String? codigoSeguridad,
     ConfiguracionEntity? empresa,
   }) async {
-    final codigo = (xmlFirmado != null && xmlFirmado.isNotEmpty)
-        ? CodigoSeguridadEcf.desdeXmlFirmado(xmlFirmado)
-        : '------';
+    final codigo = CodigoSeguridadEcf.resolver(
+      codigoPersistido: codigoSeguridad,
+      xmlFirmado: xmlFirmado,
+    );
     final url = CodigoSeguridadEcf.urlConsulta(
       ambiente: ambiente,
       rncEmisor: rncEmisor,

@@ -13,6 +13,9 @@ class EcfeDocumento {
     this.codigoRespuesta,
     this.mensajeDgii,
     this.ultimoError,
+    this.codigoSeguridad,
+    this.encfReferencia,
+    this.motivoAnulacion,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -27,6 +30,10 @@ class EcfeDocumento {
   final String? codigoRespuesta;
   final String? mensajeDgii;
   final String? ultimoError;
+  /// Código de seguridad para RI/QR (oficial o derivado de firma).
+  final String? codigoSeguridad;
+  final String? encfReferencia;
+  final String? motivoAnulacion;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
 }

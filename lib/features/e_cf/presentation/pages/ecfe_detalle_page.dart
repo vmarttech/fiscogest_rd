@@ -1,3 +1,9 @@
+import 'package:fiscogest_rd/features/e_cf/domain/enums/tipo_ecf.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_documento.dart';
+import 'package:fiscogest_rd/features/e_cf/application/anular_ecfe.dart';
+import 'package:fiscogest_rd/features/e_cf/application/consultar_ecfe.dart';
+import 'package:fiscogest_rd/features/e_cf/application/enviar_ecfe.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,6 +61,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         ambiente: cfg.ambiente,
         xmlFirmado: xml,
         trackId: doc.trackId,
+        codigoSeguridad: doc.codigoSeguridad,
         empresa: empresa,
       );
     } catch (e) {
@@ -111,6 +118,8 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         nombreCliente: venta.nombreCliente ?? '',
         tasaItbis: empresa?.impuestoPorcentaje ?? 18.0,
         rutaXsd: ecfeCfg.xsdVersion.isEmpty ? null : ecfeCfg.xsdVersion,
+        exigirXsd: ecfeCfg.ambiente == AmbienteDgii.certificacion ||
+            ecfeCfg.ambiente == AmbienteDgii.produccion,
       );
 
       ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
@@ -148,32 +157,24 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   Future<void> _enviarDgii() async {
     setState(() => _generando = true);
     try {
-      final result = await ref.read(enviarEcfeProvider)(
-        documentoId: widget.documentoId,
-      );
+      final result = await EnviarEcfe(repo: ref.read(ecfeRepositoryProvider))
+          .call(documentoId: widget.documentoId);
       ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
       ref.invalidate(ecfeEventosProvider(widget.documentoId));
       ref.invalidate(ecfeColaProvider);
       if (!mounted) return;
-      FiscoGestNotifications.show(
-        SnackBar(
-          content: Text(
-            result.ok
-                ? 'Enviado a DGII · TrackId: ${result.trackId}'
-                : 'Error envío: ${result.errores.take(2).join('; ')}',
-          ),
-          backgroundColor:
-              result.ok ? AppColors.success : AppColors.error,
-        ),
-      );
+      if (result.ok) {
+        final msg = result.yaEnviado
+            ? 'Ya estaba enviado (TrackId ${result.trackId}). Consulta el estado.'
+            : 'Enviado a DGII · TrackId ${result.trackId}';
+        FiscoGestNotifications.show(SnackBar(content: Text(msg)));
+      } else {
+        FiscoGestNotifications.show(SnackBar(content: Text(result.errores.join(' · ')), backgroundColor: AppColors.error));
+      }
     } catch (e) {
-      if (!mounted) return;
-      FiscoGestNotifications.show(
-        SnackBar(
-          content: Text('Error envío: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      if (mounted) {
+        FiscoGestNotifications.show(SnackBar(content: Text('$e'), backgroundColor: AppColors.error));
+      }
     } finally {
       if (mounted) setState(() => _generando = false);
     }
@@ -182,32 +183,110 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   Future<void> _consultarEstado() async {
     setState(() => _generando = true);
     try {
-      final result = await ref.read(consultarEstadoEcfeProvider)(
+      final result = await ConsultarEcfe(repo: ref.read(ecfeRepositoryProvider))
+          .call(documentoId: widget.documentoId);
+      ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
+      ref.invalidate(ecfeEventosProvider(widget.documentoId));
+      ref.invalidate(ecfeColaProvider);
+      if (!mounted) return;
+      if (result.ok) {
+        final label = result.estado?.etiqueta ?? result.estadoDgii ?? 'OK';
+        final extra = result.mensaje != null ? ' · ${result.mensaje}' : '';
+        FiscoGestNotifications.show(SnackBar(content: Text('DGII: $label$extra')));
+      } else {
+        FiscoGestNotifications.show(SnackBar(content: Text(result.errores.join(' · ')), backgroundColor: AppColors.error));
+      }
+    } catch (e) {
+      if (mounted) {
+        FiscoGestNotifications.show(SnackBar(content: Text('$e'), backgroundColor: AppColors.error));
+      }
+    } finally {
+      if (mounted) setState(() => _generando = false);
+    }
+  }
+
+
+  Future<void> _editarEncfReferencia(EcfeDocumento doc) async {
+    final ctrl = TextEditingController(text: doc.encfReferencia ?? '');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('e-NCF de referencia (NC)'),
+        content: TextField(
+          controller: ctrl,
+          decoration: const InputDecoration(
+            labelText: 'e-NCF modificado (E31… / E32…)',
+            border: OutlineInputBorder(),
+            helperText: 'Obligatorio para nota de crédito electrónica (34)',
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Guardar')),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await ref.read(ecfeRepositoryProvider).guardarEncfReferencia(
+            id: widget.documentoId,
+            encfReferencia: ctrl.text,
+          );
+      ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
+      FiscoGestNotifications.show(
+        const SnackBar(content: Text('e-NCF de referencia guardado')),
+      );
+    } catch (e) {
+      FiscoGestNotifications.show(
+        SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
+      );
+    }
+  }
+
+  Future<void> _anularDocumento(EcfeDocumento doc) async {
+    final ctrl = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Anular documento e-CF'),
+        content: TextField(
+          controller: ctrl,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            labelText: 'Motivo',
+            border: OutlineInputBorder(),
+            helperText: 'Queda registrado en el historial del documento',
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Anular')),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _generando = true);
+    try {
+      final r = await AnularEcfe(repo: ref.read(ecfeRepositoryProvider)).call(
         documentoId: widget.documentoId,
+        motivo: ctrl.text,
       );
       ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
       ref.invalidate(ecfeEventosProvider(widget.documentoId));
       ref.invalidate(ecfeColaProvider);
       if (!mounted) return;
-      FiscoGestNotifications.show(
-        SnackBar(
-          content: Text(
-            result.ok
-                ? 'Estado DGII: ${result.estadoDgii ?? result.estadoInterno?.etiqueta ?? '—'}'
-                : 'Error consulta: ${result.errores.take(2).join('; ')}',
+      if (r.ok) {
+        FiscoGestNotifications.show(
+          const SnackBar(content: Text('Documento anulado')),
+        );
+      } else {
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text(r.errores.join(' · ')),
+            backgroundColor: AppColors.error,
           ),
-          backgroundColor:
-              result.ok ? AppColors.success : AppColors.error,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      FiscoGestNotifications.show(
-        SnackBar(
-          content: Text('Error consulta: $e'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+        );
+      }
     } finally {
       if (mounted) setState(() => _generando = false);
     }
@@ -269,6 +348,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                           doc.ventaId != null ? '#${doc.ventaId}' : '—',
                         ),
                         _row('TrackId', doc.trackId ?? '—'),
+                        _row('Cód. seguridad', doc.codigoSeguridad ?? '—'),
+                        if (doc.tipoEcf == TipoEcf.notaCredito)
+                          _row('e-NCF ref.', doc.encfReferencia ?? '—'),
+                        if (doc.estado == EstadoEcfInterno.anulado)
+                          _row('Motivo anulación', doc.motivoAnulacion ?? '—'),
                         if (doc.ultimoError != null &&
                             doc.ultimoError!.isNotEmpty)
                           _row('Error', doc.ultimoError!, error: true),
@@ -352,6 +436,21 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                         text: _generando ? 'Procesando…' : 'Imprimir RI (QR)',
                         onPressed: _generando ? null : _imprimirRi,
                       ),
+                      if (doc.tipoEcf == TipoEcf.notaCredito &&
+                          doc.estado != EstadoEcfInterno.anulado)
+                        AppButton(
+                          text: 'e-NCF de referencia (NC)',
+                          onPressed: _generando
+                              ? null
+                              : () => _editarEncfReferencia(doc),
+                        ),
+                      if (doc.estado != EstadoEcfInterno.anulado &&
+                          !doc.estado.esTerminalExito)
+                        AppButton(
+                          text: 'Anular e-CF (interno)',
+                          onPressed:
+                              _generando ? null : () => _anularDocumento(doc),
+                        ),
                     ],
 
                     const SizedBox(height: 16),

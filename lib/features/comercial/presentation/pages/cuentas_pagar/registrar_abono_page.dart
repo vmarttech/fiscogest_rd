@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_action_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -275,33 +276,30 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                       maxLines: 2,
                     ),
                     const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextButton(
-                            onPressed: _cargando ? null : () => context.pop(),
-                            child: const Text('Cancelar'),
-                          ),
+                    AppActionBar(
+                      actions: [
+                        TextButton(
+                          onPressed: _cargando ? null : () => context.pop(),
+                          child: const Text('Cancelar'),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 2,
-                          child: ElevatedButton(
-                            onPressed: _cargando ? null : _guardar,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                        ElevatedButton(
+                          onPressed: _cargando ? null : _guardar,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                              horizontal: 20,
                             ),
-                            child: _cargando
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
-                                : const Text(
-                                    'Registrar Abono',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
                           ),
+                          child: _cargando
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text(
+                                  'Registrar Abono',
+                                  style: TextStyle(fontSize: 16),
+                                ),
                         ),
                       ],
                     ),

@@ -340,110 +340,101 @@ class ListaComprasPage extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                icon: const Icon(
-                                  Icons.calendar_today,
-                                  size: 16,
-                                ),
-                                label: Text(
-                                  desde == null
-                                      ? 'Desde'
-                                      : _formatearFecha(desde!),
-                                ),
-                                onPressed: () async {
-                                  final picked = await showDatePicker(
-                                    context: ctx,
-                                    initialDate: desde ?? DateTime.now(),
-                                    firstDate: DateTime(2020),
-                                    lastDate: DateTime.now().add(
-                                      const Duration(days: 365),
-                                    ),
-                                  );
-                                  if (picked != null) {
-                                    setModalState(() => desde = picked);
-                                  }
-                                },
+                        AppActionBar(
+                          alignment: WrapAlignment.start,
+                          actions: [
+                            OutlinedButton.icon(
+                              icon: const Icon(
+                                Icons.calendar_today,
+                                size: 16,
                               ),
+                              label: Text(
+                                desde == null
+                                    ? 'Desde'
+                                    : _formatearFecha(desde!),
+                              ),
+                              onPressed: () async {
+                                final picked = await showDatePicker(
+                                  context: ctx,
+                                  initialDate: desde ?? DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime.now().add(
+                                    const Duration(days: 365),
+                                  ),
+                                );
+                                if (picked != null) {
+                                  setModalState(() => desde = picked);
+                                }
+                              },
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                icon: const Icon(
-                                  Icons.calendar_today,
-                                  size: 16,
-                                ),
-                                label: Text(
-                                  hasta == null
-                                      ? 'Hasta'
-                                      : _formatearFecha(hasta!),
-                                ),
-                                onPressed: () async {
-                                  final picked = await showDatePicker(
-                                    context: ctx,
-                                    initialDate: hasta ?? DateTime.now(),
-                                    firstDate: DateTime(2020),
-                                    lastDate: DateTime.now().add(
-                                      const Duration(days: 365),
-                                    ),
-                                  );
-                                  if (picked != null) {
-                                    setModalState(() => hasta = picked);
-                                  }
-                                },
+                            OutlinedButton.icon(
+                              icon: const Icon(
+                                Icons.calendar_today,
+                                size: 16,
                               ),
+                              label: Text(
+                                hasta == null
+                                    ? 'Hasta'
+                                    : _formatearFecha(hasta!),
+                              ),
+                              onPressed: () async {
+                                final picked = await showDatePicker(
+                                  context: ctx,
+                                  initialDate: hasta ?? DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime.now().add(
+                                    const Duration(days: 365),
+                                  ),
+                                );
+                                if (picked != null) {
+                                  setModalState(() => hasta = picked);
+                                }
+                              },
                             ),
                           ],
                         ),
                         const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  ref
-                                          .read(
-                                            _filtrosComprasProvider.notifier,
-                                          )
-                                          .state =
-                                      const _FiltrosCompras();
-                                  Navigator.pop(ctx);
-                                },
-                                child: const Text('Limpiar'),
-                              ),
+                        AppActionBar(
+                          actions: [
+                            OutlinedButton(
+                              onPressed: () {
+                                ref
+                                        .read(
+                                          _filtrosComprasProvider.notifier,
+                                        )
+                                        .state =
+                                    const _FiltrosCompras();
+                                Navigator.pop(ctx);
+                              },
+                              child: const Text('Limpiar'),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: AppColors.white,
-                                ),
-                                onPressed: () {
-                                  final min = double.tryParse(
-                                    montoMinCtrl.text.trim(),
-                                  );
-                                  final max = double.tryParse(
-                                    montoMaxCtrl.text.trim(),
-                                  );
-                                  ref
-                                      .read(_filtrosComprasProvider.notifier)
-                                      .state = _FiltrosCompras(
-                                    textoBusqueda: textoCtrl.text.trim(),
-                                    soloCredito: creditoSel,
-                                    estado: estadoSel,
-                                    tipoComprobante: tipoSel,
-                                    montoMin: min,
-                                    montoMax: max,
-                                    fechaDesde: desde,
-                                    fechaHasta: hasta,
-                                  );
-                                  Navigator.pop(ctx);
-                                },
-                                child: const Text('Aplicar'),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.white,
                               ),
+                              onPressed: () {
+                                final min = double.tryParse(
+                                  montoMinCtrl.text.trim(),
+                                );
+                                final max = double.tryParse(
+                                  montoMaxCtrl.text.trim(),
+                                );
+                                ref
+                                    .read(_filtrosComprasProvider.notifier)
+                                    .state = _FiltrosCompras(
+                                  textoBusqueda: textoCtrl.text.trim(),
+                                  soloCredito: creditoSel,
+                                  estado: estadoSel,
+                                  tipoComprobante: tipoSel,
+                                  montoMin: min,
+                                  montoMax: max,
+                                  fechaDesde: desde,
+                                  fechaHasta: hasta,
+                                );
+                                Navigator.pop(ctx);
+                              },
+                              child: const Text('Aplicar'),
                             ),
                           ],
                         ),

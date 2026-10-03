@@ -27195,6 +27195,39 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _codigoSeguridadMeta = const VerificationMeta(
+    'codigoSeguridad',
+  );
+  @override
+  late final GeneratedColumn<String> codigoSeguridad = GeneratedColumn<String>(
+    'codigo_seguridad',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _encfReferenciaMeta = const VerificationMeta(
+    'encfReferencia',
+  );
+  @override
+  late final GeneratedColumn<String> encfReferencia = GeneratedColumn<String>(
+    'encf_referencia',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _motivoAnulacionMeta = const VerificationMeta(
+    'motivoAnulacion',
+  );
+  @override
+  late final GeneratedColumn<String> motivoAnulacion = GeneratedColumn<String>(
+    'motivo_anulacion',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _creadoEnMeta = const VerificationMeta(
     'creadoEn',
   );
@@ -27231,6 +27264,9 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
     ultimoError,
     xmlSinFirma,
     xmlFirmado,
+    codigoSeguridad,
+    encfReferencia,
+    motivoAnulacion,
     creadoEn,
     actualizadoEn,
   ];
@@ -27323,6 +27359,33 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
         xmlFirmado.isAcceptableOrUnknown(data['xml_firmado']!, _xmlFirmadoMeta),
       );
     }
+    if (data.containsKey('codigo_seguridad')) {
+      context.handle(
+        _codigoSeguridadMeta,
+        codigoSeguridad.isAcceptableOrUnknown(
+          data['codigo_seguridad']!,
+          _codigoSeguridadMeta,
+        ),
+      );
+    }
+    if (data.containsKey('encf_referencia')) {
+      context.handle(
+        _encfReferenciaMeta,
+        encfReferencia.isAcceptableOrUnknown(
+          data['encf_referencia']!,
+          _encfReferenciaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('motivo_anulacion')) {
+      context.handle(
+        _motivoAnulacionMeta,
+        motivoAnulacion.isAcceptableOrUnknown(
+          data['motivo_anulacion']!,
+          _motivoAnulacionMeta,
+        ),
+      );
+    }
     if (data.containsKey('creado_en')) {
       context.handle(
         _creadoEnMeta,
@@ -27396,6 +27459,18 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
         DriftSqlType.string,
         data['${effectivePrefix}xml_firmado'],
       ),
+      codigoSeguridad: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo_seguridad'],
+      ),
+      encfReferencia: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}encf_referencia'],
+      ),
+      motivoAnulacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}motivo_anulacion'],
+      ),
       creadoEn: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}creado_en'],
@@ -27428,6 +27503,13 @@ class EcfeDocumentosTableData extends DataClass
   final String? ultimoError;
   final String? xmlSinFirma;
   final String? xmlFirmado;
+
+  /// Código de seguridad RI (6 chars). Persistido al firmar / consulta DGII.
+  final String? codigoSeguridad;
+
+  /// e-NCF del comprobante modificado (NC/ND).
+  final String? encfReferencia;
+  final String? motivoAnulacion;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
   const EcfeDocumentosTableData({
@@ -27442,6 +27524,9 @@ class EcfeDocumentosTableData extends DataClass
     this.ultimoError,
     this.xmlSinFirma,
     this.xmlFirmado,
+    this.codigoSeguridad,
+    this.encfReferencia,
+    this.motivoAnulacion,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -27474,6 +27559,15 @@ class EcfeDocumentosTableData extends DataClass
     }
     if (!nullToAbsent || xmlFirmado != null) {
       map['xml_firmado'] = Variable<String>(xmlFirmado);
+    }
+    if (!nullToAbsent || codigoSeguridad != null) {
+      map['codigo_seguridad'] = Variable<String>(codigoSeguridad);
+    }
+    if (!nullToAbsent || encfReferencia != null) {
+      map['encf_referencia'] = Variable<String>(encfReferencia);
+    }
+    if (!nullToAbsent || motivoAnulacion != null) {
+      map['motivo_anulacion'] = Variable<String>(motivoAnulacion);
     }
     map['creado_en'] = Variable<DateTime>(creadoEn);
     if (!nullToAbsent || actualizadoEn != null) {
@@ -27509,6 +27603,15 @@ class EcfeDocumentosTableData extends DataClass
       xmlFirmado: xmlFirmado == null && nullToAbsent
           ? const Value.absent()
           : Value(xmlFirmado),
+      codigoSeguridad: codigoSeguridad == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codigoSeguridad),
+      encfReferencia: encfReferencia == null && nullToAbsent
+          ? const Value.absent()
+          : Value(encfReferencia),
+      motivoAnulacion: motivoAnulacion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(motivoAnulacion),
       creadoEn: Value(creadoEn),
       actualizadoEn: actualizadoEn == null && nullToAbsent
           ? const Value.absent()
@@ -27533,6 +27636,9 @@ class EcfeDocumentosTableData extends DataClass
       ultimoError: serializer.fromJson<String?>(json['ultimoError']),
       xmlSinFirma: serializer.fromJson<String?>(json['xmlSinFirma']),
       xmlFirmado: serializer.fromJson<String?>(json['xmlFirmado']),
+      codigoSeguridad: serializer.fromJson<String?>(json['codigoSeguridad']),
+      encfReferencia: serializer.fromJson<String?>(json['encfReferencia']),
+      motivoAnulacion: serializer.fromJson<String?>(json['motivoAnulacion']),
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
     );
@@ -27552,6 +27658,9 @@ class EcfeDocumentosTableData extends DataClass
       'ultimoError': serializer.toJson<String?>(ultimoError),
       'xmlSinFirma': serializer.toJson<String?>(xmlSinFirma),
       'xmlFirmado': serializer.toJson<String?>(xmlFirmado),
+      'codigoSeguridad': serializer.toJson<String?>(codigoSeguridad),
+      'encfReferencia': serializer.toJson<String?>(encfReferencia),
+      'motivoAnulacion': serializer.toJson<String?>(motivoAnulacion),
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
     };
@@ -27569,6 +27678,9 @@ class EcfeDocumentosTableData extends DataClass
     Value<String?> ultimoError = const Value.absent(),
     Value<String?> xmlSinFirma = const Value.absent(),
     Value<String?> xmlFirmado = const Value.absent(),
+    Value<String?> codigoSeguridad = const Value.absent(),
+    Value<String?> encfReferencia = const Value.absent(),
+    Value<String?> motivoAnulacion = const Value.absent(),
     DateTime? creadoEn,
     Value<DateTime?> actualizadoEn = const Value.absent(),
   }) => EcfeDocumentosTableData(
@@ -27585,6 +27697,15 @@ class EcfeDocumentosTableData extends DataClass
     ultimoError: ultimoError.present ? ultimoError.value : this.ultimoError,
     xmlSinFirma: xmlSinFirma.present ? xmlSinFirma.value : this.xmlSinFirma,
     xmlFirmado: xmlFirmado.present ? xmlFirmado.value : this.xmlFirmado,
+    codigoSeguridad: codigoSeguridad.present
+        ? codigoSeguridad.value
+        : this.codigoSeguridad,
+    encfReferencia: encfReferencia.present
+        ? encfReferencia.value
+        : this.encfReferencia,
+    motivoAnulacion: motivoAnulacion.present
+        ? motivoAnulacion.value
+        : this.motivoAnulacion,
     creadoEn: creadoEn ?? this.creadoEn,
     actualizadoEn: actualizadoEn.present
         ? actualizadoEn.value
@@ -27613,6 +27734,15 @@ class EcfeDocumentosTableData extends DataClass
       xmlFirmado: data.xmlFirmado.present
           ? data.xmlFirmado.value
           : this.xmlFirmado,
+      codigoSeguridad: data.codigoSeguridad.present
+          ? data.codigoSeguridad.value
+          : this.codigoSeguridad,
+      encfReferencia: data.encfReferencia.present
+          ? data.encfReferencia.value
+          : this.encfReferencia,
+      motivoAnulacion: data.motivoAnulacion.present
+          ? data.motivoAnulacion.value
+          : this.motivoAnulacion,
       creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
       actualizadoEn: data.actualizadoEn.present
           ? data.actualizadoEn.value
@@ -27634,6 +27764,9 @@ class EcfeDocumentosTableData extends DataClass
           ..write('ultimoError: $ultimoError, ')
           ..write('xmlSinFirma: $xmlSinFirma, ')
           ..write('xmlFirmado: $xmlFirmado, ')
+          ..write('codigoSeguridad: $codigoSeguridad, ')
+          ..write('encfReferencia: $encfReferencia, ')
+          ..write('motivoAnulacion: $motivoAnulacion, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -27653,6 +27786,9 @@ class EcfeDocumentosTableData extends DataClass
     ultimoError,
     xmlSinFirma,
     xmlFirmado,
+    codigoSeguridad,
+    encfReferencia,
+    motivoAnulacion,
     creadoEn,
     actualizadoEn,
   );
@@ -27671,6 +27807,9 @@ class EcfeDocumentosTableData extends DataClass
           other.ultimoError == this.ultimoError &&
           other.xmlSinFirma == this.xmlSinFirma &&
           other.xmlFirmado == this.xmlFirmado &&
+          other.codigoSeguridad == this.codigoSeguridad &&
+          other.encfReferencia == this.encfReferencia &&
+          other.motivoAnulacion == this.motivoAnulacion &&
           other.creadoEn == this.creadoEn &&
           other.actualizadoEn == this.actualizadoEn);
 }
@@ -27688,6 +27827,9 @@ class EcfeDocumentosTableCompanion
   final Value<String?> ultimoError;
   final Value<String?> xmlSinFirma;
   final Value<String?> xmlFirmado;
+  final Value<String?> codigoSeguridad;
+  final Value<String?> encfReferencia;
+  final Value<String?> motivoAnulacion;
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
   const EcfeDocumentosTableCompanion({
@@ -27702,6 +27844,9 @@ class EcfeDocumentosTableCompanion
     this.ultimoError = const Value.absent(),
     this.xmlSinFirma = const Value.absent(),
     this.xmlFirmado = const Value.absent(),
+    this.codigoSeguridad = const Value.absent(),
+    this.encfReferencia = const Value.absent(),
+    this.motivoAnulacion = const Value.absent(),
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
   });
@@ -27717,6 +27862,9 @@ class EcfeDocumentosTableCompanion
     this.ultimoError = const Value.absent(),
     this.xmlSinFirma = const Value.absent(),
     this.xmlFirmado = const Value.absent(),
+    this.codigoSeguridad = const Value.absent(),
+    this.encfReferencia = const Value.absent(),
+    this.motivoAnulacion = const Value.absent(),
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
   }) : tipoEcf = Value(tipoEcf),
@@ -27733,6 +27881,9 @@ class EcfeDocumentosTableCompanion
     Expression<String>? ultimoError,
     Expression<String>? xmlSinFirma,
     Expression<String>? xmlFirmado,
+    Expression<String>? codigoSeguridad,
+    Expression<String>? encfReferencia,
+    Expression<String>? motivoAnulacion,
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
   }) {
@@ -27748,6 +27899,9 @@ class EcfeDocumentosTableCompanion
       if (ultimoError != null) 'ultimo_error': ultimoError,
       if (xmlSinFirma != null) 'xml_sin_firma': xmlSinFirma,
       if (xmlFirmado != null) 'xml_firmado': xmlFirmado,
+      if (codigoSeguridad != null) 'codigo_seguridad': codigoSeguridad,
+      if (encfReferencia != null) 'encf_referencia': encfReferencia,
+      if (motivoAnulacion != null) 'motivo_anulacion': motivoAnulacion,
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
     });
@@ -27765,6 +27919,9 @@ class EcfeDocumentosTableCompanion
     Value<String?>? ultimoError,
     Value<String?>? xmlSinFirma,
     Value<String?>? xmlFirmado,
+    Value<String?>? codigoSeguridad,
+    Value<String?>? encfReferencia,
+    Value<String?>? motivoAnulacion,
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
   }) {
@@ -27780,6 +27937,9 @@ class EcfeDocumentosTableCompanion
       ultimoError: ultimoError ?? this.ultimoError,
       xmlSinFirma: xmlSinFirma ?? this.xmlSinFirma,
       xmlFirmado: xmlFirmado ?? this.xmlFirmado,
+      codigoSeguridad: codigoSeguridad ?? this.codigoSeguridad,
+      encfReferencia: encfReferencia ?? this.encfReferencia,
+      motivoAnulacion: motivoAnulacion ?? this.motivoAnulacion,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
     );
@@ -27821,6 +27981,15 @@ class EcfeDocumentosTableCompanion
     if (xmlFirmado.present) {
       map['xml_firmado'] = Variable<String>(xmlFirmado.value);
     }
+    if (codigoSeguridad.present) {
+      map['codigo_seguridad'] = Variable<String>(codigoSeguridad.value);
+    }
+    if (encfReferencia.present) {
+      map['encf_referencia'] = Variable<String>(encfReferencia.value);
+    }
+    if (motivoAnulacion.present) {
+      map['motivo_anulacion'] = Variable<String>(motivoAnulacion.value);
+    }
     if (creadoEn.present) {
       map['creado_en'] = Variable<DateTime>(creadoEn.value);
     }
@@ -27844,6 +28013,9 @@ class EcfeDocumentosTableCompanion
           ..write('ultimoError: $ultimoError, ')
           ..write('xmlSinFirma: $xmlSinFirma, ')
           ..write('xmlFirmado: $xmlFirmado, ')
+          ..write('codigoSeguridad: $codigoSeguridad, ')
+          ..write('encfReferencia: $encfReferencia, ')
+          ..write('motivoAnulacion: $motivoAnulacion, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -49981,6 +50153,9 @@ typedef $$EcfeDocumentosTableTableCreateCompanionBuilder =
       Value<String?> ultimoError,
       Value<String?> xmlSinFirma,
       Value<String?> xmlFirmado,
+      Value<String?> codigoSeguridad,
+      Value<String?> encfReferencia,
+      Value<String?> motivoAnulacion,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -49997,6 +50172,9 @@ typedef $$EcfeDocumentosTableTableUpdateCompanionBuilder =
       Value<String?> ultimoError,
       Value<String?> xmlSinFirma,
       Value<String?> xmlFirmado,
+      Value<String?> codigoSeguridad,
+      Value<String?> encfReferencia,
+      Value<String?> motivoAnulacion,
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -50062,6 +50240,21 @@ class $$EcfeDocumentosTableTableFilterComposer
 
   ColumnFilters<String> get xmlFirmado => $composableBuilder(
     column: $table.xmlFirmado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigoSeguridad => $composableBuilder(
+    column: $table.codigoSeguridad,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get encfReferencia => $composableBuilder(
+    column: $table.encfReferencia,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get motivoAnulacion => $composableBuilder(
+    column: $table.motivoAnulacion,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -50140,6 +50333,21 @@ class $$EcfeDocumentosTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get codigoSeguridad => $composableBuilder(
+    column: $table.codigoSeguridad,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get encfReferencia => $composableBuilder(
+    column: $table.encfReferencia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get motivoAnulacion => $composableBuilder(
+    column: $table.motivoAnulacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
     column: $table.creadoEn,
     builder: (column) => ColumnOrderings(column),
@@ -50200,6 +50408,21 @@ class $$EcfeDocumentosTableTableAnnotationComposer
 
   GeneratedColumn<String> get xmlFirmado => $composableBuilder(
     column: $table.xmlFirmado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get codigoSeguridad => $composableBuilder(
+    column: $table.codigoSeguridad,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get encfReferencia => $composableBuilder(
+    column: $table.encfReferencia,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get motivoAnulacion => $composableBuilder(
+    column: $table.motivoAnulacion,
     builder: (column) => column,
   );
 
@@ -50266,6 +50489,9 @@ class $$EcfeDocumentosTableTableTableManager
                 Value<String?> ultimoError = const Value.absent(),
                 Value<String?> xmlSinFirma = const Value.absent(),
                 Value<String?> xmlFirmado = const Value.absent(),
+                Value<String?> codigoSeguridad = const Value.absent(),
+                Value<String?> encfReferencia = const Value.absent(),
+                Value<String?> motivoAnulacion = const Value.absent(),
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => EcfeDocumentosTableCompanion(
@@ -50280,6 +50506,9 @@ class $$EcfeDocumentosTableTableTableManager
                 ultimoError: ultimoError,
                 xmlSinFirma: xmlSinFirma,
                 xmlFirmado: xmlFirmado,
+                codigoSeguridad: codigoSeguridad,
+                encfReferencia: encfReferencia,
+                motivoAnulacion: motivoAnulacion,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
@@ -50296,6 +50525,9 @@ class $$EcfeDocumentosTableTableTableManager
                 Value<String?> ultimoError = const Value.absent(),
                 Value<String?> xmlSinFirma = const Value.absent(),
                 Value<String?> xmlFirmado = const Value.absent(),
+                Value<String?> codigoSeguridad = const Value.absent(),
+                Value<String?> encfReferencia = const Value.absent(),
+                Value<String?> motivoAnulacion = const Value.absent(),
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => EcfeDocumentosTableCompanion.insert(
@@ -50310,6 +50542,9 @@ class $$EcfeDocumentosTableTableTableManager
                 ultimoError: ultimoError,
                 xmlSinFirma: xmlSinFirma,
                 xmlFirmado: xmlFirmado,
+                codigoSeguridad: codigoSeguridad,
+                encfReferencia: encfReferencia,
+                motivoAnulacion: motivoAnulacion,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),

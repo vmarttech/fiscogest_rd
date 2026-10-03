@@ -2,6 +2,7 @@ class EcfePayload {
   const EcfePayload({
     required this.tipoEcfCodigo,
     required this.encf,
+    this.encfReferencia,
     required this.fechaVencimientoSecuencia,
     required this.fechaEmision,
     required this.tipoIngresos,
@@ -25,6 +26,8 @@ class EcfePayload {
 
   final int tipoEcfCodigo;
   final String encf;
+  /// e-NCF modificado (obligatorio en NC 34 / ND 33).
+  final String? encfReferencia;
   final String fechaVencimientoSecuencia;
   final String fechaEmision;
   final String tipoIngresos;

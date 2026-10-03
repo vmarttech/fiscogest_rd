@@ -340,10 +340,19 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       );
                     }
 
-                    return _buildTablaDesktop(
-                      filtrados,
-                      puedeVerCostos,
-                      puedeEliminar,
+                    final alturaTabla = (62 + filtrados.length * 64)
+                        .clamp(128, 600)
+                        .toDouble();
+                    return Align(
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                        height: alturaTabla,
+                        child: _buildTablaDesktop(
+                          filtrados,
+                          puedeVerCostos,
+                          puedeEliminar,
+                        ),
+                      ),
                     );
                   },
                 ),

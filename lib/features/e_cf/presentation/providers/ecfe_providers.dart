@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/e_cf/domain/services/certificado_info_service.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_spec_version.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
@@ -126,4 +127,21 @@ final ecfeSpecVersionsProvider =
 final ecfeSpecPorIdProvider =
     FutureProvider.autoDispose.family<EcfeSpecVersion?, int>((ref, id) async {
   return ref.watch(ecfeRepositoryProvider).obtenerSpecPorId(id);
+});
+
+final ecfeSecuenciasProvider =
+    FutureProvider.autoDispose<List<EcfeSecuenciaInfo>>((ref) async {
+  final svc = ref.watch(ecfeSecuenciaServiceProvider);
+  await svc.asegurarTiposBase();
+  return svc.listar();
+});
+
+final certificadoInfoProvider =
+    FutureProvider.autoDispose<CertificadoInfo?>((ref) async {
+  final cfg = await ref.watch(ecfeConfigProvider.future);
+  if (cfg.rutaCertificado.trim().isEmpty) return null;
+  return CertificadoInfoService.inspeccionar(
+    ruta: cfg.rutaCertificado,
+    clave: cfg.claveCertificado,
+  );
 });

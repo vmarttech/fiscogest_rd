@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/ui/app_action_bar.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -323,48 +324,49 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
               padding: EdgeInsets.fromLTRB(mobile ? 16 : 24, 12, mobile ? 16 : 24, 0),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _cargando ? null : _pickDesde,
-                          icon: const Icon(Icons.calendar_today, size: 16),
-                          label: Text('Desde ${_fmtFecha.format(_desde)}'),
-                        ),
+                  AppActionBar(
+                    alignment: WrapAlignment.start,
+                    actions: [
+                      OutlinedButton.icon(
+                        onPressed: _cargando ? null : _pickDesde,
+                        icon: const Icon(Icons.calendar_today, size: 16),
+                        label: Text('Desde ${_fmtFecha.format(_desde)}'),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _cargando ? null : _pickHasta,
-                          icon: const Icon(Icons.event, size: 16),
-                          label: Text(
-                            'Hasta ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
-                          ),
+                      OutlinedButton.icon(
+                        onPressed: _cargando ? null : _pickHasta,
+                        icon: const Icon(Icons.event, size: 16),
+                        label: Text(
+                          'Hasta ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _cargando ? null : _generar,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      width: mobile ? double.infinity : 220,
+                      child: ElevatedButton.icon(
+                        onPressed: _cargando ? null : _generar,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        icon: _cargando
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.play_arrow_rounded),
+                        label: Text(
+                          _cargando ? 'Generando…' : 'Generar reporte',
+                        ),
                       ),
-                      icon: _cargando
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.play_arrow_rounded),
-                      label: Text(_cargando ? 'Generando…' : 'Generar reporte'),
                     ),
                   ),
                 ],

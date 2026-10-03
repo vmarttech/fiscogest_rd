@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/marca.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/unidad_medida.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_action_bar.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
-  const NuevoProductoPage({super.key});
+  const NuevoProductoPage({super.key, this.producto});
+
+  final Producto? producto;
   static const String routeName = 'nuevo-producto';
 
   @override
@@ -57,16 +63,12 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = GoRouterState.of(context).extra;
-      if (args is Producto) {
-        setState(() {
-          _productoEditar = args;
-          _esEdicion = true;
-          _cargarDatosProducto(args);
-        });
-      }
-    });
+    final args = widget.producto;
+    if (args != null) {
+      _productoEditar = args;
+      _esEdicion = true;
+      _cargarDatosProducto(args);
+    }
   }
 
   void _cargarDatosProducto(Producto p) {
@@ -91,7 +93,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     _precioManual = false;
   }
 
-  @override
+    @override
   void dispose() {
     _nombreCtrl.dispose();
     _skuCtrl.dispose();
@@ -127,6 +129,178 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
 
   void _marcarPrecioManual() {
     _precioManual = true;
+  }
+
+  Future<({String nombre, String? abreviatura})?> _pedirDatosCatalogo({
+    required String titulo,
+    required String etiqueta,
+    bool conAbreviatura = false,
+  }) async {
+    return showDialog<({String nombre, String? abreviatura})>(
+      context: context,
+      builder: (dialogContext) => _CatalogoRapidoDialog(
+        titulo: titulo,
+        etiqueta: etiqueta,
+        conAbreviatura: conAbreviatura,
+      ),
+    );
+  }
+
+  Widget _campoConCreacionRapida({
+    required Widget campo,
+    required String tooltip,
+    required VoidCallback onCrear,
+  }) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(child: campo),
+      const SizedBox(width: 4),
+      Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: IconButton.filledTonal(
+          tooltip: tooltip,
+          onPressed: onCrear,
+          icon: const Icon(Icons.add_rounded),
+        ),
+      ),
+    ],
+  );
+
+  Future<void> _crearCategoriaRapida() async {
+    final datos = await _pedirDatosCatalogo(
+      titulo: 'Nueva categoría',
+      etiqueta: 'Nombre de la categoría',
+    );
+    if (datos == null || !mounted) return;
+    final actual = ref.read(categoriaControllerProvider).valueOrNull ?? [];
+    final existente = actual.where(
+      (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
+    );
+    if (existente.isNotEmpty) {
+      setState(() => _catSel = existente.first.id);
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('La categoría ya existía y fue seleccionada'),
+        ),
+      );
+      return;
+    }
+    await ref
+        .read(categoriaControllerProvider.notifier)
+        .guardar(Categoria(nombre: datos.nombre, creadoEn: DateTime.now()));
+    if (!mounted) return;
+    final estado = ref.read(categoriaControllerProvider);
+    final creada = estado.valueOrNull?.where(
+      (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
+    );
+    if (creada == null || creada.isEmpty) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(
+            'No se pudo crear la categoría: ${estado.error ?? 'verifica los datos'}',
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+    setState(() => _catSel = creada.first.id);
+    FiscoGestNotifications.show(
+      const SnackBar(content: Text('Categoría creada y seleccionada')),
+    );
+  }
+
+  Future<void> _crearMarcaRapida() async {
+    final datos = await _pedirDatosCatalogo(
+      titulo: 'Nueva marca',
+      etiqueta: 'Nombre de la marca',
+    );
+    if (datos == null || !mounted) return;
+    final actual = ref.read(marcaControllerProvider).valueOrNull ?? [];
+    final existente = actual.where(
+      (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
+    );
+    if (existente.isNotEmpty) {
+      setState(() => _marcaSel = existente.first.id);
+      FiscoGestNotifications.show(
+        const SnackBar(content: Text('La marca ya existía y fue seleccionada')),
+      );
+      return;
+    }
+    await ref
+        .read(marcaControllerProvider.notifier)
+        .guardar(Marca(nombre: datos.nombre, creadoEn: DateTime.now()));
+    if (!mounted) return;
+    final estado = ref.read(marcaControllerProvider);
+    final creada = estado.valueOrNull?.where(
+      (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
+    );
+    if (creada == null || creada.isEmpty) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(
+            'No se pudo crear la marca: ${estado.error ?? 'verifica los datos'}',
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+    setState(() => _marcaSel = creada.first.id);
+    FiscoGestNotifications.show(
+      const SnackBar(content: Text('Marca creada y seleccionada')),
+    );
+  }
+
+  Future<void> _crearUnidadRapida() async {
+    final datos = await _pedirDatosCatalogo(
+      titulo: 'Nueva unidad de medida',
+      etiqueta: 'Nombre de la unidad',
+      conAbreviatura: true,
+    );
+    if (datos == null || !mounted) return;
+    final actual = ref.read(unidadMedidaControllerProvider).valueOrNull ?? [];
+    final existente = actual.where(
+      (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
+    );
+    if (existente.isNotEmpty) {
+      setState(() => _unidadSel = existente.first.id);
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('La unidad ya existía y fue seleccionada'),
+        ),
+      );
+      return;
+    }
+    await ref
+        .read(unidadMedidaControllerProvider.notifier)
+        .guardar(
+          UnidadMedida(
+            nombre: datos.nombre,
+            abreviatura: datos.abreviatura,
+            creadoEn: DateTime.now(),
+          ),
+        );
+    if (!mounted) return;
+    final estado = ref.read(unidadMedidaControllerProvider);
+    final creada = estado.valueOrNull?.where(
+      (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
+    );
+    if (creada == null || creada.isEmpty) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(
+            'No se pudo crear la unidad: ${estado.error ?? 'verifica los datos'}',
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+    setState(() => _unidadSel = creada.first.id);
+    FiscoGestNotifications.show(
+      const SnackBar(content: Text('Unidad creada y seleccionada')),
+    );
   }
 
   void _guardarProducto() {
@@ -233,7 +407,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         const SnackBar(content: Text('¡Producto registrado correctamente!')),
       );
     }
-    context.pop();
+    if (!mounted) return;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (context.canPop()) context.pop();
+    });
   }
 
   @override
@@ -273,22 +451,26 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         prefixIcon: Icons.qr_code,
                       ),
                       child2: cats.when(
-                        data: (lista) => AppDropdown<int>(
-                          label: 'Categoría',
-                          hint: 'Seleccione categoría',
-                          initialValue: _catSel,
-                          items: lista
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: Text(
-                                    c.nombre,
-                                    style: AppTypography.bodyMedium,
+                        data: (lista) => _campoConCreacionRapida(
+                          tooltip: 'Crear categoría',
+                          onCrear: _crearCategoriaRapida,
+                          campo: AppDropdown<int>(
+                            label: 'Categoría',
+                            hint: 'Seleccione categoría',
+                            initialValue: _catSel,
+                            items: lista
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c.id,
+                                    child: Text(
+                                      c.nombre,
+                                      style: AppTypography.bodyMedium,
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => _catSel = v),
+                                )
+                                .toList(),
+                            onChanged: (v) => setState(() => _catSel = v),
+                          ),
                         ),
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
@@ -303,22 +485,26 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     AppLayout.vM,
                     ResponsiveRow(
                       child1: marcas.when(
-                        data: (lista) => AppDropdown<int>(
-                          label: 'Marca',
-                          hint: 'Seleccione marca',
-                          initialValue: _marcaSel,
-                          items: lista
-                              .map(
-                                (m) => DropdownMenuItem(
-                                  value: m.id,
-                                  child: Text(
-                                    m.nombre,
-                                    style: AppTypography.bodyMedium,
+                        data: (lista) => _campoConCreacionRapida(
+                          tooltip: 'Crear marca',
+                          onCrear: _crearMarcaRapida,
+                          campo: AppDropdown<int>(
+                            label: 'Marca',
+                            hint: 'Seleccione marca',
+                            initialValue: _marcaSel,
+                            items: lista
+                                .map(
+                                  (m) => DropdownMenuItem(
+                                    value: m.id,
+                                    child: Text(
+                                      m.nombre,
+                                      style: AppTypography.bodyMedium,
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => _marcaSel = v),
+                                )
+                                .toList(),
+                            onChanged: (v) => setState(() => _marcaSel = v),
+                          ),
                         ),
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
@@ -330,22 +516,26 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         ),
                       ),
                       child2: unids.when(
-                        data: (lista) => AppDropdown<int>(
-                          label: 'Unidad de Medida',
-                          hint: 'Seleccione unidad',
-                          initialValue: _unidadSel,
-                          items: lista
-                              .map(
-                                (u) => DropdownMenuItem(
-                                  value: u.id,
-                                  child: Text(
-                                    u.nombre,
-                                    style: AppTypography.bodyMedium,
+                        data: (lista) => _campoConCreacionRapida(
+                          tooltip: 'Crear unidad',
+                          onCrear: _crearUnidadRapida,
+                          campo: AppDropdown<int>(
+                            label: 'Unidad de Medida',
+                            hint: 'Seleccione unidad',
+                            initialValue: _unidadSel,
+                            items: lista
+                                .map(
+                                  (u) => DropdownMenuItem(
+                                    value: u.id,
+                                    child: Text(
+                                      u.nombre,
+                                      style: AppTypography.bodyMedium,
+                                    ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => _unidadSel = v),
+                                )
+                                .toList(),
+                            onChanged: (v) => setState(() => _unidadSel = v),
+                          ),
                         ),
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
@@ -587,22 +777,17 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     ),
                     AppLayout.vL,
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppButton(
-                            text: 'Cancelar',
-                            icon: Icons.close,
-                            onPressed: () => context.pop(),
-                          ),
+                    AppActionBar(
+                      actions: [
+                        AppButton(
+                          text: 'Cancelar',
+                          icon: Icons.close,
+                          onPressed: () => context.pop(),
                         ),
-                        const SizedBox(width: AppSpacing.m),
-                        Expanded(
-                          child: AppButton(
-                            text: _esEdicion ? 'Actualizar' : 'Guardar',
-                            icon: Icons.check_circle_outline,
-                            onPressed: _guardarProducto,
-                          ),
+                        AppButton(
+                          text: _esEdicion ? 'Actualizar' : 'Guardar',
+                          icon: Icons.check_circle_outline,
+                          onPressed: _guardarProducto,
                         ),
                       ],
                     ),
@@ -613,6 +798,104 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+/// Diálogo que posee sus TextEditingController (evita dispose prematuro).
+class _CatalogoRapidoDialog extends StatefulWidget {
+  const _CatalogoRapidoDialog({
+    required this.titulo,
+    required this.etiqueta,
+    this.conAbreviatura = false,
+  });
+
+  final String titulo;
+  final String etiqueta;
+  final bool conAbreviatura;
+
+  @override
+  State<_CatalogoRapidoDialog> createState() => _CatalogoRapidoDialogState();
+}
+
+class _CatalogoRapidoDialogState extends State<_CatalogoRapidoDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _nombreCtrl = TextEditingController();
+  final _abreviaturaCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _nombreCtrl.dispose();
+    _abreviaturaCtrl.dispose();
+    super.dispose();
+  }
+
+  void _confirmar() {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    Navigator.pop(
+      context,
+      (
+        nombre: _nombreCtrl.text.trim(),
+        abreviatura: widget.conAbreviatura &&
+                _abreviaturaCtrl.text.trim().isNotEmpty
+            ? _abreviaturaCtrl.text.trim()
+            : null,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.titulo),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _nombreCtrl,
+              autofocus: true,
+              maxLength: 60,
+              decoration: InputDecoration(
+                labelText: widget.etiqueta,
+                border: const OutlineInputBorder(),
+                counterText: '',
+              ),
+              validator: (value) {
+                final nombre = value?.trim() ?? '';
+                if (nombre.isEmpty) return 'Escribe un nombre';
+                if (nombre.length > 60) return 'Máximo 60 caracteres';
+                return null;
+              },
+              onFieldSubmitted: (_) => _confirmar(),
+            ),
+            if (widget.conAbreviatura) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _abreviaturaCtrl,
+                maxLength: 12,
+                decoration: const InputDecoration(
+                  labelText: 'Abreviatura (opcional)',
+                  border: OutlineInputBorder(),
+                  counterText: '',
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: _confirmar,
+          child: const Text('Crear y seleccionar'),
+        ),
+      ],
     );
   }
 }

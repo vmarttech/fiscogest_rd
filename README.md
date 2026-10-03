@@ -19,3 +19,9 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Documentación e-CF (DGII)
+
+- [Guía de uso](docs/ecf_guia_uso.md)
+- [Smoke test TesteCF](docs/ecf_smoke_test.md)
+- [Manual del implementador](docs/ecf_manual_implementador.md)

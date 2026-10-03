@@ -46,6 +46,7 @@ class GenerarXmlEcfe {
     String nombreCliente = '',
     double tasaItbis = 18.0,
     String? rutaXsd,
+    bool exigirXsd = false,
   }) async {
     try {
       final doc = await repo.obtenerPorId(documentoId);
@@ -56,10 +57,14 @@ class GenerarXmlEcfe {
         );
       }
       if (doc.tipoEcf != TipoEcf.facturaCreditoFiscal &&
-          doc.tipoEcf != TipoEcf.facturaConsumo) {
+          doc.tipoEcf != TipoEcf.facturaConsumo &&
+          doc.tipoEcf != TipoEcf.notaCredito) {
         return GenerarXmlResultado(
           ok: false,
-          errores: ['Tipo ${doc.tipoEcf.codigo} no soportado en Fase 2'],
+          errores: [
+            'Tipo ${doc.tipoEcf.codigo} aún no soportado en generación XML '
+            '(soportados: 31, 32, 34)',
+          ],
         );
       }
       if (detalles.isEmpty) {
@@ -69,11 +74,33 @@ class GenerarXmlEcfe {
         );
       }
 
-      final seq = await secuencias.siguiente(doc.tipoEcf);
+      if (doc.tipoEcf == TipoEcf.notaCredito) {
+        final ref = (doc.encfReferencia ?? '').trim();
+        if (ref.isEmpty) {
+          return const GenerarXmlResultado(
+            ok: false,
+            errores: [
+              'Nota de crédito (34): indica el e-NCF de referencia '
+              '(comprobante modificado) en el detalle e-CF',
+            ],
+          );
+        }
+      }
+      // Reutilizar e-NCF formal si el documento ya lo tiene (reintento / regenerar).
+      late final String encfAsignado;
+      late final DateTime? vencSeq;
+      if (EcfeSecuenciaService.esEncfFormal(doc.encf)) {
+        encfAsignado = doc.encf!.trim().toUpperCase();
+        vencSeq = null;
+      } else {
+        final seq = await secuencias.siguiente(doc.tipoEcf);
+        encfAsignado = seq.encf;
+        vencSeq = seq.vencimiento;
+      }
       final fmt = DateFormat('dd-MM-yyyy');
       final fechaEmision = fmt.format(venta.fecha);
-      final fechaVenc = seq.vencimiento != null
-          ? fmt.format(seq.vencimiento!)
+      final fechaVenc = vencSeq != null
+          ? fmt.format(vencSeq)
           : fmt.format(DateTime(DateTime.now().year + 1, 12, 31));
 
       final items = <EcfePayloadItem>[];
@@ -101,7 +128,8 @@ class GenerarXmlEcfe {
 
       final payload = EcfePayload(
         tipoEcfCodigo: doc.tipoEcf.codigo,
-        encf: seq.encf,
+        encf: encfAsignado,
+        encfReferencia: doc.encfReferencia,
         fechaVencimientoSecuencia: fechaVenc,
         fechaEmision: fechaEmision,
         tipoIngresos: '01',
@@ -127,13 +155,16 @@ class GenerarXmlEcfe {
       );
 
       final xml = builder.construirDesdePayload(payload);
-      final val = await EcfeXsdValidatorImpl(rutaXsd: rutaXsd).validar(xml);
+      final val = await EcfeXsdValidatorImpl(
+        rutaXsd: rutaXsd,
+        exigirXsd: exigirXsd,
+      ).validar(xml);
 
       if (!val.ok) {
         await repo.guardarXml(
           id: documentoId,
           xmlSinFirma: xml,
-          encf: seq.encf,
+          encf: encfAsignado,
           estado: EstadoEcfInterno.validacionFallida,
           ultimoError: val.errores.join(' · '),
         );
@@ -146,7 +177,7 @@ class GenerarXmlEcfe {
         return GenerarXmlResultado(
           ok: false,
           xml: xml,
-          encf: seq.encf,
+          encf: encfAsignado,
           errores: val.errores,
         );
       }
@@ -154,7 +185,7 @@ class GenerarXmlEcfe {
       await repo.guardarXml(
         id: documentoId,
         xmlSinFirma: xml,
-        encf: seq.encf,
+        encf: encfAsignado,
         estado: EstadoEcfInterno.xmlListo,
         ultimoError: null,
       );
@@ -162,7 +193,7 @@ class GenerarXmlEcfe {
         documentoId: documentoId,
         paso: 'generar_xml',
         ok: true,
-        detalle: 'XML generado ${seq.encf}',
+        detalle: 'XML generado $encfAsignado',
       );
       await repo.registrarEvento(
         documentoId: documentoId,
@@ -171,7 +202,7 @@ class GenerarXmlEcfe {
         detalle: 'Validación estructural OK',
       );
 
-      return GenerarXmlResultado(ok: true, xml: xml, encf: seq.encf);
+      return GenerarXmlResultado(ok: true, xml: xml, encf: encfAsignado);
     } catch (e) {
       try {
         await repo.actualizarEstado(

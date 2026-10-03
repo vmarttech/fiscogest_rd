@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_form.dart';
 import 'package:fiscogest_rd/core/ui/app_section.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
+import 'package:fiscogest_rd/core/ui/app_action_bar.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
@@ -423,21 +424,16 @@ class _FormularioCreditoDialogState
                 ),
                 AppSection(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppButton(
-                            text: 'CANCELAR',
-                            onPressed: _guardando ? null : _accionVolver,
-                          ),
+                    AppActionBar(
+                      actions: [
+                        AppButton(
+                          text: 'CANCELAR',
+                          onPressed: _guardando ? null : _accionVolver,
                         ),
-                        const SizedBox(width: AppSpacing.m),
-                        Expanded(
-                          child: AppButton(
-                            text: 'CONFIRMAR CRÉDITO',
-                            onPressed: _guardando ? null : _confirmar,
-                            isLoading: _guardando,
-                          ),
+                        AppButton(
+                          text: 'CONFIRMAR CRÉDITO',
+                          onPressed: _guardando ? null : _confirmar,
+                          isLoading: _guardando,
                         ),
                       ],
                     ),

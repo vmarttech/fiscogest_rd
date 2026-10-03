@@ -25,6 +25,10 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
         builder.element('IdDoc', nest: () {
           builder.element('TipoeCF', nest: p.tipoEcfCodigo.toString());
           builder.element('eNCF', nest: p.encf);
+          final ref = (p.encfReferencia ?? '').trim();
+          if (ref.isNotEmpty) {
+            builder.element('eNCFModificado', nest: ref);
+          }
           builder.element(
             'FechaVencimientoSecuencia',
             nest: p.fechaVencimientoSecuencia,

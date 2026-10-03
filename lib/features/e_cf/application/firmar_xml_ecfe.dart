@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/e_cf/domain/services/codigo_seguridad_ecf.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dart';
 import 'package:fiscogest_rd/features/e_cf/data/xml/ecfe_signer_impl.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
@@ -56,11 +57,13 @@ class FirmarXmlEcfe {
             );
 
       final firmado = await signer.firmar(xml);
+      final codigoSeg = CodigoSeguridadEcf.desdeXmlFirmado(firmado);
 
       await repo.guardarXmlFirmado(
         id: documentoId,
         xmlFirmado: firmado,
         estado: EstadoEcfInterno.firmado,
+        codigoSeguridad: codigoSeg,
         ultimoError: null,
       );
       await repo.registrarEvento(

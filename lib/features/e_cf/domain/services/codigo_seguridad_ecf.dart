@@ -1,9 +1,14 @@
 import 'dart:convert';
+
 import 'package:crypto/crypto.dart';
+import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_endpoints.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 
-/// Código de seguridad para RI (6 caracteres) a partir del XML firmado.
-/// Heurística estable: SHA-256 del SignatureValue / xml firmado → hex mayúsculas.
+/// Código de seguridad para Representación Impresa (RI) y QR.
+///
+/// 1. Preferir valor persistido (oficial DGII o calculado al firmar).
+/// 2. Si no hay, derivar 6 caracteres del SignatureValue del XML firmado
+///    (SHA-256 hex mayúsculas) — estable para reimpresiones.
 class CodigoSeguridadEcf {
   static String desdeXmlFirmado(String xmlFirmado) {
     final m = RegExp(
@@ -15,28 +20,36 @@ class CodigoSeguridadEcf {
     return digest.toString().substring(0, 6).toUpperCase();
   }
 
-  /// URL orientativa de consulta pública (ajustar cuando DGII publique la definitiva del ambiente).
+  /// Resuelve el código a mostrar/imprimir.
+  static String resolver({
+    String? codigoPersistido,
+    String? xmlFirmado,
+  }) {
+    final p = (codigoPersistido ?? '').trim();
+    if (p.isNotEmpty) return p.toUpperCase();
+    final xml = (xmlFirmado ?? '').trim();
+    if (xml.isNotEmpty) return desdeXmlFirmado(xml);
+    return '------';
+  }
+
+  /// URL de consulta pública del timbre (misma base por ambiente que APIs).
   static String urlConsulta({
     required AmbienteDgii ambiente,
     required String rncEmisor,
     required String encf,
     required String codigoSeguridad,
   }) {
-    final base = switch (ambiente) {
-      AmbienteDgii.precertificacion =>
-        'https://ecf.dgii.gov.do/testecf/ConsultaTimbre',
-      AmbienteDgii.certificacion =>
-        'https://ecf.dgii.gov.do/certecf/ConsultaTimbre',
-      AmbienteDgii.produccion =>
-        'https://ecf.dgii.gov.do/ecf/ConsultaTimbre',
-      AmbienteDgii.deshabilitado =>
-        'https://ecf.dgii.gov.do/testecf/ConsultaTimbre',
-    };
-    final q = Uri(queryParameters: {
-      'RncEmisor': rncEmisor,
-      'ENCF': encf,
-      'CodigoSeguridad': codigoSeguridad,
-    });
-    return '$base?${q.query}';
+    final base = DgiiEndpoints.baseEcf(ambiente);
+    final root = base.isEmpty
+        ? 'https://ecf.dgii.gov.do/testecf'
+        : base;
+    final q = Uri(
+      queryParameters: {
+        'RncEmisor': rncEmisor.replaceAll(RegExp(r'\D'), ''),
+        'ENCF': encf.trim().toUpperCase(),
+        'CodigoSeguridad': codigoSeguridad.trim().toUpperCase(),
+      },
+    );
+    return '$root/ConsultaTimbre?${q.query}';
   }
 }

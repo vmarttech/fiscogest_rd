@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
@@ -378,7 +379,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/productos/nuevo',
         name: NuevoProductoPage.routeName,
-        builder: (_, __) => const AppShell(child: NuevoProductoPage()),
+        builder: (context, state) {
+          final extra = state.extra;
+          final producto = extra is Producto ? extra : null;
+          return AppShell(child: NuevoProductoPage(producto: producto));
+        },
       ),
       GoRoute(
         path: '/inventario/entrada/:productoId/:nombreProducto',

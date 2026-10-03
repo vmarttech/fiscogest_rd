@@ -769,21 +769,16 @@ class _FormularioCreditoVistaState
             const SizedBox(height: AppSpacing.l),
             _buildContenidoPrincipal(resumen),
             const SizedBox(height: AppSpacing.l),
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton(
-                    text: 'CANCELAR',
-                    onPressed: _guardando ? null : widget.onVolver,
-                  ),
+            AppActionBar(
+              actions: [
+                AppButton(
+                  text: 'CANCELAR',
+                  onPressed: _guardando ? null : widget.onVolver,
                 ),
-                const SizedBox(width: AppSpacing.m),
-                Expanded(
-                  child: AppButton(
-                    text: 'CONFIRMAR',
-                    onPressed: _guardando ? null : _confirmar,
-                    isLoading: _guardando,
-                  ),
+                AppButton(
+                  text: 'CONFIRMAR',
+                  onPressed: _guardando ? null : _confirmar,
+                  isLoading: _guardando,
                 ),
               ],
             ),

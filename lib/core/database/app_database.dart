@@ -111,7 +111,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 52;
+  int get schemaVersion => 54;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -120,6 +120,21 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 54) {
+        await customStatement(
+          "ALTER TABLE ecfe_documentos_table ADD COLUMN encf_referencia TEXT NULL;",
+        );
+        await customStatement(
+          "ALTER TABLE ecfe_documentos_table ADD COLUMN motivo_anulacion TEXT NULL;",
+        );
+      }
+
+      if (from < 53) {
+        await customStatement(
+          "ALTER TABLE ecfe_documentos_table ADD COLUMN codigo_seguridad TEXT NULL;",
+        );
+      }
+
       if (from < 52) {
         await customStatement(
           'CREATE TABLE IF NOT EXISTS ecfe_spec_version_table ('
