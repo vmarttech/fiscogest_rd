@@ -82,7 +82,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
           _BannerPago(esMovil: esMovil),
           const SizedBox(height: 20),
 
-          _SectionLabel('Plan'),
+          const _SectionLabel('Plan'),
           const SizedBox(height: 8),
           Text(
             'Sin fiscal (ambulantes)',
@@ -94,11 +94,14 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
             runSpacing: 8,
             children: [
               _PlanChip(
-                label: 'Simplificado · RD\$2,990/año',
+                label: 'Simplificado · desde RD\$300',
                 selected: _plan == 'simplificado',
                 onTap: () => setState(() {
                   _plan = 'simplificado';
-                  _vigencia = 'anual';
+                  if (!vigenciasDisponiblesParaPlan('simplificado')
+                      .contains(_vigencia)) {
+                    _vigencia = 'mensual';
+                  }
                   _referencia = null;
                 }),
               ),
@@ -137,7 +140,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
           ],
 
           const SizedBox(height: 20),
-          _SectionLabel('Periodo'),
+          const _SectionLabel('Periodo'),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -178,7 +181,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 const SizedBox(height: 6),
                 Text(
                   esPlanSimplificado(_plan)
-                      ? 'Sin impuestos · 1 dispositivo · solo operación'
+                      ? 'Sin impuestos · 1 dispositivo · fiao hasta 50 cuentas'
                       : 'Máx. cajas: ${kMaxCajasPorPlan[_plan] ?? 1}'
                           ' · Instalaciones: ${maxInstalacionesPermitidas(_plan)}'
                           ' (incluye 1 celular gratis)'
@@ -261,7 +264,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
               ),
             ),
             const SizedBox(height: 18),
-            _SectionLabel('Medios de pago'),
+            const _SectionLabel('Medios de pago'),
             const SizedBox(height: 10),
             ...kMediosCobroMartTech.map((m) {
               final sel = _medioId == m.id;

@@ -103,7 +103,7 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Referencia', style: AppTypography.labelLarge),
+                const Text('Referencia', style: AppTypography.labelLarge),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _ctrl,

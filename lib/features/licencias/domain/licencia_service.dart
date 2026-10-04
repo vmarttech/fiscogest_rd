@@ -94,6 +94,30 @@ class LicenciaService {
   Future<LicenciaInfo> _mapYActualizarEstado(LicenciasTableData row) async {
     final info = _fromRow(row);
     final nuevoEstado = _calcularEstado(info);
+
+    // Demo vencida (tras gracia) → plan gratis automático
+    if (row.plan == 'demo' && nuevoEstado == 'vencida') {
+      final ahora = DateTime.now();
+      await (_db.update(_db.licenciasTable)..where((t) => t.id.equals(row.id)))
+          .write(
+        LicenciasTableCompanion(
+          plan: const Value('gratis'),
+          vigenciaTipo: const Value('permanente_limitada'),
+          fechaFin: const Value(null),
+          vitalicia: const Value(false),
+          maxDispositivos: const Value(1),
+          maxCajas: const Value(1),
+          ecfHabilitado: const Value(false),
+          estado: const Value('activa'),
+          actualizadoEn: Value(ahora.toIso8601String()),
+        ),
+      );
+      final updated = await (_db.select(_db.licenciasTable)
+            ..where((t) => t.id.equals(row.id)))
+          .getSingle();
+      return _fromRow(updated);
+    }
+
     if (nuevoEstado != row.estado) {
       await (_db.update(_db.licenciasTable)..where((t) => t.id.equals(row.id)))
           .write(

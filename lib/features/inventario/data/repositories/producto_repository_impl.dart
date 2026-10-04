@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/licencias/domain/licencia_limites_guard.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
@@ -41,7 +42,8 @@ class ProductoRepositoryImpl implements IProductoRepository {
 
       // ✅ DECISIÓN: INSERT si es nuevo, UPDATE si ya existe
       if (producto.id == null) {
-        // PRODUCTO NUEVO → INSERT + movimiento de entrada
+        // PRODUCTO NUEVO → tope de plan + INSERT
+        await LicenciaLimitesGuard(_db).assertPuedeCrearProducto();
         final idGenerado = await _db.into(_db.productosTable).insert(companion);
         await _kardexRepo.registrarMovimiento(
           Kardex(

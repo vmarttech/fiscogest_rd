@@ -34,10 +34,13 @@ class AppShell extends ConsumerWidget {
         ? cfg!.nombreComercial.trim()
         : 'Mi negocio';
 
-    final permiteFiscalLicencia = ref.watch(licenciaActualProvider).maybeWhen(
-      data: (lic) => LicenciaGates(lic).permiteFiscal,
-      orElse: () => true,
+    final gatesLic = ref.watch(licenciaActualProvider).maybeWhen(
+      data: (lic) => LicenciaGates(lic),
+      orElse: () => const LicenciaGates(null),
     );
+    final permiteFiscalLicencia = gatesLic.permiteFiscal;
+    final permiteFiaoLicencia = gatesLic.permiteFiao;
+    final permiteCreditoFormalLicencia = gatesLic.permiteCreditoFormal;
 
     const navWidth = 280.0;
     final currentPath = GoRouterState.of(context).uri.path;
@@ -62,6 +65,8 @@ class AppShell extends ConsumerWidget {
             context.go('/login');
           },
           permiteFiscalLicencia,
+          permiteFiaoLicencia,
+          permiteCreditoFormalLicencia,
         ),
       ),
       body: Builder(
@@ -97,6 +102,8 @@ class AppShell extends ConsumerWidget {
     String rolUsuario,
     VoidCallback onLogout,
     bool permiteFiscalLicencia,
+    bool permiteFiaoLicencia,
+    bool permiteCreditoFormalLicencia,
   ) {
     // Menú completo SOLO Admin.
     // Cara "colmado" (Fiao, etc.) SOLO si config.simplificado Y es Admin.
@@ -200,7 +207,8 @@ class AppShell extends ConsumerWidget {
                         Icons.payments_outlined,
                         currentPath,
                       ),
-                    if (modoColmadoFlag)
+                    // Fiao: gratis / simplificado / básico / demo (no Pro/Empresa)
+                    if (permiteFiaoLicencia && puede(Permiso.fiaoUsar))
                       _buildNavItem(
                         context,
                         '/ventas/fios',
@@ -208,7 +216,9 @@ class AppShell extends ConsumerWidget {
                         Icons.edit_note_rounded,
                         currentPath,
                       ),
-                    if (!modoColmadoFlag && puede(Permiso.creditosGestionar))
+                    // Crédito formal: profesional / empresa (sin fiao)
+                    if (permiteCreditoFormalLicencia &&
+                        puede(Permiso.creditosGestionar))
                       _buildNavItem(
                         context,
                         '/creditos',

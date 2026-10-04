@@ -8,6 +8,9 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/fios_provider.dart';
 
 class SheetAnotarFiao extends ConsumerStatefulWidget {
   const SheetAnotarFiao({
@@ -92,6 +95,39 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
         ),
       );
       return;
+    }
+
+
+    final lic = ref.read(licenciaActualProvider).valueOrNull;
+    final gates = LicenciaGates(lic);
+    if (!gates.permiteFiao) {
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text(
+            'Su plan no incluye Fiao. Use el módulo de créditos o actualice el plan.',
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    final maxFiao = gates.maxCuentasFiao;
+    if (maxFiao != null) {
+      final repo = ref.read(fiosRepositoryProvider);
+      final abiertos = await repo.contarFiosAbiertos();
+      if (abiertos >= maxFiao) {
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text(
+              gates.mensajeTope('fiao (máx. $maxFiao cuentas abiertas)'),
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
     }
 
     setState(() => _guardando = true);

@@ -45,6 +45,14 @@ class FiosRepository {
       ),
     );
   }
+
+  /// Fios con saldo pendiente > 0 (cuentan para tope del plan).
+  Future<int> contarFiosAbiertos() async {
+    final rows = await (_db.select(_db.fiosTable)
+          ..where((t) => t.saldoPendiente.isBiggerThanValue(0.01)))
+        .get();
+    return rows.length;
+  }
 }
 
 final fiosRepositoryProvider = Provider<FiosRepository>((ref) {

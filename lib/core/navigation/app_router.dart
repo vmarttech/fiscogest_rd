@@ -117,6 +117,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             }
           }
         }
+        // Fiao solo si el plan lo permite
+        if (!gates.permiteFiao &&
+            (path == '/ventas/fios' || path.startsWith('/ventas/fios/'))) {
+          return '/licencia';
+        }
+        // Crédito formal solo Pro/Empresa (y demo/dev)
+        if (!gates.permiteCreditoFormal &&
+            (path == '/creditos' || path.startsWith('/creditos/'))) {
+          return '/licencia';
+        }
       } catch (_) {}
 
       if (sesion.requiereSetupInicial && path != '/setup-cuenta') {

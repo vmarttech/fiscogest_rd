@@ -13,7 +13,6 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/regist
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/botones_accion_widget.dart';
 import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/providers/proveedor_providers.dart';
-import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
@@ -169,58 +168,117 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       );
       return;
     }
-    await showDialog<Producto>(
+    final buscador = TextEditingController();
+    await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Seleccionar producto',
-          style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
-        ),
-        contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-        content: SizedBox(
-          width: 360,
-          height: 320,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: listaProductos!.length,
-            itemBuilder: (context, index) {
-              final prod = listaProductos[index];
-              return ListTile(
-                dense: true,
-                title: Text(
-                  prod.nombre,
-                  style: AppTypography.bodyMedium,
-                ),
-                subtitle: Text(
-                  'Código: ${prod.codigo} | ID: ${prod.id ?? ''}',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final media = MediaQuery.of(context);
+          final ancho = (media.size.width - 88).clamp(0.0, 480.0).toDouble();
+          final altoDisponible =
+              media.size.height - media.viewInsets.bottom - 96;
+          final alto = (altoDisponible * 0.7).clamp(100.0, 440.0).toDouble();
+          final consulta = buscador.text.trim().toLowerCase();
+          final productosFiltrados = listaProductos!.where((producto) {
+            if (consulta.isEmpty) return true;
+            return producto.nombre.toLowerCase().contains(consulta) ||
+                producto.codigo.toLowerCase().contains(consulta);
+          }).toList();
+
+          return AlertDialog(
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 20,
+            ),
+            title: Text(
+              'Seleccionar producto',
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+            content: SizedBox(
+              width: ancho,
+              height: alto,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: buscador,
+                    autofocus: true,
+                    textInputAction: TextInputAction.search,
+                    decoration: const InputDecoration(
+                      hintText: 'Buscar por nombre o SKU',
+                      prefixIcon: Icon(Icons.search),
+                      isDense: true,
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: productosFiltrados.isEmpty
+                        ? const Center(
+                            child: Text('No se encontraron productos'),
+                          )
+                        : ListView.builder(
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            itemCount: productosFiltrados.length,
+                            itemBuilder: (context, index) {
+                              final prod = productosFiltrados[index];
+                              return ListTile(
+                                dense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                title: Text(
+                                  prod.nombre,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.bodyMedium,
+                                ),
+                                subtitle: Text(
+                                  'SKU: ${prod.codigo}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                onTap: () {
+                                  if (!mounted) return;
+                                  setState(() {
+                                    final ctrl = _controladores[indexLinea];
+                                    ctrl.productoId.text =
+                                        prod.id?.toString() ?? '';
+                                    ctrl.nombreProducto.text = prod.nombre;
+                                    _lineas[indexLinea].productoId = prod.id;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Cancelar',
+                  style: AppTypography.button.copyWith(
+                    color: AppColors.primary,
                   ),
                 ),
-                onTap: () {
-                  setState(() {
-                    final ctrl = _controladores[indexLinea];
-                    ctrl.productoId.text = prod.id?.toString() ?? '';
-                    ctrl.nombreProducto.text = prod.nombre;
-                    _lineas[indexLinea].productoId = prod.id;
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancelar',
-              style: AppTypography.button.copyWith(color: AppColors.primary),
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
+    buscador.dispose();
   }
 
   Future<void> _guardarCompra() async {
@@ -375,7 +433,10 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   Widget build(BuildContext context) {
     final esPequena = AppBreakpoints.isMobile(context);
     final modoSimplificado =
-        ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ??
+        ref
+            .watch(configuracionControllerProvider)
+            .valueOrNull
+            ?.modoSimplificado ??
         false;
     final desktop = AppBreakpoints.isDesktop(context);
     final maxW = desktop ? 900 : (esPequena ? 640 : 760);
@@ -422,62 +483,63 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                         ? 'Proveedor, recibo y forma de pago'
                         : 'Proveedor, comprobante y forma de pago',
                   ),
-                CabeceraCompraWidget(
-                  fechaController: _fechaController,
-                  proveedorIdController: _proveedorIdController,
-                  proveedorNombreController: _proveedorNombreController,
-                  onSeleccionarProveedor: _seleccionarProveedor,
-                  comprobanteController: _comprobanteController,
-                  ncfController: _ncfController,
-                  tipoComprobante: _tipoComprobante,
-                  onTipoComprobanteChanged: (v) =>
-                      setState(() => _tipoComprobante = v),
-                  formaPago: _formaPago,
-                  onFormaPagoChanged: (v) => setState(() => _formaPago = v),
-                  condicionPagoController: _condicionPagoController,
-                  diasCreditoController: _diasCreditoController,
-                  fechaVencimientoController: _fechaVencimientoController,
-                  observacionesController: _observacionesController,
-                  esPequena: esPequena,
-                  filaResponsiva: filaResponsiva,
-                  modoSimplificado: modoSimplificado,
-                ),
-                AppLayout.vL,
-                const SectionHeader(
-                  title: 'Productos',
-                  subtitle: 'Líneas de la compra',
-                ),
-                SeccionLineasWidget(
-                  lineas: _lineas,
-                  controladores: _controladores,
-                  onAgregarLinea: _agregarLinea,
-                  onEliminarLinea: _eliminarLinea,
-                  onSeleccionarProducto: _seleccionarProducto,
-                  onValorCambiado: _actualizarLineaEnTiempoReal, // ✅ CONECTADO
-                  esPequena: esPequena,
-                  filaResponsiva: filaResponsiva,
-                  modoSimplificado: modoSimplificado,
-                ),
-                AppLayout.vL,
-                const SectionHeader(
-                  title: 'Resumen',
-                  subtitle: 'Totales de la compra',
-                ),
-                TotalesCompraWidget(
-                  subtotalSinImpuestos: _subtotalSinImpuestos,
-                  descuentoGlobal: _descuentoGlobal,
-                  montoImpuesto: _montoImpuesto,
-                  totalCompra: _totalCompra,
-                  mostrarImpuesto: !modoSimplificado,
-                ),
-                AppLayout.vL,
-                BotonesAccionWidget(
-                  onGuardarBorrador: _guardarComoBorrador,
-                  onRegistrarCompra: _registrarCompraDirecta,
-                ),
-              ],
+                  CabeceraCompraWidget(
+                    fechaController: _fechaController,
+                    proveedorIdController: _proveedorIdController,
+                    proveedorNombreController: _proveedorNombreController,
+                    onSeleccionarProveedor: _seleccionarProveedor,
+                    comprobanteController: _comprobanteController,
+                    ncfController: _ncfController,
+                    tipoComprobante: _tipoComprobante,
+                    onTipoComprobanteChanged: (v) =>
+                        setState(() => _tipoComprobante = v),
+                    formaPago: _formaPago,
+                    onFormaPagoChanged: (v) => setState(() => _formaPago = v),
+                    condicionPagoController: _condicionPagoController,
+                    diasCreditoController: _diasCreditoController,
+                    fechaVencimientoController: _fechaVencimientoController,
+                    observacionesController: _observacionesController,
+                    esPequena: esPequena,
+                    filaResponsiva: filaResponsiva,
+                    modoSimplificado: modoSimplificado,
+                  ),
+                  AppLayout.vL,
+                  const SectionHeader(
+                    title: 'Productos',
+                    subtitle: 'Líneas de la compra',
+                  ),
+                  SeccionLineasWidget(
+                    lineas: _lineas,
+                    controladores: _controladores,
+                    onAgregarLinea: _agregarLinea,
+                    onEliminarLinea: _eliminarLinea,
+                    onSeleccionarProducto: _seleccionarProducto,
+                    onValorCambiado:
+                        _actualizarLineaEnTiempoReal, // ✅ CONECTADO
+                    esPequena: esPequena,
+                    filaResponsiva: filaResponsiva,
+                    modoSimplificado: modoSimplificado,
+                  ),
+                  AppLayout.vL,
+                  const SectionHeader(
+                    title: 'Resumen',
+                    subtitle: 'Totales de la compra',
+                  ),
+                  TotalesCompraWidget(
+                    subtotalSinImpuestos: _subtotalSinImpuestos,
+                    descuentoGlobal: _descuentoGlobal,
+                    montoImpuesto: _montoImpuesto,
+                    totalCompra: _totalCompra,
+                    mostrarImpuesto: !modoSimplificado,
+                  ),
+                  AppLayout.vL,
+                  BotonesAccionWidget(
+                    onGuardarBorrador: _guardarComoBorrador,
+                    onRegistrarCompra: _registrarCompraDirecta,
+                  ),
+                ],
+              ),
             ),
-          ),
           ),
         ),
       ),

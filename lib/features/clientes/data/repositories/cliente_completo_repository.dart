@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/licencias/domain/licencia_limites_guard.dart';
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -5,7 +6,10 @@ import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 
 class ClienteCompletoRepository {
   // ✅ RECIBE LA BASE POR PARÁMETRO
-  ClienteCompletoRepository(AppDatabase db) : _dao = ClienteDao(db);
+  ClienteCompletoRepository(AppDatabase db)
+      : _db = db,
+        _dao = ClienteDao(db);
+  final AppDatabase _db;
   final ClienteDao _dao;
 
   Future<List<ClienteCompleto>> obtenerClientes() async {
@@ -26,6 +30,7 @@ class ClienteCompletoRepository {
   }
 
   Future<void> agregarCliente(ClienteCompleto cliente) async {
+    await LicenciaLimitesGuard(_db).assertPuedeCrearCliente();
     final codigoUnico = 'CLI-${DateTime.now().millisecondsSinceEpoch}';
     await _dao.insertarOActualizar(
       ClientesTableCompanion.insert(

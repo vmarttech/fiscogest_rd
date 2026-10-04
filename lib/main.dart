@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
+import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
@@ -213,6 +214,7 @@ void main() async {
   try {
     final licenciaSvc = LicenciaService(db);
     await licenciaSvc.ensureLicenciaInicial();
+    await DispositivoService(db).ensureDispositivoRegistrado();
     await licenciaSvc.expirarPedidosVencidos();
     // UNA vez en tu PC (MartTech vitalicio), descomenta, corre y vuelve a comentar:
     // await licenciaSvc.activarDesarrolladorVitalicio();

@@ -5,6 +5,10 @@
     <!-- ✅ Permiso opcional pero recomendado para verificar estado de red -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
+
     <application
         android:label="fiscogest_rd"
         android:name="${applicationName}"

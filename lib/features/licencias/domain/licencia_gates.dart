@@ -1,42 +1,65 @@
 import 'package:fiscogest_rd/features/licencias/domain/licencia_estado.dart';
 import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
 
-/// Reglas de producto sobre una licencia ya resuelta.
 class LicenciaGates {
   const LicenciaGates(this.lic);
 
   final LicenciaInfo? lic;
 
+  String get plan => lic?.plan ?? 'demo';
+
+  LimitesPlan get limites => limitesDe(plan);
+
   bool get tieneLicencia => lic != null;
 
   bool get puedeEscribir => lic?.puedeEscribir ?? false;
 
-  /// Simplificado / ambulantes: sin impuestos ni e-CF ni NCF.
   bool get permiteFiscal {
-    final p = lic?.plan ?? 'demo';
-    if (esPlanSimplificado(p)) return false;
     if (lic?.esDesarrollador == true) return true;
-    return planPermiteModuloFiscal(p) || planIncluyeEcf(p) || p == 'demo';
+    return limites.permiteFiscal || plan == 'demo';
   }
 
-  bool get esSimplificado => esPlanSimplificado(lic?.plan ?? '');
-
-  bool get esNormalActivo {
-    final p = lic?.plan ?? '';
-    return esPlanNormal(p) && (lic?.puedeEscribir ?? false);
+  bool get permiteFiao {
+    if (lic?.esDesarrollador == true) return true;
+    return limites.permiteFiao;
   }
 
-  /// Texto para UI del beneficio móvil.
+  bool get permiteCreditoFormal {
+    if (lic?.esDesarrollador == true) return true;
+    return limites.permiteCreditoFormal;
+  }
+
+  bool get esSimplificado => esPlanSimplificado(plan);
+
+  bool get esGratis => esPlanGratis(plan);
+
+  int? get maxCuentasFiao => limites.maxCuentasFiaoAbiertas;
+
+  int? get maxProductos => limites.maxProductos;
+
+  int? get maxClientes => limites.maxClientes;
+
+  int? get maxVentasMes => limites.maxVentasMes;
+
   String get textoDispositivos {
     if (lic == null) return '';
     if (lic!.esDesarrollador) {
       return 'Acceso vitalicio MartTech · sin límite práctico de equipos.';
     }
+    if (esGratis) {
+      return 'Plan gratis · 1 dispositivo · límites activos · fiao hasta ${maxCuentasFiao ?? 25} cuentas.';
+    }
     if (esSimplificado) {
-      return 'Simplificado: 1 dispositivo · sin impuestos ni facturación fiscal.';
+      return 'Simplificado · 1 dispositivo · sin impuestos · fiao hasta ${maxCuentasFiao ?? 50}.';
     }
     final max = lic!.maxDispositivos;
-    return 'Modo normal: hasta $max instalaciones '
-        '(incluye 1 celular gratis con las mismas funciones de este plan).';
+    if (permiteFiao) {
+      return 'Hasta $max instalaciones · fiao disponible · 1 celular gratis en planes de pago.';
+    }
+    return 'Hasta $max instalaciones · crédito formal (sin fiao) · 1 celular gratis.';
   }
+
+  String mensajeTope(String recurso) =>
+      'Límite del plan ($plan) en $recurso. '
+      'Actualice en Configuración → Sistema → Licencia y pagos.';
 }

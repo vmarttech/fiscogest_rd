@@ -1624,6 +1624,742 @@ class PedidosLicenciaTableCompanion
   }
 }
 
+class $DispositivosLicenciaTableTable extends DispositivosLicenciaTable
+    with
+        TableInfo<
+          $DispositivosLicenciaTableTable,
+          DispositivosLicenciaTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DispositivosLicenciaTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _negocioIdMeta = const VerificationMeta(
+    'negocioId',
+  );
+  @override
+  late final GeneratedColumn<String> negocioId = GeneratedColumn<String>(
+    'negocio_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fingerprintMeta = const VerificationMeta(
+    'fingerprint',
+  );
+  @override
+  late final GeneratedColumn<String> fingerprint = GeneratedColumn<String>(
+    'fingerprint',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _aliasMeta = const VerificationMeta('alias');
+  @override
+  late final GeneratedColumn<String> alias = GeneratedColumn<String>(
+    'alias',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Este equipo'),
+  );
+  static const VerificationMeta _plataformaMeta = const VerificationMeta(
+    'plataforma',
+  );
+  @override
+  late final GeneratedColumn<String> plataforma = GeneratedColumn<String>(
+    'plataforma',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
+  @override
+  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
+    'tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pc'),
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _registradoEnMeta = const VerificationMeta(
+    'registradoEn',
+  );
+  @override
+  late final GeneratedColumn<String> registradoEn = GeneratedColumn<String>(
+    'registrado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ultimoUsoMeta = const VerificationMeta(
+    'ultimoUso',
+  );
+  @override
+  late final GeneratedColumn<String> ultimoUso = GeneratedColumn<String>(
+    'ultimo_uso',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sincronizadoEnMeta = const VerificationMeta(
+    'sincronizadoEn',
+  );
+  @override
+  late final GeneratedColumn<String> sincronizadoEn = GeneratedColumn<String>(
+    'sincronizado_en',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pendienteSyncMeta = const VerificationMeta(
+    'pendienteSync',
+  );
+  @override
+  late final GeneratedColumn<bool> pendienteSync = GeneratedColumn<bool>(
+    'pendiente_sync',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pendiente_sync" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    remoteId,
+    negocioId,
+    fingerprint,
+    alias,
+    plataforma,
+    tipo,
+    activo,
+    registradoEn,
+    ultimoUso,
+    sincronizadoEn,
+    pendienteSync,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dispositivos_licencia_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DispositivosLicenciaTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('negocio_id')) {
+      context.handle(
+        _negocioIdMeta,
+        negocioId.isAcceptableOrUnknown(data['negocio_id']!, _negocioIdMeta),
+      );
+    }
+    if (data.containsKey('fingerprint')) {
+      context.handle(
+        _fingerprintMeta,
+        fingerprint.isAcceptableOrUnknown(
+          data['fingerprint']!,
+          _fingerprintMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fingerprintMeta);
+    }
+    if (data.containsKey('alias')) {
+      context.handle(
+        _aliasMeta,
+        alias.isAcceptableOrUnknown(data['alias']!, _aliasMeta),
+      );
+    }
+    if (data.containsKey('plataforma')) {
+      context.handle(
+        _plataformaMeta,
+        plataforma.isAcceptableOrUnknown(data['plataforma']!, _plataformaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_plataformaMeta);
+    }
+    if (data.containsKey('tipo')) {
+      context.handle(
+        _tipoMeta,
+        tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+      );
+    }
+    if (data.containsKey('registrado_en')) {
+      context.handle(
+        _registradoEnMeta,
+        registradoEn.isAcceptableOrUnknown(
+          data['registrado_en']!,
+          _registradoEnMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_registradoEnMeta);
+    }
+    if (data.containsKey('ultimo_uso')) {
+      context.handle(
+        _ultimoUsoMeta,
+        ultimoUso.isAcceptableOrUnknown(data['ultimo_uso']!, _ultimoUsoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ultimoUsoMeta);
+    }
+    if (data.containsKey('sincronizado_en')) {
+      context.handle(
+        _sincronizadoEnMeta,
+        sincronizadoEn.isAcceptableOrUnknown(
+          data['sincronizado_en']!,
+          _sincronizadoEnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pendiente_sync')) {
+      context.handle(
+        _pendienteSyncMeta,
+        pendienteSync.isAcceptableOrUnknown(
+          data['pendiente_sync']!,
+          _pendienteSyncMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DispositivosLicenciaTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DispositivosLicenciaTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      negocioId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}negocio_id'],
+      ),
+      fingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fingerprint'],
+      )!,
+      alias: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}alias'],
+      )!,
+      plataforma: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}plataforma'],
+      )!,
+      tipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo'],
+      )!,
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
+      registradoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}registrado_en'],
+      )!,
+      ultimoUso: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ultimo_uso'],
+      )!,
+      sincronizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sincronizado_en'],
+      ),
+      pendienteSync: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pendiente_sync'],
+      )!,
+    );
+  }
+
+  @override
+  $DispositivosLicenciaTableTable createAlias(String alias) {
+    return $DispositivosLicenciaTableTable(attachedDatabase, alias);
+  }
+}
+
+class DispositivosLicenciaTableData extends DataClass
+    implements Insertable<DispositivosLicenciaTableData> {
+  final int id;
+
+  /// UUID remoto (Supabase). Null hasta la primera sync.
+  final String? remoteId;
+
+  /// Negocio/cuenta en nube (futuro). Localmente puede quedar null.
+  final String? negocioId;
+
+  /// Huella estable del equipo (uuid persistido en disco).
+  final String fingerprint;
+  final String alias;
+
+  /// android | ios | linux | windows | macos | web
+  final String plataforma;
+
+  /// pc | movil | tablet | otro
+  final String tipo;
+  final bool activo;
+  final String registradoEn;
+  final String ultimoUso;
+
+  /// ISO última sync exitosa a Supabase (null = pendiente).
+  final String? sincronizadoEn;
+  final bool pendienteSync;
+  const DispositivosLicenciaTableData({
+    required this.id,
+    this.remoteId,
+    this.negocioId,
+    required this.fingerprint,
+    required this.alias,
+    required this.plataforma,
+    required this.tipo,
+    required this.activo,
+    required this.registradoEn,
+    required this.ultimoUso,
+    this.sincronizadoEn,
+    required this.pendienteSync,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    if (!nullToAbsent || negocioId != null) {
+      map['negocio_id'] = Variable<String>(negocioId);
+    }
+    map['fingerprint'] = Variable<String>(fingerprint);
+    map['alias'] = Variable<String>(alias);
+    map['plataforma'] = Variable<String>(plataforma);
+    map['tipo'] = Variable<String>(tipo);
+    map['activo'] = Variable<bool>(activo);
+    map['registrado_en'] = Variable<String>(registradoEn);
+    map['ultimo_uso'] = Variable<String>(ultimoUso);
+    if (!nullToAbsent || sincronizadoEn != null) {
+      map['sincronizado_en'] = Variable<String>(sincronizadoEn);
+    }
+    map['pendiente_sync'] = Variable<bool>(pendienteSync);
+    return map;
+  }
+
+  DispositivosLicenciaTableCompanion toCompanion(bool nullToAbsent) {
+    return DispositivosLicenciaTableCompanion(
+      id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      negocioId: negocioId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(negocioId),
+      fingerprint: Value(fingerprint),
+      alias: Value(alias),
+      plataforma: Value(plataforma),
+      tipo: Value(tipo),
+      activo: Value(activo),
+      registradoEn: Value(registradoEn),
+      ultimoUso: Value(ultimoUso),
+      sincronizadoEn: sincronizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sincronizadoEn),
+      pendienteSync: Value(pendienteSync),
+    );
+  }
+
+  factory DispositivosLicenciaTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DispositivosLicenciaTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      negocioId: serializer.fromJson<String?>(json['negocioId']),
+      fingerprint: serializer.fromJson<String>(json['fingerprint']),
+      alias: serializer.fromJson<String>(json['alias']),
+      plataforma: serializer.fromJson<String>(json['plataforma']),
+      tipo: serializer.fromJson<String>(json['tipo']),
+      activo: serializer.fromJson<bool>(json['activo']),
+      registradoEn: serializer.fromJson<String>(json['registradoEn']),
+      ultimoUso: serializer.fromJson<String>(json['ultimoUso']),
+      sincronizadoEn: serializer.fromJson<String?>(json['sincronizadoEn']),
+      pendienteSync: serializer.fromJson<bool>(json['pendienteSync']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'negocioId': serializer.toJson<String?>(negocioId),
+      'fingerprint': serializer.toJson<String>(fingerprint),
+      'alias': serializer.toJson<String>(alias),
+      'plataforma': serializer.toJson<String>(plataforma),
+      'tipo': serializer.toJson<String>(tipo),
+      'activo': serializer.toJson<bool>(activo),
+      'registradoEn': serializer.toJson<String>(registradoEn),
+      'ultimoUso': serializer.toJson<String>(ultimoUso),
+      'sincronizadoEn': serializer.toJson<String?>(sincronizadoEn),
+      'pendienteSync': serializer.toJson<bool>(pendienteSync),
+    };
+  }
+
+  DispositivosLicenciaTableData copyWith({
+    int? id,
+    Value<String?> remoteId = const Value.absent(),
+    Value<String?> negocioId = const Value.absent(),
+    String? fingerprint,
+    String? alias,
+    String? plataforma,
+    String? tipo,
+    bool? activo,
+    String? registradoEn,
+    String? ultimoUso,
+    Value<String?> sincronizadoEn = const Value.absent(),
+    bool? pendienteSync,
+  }) => DispositivosLicenciaTableData(
+    id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    negocioId: negocioId.present ? negocioId.value : this.negocioId,
+    fingerprint: fingerprint ?? this.fingerprint,
+    alias: alias ?? this.alias,
+    plataforma: plataforma ?? this.plataforma,
+    tipo: tipo ?? this.tipo,
+    activo: activo ?? this.activo,
+    registradoEn: registradoEn ?? this.registradoEn,
+    ultimoUso: ultimoUso ?? this.ultimoUso,
+    sincronizadoEn: sincronizadoEn.present
+        ? sincronizadoEn.value
+        : this.sincronizadoEn,
+    pendienteSync: pendienteSync ?? this.pendienteSync,
+  );
+  DispositivosLicenciaTableData copyWithCompanion(
+    DispositivosLicenciaTableCompanion data,
+  ) {
+    return DispositivosLicenciaTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      negocioId: data.negocioId.present ? data.negocioId.value : this.negocioId,
+      fingerprint: data.fingerprint.present
+          ? data.fingerprint.value
+          : this.fingerprint,
+      alias: data.alias.present ? data.alias.value : this.alias,
+      plataforma: data.plataforma.present
+          ? data.plataforma.value
+          : this.plataforma,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      activo: data.activo.present ? data.activo.value : this.activo,
+      registradoEn: data.registradoEn.present
+          ? data.registradoEn.value
+          : this.registradoEn,
+      ultimoUso: data.ultimoUso.present ? data.ultimoUso.value : this.ultimoUso,
+      sincronizadoEn: data.sincronizadoEn.present
+          ? data.sincronizadoEn.value
+          : this.sincronizadoEn,
+      pendienteSync: data.pendienteSync.present
+          ? data.pendienteSync.value
+          : this.pendienteSync,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DispositivosLicenciaTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('negocioId: $negocioId, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('alias: $alias, ')
+          ..write('plataforma: $plataforma, ')
+          ..write('tipo: $tipo, ')
+          ..write('activo: $activo, ')
+          ..write('registradoEn: $registradoEn, ')
+          ..write('ultimoUso: $ultimoUso, ')
+          ..write('sincronizadoEn: $sincronizadoEn, ')
+          ..write('pendienteSync: $pendienteSync')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    remoteId,
+    negocioId,
+    fingerprint,
+    alias,
+    plataforma,
+    tipo,
+    activo,
+    registradoEn,
+    ultimoUso,
+    sincronizadoEn,
+    pendienteSync,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DispositivosLicenciaTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.negocioId == this.negocioId &&
+          other.fingerprint == this.fingerprint &&
+          other.alias == this.alias &&
+          other.plataforma == this.plataforma &&
+          other.tipo == this.tipo &&
+          other.activo == this.activo &&
+          other.registradoEn == this.registradoEn &&
+          other.ultimoUso == this.ultimoUso &&
+          other.sincronizadoEn == this.sincronizadoEn &&
+          other.pendienteSync == this.pendienteSync);
+}
+
+class DispositivosLicenciaTableCompanion
+    extends UpdateCompanion<DispositivosLicenciaTableData> {
+  final Value<int> id;
+  final Value<String?> remoteId;
+  final Value<String?> negocioId;
+  final Value<String> fingerprint;
+  final Value<String> alias;
+  final Value<String> plataforma;
+  final Value<String> tipo;
+  final Value<bool> activo;
+  final Value<String> registradoEn;
+  final Value<String> ultimoUso;
+  final Value<String?> sincronizadoEn;
+  final Value<bool> pendienteSync;
+  const DispositivosLicenciaTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.negocioId = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.alias = const Value.absent(),
+    this.plataforma = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.registradoEn = const Value.absent(),
+    this.ultimoUso = const Value.absent(),
+    this.sincronizadoEn = const Value.absent(),
+    this.pendienteSync = const Value.absent(),
+  });
+  DispositivosLicenciaTableCompanion.insert({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.negocioId = const Value.absent(),
+    required String fingerprint,
+    this.alias = const Value.absent(),
+    required String plataforma,
+    this.tipo = const Value.absent(),
+    this.activo = const Value.absent(),
+    required String registradoEn,
+    required String ultimoUso,
+    this.sincronizadoEn = const Value.absent(),
+    this.pendienteSync = const Value.absent(),
+  }) : fingerprint = Value(fingerprint),
+       plataforma = Value(plataforma),
+       registradoEn = Value(registradoEn),
+       ultimoUso = Value(ultimoUso);
+  static Insertable<DispositivosLicenciaTableData> custom({
+    Expression<int>? id,
+    Expression<String>? remoteId,
+    Expression<String>? negocioId,
+    Expression<String>? fingerprint,
+    Expression<String>? alias,
+    Expression<String>? plataforma,
+    Expression<String>? tipo,
+    Expression<bool>? activo,
+    Expression<String>? registradoEn,
+    Expression<String>? ultimoUso,
+    Expression<String>? sincronizadoEn,
+    Expression<bool>? pendienteSync,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (negocioId != null) 'negocio_id': negocioId,
+      if (fingerprint != null) 'fingerprint': fingerprint,
+      if (alias != null) 'alias': alias,
+      if (plataforma != null) 'plataforma': plataforma,
+      if (tipo != null) 'tipo': tipo,
+      if (activo != null) 'activo': activo,
+      if (registradoEn != null) 'registrado_en': registradoEn,
+      if (ultimoUso != null) 'ultimo_uso': ultimoUso,
+      if (sincronizadoEn != null) 'sincronizado_en': sincronizadoEn,
+      if (pendienteSync != null) 'pendiente_sync': pendienteSync,
+    });
+  }
+
+  DispositivosLicenciaTableCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? remoteId,
+    Value<String?>? negocioId,
+    Value<String>? fingerprint,
+    Value<String>? alias,
+    Value<String>? plataforma,
+    Value<String>? tipo,
+    Value<bool>? activo,
+    Value<String>? registradoEn,
+    Value<String>? ultimoUso,
+    Value<String?>? sincronizadoEn,
+    Value<bool>? pendienteSync,
+  }) {
+    return DispositivosLicenciaTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      negocioId: negocioId ?? this.negocioId,
+      fingerprint: fingerprint ?? this.fingerprint,
+      alias: alias ?? this.alias,
+      plataforma: plataforma ?? this.plataforma,
+      tipo: tipo ?? this.tipo,
+      activo: activo ?? this.activo,
+      registradoEn: registradoEn ?? this.registradoEn,
+      ultimoUso: ultimoUso ?? this.ultimoUso,
+      sincronizadoEn: sincronizadoEn ?? this.sincronizadoEn,
+      pendienteSync: pendienteSync ?? this.pendienteSync,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (negocioId.present) {
+      map['negocio_id'] = Variable<String>(negocioId.value);
+    }
+    if (fingerprint.present) {
+      map['fingerprint'] = Variable<String>(fingerprint.value);
+    }
+    if (alias.present) {
+      map['alias'] = Variable<String>(alias.value);
+    }
+    if (plataforma.present) {
+      map['plataforma'] = Variable<String>(plataforma.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(tipo.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
+    if (registradoEn.present) {
+      map['registrado_en'] = Variable<String>(registradoEn.value);
+    }
+    if (ultimoUso.present) {
+      map['ultimo_uso'] = Variable<String>(ultimoUso.value);
+    }
+    if (sincronizadoEn.present) {
+      map['sincronizado_en'] = Variable<String>(sincronizadoEn.value);
+    }
+    if (pendienteSync.present) {
+      map['pendiente_sync'] = Variable<bool>(pendienteSync.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DispositivosLicenciaTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('negocioId: $negocioId, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('alias: $alias, ')
+          ..write('plataforma: $plataforma, ')
+          ..write('tipo: $tipo, ')
+          ..write('activo: $activo, ')
+          ..write('registradoEn: $registradoEn, ')
+          ..write('ultimoUso: $ultimoUso, ')
+          ..write('sincronizadoEn: $sincronizadoEn, ')
+          ..write('pendienteSync: $pendienteSync')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $NotasCreditoTableTable extends NotasCreditoTable
     with TableInfo<$NotasCreditoTableTable, NotasCreditoTableData> {
   @override
@@ -32877,6 +33613,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LicenciasTableTable licenciasTable = $LicenciasTableTable(this);
   late final $PedidosLicenciaTableTable pedidosLicenciaTable =
       $PedidosLicenciaTableTable(this);
+  late final $DispositivosLicenciaTableTable dispositivosLicenciaTable =
+      $DispositivosLicenciaTableTable(this);
   late final $NotasCreditoTableTable notasCreditoTable =
       $NotasCreditoTableTable(this);
   late final $SecuenciasNcfTableTable secuenciasNcfTable =
@@ -32966,6 +33704,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     licenciasTable,
     pedidosLicenciaTable,
+    dispositivosLicenciaTable,
     notasCreditoTable,
     secuenciasNcfTable,
     clientesTable,
@@ -33840,6 +34579,362 @@ typedef $$PedidosLicenciaTableTableProcessedTableManager =
         >,
       ),
       PedidosLicenciaTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$DispositivosLicenciaTableTableCreateCompanionBuilder =
+    DispositivosLicenciaTableCompanion Function({
+      Value<int> id,
+      Value<String?> remoteId,
+      Value<String?> negocioId,
+      required String fingerprint,
+      Value<String> alias,
+      required String plataforma,
+      Value<String> tipo,
+      Value<bool> activo,
+      required String registradoEn,
+      required String ultimoUso,
+      Value<String?> sincronizadoEn,
+      Value<bool> pendienteSync,
+    });
+typedef $$DispositivosLicenciaTableTableUpdateCompanionBuilder =
+    DispositivosLicenciaTableCompanion Function({
+      Value<int> id,
+      Value<String?> remoteId,
+      Value<String?> negocioId,
+      Value<String> fingerprint,
+      Value<String> alias,
+      Value<String> plataforma,
+      Value<String> tipo,
+      Value<bool> activo,
+      Value<String> registradoEn,
+      Value<String> ultimoUso,
+      Value<String?> sincronizadoEn,
+      Value<bool> pendienteSync,
+    });
+
+class $$DispositivosLicenciaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DispositivosLicenciaTableTable> {
+  $$DispositivosLicenciaTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get negocioId => $composableBuilder(
+    column: $table.negocioId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get alias => $composableBuilder(
+    column: $table.alias,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get plataforma => $composableBuilder(
+    column: $table.plataforma,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get registradoEn => $composableBuilder(
+    column: $table.registradoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ultimoUso => $composableBuilder(
+    column: $table.ultimoUso,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sincronizadoEn => $composableBuilder(
+    column: $table.sincronizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pendienteSync => $composableBuilder(
+    column: $table.pendienteSync,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DispositivosLicenciaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DispositivosLicenciaTableTable> {
+  $$DispositivosLicenciaTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get negocioId => $composableBuilder(
+    column: $table.negocioId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get alias => $composableBuilder(
+    column: $table.alias,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get plataforma => $composableBuilder(
+    column: $table.plataforma,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get registradoEn => $composableBuilder(
+    column: $table.registradoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ultimoUso => $composableBuilder(
+    column: $table.ultimoUso,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sincronizadoEn => $composableBuilder(
+    column: $table.sincronizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pendienteSync => $composableBuilder(
+    column: $table.pendienteSync,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DispositivosLicenciaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DispositivosLicenciaTableTable> {
+  $$DispositivosLicenciaTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get negocioId =>
+      $composableBuilder(column: $table.negocioId, builder: (column) => column);
+
+  GeneratedColumn<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get alias =>
+      $composableBuilder(column: $table.alias, builder: (column) => column);
+
+  GeneratedColumn<String> get plataforma => $composableBuilder(
+    column: $table.plataforma,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
+
+  GeneratedColumn<String> get registradoEn => $composableBuilder(
+    column: $table.registradoEn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ultimoUso =>
+      $composableBuilder(column: $table.ultimoUso, builder: (column) => column);
+
+  GeneratedColumn<String> get sincronizadoEn => $composableBuilder(
+    column: $table.sincronizadoEn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get pendienteSync => $composableBuilder(
+    column: $table.pendienteSync,
+    builder: (column) => column,
+  );
+}
+
+class $$DispositivosLicenciaTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DispositivosLicenciaTableTable,
+          DispositivosLicenciaTableData,
+          $$DispositivosLicenciaTableTableFilterComposer,
+          $$DispositivosLicenciaTableTableOrderingComposer,
+          $$DispositivosLicenciaTableTableAnnotationComposer,
+          $$DispositivosLicenciaTableTableCreateCompanionBuilder,
+          $$DispositivosLicenciaTableTableUpdateCompanionBuilder,
+          (
+            DispositivosLicenciaTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $DispositivosLicenciaTableTable,
+              DispositivosLicenciaTableData
+            >,
+          ),
+          DispositivosLicenciaTableData,
+          PrefetchHooks Function()
+        > {
+  $$DispositivosLicenciaTableTableTableManager(
+    _$AppDatabase db,
+    $DispositivosLicenciaTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DispositivosLicenciaTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$DispositivosLicenciaTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$DispositivosLicenciaTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String?> negocioId = const Value.absent(),
+                Value<String> fingerprint = const Value.absent(),
+                Value<String> alias = const Value.absent(),
+                Value<String> plataforma = const Value.absent(),
+                Value<String> tipo = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<String> registradoEn = const Value.absent(),
+                Value<String> ultimoUso = const Value.absent(),
+                Value<String?> sincronizadoEn = const Value.absent(),
+                Value<bool> pendienteSync = const Value.absent(),
+              }) => DispositivosLicenciaTableCompanion(
+                id: id,
+                remoteId: remoteId,
+                negocioId: negocioId,
+                fingerprint: fingerprint,
+                alias: alias,
+                plataforma: plataforma,
+                tipo: tipo,
+                activo: activo,
+                registradoEn: registradoEn,
+                ultimoUso: ultimoUso,
+                sincronizadoEn: sincronizadoEn,
+                pendienteSync: pendienteSync,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String?> negocioId = const Value.absent(),
+                required String fingerprint,
+                Value<String> alias = const Value.absent(),
+                required String plataforma,
+                Value<String> tipo = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                required String registradoEn,
+                required String ultimoUso,
+                Value<String?> sincronizadoEn = const Value.absent(),
+                Value<bool> pendienteSync = const Value.absent(),
+              }) => DispositivosLicenciaTableCompanion.insert(
+                id: id,
+                remoteId: remoteId,
+                negocioId: negocioId,
+                fingerprint: fingerprint,
+                alias: alias,
+                plataforma: plataforma,
+                tipo: tipo,
+                activo: activo,
+                registradoEn: registradoEn,
+                ultimoUso: ultimoUso,
+                sincronizadoEn: sincronizadoEn,
+                pendienteSync: pendienteSync,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DispositivosLicenciaTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DispositivosLicenciaTableTable,
+      DispositivosLicenciaTableData,
+      $$DispositivosLicenciaTableTableFilterComposer,
+      $$DispositivosLicenciaTableTableOrderingComposer,
+      $$DispositivosLicenciaTableTableAnnotationComposer,
+      $$DispositivosLicenciaTableTableCreateCompanionBuilder,
+      $$DispositivosLicenciaTableTableUpdateCompanionBuilder,
+      (
+        DispositivosLicenciaTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $DispositivosLicenciaTableTable,
+          DispositivosLicenciaTableData
+        >,
+      ),
+      DispositivosLicenciaTableData,
       PrefetchHooks Function()
     >;
 typedef $$NotasCreditoTableTableCreateCompanionBuilder =
@@ -54551,6 +55646,11 @@ class $AppDatabaseManager {
       $$LicenciasTableTableTableManager(_db, _db.licenciasTable);
   $$PedidosLicenciaTableTableTableManager get pedidosLicenciaTable =>
       $$PedidosLicenciaTableTableTableManager(_db, _db.pedidosLicenciaTable);
+  $$DispositivosLicenciaTableTableTableManager get dispositivosLicenciaTable =>
+      $$DispositivosLicenciaTableTableTableManager(
+        _db,
+        _db.dispositivosLicenciaTable,
+      );
   $$NotasCreditoTableTableTableManager get notasCreditoTable =>
       $$NotasCreditoTableTableTableManager(_db, _db.notasCreditoTable);
   $$SecuenciasNcfTableTableTableManager get secuenciasNcfTable =>

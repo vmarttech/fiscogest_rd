@@ -119,6 +119,107 @@ class LicenciaEstadoPage extends ConsumerWidget {
                                 '${lic.diasRestantes != null ? '  (${lic.diasRestantes} días)' : ''}',
                               ),
                             _kv('Máx. equipos', '${lic.maxDispositivos}'),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Dispositivos en este negocio',
+                      style: AppTypography.bodySmall.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ref.watch(dispositivosListaProvider).when(
+                          data: (list) {
+                            if (list.isEmpty) {
+                              return const Text(
+                                'Ningún equipo registrado aún.',
+                                style: AppTypography.bodySmall,
+                              );
+                            }
+                            return Column(
+                              children: [
+                                for (final d in list)
+                                  ListTile(
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    leading: Icon(
+                                      d.tipo == 'movil'
+                                          ? Icons.phone_android
+                                          : Icons.computer,
+                                      color: d.esEsteEquipo
+                                          ? const Color(0xFF0F766E)
+                                          : null,
+                                    ),
+                                    title: Text(
+                                      d.esEsteEquipo
+                                          ? '${d.alias} (este equipo)'
+                                          : d.alias,
+                                    ),
+                                    subtitle: Text(
+                                      '${d.plataforma} · ${d.tipo}'
+                                      '${d.pendienteSync ? ' · pendiente sync' : ''}',
+                                    ),
+                                  ),
+                                Text(
+                                  '${list.length} / ${lic.maxDispositivos} cupos',
+                                  style: AppTypography.bodySmall,
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () => const LinearProgressIndicator(),
+                          error: (e, _) => Text('Dispositivos: $e'),
+                        ),
+
+                    const SizedBox(height: 12),
+                    Text(
+                      'Dispositivos en este negocio',
+                      style: AppTypography.bodySmall.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ref.watch(dispositivosListaProvider).when(
+                          data: (list) {
+                            if (list.isEmpty) {
+                              return const Text(
+                                'Ningún equipo registrado aún.',
+                                style: AppTypography.bodySmall,
+                              );
+                            }
+                            return Column(
+                              children: [
+                                for (final d in list)
+                                  ListTile(
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    leading: Icon(
+                                      d.tipo == 'movil'
+                                          ? Icons.phone_android
+                                          : Icons.computer,
+                                      color: d.esEsteEquipo
+                                          ? const Color(0xFF0F766E)
+                                          : null,
+                                    ),
+                                    title: Text(
+                                      d.esEsteEquipo
+                                          ? '${d.alias} (este equipo)'
+                                          : d.alias,
+                                    ),
+                                    subtitle: Text(
+                                      '${d.plataforma} · ${d.tipo}'
+                                      '${d.pendienteSync ? ' · pendiente sync' : ''}',
+                                    ),
+                                  ),
+                                Text(
+                                  '${list.length} / ${lic.maxDispositivos} cupos',
+                                  style: AppTypography.bodySmall,
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () => const LinearProgressIndicator(),
+                          error: (e, _) => Text('Dispositivos: $e'),
+                        ),
                             _kv('Máx. cajas', '${lic.maxCajas}'),
                             _kv('e-CF', lic.ecfHabilitado ? 'Incluido' : 'No incluido'),
                           ],
@@ -147,7 +248,7 @@ class LicenciaEstadoPage extends ConsumerWidget {
               ],
 
               const SizedBox(height: 24),
-              Text('Acciones', style: AppTypography.labelLarge),
+              const Text('Acciones', style: AppTypography.labelLarge),
               const SizedBox(height: 10),
 
               if (!esDev) ...[

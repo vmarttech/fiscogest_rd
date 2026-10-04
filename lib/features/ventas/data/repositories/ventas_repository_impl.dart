@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/licencias/domain/licencia_limites_guard.dart';
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
@@ -289,7 +290,8 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta> registrarVenta(Venta venta) async {
-    final id = await _ventasDao.insertarVenta(
+    await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
+final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
         numeroCotizacion: Value(venta.numeroCotizacion),
         numeroFactura: Value(venta.numeroFactura),
@@ -413,6 +415,7 @@ class VentasRepositoryImpl implements IVentasRepository {
     int cotizacionId, {
     String? formaPago,
   }) async {
+    await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
     final actual = await _ventasDao.obtenerVentaPorId(cotizacionId);
     final ya = (actual?.numeroFactura ?? '').trim();
     /* NCF lo emite Caja con emitirNcfFiscal antes/durante cobro */
@@ -471,6 +474,7 @@ class VentasRepositoryImpl implements IVentasRepository {
     String referencia, {
     String? formaPago,
   }) async {
+    await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
     final actual = await _ventasDao.obtenerVentaPorId(ventaId);
     final ya = (actual?.numeroFactura ?? '').trim();
     /* NCF lo emite Caja con emitirNcfFiscal antes/durante cobro */

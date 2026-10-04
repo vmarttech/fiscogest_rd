@@ -6,6 +6,7 @@ typedef VentaConCliente = ({VentasTableData venta, String? nombreCliente});
 class VentasDao {
   VentasDao(this._db);
   final AppDatabase _db;
+  AppDatabase get db => _db;
 
   Future<int> insertarVenta(final VentasTableCompanion venta) async {
     return await _db.into(_db.ventasTable).insert(venta);
