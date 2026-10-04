@@ -9,6 +9,13 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/dispositivo_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/usuario_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/pedido_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/cliente_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/producto_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sync_scheduler.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
@@ -215,6 +222,28 @@ void main() async {
     final licenciaSvc = LicenciaService(db);
     await licenciaSvc.ensureLicenciaInicial();
     await DispositivoService(db).ensureDispositivoRegistrado();
+    debugPrint(
+      'Supabase configurado: ${SupabaseConfig.isConfigured} '
+      'urlLen=${SupabaseConfig.url.length} keyLen=${SupabaseConfig.anonKey.length}',
+    );
+    if (SupabaseConfig.isConfigured) {
+      try {
+        await DispositivoSync(db).pushEsteEquipo();
+        await UsuarioSync(db).pushTodos();
+        await PedidoSync(db).pushTodos();
+        await ProductoSync(db).pushTodos();
+        await ClienteSync(db).pushTodos();
+      } catch (e, st) {
+        debugPrint('Sync nube: $e');
+        debugPrint('$st');
+      }
+      // Reintentos periódicos (fase 1)
+      SyncScheduler(db).start();
+    } else {
+      debugPrint(
+        'DispositivoSync: OMITIDO — falta --dart-define SUPABASE_URL y SUPABASE_ANON_KEY',
+      );
+    }
     await licenciaSvc.expirarPedidosVencidos();
     // UNA vez en tu PC (MartTech vitalicio), descomenta, corre y vuelve a comentar:
     // await licenciaSvc.activarDesarrolladorVitalicio();
