@@ -1,3 +1,10 @@
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_admin_pedidos_page.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_activar_page.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_comprar_page.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_estado_page.dart';
 import 'package:fiscogest_rd/core/ui/fisco_splash.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:go_router/go_router.dart';
@@ -80,7 +87,7 @@ import 'package:fiscogest_rd/core/presentation/pages/inicio_page.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
-    redirect: (context, state) {
+    redirect: (context, state) async {
       final path = state.uri.path;
       if (path == '/login' ||
           path == '/splash' ||
@@ -90,6 +97,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
       final sesion = ref.read(sesionProvider);
       if (sesion == null) return '/login';
+      // Plan simplificado: sin módulos fiscales
+      try {
+        final db = ref.read(databaseProvider);
+        final licSvc = LicenciaService(db);
+        final lic = await licSvc.obtenerActual();
+        final gates = LicenciaGates(lic);
+        final path = state.uri.path;
+        const fiscalPrefixes = <String>[
+          '/ecfe',
+          '/impuestos',
+          '/taxes',
+          '/sales', // hub NCF + emitir/historial/secuencias
+        ];
+        if (!gates.permiteFiscal) {
+          for (final pref in fiscalPrefixes) {
+            if (path == pref || path.startsWith('$pref/')) {
+              return '/licencia';
+            }
+          }
+        }
+      } catch (_) {}
+
       if (sesion.requiereSetupInicial && path != '/setup-cuenta') {
         return '/setup-cuenta';
       }
@@ -99,6 +128,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+
+      GoRoute(
+        path: '/licencia',
+        name: LicenciaEstadoPage.routeName,
+        builder: (_, __) => const AppShell(child: LicenciaEstadoPage()),
+      ),
+      GoRoute(
+        path: '/licencia/comprar',
+        name: LicenciaComprarPage.routeName,
+        builder: (_, __) => const AppShell(child: LicenciaComprarPage()),
+      ),
+      GoRoute(
+        path: '/licencia/activar',
+        name: LicenciaActivarPage.routeName,
+        builder: (_, __) => const AppShell(child: LicenciaActivarPage()),
+      ),
+      GoRoute(
+        path: '/licencia/admin',
+        name: LicenciaAdminPedidosPage.routeName,
+        builder: (_, __) => const AppShell(child: LicenciaAdminPedidosPage()),
+      ),
+
 
       GoRoute(
         path: '/splash',

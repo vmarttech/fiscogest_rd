@@ -100,7 +100,7 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
                     children: const [
                       _ColaTab(),
                       _ConfigTab(),
-          const _GuiaTab(),
+          _GuiaTab(),
                     ],
                   ),
                 ),

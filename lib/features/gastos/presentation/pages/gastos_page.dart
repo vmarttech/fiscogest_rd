@@ -217,9 +217,13 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                     onPressed: () => Navigator.pop(ctx),
                     child: const Text('Cancelar'),
                   ),
-                  AppButton(
-                    text: 'Guardar',
+                  FilledButton(
                     onPressed: () => guardar(ctx),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Guardar'),
                   ),
                 ],
               );
@@ -265,10 +269,19 @@ class _GastosPageState extends ConsumerState<GastosPage> {
       subtitle: 'Egresos operativos del negocio',
       actions: [
         if (!mobile)
-          AppButton(
-            text: 'Nuevo gasto',
-            icon: Icons.add,
-            onPressed: () => _abrirForm(),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilledButton.icon(
+              onPressed: () => _abrirForm(),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Nuevo gasto'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+              ),
+            ),
           ),
       ],
       floatingActionButton: mobile

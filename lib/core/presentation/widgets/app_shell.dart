@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/licencias/presentation/widgets/licencia_aviso_banner.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
@@ -8,6 +9,8 @@ import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
@@ -31,6 +34,11 @@ class AppShell extends ConsumerWidget {
         ? cfg!.nombreComercial.trim()
         : 'Mi negocio';
 
+    final permiteFiscalLicencia = ref.watch(licenciaActualProvider).maybeWhen(
+      data: (lic) => LicenciaGates(lic).permiteFiscal,
+      orElse: () => true,
+    );
+
     const navWidth = 280.0;
     final currentPath = GoRouterState.of(context).uri.path;
 
@@ -53,6 +61,7 @@ class AppShell extends ConsumerWidget {
             ref.read(sesionProvider.notifier).state = null;
             context.go('/login');
           },
+          permiteFiscalLicencia,
         ),
       ),
       body: Builder(
@@ -62,7 +71,13 @@ class AppShell extends ConsumerWidget {
               final s = Scaffold.maybeOf(scaffoldContext);
               if (s != null && s.hasDrawer) s.openDrawer();
             },
-            child: child,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const LicenciaAvisoBanner(),
+                Expanded(child: child),
+              ],
+            ),
           );
         },
       ),
@@ -81,6 +96,7 @@ class AppShell extends ConsumerWidget {
     String operadorLabel,
     String rolUsuario,
     VoidCallback onLogout,
+    bool permiteFiscalLicencia,
   ) {
     // Menú completo SOLO Admin.
     // Cara "colmado" (Fiao, etc.) SOLO si config.simplificado Y es Admin.
@@ -88,6 +104,7 @@ class AppShell extends ConsumerWidget {
     // modoColmado: param modoSimplificado && fiao
     final bool modoColmadoFlag =
         modoSimplificado && rolTienePermiso(rolUsuario, Permiso.fiaoUsar);
+
     bool puede(String permiso) => rolTienePermiso(rolUsuario, permiso);
 
     return Material(
@@ -159,7 +176,7 @@ class AppShell extends ConsumerWidget {
                         Icons.home_outlined,
                         currentPath,
                       ),
-                    if (!modoColmadoFlag && puede(Permiso.facturacionGestionar))
+                    if (!modoColmadoFlag && permiteFiscalLicencia && puede(Permiso.facturacionGestionar))
                       _buildNavItem(
                         context,
                         '/sales',
@@ -317,7 +334,7 @@ class AppShell extends ConsumerWidget {
                         Icons.assessment_outlined,
                         currentPath,
                       ),
-                    if (!modoColmadoFlag && esAdmin) ...[
+                    if (!modoColmadoFlag && esAdmin && permiteFiscalLicencia) ...[
                       _buildNavItem(
                         context,
                         '/ecfe',

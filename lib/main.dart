@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/navigation/app_router.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
@@ -207,6 +208,18 @@ void main() async {
   await initializeDateFormatting('es_DO', null);
   final db = AppDatabase();
   await RepositoryInjection.initialize(db);
+
+  // Licencia offline: demo 15 días si no hay fila; limpia pedidos >7 días.
+  try {
+    final licenciaSvc = LicenciaService(db);
+    await licenciaSvc.ensureLicenciaInicial();
+    await licenciaSvc.expirarPedidosVencidos();
+    // UNA vez en tu PC (MartTech vitalicio), descomenta, corre y vuelve a comentar:
+    // await licenciaSvc.activarDesarrolladorVitalicio();
+  } catch (e, st) {
+    debugPrint('Licencia ensure: $e');
+    debugPrint('$st');
+  }
   final InventarioRepositoryInterface inventarioRepo =
       _InventarioRepositoryAdapter(db);
   final InventarioFisicoRepositoryInterface inventarioFisicoRepo =

@@ -3,6 +3,1627 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
+class $LicenciasTableTable extends LicenciasTable
+    with TableInfo<$LicenciasTableTable, LicenciasTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LicenciasTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _planMeta = const VerificationMeta('plan');
+  @override
+  late final GeneratedColumn<String> plan = GeneratedColumn<String>(
+    'plan',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vigenciaTipoMeta = const VerificationMeta(
+    'vigenciaTipo',
+  );
+  @override
+  late final GeneratedColumn<String> vigenciaTipo = GeneratedColumn<String>(
+    'vigencia_tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fechaInicioMeta = const VerificationMeta(
+    'fechaInicio',
+  );
+  @override
+  late final GeneratedColumn<String> fechaInicio = GeneratedColumn<String>(
+    'fecha_inicio',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fechaFinMeta = const VerificationMeta(
+    'fechaFin',
+  );
+  @override
+  late final GeneratedColumn<String> fechaFin = GeneratedColumn<String>(
+    'fecha_fin',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _maxDispositivosMeta = const VerificationMeta(
+    'maxDispositivos',
+  );
+  @override
+  late final GeneratedColumn<int> maxDispositivos = GeneratedColumn<int>(
+    'max_dispositivos',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _maxCajasMeta = const VerificationMeta(
+    'maxCajas',
+  );
+  @override
+  late final GeneratedColumn<int> maxCajas = GeneratedColumn<int>(
+    'max_cajas',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _ecfHabilitadoMeta = const VerificationMeta(
+    'ecfHabilitado',
+  );
+  @override
+  late final GeneratedColumn<bool> ecfHabilitado = GeneratedColumn<bool>(
+    'ecf_habilitado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("ecf_habilitado" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _vitaliciaMeta = const VerificationMeta(
+    'vitalicia',
+  );
+  @override
+  late final GeneratedColumn<bool> vitalicia = GeneratedColumn<bool>(
+    'vitalicia',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("vitalicia" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
+  @override
+  late final GeneratedColumn<String> estado = GeneratedColumn<String>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fingerprintMeta = const VerificationMeta(
+    'fingerprint',
+  );
+  @override
+  late final GeneratedColumn<String> fingerprint = GeneratedColumn<String>(
+    'fingerprint',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _codigoActivacionMeta = const VerificationMeta(
+    'codigoActivacion',
+  );
+  @override
+  late final GeneratedColumn<String> codigoActivacion = GeneratedColumn<String>(
+    'codigo_activacion',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _payloadFirmaMeta = const VerificationMeta(
+    'payloadFirma',
+  );
+  @override
+  late final GeneratedColumn<String> payloadFirma = GeneratedColumn<String>(
+    'payload_firma',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<String> actualizadoEn = GeneratedColumn<String>(
+    'actualizado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    plan,
+    vigenciaTipo,
+    fechaInicio,
+    fechaFin,
+    maxDispositivos,
+    maxCajas,
+    ecfHabilitado,
+    vitalicia,
+    estado,
+    fingerprint,
+    codigoActivacion,
+    payloadFirma,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'licencias_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LicenciasTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('plan')) {
+      context.handle(
+        _planMeta,
+        plan.isAcceptableOrUnknown(data['plan']!, _planMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_planMeta);
+    }
+    if (data.containsKey('vigencia_tipo')) {
+      context.handle(
+        _vigenciaTipoMeta,
+        vigenciaTipo.isAcceptableOrUnknown(
+          data['vigencia_tipo']!,
+          _vigenciaTipoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_vigenciaTipoMeta);
+    }
+    if (data.containsKey('fecha_inicio')) {
+      context.handle(
+        _fechaInicioMeta,
+        fechaInicio.isAcceptableOrUnknown(
+          data['fecha_inicio']!,
+          _fechaInicioMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaInicioMeta);
+    }
+    if (data.containsKey('fecha_fin')) {
+      context.handle(
+        _fechaFinMeta,
+        fechaFin.isAcceptableOrUnknown(data['fecha_fin']!, _fechaFinMeta),
+      );
+    }
+    if (data.containsKey('max_dispositivos')) {
+      context.handle(
+        _maxDispositivosMeta,
+        maxDispositivos.isAcceptableOrUnknown(
+          data['max_dispositivos']!,
+          _maxDispositivosMeta,
+        ),
+      );
+    }
+    if (data.containsKey('max_cajas')) {
+      context.handle(
+        _maxCajasMeta,
+        maxCajas.isAcceptableOrUnknown(data['max_cajas']!, _maxCajasMeta),
+      );
+    }
+    if (data.containsKey('ecf_habilitado')) {
+      context.handle(
+        _ecfHabilitadoMeta,
+        ecfHabilitado.isAcceptableOrUnknown(
+          data['ecf_habilitado']!,
+          _ecfHabilitadoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('vitalicia')) {
+      context.handle(
+        _vitaliciaMeta,
+        vitalicia.isAcceptableOrUnknown(data['vitalicia']!, _vitaliciaMeta),
+      );
+    }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_estadoMeta);
+    }
+    if (data.containsKey('fingerprint')) {
+      context.handle(
+        _fingerprintMeta,
+        fingerprint.isAcceptableOrUnknown(
+          data['fingerprint']!,
+          _fingerprintMeta,
+        ),
+      );
+    }
+    if (data.containsKey('codigo_activacion')) {
+      context.handle(
+        _codigoActivacionMeta,
+        codigoActivacion.isAcceptableOrUnknown(
+          data['codigo_activacion']!,
+          _codigoActivacionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payload_firma')) {
+      context.handle(
+        _payloadFirmaMeta,
+        payloadFirma.isAcceptableOrUnknown(
+          data['payload_firma']!,
+          _payloadFirmaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_actualizadoEnMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LicenciasTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LicenciasTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      plan: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}plan'],
+      )!,
+      vigenciaTipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vigencia_tipo'],
+      )!,
+      fechaInicio: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fecha_inicio'],
+      )!,
+      fechaFin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fecha_fin'],
+      ),
+      maxDispositivos: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_dispositivos'],
+      )!,
+      maxCajas: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_cajas'],
+      )!,
+      ecfHabilitado: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}ecf_habilitado'],
+      )!,
+      vitalicia: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}vitalicia'],
+      )!,
+      estado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}estado'],
+      )!,
+      fingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fingerprint'],
+      ),
+      codigoActivacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo_activacion'],
+      ),
+      payloadFirma: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload_firma'],
+      ),
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}actualizado_en'],
+      )!,
+    );
+  }
+
+  @override
+  $LicenciasTableTable createAlias(String alias) {
+    return $LicenciasTableTable(attachedDatabase, alias);
+  }
+}
+
+class LicenciasTableData extends DataClass
+    implements Insertable<LicenciasTableData> {
+  final int id;
+
+  /// demo | basico | profesional | empresa | desarrollador
+  final String plan;
+
+  /// prueba | mensual | trimestral | semestral | anual | vitalicia
+  final String vigenciaTipo;
+  final String fechaInicio;
+  final String? fechaFin;
+  final int maxDispositivos;
+  final int maxCajas;
+  final bool ecfHabilitado;
+  final bool vitalicia;
+
+  /// activa | gracia | vencida | no_activada
+  final String estado;
+  final String? fingerprint;
+  final String? codigoActivacion;
+  final String? payloadFirma;
+  final String actualizadoEn;
+  const LicenciasTableData({
+    required this.id,
+    required this.plan,
+    required this.vigenciaTipo,
+    required this.fechaInicio,
+    this.fechaFin,
+    required this.maxDispositivos,
+    required this.maxCajas,
+    required this.ecfHabilitado,
+    required this.vitalicia,
+    required this.estado,
+    this.fingerprint,
+    this.codigoActivacion,
+    this.payloadFirma,
+    required this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['plan'] = Variable<String>(plan);
+    map['vigencia_tipo'] = Variable<String>(vigenciaTipo);
+    map['fecha_inicio'] = Variable<String>(fechaInicio);
+    if (!nullToAbsent || fechaFin != null) {
+      map['fecha_fin'] = Variable<String>(fechaFin);
+    }
+    map['max_dispositivos'] = Variable<int>(maxDispositivos);
+    map['max_cajas'] = Variable<int>(maxCajas);
+    map['ecf_habilitado'] = Variable<bool>(ecfHabilitado);
+    map['vitalicia'] = Variable<bool>(vitalicia);
+    map['estado'] = Variable<String>(estado);
+    if (!nullToAbsent || fingerprint != null) {
+      map['fingerprint'] = Variable<String>(fingerprint);
+    }
+    if (!nullToAbsent || codigoActivacion != null) {
+      map['codigo_activacion'] = Variable<String>(codigoActivacion);
+    }
+    if (!nullToAbsent || payloadFirma != null) {
+      map['payload_firma'] = Variable<String>(payloadFirma);
+    }
+    map['actualizado_en'] = Variable<String>(actualizadoEn);
+    return map;
+  }
+
+  LicenciasTableCompanion toCompanion(bool nullToAbsent) {
+    return LicenciasTableCompanion(
+      id: Value(id),
+      plan: Value(plan),
+      vigenciaTipo: Value(vigenciaTipo),
+      fechaInicio: Value(fechaInicio),
+      fechaFin: fechaFin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaFin),
+      maxDispositivos: Value(maxDispositivos),
+      maxCajas: Value(maxCajas),
+      ecfHabilitado: Value(ecfHabilitado),
+      vitalicia: Value(vitalicia),
+      estado: Value(estado),
+      fingerprint: fingerprint == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fingerprint),
+      codigoActivacion: codigoActivacion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codigoActivacion),
+      payloadFirma: payloadFirma == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payloadFirma),
+      actualizadoEn: Value(actualizadoEn),
+    );
+  }
+
+  factory LicenciasTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LicenciasTableData(
+      id: serializer.fromJson<int>(json['id']),
+      plan: serializer.fromJson<String>(json['plan']),
+      vigenciaTipo: serializer.fromJson<String>(json['vigenciaTipo']),
+      fechaInicio: serializer.fromJson<String>(json['fechaInicio']),
+      fechaFin: serializer.fromJson<String?>(json['fechaFin']),
+      maxDispositivos: serializer.fromJson<int>(json['maxDispositivos']),
+      maxCajas: serializer.fromJson<int>(json['maxCajas']),
+      ecfHabilitado: serializer.fromJson<bool>(json['ecfHabilitado']),
+      vitalicia: serializer.fromJson<bool>(json['vitalicia']),
+      estado: serializer.fromJson<String>(json['estado']),
+      fingerprint: serializer.fromJson<String?>(json['fingerprint']),
+      codigoActivacion: serializer.fromJson<String?>(json['codigoActivacion']),
+      payloadFirma: serializer.fromJson<String?>(json['payloadFirma']),
+      actualizadoEn: serializer.fromJson<String>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'plan': serializer.toJson<String>(plan),
+      'vigenciaTipo': serializer.toJson<String>(vigenciaTipo),
+      'fechaInicio': serializer.toJson<String>(fechaInicio),
+      'fechaFin': serializer.toJson<String?>(fechaFin),
+      'maxDispositivos': serializer.toJson<int>(maxDispositivos),
+      'maxCajas': serializer.toJson<int>(maxCajas),
+      'ecfHabilitado': serializer.toJson<bool>(ecfHabilitado),
+      'vitalicia': serializer.toJson<bool>(vitalicia),
+      'estado': serializer.toJson<String>(estado),
+      'fingerprint': serializer.toJson<String?>(fingerprint),
+      'codigoActivacion': serializer.toJson<String?>(codigoActivacion),
+      'payloadFirma': serializer.toJson<String?>(payloadFirma),
+      'actualizadoEn': serializer.toJson<String>(actualizadoEn),
+    };
+  }
+
+  LicenciasTableData copyWith({
+    int? id,
+    String? plan,
+    String? vigenciaTipo,
+    String? fechaInicio,
+    Value<String?> fechaFin = const Value.absent(),
+    int? maxDispositivos,
+    int? maxCajas,
+    bool? ecfHabilitado,
+    bool? vitalicia,
+    String? estado,
+    Value<String?> fingerprint = const Value.absent(),
+    Value<String?> codigoActivacion = const Value.absent(),
+    Value<String?> payloadFirma = const Value.absent(),
+    String? actualizadoEn,
+  }) => LicenciasTableData(
+    id: id ?? this.id,
+    plan: plan ?? this.plan,
+    vigenciaTipo: vigenciaTipo ?? this.vigenciaTipo,
+    fechaInicio: fechaInicio ?? this.fechaInicio,
+    fechaFin: fechaFin.present ? fechaFin.value : this.fechaFin,
+    maxDispositivos: maxDispositivos ?? this.maxDispositivos,
+    maxCajas: maxCajas ?? this.maxCajas,
+    ecfHabilitado: ecfHabilitado ?? this.ecfHabilitado,
+    vitalicia: vitalicia ?? this.vitalicia,
+    estado: estado ?? this.estado,
+    fingerprint: fingerprint.present ? fingerprint.value : this.fingerprint,
+    codigoActivacion: codigoActivacion.present
+        ? codigoActivacion.value
+        : this.codigoActivacion,
+    payloadFirma: payloadFirma.present ? payloadFirma.value : this.payloadFirma,
+    actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+  );
+  LicenciasTableData copyWithCompanion(LicenciasTableCompanion data) {
+    return LicenciasTableData(
+      id: data.id.present ? data.id.value : this.id,
+      plan: data.plan.present ? data.plan.value : this.plan,
+      vigenciaTipo: data.vigenciaTipo.present
+          ? data.vigenciaTipo.value
+          : this.vigenciaTipo,
+      fechaInicio: data.fechaInicio.present
+          ? data.fechaInicio.value
+          : this.fechaInicio,
+      fechaFin: data.fechaFin.present ? data.fechaFin.value : this.fechaFin,
+      maxDispositivos: data.maxDispositivos.present
+          ? data.maxDispositivos.value
+          : this.maxDispositivos,
+      maxCajas: data.maxCajas.present ? data.maxCajas.value : this.maxCajas,
+      ecfHabilitado: data.ecfHabilitado.present
+          ? data.ecfHabilitado.value
+          : this.ecfHabilitado,
+      vitalicia: data.vitalicia.present ? data.vitalicia.value : this.vitalicia,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      fingerprint: data.fingerprint.present
+          ? data.fingerprint.value
+          : this.fingerprint,
+      codigoActivacion: data.codigoActivacion.present
+          ? data.codigoActivacion.value
+          : this.codigoActivacion,
+      payloadFirma: data.payloadFirma.present
+          ? data.payloadFirma.value
+          : this.payloadFirma,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LicenciasTableData(')
+          ..write('id: $id, ')
+          ..write('plan: $plan, ')
+          ..write('vigenciaTipo: $vigenciaTipo, ')
+          ..write('fechaInicio: $fechaInicio, ')
+          ..write('fechaFin: $fechaFin, ')
+          ..write('maxDispositivos: $maxDispositivos, ')
+          ..write('maxCajas: $maxCajas, ')
+          ..write('ecfHabilitado: $ecfHabilitado, ')
+          ..write('vitalicia: $vitalicia, ')
+          ..write('estado: $estado, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('codigoActivacion: $codigoActivacion, ')
+          ..write('payloadFirma: $payloadFirma, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    plan,
+    vigenciaTipo,
+    fechaInicio,
+    fechaFin,
+    maxDispositivos,
+    maxCajas,
+    ecfHabilitado,
+    vitalicia,
+    estado,
+    fingerprint,
+    codigoActivacion,
+    payloadFirma,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LicenciasTableData &&
+          other.id == this.id &&
+          other.plan == this.plan &&
+          other.vigenciaTipo == this.vigenciaTipo &&
+          other.fechaInicio == this.fechaInicio &&
+          other.fechaFin == this.fechaFin &&
+          other.maxDispositivos == this.maxDispositivos &&
+          other.maxCajas == this.maxCajas &&
+          other.ecfHabilitado == this.ecfHabilitado &&
+          other.vitalicia == this.vitalicia &&
+          other.estado == this.estado &&
+          other.fingerprint == this.fingerprint &&
+          other.codigoActivacion == this.codigoActivacion &&
+          other.payloadFirma == this.payloadFirma &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
+  final Value<int> id;
+  final Value<String> plan;
+  final Value<String> vigenciaTipo;
+  final Value<String> fechaInicio;
+  final Value<String?> fechaFin;
+  final Value<int> maxDispositivos;
+  final Value<int> maxCajas;
+  final Value<bool> ecfHabilitado;
+  final Value<bool> vitalicia;
+  final Value<String> estado;
+  final Value<String?> fingerprint;
+  final Value<String?> codigoActivacion;
+  final Value<String?> payloadFirma;
+  final Value<String> actualizadoEn;
+  const LicenciasTableCompanion({
+    this.id = const Value.absent(),
+    this.plan = const Value.absent(),
+    this.vigenciaTipo = const Value.absent(),
+    this.fechaInicio = const Value.absent(),
+    this.fechaFin = const Value.absent(),
+    this.maxDispositivos = const Value.absent(),
+    this.maxCajas = const Value.absent(),
+    this.ecfHabilitado = const Value.absent(),
+    this.vitalicia = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.codigoActivacion = const Value.absent(),
+    this.payloadFirma = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  LicenciasTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String plan,
+    required String vigenciaTipo,
+    required String fechaInicio,
+    this.fechaFin = const Value.absent(),
+    this.maxDispositivos = const Value.absent(),
+    this.maxCajas = const Value.absent(),
+    this.ecfHabilitado = const Value.absent(),
+    this.vitalicia = const Value.absent(),
+    required String estado,
+    this.fingerprint = const Value.absent(),
+    this.codigoActivacion = const Value.absent(),
+    this.payloadFirma = const Value.absent(),
+    required String actualizadoEn,
+  }) : plan = Value(plan),
+       vigenciaTipo = Value(vigenciaTipo),
+       fechaInicio = Value(fechaInicio),
+       estado = Value(estado),
+       actualizadoEn = Value(actualizadoEn);
+  static Insertable<LicenciasTableData> custom({
+    Expression<int>? id,
+    Expression<String>? plan,
+    Expression<String>? vigenciaTipo,
+    Expression<String>? fechaInicio,
+    Expression<String>? fechaFin,
+    Expression<int>? maxDispositivos,
+    Expression<int>? maxCajas,
+    Expression<bool>? ecfHabilitado,
+    Expression<bool>? vitalicia,
+    Expression<String>? estado,
+    Expression<String>? fingerprint,
+    Expression<String>? codigoActivacion,
+    Expression<String>? payloadFirma,
+    Expression<String>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (plan != null) 'plan': plan,
+      if (vigenciaTipo != null) 'vigencia_tipo': vigenciaTipo,
+      if (fechaInicio != null) 'fecha_inicio': fechaInicio,
+      if (fechaFin != null) 'fecha_fin': fechaFin,
+      if (maxDispositivos != null) 'max_dispositivos': maxDispositivos,
+      if (maxCajas != null) 'max_cajas': maxCajas,
+      if (ecfHabilitado != null) 'ecf_habilitado': ecfHabilitado,
+      if (vitalicia != null) 'vitalicia': vitalicia,
+      if (estado != null) 'estado': estado,
+      if (fingerprint != null) 'fingerprint': fingerprint,
+      if (codigoActivacion != null) 'codigo_activacion': codigoActivacion,
+      if (payloadFirma != null) 'payload_firma': payloadFirma,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  LicenciasTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? plan,
+    Value<String>? vigenciaTipo,
+    Value<String>? fechaInicio,
+    Value<String?>? fechaFin,
+    Value<int>? maxDispositivos,
+    Value<int>? maxCajas,
+    Value<bool>? ecfHabilitado,
+    Value<bool>? vitalicia,
+    Value<String>? estado,
+    Value<String?>? fingerprint,
+    Value<String?>? codigoActivacion,
+    Value<String?>? payloadFirma,
+    Value<String>? actualizadoEn,
+  }) {
+    return LicenciasTableCompanion(
+      id: id ?? this.id,
+      plan: plan ?? this.plan,
+      vigenciaTipo: vigenciaTipo ?? this.vigenciaTipo,
+      fechaInicio: fechaInicio ?? this.fechaInicio,
+      fechaFin: fechaFin ?? this.fechaFin,
+      maxDispositivos: maxDispositivos ?? this.maxDispositivos,
+      maxCajas: maxCajas ?? this.maxCajas,
+      ecfHabilitado: ecfHabilitado ?? this.ecfHabilitado,
+      vitalicia: vitalicia ?? this.vitalicia,
+      estado: estado ?? this.estado,
+      fingerprint: fingerprint ?? this.fingerprint,
+      codigoActivacion: codigoActivacion ?? this.codigoActivacion,
+      payloadFirma: payloadFirma ?? this.payloadFirma,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (plan.present) {
+      map['plan'] = Variable<String>(plan.value);
+    }
+    if (vigenciaTipo.present) {
+      map['vigencia_tipo'] = Variable<String>(vigenciaTipo.value);
+    }
+    if (fechaInicio.present) {
+      map['fecha_inicio'] = Variable<String>(fechaInicio.value);
+    }
+    if (fechaFin.present) {
+      map['fecha_fin'] = Variable<String>(fechaFin.value);
+    }
+    if (maxDispositivos.present) {
+      map['max_dispositivos'] = Variable<int>(maxDispositivos.value);
+    }
+    if (maxCajas.present) {
+      map['max_cajas'] = Variable<int>(maxCajas.value);
+    }
+    if (ecfHabilitado.present) {
+      map['ecf_habilitado'] = Variable<bool>(ecfHabilitado.value);
+    }
+    if (vitalicia.present) {
+      map['vitalicia'] = Variable<bool>(vitalicia.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<String>(estado.value);
+    }
+    if (fingerprint.present) {
+      map['fingerprint'] = Variable<String>(fingerprint.value);
+    }
+    if (codigoActivacion.present) {
+      map['codigo_activacion'] = Variable<String>(codigoActivacion.value);
+    }
+    if (payloadFirma.present) {
+      map['payload_firma'] = Variable<String>(payloadFirma.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<String>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LicenciasTableCompanion(')
+          ..write('id: $id, ')
+          ..write('plan: $plan, ')
+          ..write('vigenciaTipo: $vigenciaTipo, ')
+          ..write('fechaInicio: $fechaInicio, ')
+          ..write('fechaFin: $fechaFin, ')
+          ..write('maxDispositivos: $maxDispositivos, ')
+          ..write('maxCajas: $maxCajas, ')
+          ..write('ecfHabilitado: $ecfHabilitado, ')
+          ..write('vitalicia: $vitalicia, ')
+          ..write('estado: $estado, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('codigoActivacion: $codigoActivacion, ')
+          ..write('payloadFirma: $payloadFirma, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PedidosLicenciaTableTable extends PedidosLicenciaTable
+    with TableInfo<$PedidosLicenciaTableTable, PedidosLicenciaTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PedidosLicenciaTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _referenciaMeta = const VerificationMeta(
+    'referencia',
+  );
+  @override
+  late final GeneratedColumn<String> referencia = GeneratedColumn<String>(
+    'referencia',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _planMeta = const VerificationMeta('plan');
+  @override
+  late final GeneratedColumn<String> plan = GeneratedColumn<String>(
+    'plan',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vigenciaTipoMeta = const VerificationMeta(
+    'vigenciaTipo',
+  );
+  @override
+  late final GeneratedColumn<String> vigenciaTipo = GeneratedColumn<String>(
+    'vigencia_tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _montoMeta = const VerificationMeta('monto');
+  @override
+  late final GeneratedColumn<double> monto = GeneratedColumn<double>(
+    'monto',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _monedaMeta = const VerificationMeta('moneda');
+  @override
+  late final GeneratedColumn<String> moneda = GeneratedColumn<String>(
+    'moneda',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('DOP'),
+  );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
+  @override
+  late final GeneratedColumn<String> estado = GeneratedColumn<String>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _negocioNombreMeta = const VerificationMeta(
+    'negocioNombre',
+  );
+  @override
+  late final GeneratedColumn<String> negocioNombre = GeneratedColumn<String>(
+    'negocio_nombre',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _rncMeta = const VerificationMeta('rnc');
+  @override
+  late final GeneratedColumn<String> rnc = GeneratedColumn<String>(
+    'rnc',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fechaCreacionMeta = const VerificationMeta(
+    'fechaCreacion',
+  );
+  @override
+  late final GeneratedColumn<String> fechaCreacion = GeneratedColumn<String>(
+    'fecha_creacion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fechaExpiracionPedidoMeta =
+      const VerificationMeta('fechaExpiracionPedido');
+  @override
+  late final GeneratedColumn<String> fechaExpiracionPedido =
+      GeneratedColumn<String>(
+        'fecha_expiracion_pedido',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _medioPagoPreferidoMeta =
+      const VerificationMeta('medioPagoPreferido');
+  @override
+  late final GeneratedColumn<String> medioPagoPreferido =
+      GeneratedColumn<String>(
+        'medio_pago_preferido',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _notasMeta = const VerificationMeta('notas');
+  @override
+  late final GeneratedColumn<String> notas = GeneratedColumn<String>(
+    'notas',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    referencia,
+    plan,
+    vigenciaTipo,
+    monto,
+    moneda,
+    estado,
+    negocioNombre,
+    rnc,
+    fechaCreacion,
+    fechaExpiracionPedido,
+    medioPagoPreferido,
+    notas,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pedidos_licencia_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PedidosLicenciaTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('referencia')) {
+      context.handle(
+        _referenciaMeta,
+        referencia.isAcceptableOrUnknown(data['referencia']!, _referenciaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_referenciaMeta);
+    }
+    if (data.containsKey('plan')) {
+      context.handle(
+        _planMeta,
+        plan.isAcceptableOrUnknown(data['plan']!, _planMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_planMeta);
+    }
+    if (data.containsKey('vigencia_tipo')) {
+      context.handle(
+        _vigenciaTipoMeta,
+        vigenciaTipo.isAcceptableOrUnknown(
+          data['vigencia_tipo']!,
+          _vigenciaTipoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_vigenciaTipoMeta);
+    }
+    if (data.containsKey('monto')) {
+      context.handle(
+        _montoMeta,
+        monto.isAcceptableOrUnknown(data['monto']!, _montoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_montoMeta);
+    }
+    if (data.containsKey('moneda')) {
+      context.handle(
+        _monedaMeta,
+        moneda.isAcceptableOrUnknown(data['moneda']!, _monedaMeta),
+      );
+    }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_estadoMeta);
+    }
+    if (data.containsKey('negocio_nombre')) {
+      context.handle(
+        _negocioNombreMeta,
+        negocioNombre.isAcceptableOrUnknown(
+          data['negocio_nombre']!,
+          _negocioNombreMeta,
+        ),
+      );
+    }
+    if (data.containsKey('rnc')) {
+      context.handle(
+        _rncMeta,
+        rnc.isAcceptableOrUnknown(data['rnc']!, _rncMeta),
+      );
+    }
+    if (data.containsKey('fecha_creacion')) {
+      context.handle(
+        _fechaCreacionMeta,
+        fechaCreacion.isAcceptableOrUnknown(
+          data['fecha_creacion']!,
+          _fechaCreacionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaCreacionMeta);
+    }
+    if (data.containsKey('fecha_expiracion_pedido')) {
+      context.handle(
+        _fechaExpiracionPedidoMeta,
+        fechaExpiracionPedido.isAcceptableOrUnknown(
+          data['fecha_expiracion_pedido']!,
+          _fechaExpiracionPedidoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaExpiracionPedidoMeta);
+    }
+    if (data.containsKey('medio_pago_preferido')) {
+      context.handle(
+        _medioPagoPreferidoMeta,
+        medioPagoPreferido.isAcceptableOrUnknown(
+          data['medio_pago_preferido']!,
+          _medioPagoPreferidoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notas')) {
+      context.handle(
+        _notasMeta,
+        notas.isAcceptableOrUnknown(data['notas']!, _notasMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PedidosLicenciaTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PedidosLicenciaTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      referencia: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}referencia'],
+      )!,
+      plan: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}plan'],
+      )!,
+      vigenciaTipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vigencia_tipo'],
+      )!,
+      monto: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto'],
+      )!,
+      moneda: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}moneda'],
+      )!,
+      estado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}estado'],
+      )!,
+      negocioNombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}negocio_nombre'],
+      ),
+      rnc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rnc'],
+      ),
+      fechaCreacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fecha_creacion'],
+      )!,
+      fechaExpiracionPedido: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fecha_expiracion_pedido'],
+      )!,
+      medioPagoPreferido: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}medio_pago_preferido'],
+      ),
+      notas: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notas'],
+      ),
+    );
+  }
+
+  @override
+  $PedidosLicenciaTableTable createAlias(String alias) {
+    return $PedidosLicenciaTableTable(attachedDatabase, alias);
+  }
+}
+
+class PedidosLicenciaTableData extends DataClass
+    implements Insertable<PedidosLicenciaTableData> {
+  final int id;
+
+  /// FG-48291 (solo dígitos tras el prefijo)
+  final String referencia;
+  final String plan;
+  final String vigenciaTipo;
+  final double monto;
+  final String moneda;
+
+  /// pendiente_pago | pago_reportado | pagado | licencia_emitida | expirado
+  final String estado;
+  final String? negocioNombre;
+  final String? rnc;
+  final String fechaCreacion;
+  final String fechaExpiracionPedido;
+
+  /// toke | banreservas | bhd | apap | null
+  final String? medioPagoPreferido;
+  final String? notas;
+  const PedidosLicenciaTableData({
+    required this.id,
+    required this.referencia,
+    required this.plan,
+    required this.vigenciaTipo,
+    required this.monto,
+    required this.moneda,
+    required this.estado,
+    this.negocioNombre,
+    this.rnc,
+    required this.fechaCreacion,
+    required this.fechaExpiracionPedido,
+    this.medioPagoPreferido,
+    this.notas,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['referencia'] = Variable<String>(referencia);
+    map['plan'] = Variable<String>(plan);
+    map['vigencia_tipo'] = Variable<String>(vigenciaTipo);
+    map['monto'] = Variable<double>(monto);
+    map['moneda'] = Variable<String>(moneda);
+    map['estado'] = Variable<String>(estado);
+    if (!nullToAbsent || negocioNombre != null) {
+      map['negocio_nombre'] = Variable<String>(negocioNombre);
+    }
+    if (!nullToAbsent || rnc != null) {
+      map['rnc'] = Variable<String>(rnc);
+    }
+    map['fecha_creacion'] = Variable<String>(fechaCreacion);
+    map['fecha_expiracion_pedido'] = Variable<String>(fechaExpiracionPedido);
+    if (!nullToAbsent || medioPagoPreferido != null) {
+      map['medio_pago_preferido'] = Variable<String>(medioPagoPreferido);
+    }
+    if (!nullToAbsent || notas != null) {
+      map['notas'] = Variable<String>(notas);
+    }
+    return map;
+  }
+
+  PedidosLicenciaTableCompanion toCompanion(bool nullToAbsent) {
+    return PedidosLicenciaTableCompanion(
+      id: Value(id),
+      referencia: Value(referencia),
+      plan: Value(plan),
+      vigenciaTipo: Value(vigenciaTipo),
+      monto: Value(monto),
+      moneda: Value(moneda),
+      estado: Value(estado),
+      negocioNombre: negocioNombre == null && nullToAbsent
+          ? const Value.absent()
+          : Value(negocioNombre),
+      rnc: rnc == null && nullToAbsent ? const Value.absent() : Value(rnc),
+      fechaCreacion: Value(fechaCreacion),
+      fechaExpiracionPedido: Value(fechaExpiracionPedido),
+      medioPagoPreferido: medioPagoPreferido == null && nullToAbsent
+          ? const Value.absent()
+          : Value(medioPagoPreferido),
+      notas: notas == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notas),
+    );
+  }
+
+  factory PedidosLicenciaTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PedidosLicenciaTableData(
+      id: serializer.fromJson<int>(json['id']),
+      referencia: serializer.fromJson<String>(json['referencia']),
+      plan: serializer.fromJson<String>(json['plan']),
+      vigenciaTipo: serializer.fromJson<String>(json['vigenciaTipo']),
+      monto: serializer.fromJson<double>(json['monto']),
+      moneda: serializer.fromJson<String>(json['moneda']),
+      estado: serializer.fromJson<String>(json['estado']),
+      negocioNombre: serializer.fromJson<String?>(json['negocioNombre']),
+      rnc: serializer.fromJson<String?>(json['rnc']),
+      fechaCreacion: serializer.fromJson<String>(json['fechaCreacion']),
+      fechaExpiracionPedido: serializer.fromJson<String>(
+        json['fechaExpiracionPedido'],
+      ),
+      medioPagoPreferido: serializer.fromJson<String?>(
+        json['medioPagoPreferido'],
+      ),
+      notas: serializer.fromJson<String?>(json['notas']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'referencia': serializer.toJson<String>(referencia),
+      'plan': serializer.toJson<String>(plan),
+      'vigenciaTipo': serializer.toJson<String>(vigenciaTipo),
+      'monto': serializer.toJson<double>(monto),
+      'moneda': serializer.toJson<String>(moneda),
+      'estado': serializer.toJson<String>(estado),
+      'negocioNombre': serializer.toJson<String?>(negocioNombre),
+      'rnc': serializer.toJson<String?>(rnc),
+      'fechaCreacion': serializer.toJson<String>(fechaCreacion),
+      'fechaExpiracionPedido': serializer.toJson<String>(fechaExpiracionPedido),
+      'medioPagoPreferido': serializer.toJson<String?>(medioPagoPreferido),
+      'notas': serializer.toJson<String?>(notas),
+    };
+  }
+
+  PedidosLicenciaTableData copyWith({
+    int? id,
+    String? referencia,
+    String? plan,
+    String? vigenciaTipo,
+    double? monto,
+    String? moneda,
+    String? estado,
+    Value<String?> negocioNombre = const Value.absent(),
+    Value<String?> rnc = const Value.absent(),
+    String? fechaCreacion,
+    String? fechaExpiracionPedido,
+    Value<String?> medioPagoPreferido = const Value.absent(),
+    Value<String?> notas = const Value.absent(),
+  }) => PedidosLicenciaTableData(
+    id: id ?? this.id,
+    referencia: referencia ?? this.referencia,
+    plan: plan ?? this.plan,
+    vigenciaTipo: vigenciaTipo ?? this.vigenciaTipo,
+    monto: monto ?? this.monto,
+    moneda: moneda ?? this.moneda,
+    estado: estado ?? this.estado,
+    negocioNombre: negocioNombre.present
+        ? negocioNombre.value
+        : this.negocioNombre,
+    rnc: rnc.present ? rnc.value : this.rnc,
+    fechaCreacion: fechaCreacion ?? this.fechaCreacion,
+    fechaExpiracionPedido: fechaExpiracionPedido ?? this.fechaExpiracionPedido,
+    medioPagoPreferido: medioPagoPreferido.present
+        ? medioPagoPreferido.value
+        : this.medioPagoPreferido,
+    notas: notas.present ? notas.value : this.notas,
+  );
+  PedidosLicenciaTableData copyWithCompanion(
+    PedidosLicenciaTableCompanion data,
+  ) {
+    return PedidosLicenciaTableData(
+      id: data.id.present ? data.id.value : this.id,
+      referencia: data.referencia.present
+          ? data.referencia.value
+          : this.referencia,
+      plan: data.plan.present ? data.plan.value : this.plan,
+      vigenciaTipo: data.vigenciaTipo.present
+          ? data.vigenciaTipo.value
+          : this.vigenciaTipo,
+      monto: data.monto.present ? data.monto.value : this.monto,
+      moneda: data.moneda.present ? data.moneda.value : this.moneda,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      negocioNombre: data.negocioNombre.present
+          ? data.negocioNombre.value
+          : this.negocioNombre,
+      rnc: data.rnc.present ? data.rnc.value : this.rnc,
+      fechaCreacion: data.fechaCreacion.present
+          ? data.fechaCreacion.value
+          : this.fechaCreacion,
+      fechaExpiracionPedido: data.fechaExpiracionPedido.present
+          ? data.fechaExpiracionPedido.value
+          : this.fechaExpiracionPedido,
+      medioPagoPreferido: data.medioPagoPreferido.present
+          ? data.medioPagoPreferido.value
+          : this.medioPagoPreferido,
+      notas: data.notas.present ? data.notas.value : this.notas,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PedidosLicenciaTableData(')
+          ..write('id: $id, ')
+          ..write('referencia: $referencia, ')
+          ..write('plan: $plan, ')
+          ..write('vigenciaTipo: $vigenciaTipo, ')
+          ..write('monto: $monto, ')
+          ..write('moneda: $moneda, ')
+          ..write('estado: $estado, ')
+          ..write('negocioNombre: $negocioNombre, ')
+          ..write('rnc: $rnc, ')
+          ..write('fechaCreacion: $fechaCreacion, ')
+          ..write('fechaExpiracionPedido: $fechaExpiracionPedido, ')
+          ..write('medioPagoPreferido: $medioPagoPreferido, ')
+          ..write('notas: $notas')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    referencia,
+    plan,
+    vigenciaTipo,
+    monto,
+    moneda,
+    estado,
+    negocioNombre,
+    rnc,
+    fechaCreacion,
+    fechaExpiracionPedido,
+    medioPagoPreferido,
+    notas,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PedidosLicenciaTableData &&
+          other.id == this.id &&
+          other.referencia == this.referencia &&
+          other.plan == this.plan &&
+          other.vigenciaTipo == this.vigenciaTipo &&
+          other.monto == this.monto &&
+          other.moneda == this.moneda &&
+          other.estado == this.estado &&
+          other.negocioNombre == this.negocioNombre &&
+          other.rnc == this.rnc &&
+          other.fechaCreacion == this.fechaCreacion &&
+          other.fechaExpiracionPedido == this.fechaExpiracionPedido &&
+          other.medioPagoPreferido == this.medioPagoPreferido &&
+          other.notas == this.notas);
+}
+
+class PedidosLicenciaTableCompanion
+    extends UpdateCompanion<PedidosLicenciaTableData> {
+  final Value<int> id;
+  final Value<String> referencia;
+  final Value<String> plan;
+  final Value<String> vigenciaTipo;
+  final Value<double> monto;
+  final Value<String> moneda;
+  final Value<String> estado;
+  final Value<String?> negocioNombre;
+  final Value<String?> rnc;
+  final Value<String> fechaCreacion;
+  final Value<String> fechaExpiracionPedido;
+  final Value<String?> medioPagoPreferido;
+  final Value<String?> notas;
+  const PedidosLicenciaTableCompanion({
+    this.id = const Value.absent(),
+    this.referencia = const Value.absent(),
+    this.plan = const Value.absent(),
+    this.vigenciaTipo = const Value.absent(),
+    this.monto = const Value.absent(),
+    this.moneda = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.negocioNombre = const Value.absent(),
+    this.rnc = const Value.absent(),
+    this.fechaCreacion = const Value.absent(),
+    this.fechaExpiracionPedido = const Value.absent(),
+    this.medioPagoPreferido = const Value.absent(),
+    this.notas = const Value.absent(),
+  });
+  PedidosLicenciaTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String referencia,
+    required String plan,
+    required String vigenciaTipo,
+    required double monto,
+    this.moneda = const Value.absent(),
+    required String estado,
+    this.negocioNombre = const Value.absent(),
+    this.rnc = const Value.absent(),
+    required String fechaCreacion,
+    required String fechaExpiracionPedido,
+    this.medioPagoPreferido = const Value.absent(),
+    this.notas = const Value.absent(),
+  }) : referencia = Value(referencia),
+       plan = Value(plan),
+       vigenciaTipo = Value(vigenciaTipo),
+       monto = Value(monto),
+       estado = Value(estado),
+       fechaCreacion = Value(fechaCreacion),
+       fechaExpiracionPedido = Value(fechaExpiracionPedido);
+  static Insertable<PedidosLicenciaTableData> custom({
+    Expression<int>? id,
+    Expression<String>? referencia,
+    Expression<String>? plan,
+    Expression<String>? vigenciaTipo,
+    Expression<double>? monto,
+    Expression<String>? moneda,
+    Expression<String>? estado,
+    Expression<String>? negocioNombre,
+    Expression<String>? rnc,
+    Expression<String>? fechaCreacion,
+    Expression<String>? fechaExpiracionPedido,
+    Expression<String>? medioPagoPreferido,
+    Expression<String>? notas,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (referencia != null) 'referencia': referencia,
+      if (plan != null) 'plan': plan,
+      if (vigenciaTipo != null) 'vigencia_tipo': vigenciaTipo,
+      if (monto != null) 'monto': monto,
+      if (moneda != null) 'moneda': moneda,
+      if (estado != null) 'estado': estado,
+      if (negocioNombre != null) 'negocio_nombre': negocioNombre,
+      if (rnc != null) 'rnc': rnc,
+      if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
+      if (fechaExpiracionPedido != null)
+        'fecha_expiracion_pedido': fechaExpiracionPedido,
+      if (medioPagoPreferido != null)
+        'medio_pago_preferido': medioPagoPreferido,
+      if (notas != null) 'notas': notas,
+    });
+  }
+
+  PedidosLicenciaTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? referencia,
+    Value<String>? plan,
+    Value<String>? vigenciaTipo,
+    Value<double>? monto,
+    Value<String>? moneda,
+    Value<String>? estado,
+    Value<String?>? negocioNombre,
+    Value<String?>? rnc,
+    Value<String>? fechaCreacion,
+    Value<String>? fechaExpiracionPedido,
+    Value<String?>? medioPagoPreferido,
+    Value<String?>? notas,
+  }) {
+    return PedidosLicenciaTableCompanion(
+      id: id ?? this.id,
+      referencia: referencia ?? this.referencia,
+      plan: plan ?? this.plan,
+      vigenciaTipo: vigenciaTipo ?? this.vigenciaTipo,
+      monto: monto ?? this.monto,
+      moneda: moneda ?? this.moneda,
+      estado: estado ?? this.estado,
+      negocioNombre: negocioNombre ?? this.negocioNombre,
+      rnc: rnc ?? this.rnc,
+      fechaCreacion: fechaCreacion ?? this.fechaCreacion,
+      fechaExpiracionPedido:
+          fechaExpiracionPedido ?? this.fechaExpiracionPedido,
+      medioPagoPreferido: medioPagoPreferido ?? this.medioPagoPreferido,
+      notas: notas ?? this.notas,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (referencia.present) {
+      map['referencia'] = Variable<String>(referencia.value);
+    }
+    if (plan.present) {
+      map['plan'] = Variable<String>(plan.value);
+    }
+    if (vigenciaTipo.present) {
+      map['vigencia_tipo'] = Variable<String>(vigenciaTipo.value);
+    }
+    if (monto.present) {
+      map['monto'] = Variable<double>(monto.value);
+    }
+    if (moneda.present) {
+      map['moneda'] = Variable<String>(moneda.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<String>(estado.value);
+    }
+    if (negocioNombre.present) {
+      map['negocio_nombre'] = Variable<String>(negocioNombre.value);
+    }
+    if (rnc.present) {
+      map['rnc'] = Variable<String>(rnc.value);
+    }
+    if (fechaCreacion.present) {
+      map['fecha_creacion'] = Variable<String>(fechaCreacion.value);
+    }
+    if (fechaExpiracionPedido.present) {
+      map['fecha_expiracion_pedido'] = Variable<String>(
+        fechaExpiracionPedido.value,
+      );
+    }
+    if (medioPagoPreferido.present) {
+      map['medio_pago_preferido'] = Variable<String>(medioPagoPreferido.value);
+    }
+    if (notas.present) {
+      map['notas'] = Variable<String>(notas.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PedidosLicenciaTableCompanion(')
+          ..write('id: $id, ')
+          ..write('referencia: $referencia, ')
+          ..write('plan: $plan, ')
+          ..write('vigenciaTipo: $vigenciaTipo, ')
+          ..write('monto: $monto, ')
+          ..write('moneda: $moneda, ')
+          ..write('estado: $estado, ')
+          ..write('negocioNombre: $negocioNombre, ')
+          ..write('rnc: $rnc, ')
+          ..write('fechaCreacion: $fechaCreacion, ')
+          ..write('fechaExpiracionPedido: $fechaExpiracionPedido, ')
+          ..write('medioPagoPreferido: $medioPagoPreferido, ')
+          ..write('notas: $notas')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $NotasCreditoTableTable extends NotasCreditoTable
     with TableInfo<$NotasCreditoTableTable, NotasCreditoTableData> {
   @override
@@ -31253,6 +32874,9 @@ class FiosTableCompanion extends UpdateCompanion<FioData> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $LicenciasTableTable licenciasTable = $LicenciasTableTable(this);
+  late final $PedidosLicenciaTableTable pedidosLicenciaTable =
+      $PedidosLicenciaTableTable(this);
   late final $NotasCreditoTableTable notasCreditoTable =
       $NotasCreditoTableTable(this);
   late final $SecuenciasNcfTableTable secuenciasNcfTable =
@@ -31340,6 +32964,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    licenciasTable,
+    pedidosLicenciaTable,
     notasCreditoTable,
     secuenciasNcfTable,
     clientesTable,
@@ -31455,6 +33081,767 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ]);
 }
 
+typedef $$LicenciasTableTableCreateCompanionBuilder =
+    LicenciasTableCompanion Function({
+      Value<int> id,
+      required String plan,
+      required String vigenciaTipo,
+      required String fechaInicio,
+      Value<String?> fechaFin,
+      Value<int> maxDispositivos,
+      Value<int> maxCajas,
+      Value<bool> ecfHabilitado,
+      Value<bool> vitalicia,
+      required String estado,
+      Value<String?> fingerprint,
+      Value<String?> codigoActivacion,
+      Value<String?> payloadFirma,
+      required String actualizadoEn,
+    });
+typedef $$LicenciasTableTableUpdateCompanionBuilder =
+    LicenciasTableCompanion Function({
+      Value<int> id,
+      Value<String> plan,
+      Value<String> vigenciaTipo,
+      Value<String> fechaInicio,
+      Value<String?> fechaFin,
+      Value<int> maxDispositivos,
+      Value<int> maxCajas,
+      Value<bool> ecfHabilitado,
+      Value<bool> vitalicia,
+      Value<String> estado,
+      Value<String?> fingerprint,
+      Value<String?> codigoActivacion,
+      Value<String?> payloadFirma,
+      Value<String> actualizadoEn,
+    });
+
+class $$LicenciasTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LicenciasTableTable> {
+  $$LicenciasTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get plan => $composableBuilder(
+    column: $table.plan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vigenciaTipo => $composableBuilder(
+    column: $table.vigenciaTipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fechaFin => $composableBuilder(
+    column: $table.fechaFin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get maxDispositivos => $composableBuilder(
+    column: $table.maxDispositivos,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get maxCajas => $composableBuilder(
+    column: $table.maxCajas,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ecfHabilitado => $composableBuilder(
+    column: $table.ecfHabilitado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get vitalicia => $composableBuilder(
+    column: $table.vitalicia,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigoActivacion => $composableBuilder(
+    column: $table.codigoActivacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payloadFirma => $composableBuilder(
+    column: $table.payloadFirma,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LicenciasTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LicenciasTableTable> {
+  $$LicenciasTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get plan => $composableBuilder(
+    column: $table.plan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get vigenciaTipo => $composableBuilder(
+    column: $table.vigenciaTipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fechaFin => $composableBuilder(
+    column: $table.fechaFin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get maxDispositivos => $composableBuilder(
+    column: $table.maxDispositivos,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get maxCajas => $composableBuilder(
+    column: $table.maxCajas,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ecfHabilitado => $composableBuilder(
+    column: $table.ecfHabilitado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get vitalicia => $composableBuilder(
+    column: $table.vitalicia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigoActivacion => $composableBuilder(
+    column: $table.codigoActivacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payloadFirma => $composableBuilder(
+    column: $table.payloadFirma,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LicenciasTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LicenciasTableTable> {
+  $$LicenciasTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get plan =>
+      $composableBuilder(column: $table.plan, builder: (column) => column);
+
+  GeneratedColumn<String> get vigenciaTipo => $composableBuilder(
+    column: $table.vigenciaTipo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fechaFin =>
+      $composableBuilder(column: $table.fechaFin, builder: (column) => column);
+
+  GeneratedColumn<int> get maxDispositivos => $composableBuilder(
+    column: $table.maxDispositivos,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get maxCajas =>
+      $composableBuilder(column: $table.maxCajas, builder: (column) => column);
+
+  GeneratedColumn<bool> get ecfHabilitado => $composableBuilder(
+    column: $table.ecfHabilitado,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get vitalicia =>
+      $composableBuilder(column: $table.vitalicia, builder: (column) => column);
+
+  GeneratedColumn<String> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get codigoActivacion => $composableBuilder(
+    column: $table.codigoActivacion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get payloadFirma => $composableBuilder(
+    column: $table.payloadFirma,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$LicenciasTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LicenciasTableTable,
+          LicenciasTableData,
+          $$LicenciasTableTableFilterComposer,
+          $$LicenciasTableTableOrderingComposer,
+          $$LicenciasTableTableAnnotationComposer,
+          $$LicenciasTableTableCreateCompanionBuilder,
+          $$LicenciasTableTableUpdateCompanionBuilder,
+          (
+            LicenciasTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $LicenciasTableTable,
+              LicenciasTableData
+            >,
+          ),
+          LicenciasTableData,
+          PrefetchHooks Function()
+        > {
+  $$LicenciasTableTableTableManager(
+    _$AppDatabase db,
+    $LicenciasTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LicenciasTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LicenciasTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LicenciasTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> plan = const Value.absent(),
+                Value<String> vigenciaTipo = const Value.absent(),
+                Value<String> fechaInicio = const Value.absent(),
+                Value<String?> fechaFin = const Value.absent(),
+                Value<int> maxDispositivos = const Value.absent(),
+                Value<int> maxCajas = const Value.absent(),
+                Value<bool> ecfHabilitado = const Value.absent(),
+                Value<bool> vitalicia = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+                Value<String?> fingerprint = const Value.absent(),
+                Value<String?> codigoActivacion = const Value.absent(),
+                Value<String?> payloadFirma = const Value.absent(),
+                Value<String> actualizadoEn = const Value.absent(),
+              }) => LicenciasTableCompanion(
+                id: id,
+                plan: plan,
+                vigenciaTipo: vigenciaTipo,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                maxDispositivos: maxDispositivos,
+                maxCajas: maxCajas,
+                ecfHabilitado: ecfHabilitado,
+                vitalicia: vitalicia,
+                estado: estado,
+                fingerprint: fingerprint,
+                codigoActivacion: codigoActivacion,
+                payloadFirma: payloadFirma,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String plan,
+                required String vigenciaTipo,
+                required String fechaInicio,
+                Value<String?> fechaFin = const Value.absent(),
+                Value<int> maxDispositivos = const Value.absent(),
+                Value<int> maxCajas = const Value.absent(),
+                Value<bool> ecfHabilitado = const Value.absent(),
+                Value<bool> vitalicia = const Value.absent(),
+                required String estado,
+                Value<String?> fingerprint = const Value.absent(),
+                Value<String?> codigoActivacion = const Value.absent(),
+                Value<String?> payloadFirma = const Value.absent(),
+                required String actualizadoEn,
+              }) => LicenciasTableCompanion.insert(
+                id: id,
+                plan: plan,
+                vigenciaTipo: vigenciaTipo,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                maxDispositivos: maxDispositivos,
+                maxCajas: maxCajas,
+                ecfHabilitado: ecfHabilitado,
+                vitalicia: vitalicia,
+                estado: estado,
+                fingerprint: fingerprint,
+                codigoActivacion: codigoActivacion,
+                payloadFirma: payloadFirma,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LicenciasTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LicenciasTableTable,
+      LicenciasTableData,
+      $$LicenciasTableTableFilterComposer,
+      $$LicenciasTableTableOrderingComposer,
+      $$LicenciasTableTableAnnotationComposer,
+      $$LicenciasTableTableCreateCompanionBuilder,
+      $$LicenciasTableTableUpdateCompanionBuilder,
+      (
+        LicenciasTableData,
+        BaseReferences<_$AppDatabase, $LicenciasTableTable, LicenciasTableData>,
+      ),
+      LicenciasTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$PedidosLicenciaTableTableCreateCompanionBuilder =
+    PedidosLicenciaTableCompanion Function({
+      Value<int> id,
+      required String referencia,
+      required String plan,
+      required String vigenciaTipo,
+      required double monto,
+      Value<String> moneda,
+      required String estado,
+      Value<String?> negocioNombre,
+      Value<String?> rnc,
+      required String fechaCreacion,
+      required String fechaExpiracionPedido,
+      Value<String?> medioPagoPreferido,
+      Value<String?> notas,
+    });
+typedef $$PedidosLicenciaTableTableUpdateCompanionBuilder =
+    PedidosLicenciaTableCompanion Function({
+      Value<int> id,
+      Value<String> referencia,
+      Value<String> plan,
+      Value<String> vigenciaTipo,
+      Value<double> monto,
+      Value<String> moneda,
+      Value<String> estado,
+      Value<String?> negocioNombre,
+      Value<String?> rnc,
+      Value<String> fechaCreacion,
+      Value<String> fechaExpiracionPedido,
+      Value<String?> medioPagoPreferido,
+      Value<String?> notas,
+    });
+
+class $$PedidosLicenciaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PedidosLicenciaTableTable> {
+  $$PedidosLicenciaTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get referencia => $composableBuilder(
+    column: $table.referencia,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get plan => $composableBuilder(
+    column: $table.plan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vigenciaTipo => $composableBuilder(
+    column: $table.vigenciaTipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get moneda => $composableBuilder(
+    column: $table.moneda,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get negocioNombre => $composableBuilder(
+    column: $table.negocioNombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rnc => $composableBuilder(
+    column: $table.rnc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fechaExpiracionPedido => $composableBuilder(
+    column: $table.fechaExpiracionPedido,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get medioPagoPreferido => $composableBuilder(
+    column: $table.medioPagoPreferido,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notas => $composableBuilder(
+    column: $table.notas,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PedidosLicenciaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PedidosLicenciaTableTable> {
+  $$PedidosLicenciaTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get referencia => $composableBuilder(
+    column: $table.referencia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get plan => $composableBuilder(
+    column: $table.plan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get vigenciaTipo => $composableBuilder(
+    column: $table.vigenciaTipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get monto => $composableBuilder(
+    column: $table.monto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get moneda => $composableBuilder(
+    column: $table.moneda,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get negocioNombre => $composableBuilder(
+    column: $table.negocioNombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rnc => $composableBuilder(
+    column: $table.rnc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fechaExpiracionPedido => $composableBuilder(
+    column: $table.fechaExpiracionPedido,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get medioPagoPreferido => $composableBuilder(
+    column: $table.medioPagoPreferido,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notas => $composableBuilder(
+    column: $table.notas,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PedidosLicenciaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PedidosLicenciaTableTable> {
+  $$PedidosLicenciaTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get referencia => $composableBuilder(
+    column: $table.referencia,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get plan =>
+      $composableBuilder(column: $table.plan, builder: (column) => column);
+
+  GeneratedColumn<String> get vigenciaTipo => $composableBuilder(
+    column: $table.vigenciaTipo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get monto =>
+      $composableBuilder(column: $table.monto, builder: (column) => column);
+
+  GeneratedColumn<String> get moneda =>
+      $composableBuilder(column: $table.moneda, builder: (column) => column);
+
+  GeneratedColumn<String> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<String> get negocioNombre => $composableBuilder(
+    column: $table.negocioNombre,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rnc =>
+      $composableBuilder(column: $table.rnc, builder: (column) => column);
+
+  GeneratedColumn<String> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fechaExpiracionPedido => $composableBuilder(
+    column: $table.fechaExpiracionPedido,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get medioPagoPreferido => $composableBuilder(
+    column: $table.medioPagoPreferido,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notas =>
+      $composableBuilder(column: $table.notas, builder: (column) => column);
+}
+
+class $$PedidosLicenciaTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PedidosLicenciaTableTable,
+          PedidosLicenciaTableData,
+          $$PedidosLicenciaTableTableFilterComposer,
+          $$PedidosLicenciaTableTableOrderingComposer,
+          $$PedidosLicenciaTableTableAnnotationComposer,
+          $$PedidosLicenciaTableTableCreateCompanionBuilder,
+          $$PedidosLicenciaTableTableUpdateCompanionBuilder,
+          (
+            PedidosLicenciaTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $PedidosLicenciaTableTable,
+              PedidosLicenciaTableData
+            >,
+          ),
+          PedidosLicenciaTableData,
+          PrefetchHooks Function()
+        > {
+  $$PedidosLicenciaTableTableTableManager(
+    _$AppDatabase db,
+    $PedidosLicenciaTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PedidosLicenciaTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PedidosLicenciaTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PedidosLicenciaTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> referencia = const Value.absent(),
+                Value<String> plan = const Value.absent(),
+                Value<String> vigenciaTipo = const Value.absent(),
+                Value<double> monto = const Value.absent(),
+                Value<String> moneda = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+                Value<String?> negocioNombre = const Value.absent(),
+                Value<String?> rnc = const Value.absent(),
+                Value<String> fechaCreacion = const Value.absent(),
+                Value<String> fechaExpiracionPedido = const Value.absent(),
+                Value<String?> medioPagoPreferido = const Value.absent(),
+                Value<String?> notas = const Value.absent(),
+              }) => PedidosLicenciaTableCompanion(
+                id: id,
+                referencia: referencia,
+                plan: plan,
+                vigenciaTipo: vigenciaTipo,
+                monto: monto,
+                moneda: moneda,
+                estado: estado,
+                negocioNombre: negocioNombre,
+                rnc: rnc,
+                fechaCreacion: fechaCreacion,
+                fechaExpiracionPedido: fechaExpiracionPedido,
+                medioPagoPreferido: medioPagoPreferido,
+                notas: notas,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String referencia,
+                required String plan,
+                required String vigenciaTipo,
+                required double monto,
+                Value<String> moneda = const Value.absent(),
+                required String estado,
+                Value<String?> negocioNombre = const Value.absent(),
+                Value<String?> rnc = const Value.absent(),
+                required String fechaCreacion,
+                required String fechaExpiracionPedido,
+                Value<String?> medioPagoPreferido = const Value.absent(),
+                Value<String?> notas = const Value.absent(),
+              }) => PedidosLicenciaTableCompanion.insert(
+                id: id,
+                referencia: referencia,
+                plan: plan,
+                vigenciaTipo: vigenciaTipo,
+                monto: monto,
+                moneda: moneda,
+                estado: estado,
+                negocioNombre: negocioNombre,
+                rnc: rnc,
+                fechaCreacion: fechaCreacion,
+                fechaExpiracionPedido: fechaExpiracionPedido,
+                medioPagoPreferido: medioPagoPreferido,
+                notas: notas,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PedidosLicenciaTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PedidosLicenciaTableTable,
+      PedidosLicenciaTableData,
+      $$PedidosLicenciaTableTableFilterComposer,
+      $$PedidosLicenciaTableTableOrderingComposer,
+      $$PedidosLicenciaTableTableAnnotationComposer,
+      $$PedidosLicenciaTableTableCreateCompanionBuilder,
+      $$PedidosLicenciaTableTableUpdateCompanionBuilder,
+      (
+        PedidosLicenciaTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $PedidosLicenciaTableTable,
+          PedidosLicenciaTableData
+        >,
+      ),
+      PedidosLicenciaTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$NotasCreditoTableTableCreateCompanionBuilder =
     NotasCreditoTableCompanion Function({
       Value<int> id,
@@ -52160,6 +54547,10 @@ typedef $$FiosTableTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
+  $$LicenciasTableTableTableManager get licenciasTable =>
+      $$LicenciasTableTableTableManager(_db, _db.licenciasTable);
+  $$PedidosLicenciaTableTableTableManager get pedidosLicenciaTable =>
+      $$PedidosLicenciaTableTableTableManager(_db, _db.pedidosLicenciaTable);
   $$NotasCreditoTableTableTableManager get notasCreditoTable =>
       $$NotasCreditoTableTableTableManager(_db, _db.notasCreditoTable);
   $$SecuenciasNcfTableTableTableManager get secuenciasNcfTable =>

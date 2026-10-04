@@ -9,6 +9,8 @@ import 'package:riverpod/riverpod.dart';
 import 'package:fiscogest_rd/core/database/migrations/migracion_002_agregar_campos_productos.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
+import 'package:fiscogest_rd/features/licencias/data/dao/licencias_table.dart';
+import 'package:fiscogest_rd/features/licencias/data/dao/pedidos_licencia_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/entradas_table.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/salidas_table.dart';
@@ -56,6 +58,8 @@ part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
+    LicenciasTable,
+    PedidosLicenciaTable,
     NotasCreditoTable,
     SecuenciasNcfTable,
     ClientesTable,
@@ -111,7 +115,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 54;
+  int get schemaVersion => 55;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -120,18 +124,22 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 55) {
+        await m.createTable(licenciasTable);
+        await m.createTable(pedidosLicenciaTable);
+      }
       if (from < 54) {
         await customStatement(
-          "ALTER TABLE ecfe_documentos_table ADD COLUMN encf_referencia TEXT NULL;",
+          'ALTER TABLE ecfe_documentos_table ADD COLUMN encf_referencia TEXT NULL;',
         );
         await customStatement(
-          "ALTER TABLE ecfe_documentos_table ADD COLUMN motivo_anulacion TEXT NULL;",
+          'ALTER TABLE ecfe_documentos_table ADD COLUMN motivo_anulacion TEXT NULL;',
         );
       }
 
       if (from < 53) {
         await customStatement(
-          "ALTER TABLE ecfe_documentos_table ADD COLUMN codigo_seguridad TEXT NULL;",
+          'ALTER TABLE ecfe_documentos_table ADD COLUMN codigo_seguridad TEXT NULL;',
         );
       }
 

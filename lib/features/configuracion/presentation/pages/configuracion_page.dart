@@ -1202,25 +1202,55 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   }
 
   Widget _seccionSistema() {
-    return const AppCard(
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sistema', style: AppTypography.h3),
+          const Text('Sistema', style: AppTypography.h3),
           AppLayout.vM,
-          ListTile(
+          Material(
+            color: const Color(0xFF0F766E).withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(14),
+            child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: Color(0xFF0F766E), width: 1.2),
+              ),
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFF0F766E),
+                child: Icon(Icons.workspace_premium, color: Colors.white, size: 22),
+              ),
+              title: const Text(
+                'Licencia y pagos',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F766E),
+                ),
+              ),
+              subtitle: const Text(
+                'Elige tu plan · Toke o transferencia · Referencia FG-',
+              ),
+              trailing:
+                  const Icon(Icons.chevron_right, color: Color(0xFF0F766E)),
+              onTap: () => context.push('/licencia'),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.info_outline),
             title: Text('Versión'),
             subtitle: Text('FiscoGest RD v3.0 Pro'),
           ),
-          ListTile(
+          const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.storage_outlined),
             title: Text('Base de datos'),
             subtitle: Text('SQLite local (Drift)'),
           ),
-          ListTile(
+          const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.schedule_outlined),
             title: Text('Zona horaria'),
