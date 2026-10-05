@@ -34,10 +34,12 @@ class AppShell extends ConsumerWidget {
         ? cfg!.nombreComercial.trim()
         : 'Mi negocio';
 
-    final gatesLic = ref.watch(licenciaActualProvider).maybeWhen(
-      data: (lic) => LicenciaGates(lic),
-      orElse: () => const LicenciaGates(null),
-    );
+    final gatesLic = ref
+        .watch(licenciaActualProvider)
+        .maybeWhen(
+          data: (lic) => LicenciaGates(lic),
+          orElse: () => const LicenciaGates(null),
+        );
     final permiteFiscalLicencia = gatesLic.permiteFiscal;
     final permiteFiaoLicencia = gatesLic.permiteFiao;
     final permiteCreditoFormalLicencia = gatesLic.permiteCreditoFormal;
@@ -183,7 +185,9 @@ class AppShell extends ConsumerWidget {
                         Icons.home_outlined,
                         currentPath,
                       ),
-                    if (!modoColmadoFlag && permiteFiscalLicencia && puede(Permiso.facturacionGestionar))
+                    if (!modoColmadoFlag &&
+                        permiteFiscalLicencia &&
+                        puede(Permiso.facturacionGestionar))
                       _buildNavItem(
                         context,
                         '/sales',
@@ -217,7 +221,8 @@ class AppShell extends ConsumerWidget {
                         currentPath,
                       ),
                     // Crédito formal: profesional / empresa (sin fiao)
-                    if (permiteCreditoFormalLicencia &&
+                    if (!modoSimplificado &&
+                        permiteCreditoFormalLicencia &&
                         puede(Permiso.creditosGestionar))
                       _buildNavItem(
                         context,
@@ -344,7 +349,9 @@ class AppShell extends ConsumerWidget {
                         Icons.assessment_outlined,
                         currentPath,
                       ),
-                    if (!modoColmadoFlag && esAdmin && permiteFiscalLicencia) ...[
+                    if (!modoColmadoFlag &&
+                        esAdmin &&
+                        permiteFiscalLicencia) ...[
                       _buildNavItem(
                         context,
                         '/ecfe',

@@ -145,7 +145,7 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                           data: (t) => LayoutBuilder(
                             builder: (context, c) {
                               final w = c.maxWidth;
-                              final cols = w > 720 ? 3 : (w > 420 ? 3 : 1);
+                              final cols = mobile ? 2 : (w > 720 ? 3 : 2);
                               const gap = 10.0;
                               final tileW = cols == 1
                                   ? w
@@ -200,7 +200,7 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                           alignment: Alignment.centerRight,
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxWidth: mobile ? 280 : 340,
+                              maxWidth: mobile ? 560 : 340,
                             ),
                             child: SizedBox(
                               width: double.infinity,
@@ -295,93 +295,125 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                                   ),
                                 );
                               }
-                              return AppCard(
-                                padding: EdgeInsets.zero,
-                                child: RefreshIndicator(
-                                  onRefresh: () async {
-                                    ref.invalidate(cuentasCobrarListaProvider);
-                                    ref.invalidate(creditoTotalesProvider);
-                                  },
-                                  child: ListView.separated(
-                                    itemCount: filtradas.length,
-                                    separatorBuilder: (_, __) => const Divider(
-                                      height: 1,
-                                      color: AppColors.border,
-                                    ),
-                                    itemBuilder: (_, i) {
-                                      final c = filtradas[i].cuenta;
-                                      return InkWell(
-                                        onTap: () {
-                                          final id = c.id;
-                                          if (id == null) return;
-                                          context.push('/creditos/cuentas/$id');
-                                        },
+                              return RefreshIndicator(
+                                onRefresh: () async {
+                                  ref.invalidate(cuentasCobrarListaProvider);
+                                  ref.invalidate(creditoTotalesProvider);
+                                },
+                                child: GridView.builder(
+                                  padding: EdgeInsets.all(mobile ? 4 : 8),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: mobile ? 2 : 3,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        mainAxisExtent: mobile ? 250 : 230,
+                                      ),
+                                  itemCount: filtradas.length,
+                                  itemBuilder: (_, i) {
+                                    final c = filtradas[i].cuenta;
+                                    final id = c.id;
+                                    return Card(
+                                      margin: EdgeInsets.zero,
+                                      color: AppColors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: AppRadius.allL,
+                                        side: const BorderSide(
+                                          color: AppColors.border,
+                                        ),
+                                      ),
+                                      clipBehavior: Clip.antiAlias,
+                                      child: InkWell(
+                                        onTap: id == null
+                                            ? null
+                                            : () => context.push(
+                                                '/creditos/cuentas/$id',
+                                              ),
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 14,
-                                            vertical: 12,
+                                          padding: EdgeInsets.all(
+                                            mobile ? 12 : 16,
                                           ),
-                                          child: Row(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      c.numero ?? 'CXC-${c.id}',
-                                                      style: AppTypography
-                                                          .labelMedium
-                                                          .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                            color: AppColors
-                                                                .textPrimary,
-                                                          ),
+                                              Text(
+                                                c.numero ?? 'CXC-${c.id}',
+                                                style: AppTypography.labelMedium
+                                                    .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w700,
                                                     ),
-                                                    Text(
-                                                      c.clienteNombre ??
-                                                          'Cliente #${c.clienteId}',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Text(
+                                                c.clienteNombre ??
+                                                    'Cliente #${c.clienteId}',
+                                                style: AppTypography.bodySmall
+                                                    .copyWith(
+                                                      color: AppColors.grey600,
+                                                    ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                'Saldo pendiente',
+                                                style: AppTypography.bodySmall
+                                                    .copyWith(
+                                                      color: AppColors
+                                                          .textSecondary,
+                                                    ),
+                                              ),
+                                              Text(
+                                                formatRd(c.saldoPendiente),
+                                                style: AppTypography.h4
+                                                    .copyWith(
+                                                      color:
+                                                          AppColors.textPrimary,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                'Total: ${formatRd(c.totalOriginal)}',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: AppTypography.bodySmall,
+                                              ),
+                                              Text(
+                                                'Abonado: ${formatRd(c.totalAbonado)}',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: AppTypography.bodySmall,
+                                              ),
+                                              const Spacer(),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      _fmtFecha.format(
+                                                        c.fechaVencimiento,
+                                                      ),
                                                       style: AppTypography
                                                           .bodySmall
                                                           .copyWith(
-                                                            color: AppColors
-                                                                .grey600,
+                                                            fontSize: 11,
                                                           ),
                                                       maxLines: 1,
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                     ),
-                                                    Text(
-                                                      'Vence: ${_fmtFecha.format(c.fechaVencimiento)}'
-                                                      '${c.ventaId != null ? ' · Venta #${c.ventaId}' : ''}',
-                                                      style: AppTypography
-                                                          .bodySmall
-                                                          .copyWith(
-                                                            color: AppColors
-                                                                .textSecondary,
-                                                            fontSize: 11,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
-                                                children: [
-                                                  Text(
-                                                    formatRd(c.saldoPendiente),
-                                                    style: AppTypography
-                                                        .labelMedium
-                                                        .copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: AppColors
-                                                              .textPrimary,
-                                                        ),
                                                   ),
-                                                  const SizedBox(height: 4),
+                                                  const SizedBox(width: 4),
                                                   StatusChip(
                                                     label: c.estado.nombre
                                                         .toUpperCase(),
@@ -390,18 +422,12 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                                                   ),
                                                 ],
                                               ),
-                                              const SizedBox(width: 4),
-                                              const Icon(
-                                                Icons.chevron_right,
-                                                size: 20,
-                                                color: AppColors.grey400,
-                                              ),
                                             ],
                                           ),
                                         ),
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               );
                             },

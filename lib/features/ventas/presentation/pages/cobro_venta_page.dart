@@ -25,7 +25,6 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
-
 class CobroVentaPage extends ConsumerStatefulWidget {
   const CobroVentaPage({super.key});
 
@@ -41,6 +40,8 @@ class CobroVentaPage extends ConsumerStatefulWidget {
 
 class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   final TextEditingController _abonoController = TextEditingController();
+  final TextEditingController _efectivoRecibidoController =
+      TextEditingController();
   final TextEditingController _referenciaController = TextEditingController();
   final TextEditingController _busquedaController = TextEditingController();
 
@@ -139,6 +140,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       ref.read(cajaProvider.notifier).establecerAbono(abonoPactado);
     } else {
       _abonoController.text = montoTotal.toStringAsFixed(2);
+      _efectivoRecibidoController.text = montoTotal.toStringAsFixed(2);
       ref.read(cajaProvider.notifier).establecerAbono(montoTotal);
     }
     _aplicarConfigCaja();
@@ -248,6 +250,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   void dispose() {
     _rncFiscalController.dispose();
     _abonoController.dispose();
+    _efectivoRecibidoController.dispose();
     _referenciaController.dispose();
     _busquedaController.dispose();
     super.dispose();
@@ -478,14 +481,15 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         ref.invalidate(ecfeColaProvider);
       }
     } catch (_) {}
-
   }
 
   Future<void> _cobrarYGenerarFactura() async {
     if (!mounted || _procesando) return;
 
     final errMonto = _validarMontoCobro(
-      textoAbono: _abonoController.text,
+      textoAbono: !esCredito && _formaPago == FormaPago.efectivo
+          ? _efectivoRecibidoController.text
+          : _abonoController.text,
       montoTotal: montoTotal,
       esCredito: esCredito,
     );
@@ -499,8 +503,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       );
       return;
     }
-    final montoParsed = _parseMontoCobro(_abonoController.text) ?? 0;
-    ref.read(cajaProvider.notifier).establecerAbono(montoParsed);
+    final montoCapturado =
+        _parseMontoCobro(
+          !esCredito && _formaPago == FormaPago.efectivo
+              ? _efectivoRecibidoController.text
+              : _abonoController.text,
+        ) ??
+        0;
+    ref
+        .read(cajaProvider.notifier)
+        .establecerAbono(esCredito ? montoCapturado : montoTotal);
 
     final cajaNotifier = ref.read(cajaProvider.notifier);
     final estado = ref.read(cajaProvider);
@@ -641,15 +653,29 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       final numeroFactura = venta.numeroFactura ?? '—';
       final saldo = esCredito ? (montoTotal - estado.abono) : 0.0;
 
-      await showDialog<void>(
+      // El cobro queda cerrado antes de ofrecer la impresión o el envío.
+      setState(() {
+        _modoBusqueda = true;
+        ventaId = 0;
+        _detalles = [];
+        _abonoController.clear();
+        _efectivoRecibidoController.clear();
+        _referenciaController.clear();
+        _procesando = false;
+      });
+      ref.read(cajaProvider.notifier).limpiar();
+      await _cargarPendientes();
+      if (!mounted) return;
+
+      final deseaComprobante = await showDialog<bool>(
         context: context,
-        barrierDismissible: false,
+        barrierDismissible: true,
         builder: (ctx) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text('Factura generada'),
+            title: const Text('Cobro completado'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -670,52 +696,22 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
               ],
             ),
             actions: [
-              TextButton.icon(
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  await _opcionesComprobantePdf(ventaConDetalle);
-                },
-                icon: const Icon(Icons.print_outlined, size: 18),
-                label: const Text('Fiscal'),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Más tarde'),
               ),
-
-              TextButton.icon(
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  await _opcionesComprobantePdf(ventaConDetalle);
-                },
-                icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-                label: const Text('PDF'),
-              ),
-              TextButton.icon(
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  await _opcionesComprobantePdf(ventaConDetalle);
-                },
-                icon: const Icon(Icons.share_outlined, size: 18),
-                label: const Text('Enviar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  setState(() {
-                    _modoBusqueda = true;
-                    ventaId = 0;
-                    _abonoController.clear();
-                    _referenciaController.clear();
-                  });
-                  _cargarPendientes();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
-                  foregroundColor: AppColors.white,
-                ),
-                child: const Text('Aceptar'),
+              FilledButton.icon(
+                onPressed: () => Navigator.pop(ctx, true),
+                icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                label: const Text('Imprimir / enviar'),
               ),
             ],
           );
         },
       );
+      if (deseaComprobante == true && mounted) {
+        await _opcionesComprobantePdf(ventaConDetalle);
+      }
     } catch (e) {
       if (mounted) {
         FiscoGestNotifications.show(
@@ -990,6 +986,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
 
   Widget _buildCobro(BuildContext context) {
     final estado = ref.watch(cajaProvider);
+    final esPagoEfectivo = !esCredito && _formaPago == FormaPago.efectivo;
+    final efectivoRecibido =
+        _parseMontoCobro(_efectivoRecibidoController.text) ?? 0.0;
+    final cambioADevolver = (efectivoRecibido - montoTotal)
+        .clamp(0.0, double.infinity)
+        .toDouble();
     final ancho = MediaQuery.of(context).size.width;
     final esPequena = ancho < 600;
     final padding = esPequena ? 12.0 : 20.0;
@@ -1287,8 +1289,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                   selectedColor: AppColors.primary.withValues(
                                     alpha: 0.15,
                                   ),
-                                  onSelected: (_) =>
-                                      setState(() => _formaPago = forma),
+                                  onSelected: (_) {
+                                    setState(() => _formaPago = forma);
+                                  },
                                   side: sel
                                       ? const BorderSide(
                                           color: AppColors.primary,
@@ -1307,6 +1310,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                         Text(
                           esCredito
                               ? 'Abono inicial (según crédito)'
+                              : esPagoEfectivo
+                              ? 'Efectivo recibido'
                               : 'Monto a pagar',
                           style: AppTypography.labelMedium.copyWith(
                             fontWeight: FontWeight.w600,
@@ -1315,12 +1320,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                         ),
                         const SizedBox(height: 10),
                         TextField(
-                          controller: _abonoController,
+                          controller: esPagoEfectivo
+                              ? _efectivoRecibidoController
+                              : _abonoController,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          enabled: esCredito,
-                          onChanged: _onAbonoChanged,
+                          enabled: esCredito || esPagoEfectivo,
+                          onChanged: esPagoEfectivo
+                              ? (_) => setState(() {})
+                              : _onAbonoChanged,
                           style: TextStyle(
                             fontSize: tamanoCuerpo + 2,
                             fontWeight: FontWeight.w600,
@@ -1340,6 +1349,43 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                             ),
                           ),
                         ),
+
+                        if (esPagoEfectivo) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.success.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Cambio a devolver',
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    fontSize: tamanoCuerpo,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  formatRd(cambioADevolver),
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    fontSize: tamanoCuerpo + 1,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.success,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
 
                         // === SALDO PENDIENTE (solo crédito) ===
                         if (esCredito) ...[
@@ -1425,12 +1471,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                   child: SafeArea(
                     top: false,
                     child: Align(
-                      alignment: esPequena ? Alignment.center : Alignment.centerRight,
+                      alignment: esPequena
+                          ? Alignment.center
+                          : Alignment.centerRight,
                       child: SizedBox(
                         width: esPequena ? double.infinity : 360,
                         height: alturaBoton,
                         child: ElevatedButton.icon(
-                          onPressed: _procesando ? null : _cobrarYGenerarFactura,
+                          onPressed: _procesando
+                              ? null
+                              : _cobrarYGenerarFactura,
                           icon: _procesando
                               ? const SizedBox(
                                   width: 22,
@@ -1459,8 +1509,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                             ),
                             elevation: 2,
                           ),
+                        ),
                       ),
-                    ),
                     ),
                   ),
                 ),

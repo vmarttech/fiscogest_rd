@@ -266,7 +266,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                   alignment: Alignment.centerRight,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: esPantallaPequena ? 280 : 340,
+                      maxWidth: esPantallaPequena ? 560 : 340,
                     ),
                     child: SizedBox(
                       width: double.infinity,
@@ -309,16 +309,29 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                             textAlign: TextAlign.center,
                           ),
                         )
-                      : ListView.builder(
+                      : GridView.builder(
                           padding: AppLayout.pantallaPadding,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: esPantallaPequena ? 2 : 3,
+                                crossAxisSpacing: espaciadoTarjeta,
+                                mainAxisSpacing: espaciadoTarjeta,
+                                mainAxisExtent: esPantallaPequena ? 300 : 270,
+                              ),
                           itemCount: cuentasFiltradas.length,
                           itemBuilder: (context, i) {
                             final c = cuentasFiltradas[i];
                             final vencida = c.estado == 'Vencido';
-                            return Padding(
-                              padding: EdgeInsets.only(
-                                bottom: espaciadoTarjeta,
+                            return Card(
+                              margin: EdgeInsets.zero,
+                              color: vencida
+                                  ? AppColors.grey100
+                                  : AppColors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppRadius.allM,
+                                side: const BorderSide(color: AppColors.border),
                               ),
+                              clipBehavior: Clip.antiAlias,
                               child: InkWell(
                                 borderRadius: AppRadius.allM,
                                 onTap: () async {
@@ -331,8 +344,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                     ),
                                   );
                                 },
-                                child: Container(
-                                  color: vencida ? AppColors.grey100 : null,
+                                child: Padding(
                                   padding: EdgeInsets.all(paddingTexto),
                                   child: Column(
                                     crossAxisAlignment:
