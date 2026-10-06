@@ -34,8 +34,15 @@ class _GastosPageState extends ConsumerState<GastosPage> {
     var formaPago = edit?.formaPago ?? 'efectivo';
     var fecha = edit?.fecha ?? DateTime.now();
     const cats = [
-      'General', 'Alquiler', 'Servicios', 'Nómina', 'Transporte',
-      'Mantenimiento', 'Impuestos', 'Marketing', 'Otros',
+      'General',
+      'Alquiler',
+      'Servicios',
+      'Nómina',
+      'Transporte',
+      'Mantenimiento',
+      'Impuestos',
+      'Marketing',
+      'Otros',
     ];
     const formas = ['efectivo', 'transferencia', 'tarjeta', 'cheque', 'otro'];
 
@@ -43,10 +50,12 @@ class _GastosPageState extends ConsumerState<GastosPage> {
       final desc = descCtrl.text.trim();
       final monto = double.tryParse(montoCtrl.text.replaceAll(',', '.')) ?? 0;
       if (desc.isEmpty || monto <= 0) {
-        FiscoGestNotifications.show(const SnackBar(
-          content: Text('Descripción y monto válidos son requeridos'),
-          backgroundColor: AppColors.error,
-        ));
+        FiscoGestNotifications.show(
+          const SnackBar(
+            content: Text('Descripción y monto válidos son requeridos'),
+            backgroundColor: AppColors.error,
+          ),
+        );
         return;
       }
       final g = Gasto(
@@ -63,15 +72,24 @@ class _GastosPageState extends ConsumerState<GastosPage> {
       await ref.read(gastosRepositoryProvider).guardar(g);
       ref.invalidate(gastosListaProvider);
       if (ctx.mounted) Navigator.pop(ctx);
-      FiscoGestNotifications.show(SnackBar(
-        content: Text(edit == null ? 'Gasto registrado' : 'Gasto actualizado'),
-        backgroundColor: AppColors.success,
-      ));
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(
+            edit == null ? 'Gasto registrado' : 'Gasto actualizado',
+          ),
+          backgroundColor: AppColors.success,
+        ),
+      );
     }
 
     Widget formBody(void Function(void Function()) setLocal) {
       return SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+        padding: EdgeInsets.fromLTRB(
+          mobile ? 16 : 24,
+          16,
+          mobile ? 16 : 24,
+          20,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -89,7 +107,10 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               label: Text('Fecha: ${_fmt.format(fecha)}'),
               style: OutlinedButton.styleFrom(
                 alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -116,8 +137,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             AppTextField(
               label: 'Monto *',
               controller: montoCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -152,18 +174,22 @@ class _GastosPageState extends ConsumerState<GastosPage> {
         builder: (ctx) {
           return StatefulBuilder(
             builder: (ctx, setLocal) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.viewInsetsOf(ctx).bottom,
-                ),
+              final media = MediaQuery.of(ctx);
+              final availableHeight =
+                  media.size.height -
+                  media.viewInsets.bottom -
+                  media.padding.top -
+                  media.padding.bottom;
+              return SafeArea(
+                top: false,
                 child: SizedBox(
-                  height: (MediaQuery.sizeOf(ctx).height -
-                          MediaQuery.viewInsetsOf(ctx).bottom)
-                      .clamp(360.0, MediaQuery.sizeOf(ctx).height * 0.9),
+                  height: (availableHeight * 0.96)
+                      .clamp(0.0, availableHeight)
+                      .toDouble(),
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 18, 12, 12),
+                        padding: const EdgeInsets.fromLTRB(16, 12, 8, 10),
                         child: Row(
                           children: [
                             Container(
@@ -184,7 +210,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    edit == null ? 'Nuevo gasto' : 'Editar gasto',
+                                    edit == null
+                                        ? 'Nuevo gasto'
+                                        : 'Editar gasto',
                                     style: AppTypography.h4.copyWith(
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -210,20 +238,33 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                       Expanded(child: formBody(setLocal)),
                       const Divider(height: 1),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+                        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                         child: Row(
                           children: [
                             Expanded(
-                              child: TextButton(
-                                onPressed: () => Navigator.pop(ctx),
-                                child: const Text('Cancelar'),
+                              child: SizedBox(
+                                height: 48,
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.textSecondary,
+                                    side: BorderSide(color: AppColors.divider),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  child: const Text('Cancelar'),
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 8),
                             Expanded(
-                              child: AppButton(
-                                text: 'Guardar',
-                                onPressed: () => guardar(ctx),
+                              child: SizedBox(
+                                height: 48,
+                                child: AppButton(
+                                  text: 'Guardar',
+                                  onPressed: () => guardar(ctx),
+                                ),
                               ),
                             ),
                           ],
@@ -310,9 +351,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Eliminar gasto'),
-        content: Text(
-          'Eliminar "${g.descripcion}" (${formatRd(g.monto)})?',
-        ),
+        content: Text('Eliminar "${g.descripcion}" (${formatRd(g.monto)})?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -369,191 +408,194 @@ class _GastosPageState extends ConsumerState<GastosPage> {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: mobile ? 720 : 960),
             child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
-          data: (lista) {
-            final filtrados = _filtro.isEmpty
-                ? lista
-                : lista
-                    .where(
-                      (g) =>
-                          g.descripcion.toLowerCase().contains(_filtro) ||
-                          g.categoria.toLowerCase().contains(_filtro),
-                    )
-                    .toList();
-            final total =
-                filtrados.fold<double>(0, (s, g) => s + g.monto);
-            return Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    mobile ? 16 : 24,
-                    12,
-                    mobile ? 16 : 24,
-                    8,
-                  ),
-                  child: Column(
-                    children: [
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Buscar por descripción o categoría…',
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          isDense: true,
-                        ),
-                        onChanged: (v) =>
-                            setState(() => _filtro = v.toLowerCase()),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e')),
+              data: (lista) {
+                final filtrados = _filtro.isEmpty
+                    ? lista
+                    : lista
+                          .where(
+                            (g) =>
+                                g.descripcion.toLowerCase().contains(_filtro) ||
+                                g.categoria.toLowerCase().contains(_filtro),
+                          )
+                          .toList();
+                final total = filtrados.fold<double>(0, (s, g) => s + g.monto);
+                return Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        mobile ? 16 : 24,
+                        12,
+                        mobile ? 16 : 24,
+                        8,
                       ),
-                      const SizedBox(height: 10),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.error.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.payments_outlined,
-                              color: AppColors.error,
+                      child: Column(
+                        children: [
+                          TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Buscar por descripción o categoría…',
+                              prefixIcon: const Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              isDense: true,
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
+                            onChanged: (v) =>
+                                setState(() => _filtro = v.toLowerCase()),
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.error.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.payments_outlined,
+                                  color: AppColors.error,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Total filtrado',
+                                    style: AppTypography.labelMedium.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  formatRd(total),
+                                  style: AppTypography.h4.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.error,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: filtrados.isEmpty
+                          ? Center(
                               child: Text(
-                                'Total filtrado',
-                                style: AppTypography.labelMedium.copyWith(
+                                'No hay gastos registrados',
+                                style: AppTypography.bodyMedium.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
                               ),
-                            ),
-                            Text(
-                              formatRd(total),
-                              style: AppTypography.h4.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.error,
+                            )
+                          : ListView.separated(
+                              padding: EdgeInsets.fromLTRB(
+                                mobile ? 16 : 24,
+                                4,
+                                mobile ? 16 : 24,
+                                24,
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: filtrados.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No hay gastos registrados',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        )
-                      : ListView.separated(
-                          padding: EdgeInsets.fromLTRB(
-                            mobile ? 16 : 24,
-                            4,
-                            mobile ? 16 : 24,
-                            24,
-                          ),
-                          itemCount: filtrados.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 8),
-                          itemBuilder: (_, i) {
-                            final g = filtrados[i];
-                            return Material(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(14),
-                                onTap: () => _abrirForm(edit: g),
-                                child: Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
+                              itemCount: filtrados.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 8),
+                              itemBuilder: (_, i) {
+                                final g = filtrados[i];
+                                return Material(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: InkWell(
                                     borderRadius: BorderRadius.circular(14),
-                                    border:
-                                        Border.all(color: AppColors.border),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.error
-                                              .withValues(alpha: 0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: const Icon(
-                                          Icons.money_off_csred_outlined,
-                                          color: AppColors.error,
+                                    onTap: () => _abrirForm(edit: g),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(14),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                          color: AppColors.border,
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              g.descripcion,
-                                              style: AppTypography.bodyLarge
-                                                  .copyWith(
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              '${g.categoria} · ${_fmt.format(g.fecha)} · ${g.formaPago}',
-                                              style: AppTypography.bodySmall
-                                                  .copyWith(
-                                                color:
-                                                    AppColors.textSecondary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
+                                      child: Row(
                                         children: [
-                                          Text(
-                                            formatRd(g.monto),
-                                            style: AppTypography.bodyLarge
-                                                .copyWith(
-                                              fontWeight: FontWeight.w800,
+                                          Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.error.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: const Icon(
+                                              Icons.money_off_csred_outlined,
                                               color: AppColors.error,
                                             ),
                                           ),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete_outline,
-                                              size: 20,
-                                              color: AppColors.error,
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  g.descripcion,
+                                                  style: AppTypography.bodyLarge
+                                                      .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  '${g.categoria} · ${_fmt.format(g.fecha)} · ${g.formaPago}',
+                                                  style: AppTypography.bodySmall
+                                                      .copyWith(
+                                                        color: AppColors
+                                                            .textSecondary,
+                                                      ),
+                                                ),
+                                              ],
                                             ),
-                                            onPressed: () => _eliminar(g),
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                formatRd(g.monto),
+                                                style: AppTypography.bodyLarge
+                                                    .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      color: AppColors.error,
+                                                    ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.delete_outline,
+                                                  size: 20,
+                                                  color: AppColors.error,
+                                                ),
+                                                onPressed: () => _eliminar(g),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-              ],
-            );
-          },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),

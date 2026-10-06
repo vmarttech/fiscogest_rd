@@ -48,11 +48,47 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
     final mobile = AppBreakpoints.isMobile(context);
     return AppScaffold(
       actions: [
-        IconButton(
-          tooltip: 'Especificación y checklist',
-          icon: const Icon(Icons.rule_folder_outlined),
-          onPressed: () => context.push('/ecfe/spec'),
-        ),
+        if (mobile)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Tooltip(
+              message: 'Especificación y checklist',
+              child: SizedBox(
+                width: 44,
+                height: 42,
+                child: FilledButton(
+                  onPressed: () => context.push('/ecfe/spec'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Icon(Icons.rule_folder_rounded, size: 23),
+                ),
+              ),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilledButton.icon(
+              onPressed: () => context.push('/ecfe/spec'),
+              icon: const Icon(Icons.rule_folder_rounded, size: 19),
+              label: const Text('Especificación'),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primary,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
       ],
 
       title: 'e-CF · DGII',

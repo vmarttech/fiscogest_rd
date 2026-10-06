@@ -164,11 +164,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           await SyncPull(db).pullTodoElNegocio();
           final uCheck = await AuthService(db).buscarPorUsername(user);
           // ignore: avoid_print
-          print(
-            'Login: tras pull user=${uCheck?.username} '
-            'hashLen=${uCheck?.passwordHash.length ?? -1} '
-            'estado=${uCheck?.estado}',
-          );
           res = await AuthService(db).login(user, pass);
         } catch (e, st) {
           debugPrint('Login: pull antes de reintento: $e');

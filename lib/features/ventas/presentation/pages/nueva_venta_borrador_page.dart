@@ -589,74 +589,83 @@ class _NuevaVentaBorradorPageState
   }
 
   Widget _buildSeccionTipoYVencimiento(bool esPantallaPequena) {
-    final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
-    final tamanoEtiqueta = esPantallaPequena ? 11.0 : 12.0;
-    return Row(
-      children: [
-        Expanded(
-          child: Material(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () => _cambiarEsCredito(!_esCredito),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: esPantallaPequena ? 12 : 14,
-                  vertical: esPantallaPequena ? 12 : 14,
+    Widget opcionPago({required bool credito}) {
+      final seleccionada = _esCredito == credito;
+      final color = credito ? AppColors.warning : AppColors.primary;
+      return Expanded(
+        child: Material(
+          color: seleccionada ? color.withValues(alpha: 0.10) : AppColors.white,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            onTap: () => _cambiarEsCredito(credito),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 44),
+              padding: EdgeInsets.symmetric(
+                horizontal: esPantallaPequena ? 6 : 10,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: seleccionada ? color : AppColors.border,
                 ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: _esCredito
-                        ? AppColors.warning.withValues(alpha: 0.6)
-                        : AppColors.border,
-                    width: _esCredito ? 1.5 : 1,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    credito ? Icons.schedule : Icons.payments_outlined,
+                    size: 16,
+                    color: seleccionada ? color : AppColors.textSecondary,
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _esCredito ? Icons.schedule : Icons.payments_outlined,
-                      size: 20,
-                      color: _esCredito ? AppColors.warning : AppColors.primary,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _esCredito ? 'Crédito' : 'Contado',
-                            style: AppTypography.labelMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: tamanoCuerpo,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Text(
-                            _esCredito ? 'Prefijo CR' : 'Prefijo C',
-                            style: AppTypography.bodySmall.copyWith(
-                              fontSize: tamanoEtiqueta,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      credito ? 'Crédito' : 'Contado',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.labelMedium.copyWith(
+                        fontSize: esPantallaPequena ? 12 : 13,
+                        fontWeight: FontWeight.w600,
+                        color: seleccionada
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
                       ),
                     ),
-                    Switch.adaptive(
-                      value: _esCredito,
-                      onChanged: _cambiarEsCredito,
-                      activeTrackColor: AppColors.warning,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-        const SizedBox(width: 10),
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
         Expanded(
+          flex: 6,
+          child: Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: AppColors.grey100,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                opcionPago(credito: false),
+                const SizedBox(width: 4),
+                opcionPago(credito: true),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(width: esPantallaPequena ? 6 : 10),
+        Expanded(
+          flex: 4,
           child: Material(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
@@ -664,9 +673,10 @@ class _NuevaVentaBorradorPageState
               onTap: _seleccionarVencimiento,
               borderRadius: BorderRadius.circular(12),
               child: Container(
+                constraints: const BoxConstraints(minHeight: 54),
                 padding: EdgeInsets.symmetric(
-                  horizontal: esPantallaPequena ? 12 : 14,
-                  vertical: esPantallaPequena ? 12 : 14,
+                  horizontal: esPantallaPequena ? 8 : 12,
+                  vertical: 8,
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -679,27 +689,30 @@ class _NuevaVentaBorradorPageState
                       size: 18,
                       color: AppColors.primary,
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: esPantallaPequena ? 6 : 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Vencimiento',
+                            'Vence',
                             style: AppTypography.labelMedium.copyWith(
                               fontWeight: FontWeight.w600,
-                              fontSize: tamanoCuerpo,
+                              fontSize: esPantallaPequena ? 12 : 13,
                               color: AppColors.textPrimary,
                             ),
+                            maxLines: 1,
                           ),
                           Text(
                             _fechaVencimientoSeleccionada != null
-                                ? '${_fechaVencimientoSeleccionada!.day.toString().padLeft(2, '0')}/${_fechaVencimientoSeleccionada!.month.toString().padLeft(2, '0')}/${_fechaVencimientoSeleccionada!.year}'
+                                ? '${_fechaVencimientoSeleccionada!.day.toString().padLeft(2, '0')}/${_fechaVencimientoSeleccionada!.month.toString().padLeft(2, '0')}/${(_fechaVencimientoSeleccionada!.year % 100).toString().padLeft(2, '0')}'
                                 : 'Opcional',
                             style: AppTypography.bodySmall.copyWith(
-                              fontSize: tamanoEtiqueta,
+                              fontSize: esPantallaPequena ? 10 : 11,
                               color: AppColors.textSecondary,
                             ),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
@@ -1400,11 +1413,17 @@ class _NuevaVentaBorradorPageState
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : Text(
-                                  label,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
+                              : FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    label,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 ),
                         );
@@ -1516,11 +1535,19 @@ class _NuevaVentaBorradorPageState
                                 strokeWidth: 2.5,
                               ),
                             )
-                          : Text(
-                              label,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: tamanoBoton,
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                softWrap: false,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: esPantallaPequena
+                                      ? 12
+                                      : tamanoBoton,
+                                ),
                               ),
                             ),
                     );

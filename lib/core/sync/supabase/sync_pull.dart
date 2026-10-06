@@ -66,7 +66,6 @@ class SyncPull {
                 requiereSetupInicial: const Value(false),
               ),
             );
-        debugPrint('SyncPull: usuario NUEVO $username hashLen=${hash.length}');
       } else {
         await (_db.update(_db.usuariosTable)
               ..where((t) => t.id.equals(existing.id)))
@@ -81,10 +80,6 @@ class SyncPull {
                 : const Value.absent(),
             requiereSetupInicial: const Value(false),
           ),
-        );
-        debugPrint(
-          'SyncPull: usuario UPD $username hashLen=${hash.length} '
-          'localAntes=${existing.passwordHash.length}',
         );
       }
     }

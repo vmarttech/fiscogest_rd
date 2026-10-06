@@ -45,10 +45,8 @@ class UsuarioSync {
       final hash = u.passwordHash.trim();
       if (hash.isNotEmpty) {
         conHash.add({...base, 'password_hash': hash});
-        debugPrint('UsuarioSync push ${u.username} hashLen=${hash.length}');
       } else {
         sinHash.add(base);
-        debugPrint('UsuarioSync push ${u.username} hashLen=0 (sin columna)');
       }
     }
 

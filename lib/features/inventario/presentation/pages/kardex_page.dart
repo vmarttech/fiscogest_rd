@@ -68,7 +68,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   ),
                   SizedBox(height: isMobile ? 14 : 18),
                   Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: EdgeInsets.all(isMobile ? 8 : 14),
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -84,32 +84,56 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Filtros en fila responsiva
+                        // En móvil, los filtros comparten una sola fila para
+                        // dejar más altura disponible al historial.
                         if (isMobile) ...[
-                          AppTextField(
-                            hint: 'Buscar por producto, documento o fecha...',
-                            onChanged: (valor) => setState(
-                              () =>
-                                  _filtroBusqueda = valor.trim().toLowerCase(),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          AppDropdown<TipoMovimiento>(
-                            initialValue: _filtroTipo,
-                            hint: 'Tipo de Movimiento',
-                            items: TipoMovimiento.values
-                                .map(
-                                  (tipo) => DropdownMenuItem<TipoMovimiento>(
-                                    value: tipo,
-                                    child: Text(
-                                      tipo.name.toUpperCase(),
-                                      style: AppTypography.bodySmall,
-                                    ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AppTextField(
+                                  height: 48,
+                                  prefixIcon: Icons.search_rounded,
+                                  hint: 'Producto o documento',
+                                  onChanged: (valor) => setState(
+                                    () => _filtroBusqueda = valor
+                                        .trim()
+                                        .toLowerCase(),
                                   ),
-                                )
-                                .toList(),
-                            onChanged: (valor) =>
-                                setState(() => _filtroTipo = valor),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 138,
+                                child: AppDropdown<TipoMovimiento>(
+                                  initialValue: _filtroTipo,
+                                  hint: 'Tipo',
+                                  items: TipoMovimiento.values
+                                      .map(
+                                        (
+                                          tipo,
+                                        ) => DropdownMenuItem<TipoMovimiento>(
+                                          value: tipo,
+                                          child: Text(
+                                            switch (tipo) {
+                                              TipoMovimiento.transferencia =>
+                                                'TRANSFER.',
+                                              TipoMovimiento.devolucion =>
+                                                'DEVOLUCIÓN',
+                                              _ => tipo.name.toUpperCase(),
+                                            },
+                                            style: AppTypography.bodySmall
+                                                .copyWith(fontSize: 12),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (valor) =>
+                                      setState(() => _filtroTipo = valor),
+                                ),
+                              ),
+                            ],
                           ),
                         ] else
                           Row(
@@ -152,9 +176,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // Lista de movimientos
                   const SizedBox(height: 12),
+                  // Lista de movimientos
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(

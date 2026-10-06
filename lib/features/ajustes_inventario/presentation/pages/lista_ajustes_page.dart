@@ -28,11 +28,48 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
       title: 'Lista de Ajustes',
       subtitle: isMobile ? null : 'Correcciones de stock y mermas',
       actions: [
-        IconButton(
-          icon: const Icon(Icons.add),
-          tooltip: 'Nuevo Ajuste',
-          onPressed: () => context.pushNamed(RegistrarAjustePage.routeName),
-        ),
+        if (isMobile)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Tooltip(
+              message: 'Nuevo ajuste',
+              child: SizedBox(
+                width: 44,
+                height: 42,
+                child: FilledButton(
+                  onPressed: () =>
+                      context.pushNamed(RegistrarAjustePage.routeName),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Icon(Icons.add_rounded, size: 25),
+                ),
+              ),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilledButton.icon(
+              onPressed: () => context.pushNamed(RegistrarAjustePage.routeName),
+              icon: const Icon(Icons.add_rounded, size: 19),
+              label: const Text('Nuevo ajuste'),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primary,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
       ],
       body: SafeArea(
         child: Padding(

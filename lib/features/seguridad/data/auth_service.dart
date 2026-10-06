@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -25,9 +26,43 @@ class AuthService {
   AuthService(this._db);
   final AppDatabase _db;
 
+  static const _prefix = 's1\$';
+
+  /// Formato nuevo: s1\$saltHex\$sha256hex
+  /// Legado: 64 hex (sha256 del password solo).
   static String hashPassword(String plain) {
-    return sha256.convert(utf8.encode(plain)).toString();
+    final salt = _randomSalt();
+    final digest = sha256.convert(utf8.encode('$salt$plain')).toString();
+    return '$_prefix$salt\$$digest';
   }
+
+  static String _randomSalt() {
+    final r = Random.secure();
+    final bytes = List<int>.generate(8, (_) => r.nextInt(256));
+    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  static bool verifyPassword(String plain, String stored) {
+    final s = stored.trim();
+    if (s.isEmpty) return false;
+    if (s.startsWith(_prefix)) {
+      final parts = s.split('\$');
+      // s1, salt, digest
+      if (parts.length != 3) return false;
+      final salt = parts[1];
+      final digest = parts[2];
+      final check = sha256.convert(utf8.encode('$salt$plain')).toString();
+      return check == digest;
+    }
+    // Legado SHA-256 sin salt
+    final legacy = sha256.convert(utf8.encode(plain)).toString();
+    return s == legacy;
+  }
+
+  static bool needsRehash(String stored) {
+    return !stored.trim().startsWith(_prefix);
+  }
+
 
   Future<AuthResult?> login(String username, String password) async {
     final u = username.trim();
@@ -38,15 +73,19 @@ class AuthService {
     )..where((t) => t.username.equals(u))).getSingleOrNull();
     if (row == null) return null;
     if (row.estado.toLowerCase() != 'activo') return null;
+    if (!verifyPassword(password, row.passwordHash)) return null;
+    final updates = UsuariosTableCompanion(
+      fechaUltimoAcceso: Value(DateTime.now()),
+      passwordHash: needsRehash(row.passwordHash)
+          ? Value(hashPassword(password))
+          : const Value.absent(),
+    );
+    await (_db.update(
+      _db.usuariosTable,
+    )..where((t) => t.id.equals(row.id))).write(updates);
 
-    final hashed = hashPassword(password);
-    final ok = row.passwordHash == hashed || row.passwordHash == password;
-    if (!ok) return null;
 
-    if (row.passwordHash == password) {
-      await (_db.update(_db.usuariosTable)..where((t) => t.id.equals(row.id)))
-          .write(UsuariosTableCompanion(passwordHash: Value(hashed)));
-    }
+    // Contraseña solo se valida como hash; no se acepta texto plano.
 
     await (_db.update(
       _db.usuariosTable,
