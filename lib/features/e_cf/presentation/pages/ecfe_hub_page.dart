@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:fiscogest_rd/features/e_cf/domain/services/certificado_info_service.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_documento.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/services/ecfe_siguiente_accion.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
@@ -12,7 +14,6 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_config.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
@@ -337,13 +338,179 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
     await ref.read(ecfeRepositoryProvider).guardarConfig(c);
     ref.invalidate(ecfeConfigProvider);
     ref.invalidate(ecfeHabilitadoProvider);
+
+    // Checklist operativo (cert, XSD, secuencias, OpenSSL)
+    final checks = await _evaluarChecklistConfig(c);
     if (!mounted) return;
-    FiscoGestNotifications.show(
-      const SnackBar(
-        content: Text('Configuración e-CF guardada (no afecta ventas)'),
-        backgroundColor: AppColors.success,
-      ),
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        final todosOk = checks.every((e) => e.$2);
+        return AlertDialog(
+          title: Text(
+            todosOk
+                ? 'Configuración lista para e-CF'
+                : 'Configuración guardada — revisar checklist',
+          ),
+          content: SizedBox(
+            width: 420,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final (label, ok, detail) in checks) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        ok ? Icons.check_circle : Icons.warning_amber_rounded,
+                        color: ok ? AppColors.success : AppColors.warning,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              label,
+                              style: AppTypography.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            if (detail.isNotEmpty)
+                              Text(
+                                detail,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Entendido'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  Future<List<(String, bool, String)>> _evaluarChecklistConfig(
+    EcfeConfig c,
+  ) async {
+    final out = <(String, bool, String)>[];
+
+    // 1) Módulo + ambiente
+    final ambOk = c.habilitado && c.ambiente.permiteEnvio;
+    out.add((
+      'Módulo y ambiente DGII',
+      ambOk,
+      ambOk
+          ? 'Habilitado · ${c.ambiente.etiqueta}'
+          : 'Active el módulo y elija precertificación, certificación o producción',
+    ));
+
+    // 2) RNC + razón
+    final rnc = c.rncEmisor.replaceAll(RegExp(r'\D'), '');
+    final emisorOk = rnc.length >= 9 && c.razonSocialEmisor.trim().length >= 3;
+    out.add((
+      'Datos del emisor',
+      emisorOk,
+      emisorOk
+          ? 'RNC $rnc · ${c.razonSocialEmisor.trim()}'
+          : 'RNC (≥9 dígitos) y razón social requeridos',
+    ));
+
+    // 3) OpenSSL
+    var opensslOk = false;
+    var opensslDetail = 'No se encontró openssl en el PATH';
+    try {
+      final r = await Process.run('openssl', ['version']);
+      opensslOk = r.exitCode == 0;
+      opensslDetail = opensslOk
+          ? '${r.stdout}'.trim().split('\n').first
+          : opensslDetail;
+    } catch (_) {}
+    out.add(('OpenSSL (firma XMLDSig)', opensslOk, opensslDetail));
+
+    // 4) Certificado .p12
+    final ruta = c.rutaCertificado.trim();
+    var certOk = false;
+    var certDetail = 'Indique ruta y clave del .p12 / .pfx';
+    if (ruta.isEmpty) {
+      certDetail = 'Ruta de certificado vacía';
+    } else if (!await File(ruta).exists()) {
+      certDetail = 'Archivo no encontrado: $ruta';
+    } else if (c.claveCertificado.isEmpty) {
+      certDetail = 'Clave del certificado vacía';
+    } else {
+      final info = await CertificadoInfoService.inspeccionar(
+        ruta: ruta,
+        clave: c.claveCertificado,
+      );
+      if (info.vencido) {
+        certDetail = info.mensaje;
+      } else if (info.error != null) {
+        certDetail = info.error!;
+      } else {
+        certOk = true;
+        certDetail = info.mensaje;
+      }
+    }
+    out.add(('Certificado digital PSC', certOk, certDetail));
+
+    // 5) XSD
+    final xsd = c.xsdVersion.trim();
+    var xsdOk = false;
+    var xsdDetail = 'Recomendado (obligatorio en cert/prod al generar XML)';
+    if (xsd.isEmpty) {
+      xsdDetail = 'Sin ruta XSD — solo validación estructural interna';
+      // no bloquea checklist como error duro
+      xsdOk = c.ambiente != AmbienteDgii.certificacion &&
+          c.ambiente != AmbienteDgii.produccion;
+      if (!xsdOk) {
+        xsdDetail = 'En certificación/producción configure el XSD oficial DGII';
+      }
+    } else if (await File(xsd).exists() || await Directory(xsd).exists()) {
+      xsdOk = true;
+      xsdDetail = xsd;
+    } else {
+      xsdDetail = 'Ruta XSD no existe: $xsd';
+    }
+    out.add(('Esquema XSD DGII', xsdOk, xsdDetail));
+
+    // 6) Secuencias e-NCF
+    var seqOk = false;
+    var seqDetail = 'Configure al menos un rango e-NCF activo (31/32/34…)';
+    try {
+      final seqs = await ref.read(ecfeSecuenciaServiceProvider).listar();
+      final activas = seqs.where((s) => s.activo && !s.vencida).toList();
+      if (activas.isNotEmpty) {
+        seqOk = true;
+        seqDetail = activas
+            .map((s) => '${s.tipoLabel} (${s.disponibles} disp.)')
+            .join(' · ');
+      } else if (seqs.isNotEmpty) {
+        seqDetail =
+            'Hay secuencias pero ninguna activa/vigente. Active un rango válido.';
+      }
+    } catch (e) {
+      seqDetail = 'No se pudieron leer secuencias: $e';
+    }
+    out.add(('Secuencias e-NCF', seqOk, seqDetail));
+
+    return out;
   }
 
   @override
@@ -456,8 +623,9 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Certificado digital, XSD y envío a DGII se configuran en fases posteriores. '
-              'Fase 0 solo prepara la base del módulo.',
+              'Configure certificado .p12, clave, XSD oficial y secuencias e-NCF. '
+              'Con ambiente de precertificación/certificación/producción y OpenSSL '
+              'en el equipo emisor, puede firmar y enviar a la DGII desde la Cola.',
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),

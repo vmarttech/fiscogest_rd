@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/store/store_channel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
@@ -20,13 +21,16 @@ class LicenciaAvisoBanner extends ConsumerWidget {
         }
 
         final gates = LicenciaGates(lic);
-        final porVencer = lic.diasRestantes != null &&
+        final mobile = MediaQuery.sizeOf(context).width < 600;
+        final porVencer =
+            lic.diasRestantes != null &&
             lic.diasRestantes! >= 0 &&
             lic.diasRestantes! <= 15 &&
             lic.plan != 'gratis' &&
             lic.plan != 'demo';
 
-        final mostrar = lic.plan == 'demo' ||
+        final mostrar =
+            lic.plan == 'demo' ||
             lic.plan == 'gratis' ||
             lic.estado == 'gracia' ||
             lic.estado == 'vencida' ||
@@ -39,7 +43,9 @@ class LicenciaAvisoBanner extends ConsumerWidget {
 
         if (lic.estado == 'vencida' && lic.plan != 'gratis') {
           texto =
-              'Licencia vencida. Configuración → Sistema → Licencia y pagos para elegir plan.';
+              storeOcultaCompraTransferencia
+              ? 'Licencia vencida. Vaya a Configuración → Licencia para activar o renovar.'
+              : 'Licencia vencida. Configuración → Sistema → Licencia y pagos para elegir plan.';
           bg = const Color(0xFFB91C1C);
           icon = Icons.error_outline;
         } else if (lic.estado == 'gracia') {
@@ -54,15 +60,18 @@ class LicenciaAvisoBanner extends ConsumerWidget {
           final prod = gates.maxProductos ?? 50;
           final cli = gates.maxClientes ?? 30;
           final ven = gates.maxVentasMes ?? 40;
-          texto =
-              'Plan gratis · límites: $prod productos, $cli clientes, '
-              '$ven ventas/mes, fiao $fiao. Toque para mejorar su plan.';
+          texto = mobile
+              ? 'Plan gratis · $prod productos · $cli clientes · $ven ventas/mes · fiao $fiao'
+              : 'Plan gratis · límites: $prod productos, $cli clientes, '
+                    '$ven ventas/mes, fiao $fiao. Toque para mejorar su plan.';
           bg = const Color(0xFF0F766E);
           icon = Icons.workspace_premium_outlined;
         } else if (lic.plan == 'demo') {
           final d = lic.diasRestantes;
           texto = d != null
-              ? 'Prueba: $d días restantes. Elija plan de pago en Licencia y pagos.'
+              ? mobile
+                    ? 'Prueba · $d días restantes · Ver planes'
+                    : 'Prueba: $d días restantes. Elija plan de pago en Licencia y pagos.'
               : 'Está en prueba. Elija plan de pago en Configuración → Licencia y pagos.';
           bg = const Color(0xFF0F766E);
           icon = Icons.info_outline;
@@ -75,42 +84,45 @@ class LicenciaAvisoBanner extends ConsumerWidget {
           icon = Icons.notification_important_outlined;
         }
 
+        final textoCompacto = texto
+            .replaceAll('Configuración → ', '')
+            .replaceAll('Toque para mejorar su plan.', '· Ver planes');
+
         return Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: () => context.push('/licencia'),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(9),
             child: Container(
               width: double.infinity,
-              margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              margin: const EdgeInsets.fromLTRB(12, 5, 12, 0),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: bg,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: bg.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(9),
               ),
               child: Row(
                 children: [
-                  Icon(icon, color: Colors.white, size: 20),
-                  const SizedBox(width: 10),
+                  Icon(icon, color: Colors.white, size: 17),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      texto,
+                      mobile ? texto : textoCompacto,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        height: 1.25,
                       ),
                     ),
                   ),
-                  const Icon(Icons.chevron_right, color: Colors.white70, size: 20),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Colors.white70,
+                    size: 18,
+                  ),
                 ],
               ),
             ),

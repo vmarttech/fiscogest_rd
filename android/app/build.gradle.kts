@@ -41,6 +41,10 @@ android {
     }
 
     buildTypes {
+        // Misma firma en debug (flutter run) y release (APK firmado)
+        debug {
+            signingConfig = signingConfigs.getByName("release")
+        }
         release {
             signingConfig = signingConfigs.getByName("release")
         }

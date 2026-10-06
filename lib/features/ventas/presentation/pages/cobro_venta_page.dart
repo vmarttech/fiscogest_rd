@@ -22,6 +22,7 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_p
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
+import 'package:fiscogest_rd/core/services/dgii_rnc_consulta_service.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 
@@ -50,6 +51,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   /// Comprobante fiscal en Caja (antes de cobrar).
   String _tipoNcf = 'B02';
   final TextEditingController _rncFiscalController = TextEditingController();
+  bool _buscandoRnc = false;
+  String? _rncNombreEncontrado;
   String _dirCliente = '';
   String _telCliente = '';
   double montoTotal = 0.0;
@@ -409,6 +412,54 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       return false;
     }
     return true;
+  }
+
+
+  Future<void> _buscarRncFiscalEnLinea() async {
+    final raw = _rncFiscalController.text.trim();
+    if (!DgiiRncConsultaService.esFormatoValido(raw)) {
+      if (!mounted) return;
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('Ingrese RNC (9) o cédula (11 dígitos)'),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _buscandoRnc = true;
+      _rncNombreEncontrado = null;
+    });
+    final svc = DgiiRncConsultaService();
+    try {
+      final r = await svc.consultar(raw);
+      if (!mounted) return;
+      setState(() {
+        _rncFiscalController.text = r.rnc;
+        _rncNombreEncontrado = r.estado != null
+            ? '${r.nombre} · ${r.estado}'
+            : r.nombre;
+      });
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text('RNC verificado: ${r.nombre}'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _rncNombreEncontrado = null);
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text('$e'.replaceAll('Exception: ', '')),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } finally {
+      svc.dispose();
+      if (mounted) setState(() => _buscandoRnc = false);
+    }
   }
 
   Future<void> _cargarRncCliente(int clienteId) async {
@@ -1242,14 +1293,53 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                           ),
                           if (_tipoNcf == 'B01') ...[
                             const SizedBox(height: 12),
-                            TextField(
-                              controller: _rncFiscalController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'RNC (9) o cédula (11 dígitos)',
-                                border: OutlineInputBorder(),
-                                isDense: true,
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _rncFiscalController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      labelText:
+                                          'RNC (9) o cédula (11 dígitos)',
+                                      border: const OutlineInputBorder(),
+                                      isDense: true,
+                                      helperText: _rncNombreEncontrado,
+                                      helperMaxLines: 2,
+                                    ),
+                                    onChanged: (_) {
+                                      if (_rncNombreEncontrado != null) {
+                                        setState(
+                                          () => _rncNombreEncontrado = null,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: _buscandoRnc
+                                      ? const SizedBox(
+                                          width: 44,
+                                          height: 44,
+                                          child: Padding(
+                                            padding: EdgeInsets.all(10),
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        )
+                                      : IconButton.filledTonal(
+                                          tooltip: 'Buscar RNC en línea',
+                                          onPressed: _buscarRncFiscalEnLinea,
+                                          icon: const Icon(
+                                            Icons.travel_explore,
+                                          ),
+                                        ),
+                                ),
+                              ],
                             ),
                           ],
                           const SizedBox(height: 16),

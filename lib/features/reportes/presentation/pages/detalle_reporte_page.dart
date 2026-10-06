@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
@@ -7,7 +8,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_action_bar.dart';
@@ -305,13 +305,8 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
       ],
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/reports');
-          }
-        },
+        tooltip: 'Atrás',
+        onPressed: () => safeBack(context, fallback: '/reports/hub'),
       ),
       body: SafeArea(
         child: Align(

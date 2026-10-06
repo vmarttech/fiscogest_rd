@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
 
 /// Presentación de arranque (cold start). Sin menú lateral.
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   static const String path = '/splash';
   static const String routeName = 'splash';
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
+class _SplashPageState extends ConsumerState<SplashPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _fade;
@@ -32,9 +35,38 @@ class _SplashPageState extends State<SplashPage>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
     _ctrl.forward();
-    Future<void>.delayed(const Duration(milliseconds: 2200), () {
+    Future<void>.delayed(const Duration(milliseconds: 2200), () async {
       if (!mounted) return;
-      context.go('/login');
+      try {
+        final db = ref.read(databaseProvider);
+        final usuarios = await db.select(db.usuariosTable).get();
+        // ignore: avoid_print
+        print('SPLASH: usuarios locales = ${usuarios.length}');
+        if (usuarios.isEmpty) {
+          ref.read(sesionProvider.notifier).state = const UsuarioSesion(
+            id: 0,
+            username: 'invitado',
+            nombre: 'Modo prueba',
+            rol: 'Admin',
+            requiereSetupInicial: false,
+          );
+          // ignore: avoid_print
+          print('SPLASH: sesión invitado → /');
+          if (!mounted) return;
+          context.go('/');
+        } else {
+          // ignore: avoid_print
+          print('SPLASH: hay usuarios → /login');
+          if (!mounted) return;
+          context.go('/login');
+        }
+      } catch (e, st) {
+        // ignore: avoid_print
+        print('SPLASH: error $e');
+        print(st);
+        if (!mounted) return;
+        context.go('/login');
+      }
     });
   }
 

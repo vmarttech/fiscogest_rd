@@ -68,24 +68,73 @@ class AuthService {
     );
   }
 
-  Future<void> ensureAdminSeed() async {
-    final existentes = await _db.select(_db.usuariosTable).get();
-    if (existentes.isNotEmpty) return;
-
-    await _db
-        .into(_db.usuariosTable)
-        .insert(
-          UsuariosTableCompanion.insert(
-            nombre: 'Administrador',
-            username: 'admin',
-            passwordHash: hashPassword('admin'),
-            apellido: const Value('Sistema'),
-            email: const Value('admin@local'),
-            rol: const Value('Admin'),
-            estado: const Value('Activo'),
-            requiereSetupInicial: const Value(true),
-          ),
+  /// Crea la cuenta administradora en una instalación sin usuarios.
+  Future<AuthResult> crearCuentaInicial({
+    required String username,
+    required String password,
+    required String pregunta,
+    required String respuesta,
+  }) async {
+    final user = username.trim();
+    final pass = password;
+    final preg = pregunta.trim();
+    final resp = respuesta.trim();
+    if (user.length < 3) {
+      throw const FormatException(
+        'El usuario debe tener al menos 3 caracteres',
+      );
+    }
+    if (user.toLowerCase() == 'admin') {
+      throw const FormatException('No puede usar "admin" como usuario');
+    }
+    if (pass.length < 6) {
+      throw const FormatException(
+        'La contraseña debe tener al menos 6 caracteres',
+      );
+    }
+    if (preg.isEmpty) {
+      throw const FormatException('Indique una pregunta de recuperación');
+    }
+    if (resp.length < 3) {
+      throw const FormatException(
+        'La respuesta debe tener al menos 3 caracteres',
+      );
+    }
+    final id = await _db.transaction(() async {
+      final existentes = await _db.select(_db.usuariosTable).get();
+      if (existentes.isNotEmpty) {
+        throw const FormatException(
+          'La configuración inicial ya está completada',
         );
+      }
+      if (await buscarPorUsername(user) != null) {
+        throw const FormatException('Ese nombre de usuario ya existe');
+      }
+      return _db
+          .into(_db.usuariosTable)
+          .insert(
+            UsuariosTableCompanion.insert(
+              nombre: user,
+              username: user,
+              passwordHash: hashPassword(pass),
+              apellido: const Value(''),
+              email: const Value(null),
+              rol: const Value('Admin'),
+              estado: const Value('Activo'),
+              requiereSetupInicial: const Value(false),
+              preguntaRecuperacion: Value(preg),
+              respuestaHash: Value(hashPassword(resp.toLowerCase())),
+            ),
+          );
+    });
+    return AuthResult(
+      usuarioId: id,
+      username: user,
+      nombre: user,
+      rol: 'Admin',
+      estado: 'Activo',
+      requiereSetupInicial: false,
+    );
   }
 
   /// Setup obligatorio: nuevo usuario, clave y pregunta de recuperación.

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
+import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 
 abstract class ICreditoDocumentoService {
@@ -53,4 +54,26 @@ abstract class ICreditoDocumentoService {
   Future<Uint8List> generarPdfEstadoCuenta({required CuentaPorCobrar cuenta});
 
   Future<void> imprimirEstadoCuenta({required CuentaPorCobrar cuenta});
+
+  Future<Uint8List> generarPdfAbono({
+    required CuentaPorCobrar cuenta,
+    required AbonoCredito abono,
+    double? saldoAnterior,
+    double? saldoActual,
+  });
+
+  Future<void> imprimirAbono({
+    required CuentaPorCobrar cuenta,
+    required AbonoCredito abono,
+    double? saldoAnterior,
+    double? saldoActual,
+  });
+
+  Future<void> compartirAbono({
+    required CuentaPorCobrar cuenta,
+    required AbonoCredito abono,
+    double? saldoAnterior,
+    double? saldoActual,
+  });
+
 }

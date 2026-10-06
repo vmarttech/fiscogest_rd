@@ -1,12 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
-import 'package:fiscogest_rd/core/sync/supabase/dispositivo_sync.dart';
-import 'package:fiscogest_rd/core/sync/supabase/pedido_sync.dart';
-import 'package:fiscogest_rd/core/sync/supabase/cliente_sync.dart';
-import 'package:fiscogest_rd/core/sync/supabase/producto_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
-import 'package:fiscogest_rd/core/sync/supabase/usuario_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 
 /// Reintenta subida a Supabase cada [intervalo].
 class SyncScheduler {
@@ -38,11 +34,7 @@ class SyncScheduler {
     if (!SupabaseConfig.isConfigured) return;
     _corriendo = true;
     try {
-      await DispositivoSync(_db).pushEsteEquipo();
-      await UsuarioSync(_db).pushTodos();
-      await PedidoSync(_db).pushTodos();
-      await ProductoSync(_db).pushTodos();
-      await ClienteSync(_db).pushTodos();
+      await SyncEngine(_db).pushAll();
       debugPrint('SyncScheduler: tick OK');
     } catch (e, st) {
       debugPrint('SyncScheduler: $e');

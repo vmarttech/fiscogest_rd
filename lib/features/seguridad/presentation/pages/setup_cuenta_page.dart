@@ -6,8 +6,11 @@ import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_remote.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 
-/// Obligatorio tras primer login con admin/admin.
+/// Configuración de la cuenta al iniciar por primera vez.
 class SetupCuentaPage extends ConsumerStatefulWidget {
   const SetupCuentaPage({super.key});
 
@@ -47,10 +50,6 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
 
   Future<void> _guardar() async {
     final sesion = ref.read(sesionProvider);
-    if (sesion == null) {
-      context.go('/login');
-      return;
-    }
     if (_passCtrl.text != _pass2Ctrl.text) {
       setState(() => _error = 'Las contraseñas no coinciden');
       return;
@@ -63,29 +62,61 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
 
     try {
       final db = ref.read(databaseProvider);
-      final err = await AuthService(db).completarSetupInicial(
-        usuarioId: sesion.id,
-        nuevoUsername: _userCtrl.text,
-        nuevaPassword: _passCtrl.text,
-        pregunta: _preguntaCtrl.text,
-        respuesta: _respuestaCtrl.text,
-      );
-      if (err != null) {
-        setState(() => _error = err);
-        return;
+      final auth = AuthService(db);
+      final esInvitado = sesion == null ||
+          sesion.id == 0 ||
+          sesion.username.toLowerCase() == 'invitado';
+      if (esInvitado) {
+        // 1) Negocio propio en Supabase (no compartir idPrueba)
+        if (SupabaseConfig.isConfigured) {
+          final nombreNegocio = _userCtrl.text.trim().isEmpty
+              ? 'Mi negocio'
+              : 'Negocio ${_userCtrl.text.trim()}';
+          final negocioId = await NegocioRemote().crear(nombre: nombreNegocio);
+          await NegocioLocal.setId(negocioId);
+        }
+        final cuenta = await auth.crearCuentaInicial(
+          username: _userCtrl.text,
+          password: _passCtrl.text,
+          pregunta: _preguntaCtrl.text,
+          respuesta: _respuestaCtrl.text,
+        );
+        ref.read(sesionProvider.notifier).state = UsuarioSesion(
+          id: cuenta.usuarioId,
+          username: cuenta.username,
+          nombre: cuenta.nombre,
+          rol: cuenta.rol,
+          requiereSetupInicial: false,
+        );
+      } else {
+        final err = await auth.completarSetupInicial(
+          usuarioId: sesion.id,
+          nuevoUsername: _userCtrl.text,
+          nuevaPassword: _passCtrl.text,
+          pregunta: _preguntaCtrl.text,
+          respuesta: _respuestaCtrl.text,
+        );
+        if (err != null) {
+          setState(() => _error = err);
+          return;
+        }
+        ref.read(sesionProvider.notifier).state = UsuarioSesion(
+          id: sesion.id,
+          username: _userCtrl.text.trim(),
+          nombre: sesion.nombre,
+          rol: sesion.rol,
+          requiereSetupInicial: false,
+        );
       }
-      ref.read(sesionProvider.notifier).state = UsuarioSesion(
-        id: sesion.id,
-        username: _userCtrl.text.trim(),
-        nombre: sesion.nombre,
-        rol: sesion.rol,
-        requiereSetupInicial: false,
-      );
       if (!mounted) return;
       final s = ref.read(sesionProvider);
       context.go(s?.rutaInicio ?? '/');
     } catch (e) {
-      setState(() => _error = 'Error: $e');
+      setState(
+        () => _error = e is FormatException
+            ? e.message
+            : 'No se pudo guardar la cuenta',
+      );
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
@@ -127,9 +158,9 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Por seguridad debe cambiar el usuario y la contraseña '
-                          'de fábrica (admin). También configure una pregunta para '
-                          'recuperar la clave si la olvida.',
+                          'Cree el usuario y la contraseña de su cuenta. Configure '
+                          'una pregunta de seguridad para recuperar el acceso si '
+                          'alguna vez olvida la clave.',
                           textAlign: TextAlign.center,
                           style: AppTypography.bodySmall.copyWith(
                             color: Colors.white.withValues(alpha: 0.55),
@@ -140,7 +171,7 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                         TextField(
                           controller: _userCtrl,
                           style: const TextStyle(color: Colors.white),
-                          decoration: _dec('Nuevo usuario *'),
+                          decoration: _dec('Usuario *'),
                           textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 12),
@@ -149,7 +180,7 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                           obscureText: _ocultar,
                           style: const TextStyle(color: Colors.white),
                           decoration: _dec(
-                            'Nueva contraseña *',
+                            'Contraseña *',
                             suffix: IconButton(
                               icon: Icon(
                                 _ocultar
@@ -171,6 +202,18 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          selectedItemBuilder: (context) => [
+                            for (final q in _preguntas)
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  q,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                          ],
                           initialValue:
                               _preguntaCtrl.text.isNotEmpty &&
                                   _preguntas.contains(_preguntaCtrl.text)

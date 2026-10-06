@@ -44,7 +44,7 @@ class LicenciaGates {
   String get textoDispositivos {
     if (lic == null) return '';
     if (lic!.esDesarrollador) {
-      return 'Acceso vitalicio MartTech · sin límite práctico de equipos.';
+      return 'Licencia de plataforma · desarrollador autorizado.';
     }
     if (esGratis) {
       return 'Plan gratis · 1 dispositivo · límites activos · fiao hasta ${maxCuentasFiao ?? 25} cuentas.';

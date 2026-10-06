@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_deliv
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_contado_fiao.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_anotar_fiao.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -466,7 +467,8 @@ class _NuevaVentaBorradorPageState
       title: 'NUEVA COTIZACIÓN',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.pop(),
+        tooltip: 'Atrás',
+        onPressed: () => safeBack(context, fallback: '/ventas'),
       ),
       body: SafeArea(
         bottom: true,

@@ -5,6 +5,8 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 
 class LicenciaActivarPage extends ConsumerStatefulWidget {
   const LicenciaActivarPage({super.key});
@@ -39,7 +41,12 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
     }
     setState(() => _cargando = true);
     try {
-      await ref.read(licenciaServiceProvider).marcarPagadoYEmitirLicencia(refCode);
+      // Traer estado real del pedido desde la nube (negocio actual)
+      try {
+        final db = ref.read(databaseProvider);
+        await SyncEngine(db).pullAll();
+      } catch (_) {}
+      await ref.read(licenciaServiceProvider).aplicarLicenciaSiYaEmitida(refCode);
       ref.invalidate(licenciaActualProvider);
       if (!mounted) return;
       FiscoGestNotifications.show(
@@ -79,7 +86,7 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
                 Expanded(
                   child: Text(
                     'Solo si te confirmamos una referencia FG- ya pagada. '
-                    'MartTech (dueño) no necesita este paso.',
+                    'Las cuentas de plataforma autorizadas se gestionan al iniciar sesión.',
                     style: TextStyle(color: Colors.white, height: 1.35),
                   ),
                 ),

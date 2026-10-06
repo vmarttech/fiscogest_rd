@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
+import 'package:fiscogest_rd/core/print/print_formats.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -702,7 +703,7 @@ class ComprobantePdf {
     final doc = pw.Document();
     doc.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.letter,
+        pageFormat: PrintFormats.a4,
         margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 40),
         build: (ctx) => [
           pw.Text(
@@ -782,7 +783,7 @@ class ComprobantePdf {
     final doc = pw.Document();
     doc.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.letter,
+        pageFormat: PrintFormats.a4,
         margin: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 28),
         build: (ctx) => [
           pw.Text(

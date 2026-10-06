@@ -6,6 +6,51 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 
+/// Modelos editables precargables (variables {{…}} se resuelven al imprimir).
+class CreditoPlantillasModelo {
+  CreditoPlantillasModelo._();
+
+  static const solicitud = '''
+Declaración del solicitante
+
+Yo, {{CLIENTE}}, declaro que la información suministrada es verdadera y autorizo a {{EMPRESA}} (RNC {{RNC}}) a verificar mis datos y referencias para la evaluación del crédito correspondiente a la cotización {{NRO}}.
+
+Monto de la operación: {{MONTO}}
+Abono inicial: {{ABONO}}
+Saldo a financiar: {{SALDO}}
+Plazo propuesto: {{CUOTAS}} cuota(s) de {{CUOTA}} (estimado)
+
+Me comprometo a cumplir las condiciones que se aprueben y consten en el contrato de crédito / compra a plazo.
+
+Fecha: {{FECHA}}
+''';
+
+  static const contrato = '''
+CONTRATO DE CRÉDITO / COMPRA A PLAZO
+
+Entre {{EMPRESA}} (RNC {{RNC}}), en adelante EL ACREEDOR, y {{CLIENTE}}, en adelante EL DEUDOR, se conviene lo siguiente:
+
+1. OBJETO Y MONTO
+El DEUDOR adquiere los bienes/servicios de la cotización {{NRO}} por un valor de {{MONTO}}. Abono inicial: {{ABONO}}. Saldo a financiar: {{SALDO}}, pagadero en {{CUOTAS}} cuota(s) estimada(s) de {{CUOTA}}.
+
+2. OBLIGACIONES DEL DEUDOR
+a) Pagar puntualmente las cuotas en las fechas pactadas.
+b) Informar cambios de domicilio o teléfono.
+c) Conservar los bienes en buen estado mientras exista saldo pendiente.
+d) Cubrir cargos por mora según la política del establecimiento, si aplica.
+
+3. INCUMPLIMIENTO
+El atraso en el pago podrá generar intereses moratorios y/o gestión de cobro conforme a la ley y a las políticas internas. El ACREEDOR se reserva las acciones legales pertinentes.
+
+4. ACEPTACIÓN
+Ambas partes declaran haber leído y aceptado este contrato en todas sus partes.
+
+Fecha: {{FECHA}}
+Dirección del acreedor: {{DIRECCION_EMPRESA}} · Tel: {{TELEFONO_EMPRESA}}
+''';
+}
+
+
 class ConfigCreditoPage extends ConsumerStatefulWidget {
   const ConfigCreditoPage({super.key});
 
@@ -49,6 +94,27 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
     _plantillaSolCtrl.text = p.plantillaSolicitud;
     _plantillaConCtrl.text = p.plantillaContrato;
     _cargado = true;
+  }
+
+
+  void _cargarModeloSolicitud() {
+    setState(() {
+      _plantillaSolCtrl.text = CreditoPlantillasModelo.solicitud.trim();
+    });
+  }
+
+  void _cargarModeloContrato() {
+    setState(() {
+      _plantillaConCtrl.text = CreditoPlantillasModelo.contrato.trim();
+    });
+  }
+
+  void _limpiarSolicitud() {
+    setState(() => _plantillaSolCtrl.clear());
+  }
+
+  void _limpiarContrato() {
+    setState(() => _plantillaConCtrl.clear());
   }
 
   Future<void> _guardar() async {
@@ -243,7 +309,7 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Texto adicional en el PDF de solicitud',
+                        'Cuerpo legal editable. Vacío = texto por defecto. Variables: {{EMPRESA}} {{RNC}} {{CLIENTE}} {{NRO}} {{MONTO}} {{ABONO}} {{SALDO}} {{CUOTAS}} {{CUOTA}} {{FECHA}}',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.grey600,
                         ),
@@ -253,10 +319,10 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                         borderColor: AppColors.border,
                         child: TextField(
                           controller: _plantillaSolCtrl,
-                          maxLines: 5,
+                          maxLines: 14,
                           style: AppTypography.bodyMedium,
                           decoration: InputDecoration(
-                            labelText: 'Texto adicional solicitud',
+                            labelText: 'Cuerpo completo de la solicitud',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -264,6 +330,22 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                             fillColor: Colors.white,
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: _cargarModeloSolicitud,
+                            icon: const Icon(Icons.description_outlined, size: 18),
+                            label: const Text('Cargar modelo'),
+                          ),
+                          TextButton(
+                            onPressed: _limpiarSolicitud,
+                            child: const Text('Usar default del PDF'),
+                          ),
+                        ],
                       ),
                       AppLayout.vL,
                       const SizedBox(height: 8),
@@ -276,7 +358,7 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Cláusulas adicionales del contrato PDF',
+                        'Cuerpo legal editable del contrato. Vacío = cláusulas por defecto. Mismas variables {{EMPRESA}} {{CLIENTE}} {{MONTO}}… El cronograma de cuotas se anexa automáticamente al PDF.',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.grey600,
                         ),
@@ -286,10 +368,10 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                         borderColor: AppColors.border,
                         child: TextField(
                           controller: _plantillaConCtrl,
-                          maxLines: 8,
+                          maxLines: 14,
                           style: AppTypography.bodyMedium,
                           decoration: InputDecoration(
-                            labelText: 'Cláusulas adicionales contrato',
+                            labelText: 'Cuerpo completo del contrato',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -297,6 +379,22 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                             fillColor: Colors.white,
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: _cargarModeloContrato,
+                            icon: const Icon(Icons.description_outlined, size: 18),
+                            label: const Text('Cargar modelo'),
+                          ),
+                          TextButton(
+                            onPressed: _limpiarContrato,
+                            child: const Text('Usar default del PDF'),
+                          ),
+                        ],
                       ),
                       AppLayout.vL,
                       AppButton(

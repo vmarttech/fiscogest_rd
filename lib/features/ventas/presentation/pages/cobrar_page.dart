@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
@@ -173,8 +174,8 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
         onPressed: () {
           if (widget.onVolver != null) {
             widget.onVolver!();
-          } else if (Navigator.canPop(context)) {
-            Navigator.pop(context);
+          } else {
+            safeBack(context, fallback: '/ventas/cobro');
           }
         },
       ),

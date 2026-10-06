@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
@@ -63,7 +66,7 @@ class ImportExportPage extends ConsumerWidget {
                                 'productos',
                               );
                               if (!context.mounted) return;
-                              _mostrarResultadoExportacion(
+                              await _mostrarResultadoExportacion(
                                 context,
                                 'Productos.csv',
                                 csv,
@@ -74,7 +77,7 @@ class ImportExportPage extends ConsumerWidget {
                                 'clientes',
                               );
                               if (!context.mounted) return;
-                              _mostrarResultadoExportacion(
+                              await _mostrarResultadoExportacion(
                                 context,
                                 'Clientes.csv',
                                 csv,
@@ -85,7 +88,7 @@ class ImportExportPage extends ConsumerWidget {
                                 'proveedores',
                               );
                               if (!context.mounted) return;
-                              _mostrarResultadoExportacion(
+                              await _mostrarResultadoExportacion(
                                 context,
                                 'Proveedores.csv',
                                 csv,
@@ -110,7 +113,7 @@ class ImportExportPage extends ConsumerWidget {
                           'productos',
                         );
                         if (!context.mounted) return;
-                        _mostrarResultadoExportacion(
+                        await _mostrarResultadoExportacion(
                           context,
                           'Productos.csv',
                           csv,
@@ -121,7 +124,7 @@ class ImportExportPage extends ConsumerWidget {
                           'clientes',
                         );
                         if (!context.mounted) return;
-                        _mostrarResultadoExportacion(
+                        await _mostrarResultadoExportacion(
                           context,
                           'Clientes.csv',
                           csv,
@@ -132,7 +135,7 @@ class ImportExportPage extends ConsumerWidget {
                           'proveedores',
                         );
                         if (!context.mounted) return;
-                        _mostrarResultadoExportacion(
+                        await _mostrarResultadoExportacion(
                           context,
                           'Proveedores.csv',
                           csv,
@@ -214,42 +217,59 @@ class ImportExportPage extends ConsumerWidget {
     await controller.importarProductosDesdeCsv(csv);
   }
 
-  void _mostrarResultadoExportacion(
+  Future<void> _mostrarResultadoExportacion(
     BuildContext context,
     String tituloArchivo,
     String contenido,
-  ) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-        title: Text(
-          'Exportación: $tituloArchivo',
-          style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
-        ),
-        content: SizedBox(
-          width: 520,
-          height: 280,
-          child: SingleChildScrollView(
-            child: SelectableText(
-              contenido,
-              style: AppTypography.bodySmall.copyWith(
-                fontFamily: 'monospace',
-                fontSize: 12,
-              ),
-            ),
+  ) async {
+    if (contenido.trim().isEmpty ||
+        contenido.trim().split('\n').length <= 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No hay datos para exportar (lista vacía o no cargada)',
           ),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
+      );
+      return;
+    }
+    final bytes = utf8.encode(contenido);
+
+    // Guardar archivo
+    final ruta = await FilePicker.platform.saveFile(
+      dialogTitle: 'Guardar $tituloArchivo',
+      fileName: tituloArchivo,
+      type: FileType.custom,
+      allowedExtensions: const ['csv'],
+      bytes: bytes,
+    );
+    if (ruta != null && ruta.isNotEmpty) {
+      final dest = File(ruta.endsWith('.csv') ? ruta : '$ruta.csv');
+      await dest.writeAsBytes(bytes, flush: true);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('CSV guardado: ${dest.path}'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Compartir si canceló o no hay saveFile
+    final tmpDir = await getTemporaryDirectory();
+    final tmp = File(p.join(tmpDir.path, tituloArchivo));
+    await tmp.writeAsBytes(bytes, flush: true);
+    await Share.shareXFiles(
+      [XFile(tmp.path, mimeType: 'text/csv', name: tituloArchivo)],
+      subject: tituloArchivo,
     );
   }
 }
+
 
 class _HubHero extends StatelessWidget {
   const _HubHero({

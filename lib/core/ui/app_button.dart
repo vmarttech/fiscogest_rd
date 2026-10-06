@@ -29,17 +29,23 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveOnPressed = (isDisabled || isLoading) ? null : onPressed;
+    final inAppBar = context.findAncestorWidgetOfExactType<AppBar>() != null;
     return SizedBox(
       width: width,
       height: height,
       child: ElevatedButton(
         onPressed: effectiveOnPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: inAppBar ? AppColors.white : AppColors.primary,
           disabledBackgroundColor: AppColors.grey300,
-          foregroundColor: AppColors.white,
+          foregroundColor: inAppBar ? AppColors.primaryDark : AppColors.white,
           disabledForegroundColor: AppColors.grey500,
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppRadius.allM,
+            side: inAppBar
+                ? BorderSide(color: AppColors.white.withValues(alpha: 0.4))
+                : BorderSide.none,
+          ),
           textStyle: AppTypography.button,
           padding: const EdgeInsets.symmetric(horizontal: 16),
         ),

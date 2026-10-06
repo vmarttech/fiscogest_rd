@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/import_export/data/services/import_export_service.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
-import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/providers/proveedor_providers.dart';
@@ -45,6 +44,7 @@ class ImportExportNotifier extends StateNotifier<AsyncValue<String>> {
   Future<String> exportarDatosEntidad(String tipo) async {
     switch (tipo) {
       case 'productos':
+        await _ref.read(productoControllerProvider.notifier).cargarProductos();
         final list =
             _ref.read(productoControllerProvider).valueOrNull ?? <Producto>[];
         return _service.exportarProductos([
@@ -59,9 +59,9 @@ class ImportExportNotifier extends StateNotifier<AsyncValue<String>> {
             },
         ]);
       case 'clientes':
-        final list =
-            _ref.read(clientesControllerProvider).valueOrNull ??
-            <ClienteEntity>[];
+        // AsyncNotifier: invalidate + await future
+        _ref.invalidate(clientesControllerProvider);
+        final list = await _ref.read(clientesControllerProvider.future);
         return _service.exportarClientes([
           for (final c in list)
             {
@@ -74,6 +74,7 @@ class ImportExportNotifier extends StateNotifier<AsyncValue<String>> {
             },
         ]);
       default:
+        await _ref.read(proveedorControllerProvider.notifier).recargar();
         final list =
             _ref.read(proveedorControllerProvider).valueOrNull ?? <Proveedor>[];
         return _service.exportarProveedores([

@@ -577,8 +577,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     );
   }
 
-  /// Hub del punto de venta (solo vendedor: cotizar + historial).
-  /// Hub vendedor: cotizar, historial, simular crédito, consultar stock (lectura).
+  /// Hub POS: modo normal (cotizar / crédito) o colmado (vender / fiao).
   Widget _buildEntradaCotizacion(bool isMobile) {
     final width = MediaQuery.sizeOf(context).width;
     final wide = !isMobile && width >= 900;
@@ -604,7 +603,11 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       );
     }
 
-    final cta = _PosCtaCard(isMobile: isMobile, onTap: irNuevaCotizacion);
+    final cta = _PosCtaCard(
+      isMobile: isMobile,
+      simplificado: simplificado,
+      onTap: irNuevaCotizacion,
+    );
 
     final atajos = AppAccessGrid(
       minTileWidth: isMobile ? 150 : 180,
@@ -618,7 +621,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           AppHubCard(
             icon: Icons.history_rounded,
             title: 'Historial',
-            subtitle: 'Cotizaciones y ventas',
+            subtitle: simplificado ? 'Ventas del día' : 'Cotizaciones y ventas',
             color: AppColors.info,
             onTap: irHistorial,
           ),
@@ -630,16 +633,15 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           onTap: consultarStock,
         ),
         if (!simplificado)
-          if (!simplificado)
-            AppHubCard(
-              icon: Icons.calculate_outlined,
-              title: 'Simular crédito',
-              subtitle: isMobile
-                  ? 'Montos y cuotas'
-                  : 'Montos y cuotas oficiales',
-              color: AppColors.warning,
-              onTap: irSimuladorCredito,
-            ),
+          AppHubCard(
+            icon: Icons.calculate_outlined,
+            title: 'Simular crédito',
+            subtitle: isMobile
+                ? 'Montos y cuotas'
+                : 'Montos y cuotas oficiales',
+            color: AppColors.warning,
+            onTap: irSimuladorCredito,
+          ),
         if (simplificado)
           AppHubCard(
             icon: Icons.edit_note_rounded,
@@ -667,6 +669,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   child: _PosContextoCard(
                     onHistorial: irHistorial,
                     isMobile: false,
+                    simplificado: simplificado,
                   ),
                 ),
               ],
@@ -675,12 +678,15 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
             cta,
             if (!isMobile) ...[
               const SizedBox(height: 14),
-              _PosContextoCard(onHistorial: irHistorial),
+              _PosContextoCard(
+                onHistorial: irHistorial,
+                simplificado: simplificado,
+              ),
             ],
           ],
           SizedBox(height: isMobile ? 14 : 22),
           Text(
-            'Accesos del vendedor',
+            simplificado ? 'Accesos rápidos' : 'Accesos del vendedor',
             style: AppTypography.h4.copyWith(
               fontWeight: FontWeight.w800,
               fontSize: isMobile ? 15 : null,
@@ -689,7 +695,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           if (!isMobile) ...[
             const SizedBox(height: 4),
             Text(
-              'Stock en solo lectura y simulación de crédito. Historial en la tarjeta superior.',
+              simplificado
+                  ? 'Venda al contado o fiao. Consulte stock sin salir. Historial arriba.'
+                  : 'Stock en solo lectura y simulación de crédito. Historial en la tarjeta superior.',
               style: AppTypography.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -718,8 +726,13 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
 
 /// CTA principal del POS — máxima jerarquía visual.
 class _PosCtaCard extends StatelessWidget {
-  const _PosCtaCard({required this.isMobile, required this.onTap});
+  const _PosCtaCard({
+    required this.isMobile,
+    required this.onTap,
+    this.simplificado = false,
+  });
   final bool isMobile;
+  final bool simplificado;
   final VoidCallback onTap;
 
   @override
@@ -764,7 +777,9 @@ class _PosCtaCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(isMobile ? 14 : 16),
                   ),
                   child: Icon(
-                    Icons.request_quote_rounded,
+                    simplificado
+                        ? Icons.point_of_sale_rounded
+                        : Icons.request_quote_rounded,
                     color: Colors.white,
                     size: isMobile ? 30 : 34,
                   ),
@@ -775,7 +790,7 @@ class _PosCtaCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Nueva cotización',
+                        simplificado ? 'Vender' : 'Nueva cotización',
                         style: (isMobile ? AppTypography.h4 : AppTypography.h3)
                             .copyWith(
                               color: Colors.white,
@@ -785,9 +800,13 @@ class _PosCtaCard extends StatelessWidget {
                       ),
                       SizedBox(height: isMobile ? 4 : 4),
                       Text(
-                        isMobile
-                            ? 'Arme el pedido y envíe a Caja'
-                            : 'Arme el pedido, aplique crédito si aplica y envíe a Caja',
+                        simplificado
+                            ? (isMobile
+                                ? 'Productos → Contado o Fiao'
+                                : 'Arme el pedido y cobre: contado o fiao')
+                            : (isMobile
+                                ? 'Arme el pedido y envíe a Caja'
+                                : 'Arme el pedido, aplique crédito si aplica y envíe a Caja'),
                         style: AppTypography.bodyMedium.copyWith(
                           color: Colors.white.withValues(alpha: 0.92),
                           height: 1.3,
@@ -815,9 +834,14 @@ class _PosCtaCard extends StatelessWidget {
 
 /// Contexto / recordatorio de estación (sin depender aún de KPIs live).
 class _PosContextoCard extends StatelessWidget {
-  const _PosContextoCard({required this.onHistorial, this.isMobile = false});
+  const _PosContextoCard({
+    required this.onHistorial,
+    this.isMobile = false,
+    this.simplificado = false,
+  });
   final VoidCallback onHistorial;
   final bool isMobile;
+  final bool simplificado;
 
   @override
   Widget build(BuildContext context) {
@@ -873,7 +897,9 @@ class _PosContextoCard extends StatelessWidget {
                     if (!isMobile) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Cotizaciones y ventas del vendedor.',
+                        simplificado
+                            ? 'Ventas y pedidos recientes.'
+                            : 'Cotizaciones y ventas del vendedor.',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textPrimary.withValues(alpha: 0.75),
                           height: 1.35,
@@ -881,7 +907,9 @@ class _PosContextoCard extends StatelessWidget {
                       ),
                     ] else ...[
                       Text(
-                        'Cotizaciones y ventas',
+                        simplificado
+                            ? 'Ventas recientes'
+                            : 'Cotizaciones y ventas',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 11,

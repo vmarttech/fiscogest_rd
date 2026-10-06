@@ -15,7 +15,7 @@ class FacturacionPlaceholderPage extends StatelessWidget {
 
       title: titulo.toUpperCase(),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();

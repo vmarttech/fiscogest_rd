@@ -1,5 +1,8 @@
+import 'package:fiscogest_rd/core/store/store_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -48,7 +51,7 @@ class LicenciaEstadoPage extends ConsumerWidget {
                 colorEstado: colorEstado,
                 plan: esDev ? 'Desarrollador' : lic.plan,
                 subtitulo: esDev
-                    ? 'Acceso vitalicio MartTech · sin llave'
+                    ? 'Licencia de plataforma · desarrollador autorizado'
                     : gates.textoDispositivos,
               ),
               const SizedBox(height: 20),
@@ -256,9 +259,13 @@ class LicenciaEstadoPage extends ConsumerWidget {
                   width: double.infinity,
                   height: 48,
                   child: FilledButton.icon(
-                    onPressed: () => context.push('/licencia/comprar'),
+                    onPressed: () => context.push(storeOcultaCompraTransferencia ? '/licencia/activar' : '/licencia/comprar'),
                     icon: const Icon(Icons.shopping_cart_outlined),
-                    label: const Text('Comprar / renovar licencia'),
+                    label: Text(
+                      storeOcultaCompraTransferencia
+                          ? 'Ver planes (activar con código)'
+                          : 'Comprar / renovar licencia',
+                    ),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF0F766E),
                       shape: RoundedRectangleBorder(
@@ -286,16 +293,20 @@ class LicenciaEstadoPage extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: 8),
-              Center(
-                child: TextButton(
-                  onPressed: () => context.push('/licencia/admin'),
-                  child: const Text('Administrar pedidos de pago'),
+              if (esDuenoPlataforma(ref.watch(sesionProvider)?.username))
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.push('/licencia/admin'),
+                    child: const Text('Administrar pedidos de pago'),
+                  ),
                 ),
-              ),
               const SizedBox(height: 8),
               Text(
-                'Los clientes pagan por transferencia o Toke. '
-                'Tú confirmas el pago y el sistema emite la licencia.',
+                storeOcultaCompraTransferencia
+                    ? 'En esta version de tienda: active con codigo o use el plan gratuito/demo. '
+                      'La compra in-app de la tienda se habilitara cuando este disponible.'
+                    : 'Pago de la licencia: Toke o transferencia bancaria con referencia FG-. '
+                      'No confundir con los cobros del comercio a sus clientes en caja.',
                 style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
@@ -391,7 +402,7 @@ class _HeroLicencia extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      esDev ? 'Acceso vitalicio' : 'Estado de licencia',
+                      esDev ? 'Plataforma · desarrollador' : 'Estado de licencia',
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 13,

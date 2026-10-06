@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/presentaciones/presentation/providers/presentacion_providers.dart';
 import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 
 class PresentacionesPage extends ConsumerStatefulWidget {
   const PresentacionesPage({super.key});
@@ -40,7 +41,8 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
       subtitle: 'Administración de presentaciones de productos',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
+        tooltip: 'Atrás',
+        onPressed: () => safeBack(context, fallback: '/inventario'),
       ),
       actions: [
         if (!isMobile)

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
-import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
@@ -39,21 +38,12 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
       title: 'Proveedores',
       subtitle: 'Directorio de proveedores y contactos',
       actions: [
-        if (!isMobile)
-          AppButton(
-            text: 'Nuevo proveedor',
-            icon: Icons.business,
-            onPressed: () => _mostrarModalRegistro(context),
-          ),
+        AppButton(
+          text: isMobile ? 'Nuevo' : 'Nuevo proveedor',
+          icon: Icons.person_add_alt_1_rounded,
+          onPressed: () => _mostrarModalRegistro(context),
+        ),
       ],
-      floatingActionButton: isMobile
-          ? FloatingActionButton(
-              onPressed: () => _mostrarModalRegistro(context),
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.add),
-            )
-          : null,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -64,7 +54,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                 isMobile ? 16 : 24,
                 isMobile ? 12 : 20,
                 isMobile ? 16 : 24,
-                isMobile ? 88 : 24,
+                24,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -159,15 +149,6 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                       height: 1.35,
                                     ),
                                   ),
-                                  if (_filtroBusqueda.isEmpty) ...[
-                                    const SizedBox(height: 18),
-                                    AppButton(
-                                      text: 'Nuevo proveedor',
-                                      icon: Icons.business,
-                                      onPressed: () =>
-                                          _mostrarModalRegistro(context),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ),
@@ -535,7 +516,17 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
     }
 
     Widget formFields({required bool compact}) {
-      final gap = compact ? const SizedBox(height: 12) : AppLayout.vM;
+      // Móvil y desktop: filas de 2 para no alargar el sheet como un listado infinito
+      final gap = compact ? const SizedBox(height: 8) : const SizedBox(height: 10);
+      final gapW = compact ? 8.0 : 12.0;
+      Widget pair(Widget a, Widget b) => Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: a),
+              SizedBox(width: gapW),
+              Expanded(child: b),
+            ],
+          );
       return Form(
         key: formKey,
         child: Column(
@@ -547,14 +538,15 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
               controller: nombreEmpresaController,
             ),
             gap,
-            AppTextField(
-              label: 'RNC del Proveedor',
-              controller: rncController,
-            ),
-            gap,
-            AppTextField(
-              label: 'Persona de Contacto',
-              controller: nombreContactoController,
+            pair(
+              AppTextField(
+                label: 'RNC del Proveedor',
+                controller: rncController,
+              ),
+              AppTextField(
+                label: 'Persona de Contacto',
+                controller: nombreContactoController,
+              ),
             ),
             gap,
             AppTextField(
@@ -562,96 +554,37 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
               controller: direccionController,
             ),
             gap,
-            if (compact) ...[
+            pair(
               AppTextField(label: 'Ciudad', controller: ciudadController),
-              gap,
               AppTextField(
                 label: 'Provincia',
                 controller: provinciaController,
               ),
-              gap,
-              AppTextField(label: 'Teléfono', controller: telefonoController),
-              gap,
-              AppTextField(label: 'Celular', controller: celularController),
-              gap,
-              AppTextField(label: 'WhatsApp', controller: whatsAppController),
-            ] else ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      label: 'Ciudad',
-                      controller: ciudadController,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppTextField(
-                      label: 'Provincia',
-                      controller: provinciaController,
-                    ),
-                  ),
-                ],
-              ),
-              gap,
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      label: 'Teléfono',
-                      controller: telefonoController,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppTextField(
-                      label: 'Celular',
-                      controller: celularController,
-                    ),
-                  ),
-                ],
-              ),
-              gap,
-              AppTextField(
-                label: 'WhatsApp',
-                controller: whatsAppController,
-              ),
-            ],
-            gap,
-            AppTextField(
-              label: 'Correo Electrónico',
-              controller: emailController,
             ),
             gap,
-            if (compact) ...[
+            pair(
+              AppTextField(label: 'Teléfono', controller: telefonoController),
+              AppTextField(label: 'Celular', controller: celularController),
+            ),
+            gap,
+            pair(
+              AppTextField(label: 'WhatsApp', controller: whatsAppController),
+              AppTextField(
+                label: 'Correo Electrónico',
+                controller: emailController,
+              ),
+            ),
+            gap,
+            pair(
               AppTextField(
                 label: 'Límite de Crédito',
                 controller: limiteCreditoController,
               ),
-              gap,
               AppTextField(
                 label: 'Días de Crédito',
                 controller: diasCreditoController,
               ),
-            ] else ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      label: 'Límite de Crédito',
-                      controller: limiteCreditoController,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppTextField(
-                      label: 'Días de Crédito',
-                      controller: diasCreditoController,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
             gap,
             AppTextField(
               label: 'Condiciones',
@@ -675,17 +608,19 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
               alignment: Alignment.bottomCenter,
               child: Container(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(ctx).height * 0.88,
+                  maxHeight: (MediaQuery.sizeOf(ctx).height - bottom) * 0.78,
                   maxWidth: 560,
                 ),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                child: Column(
+                child: SafeArea(
+                  top: false,
+                  child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     Container(
                       width: 40,
                       height: 4,
@@ -695,15 +630,42 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+                      padding: const EdgeInsets.fromLTRB(16, 10, 8, 6),
                       child: Row(
                         children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.storefront_outlined,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor',
-                              style: AppTypography.h4.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isEditing
+                                      ? 'Editar proveedor'
+                                      : 'Nuevo proveedor',
+                                  style: AppTypography.h4.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Información comercial y de contacto',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           IconButton(
@@ -716,13 +678,13 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                     const Divider(height: 1),
                     Flexible(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                         child: formFields(compact: true),
                       ),
                     ),
                     const Divider(height: 1),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                       child: Row(
                         children: [
                           Expanded(
@@ -743,6 +705,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                     ),
                   ],
                 ),
+                ),
               ),
             ),
           );
@@ -756,25 +719,52 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
-        final maxFormH = MediaQuery.sizeOf(ctx).height * 0.48;
+        final maxFormH = MediaQuery.sizeOf(ctx).height * 0.55;
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
           child: SizedBox(
-            width: 500,
+            width: 620,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+                  padding: const EdgeInsets.fromLTRB(24, 20, 12, 16),
                   child: Row(
                     children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.storefront_outlined,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
                       Expanded(
-                        child: Text(
-                          isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor',
-                          style: AppTypography.h4.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isEditing
+                                  ? 'Editar proveedor'
+                                  : 'Nuevo proveedor',
+                              style: AppTypography.h4.copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Información comercial y de contacto',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       IconButton(
@@ -788,13 +778,13 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                 ConstrainedBox(
                   constraints: BoxConstraints(maxHeight: maxFormH),
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
                     child: formFields(compact: false),
                   ),
                 ),
                 const Divider(height: 1),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [

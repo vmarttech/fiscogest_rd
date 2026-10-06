@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detall
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 
 class _FiltrosCompras {
   const _FiltrosCompras({
@@ -454,7 +455,8 @@ class ListaComprasPage extends ConsumerWidget {
       subtitle: 'Historial y gestión de compras',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.pop(),
+        tooltip: 'Atrás',
+        onPressed: () => safeBack(context, fallback: '/compras'),
       ),
       actions: [
         IconButton(

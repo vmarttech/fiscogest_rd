@@ -11,6 +11,13 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/fisco_aurora_background.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sync_pull.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
+import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_remote.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -34,12 +41,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        final db = ref.read(databaseProvider);
-        await AuthService(db).ensureAdminSeed();
-      } catch (e) {
-        debugPrint('Seed admin: $e');
-      }
       await _cargarPrefs();
     });
   }
@@ -67,6 +68,78 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
+
+  Widget _pieLegal(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          TextButton(
+            onPressed: () => context.push('/legal/privacidad'),
+            child: const Text('Privacidad'),
+          ),
+          const Text('·', style: AppTypography.bodySmall),
+          TextButton(
+            onPressed: () => context.push('/legal/terminos'),
+            child: const Text('Términos'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  
+  /// Dueño plataforma: licencia vitalicia local + aviso de pedidos pendientes en nube.
+  Future<void> _postLoginPlataforma(String username) async {
+    final db = ref.read(databaseProvider);
+    if (esDuenoPlataforma(username)) {
+      try {
+        await LicenciaService(db).activarDesarrolladorVitalicio();
+        debugPrint('Login: licencia desarrollador vitalicia OK ($username)');
+      } catch (e, st) {
+        debugPrint('Login: vitalicio dev $e');
+        debugPrint('$st');
+      }
+    }
+    if (!esDuenoPlataforma(username) || !SupabaseConfig.isConfigured) return;
+    try {
+      final rows = await SupabaseRestClient().select(
+        table: 'pedidos_licencia',
+        filters: {
+          'estado': 'in.(pendiente_pago,pago_reportado)',
+          'select': 'id,referencia,estado,plan,monto',
+          'order': 'created_at.desc',
+        },
+      );
+      // PostgREST in. filter may need different syntax - fallback two queries if empty issues
+      debugPrint('Login: pedidos pendientes (filtro): ${rows.length}');
+      if (rows.isNotEmpty && mounted) {
+        final n = rows.length;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              n == 1
+                  ? 'Hay 1 pedido de licencia pendiente de revisar'
+                  : 'Hay $n pedidos de licencia pendientes de revisar',
+            ),
+            action: SnackBarAction(
+              label: 'Ver',
+              onPressed: () {
+                if (mounted) context.push('/licencia/admin');
+              },
+            ),
+            duration: const Duration(seconds: 6),
+          ),
+        );
+      }
+    } catch (e, st) {
+      debugPrint('Login: aviso pedidos $e');
+      debugPrint('$st');
+    }
+  }
+
   Future<void> _entrar() async {
     setState(() {
       _cargando = true;
@@ -76,7 +149,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final db = ref.read(databaseProvider);
       final user = _userCtrl.text.trim();
       final pass = _passCtrl.text;
-      final res = await AuthService(db).login(user, pass);
+      var res = await AuthService(db).login(user, pass);
+      // Equipo nuevo: no hay usuarios locales → bajar de Supabase y reintentar
+      if (res == null) {
+        try {
+          debugPrint('Login: local falló → resolver negocio + pull');
+          // Crítico multi-tenant: obtener negocio_id del username en la nube
+          // ANTES del pull (el pull filtra por NegocioLocal).
+          final remoto = await NegocioRemote().negocioIdDeUsername(user);
+          if (remoto != null && remoto.isNotEmpty) {
+            await NegocioLocal.setId(remoto);
+            debugPrint('Login: NegocioLocal ← $remoto');
+          }
+          await SyncPull(db).pullTodoElNegocio();
+          final uCheck = await AuthService(db).buscarPorUsername(user);
+          // ignore: avoid_print
+          print(
+            'Login: tras pull user=${uCheck?.username} '
+            'hashLen=${uCheck?.passwordHash.length ?? -1} '
+            'estado=${uCheck?.estado}',
+          );
+          res = await AuthService(db).login(user, pass);
+        } catch (e, st) {
+          debugPrint('Login: pull antes de reintento: $e');
+          debugPrint('$st');
+        }
+      }
       if (res == null) {
         setState(() => _error = 'Usuario o contraseña incorrectos');
         return;
@@ -126,6 +224,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         rol: res.rol,
         requiereSetupInicial: res.requiereSetupInicial,
       );
+      if (!mounted) return;
+      // Pull Supabase → local (multi-dispositivo)
+      if (!res.requiereSetupInicial) {
+        try {
+          await SyncPull(db).pullTodoElNegocio();
+        } catch (e, st) {
+          // No bloquea el login si la nube falla
+          debugPrint('Pull post-login: $e');
+          debugPrint('$st');
+        }
+      }
+      if (!mounted) return;
+      await _postLoginPlataforma(res.username);
       if (!mounted) return;
       if (res.requiereSetupInicial) {
         context.go('/setup-cuenta');
@@ -183,6 +294,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         requiereSetupInicial: res.requiereSetupInicial,
       );
       if (!mounted) return;
+      // Pull Supabase → local (multi-dispositivo)
+      if (!res.requiereSetupInicial) {
+        try {
+          await SyncPull(db).pullTodoElNegocio();
+        } catch (e, st) {
+          // No bloquea el login si la nube falla
+          debugPrint('Pull post-login: $e');
+          debugPrint('$st');
+        }
+      }
+      if (!mounted) return;
+      await _postLoginPlataforma(res.username);
+      if (!mounted) return;
       if (res.requiereSetupInicial) {
         context.go('/setup-cuenta');
       } else {
@@ -215,9 +339,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   data: Theme.of(context).copyWith(
                     brightness: Brightness.dark,
                     textTheme: Theme.of(context).textTheme.apply(
-                          bodyColor: Colors.white,
-                          displayColor: Colors.white,
-                        ),
+                      bodyColor: Colors.white,
+                      displayColor: Colors.white,
+                    ),
                     inputDecorationTheme: InputDecorationTheme(
                       filled: true,
                       fillColor: Colors.white.withValues(alpha: 0.06),
@@ -284,8 +408,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           'Tu negocio, en orden',
                           textAlign: TextAlign.center,
                           style: AppTypography.bodySmall.copyWith(
-                            color:
-                                const Color(0xFF5EEAD4).withValues(alpha: 0.9),
+                            color: const Color(
+                              0xFF5EEAD4,
+                            ).withValues(alpha: 0.9),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -301,7 +426,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         AppTextField(
                           controller: _userCtrl,
                           label: 'Usuario',
-                          hint: 'admin',
+                          hint: 'Ingrese su usuario',
                           prefixIcon: Icons.person_outline,
                         ),
                         const SizedBox(height: 14),
@@ -319,8 +444,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
@@ -341,8 +467,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           value: _rememberMe,
                           onChanged: _cargando
                               ? null
-                              : (v) =>
-                                  setState(() => _rememberMe = v ?? false),
+                              : (v) => setState(() => _rememberMe = v ?? false),
                           controlAffinity: ListTileControlAffinity.leading,
                           activeColor: const Color(0xFF2DD4BF),
                           title: Text(
@@ -372,16 +497,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         if (_bioEnabled && _bioAvailable) ...[
                           const SizedBox(height: 12),
                           OutlinedButton.icon(
-                            onPressed:
-                                _cargando ? null : _entrarConBiometria,
+                            onPressed: _cargando ? null : _entrarConBiometria,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF5EEAD4),
                               side: BorderSide(
-                                color: const Color(0xFF5EEAD4)
-                                    .withValues(alpha: 0.5),
+                                color: const Color(
+                                  0xFF5EEAD4,
+                                ).withValues(alpha: 0.5),
                               ),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             icon: const Icon(Icons.fingerprint, size: 22),
                             label: const Text('Entrar con huella / PIN'),
@@ -397,6 +521,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ),
+                        _pieLegal(context),
                       ],
                     ),
                   ),

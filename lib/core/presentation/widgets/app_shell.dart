@@ -1,4 +1,3 @@
-import 'package:fiscogest_rd/features/licencias/presentation/widgets/licencia_aviso_banner.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
@@ -10,6 +9,8 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/pedidos_pendientes_provider.dart';
+import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 
 class AppShell extends ConsumerWidget {
@@ -22,6 +23,11 @@ class AppShell extends ConsumerWidget {
     final modoSimplificado = ref.watch(modoSimplificadoProvider);
     final sesion = ref.watch(sesionProvider);
     final esAdmin = sesion?.esAdmin ?? false;
+    final pendientesAsync = ref.watch(pedidosPendientesCountProvider);
+    final pedidosPendientes = pendientesAsync.maybeWhen(
+      data: (n) => n,
+      orElse: () => 0,
+    );
     final rolNorm = (sesion?.rol ?? '').toLowerCase().trim();
     final esVendedor = rolNorm.contains('vendedor');
     final esCajero = rolNorm.contains('cajero');
@@ -62,6 +68,7 @@ class AppShell extends ConsumerWidget {
           esCajero,
           operadorLabel,
           sesion?.rol ?? '',
+          sesion?.username ?? '',
           () {
             ref.read(sesionProvider.notifier).state = null;
             context.go('/login');
@@ -69,6 +76,7 @@ class AppShell extends ConsumerWidget {
           permiteFiscalLicencia,
           permiteFiaoLicencia,
           permiteCreditoFormalLicencia,
+          pedidosPendientes,
         ),
       ),
       body: Builder(
@@ -81,7 +89,6 @@ class AppShell extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const LicenciaAvisoBanner(),
                 Expanded(child: child),
               ],
             ),
@@ -102,10 +109,12 @@ class AppShell extends ConsumerWidget {
     bool esCajero,
     String operadorLabel,
     String rolUsuario,
+    String usernameSesion,
     VoidCallback onLogout,
     bool permiteFiscalLicencia,
     bool permiteFiaoLicencia,
     bool permiteCreditoFormalLicencia,
+    int pedidosPendientes,
   ) {
     // Menú completo SOLO Admin.
     // Cara "colmado" (Fiao, etc.) SOLO si config.simplificado Y es Admin.
@@ -177,6 +186,24 @@ class AppShell extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
                   children: [
                     _buildSectionTitle('OPERACIONES'),
+                    // Invitado: puede registrarse o iniciar sesión (app ya usable)
+                    if (usernameSesion.isEmpty ||
+                        usernameSesion.toLowerCase() == 'invitado') ...[
+                      _buildNavItem(
+                        context,
+                        '/setup-cuenta',
+                        'Registro',
+                        Icons.person_add_outlined,
+                        currentPath,
+                      ),
+                      _buildNavItem(
+                        context,
+                        '/login',
+                        'Iniciar sesión',
+                        Icons.login_outlined,
+                        currentPath,
+                      ),
+                    ],
                     if (puede(Permiso.dashboardVer))
                       _buildNavItem(
                         context,
@@ -211,8 +238,11 @@ class AppShell extends ConsumerWidget {
                         Icons.payments_outlined,
                         currentPath,
                       ),
-                    // Fiao: gratis / simplificado / básico / demo (no Pro/Empresa)
-                    if (permiteFiaoLicencia && puede(Permiso.fiaoUsar))
+                    // Fiao: solo cara colmado (modoSimplificado) Y plan con fiao
+                    // (gratis / simplificado). En modo normal no aparece aunque el plan lo permita.
+                    if (modoSimplificado &&
+                        permiteFiaoLicencia &&
+                        puede(Permiso.fiaoUsar))
                       _buildNavItem(
                         context,
                         '/ventas/fios',
@@ -220,7 +250,8 @@ class AppShell extends ConsumerWidget {
                         Icons.edit_note_rounded,
                         currentPath,
                       ),
-                    // Crédito formal: profesional / empresa (sin fiao)
+                    // Crédito formal: NUNCA en modoSimplificado ni en plan gratis/simplificado.
+                    // Solo modo normal + plan con permiteCreditoFormal.
                     if (!modoSimplificado &&
                         permiteCreditoFormalLicencia &&
                         puede(Permiso.creditosGestionar))
@@ -382,6 +413,15 @@ class AppShell extends ConsumerWidget {
                         Icons.manage_accounts_outlined,
                         currentPath,
                       ),
+                    if (esDuenoPlataforma(usernameSesion))
+                      _buildNavItem(
+                        context,
+                        '/licencia/admin',
+                        'Pedidos licencia',
+                        Icons.receipt_long_outlined,
+                        currentPath,
+                        badgeCount: pedidosPendientes,
+                      ),
                     if (puede(Permiso.configAdmin))
                       _buildNavItem(
                         context,
@@ -453,11 +493,11 @@ class AppShell extends ConsumerWidget {
     String routePath,
     String title,
     IconData icon,
-    String currentPath,
-  ) {
+    String currentPath, {
+    int badgeCount = 0,
+  }) {
     final esSeleccionado =
         currentPath == routePath || currentPath.startsWith('$routePath/');
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Material(
@@ -503,6 +543,24 @@ class AppShell extends ConsumerWidget {
                     ),
                   ),
                 ),
+                if (badgeCount > 0) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFB91C1C),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      badgeCount > 99 ? '99+' : '$badgeCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                ],
                 if (esSeleccionado)
                   Container(
                     width: 4,

@@ -71,6 +71,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final esMovil = MediaQuery.sizeOf(context).width < 700;
 

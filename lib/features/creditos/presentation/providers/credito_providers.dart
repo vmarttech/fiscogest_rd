@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/features/creditos/domain/repositories/i_solicitud_c
 import 'package:fiscogest_rd/features/creditos/data/repositories/solicitud_credito_repository_impl.dart';
 import 'package:fiscogest_rd/features/creditos/data/dao/solicitud_credito_dao.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
@@ -38,7 +39,10 @@ final parametrosCreditoProvider = FutureProvider.autoDispose((ref) async {
 final creditoDocumentoServiceProvider =
     FutureProvider.autoDispose<ICreditoDocumentoService>((ref) async {
       final params = await ref.watch(parametrosCreditoProvider.future);
+      final empresa =
+          ref.watch(configuracionControllerProvider).valueOrNull;
       return CreditoDocumentoServiceImpl(
+        empresa: empresa,
         plantillaSolicitudExtra: params.plantillaSolicitud,
         plantillaContratoExtra: params.plantillaContrato,
       );

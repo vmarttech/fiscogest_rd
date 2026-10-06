@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/store/store_channel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -1229,19 +1230,38 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                   color: Color(0xFF0F766E),
                 ),
               ),
-              subtitle: const Text(
-                'Elige tu plan · Toke o transferencia · Referencia FG-',
+              subtitle: Text(
+                storeOcultaCompraTransferencia
+                    ? 'Plan activo · Activar con codigo · Tienda'
+                    : 'Elige tu plan · Toke o transferencia · Referencia FG-',
               ),
               trailing:
                   const Icon(Icons.chevron_right, color: Color(0xFF0F766E)),
               onTap: () => context.push('/licencia'),
             ),
           ),
+          const SizedBox(height: 4),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacidad'),
+            subtitle: const Text('Datos locales y politica del software'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/legal/privacidad'),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.gavel_outlined),
+            title: const Text('Terminos de uso'),
+            subtitle: const Text('Licencia de uso del software'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/legal/terminos'),
+          ),
           const SizedBox(height: 8),
           const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.info_outline),
-            title: Text('Versión'),
+            title: Text('Version'),
             subtitle: Text('FiscoGest RD v3.0 Pro'),
           ),
           const ListTile(

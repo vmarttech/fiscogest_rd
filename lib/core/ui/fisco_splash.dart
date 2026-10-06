@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 
-class FiscoSplashPage extends StatefulWidget {
+class FiscoSplashPage extends ConsumerStatefulWidget {
   const FiscoSplashPage({
     super.key,
     this.minDuration = const Duration(milliseconds: 1500),
@@ -11,10 +14,10 @@ class FiscoSplashPage extends StatefulWidget {
   static const routeName = 'splash';
 
   @override
-  State<FiscoSplashPage> createState() => _FiscoSplashPageState();
+  ConsumerState<FiscoSplashPage> createState() => _FiscoSplashPageState();
 }
 
-class _FiscoSplashPageState extends State<FiscoSplashPage>
+class _FiscoSplashPageState extends ConsumerState<FiscoSplashPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c;
   late final Animation<double> _fade;
@@ -28,13 +31,32 @@ class _FiscoSplashPageState extends State<FiscoSplashPage>
       duration: const Duration(milliseconds: 900),
     );
     _fade = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
-    _scale = Tween<double>(begin: 0.92, end: 1.0).animate(
-      CurvedAnimation(parent: _c, curve: Curves.easeOutCubic),
-    );
+    _scale = Tween<double>(
+      begin: 0.92,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic));
     _c.forward();
-    Future<void>.delayed(widget.minDuration, () {
+    Future<void>.delayed(widget.minDuration, () async {
       if (!mounted) return;
-      context.go('/login');
+      final db = ref.read(databaseProvider);
+      final usuarios = await db.select(db.usuariosTable).get();
+      if (!mounted) return;
+      if (usuarios.isEmpty) {
+        ref.read(sesionProvider.notifier).state = const UsuarioSesion(
+          id: 0,
+          username: 'invitado',
+          nombre: 'Modo prueba',
+          rol: 'Admin',
+          requiereSetupInicial: false,
+        );
+        // ignore: avoid_print
+        print('FISCO_SPLASH: invitado → /');
+        context.go('/');
+      } else {
+        // ignore: avoid_print
+        print('FISCO_SPLASH: hay usuarios → /login');
+        context.go('/login');
+      }
     });
   }
 
@@ -55,11 +77,7 @@ class _FiscoSplashPageState extends State<FiscoSplashPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF070B12),
-              Color(0xFF0C1A18),
-              Color(0xFF08141F),
-            ],
+            colors: [Color(0xFF070B12), Color(0xFF0C1A18), Color(0xFF08141F)],
           ),
         ),
         child: FadeTransition(
@@ -79,8 +97,9 @@ class _FiscoSplashPageState extends State<FiscoSplashPage>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color:
-                                const Color(0xFF2DD4BF).withValues(alpha: 0.28),
+                            color: const Color(
+                              0xFF2DD4BF,
+                            ).withValues(alpha: 0.28),
                             blurRadius: 32,
                             spreadRadius: 2,
                           ),

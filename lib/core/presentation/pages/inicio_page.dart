@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/reportes/domain/kpi_models.dart';
 import 'package:fiscogest_rd/features/reportes/presentation/providers/dashboard_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart';
@@ -39,6 +41,13 @@ class InicioPage extends ConsumerWidget {
     final esAdmin = sesion?.esAdmin ?? false;
     // Dashboard colmado solo Admin + config simplificada
     final simplificado = modoCfg && esAdmin;
+    final gatesLic = ref.watch(licenciaActualProvider).maybeWhen(
+          data: (lic) => LicenciaGates(lic),
+          orElse: () => const LicenciaGates(null),
+        );
+    final permiteCreditoFormal = gatesLic.permiteCreditoFormal;
+    // Crédito en UI solo modo normal + plan formal (nunca gratis / simplificado).
+    final mostrarCredito = !modoCfg && permiteCreditoFormal;
     final fecha = DateFormat(
       "EEEE d 'de' MMMM yyyy",
       'es',
@@ -160,17 +169,19 @@ class InicioPage extends ConsumerWidget {
                               onTap: () => _go(context, '/ventas/cobro'),
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _KpiTile(
-                              label: 'Crédito',
-                              value: 'CxC',
-                              hint: 'Solicitudes y cobro',
-                              icon: Icons.credit_score_outlined,
-                              color: AppColors.warning,
-                              onTap: () => _go(context, '/creditos'),
+                          if (mostrarCredito) ...[
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _KpiTile(
+                                label: 'Crédito',
+                                value: 'CxC',
+                                hint: 'Solicitudes y cobro',
+                                icon: Icons.credit_score_outlined,
+                                color: AppColors.warning,
+                                onTap: () => _go(context, '/creditos'),
+                              ),
                             ),
-                          ),
+                          ],
                           const SizedBox(width: 12),
                           Expanded(
                             child: _KpiTile(
@@ -202,17 +213,20 @@ class InicioPage extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              Expanded(
-                                child: _KpiTile(
-                                  label: 'Crédito',
-                                  value: 'CxC',
-                                  hint: 'Cartera',
-                                  icon: Icons.credit_score_outlined,
-                                  color: AppColors.warning,
-                                  onTap: () => _go(context, '/creditos'),
-                                  compact: true,
-                                ),
-                              ),
+                              if (mostrarCredito)
+                                Expanded(
+                                  child: _KpiTile(
+                                    label: 'Crédito',
+                                    value: 'CxC',
+                                    hint: 'Cartera',
+                                    icon: Icons.credit_score_outlined,
+                                    color: AppColors.warning,
+                                    onTap: () => _go(context, '/creditos'),
+                                    compact: true,
+                                  ),
+                                )
+                              else
+                                const Expanded(child: SizedBox.shrink()),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -293,16 +307,17 @@ class InicioPage extends ConsumerWidget {
                                 const SizedBox(height: 12),
                                 Row(
                                   children: [
-                                    Expanded(
-                                      child: _Acceso(
-                                        icon: Icons.credit_score_outlined,
-                                        titulo: 'Crédito',
-                                        sub: 'Solicitudes y CxC',
-                                        color: AppColors.warning,
-                                        onTap: () => _go(context, '/creditos'),
+                                    if (mostrarCredito)
+                                      Expanded(
+                                        child: _Acceso(
+                                          icon: Icons.credit_score_outlined,
+                                          titulo: 'Crédito',
+                                          sub: 'Solicitudes y CxC',
+                                          color: AppColors.warning,
+                                          onTap: () => _go(context, '/creditos'),
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 12),
+                                    if (mostrarCredito) const SizedBox(width: 12),
                                     Expanded(
                                       child: _Acceso(
                                         icon: Icons.people_outline,
@@ -432,7 +447,7 @@ class InicioPage extends ConsumerWidget {
                         titulo: 'Más acciones',
                         sub: 'Crédito · Clientes · Proveedores',
                         color: const Color(0xFF64748B),
-                        onTap: () => _mostrarMasAccionesNormal(context),
+                        onTap: () => _mostrarMasAccionesNormal(context, ref),
                       ),
                       const SizedBox(height: 20),
                       const SectionHeader(
@@ -461,7 +476,13 @@ class InicioPage extends ConsumerWidget {
     );
   }
 
-  void _mostrarMasAccionesNormal(BuildContext context) {
+  void _mostrarMasAccionesNormal(BuildContext context, WidgetRef ref) {
+    final gates = ref.watch(licenciaActualProvider).maybeWhen(
+          data: (lic) => LicenciaGates(lic),
+          orElse: () => const LicenciaGates(null),
+        );
+    final modoCfg = ref.watch(modoSimplificadoProvider);
+    final mostrarCredito = !modoCfg && gates.permiteCreditoFormal;
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -499,7 +520,7 @@ class InicioPage extends ConsumerWidget {
             ),
             onTap: () {
               Navigator.pop(ctx);
-              context.go(route);
+              context.push(route);
             },
           );
         }
@@ -524,13 +545,14 @@ class InicioPage extends ConsumerWidget {
                   style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
-                tile(
-                  Icons.credit_score_outlined,
-                  'Crédito',
-                  'Solicitudes y CxC',
-                  AppColors.warning,
-                  '/creditos',
-                ),
+                if (mostrarCredito)
+                  tile(
+                    Icons.credit_score_outlined,
+                    'Crédito',
+                    'Solicitudes y CxC',
+                    AppColors.warning,
+                    '/creditos',
+                  ),
                 tile(
                   Icons.people_outline,
                   'Clientes',

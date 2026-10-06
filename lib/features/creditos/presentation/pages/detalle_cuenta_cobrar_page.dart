@@ -190,6 +190,7 @@ class _DetalleCuentaCobrarPageState
 
     setState(() => _pagando = true);
     try {
+      final saldoAnterior = c.saldoPendiente;
       final notaAuto = pago.nota.isEmpty
           ? (pendientes.isNotEmpty
                 ? 'Cuota #${pendientes.first.numeroCuota}'
@@ -253,6 +254,74 @@ class _DetalleCuentaCobrarPageState
           behavior: SnackBarBehavior.floating,
         ),
       );
+
+      final accion = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Pago registrado'),
+          content: Text(
+            'Abono de ${formatRd(pago.monto)}.\n'
+            '¿Imprimir o compartir el comprobante?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, 'cerrar'),
+              child: const Text('Cerrar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, 'compartir'),
+              child: const Text('Compartir'),
+            ),
+            FilledButton.icon(
+              onPressed: () => Navigator.pop(ctx, 'imprimir'),
+              icon: const Icon(Icons.print_outlined, size: 18),
+              label: const Text('Imprimir'),
+            ),
+          ],
+        ),
+      );
+
+      if ((accion == 'imprimir' || accion == 'compartir') && mounted) {
+        try {
+          final svc = await ref.read(creditoDocumentoServiceProvider.future);
+          final cuentaActual = _cuenta ?? c;
+          final abonoDoc = AbonoCredito(
+            cuentaId: c.id!,
+            monto: pago.monto,
+            metodoPago: pago.metodo,
+            fecha: DateTime.now(),
+            nota: notaAuto,
+          );
+          if (accion == 'imprimir') {
+            await svc.imprimirAbono(
+              cuenta: cuentaActual,
+              abono: abonoDoc,
+              saldoAnterior: saldoAnterior,
+              saldoActual: cuentaActual.saldoPendiente,
+            );
+          } else {
+            await svc.compartirAbono(
+              cuenta: cuentaActual,
+              abono: abonoDoc,
+              saldoAnterior: saldoAnterior,
+              saldoActual: cuentaActual.saldoPendiente,
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            FiscoGestNotifications.show(
+              SnackBar(
+                content: Text(
+                  'No se pudo generar el comprobante: '
+                  '${'$e'.replaceAll('Exception: ', '')}',
+                ),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
+      }
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(

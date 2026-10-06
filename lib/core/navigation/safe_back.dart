@@ -2,6 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+String _rutaAnterior(String path, String fallback) {
+  if (path.startsWith('/compras/detalle/')) return '/compras/lista';
+  if (path.startsWith('/compras/historial-costos/')) return '/compras';
+  if (path.startsWith('/inventario/entrada/') ||
+      path.startsWith('/inventario/salida/')) {
+    return '/inventario';
+  }
+  if (path.startsWith('/diferencias-conteo-fisico/')) {
+    return '/inventario-fisico/listar';
+  }
+  if (path.startsWith('/recepcion/')) return '/compras';
+  if (path.startsWith('/reports/detalle/')) return '/reports/hub';
+  if (path.startsWith('/ventas/cotizaciones/')) return '/ventas';
+  if (path.startsWith('/compras/cuentas-pagar/')) {
+    return '/compras/cuentas-pagar';
+  }
+
+  const rutasAnteriores = <String, String>{
+    '/productos/nuevo': '/inventario',
+    '/registrar-ajuste': '/lista-ajustes',
+    '/lista-ajustes': '/inventario',
+    '/transferencias/registrar': '/inventario',
+    '/presentaciones': '/inventario',
+    '/ventas/simulador-credito': '/ventas',
+    '/usuarios': '/configuracion',
+    '/licencia': '/configuracion',
+    '/licencia/comprar': '/licencia',
+    '/licencia/activar': '/licencia',
+    '/licencia/admin': '/licencia',
+  };
+  final explicit = rutasAnteriores[path];
+  if (explicit != null) return explicit;
+
+  final slash = path.lastIndexOf('/');
+  if (slash > 0) return path.substring(0, slash);
+  return fallback;
+}
+
 void safeBack(BuildContext context, {String fallback = '/'}) {
   final router = GoRouter.of(context);
   if (router.canPop()) {
@@ -9,8 +47,9 @@ void safeBack(BuildContext context, {String fallback = '/'}) {
     return;
   }
   final path = router.routerDelegate.currentConfiguration.uri.path;
-  if (path == fallback || path == '/' || path.isEmpty) return;
-  context.go(fallback);
+  if (path == '/' || path.isEmpty) return;
+  final previous = _rutaAnterior(path, fallback);
+  if (path != previous) context.go(previous);
 }
 
 /// Botón atrás del sistema (Android):
@@ -29,7 +68,8 @@ Future<void> handleSystemBack(
   }
 
   if (currentPath != '/' && currentPath.isNotEmpty) {
-    context.go('/');
+    final previous = _rutaAnterior(currentPath, '/');
+    if (previous != currentPath) context.go(previous);
     return;
   }
 

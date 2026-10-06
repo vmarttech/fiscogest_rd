@@ -69,7 +69,7 @@ class HistorialCostosPage extends ConsumerWidget {
                   padding: AppSpacing.bS,
                   child: AppCard(
                     onTap: () =>
-                        context.go('/compras/detalle/${item.compraId}'),
+                        context.push('/compras/detalle/${item.compraId}'),
                     padding: EdgeInsets.zero,
                     child: ListTile(
                       contentPadding: AppSpacing.hM,

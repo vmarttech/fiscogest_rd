@@ -73,7 +73,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         const SnackBar(content: Text('✅ Conteo creado exitosamente')),
       );
       ref.invalidate(listaConteosProvider);
-      context.go('/inventario-fisico/capturar/$id');
+      await context.push('/inventario-fisico/capturar/$id');
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(

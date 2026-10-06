@@ -71,7 +71,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
 
     Widget formBody(void Function(void Function()) setLocal) {
       return SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -87,8 +87,15 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               },
               icon: const Icon(Icons.calendar_today, size: 16),
               label: Text('Fecha: ${_fmt.format(fecha)}'),
+              style: OutlinedButton.styleFrom(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: categoria,
               decoration: const InputDecoration(
@@ -103,16 +110,16 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                 if (v != null) setLocal(() => categoria = v);
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             AppTextField(label: 'Descripción *', controller: descCtrl),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             AppTextField(
               label: 'Monto *',
               controller: montoCtrl,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: formaPago,
               decoration: const InputDecoration(
@@ -127,7 +134,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                 if (v != null) setLocal(() => formaPago = v);
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             AppTextField(label: 'Notas', controller: notasCtrl),
           ],
         ),
@@ -150,18 +157,46 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                   bottom: MediaQuery.viewInsetsOf(ctx).bottom,
                 ),
                 child: SizedBox(
-                  height: MediaQuery.sizeOf(ctx).height * 0.85,
+                  height: (MediaQuery.sizeOf(ctx).height -
+                          MediaQuery.viewInsetsOf(ctx).bottom)
+                      .clamp(360.0, MediaQuery.sizeOf(ctx).height * 0.9),
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+                        padding: const EdgeInsets.fromLTRB(20, 18, 12, 12),
                         child: Row(
                           children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.receipt_long_rounded,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
                             Expanded(
-                              child: Text(
-                                edit == null ? 'Nuevo gasto' : 'Editar gasto',
-                                style: AppTypography.h4
-                                    .copyWith(fontWeight: FontWeight.w800),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    edit == null ? 'Nuevo gasto' : 'Editar gasto',
+                                    style: AppTypography.h4.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Registre el egreso de su negocio',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             IconButton(
@@ -175,7 +210,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                       Expanded(child: formBody(setLocal)),
                       const Divider(height: 1),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
                         child: Row(
                           children: [
                             Expanded(
@@ -210,8 +245,44 @@ class _GastosPageState extends ConsumerState<GastosPage> {
           return StatefulBuilder(
             builder: (ctx, setLocal) {
               return AlertDialog(
-                title: Text(edit == null ? 'Nuevo gasto' : 'Editar gasto'),
-                content: SizedBox(width: 420, child: formBody(setLocal)),
+                title: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(
+                        Icons.receipt_long_rounded,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(edit == null ? 'Nuevo gasto' : 'Editar gasto'),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Registre el egreso de su negocio',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                content: SizedBox(
+                  width: 500,
+                  height: MediaQuery.sizeOf(ctx).height * 0.62,
+                  child: formBody(setLocal),
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx),

@@ -1,4 +1,6 @@
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/store/store_channel.dart';
+import 'package:fiscogest_rd/core/legal/legal_page.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_admin_pedidos_page.dart';
@@ -21,6 +23,7 @@ import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/lista
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/capturar_conteo_page.dart';
 import 'package:fiscogest_rd/features/seguridad/presentation/pages/login_page.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/core/auth/permisos.dart';
 import 'package:fiscogest_rd/features/seguridad/presentation/pages/usuarios_page.dart';
 import 'package:fiscogest_rd/features/seguridad/presentation/pages/setup_cuenta_page.dart';
@@ -89,14 +92,56 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     redirect: (context, state) async {
       final path = state.uri.path;
+      // Rutas públicas (setup solo si el usuario elige Registro en el menú)
       if (path == '/login' ||
           path == '/splash' ||
           path == '/setup-cuenta' ||
-          path == '/recuperar-clave') {
+          path == '/recuperar-clave' ||
+          path == '/legal/privacidad' ||
+          path == '/legal/terminos') {
         return null;
       }
-      final sesion = ref.read(sesionProvider);
+      var sesion = ref.read(sesionProvider);
+      if (sesion == null) {
+        try {
+          final db = ref.read(databaseProvider);
+          final usuarios = await db.select(db.usuariosTable).get();
+          // ignore: avoid_print
+          print('ROUTER: path=$path usuarios=${usuarios.length}');
+          if (usuarios.isEmpty) {
+            ref.read(sesionProvider.notifier).state = const UsuarioSesion(
+              id: 0,
+              username: 'invitado',
+              nombre: 'Modo prueba',
+              rol: 'Admin',
+              requiereSetupInicial: false,
+            );
+            sesion = ref.read(sesionProvider);
+            // ignore: avoid_print
+            print('ROUTER: invitado OK → continuar a $path');
+          } else {
+            // ignore: avoid_print
+            print('ROUTER: hay usuarios → /login');
+            return '/login';
+          }
+        } catch (e, st) {
+          // ignore: avoid_print
+          print('ROUTER: error al leer usuarios: $e');
+          print(st);
+          return '/login';
+        }
+      }
       if (sesion == null) return '/login';
+      // Solo dueño FiscoGest puede administrar pedidos de pago
+      if ((path == '/licencia/admin' || path.startsWith('/licencia/admin/')) &&
+          !esDuenoPlataforma(sesion.username)) {
+        return '/licencia';
+      }
+      // Tiendas: no checkout de licencia por transferencia dentro de la app
+      if (storeOcultaCompraTransferencia &&
+          (path == '/licencia/comprar' || path.startsWith('/licencia/comprar/'))) {
+        return '/licencia/activar';
+      }
       // Plan simplificado: sin módulos fiscales
       try {
         final db = ref.read(databaseProvider);
@@ -129,7 +174,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         }
       } catch (_) {}
 
-      if (sesion.requiereSetupInicial && path != '/setup-cuenta') {
+      // Setup obligatorio SOLO para cuentas reales de fábrica (no invitado).
+      // El registro voluntario es por menú → /setup-cuenta.
+      final esInvitado =
+          sesion.id == 0 || sesion.username.toLowerCase() == 'invitado';
+      if (!esInvitado &&
+          sesion.requiereSetupInicial &&
+          path != '/setup-cuenta') {
+        // ignore: avoid_print
+        print('ROUTER: requiereSetupInicial → /setup-cuenta (user=${sesion.username})');
         return '/setup-cuenta';
       }
       if (!rutaPermitida(path, sesion)) {
@@ -170,6 +223,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: LoginPage.routeName,
         builder: (_, __) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/legal/privacidad',
+        name: LegalPage.routePrivacidad,
+        builder: (_, __) =>
+            const LegalPage(documento: LegalDocumento.privacidad),
+      ),
+      GoRoute(
+        path: '/legal/terminos',
+        name: LegalPage.routeTerminos,
+        builder: (_, __) =>
+            const LegalPage(documento: LegalDocumento.terminos),
       ),
       GoRoute(
         path: '/setup-cuenta',

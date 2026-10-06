@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -95,13 +96,8 @@ class ReportsPage extends StatelessWidget {
       subtitle: 'Operativos y declaraciones DGII',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/reports');
-          }
-        },
+        tooltip: 'Atrás',
+        onPressed: () => safeBack(context, fallback: '/reports'),
       ),
       body: SafeArea(
         child: Align(
@@ -122,7 +118,7 @@ class ReportsPage extends StatelessWidget {
                     icon: Icons.monitor_heart_outlined,
                     title: 'Dashboard económico',
                     subtitle: 'KPIs de ventas, ganancia y tendencias',
-                    onTap: () => context.go('/reports'),
+                    onTap: () => safeBack(context, fallback: '/reports'),
                   ),
                   SizedBox(height: mobile ? 18 : 22),
                   Text(

@@ -6,7 +6,7 @@ import 'package:fiscogest_rd/features/e_cf/domain/services/codigo_seguridad_ecf.
 import 'package:fiscogest_rd/features/e_cf/domain/services/rfce_rules.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:intl/intl.dart';
-import 'package:pdf/pdf.dart';
+import 'package:fiscogest_rd/core/print/print_formats.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
@@ -44,7 +44,7 @@ class RepresentacionImpresaPdf {
     final doc = pw.Document();
     doc.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.letter.copyWith(
+        pageFormat: PrintFormats.a4.copyWith(
           marginLeft: 28,
           marginRight: 28,
           marginTop: 28,

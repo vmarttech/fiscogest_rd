@@ -50,7 +50,7 @@ class LicenciaService {
     return _mapYActualizarEstado(row);
   }
 
-  /// Acceso vitalicio del dueño (MartTech).
+  /// Licencia de plataforma para cuenta de desarrollador autorizado.
   Future<LicenciaInfo> activarDesarrolladorVitalicio() async {
     final ahora = DateTime.now();
     final existentes = await _db.select(_db.licenciasTable).get();
@@ -214,6 +214,59 @@ class LicenciaService {
   }
 
   /// Admin: confirmó el depósito → emite licencia de pago.
+
+  /// Cliente: solo aplica licencia si el pedido YA está en licencia_emitida
+  /// (aprobado por la plataforma). No cambia el estado del pedido.
+  Future<LicenciaInfo> aplicarLicenciaSiYaEmitida(String referencia) async {
+    final refCode = referencia.trim().toUpperCase();
+    final rows = await (_db.select(_db.pedidosLicenciaTable)
+          ..where((t) => t.referencia.equals(refCode)))
+        .get();
+    if (rows.isEmpty) {
+      throw Exception(
+        'Referencia no encontrada. Sincronice o verifique el código FG-.',
+      );
+    }
+    final p = rows.first;
+    if (p.estado != 'licencia_emitida') {
+      throw Exception(
+        'Esta referencia aún no está autorizada por la plataforma. '
+        'Estado: ${p.estado}.',
+      );
+    }
+
+    // Ya aplicada con este código → devolver actual
+    final existentes = await (_db.select(_db.licenciasTable)
+          ..where((t) => t.codigoActivacion.equals(refCode)))
+        .get();
+    if (existentes.isNotEmpty) {
+      return _mapYActualizarEstado(existentes.first);
+    }
+
+    final ahora = DateTime.now();
+    final dias = _diasVigencia(p.vigenciaTipo);
+    final fin = ahora.add(Duration(days: dias));
+    final id = await _db.into(_db.licenciasTable).insert(
+          LicenciasTableCompanion.insert(
+            plan: p.plan,
+            vigenciaTipo: p.vigenciaTipo,
+            fechaInicio: ahora.toIso8601String(),
+            fechaFin: Value(fin.toIso8601String()),
+            maxDispositivos: Value(maxInstalacionesPermitidas(p.plan)),
+            maxCajas: Value(kMaxCajasPorPlan[p.plan] ?? 1),
+            ecfHabilitado: Value(planIncluyeEcf(p.plan)),
+            vitalicia: const Value(false),
+            estado: 'activa',
+            codigoActivacion: Value(refCode),
+            actualizadoEn: ahora.toIso8601String(),
+          ),
+        );
+    final row = await (_db.select(_db.licenciasTable)
+          ..where((t) => t.id.equals(id)))
+        .getSingle();
+    return _mapYActualizarEstado(row);
+  }
+
   Future<LicenciaInfo> marcarPagadoYEmitirLicencia(String referencia) async {
     final pedidos = await (_db.select(_db.pedidosLicenciaTable)
           ..where((t) => t.referencia.equals(referencia)))

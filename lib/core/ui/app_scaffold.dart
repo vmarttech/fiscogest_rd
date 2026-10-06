@@ -89,8 +89,8 @@ class AppScaffold extends StatelessWidget {
     final Widget? bodyWidget = contenido == null
         ? null
         : (useAppPage
-            ? AppPage(maxWidth: contentMaxWidth, child: contenido)
-            : contenido);
+              ? AppPage(maxWidth: contentMaxWidth, child: contenido)
+              : contenido);
 
     return Scaffold(
       backgroundColor: backgroundColor ?? const Color(0xFFEEF2F6),
@@ -116,21 +116,62 @@ class AppScaffold extends StatelessWidget {
           icon: const Icon(Icons.menu),
           tooltip: 'Menú',
           onPressed: () => ShellDrawerScope.open(context),
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         );
       } else if (!principal) {
         resolvedLeading = IconButton(
           icon: const Icon(Icons.arrow_back),
           tooltip: 'Atrás',
           onPressed: () => safeBack(context),
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         );
       }
     }
 
+    final leadingWidget = resolvedLeading == null
+        ? null
+        : IconButtonTheme(
+            data: IconButtonThemeData(
+              style: IconButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.white.withValues(alpha: 0.1),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            child: resolvedLeading,
+          );
+
     return AppBar(
       toolbarHeight: subtitle != null ? 56 : 48,
       automaticallyImplyLeading: false,
-      leading: resolvedLeading,
+      leading: leadingWidget,
       backgroundColor: AppColors.primary,
+      flexibleSpace: const DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [AppColors.primaryDark, AppColors.primary],
+          ),
+        ),
+      ),
       foregroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
@@ -189,11 +230,67 @@ class AppScaffold extends StatelessWidget {
                           textButtonTheme: TextButtonThemeData(
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.white,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.1,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                  color: Colors.white.withValues(alpha: 0.18),
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
                             ),
                           ),
                           iconButtonTheme: IconButtonThemeData(
                             style: IconButton.styleFrom(
                               foregroundColor: Colors.white,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.1,
+                              ),
+                              side: BorderSide(
+                                color: Colors.white.withValues(alpha: 0.18),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          filledButtonTheme: FilledButtonThemeData(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppColors.primaryDark,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                            ),
+                          ),
+                          elevatedButtonTheme: ElevatedButtonThemeData(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppColors.primaryDark,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          outlinedButtonTheme: OutlinedButtonThemeData(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: BorderSide(
+                                color: Colors.white.withValues(alpha: 0.35),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),

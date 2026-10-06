@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/marca.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
@@ -35,24 +36,22 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
       subtitle: 'Administración de marcas comerciales',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
+        tooltip: 'Atrás',
+        onPressed: () => safeBack(context, fallback: '/inventario'),
+        style: IconButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.white.withValues(alpha: 0.1),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       ),
       actions: [
-        if (!isMobile)
-          AppButton(
-            text: 'Nueva marca',
-            icon: Icons.add,
-            onPressed: () => _mostrarModalRegistro(context),
-          ),
+        AppButton(
+          text: isMobile ? 'Nuevo' : 'Nueva marca',
+          icon: Icons.sell_outlined,
+          onPressed: () => _mostrarModalRegistro(context),
+        ),
       ],
-      floatingActionButton: isMobile
-          ? FloatingActionButton(
-              onPressed: () => _mostrarModalRegistro(context),
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.add),
-            )
-          : null,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -65,7 +64,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                 isMobile ? 16 : 24,
                 isMobile ? 12 : 20,
                 isMobile ? 16 : 24,
-                isMobile ? 88 : 24,
+                24,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -165,15 +164,6 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                       height: 1.35,
                                     ),
                                   ),
-                                  if (_filtroBusqueda.isEmpty) ...[
-                                    const SizedBox(height: 18),
-                                    AppButton(
-                                      text: 'Nueva marca',
-                                      icon: Icons.add,
-                                      onPressed: () =>
-                                          _mostrarModalRegistro(context),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ),

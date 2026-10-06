@@ -10,11 +10,7 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
-import 'package:fiscogest_rd/core/sync/supabase/dispositivo_sync.dart';
-import 'package:fiscogest_rd/core/sync/supabase/usuario_sync.dart';
-import 'package:fiscogest_rd/core/sync/supabase/pedido_sync.dart';
-import 'package:fiscogest_rd/core/sync/supabase/cliente_sync.dart';
-import 'package:fiscogest_rd/core/sync/supabase/producto_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_scheduler.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
@@ -149,68 +145,6 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   }
 }
 
-String _obtenerTituloVentana(String rutaActual) {
-  return switch (rutaActual) {
-    '/' => 'Dashboard',
-    '/sales' => 'Facturación y NC',
-    '/ventas' => 'Ventas',
-    '/ventas/cotizaciones/nueva' => 'Nueva Cotización',
-    '/ventas/cotizaciones/historial' => 'Historial de Cotizaciones',
-    '/ventas/apartados' => 'Apartados',
-    '/ventas/devoluciones' => 'Devoluciones',
-    '/ventas/descuentos' => 'Descuentos',
-    '/ventas/ofertas' => 'Ofertas',
-    '/ventas/cobrar' => 'Cuentas por Cobrar',
-    '/ventas/pagar' => 'Cuentas por Pagar',
-    '/compras' => 'Compras',
-    '/compras/lista' => 'Lista de Compras',
-    '/compras/registrar' => 'Registrar Compra',
-    '/compras/detalle' => 'Detalle de Compra',
-    '/compras/cuentas-pagar' => 'Cuentas por Pagar',
-    '/compras/recepcion' => 'Recepción de Compra',
-    '/inventario' => 'Inventario',
-    '/kardex' => 'Kárdex',
-    '/productos/nuevo' => 'Nuevo Producto',
-    '/inventario/entrada' => 'Entrada de Producto',
-    '/inventario/salida' => 'Salida de Producto',
-    '/inventario-fisico' => 'Inventario Físico',
-    '/inventario-fisico/listar' => 'Lista de Conteos',
-    '/diferencias-conteo-fisico' => 'Diferencias de Conteo',
-    '/lista-ajustes' => 'Lista de Ajustes',
-    '/registrar-ajuste' => 'Registrar Ajuste',
-    '/ajustes-inventario' => 'Ajustes de Inventario',
-    '/ajustes-inventario/nuevo' => 'Nuevo Ajuste',
-    '/clientes' => 'Clientes',
-    '/clientes/gestion' => 'Gestión de Cliente',
-    '/proveedores' => 'Proveedores',
-    '/transferencias/registrar' => 'Registrar Transferencia',
-    '/presentaciones' => 'Presentaciones',
-    '/categorias' => 'Categorías',
-    '/marcas' => 'Marcas',
-    '/unidades' => 'Unidades de Medida',
-    '/reports' => 'Reportes 606/607',
-    '/impuestos' => 'Impuestos',
-    '/import-export' => 'Importar / Exportar',
-    '/configuracion' => 'Configuración',
-    _ when rutaActual.startsWith('/ventas/cotizaciones/') => 'Cotización',
-    _ when rutaActual.startsWith('/compras/') => 'Compras',
-    _ when rutaActual.startsWith('/inventario-fisico/') => 'Inventario Físico',
-    _ when rutaActual.startsWith('/clientes/') => 'Gestión de Cliente',
-    _ => 'FiscoGest RD',
-  };
-}
-
-// Provider con protección: si no hay rutas, devuelve ruta vacía segura
-final rutaActualProvider = Provider<String>((ref) {
-  final router = ref.watch(appRouterProvider);
-  try {
-    final uri = router.state.uri;
-    return uri.path;
-  } catch (e) {
-    return '/';
-  }
-});
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_DO', null);
@@ -228,11 +162,7 @@ void main() async {
     );
     if (SupabaseConfig.isConfigured) {
       try {
-        await DispositivoSync(db).pushEsteEquipo();
-        await UsuarioSync(db).pushTodos();
-        await PedidoSync(db).pushTodos();
-        await ProductoSync(db).pushTodos();
-        await ClienteSync(db).pushTodos();
+        await SyncEngine(db).pushAll();
       } catch (e, st) {
         debugPrint('Sync nube: $e');
         debugPrint('$st');
@@ -284,11 +214,8 @@ class FiscoGestApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rutaActual = ref.watch(rutaActualProvider);
-    final tituloVentana = _obtenerTituloVentana(rutaActual);
-
     return MaterialApp.router(
-      title: tituloVentana,
+      title: 'FiscoGest',
       debugShowCheckedModeBanner: false,
       routerConfig: ref.watch(appRouterProvider),
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blueGrey),
@@ -297,12 +224,9 @@ class FiscoGestApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('es', 'DO'),
-        Locale('en', 'US'),
-      ],
+      supportedLocales: const [Locale('es', 'DO'), Locale('en', 'US')],
       locale: const Locale('es', 'DO'),
-    
+
       builder: (context, child) {
         return Stack(
           children: [
@@ -311,6 +235,6 @@ class FiscoGestApp extends ConsumerWidget {
           ],
         );
       },
-);
+    );
   }
 }

@@ -1,13 +1,12 @@
 /// Precios en DOP y reglas de producto por plan.
 ///
-/// - demo: prueba 15 días
+/// - demo: prueba 15 días, sin Fiao
 /// - gratis: post-demo, límites duros + fiao ≤ 25
 /// - simplificado: sin fiscal, fiao ≤ 50, 300/mes o 2990/año
-/// - basico: modo normal + fiao (no crédito formal)
+/// - basico: modo normal sin Fiao ni crédito formal
 /// - profesional | empresa: crédito formal, sin fiao
 /// - desarrollador: sin límites
 library;
-
 
 /// Días de prueba demo al instalar.
 const int kDiasPrueba = 15;
@@ -19,25 +18,10 @@ const int kDiasGracia = 3;
 const int kDiasExpiracionPedido = 7;
 
 const kPreciosLicenciaDop = <String, Map<String, double>>{
-  'simplificado': {
-    'mensual': 300,
-    'anual': 2990,
-  },
-  'basico': {
-    'mensual': 1500,
-    'trimestral': 4050,
-    'anual': 14400,
-  },
-  'profesional': {
-    'mensual': 2500,
-    'trimestral': 6750,
-    'anual': 24000,
-  },
-  'empresa': {
-    'mensual': 4500,
-    'trimestral': 12150,
-    'anual': 43200,
-  },
+  'simplificado': {'mensual': 300, 'anual': 2990},
+  'basico': {'mensual': 1500, 'trimestral': 4050, 'anual': 14400},
+  'profesional': {'mensual': 2500, 'trimestral': 6750, 'anual': 24000},
+  'empresa': {'mensual': 4500, 'trimestral': 12150, 'anual': 43200},
 };
 
 const kMaxCajasPorPlan = <String, int>{
@@ -86,8 +70,8 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     maxProductos: null,
     maxClientes: null,
     maxVentasMes: null,
-    maxCuentasFiaoAbiertas: 100,
-    permiteFiao: true,
+    maxCuentasFiaoAbiertas: 0,
+    permiteFiao: false,
     permiteCreditoFormal: true,
     permiteFiscal: true,
   ),
@@ -113,8 +97,8 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     maxProductos: null,
     maxClientes: null,
     maxVentasMes: null,
-    maxCuentasFiaoAbiertas: 200,
-    permiteFiao: true,
+    maxCuentasFiaoAbiertas: 0,
+    permiteFiao: false,
     permiteCreditoFormal: false,
     permiteFiscal: true,
   ),
@@ -140,8 +124,8 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     maxProductos: null,
     maxClientes: null,
     maxVentasMes: null,
-    maxCuentasFiaoAbiertas: null,
-    permiteFiao: true,
+    maxCuentasFiaoAbiertas: 0,
+    permiteFiao: false,
     permiteCreditoFormal: true,
     permiteFiscal: true,
   ),
@@ -209,7 +193,7 @@ String descripcionPlanCorta(String plan) {
     case 'simplificado':
       return 'Sin impuestos · fiao hasta 50 · 1 dispositivo · RD\$300/mes o 2.990/año.';
     case 'basico':
-      return 'Modo normal · fiao · 1 PC + 1 celular gratis.';
+      return 'Modo normal · sin Fiao · 1 PC + 1 celular gratis.';
     case 'profesional':
       return 'Crédito formal · e-CF · sin fiao · hasta 3 equipos + móvil.';
     case 'empresa':

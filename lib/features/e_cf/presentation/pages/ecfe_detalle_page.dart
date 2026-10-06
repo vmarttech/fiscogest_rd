@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_documento.dart';
 import 'package:fiscogest_rd/features/e_cf/application/anular_ecfe.dart';
 import 'package:fiscogest_rd/features/e_cf/application/consultar_ecfe.dart';
 import 'package:fiscogest_rd/features/e_cf/application/enviar_ecfe.dart';
+import 'package:fiscogest_rd/features/e_cf/application/firmar_xml_ecfe.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -78,6 +79,10 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _generarXml() async {
+    await _generarXmlCore();
+  }
+
+  Future<void> _generarXmlCore() async {
     setState(() => _generando = true);
     try {
       final repoEcfe = ref.read(ecfeRepositoryProvider);
@@ -153,6 +158,139 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
     }
   }
 
+
+
+
+  /// Generar XML → Firmar → Enviar a DGII (un solo flujo).
+  Future<void> _procesarEcfe() async {
+    setState(() => _generando = true);
+    final pasos = <String>[];
+    try {
+      final repo = ref.read(ecfeRepositoryProvider);
+      var doc = await repo.obtenerPorId(widget.documentoId);
+      if (doc == null) {
+        throw StateError('Documento no encontrado');
+      }
+
+      // 1) Generar XML si aún no está listo o firmado
+      if (doc.estado == EstadoEcfInterno.borrador ||
+          doc.estado == EstadoEcfInterno.validacionFallida) {
+        // _generarXml gestiona UI; evitamos doble flag: llamamos y releemos
+        final was = _generando;
+        await _generarXmlCore();
+        doc = await repo.obtenerPorId(widget.documentoId);
+        if (doc == null ||
+            (doc.estado != EstadoEcfInterno.xmlListo &&
+                doc.estado != EstadoEcfInterno.firmado)) {
+          throw StateError(
+            'Generación incompleta (${doc?.estado.etiqueta ?? '?'}). '
+            'Revise el error del documento.',
+          );
+        }
+        pasos.add('XML generado');
+        setState(() => _generando = was);
+      } else if (doc.estado == EstadoEcfInterno.xmlListo) {
+        pasos.add('XML ya listo');
+      }
+
+      // 2) Firmar
+      doc = await repo.obtenerPorId(widget.documentoId);
+      if (doc != null &&
+          (doc.estado == EstadoEcfInterno.xmlListo ||
+              doc.estado == EstadoEcfInterno.errorTecnico)) {
+        final fr = await FirmarXmlEcfe(repo: repo).call(
+          documentoId: widget.documentoId,
+        );
+        if (!fr.ok) {
+          throw StateError(fr.errores.join(' · '));
+        }
+        if (fr.xmlFirmado != null) {
+          setState(() => _xmlPreview = fr.xmlFirmado);
+        }
+        pasos.add('Firmado');
+      } else if (doc?.estado == EstadoEcfInterno.firmado) {
+        pasos.add('Ya firmado');
+      }
+
+      // 3) Enviar
+      final er = await EnviarEcfe(repo: repo).call(
+        documentoId: widget.documentoId,
+      );
+      if (!er.ok) {
+        throw StateError(er.errores.join(' · '));
+      }
+      pasos.add(
+        er.yaEnviado
+            ? 'TrackId existente ${er.trackId}'
+            : 'Enviado · TrackId ${er.trackId}',
+      );
+
+      ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
+      ref.invalidate(ecfeEventosProvider(widget.documentoId));
+      ref.invalidate(ecfeColaProvider);
+      if (!mounted) return;
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text('Procesar e-CF: ${pasos.join(' → ')}'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
+      ref.invalidate(ecfeEventosProvider(widget.documentoId));
+      ref.invalidate(ecfeColaProvider);
+      if (mounted) {
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text('Procesar e-CF: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _generando = false);
+    }
+  }
+
+
+  Future<void> _firmarXml() async {
+    setState(() => _generando = true);
+    try {
+      final result = await FirmarXmlEcfe(repo: ref.read(ecfeRepositoryProvider))
+          .call(documentoId: widget.documentoId);
+      ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
+      ref.invalidate(ecfeEventosProvider(widget.documentoId));
+      ref.invalidate(ecfeColaProvider);
+      if (!mounted) return;
+      if (result.ok) {
+        setState(() => _xmlPreview = result.xmlFirmado);
+        FiscoGestNotifications.show(
+          const SnackBar(
+            content: Text('XML firmado (listo para enviar a DGII)'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } else {
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text(result.errores.join(' · ')),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text('Error al firmar: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _generando = false);
+    }
+  }
 
   Future<void> _enviarDgii() async {
     setState(() => _generando = true);
@@ -360,13 +498,25 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    if (puedeXml)
+                    if (puedeXml ||
+                        doc.estado == EstadoEcfInterno.xmlListo ||
+                        doc.estado == EstadoEcfInterno.firmado ||
+                        doc.estado == EstadoEcfInterno.errorTecnico)
+                      AppButton(
+                        text: _generando
+                            ? 'Procesando…'
+                            : 'Procesar e-CF (generar → firmar → enviar)',
+                        onPressed: _generando ? null : _procesarEcfe,
+                      ),
+                    if (puedeXml) ...[
+                      const SizedBox(height: 10),
                       AppButton(
                         text: _generando
                             ? 'Generando…'
                             : 'Generar / validar XML',
                         onPressed: _generando ? null : _generarXml,
                       ),
+                    ],
                     if (_xmlPreview != null) ...[
                       const SizedBox(height: 12),
                       Row(
@@ -413,8 +563,17 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                         ),
                       ),
                     ],
-                    if (doc.estado == EstadoEcfInterno.firmado ||
+                    if (doc.estado == EstadoEcfInterno.xmlListo ||
                         doc.estado == EstadoEcfInterno.errorTecnico) ...[
+                      const SizedBox(height: 10),
+                      AppButton(
+                        text: _generando ? 'Procesando…' : 'Firmar XML',
+                        onPressed: _generando ? null : _firmarXml,
+                      ),
+                    ],
+                    if (doc.estado == EstadoEcfInterno.firmado ||
+                        (doc.estado == EstadoEcfInterno.errorTecnico &&
+                            (doc.trackId ?? '').isEmpty)) ...[
                       const SizedBox(height: 10),
                       AppButton(
                         text: _generando ? 'Procesando…' : 'Enviar a DGII',

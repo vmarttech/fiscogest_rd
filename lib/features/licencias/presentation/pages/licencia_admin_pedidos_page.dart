@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart' show OrderingTerm;
+import 'package:drift/drift.dart' show OrderingTerm, Value;
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/core/sync/supabase/pedido_sync.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -19,14 +25,90 @@ class LicenciaAdminPedidosPage extends ConsumerStatefulWidget {
       _LicenciaAdminPedidosPageState();
 }
 
-class _LicenciaAdminPedidosPageState extends ConsumerState<LicenciaAdminPedidosPage> {
+class _LicenciaAdminPedidosPageState
+    extends ConsumerState<LicenciaAdminPedidosPage> {
   int _tick = 0;
+  bool _sincronizandoNube = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pullPedidosPlataforma();
+    });
+  }
+
+  /// Dueño plataforma: importa pedidos de todos los negocios desde Supabase.
+  Future<void> _pullPedidosPlataforma() async {
+    final sesion = ref.read(sesionProvider);
+    if (!esDuenoPlataforma(sesion?.username)) return;
+    if (!SupabaseConfig.isConfigured) return;
+    if (_sincronizandoNube) return;
+    setState(() => _sincronizandoNube = true);
+    try {
+      final remotos = await SupabaseRestClient().select(
+        table: 'pedidos_licencia',
+        filters: {
+          'select':
+              'referencia,plan,vigencia_tipo,monto,estado,created_at,expires_at,negocio_id',
+          'order': 'created_at.desc',
+        },
+      );
+      final db = ref.read(databaseProvider);
+      for (final r in remotos) {
+        final refCode = (r['referencia'] as String?) ?? '';
+        if (refCode.isEmpty) continue;
+        final existing = await (db.select(db.pedidosLicenciaTable)
+              ..where((t) => t.referencia.equals(refCode)))
+            .getSingleOrNull();
+        final plan = (r['plan'] as String?) ?? '';
+        final vigencia = (r['vigencia_tipo'] as String?) ?? '';
+        final monto = (r['monto'] is num)
+            ? (r['monto'] as num).toDouble()
+            : double.tryParse('${r['monto']}') ?? 0.0;
+        final estado = (r['estado'] as String?) ?? 'pendiente_pago';
+        final created =
+            (r['created_at'] as String?) ?? DateTime.now().toIso8601String();
+        final expires = (r['expires_at'] as String?) ?? '';
+        if (existing == null) {
+          await db.into(db.pedidosLicenciaTable).insert(
+                PedidosLicenciaTableCompanion.insert(
+                  referencia: refCode,
+                  plan: plan,
+                  vigenciaTipo: vigencia,
+                  monto: monto,
+                  estado: estado,
+                  fechaCreacion: created,
+                  fechaExpiracionPedido: expires,
+                ),
+              );
+        } else {
+          await (db.update(db.pedidosLicenciaTable)
+                ..where((t) => t.id.equals(existing.id)))
+              .write(
+            PedidosLicenciaTableCompanion(
+              plan: Value(plan),
+              vigenciaTipo: Value(vigencia),
+              monto: Value(monto),
+              estado: Value(estado),
+              fechaExpiracionPedido: Value(expires),
+            ),
+          );
+        }
+      }
+      if (mounted) setState(() => _tick++);
+    } catch (e, st) {
+      debugPrint('Admin pedidos pull nube: $e');
+      debugPrint('$st');
+    } finally {
+      if (mounted) setState(() => _sincronizandoNube = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(databaseProvider);
     final esMovil = MediaQuery.sizeOf(context).width < 700;
-
     return AppScaffold(
       title: 'Pedidos de licencia',
       body: FutureBuilder(
@@ -141,6 +223,12 @@ class _LicenciaAdminPedidosPageState extends ConsumerState<LicenciaAdminPedidosP
                             await ref
                                 .read(licenciaServiceProvider)
                                 .marcarPagadoYEmitirLicencia(p.referencia);
+                            try {
+                              await PedidoSync(ref.read(databaseProvider))
+                                  .pushTodos();
+                            } catch (e) {
+                              debugPrint('Push pedido tras emitir: $e');
+                            }
                             ref.invalidate(licenciaActualProvider);
                             FiscoGestNotifications.show(
                               SnackBar(content: Text('Licencia emitida: ${p.referencia}')),

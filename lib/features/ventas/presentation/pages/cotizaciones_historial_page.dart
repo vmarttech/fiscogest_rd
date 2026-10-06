@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 
 class CotizacionesHistorialPage extends ConsumerStatefulWidget {
   const CotizacionesHistorialPage({super.key});
@@ -57,7 +58,8 @@ class _CotizacionesHistorialPageState
       title: 'HISTORIAL DE COTIZACIONES',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.pop(),
+        tooltip: 'Atrás',
+        onPressed: () => safeBack(context, fallback: '/ventas'),
       ),
       actions: [
         Padding(

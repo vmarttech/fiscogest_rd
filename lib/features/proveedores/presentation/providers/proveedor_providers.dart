@@ -9,6 +9,8 @@ class ProveedorNotifier extends StateNotifier<AsyncValue<List<Proveedor>>> {
   }
   final Ref _ref;
 
+  Future<void> recargar() => _cargarTodos();
+
   Future<void> _cargarTodos() async {
     try {
       final db = _ref.read(appDatabaseProvider);
