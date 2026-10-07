@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
@@ -20,8 +21,40 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
   final IInventarioService inventarioService;
   final ProductosDao productosDao;
 
+  /// `productos_table.stock` es el saldo que muestran las pantallas de
+  /// inventario. Algunas entradas antiguas actualizaron esa columna sin crear
+  /// un movimiento de kárdex; por eso Caja debe usarla como fuente principal.
+  Future<double> _stockActual(int productoId) async {
+    final producto = await productosDao.obtenerPorId(productoId);
+    if (producto == null) {
+      throw StateError('No se encontró el producto $productoId');
+    }
+    final stock = producto.stock;
+    if (stock != null) return stock;
+    return kardexRepository.obtenerSaldoActual(productoId);
+  }
+
+  Future<void> _validarExistencias(List<DetalleVenta> detalles) async {
+    final cantidades = <int, double>{};
+    final disponibles = <int, double>{};
+    for (final detalle in detalles) {
+      final id = detalle.productoId;
+      disponibles[id] ??= await _stockActual(id);
+      final acumulada = (cantidades[id] ?? 0) + detalle.cantidad;
+      cantidades[id] = acumulada;
+      if (acumulada > disponibles[id]!) {
+        throw StateError(
+          'Stock insuficiente: ${detalle.nombreProducto ?? 'producto'}, '
+          'disponible=${disponibles[id]}, vendiendo=$acumulada',
+        );
+      }
+    }
+  }
+
   @override
   Future<Venta> registrarVentaConInventario(Venta venta) async {
+    // Comprobar antes de guardar para evitar una venta incompleta si no alcanza.
+    await _validarExistencias(venta.detalles);
     final ventaRegistrada = await ventasRepository.registrarVenta(venta);
 
     if (ventaRegistrada.id == null) {
@@ -31,9 +64,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     for (final elemento in venta.detalles) {
       final detalle = elemento;
 
-      final saldoAnterior = await kardexRepository.obtenerSaldoActual(
-        detalle.productoId,
-      );
+      final saldoAnterior = await _stockActual(detalle.productoId);
       if (saldoAnterior < detalle.cantidad) {
         throw Exception(
           'Stock insuficiente: producto ${detalle.nombreProducto}, disponible=$saldoAnterior, vendiendo=${detalle.cantidad}',
@@ -82,6 +113,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         'La venta no tiene líneas de detalle. No se puede descontar inventario.',
       );
     }
+    await _validarExistencias(venta.detalles);
     final refDoc =
         (venta.numeroFactura != null && venta.numeroFactura!.isNotEmpty)
         ? 'Factura ${venta.numeroFactura}'
@@ -93,9 +125,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
               detalle.nombreProducto!.trim().isNotEmpty)
           ? detalle.nombreProducto!.trim()
           : (producto?.nombre ?? 'Producto ${detalle.productoId}');
-      final saldoAnterior = await kardexRepository.obtenerSaldoActual(
-        detalle.productoId,
-      );
+      final saldoAnterior = await _stockActual(detalle.productoId);
       final cant = detalle.cantidad.toDouble();
       if (saldoAnterior < cant) {
         throw Exception(
@@ -144,9 +174,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
               detalle.nombreProducto!.trim().isNotEmpty)
           ? detalle.nombreProducto!.trim()
           : (producto?.nombre ?? 'Producto ${detalle.productoId}');
-      final saldoAnterior = await kardexRepository.obtenerSaldoActual(
-        detalle.productoId,
-      );
+      final saldoAnterior = await _stockActual(detalle.productoId);
       final cant = detalle.cantidad.toDouble();
       final costoUnitario = producto?.precioCompra ?? 0.0;
       final saldoNuevo = saldoAnterior + cant;

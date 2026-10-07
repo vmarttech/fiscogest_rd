@@ -37,18 +37,53 @@ class AppDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    final cuerpo =
+        content ??
+        (message != null
+            ? Text(message!, style: AppTypography.bodyMedium)
+            : null);
+    final altoMaximo = MediaQuery.sizeOf(context).height * 0.85;
+
+    // Dialog evita el RenderIntrinsicWidth de AlertDialog. Es importante para
+    // acciones personalizadas que usan LayoutBuilder, como AppButton.
+    return Dialog(
       shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-      titlePadding: AppSpacing.allM,
-      contentPadding: AppSpacing.hM.copyWith(bottom: AppSpacing.m),
-      actionsPadding: AppSpacing.allM,
-      title: Text(title, style: AppTypography.h3),
-      content:
-          content ??
-          (message != null
-              ? Text(message!, style: AppTypography.bodyMedium)
-              : null),
-      actions: actions,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 560, maxHeight: altoMaximo),
+        child: Padding(
+          padding: AppSpacing.allM,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppTypography.h3),
+              if (cuerpo != null) ...[
+                const SizedBox(height: AppSpacing.m),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: AppSpacing.hM.copyWith(
+                      bottom: AppSpacing.m,
+                      left: 0,
+                      right: 0,
+                    ),
+                    child: cuerpo,
+                  ),
+                ),
+              ],
+              if (actions.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.m),
+                OverflowBar(
+                  alignment: MainAxisAlignment.end,
+                  spacing: AppSpacing.s,
+                  overflowSpacing: AppSpacing.xs,
+                  children: actions,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

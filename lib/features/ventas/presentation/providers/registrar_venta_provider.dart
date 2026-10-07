@@ -189,25 +189,14 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     return null;
   }
 
-  String? validarStockAlAgregar(DetalleVenta producto, double cantidad) {
-    final stockDisponible = obtenerStock(producto);
-    if (stockDisponible != null && cantidad > stockDisponible) {
-      return 'Stock insuficiente. Disponible: $stockDisponible';
-    }
-    return null;
-  }
-
+  /// El detalle no contiene el stock del producto. La disponibilidad se
+  /// valida al confirmar la venta contra el stock persistido de inventario.
   String? agregarProducto(DetalleVenta linea) {
     final lista = List<DetalleVenta>.from(state.detalles);
     final indice = lista.indexWhere((p) => p.productoId == linea.productoId);
     if (indice >= 0) {
       final existente = lista[indice];
       final nuevaCantidad = existente.cantidad + linea.cantidad;
-      final mensajeStock = validarStockAlAgregar(
-        linea,
-        nuevaCantidad.toDouble(),
-      );
-      if (mensajeStock != null) return mensajeStock;
       final nuevoSubtotal = existente.precioUnitario * nuevaCantidad;
       lista[indice] = existente.copyWith(
         cantidad: nuevaCantidad,
@@ -215,11 +204,6 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
         subtotalLinea: nuevoSubtotal,
       );
     } else {
-      final mensajeStock = validarStockAlAgregar(
-        linea,
-        linea.cantidad.toDouble(),
-      );
-      if (mensajeStock != null) return mensajeStock;
       lista.add(linea);
     }
     recalcularTotales(lista);
@@ -394,8 +378,6 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
         state.tipoPago.isNotEmpty &&
         state.total > 0;
   }
-
-  double? obtenerStock(DetalleVenta linea) => linea.subtotalLinea;
 
   void recalcularTotales(List<DetalleVenta> lista) {
     final subtotal = lista.fold<double>(0.0, (sum, l) => sum + l.subtotal);
