@@ -62,6 +62,28 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   bool _precioManual =
       false; // Si el usuario edita precio venta, no recalcular automáticamente
 
+  List<T> _unicosPorId<T>(List<T> elementos, int? Function(T) obtenerId) {
+    final vistos = <int>{};
+    return elementos.where((elemento) {
+      final id = obtenerId(elemento);
+      return id != null && vistos.add(id);
+    }).toList();
+  }
+
+  int? _valorDisponible<T>(
+    List<T> elementos,
+    int? Function(T) obtenerId,
+    int? seleccionado,
+  ) {
+    if (seleccionado == null) return null;
+    return elementos
+                .where((elemento) => obtenerId(elemento) == seleccionado)
+                .length ==
+            1
+        ? seleccionado
+        : null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -96,7 +118,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     _precioManual = false;
   }
 
-    @override
+  @override
   void dispose() {
     _nombreCtrl.dispose();
     _skuCtrl.dispose();
@@ -308,7 +330,25 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
 
   void _guardarProducto() {
     if (!_formKey.currentState!.validate()) return;
-    if (_catSel == null) {
+    final categorias = ref.read(categoriaControllerProvider).valueOrNull ?? [];
+    final unidades = ref.read(unidadMedidaControllerProvider).valueOrNull ?? [];
+    final marcas = ref.read(marcaControllerProvider).valueOrNull ?? [];
+    final categoriaId = _valorDisponible(
+      _unicosPorId(categorias, (c) => c.id),
+      (c) => c.id,
+      _catSel,
+    );
+    final unidadId = _valorDisponible(
+      _unicosPorId(unidades, (u) => u.id),
+      (u) => u.id,
+      _unidadSel,
+    );
+    final marcaId = _valorDisponible(
+      _unicosPorId(marcas, (m) => m.id),
+      (m) => m.id,
+      _marcaSel,
+    );
+    if (categoriaId == null) {
       FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Seleccione una categoría'),
@@ -317,7 +357,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       return;
     }
-    if (_unidadSel == null) {
+    if (unidadId == null) {
       FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Seleccione unidad de medida'),
@@ -377,9 +417,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         precioEspecial: precioEsp,
         stock: stockVal,
         stockMinimo: stockMinVal,
-        categoriaId: _catSel!,
-        marcaId: _marcaSel ?? 1,
-        unidadMedidaId: _unidadSel!,
+        categoriaId: categoriaId,
+        marcaId: marcaId ?? 1,
+        unidadMedidaId: unidadId,
         impuestoId: _impSel,
         clearImpuesto: _impSel == null,
         activo: _activo,
@@ -402,9 +442,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         precioEspecial: precioEsp,
         stock: stockVal,
         stockMinimo: stockMinVal,
-        categoriaId: _catSel!,
-        marcaId: _marcaSel ?? 1,
-        unidadMedidaId: _unidadSel!,
+        categoriaId: categoriaId,
+        marcaId: marcaId ?? 1,
+        unidadMedidaId: unidadId,
         impuestoId: _impSel,
         activo: _activo,
       );
@@ -458,27 +498,34 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         prefixIcon: Icons.qr_code,
                       ),
                       child2: cats.when(
-                        data: (lista) => _campoConCreacionRapida(
-                          tooltip: 'Crear categoría',
-                          onCrear: _crearCategoriaRapida,
-                          campo: AppDropdown<int>(
-                            label: 'Categoría',
-                            hint: 'Seleccione categoría',
-                            initialValue: _catSel,
-                            items: lista
-                                .map(
-                                  (c) => DropdownMenuItem(
-                                    value: c.id,
-                                    child: Text(
-                                      c.nombre,
-                                      style: AppTypography.bodyMedium,
+                        data: (lista) {
+                          final opciones = _unicosPorId(lista, (c) => c.id);
+                          return _campoConCreacionRapida(
+                            tooltip: 'Crear categoría',
+                            onCrear: _crearCategoriaRapida,
+                            campo: AppDropdown<int>(
+                              label: 'Categoría',
+                              hint: 'Seleccione categoría',
+                              initialValue: _valorDisponible(
+                                opciones,
+                                (c) => c.id,
+                                _catSel,
+                              ),
+                              items: opciones
+                                  .map(
+                                    (c) => DropdownMenuItem(
+                                      value: c.id,
+                                      child: Text(
+                                        c.nombre,
+                                        style: AppTypography.bodyMedium,
+                                      ),
                                     ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) => setState(() => _catSel = v),
-                          ),
-                        ),
+                                  )
+                                  .toList(),
+                              onChanged: (v) => setState(() => _catSel = v),
+                            ),
+                          );
+                        },
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
                         error: (e, _) => Text(
@@ -492,27 +539,34 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     AppLayout.vM,
                     ResponsiveRow(
                       child1: marcas.when(
-                        data: (lista) => _campoConCreacionRapida(
-                          tooltip: 'Crear marca',
-                          onCrear: _crearMarcaRapida,
-                          campo: AppDropdown<int>(
-                            label: 'Marca',
-                            hint: 'Seleccione marca',
-                            initialValue: _marcaSel,
-                            items: lista
-                                .map(
-                                  (m) => DropdownMenuItem(
-                                    value: m.id,
-                                    child: Text(
-                                      m.nombre,
-                                      style: AppTypography.bodyMedium,
+                        data: (lista) {
+                          final opciones = _unicosPorId(lista, (m) => m.id);
+                          return _campoConCreacionRapida(
+                            tooltip: 'Crear marca',
+                            onCrear: _crearMarcaRapida,
+                            campo: AppDropdown<int>(
+                              label: 'Marca',
+                              hint: 'Seleccione marca',
+                              initialValue: _valorDisponible(
+                                opciones,
+                                (m) => m.id,
+                                _marcaSel,
+                              ),
+                              items: opciones
+                                  .map(
+                                    (m) => DropdownMenuItem(
+                                      value: m.id,
+                                      child: Text(
+                                        m.nombre,
+                                        style: AppTypography.bodyMedium,
+                                      ),
                                     ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) => setState(() => _marcaSel = v),
-                          ),
-                        ),
+                                  )
+                                  .toList(),
+                              onChanged: (v) => setState(() => _marcaSel = v),
+                            ),
+                          );
+                        },
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
                         error: (e, _) => Text(
@@ -523,27 +577,34 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                         ),
                       ),
                       child2: unids.when(
-                        data: (lista) => _campoConCreacionRapida(
-                          tooltip: 'Crear unidad',
-                          onCrear: _crearUnidadRapida,
-                          campo: AppDropdown<int>(
-                            label: 'Unidad de Medida',
-                            hint: 'Seleccione unidad',
-                            initialValue: _unidadSel,
-                            items: lista
-                                .map(
-                                  (u) => DropdownMenuItem(
-                                    value: u.id,
-                                    child: Text(
-                                      u.nombre,
-                                      style: AppTypography.bodyMedium,
+                        data: (lista) {
+                          final opciones = _unicosPorId(lista, (u) => u.id);
+                          return _campoConCreacionRapida(
+                            tooltip: 'Crear unidad',
+                            onCrear: _crearUnidadRapida,
+                            campo: AppDropdown<int>(
+                              label: 'Unidad de Medida',
+                              hint: 'Seleccione unidad',
+                              initialValue: _valorDisponible(
+                                opciones,
+                                (u) => u.id,
+                                _unidadSel,
+                              ),
+                              items: opciones
+                                  .map(
+                                    (u) => DropdownMenuItem(
+                                      value: u.id,
+                                      child: Text(
+                                        u.nombre,
+                                        style: AppTypography.bodyMedium,
+                                      ),
                                     ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) => setState(() => _unidadSel = v),
-                          ),
-                        ),
+                                  )
+                                  .toList(),
+                              onChanged: (v) => setState(() => _unidadSel = v),
+                            ),
+                          );
+                        },
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
                         error: (e, _) => Text(
@@ -557,11 +618,21 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                     const SizedBox(height: 12),
                     imps.when(
                       data: (lista) {
-                        final activos = lista.where((i) => i.activo).toList();
+                        final activos = _unicosPorId(
+                          lista.where((i) => i.activo).toList(),
+                          (i) => i.id,
+                        );
                         return AppDropdown<int?>(
                           label: 'ITBIS / impuesto',
                           hint: 'Automático (categoría o default)',
-                          initialValue: _impSel,
+                          initialValue:
+                              _impSel == null ||
+                                  activos
+                                          .where((i) => i.id == _impSel)
+                                          .length ==
+                                      1
+                              ? _impSel
+                              : null,
                           items: [
                             const DropdownMenuItem<int?>(
                               value: null,
@@ -838,7 +909,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   }
 }
 
-
 /// Diálogo que posee sus TextEditingController (evita dispose prematuro).
 class _CatalogoRapidoDialog extends StatefulWidget {
   const _CatalogoRapidoDialog({
@@ -869,16 +939,13 @@ class _CatalogoRapidoDialogState extends State<_CatalogoRapidoDialog> {
 
   void _confirmar() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    Navigator.pop(
-      context,
-      (
-        nombre: _nombreCtrl.text.trim(),
-        abreviatura: widget.conAbreviatura &&
-                _abreviaturaCtrl.text.trim().isNotEmpty
-            ? _abreviaturaCtrl.text.trim()
-            : null,
-      ),
-    );
+    Navigator.pop(context, (
+      nombre: _nombreCtrl.text.trim(),
+      abreviatura:
+          widget.conAbreviatura && _abreviaturaCtrl.text.trim().isNotEmpty
+          ? _abreviaturaCtrl.text.trim()
+          : null,
+    ));
   }
 
   @override

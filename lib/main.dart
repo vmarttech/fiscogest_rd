@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,6 +11,7 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_scheduler.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
@@ -162,7 +164,23 @@ void main() async {
     );
     if (SupabaseConfig.isConfigured) {
       try {
-        await SyncEngine(db).pushAll();
+        unawaited(() async {
+          final jwt = await SesionNube.tokenVigente();
+          if (jwt == null || jwt.isEmpty) {
+            debugPrint('main: sin JWT → push tras login');
+            return;
+          }
+          var ok = await SupabaseConfig.hayRed();
+          if (!ok) {
+            await Future<void>.delayed(const Duration(seconds: 1));
+            ok = await SupabaseConfig.hayRed();
+          }
+          if (ok) {
+            await SyncEngine(db).pushAll();
+          } else {
+            debugPrint('main: sin red → skip pushAll');
+          }
+        }());
       } catch (e, st) {
         debugPrint('Sync nube: $e');
         debugPrint('$st');

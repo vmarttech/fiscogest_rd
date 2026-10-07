@@ -53,7 +53,8 @@ class CajaSync {
               'id_local': m.id,
               'tipo': m.tipo.name,
               'referencia_tipo': m.referenciaTipo.name,
-              'referencia_id': m.referenciaId,
+              'referencia_id':
+                  (m.referenciaId.abs() > 2147483647) ? 0 : m.referenciaId,
               'monto': m.monto,
               'forma_pago': m.formaPago.name,
               'saldo_anterior': m.saldoAnterior,

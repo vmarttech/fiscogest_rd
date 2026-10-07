@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_
 import 'package:fiscogest_rd/features/licencias/presentation/providers/pedidos_pendientes_provider.dart';
 import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
@@ -72,6 +73,7 @@ class AppShell extends ConsumerWidget {
           sesion?.username ?? '',
           () {
             ref.read(sesionProvider.notifier).state = null;
+            SesionNube.clear();
             context.go('/login');
           },
           permiteFiscalLicencia,

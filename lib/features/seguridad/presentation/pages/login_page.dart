@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/sync/supabase/emitir_token.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
@@ -6,12 +8,14 @@ import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/auth/login_prefs.dart';
 import 'package:fiscogest_rd/core/auth/biometric_auth.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/fisco_aurora_background.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_pull.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
@@ -92,8 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   
   /// Dueño plataforma: licencia vitalicia local + aviso de pedidos pendientes en nube.
-  Future<void> _postLoginPlataforma(String username) async {
-    final db = ref.read(databaseProvider);
+  Future<void> _postLoginPlataforma(AppDatabase db, String username) async {
     if (esDuenoPlataforma(username)) {
       try {
         await LicenciaService(db).activarDesarrolladorVitalicio();
@@ -104,6 +107,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     }
     if (!esDuenoPlataforma(username) || !SupabaseConfig.isConfigured) return;
+    if (!await SupabaseConfig.hayRed()) return;
     try {
       final rows = await SupabaseRestClient().select(
         table: 'pedidos_licencia',
@@ -140,6 +144,39 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+
+  /// Nube en segundo plano: nunca retrasa la entrada a la caja.
+  Future<void> _nubeTrasEntrar(
+    AppDatabase db, {
+    required String username,
+    required String password,
+    required bool requiereSetup,
+    required String usernameSesion,
+  }) async {
+    if (!await SupabaseConfig.hayRed()) {
+      debugPrint('Login: sin red → skip nube');
+      return;
+    }
+    await EmitirToken.trasLogin(username: username, password: password);
+    try {
+      await SyncEngine(db).pushAll();
+    } catch (e, st) {
+      debugPrint('Push post-login: $e');
+      debugPrint('$st');
+    }
+    if (!requiereSetup) {
+      try {
+        await SyncPull(db).pullTodoElNegocio();
+      } catch (e, st) {
+        debugPrint('Pull post-login: $e');
+        debugPrint('$st');
+      }
+    }
+    if (!mounted) return;
+    if (!mounted) return;
+    await _postLoginPlataforma(db, usernameSesion);
+  }
+
   Future<void> _entrar() async {
     setState(() {
       _cargando = true;
@@ -152,22 +189,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       var res = await AuthService(db).login(user, pass);
       // Equipo nuevo: no hay usuarios locales → bajar de Supabase y reintentar
       if (res == null) {
-        try {
-          debugPrint('Login: local falló → resolver negocio + pull');
-          // Crítico multi-tenant: obtener negocio_id del username en la nube
-          // ANTES del pull (el pull filtra por NegocioLocal).
-          final remoto = await NegocioRemote().negocioIdDeUsername(user);
-          if (remoto != null && remoto.isNotEmpty) {
-            await NegocioLocal.setId(remoto);
-            debugPrint('Login: NegocioLocal ← $remoto');
+        if (await SupabaseConfig.hayRed()) {
+          try {
+            debugPrint('Login: local falló → resolver negocio + pull');
+            final remoto = await NegocioRemote().negocioIdDeUsername(user);
+            if (remoto != null && remoto.isNotEmpty) {
+              await NegocioLocal.setId(remoto);
+              debugPrint('Login: NegocioLocal ← $remoto');
+            }
+            await SyncPull(db).pullTodoElNegocio();
+            res = await AuthService(db).login(user, pass);
+          } catch (e, st) {
+            debugPrint('Login: pull antes de reintento: $e');
+            debugPrint('$st');
           }
-          await SyncPull(db).pullTodoElNegocio();
-          final uCheck = await AuthService(db).buscarPorUsername(user);
-          // ignore: avoid_print
-          res = await AuthService(db).login(user, pass);
-        } catch (e, st) {
-          debugPrint('Login: pull antes de reintento: $e');
-          debugPrint('$st');
+        } else {
+          debugPrint('Login: sin red y sin usuario local');
         }
       }
       if (res == null) {
@@ -220,18 +257,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         requiereSetupInicial: res.requiereSetupInicial,
       );
       if (!mounted) return;
-      // Pull Supabase → local (multi-dispositivo)
-      if (!res.requiereSetupInicial) {
-        try {
-          await SyncPull(db).pullTodoElNegocio();
-        } catch (e, st) {
-          // No bloquea el login si la nube falla
-          debugPrint('Pull post-login: $e');
-          debugPrint('$st');
-        }
-      }
-      if (!mounted) return;
-      await _postLoginPlataforma(res.username);
+      unawaited(_nubeTrasEntrar(
+        db,
+        username: user,
+        password: pass,
+        requiereSetup: res.requiereSetupInicial,
+        usernameSesion: res.username,
+      ));
       if (!mounted) return;
       if (res.requiereSetupInicial) {
         context.go('/setup-cuenta');
@@ -289,18 +321,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         requiereSetupInicial: res.requiereSetupInicial,
       );
       if (!mounted) return;
-      // Pull Supabase → local (multi-dispositivo)
-      if (!res.requiereSetupInicial) {
-        try {
-          await SyncPull(db).pullTodoElNegocio();
-        } catch (e, st) {
-          // No bloquea el login si la nube falla
-          debugPrint('Pull post-login: $e');
-          debugPrint('$st');
-        }
-      }
-      if (!mounted) return;
-      await _postLoginPlataforma(res.username);
+      unawaited(_nubeTrasEntrar(
+        db,
+        username: cred.user,
+        password: cred.pass,
+        requiereSetup: res.requiereSetupInicial,
+        usernameSesion: res.username,
+      ));
       if (!mounted) return;
       if (res.requiereSetupInicial) {
         context.go('/setup-cuenta');

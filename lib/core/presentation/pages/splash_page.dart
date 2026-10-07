@@ -35,7 +35,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
     _ctrl.forward();
-    Future<void>.delayed(const Duration(milliseconds: 2200), () async {
+    Future<void>.delayed(const Duration(milliseconds: 700), () async {
       if (!mounted) return;
       try {
         final db = ref.read(databaseProvider);
