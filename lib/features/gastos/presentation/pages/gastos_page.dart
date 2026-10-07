@@ -248,7 +248,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                   onPressed: () => Navigator.pop(ctx),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: AppColors.textSecondary,
-                                    side: BorderSide(color: AppColors.divider),
+                                    side: const BorderSide(color: AppColors.divider),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(14),
                                     ),

@@ -49,6 +49,7 @@ class AppShell extends ConsumerWidget {
     final permiteFiscalLicencia = gatesLic.permiteFiscal;
     final permiteFiaoLicencia = gatesLic.permiteFiao;
     final permiteCreditoFormalLicencia = gatesLic.permiteCreditoFormal;
+    final permiteAlmacenesLicencia = gatesLic.permiteAlmacenes;
 
     const navWidth = 280.0;
     final currentPath = GoRouterState.of(context).uri.path;
@@ -76,6 +77,7 @@ class AppShell extends ConsumerWidget {
           permiteFiscalLicencia,
           permiteFiaoLicencia,
           permiteCreditoFormalLicencia,
+          permiteAlmacenesLicencia,
           pedidosPendientes,
         ),
       ),
@@ -114,6 +116,7 @@ class AppShell extends ConsumerWidget {
     bool permiteFiscalLicencia,
     bool permiteFiaoLicencia,
     bool permiteCreditoFormalLicencia,
+    bool permiteAlmacenesLicencia,
     int pedidosPendientes,
   ) {
     // Menú completo SOLO Admin.
@@ -310,13 +313,14 @@ class AppShell extends ConsumerWidget {
                         Icons.tune_outlined,
                         currentPath,
                       ),
-                      _buildNavItem(
-                        context,
-                        '/transferencias/registrar',
-                        'Transferencias',
-                        Icons.swap_horiz_outlined,
-                        currentPath,
-                      ),
+                      if (permiteAlmacenesLicencia)
+                        _buildNavItem(
+                          context,
+                          '/transferencias/registrar',
+                          'Transferencias',
+                          Icons.swap_horiz_outlined,
+                          currentPath,
+                        ),
                     ],
                     const SizedBox(height: 18),
                     _buildSectionTitle('CATÁLOGOS'),
@@ -358,6 +362,15 @@ class AppShell extends ConsumerWidget {
                         '/unidades',
                         'Unidades',
                         Icons.straighten_outlined,
+                        currentPath,
+                      ),
+                    if (puede(Permiso.catalogoGestionar) &&
+                        permiteAlmacenesLicencia)
+                      _buildNavItem(
+                        context,
+                        '/almacenes',
+                        'Almacenes',
+                        Icons.warehouse_outlined,
                         currentPath,
                       ),
                     if (puede(Permiso.catalogoGestionar))

@@ -8,6 +8,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:fiscogest_rd/core/database/migrations/migracion_002_agregar_campos_productos.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
+import 'package:fiscogest_rd/features/almacenes/data/dao/almacenes_table.dart';
+import 'package:fiscogest_rd/features/transferencias/data/dao/transferencias_table.dart';
+import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
 import 'package:fiscogest_rd/features/licencias/data/dao/licencias_table.dart';
 import 'package:fiscogest_rd/features/licencias/data/dao/pedidos_licencia_table.dart';
@@ -109,6 +112,9 @@ part 'app_database.g.dart';
     EcfeSpecVersionTable,
     DetalleCompraTable,
     FiosTable,
+    AlmacenesTable,
+    StockAlmacenTable,
+    TransferenciasTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -117,7 +123,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 56;
+  int get schemaVersion => 58;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -126,6 +132,13 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 58) {
+        await m.createTable(stockAlmacenTable);
+        await m.createTable(transferenciasTable);
+      }
+      if (from < 57) {
+        await m.createTable(almacenesTable);
+      }
       if (from < 56) {
         await m.createTable(dispositivosLicenciaTable);
       }

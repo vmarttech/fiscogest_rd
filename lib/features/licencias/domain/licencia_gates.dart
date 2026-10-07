@@ -62,4 +62,10 @@ class LicenciaGates {
   String mensajeTope(String recurso) =>
       'Límite del plan ($plan) en $recurso. '
       'Actualice en Configuración → Sistema → Licencia y pagos.';
+
+  /// Catálogo de almacenes + transferencias: Profesional y Empresa.
+  bool get permiteAlmacenes {
+    final p = (lic?.plan ?? '').toLowerCase().trim();
+    return p == 'profesional' || p == 'empresa' || p == 'desarrollador';
+  }
 }

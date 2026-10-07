@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/almacenes/presentation/pages/almacenes_page.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/store/store_channel.dart';
 import 'package:fiscogest_rd/core/legal/legal_page.dart';
@@ -669,7 +670,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: MarcasPage.routeName,
         builder: (_, __) => const AppShell(child: MarcasPage()),
       ),
-      GoRoute(
+            GoRoute(
+        path: '/almacenes',
+        name: AlmacenesPage.routeName,
+        builder: (_, __) => const AppShell(child: AlmacenesPage()),
+      ),
+GoRoute(
         path: '/unidades',
         name: UnidadesPage.routeName,
         builder: (_, __) => const AppShell(child: UnidadesPage()),

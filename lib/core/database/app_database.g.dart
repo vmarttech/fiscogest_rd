@@ -33607,6 +33607,1419 @@ class FiosTableCompanion extends UpdateCompanion<FioData> {
   }
 }
 
+class $AlmacenesTableTable extends AlmacenesTable
+    with TableInfo<$AlmacenesTableTable, AlmacenData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AlmacenesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
+  @override
+  late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
+    'nombre',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
+  @override
+  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
+    'tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('tienda'),
+  );
+  static const VerificationMeta _direccionMeta = const VerificationMeta(
+    'direccion',
+  );
+  @override
+  late final GeneratedColumn<String> direccion = GeneratedColumn<String>(
+    'direccion',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _telefonoMeta = const VerificationMeta(
+    'telefono',
+  );
+  @override
+  late final GeneratedColumn<String> telefono = GeneratedColumn<String>(
+    'telefono',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _responsableMeta = const VerificationMeta(
+    'responsable',
+  );
+  @override
+  late final GeneratedColumn<String> responsable = GeneratedColumn<String>(
+    'responsable',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    codigo,
+    nombre,
+    tipo,
+    direccion,
+    telefono,
+    responsable,
+    activo,
+    creadoEn,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'almacenes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AlmacenData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codigoMeta);
+    }
+    if (data.containsKey('nombre')) {
+      context.handle(
+        _nombreMeta,
+        nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nombreMeta);
+    }
+    if (data.containsKey('tipo')) {
+      context.handle(
+        _tipoMeta,
+        tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
+      );
+    }
+    if (data.containsKey('direccion')) {
+      context.handle(
+        _direccionMeta,
+        direccion.isAcceptableOrUnknown(data['direccion']!, _direccionMeta),
+      );
+    }
+    if (data.containsKey('telefono')) {
+      context.handle(
+        _telefonoMeta,
+        telefono.isAcceptableOrUnknown(data['telefono']!, _telefonoMeta),
+      );
+    }
+    if (data.containsKey('responsable')) {
+      context.handle(
+        _responsableMeta,
+        responsable.isAcceptableOrUnknown(
+          data['responsable']!,
+          _responsableMeta,
+        ),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AlmacenData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AlmacenData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      nombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre'],
+      )!,
+      tipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo'],
+      )!,
+      direccion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}direccion'],
+      ),
+      telefono: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}telefono'],
+      ),
+      responsable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}responsable'],
+      ),
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      ),
+    );
+  }
+
+  @override
+  $AlmacenesTableTable createAlias(String alias) {
+    return $AlmacenesTableTable(attachedDatabase, alias);
+  }
+}
+
+class AlmacenData extends DataClass implements Insertable<AlmacenData> {
+  final int id;
+  final String codigo;
+  final String nombre;
+  final String tipo;
+  final String? direccion;
+  final String? telefono;
+  final String? responsable;
+  final bool activo;
+  final DateTime creadoEn;
+  final DateTime? actualizadoEn;
+  const AlmacenData({
+    required this.id,
+    required this.codigo,
+    required this.nombre,
+    required this.tipo,
+    this.direccion,
+    this.telefono,
+    this.responsable,
+    required this.activo,
+    required this.creadoEn,
+    this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['codigo'] = Variable<String>(codigo);
+    map['nombre'] = Variable<String>(nombre);
+    map['tipo'] = Variable<String>(tipo);
+    if (!nullToAbsent || direccion != null) {
+      map['direccion'] = Variable<String>(direccion);
+    }
+    if (!nullToAbsent || telefono != null) {
+      map['telefono'] = Variable<String>(telefono);
+    }
+    if (!nullToAbsent || responsable != null) {
+      map['responsable'] = Variable<String>(responsable);
+    }
+    map['activo'] = Variable<bool>(activo);
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || actualizadoEn != null) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    }
+    return map;
+  }
+
+  AlmacenesTableCompanion toCompanion(bool nullToAbsent) {
+    return AlmacenesTableCompanion(
+      id: Value(id),
+      codigo: Value(codigo),
+      nombre: Value(nombre),
+      tipo: Value(tipo),
+      direccion: direccion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(direccion),
+      telefono: telefono == null && nullToAbsent
+          ? const Value.absent()
+          : Value(telefono),
+      responsable: responsable == null && nullToAbsent
+          ? const Value.absent()
+          : Value(responsable),
+      activo: Value(activo),
+      creadoEn: Value(creadoEn),
+      actualizadoEn: actualizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualizadoEn),
+    );
+  }
+
+  factory AlmacenData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AlmacenData(
+      id: serializer.fromJson<int>(json['id']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      nombre: serializer.fromJson<String>(json['nombre']),
+      tipo: serializer.fromJson<String>(json['tipo']),
+      direccion: serializer.fromJson<String?>(json['direccion']),
+      telefono: serializer.fromJson<String?>(json['telefono']),
+      responsable: serializer.fromJson<String?>(json['responsable']),
+      activo: serializer.fromJson<bool>(json['activo']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'codigo': serializer.toJson<String>(codigo),
+      'nombre': serializer.toJson<String>(nombre),
+      'tipo': serializer.toJson<String>(tipo),
+      'direccion': serializer.toJson<String?>(direccion),
+      'telefono': serializer.toJson<String?>(telefono),
+      'responsable': serializer.toJson<String?>(responsable),
+      'activo': serializer.toJson<bool>(activo),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+    };
+  }
+
+  AlmacenData copyWith({
+    int? id,
+    String? codigo,
+    String? nombre,
+    String? tipo,
+    Value<String?> direccion = const Value.absent(),
+    Value<String?> telefono = const Value.absent(),
+    Value<String?> responsable = const Value.absent(),
+    bool? activo,
+    DateTime? creadoEn,
+    Value<DateTime?> actualizadoEn = const Value.absent(),
+  }) => AlmacenData(
+    id: id ?? this.id,
+    codigo: codigo ?? this.codigo,
+    nombre: nombre ?? this.nombre,
+    tipo: tipo ?? this.tipo,
+    direccion: direccion.present ? direccion.value : this.direccion,
+    telefono: telefono.present ? telefono.value : this.telefono,
+    responsable: responsable.present ? responsable.value : this.responsable,
+    activo: activo ?? this.activo,
+    creadoEn: creadoEn ?? this.creadoEn,
+    actualizadoEn: actualizadoEn.present
+        ? actualizadoEn.value
+        : this.actualizadoEn,
+  );
+  AlmacenData copyWithCompanion(AlmacenesTableCompanion data) {
+    return AlmacenData(
+      id: data.id.present ? data.id.value : this.id,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      nombre: data.nombre.present ? data.nombre.value : this.nombre,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      direccion: data.direccion.present ? data.direccion.value : this.direccion,
+      telefono: data.telefono.present ? data.telefono.value : this.telefono,
+      responsable: data.responsable.present
+          ? data.responsable.value
+          : this.responsable,
+      activo: data.activo.present ? data.activo.value : this.activo,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlmacenData(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('tipo: $tipo, ')
+          ..write('direccion: $direccion, ')
+          ..write('telefono: $telefono, ')
+          ..write('responsable: $responsable, ')
+          ..write('activo: $activo, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    codigo,
+    nombre,
+    tipo,
+    direccion,
+    telefono,
+    responsable,
+    activo,
+    creadoEn,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AlmacenData &&
+          other.id == this.id &&
+          other.codigo == this.codigo &&
+          other.nombre == this.nombre &&
+          other.tipo == this.tipo &&
+          other.direccion == this.direccion &&
+          other.telefono == this.telefono &&
+          other.responsable == this.responsable &&
+          other.activo == this.activo &&
+          other.creadoEn == this.creadoEn &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class AlmacenesTableCompanion extends UpdateCompanion<AlmacenData> {
+  final Value<int> id;
+  final Value<String> codigo;
+  final Value<String> nombre;
+  final Value<String> tipo;
+  final Value<String?> direccion;
+  final Value<String?> telefono;
+  final Value<String?> responsable;
+  final Value<bool> activo;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> actualizadoEn;
+  const AlmacenesTableCompanion({
+    this.id = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.nombre = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.direccion = const Value.absent(),
+    this.telefono = const Value.absent(),
+    this.responsable = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  AlmacenesTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String codigo,
+    required String nombre,
+    this.tipo = const Value.absent(),
+    this.direccion = const Value.absent(),
+    this.telefono = const Value.absent(),
+    this.responsable = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  }) : codigo = Value(codigo),
+       nombre = Value(nombre);
+  static Insertable<AlmacenData> custom({
+    Expression<int>? id,
+    Expression<String>? codigo,
+    Expression<String>? nombre,
+    Expression<String>? tipo,
+    Expression<String>? direccion,
+    Expression<String>? telefono,
+    Expression<String>? responsable,
+    Expression<bool>? activo,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (codigo != null) 'codigo': codigo,
+      if (nombre != null) 'nombre': nombre,
+      if (tipo != null) 'tipo': tipo,
+      if (direccion != null) 'direccion': direccion,
+      if (telefono != null) 'telefono': telefono,
+      if (responsable != null) 'responsable': responsable,
+      if (activo != null) 'activo': activo,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  AlmacenesTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? codigo,
+    Value<String>? nombre,
+    Value<String>? tipo,
+    Value<String?>? direccion,
+    Value<String?>? telefono,
+    Value<String?>? responsable,
+    Value<bool>? activo,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? actualizadoEn,
+  }) {
+    return AlmacenesTableCompanion(
+      id: id ?? this.id,
+      codigo: codigo ?? this.codigo,
+      nombre: nombre ?? this.nombre,
+      tipo: tipo ?? this.tipo,
+      direccion: direccion ?? this.direccion,
+      telefono: telefono ?? this.telefono,
+      responsable: responsable ?? this.responsable,
+      activo: activo ?? this.activo,
+      creadoEn: creadoEn ?? this.creadoEn,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (nombre.present) {
+      map['nombre'] = Variable<String>(nombre.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(tipo.value);
+    }
+    if (direccion.present) {
+      map['direccion'] = Variable<String>(direccion.value);
+    }
+    if (telefono.present) {
+      map['telefono'] = Variable<String>(telefono.value);
+    }
+    if (responsable.present) {
+      map['responsable'] = Variable<String>(responsable.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlmacenesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('tipo: $tipo, ')
+          ..write('direccion: $direccion, ')
+          ..write('telefono: $telefono, ')
+          ..write('responsable: $responsable, ')
+          ..write('activo: $activo, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $StockAlmacenTableTable extends StockAlmacenTable
+    with TableInfo<$StockAlmacenTableTable, StockAlmacenData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StockAlmacenTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _productoIdMeta = const VerificationMeta(
+    'productoId',
+  );
+  @override
+  late final GeneratedColumn<int> productoId = GeneratedColumn<int>(
+    'producto_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _almacenIdMeta = const VerificationMeta(
+    'almacenId',
+  );
+  @override
+  late final GeneratedColumn<int> almacenId = GeneratedColumn<int>(
+    'almacen_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cantidadMeta = const VerificationMeta(
+    'cantidad',
+  );
+  @override
+  late final GeneratedColumn<double> cantidad = GeneratedColumn<double>(
+    'cantidad',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, productoId, almacenId, cantidad];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'stock_almacen';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StockAlmacenData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('producto_id')) {
+      context.handle(
+        _productoIdMeta,
+        productoId.isAcceptableOrUnknown(data['producto_id']!, _productoIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productoIdMeta);
+    }
+    if (data.containsKey('almacen_id')) {
+      context.handle(
+        _almacenIdMeta,
+        almacenId.isAcceptableOrUnknown(data['almacen_id']!, _almacenIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_almacenIdMeta);
+    }
+    if (data.containsKey('cantidad')) {
+      context.handle(
+        _cantidadMeta,
+        cantidad.isAcceptableOrUnknown(data['cantidad']!, _cantidadMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {productoId, almacenId},
+  ];
+  @override
+  StockAlmacenData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StockAlmacenData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      productoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}producto_id'],
+      )!,
+      almacenId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}almacen_id'],
+      )!,
+      cantidad: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cantidad'],
+      )!,
+    );
+  }
+
+  @override
+  $StockAlmacenTableTable createAlias(String alias) {
+    return $StockAlmacenTableTable(attachedDatabase, alias);
+  }
+}
+
+class StockAlmacenData extends DataClass
+    implements Insertable<StockAlmacenData> {
+  final int id;
+  final int productoId;
+  final int almacenId;
+  final double cantidad;
+  const StockAlmacenData({
+    required this.id,
+    required this.productoId,
+    required this.almacenId,
+    required this.cantidad,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['producto_id'] = Variable<int>(productoId);
+    map['almacen_id'] = Variable<int>(almacenId);
+    map['cantidad'] = Variable<double>(cantidad);
+    return map;
+  }
+
+  StockAlmacenTableCompanion toCompanion(bool nullToAbsent) {
+    return StockAlmacenTableCompanion(
+      id: Value(id),
+      productoId: Value(productoId),
+      almacenId: Value(almacenId),
+      cantidad: Value(cantidad),
+    );
+  }
+
+  factory StockAlmacenData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StockAlmacenData(
+      id: serializer.fromJson<int>(json['id']),
+      productoId: serializer.fromJson<int>(json['productoId']),
+      almacenId: serializer.fromJson<int>(json['almacenId']),
+      cantidad: serializer.fromJson<double>(json['cantidad']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'productoId': serializer.toJson<int>(productoId),
+      'almacenId': serializer.toJson<int>(almacenId),
+      'cantidad': serializer.toJson<double>(cantidad),
+    };
+  }
+
+  StockAlmacenData copyWith({
+    int? id,
+    int? productoId,
+    int? almacenId,
+    double? cantidad,
+  }) => StockAlmacenData(
+    id: id ?? this.id,
+    productoId: productoId ?? this.productoId,
+    almacenId: almacenId ?? this.almacenId,
+    cantidad: cantidad ?? this.cantidad,
+  );
+  StockAlmacenData copyWithCompanion(StockAlmacenTableCompanion data) {
+    return StockAlmacenData(
+      id: data.id.present ? data.id.value : this.id,
+      productoId: data.productoId.present
+          ? data.productoId.value
+          : this.productoId,
+      almacenId: data.almacenId.present ? data.almacenId.value : this.almacenId,
+      cantidad: data.cantidad.present ? data.cantidad.value : this.cantidad,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StockAlmacenData(')
+          ..write('id: $id, ')
+          ..write('productoId: $productoId, ')
+          ..write('almacenId: $almacenId, ')
+          ..write('cantidad: $cantidad')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, productoId, almacenId, cantidad);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StockAlmacenData &&
+          other.id == this.id &&
+          other.productoId == this.productoId &&
+          other.almacenId == this.almacenId &&
+          other.cantidad == this.cantidad);
+}
+
+class StockAlmacenTableCompanion extends UpdateCompanion<StockAlmacenData> {
+  final Value<int> id;
+  final Value<int> productoId;
+  final Value<int> almacenId;
+  final Value<double> cantidad;
+  const StockAlmacenTableCompanion({
+    this.id = const Value.absent(),
+    this.productoId = const Value.absent(),
+    this.almacenId = const Value.absent(),
+    this.cantidad = const Value.absent(),
+  });
+  StockAlmacenTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int productoId,
+    required int almacenId,
+    this.cantidad = const Value.absent(),
+  }) : productoId = Value(productoId),
+       almacenId = Value(almacenId);
+  static Insertable<StockAlmacenData> custom({
+    Expression<int>? id,
+    Expression<int>? productoId,
+    Expression<int>? almacenId,
+    Expression<double>? cantidad,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (productoId != null) 'producto_id': productoId,
+      if (almacenId != null) 'almacen_id': almacenId,
+      if (cantidad != null) 'cantidad': cantidad,
+    });
+  }
+
+  StockAlmacenTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? productoId,
+    Value<int>? almacenId,
+    Value<double>? cantidad,
+  }) {
+    return StockAlmacenTableCompanion(
+      id: id ?? this.id,
+      productoId: productoId ?? this.productoId,
+      almacenId: almacenId ?? this.almacenId,
+      cantidad: cantidad ?? this.cantidad,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (productoId.present) {
+      map['producto_id'] = Variable<int>(productoId.value);
+    }
+    if (almacenId.present) {
+      map['almacen_id'] = Variable<int>(almacenId.value);
+    }
+    if (cantidad.present) {
+      map['cantidad'] = Variable<double>(cantidad.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StockAlmacenTableCompanion(')
+          ..write('id: $id, ')
+          ..write('productoId: $productoId, ')
+          ..write('almacenId: $almacenId, ')
+          ..write('cantidad: $cantidad')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TransferenciasTableTable extends TransferenciasTable
+    with TableInfo<$TransferenciasTableTable, TransferenciaData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TransferenciasTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _almacenOrigenIdMeta = const VerificationMeta(
+    'almacenOrigenId',
+  );
+  @override
+  late final GeneratedColumn<int> almacenOrigenId = GeneratedColumn<int>(
+    'almacen_origen_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _almacenDestinoIdMeta = const VerificationMeta(
+    'almacenDestinoId',
+  );
+  @override
+  late final GeneratedColumn<int> almacenDestinoId = GeneratedColumn<int>(
+    'almacen_destino_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _productoIdMeta = const VerificationMeta(
+    'productoId',
+  );
+  @override
+  late final GeneratedColumn<int> productoId = GeneratedColumn<int>(
+    'producto_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cantidadMeta = const VerificationMeta(
+    'cantidad',
+  );
+  @override
+  late final GeneratedColumn<double> cantidad = GeneratedColumn<double>(
+    'cantidad',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notaMeta = const VerificationMeta('nota');
+  @override
+  late final GeneratedColumn<String> nota = GeneratedColumn<String>(
+    'nota',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fechaMeta = const VerificationMeta('fecha');
+  @override
+  late final GeneratedColumn<DateTime> fecha = GeneratedColumn<DateTime>(
+    'fecha',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
+  @override
+  late final GeneratedColumn<String> estado = GeneratedColumn<String>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('registrada'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    almacenOrigenId,
+    almacenDestinoId,
+    productoId,
+    cantidad,
+    nota,
+    fecha,
+    estado,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'transferencias';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TransferenciaData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('almacen_origen_id')) {
+      context.handle(
+        _almacenOrigenIdMeta,
+        almacenOrigenId.isAcceptableOrUnknown(
+          data['almacen_origen_id']!,
+          _almacenOrigenIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_almacenOrigenIdMeta);
+    }
+    if (data.containsKey('almacen_destino_id')) {
+      context.handle(
+        _almacenDestinoIdMeta,
+        almacenDestinoId.isAcceptableOrUnknown(
+          data['almacen_destino_id']!,
+          _almacenDestinoIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_almacenDestinoIdMeta);
+    }
+    if (data.containsKey('producto_id')) {
+      context.handle(
+        _productoIdMeta,
+        productoId.isAcceptableOrUnknown(data['producto_id']!, _productoIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productoIdMeta);
+    }
+    if (data.containsKey('cantidad')) {
+      context.handle(
+        _cantidadMeta,
+        cantidad.isAcceptableOrUnknown(data['cantidad']!, _cantidadMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cantidadMeta);
+    }
+    if (data.containsKey('nota')) {
+      context.handle(
+        _notaMeta,
+        nota.isAcceptableOrUnknown(data['nota']!, _notaMeta),
+      );
+    }
+    if (data.containsKey('fecha')) {
+      context.handle(
+        _fechaMeta,
+        fecha.isAcceptableOrUnknown(data['fecha']!, _fechaMeta),
+      );
+    }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TransferenciaData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TransferenciaData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      almacenOrigenId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}almacen_origen_id'],
+      )!,
+      almacenDestinoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}almacen_destino_id'],
+      )!,
+      productoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}producto_id'],
+      )!,
+      cantidad: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cantidad'],
+      )!,
+      nota: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nota'],
+      ),
+      fecha: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha'],
+      )!,
+      estado: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}estado'],
+      )!,
+    );
+  }
+
+  @override
+  $TransferenciasTableTable createAlias(String alias) {
+    return $TransferenciasTableTable(attachedDatabase, alias);
+  }
+}
+
+class TransferenciaData extends DataClass
+    implements Insertable<TransferenciaData> {
+  final int id;
+  final int almacenOrigenId;
+  final int almacenDestinoId;
+  final int productoId;
+  final double cantidad;
+  final String? nota;
+  final DateTime fecha;
+  final String estado;
+  const TransferenciaData({
+    required this.id,
+    required this.almacenOrigenId,
+    required this.almacenDestinoId,
+    required this.productoId,
+    required this.cantidad,
+    this.nota,
+    required this.fecha,
+    required this.estado,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['almacen_origen_id'] = Variable<int>(almacenOrigenId);
+    map['almacen_destino_id'] = Variable<int>(almacenDestinoId);
+    map['producto_id'] = Variable<int>(productoId);
+    map['cantidad'] = Variable<double>(cantidad);
+    if (!nullToAbsent || nota != null) {
+      map['nota'] = Variable<String>(nota);
+    }
+    map['fecha'] = Variable<DateTime>(fecha);
+    map['estado'] = Variable<String>(estado);
+    return map;
+  }
+
+  TransferenciasTableCompanion toCompanion(bool nullToAbsent) {
+    return TransferenciasTableCompanion(
+      id: Value(id),
+      almacenOrigenId: Value(almacenOrigenId),
+      almacenDestinoId: Value(almacenDestinoId),
+      productoId: Value(productoId),
+      cantidad: Value(cantidad),
+      nota: nota == null && nullToAbsent ? const Value.absent() : Value(nota),
+      fecha: Value(fecha),
+      estado: Value(estado),
+    );
+  }
+
+  factory TransferenciaData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TransferenciaData(
+      id: serializer.fromJson<int>(json['id']),
+      almacenOrigenId: serializer.fromJson<int>(json['almacenOrigenId']),
+      almacenDestinoId: serializer.fromJson<int>(json['almacenDestinoId']),
+      productoId: serializer.fromJson<int>(json['productoId']),
+      cantidad: serializer.fromJson<double>(json['cantidad']),
+      nota: serializer.fromJson<String?>(json['nota']),
+      fecha: serializer.fromJson<DateTime>(json['fecha']),
+      estado: serializer.fromJson<String>(json['estado']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'almacenOrigenId': serializer.toJson<int>(almacenOrigenId),
+      'almacenDestinoId': serializer.toJson<int>(almacenDestinoId),
+      'productoId': serializer.toJson<int>(productoId),
+      'cantidad': serializer.toJson<double>(cantidad),
+      'nota': serializer.toJson<String?>(nota),
+      'fecha': serializer.toJson<DateTime>(fecha),
+      'estado': serializer.toJson<String>(estado),
+    };
+  }
+
+  TransferenciaData copyWith({
+    int? id,
+    int? almacenOrigenId,
+    int? almacenDestinoId,
+    int? productoId,
+    double? cantidad,
+    Value<String?> nota = const Value.absent(),
+    DateTime? fecha,
+    String? estado,
+  }) => TransferenciaData(
+    id: id ?? this.id,
+    almacenOrigenId: almacenOrigenId ?? this.almacenOrigenId,
+    almacenDestinoId: almacenDestinoId ?? this.almacenDestinoId,
+    productoId: productoId ?? this.productoId,
+    cantidad: cantidad ?? this.cantidad,
+    nota: nota.present ? nota.value : this.nota,
+    fecha: fecha ?? this.fecha,
+    estado: estado ?? this.estado,
+  );
+  TransferenciaData copyWithCompanion(TransferenciasTableCompanion data) {
+    return TransferenciaData(
+      id: data.id.present ? data.id.value : this.id,
+      almacenOrigenId: data.almacenOrigenId.present
+          ? data.almacenOrigenId.value
+          : this.almacenOrigenId,
+      almacenDestinoId: data.almacenDestinoId.present
+          ? data.almacenDestinoId.value
+          : this.almacenDestinoId,
+      productoId: data.productoId.present
+          ? data.productoId.value
+          : this.productoId,
+      cantidad: data.cantidad.present ? data.cantidad.value : this.cantidad,
+      nota: data.nota.present ? data.nota.value : this.nota,
+      fecha: data.fecha.present ? data.fecha.value : this.fecha,
+      estado: data.estado.present ? data.estado.value : this.estado,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TransferenciaData(')
+          ..write('id: $id, ')
+          ..write('almacenOrigenId: $almacenOrigenId, ')
+          ..write('almacenDestinoId: $almacenDestinoId, ')
+          ..write('productoId: $productoId, ')
+          ..write('cantidad: $cantidad, ')
+          ..write('nota: $nota, ')
+          ..write('fecha: $fecha, ')
+          ..write('estado: $estado')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    almacenOrigenId,
+    almacenDestinoId,
+    productoId,
+    cantidad,
+    nota,
+    fecha,
+    estado,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TransferenciaData &&
+          other.id == this.id &&
+          other.almacenOrigenId == this.almacenOrigenId &&
+          other.almacenDestinoId == this.almacenDestinoId &&
+          other.productoId == this.productoId &&
+          other.cantidad == this.cantidad &&
+          other.nota == this.nota &&
+          other.fecha == this.fecha &&
+          other.estado == this.estado);
+}
+
+class TransferenciasTableCompanion extends UpdateCompanion<TransferenciaData> {
+  final Value<int> id;
+  final Value<int> almacenOrigenId;
+  final Value<int> almacenDestinoId;
+  final Value<int> productoId;
+  final Value<double> cantidad;
+  final Value<String?> nota;
+  final Value<DateTime> fecha;
+  final Value<String> estado;
+  const TransferenciasTableCompanion({
+    this.id = const Value.absent(),
+    this.almacenOrigenId = const Value.absent(),
+    this.almacenDestinoId = const Value.absent(),
+    this.productoId = const Value.absent(),
+    this.cantidad = const Value.absent(),
+    this.nota = const Value.absent(),
+    this.fecha = const Value.absent(),
+    this.estado = const Value.absent(),
+  });
+  TransferenciasTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int almacenOrigenId,
+    required int almacenDestinoId,
+    required int productoId,
+    required double cantidad,
+    this.nota = const Value.absent(),
+    this.fecha = const Value.absent(),
+    this.estado = const Value.absent(),
+  }) : almacenOrigenId = Value(almacenOrigenId),
+       almacenDestinoId = Value(almacenDestinoId),
+       productoId = Value(productoId),
+       cantidad = Value(cantidad);
+  static Insertable<TransferenciaData> custom({
+    Expression<int>? id,
+    Expression<int>? almacenOrigenId,
+    Expression<int>? almacenDestinoId,
+    Expression<int>? productoId,
+    Expression<double>? cantidad,
+    Expression<String>? nota,
+    Expression<DateTime>? fecha,
+    Expression<String>? estado,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (almacenOrigenId != null) 'almacen_origen_id': almacenOrigenId,
+      if (almacenDestinoId != null) 'almacen_destino_id': almacenDestinoId,
+      if (productoId != null) 'producto_id': productoId,
+      if (cantidad != null) 'cantidad': cantidad,
+      if (nota != null) 'nota': nota,
+      if (fecha != null) 'fecha': fecha,
+      if (estado != null) 'estado': estado,
+    });
+  }
+
+  TransferenciasTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? almacenOrigenId,
+    Value<int>? almacenDestinoId,
+    Value<int>? productoId,
+    Value<double>? cantidad,
+    Value<String?>? nota,
+    Value<DateTime>? fecha,
+    Value<String>? estado,
+  }) {
+    return TransferenciasTableCompanion(
+      id: id ?? this.id,
+      almacenOrigenId: almacenOrigenId ?? this.almacenOrigenId,
+      almacenDestinoId: almacenDestinoId ?? this.almacenDestinoId,
+      productoId: productoId ?? this.productoId,
+      cantidad: cantidad ?? this.cantidad,
+      nota: nota ?? this.nota,
+      fecha: fecha ?? this.fecha,
+      estado: estado ?? this.estado,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (almacenOrigenId.present) {
+      map['almacen_origen_id'] = Variable<int>(almacenOrigenId.value);
+    }
+    if (almacenDestinoId.present) {
+      map['almacen_destino_id'] = Variable<int>(almacenDestinoId.value);
+    }
+    if (productoId.present) {
+      map['producto_id'] = Variable<int>(productoId.value);
+    }
+    if (cantidad.present) {
+      map['cantidad'] = Variable<double>(cantidad.value);
+    }
+    if (nota.present) {
+      map['nota'] = Variable<String>(nota.value);
+    }
+    if (fecha.present) {
+      map['fecha'] = Variable<DateTime>(fecha.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<String>(estado.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TransferenciasTableCompanion(')
+          ..write('id: $id, ')
+          ..write('almacenOrigenId: $almacenOrigenId, ')
+          ..write('almacenDestinoId: $almacenDestinoId, ')
+          ..write('productoId: $productoId, ')
+          ..write('cantidad: $cantidad, ')
+          ..write('nota: $nota, ')
+          ..write('fecha: $fecha, ')
+          ..write('estado: $estado')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -33697,6 +35110,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DetalleCompraTableTable detalleCompraTable =
       $DetalleCompraTableTable(this);
   late final $FiosTableTable fiosTable = $FiosTableTable(this);
+  late final $AlmacenesTableTable almacenesTable = $AlmacenesTableTable(this);
+  late final $StockAlmacenTableTable stockAlmacenTable =
+      $StockAlmacenTableTable(this);
+  late final $TransferenciasTableTable transferenciasTable =
+      $TransferenciasTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -33752,6 +35170,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ecfeSpecVersionTable,
     detalleCompraTable,
     fiosTable,
+    almacenesTable,
+    stockAlmacenTable,
+    transferenciasTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -55638,6 +57059,764 @@ typedef $$FiosTableTableProcessedTableManager =
       FioData,
       PrefetchHooks Function()
     >;
+typedef $$AlmacenesTableTableCreateCompanionBuilder =
+    AlmacenesTableCompanion Function({
+      Value<int> id,
+      required String codigo,
+      required String nombre,
+      Value<String> tipo,
+      Value<String?> direccion,
+      Value<String?> telefono,
+      Value<String?> responsable,
+      Value<bool> activo,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+typedef $$AlmacenesTableTableUpdateCompanionBuilder =
+    AlmacenesTableCompanion Function({
+      Value<int> id,
+      Value<String> codigo,
+      Value<String> nombre,
+      Value<String> tipo,
+      Value<String?> direccion,
+      Value<String?> telefono,
+      Value<String?> responsable,
+      Value<bool> activo,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+
+class $$AlmacenesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AlmacenesTableTable> {
+  $$AlmacenesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get direccion => $composableBuilder(
+    column: $table.direccion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get telefono => $composableBuilder(
+    column: $table.telefono,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get responsable => $composableBuilder(
+    column: $table.responsable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AlmacenesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AlmacenesTableTable> {
+  $$AlmacenesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get direccion => $composableBuilder(
+    column: $table.direccion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get telefono => $composableBuilder(
+    column: $table.telefono,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get responsable => $composableBuilder(
+    column: $table.responsable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AlmacenesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AlmacenesTableTable> {
+  $$AlmacenesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<String> get nombre =>
+      $composableBuilder(column: $table.nombre, builder: (column) => column);
+
+  GeneratedColumn<String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<String> get direccion =>
+      $composableBuilder(column: $table.direccion, builder: (column) => column);
+
+  GeneratedColumn<String> get telefono =>
+      $composableBuilder(column: $table.telefono, builder: (column) => column);
+
+  GeneratedColumn<String> get responsable => $composableBuilder(
+    column: $table.responsable,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$AlmacenesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AlmacenesTableTable,
+          AlmacenData,
+          $$AlmacenesTableTableFilterComposer,
+          $$AlmacenesTableTableOrderingComposer,
+          $$AlmacenesTableTableAnnotationComposer,
+          $$AlmacenesTableTableCreateCompanionBuilder,
+          $$AlmacenesTableTableUpdateCompanionBuilder,
+          (
+            AlmacenData,
+            BaseReferences<_$AppDatabase, $AlmacenesTableTable, AlmacenData>,
+          ),
+          AlmacenData,
+          PrefetchHooks Function()
+        > {
+  $$AlmacenesTableTableTableManager(
+    _$AppDatabase db,
+    $AlmacenesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AlmacenesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AlmacenesTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AlmacenesTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<String> nombre = const Value.absent(),
+                Value<String> tipo = const Value.absent(),
+                Value<String?> direccion = const Value.absent(),
+                Value<String?> telefono = const Value.absent(),
+                Value<String?> responsable = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => AlmacenesTableCompanion(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                tipo: tipo,
+                direccion: direccion,
+                telefono: telefono,
+                responsable: responsable,
+                activo: activo,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String codigo,
+                required String nombre,
+                Value<String> tipo = const Value.absent(),
+                Value<String?> direccion = const Value.absent(),
+                Value<String?> telefono = const Value.absent(),
+                Value<String?> responsable = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => AlmacenesTableCompanion.insert(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                tipo: tipo,
+                direccion: direccion,
+                telefono: telefono,
+                responsable: responsable,
+                activo: activo,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AlmacenesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AlmacenesTableTable,
+      AlmacenData,
+      $$AlmacenesTableTableFilterComposer,
+      $$AlmacenesTableTableOrderingComposer,
+      $$AlmacenesTableTableAnnotationComposer,
+      $$AlmacenesTableTableCreateCompanionBuilder,
+      $$AlmacenesTableTableUpdateCompanionBuilder,
+      (
+        AlmacenData,
+        BaseReferences<_$AppDatabase, $AlmacenesTableTable, AlmacenData>,
+      ),
+      AlmacenData,
+      PrefetchHooks Function()
+    >;
+typedef $$StockAlmacenTableTableCreateCompanionBuilder =
+    StockAlmacenTableCompanion Function({
+      Value<int> id,
+      required int productoId,
+      required int almacenId,
+      Value<double> cantidad,
+    });
+typedef $$StockAlmacenTableTableUpdateCompanionBuilder =
+    StockAlmacenTableCompanion Function({
+      Value<int> id,
+      Value<int> productoId,
+      Value<int> almacenId,
+      Value<double> cantidad,
+    });
+
+class $$StockAlmacenTableTableFilterComposer
+    extends Composer<_$AppDatabase, $StockAlmacenTableTable> {
+  $$StockAlmacenTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get productoId => $composableBuilder(
+    column: $table.productoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get almacenId => $composableBuilder(
+    column: $table.almacenId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get cantidad => $composableBuilder(
+    column: $table.cantidad,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StockAlmacenTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $StockAlmacenTableTable> {
+  $$StockAlmacenTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get productoId => $composableBuilder(
+    column: $table.productoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get almacenId => $composableBuilder(
+    column: $table.almacenId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get cantidad => $composableBuilder(
+    column: $table.cantidad,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StockAlmacenTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StockAlmacenTableTable> {
+  $$StockAlmacenTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get productoId => $composableBuilder(
+    column: $table.productoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get almacenId =>
+      $composableBuilder(column: $table.almacenId, builder: (column) => column);
+
+  GeneratedColumn<double> get cantidad =>
+      $composableBuilder(column: $table.cantidad, builder: (column) => column);
+}
+
+class $$StockAlmacenTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StockAlmacenTableTable,
+          StockAlmacenData,
+          $$StockAlmacenTableTableFilterComposer,
+          $$StockAlmacenTableTableOrderingComposer,
+          $$StockAlmacenTableTableAnnotationComposer,
+          $$StockAlmacenTableTableCreateCompanionBuilder,
+          $$StockAlmacenTableTableUpdateCompanionBuilder,
+          (
+            StockAlmacenData,
+            BaseReferences<
+              _$AppDatabase,
+              $StockAlmacenTableTable,
+              StockAlmacenData
+            >,
+          ),
+          StockAlmacenData,
+          PrefetchHooks Function()
+        > {
+  $$StockAlmacenTableTableTableManager(
+    _$AppDatabase db,
+    $StockAlmacenTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StockAlmacenTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StockAlmacenTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StockAlmacenTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> productoId = const Value.absent(),
+                Value<int> almacenId = const Value.absent(),
+                Value<double> cantidad = const Value.absent(),
+              }) => StockAlmacenTableCompanion(
+                id: id,
+                productoId: productoId,
+                almacenId: almacenId,
+                cantidad: cantidad,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int productoId,
+                required int almacenId,
+                Value<double> cantidad = const Value.absent(),
+              }) => StockAlmacenTableCompanion.insert(
+                id: id,
+                productoId: productoId,
+                almacenId: almacenId,
+                cantidad: cantidad,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StockAlmacenTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StockAlmacenTableTable,
+      StockAlmacenData,
+      $$StockAlmacenTableTableFilterComposer,
+      $$StockAlmacenTableTableOrderingComposer,
+      $$StockAlmacenTableTableAnnotationComposer,
+      $$StockAlmacenTableTableCreateCompanionBuilder,
+      $$StockAlmacenTableTableUpdateCompanionBuilder,
+      (
+        StockAlmacenData,
+        BaseReferences<
+          _$AppDatabase,
+          $StockAlmacenTableTable,
+          StockAlmacenData
+        >,
+      ),
+      StockAlmacenData,
+      PrefetchHooks Function()
+    >;
+typedef $$TransferenciasTableTableCreateCompanionBuilder =
+    TransferenciasTableCompanion Function({
+      Value<int> id,
+      required int almacenOrigenId,
+      required int almacenDestinoId,
+      required int productoId,
+      required double cantidad,
+      Value<String?> nota,
+      Value<DateTime> fecha,
+      Value<String> estado,
+    });
+typedef $$TransferenciasTableTableUpdateCompanionBuilder =
+    TransferenciasTableCompanion Function({
+      Value<int> id,
+      Value<int> almacenOrigenId,
+      Value<int> almacenDestinoId,
+      Value<int> productoId,
+      Value<double> cantidad,
+      Value<String?> nota,
+      Value<DateTime> fecha,
+      Value<String> estado,
+    });
+
+class $$TransferenciasTableTableFilterComposer
+    extends Composer<_$AppDatabase, $TransferenciasTableTable> {
+  $$TransferenciasTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get almacenOrigenId => $composableBuilder(
+    column: $table.almacenOrigenId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get almacenDestinoId => $composableBuilder(
+    column: $table.almacenDestinoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get productoId => $composableBuilder(
+    column: $table.productoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get cantidad => $composableBuilder(
+    column: $table.cantidad,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nota => $composableBuilder(
+    column: $table.nota,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fecha => $composableBuilder(
+    column: $table.fecha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TransferenciasTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $TransferenciasTableTable> {
+  $$TransferenciasTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get almacenOrigenId => $composableBuilder(
+    column: $table.almacenOrigenId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get almacenDestinoId => $composableBuilder(
+    column: $table.almacenDestinoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get productoId => $composableBuilder(
+    column: $table.productoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get cantidad => $composableBuilder(
+    column: $table.cantidad,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nota => $composableBuilder(
+    column: $table.nota,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fecha => $composableBuilder(
+    column: $table.fecha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TransferenciasTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TransferenciasTableTable> {
+  $$TransferenciasTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get almacenOrigenId => $composableBuilder(
+    column: $table.almacenOrigenId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get almacenDestinoId => $composableBuilder(
+    column: $table.almacenDestinoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get productoId => $composableBuilder(
+    column: $table.productoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get cantidad =>
+      $composableBuilder(column: $table.cantidad, builder: (column) => column);
+
+  GeneratedColumn<String> get nota =>
+      $composableBuilder(column: $table.nota, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fecha =>
+      $composableBuilder(column: $table.fecha, builder: (column) => column);
+
+  GeneratedColumn<String> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+}
+
+class $$TransferenciasTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TransferenciasTableTable,
+          TransferenciaData,
+          $$TransferenciasTableTableFilterComposer,
+          $$TransferenciasTableTableOrderingComposer,
+          $$TransferenciasTableTableAnnotationComposer,
+          $$TransferenciasTableTableCreateCompanionBuilder,
+          $$TransferenciasTableTableUpdateCompanionBuilder,
+          (
+            TransferenciaData,
+            BaseReferences<
+              _$AppDatabase,
+              $TransferenciasTableTable,
+              TransferenciaData
+            >,
+          ),
+          TransferenciaData,
+          PrefetchHooks Function()
+        > {
+  $$TransferenciasTableTableTableManager(
+    _$AppDatabase db,
+    $TransferenciasTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TransferenciasTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TransferenciasTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$TransferenciasTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> almacenOrigenId = const Value.absent(),
+                Value<int> almacenDestinoId = const Value.absent(),
+                Value<int> productoId = const Value.absent(),
+                Value<double> cantidad = const Value.absent(),
+                Value<String?> nota = const Value.absent(),
+                Value<DateTime> fecha = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+              }) => TransferenciasTableCompanion(
+                id: id,
+                almacenOrigenId: almacenOrigenId,
+                almacenDestinoId: almacenDestinoId,
+                productoId: productoId,
+                cantidad: cantidad,
+                nota: nota,
+                fecha: fecha,
+                estado: estado,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int almacenOrigenId,
+                required int almacenDestinoId,
+                required int productoId,
+                required double cantidad,
+                Value<String?> nota = const Value.absent(),
+                Value<DateTime> fecha = const Value.absent(),
+                Value<String> estado = const Value.absent(),
+              }) => TransferenciasTableCompanion.insert(
+                id: id,
+                almacenOrigenId: almacenOrigenId,
+                almacenDestinoId: almacenDestinoId,
+                productoId: productoId,
+                cantidad: cantidad,
+                nota: nota,
+                fecha: fecha,
+                estado: estado,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TransferenciasTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TransferenciasTableTable,
+      TransferenciaData,
+      $$TransferenciasTableTableFilterComposer,
+      $$TransferenciasTableTableOrderingComposer,
+      $$TransferenciasTableTableAnnotationComposer,
+      $$TransferenciasTableTableCreateCompanionBuilder,
+      $$TransferenciasTableTableUpdateCompanionBuilder,
+      (
+        TransferenciaData,
+        BaseReferences<
+          _$AppDatabase,
+          $TransferenciasTableTable,
+          TransferenciaData
+        >,
+      ),
+      TransferenciaData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -55760,4 +57939,10 @@ class $AppDatabaseManager {
       $$DetalleCompraTableTableTableManager(_db, _db.detalleCompraTable);
   $$FiosTableTableTableManager get fiosTable =>
       $$FiosTableTableTableManager(_db, _db.fiosTable);
+  $$AlmacenesTableTableTableManager get almacenesTable =>
+      $$AlmacenesTableTableTableManager(_db, _db.almacenesTable);
+  $$StockAlmacenTableTableTableManager get stockAlmacenTable =>
+      $$StockAlmacenTableTableTableManager(_db, _db.stockAlmacenTable);
+  $$TransferenciasTableTableTableManager get transferenciasTable =>
+      $$TransferenciasTableTableTableManager(_db, _db.transferenciasTable);
 }
