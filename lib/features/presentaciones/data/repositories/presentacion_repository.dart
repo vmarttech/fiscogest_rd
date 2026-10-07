@@ -1,54 +1,91 @@
+import 'package:drift/drift.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
 
 class PresentacionRepository {
-  final List<Presentacion> _presentacionesLocales = [
-    Presentacion(id: 1, nombre: 'Unidad', abreviatura: 'UND'),
-    Presentacion(id: 2, nombre: 'Caja', abreviatura: 'CAJ'),
-    Presentacion(id: 3, nombre: 'Kilogramo', abreviatura: 'KG'),
-    Presentacion(id: 4, nombre: 'Litro', abreviatura: 'LT'),
-  ];
+  PresentacionRepository(this._db);
+  final AppDatabase _db;
+
+  Presentacion _map(PresentacionData d) => Presentacion(
+        id: d.id,
+        nombre: d.nombre,
+        abreviatura: d.abreviatura,
+        codigo: d.codigo,
+        factorUnidades: d.factorUnidades,
+        unidadMedidaId: d.unidadMedidaId,
+        activo: d.activo,
+      );
+
+  Future<void> _seedSiVacio() async {
+    final rows = await _db.select(_db.presentacionesTable).get();
+    if (rows.isNotEmpty) return;
+    for (final p in [
+      Presentacion(nombre: 'Unidad', abreviatura: 'UND', codigo: 'UND', factorUnidades: 1),
+      Presentacion(nombre: 'Caja', abreviatura: 'CAJ', codigo: 'CAJ', factorUnidades: 12),
+      Presentacion(nombre: 'Kilogramo', abreviatura: 'KG', codigo: 'KG', factorUnidades: 1),
+      Presentacion(nombre: 'Litro', abreviatura: 'LT', codigo: 'LT', factorUnidades: 1),
+    ]) {
+      await agregarPresentacion(p);
+    }
+  }
 
   Future<List<Presentacion>> obtenerPresentaciones() async {
-    return _presentacionesLocales;
+    await _seedSiVacio();
+    final rows = await (_db.select(_db.presentacionesTable)
+          ..orderBy([(t) => OrderingTerm.asc(t.nombre)]))
+        .get();
+    return rows.map(_map).toList();
   }
 
   Future<void> agregarPresentacion(Presentacion presentacion) async {
-    final existe = _presentacionesLocales.any(
-      (p) =>
-          p.nombre.trim().toLowerCase() ==
-          presentacion.nombre.trim().toLowerCase(),
-    );
-    if (existe) {
+    final nombre = presentacion.nombre.trim();
+    final existe = await (_db.select(_db.presentacionesTable)
+          ..where((t) => t.nombre.lower().equals(nombre.toLowerCase())))
+        .get();
+    if (existe.isNotEmpty) {
       throw Exception('Ya existe una presentación registrada con ese nombre.');
     }
-    final nuevoId = _presentacionesLocales.isEmpty
-        ? 1
-        : (_presentacionesLocales
-                  .map((e) => e.id ?? 0)
-                  .reduce((a, b) => a > b ? a : b) +
-              1);
-    _presentacionesLocales.add(presentacion.copyWith(id: nuevoId));
+    await _db.into(_db.presentacionesTable).insert(
+          PresentacionesTableCompanion.insert(
+            nombre: nombre,
+            abreviatura: Value(presentacion.abreviatura.trim().toUpperCase()),
+            codigo: Value(presentacion.codigo.trim()),
+            factorUnidades: Value(presentacion.factorUnidades),
+            unidadMedidaId: Value(presentacion.unidadMedidaId),
+            activo: Value(presentacion.activo),
+          ),
+        );
   }
 
   Future<void> actualizarPresentacion(Presentacion presentacion) async {
-    final duplicada = _presentacionesLocales.any(
-      (p) =>
-          p.id != presentacion.id &&
-          p.nombre.trim().toLowerCase() ==
-              presentacion.nombre.trim().toLowerCase(),
-    );
-    if (duplicada) {
+    if (presentacion.id == null) return;
+    final nombre = presentacion.nombre.trim();
+    final dup = await (_db.select(_db.presentacionesTable)
+          ..where(
+            (t) =>
+                t.nombre.lower().equals(nombre.toLowerCase()) &
+                t.id.isNotValue(presentacion.id!),
+          ))
+        .get();
+    if (dup.isNotEmpty) {
       throw Exception('Ya existe otra presentación con ese nombre.');
     }
-    final index = _presentacionesLocales.indexWhere(
-      (p) => p.id == presentacion.id,
+    await (_db.update(_db.presentacionesTable)
+          ..where((t) => t.id.equals(presentacion.id!)))
+        .write(
+      PresentacionesTableCompanion(
+        nombre: Value(nombre),
+        abreviatura: Value(presentacion.abreviatura.trim().toUpperCase()),
+        codigo: Value(presentacion.codigo.trim()),
+        factorUnidades: Value(presentacion.factorUnidades),
+        unidadMedidaId: Value(presentacion.unidadMedidaId),
+        activo: Value(presentacion.activo),
+        actualizadoEn: Value(DateTime.now()),
+      ),
     );
-    if (index != -1) {
-      _presentacionesLocales[index] = presentacion;
-    }
   }
 
   Future<void> eliminarPresentacion(int id) async {
-    _presentacionesLocales.removeWhere((p) => p.id == id);
+    await (_db.delete(_db.presentacionesTable)..where((t) => t.id.equals(id))).go();
   }
 }

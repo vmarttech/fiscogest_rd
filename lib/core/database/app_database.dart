@@ -9,6 +9,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:fiscogest_rd/core/database/migrations/migracion_002_agregar_campos_productos.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/almacenes/data/dao/almacenes_table.dart';
+import 'package:fiscogest_rd/features/presentaciones/data/dao/presentaciones_table.dart';
 import 'package:fiscogest_rd/features/transferencias/data/dao/transferencias_table.dart';
 import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
@@ -115,6 +116,7 @@ part 'app_database.g.dart';
     AlmacenesTable,
     StockAlmacenTable,
     TransferenciasTable,
+    PresentacionesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -123,7 +125,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 58;
+  int get schemaVersion => 59;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -132,6 +134,42 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 59) {
+        await customStatement(
+          "ALTER TABLE categorias ADD COLUMN codigo TEXT NOT NULL DEFAULT '';",
+        );
+        await customStatement(
+          'ALTER TABLE categorias ADD COLUMN padre_id INTEGER NULL;',
+        );
+        await customStatement(
+          'ALTER TABLE categorias ADD COLUMN itbis_por_ciento REAL NULL;',
+        );
+        await customStatement(
+          'ALTER TABLE categorias ADD COLUMN activo INTEGER NOT NULL DEFAULT 1;',
+        );
+        await customStatement(
+          "ALTER TABLE marcas ADD COLUMN codigo TEXT NOT NULL DEFAULT '';",
+        );
+        await customStatement(
+          'ALTER TABLE marcas ADD COLUMN fabricante TEXT NULL;',
+        );
+        await customStatement(
+          'ALTER TABLE marcas ADD COLUMN activo INTEGER NOT NULL DEFAULT 1;',
+        );
+        await customStatement(
+          "ALTER TABLE unidades_medida ADD COLUMN codigo TEXT NOT NULL DEFAULT '';",
+        );
+        await customStatement(
+          'ALTER TABLE unidades_medida ADD COLUMN factor_a_base REAL NOT NULL DEFAULT 1.0;',
+        );
+        await customStatement(
+          'ALTER TABLE unidades_medida ADD COLUMN es_base INTEGER NOT NULL DEFAULT 0;',
+        );
+        await customStatement(
+          'ALTER TABLE unidades_medida ADD COLUMN activo INTEGER NOT NULL DEFAULT 1;',
+        );
+        await m.createTable(presentacionesTable);
+      }
       if (from < 58) {
         await m.createTable(stockAlmacenTable);
         await m.createTable(transferenciasTable);

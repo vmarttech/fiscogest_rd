@@ -25,6 +25,10 @@ mixin _$UnidadMedida {
   String get nombre => throw _privateConstructorUsedError;
   String? get abreviatura => throw _privateConstructorUsedError;
   String? get descripcion => throw _privateConstructorUsedError;
+  String get codigo => throw _privateConstructorUsedError;
+  double get factorABase => throw _privateConstructorUsedError;
+  bool get esBase => throw _privateConstructorUsedError;
+  bool get activo => throw _privateConstructorUsedError;
   DateTime get creadoEn => throw _privateConstructorUsedError;
   DateTime? get actualizadoEn => throw _privateConstructorUsedError;
 
@@ -50,6 +54,10 @@ abstract class $UnidadMedidaCopyWith<$Res> {
     String nombre,
     String? abreviatura,
     String? descripcion,
+    String codigo,
+    double factorABase,
+    bool esBase,
+    bool activo,
     DateTime creadoEn,
     DateTime? actualizadoEn,
   });
@@ -74,6 +82,10 @@ class _$UnidadMedidaCopyWithImpl<$Res, $Val extends UnidadMedida>
     Object? nombre = null,
     Object? abreviatura = freezed,
     Object? descripcion = freezed,
+    Object? codigo = null,
+    Object? factorABase = null,
+    Object? esBase = null,
+    Object? activo = null,
     Object? creadoEn = null,
     Object? actualizadoEn = freezed,
   }) {
@@ -95,6 +107,22 @@ class _$UnidadMedidaCopyWithImpl<$Res, $Val extends UnidadMedida>
                 ? _value.descripcion
                 : descripcion // ignore: cast_nullable_to_non_nullable
                       as String?,
+            codigo: null == codigo
+                ? _value.codigo
+                : codigo // ignore: cast_nullable_to_non_nullable
+                      as String,
+            factorABase: null == factorABase
+                ? _value.factorABase
+                : factorABase // ignore: cast_nullable_to_non_nullable
+                      as double,
+            esBase: null == esBase
+                ? _value.esBase
+                : esBase // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            activo: null == activo
+                ? _value.activo
+                : activo // ignore: cast_nullable_to_non_nullable
+                      as bool,
             creadoEn: null == creadoEn
                 ? _value.creadoEn
                 : creadoEn // ignore: cast_nullable_to_non_nullable
@@ -123,6 +151,10 @@ abstract class _$$UnidadMedidaImplCopyWith<$Res>
     String nombre,
     String? abreviatura,
     String? descripcion,
+    String codigo,
+    double factorABase,
+    bool esBase,
+    bool activo,
     DateTime creadoEn,
     DateTime? actualizadoEn,
   });
@@ -146,6 +178,10 @@ class __$$UnidadMedidaImplCopyWithImpl<$Res>
     Object? nombre = null,
     Object? abreviatura = freezed,
     Object? descripcion = freezed,
+    Object? codigo = null,
+    Object? factorABase = null,
+    Object? esBase = null,
+    Object? activo = null,
     Object? creadoEn = null,
     Object? actualizadoEn = freezed,
   }) {
@@ -167,6 +203,22 @@ class __$$UnidadMedidaImplCopyWithImpl<$Res>
             ? _value.descripcion
             : descripcion // ignore: cast_nullable_to_non_nullable
                   as String?,
+        codigo: null == codigo
+            ? _value.codigo
+            : codigo // ignore: cast_nullable_to_non_nullable
+                  as String,
+        factorABase: null == factorABase
+            ? _value.factorABase
+            : factorABase // ignore: cast_nullable_to_non_nullable
+                  as double,
+        esBase: null == esBase
+            ? _value.esBase
+            : esBase // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        activo: null == activo
+            ? _value.activo
+            : activo // ignore: cast_nullable_to_non_nullable
+                  as bool,
         creadoEn: null == creadoEn
             ? _value.creadoEn
             : creadoEn // ignore: cast_nullable_to_non_nullable
@@ -188,6 +240,10 @@ class _$UnidadMedidaImpl implements _UnidadMedida {
     required this.nombre,
     this.abreviatura,
     this.descripcion,
+    this.codigo = '',
+    this.factorABase = 1.0,
+    this.esBase = false,
+    this.activo = true,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -204,13 +260,25 @@ class _$UnidadMedidaImpl implements _UnidadMedida {
   @override
   final String? descripcion;
   @override
+  @JsonKey()
+  final String codigo;
+  @override
+  @JsonKey()
+  final double factorABase;
+  @override
+  @JsonKey()
+  final bool esBase;
+  @override
+  @JsonKey()
+  final bool activo;
+  @override
   final DateTime creadoEn;
   @override
   final DateTime? actualizadoEn;
 
   @override
   String toString() {
-    return 'UnidadMedida(id: $id, nombre: $nombre, abreviatura: $abreviatura, descripcion: $descripcion, creadoEn: $creadoEn, actualizadoEn: $actualizadoEn)';
+    return 'UnidadMedida(id: $id, nombre: $nombre, abreviatura: $abreviatura, descripcion: $descripcion, codigo: $codigo, factorABase: $factorABase, esBase: $esBase, activo: $activo, creadoEn: $creadoEn, actualizadoEn: $actualizadoEn)';
   }
 
   @override
@@ -224,6 +292,11 @@ class _$UnidadMedidaImpl implements _UnidadMedida {
                 other.abreviatura == abreviatura) &&
             (identical(other.descripcion, descripcion) ||
                 other.descripcion == descripcion) &&
+            (identical(other.codigo, codigo) || other.codigo == codigo) &&
+            (identical(other.factorABase, factorABase) ||
+                other.factorABase == factorABase) &&
+            (identical(other.esBase, esBase) || other.esBase == esBase) &&
+            (identical(other.activo, activo) || other.activo == activo) &&
             (identical(other.creadoEn, creadoEn) ||
                 other.creadoEn == creadoEn) &&
             (identical(other.actualizadoEn, actualizadoEn) ||
@@ -238,6 +311,10 @@ class _$UnidadMedidaImpl implements _UnidadMedida {
     nombre,
     abreviatura,
     descripcion,
+    codigo,
+    factorABase,
+    esBase,
+    activo,
     creadoEn,
     actualizadoEn,
   );
@@ -262,6 +339,10 @@ abstract class _UnidadMedida implements UnidadMedida {
     required final String nombre,
     final String? abreviatura,
     final String? descripcion,
+    final String codigo,
+    final double factorABase,
+    final bool esBase,
+    final bool activo,
     required final DateTime creadoEn,
     final DateTime? actualizadoEn,
   }) = _$UnidadMedidaImpl;
@@ -277,6 +358,14 @@ abstract class _UnidadMedida implements UnidadMedida {
   String? get abreviatura;
   @override
   String? get descripcion;
+  @override
+  String get codigo;
+  @override
+  double get factorABase;
+  @override
+  bool get esBase;
+  @override
+  bool get activo;
   @override
   DateTime get creadoEn;
   @override

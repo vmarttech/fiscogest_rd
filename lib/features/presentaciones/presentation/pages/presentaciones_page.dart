@@ -183,7 +183,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                 item: p,
                                 badge: p.abreviatura.isNotEmpty ? p.abreviatura : '—',
                                 title: p.nombre,
-                                subtitle: 'Abreviatura: ${p.abreviatura}',
+                                subtitle: '${p.abreviatura} · factor ${p.factorUnidades}',
                                 onEdit: () => _mostrarModalRegistro(
                                   context,
                                   presentacionToEdit: p,
@@ -306,7 +306,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                                   ),
                                                   const SizedBox(height: 2),
                                                   Text(
-                                                    'Abreviatura: ${p.abreviatura}',
+                                                    '${p.abreviatura} · factor ${p.factorUnidades}',
                                                     style: AppTypography.bodySmall
                                                         .copyWith(
                                                       color:
@@ -394,69 +394,152 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
     final abreviaturaController = TextEditingController(
       text: presentacionToEdit?.abreviatura ?? '',
     );
+    final codigoController = TextEditingController(
+      text: presentacionToEdit?.codigo ?? '',
+    );
+    final factorController = TextEditingController(
+      text: presentacionToEdit == null
+          ? '1'
+          : presentacionToEdit.factorUnidades.toString(),
+    );
+    final activoN = ValueNotifier<bool>(presentacionToEdit?.activo ?? true);
     final isEditing = presentacionToEdit != null;
+    final screenSize = MediaQuery.sizeOf(context);
+    final dialogWidth = (screenSize.width - 48).clamp(0.0, 420.0);
 
-    AppDialog.show<void>(
-      context,
-      title: isEditing ? 'Editar Presentación' : 'Nueva Presentación',
-      content: SizedBox(
-        width: 380,
-        child: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppTextField(
-                label: 'Nombre de la Presentación',
-                controller: nombreController,
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 420,
+            maxHeight: screenSize.height * 0.85,
+          ),
+          child: SizedBox(
+            width: dialogWidth,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    isEditing ? 'Editar Presentación' : 'Nueva Presentación',
+                    style: AppTypography.h3,
+                  ),
+                  AppLayout.vM,
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppTextField(
+                              label: 'Nombre de la Presentación',
+                              controller: nombreController,
+                            ),
+                            AppLayout.vM,
+                            AppTextField(
+                              label: 'Abreviatura (ej. UND, CAJ)',
+                              controller: abreviaturaController,
+                            ),
+                            AppLayout.vM,
+                            AppTextField(
+                              label: 'Código',
+                              controller: codigoController,
+                              hint: 'CAJ',
+                            ),
+                            AppLayout.vM,
+                            AppTextField(
+                              label: 'Factor (unidades por presentación)',
+                              controller: factorController,
+                              hint: '12',
+                            ),
+                            ValueListenableBuilder<bool>(
+                              valueListenable: activoN,
+                              builder: (_, value, __) => SwitchListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text('Activa'),
+                                value: value,
+                                onChanged: (next) => activoN.value = next,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  AppLayout.vM,
+                  OverflowBar(
+                    alignment: MainAxisAlignment.end,
+                    spacing: 8,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: const Text('Cancelar'),
+                      ),
+                      AppButton(
+                        text: isEditing ? 'Actualizar' : 'Guardar',
+                        onPressed: () async {
+                          if (!formKey.currentState!.validate()) return;
+                          final presentacion = Presentacion(
+                            id: presentacionToEdit?.id,
+                            nombre: nombreController.text.trim(),
+                            abreviatura: abreviaturaController.text
+                                .trim()
+                                .toUpperCase(),
+                            codigo: codigoController.text.trim(),
+                            factorUnidades: double.tryParse(
+                                  factorController.text
+                                      .trim()
+                                      .replaceAll(',', '.'),
+                                ) ??
+                                1,
+                            activo: activoN.value,
+                          );
+                          try {
+                            final notifier = ref.read(
+                              presentacionControllerProvider.notifier,
+                            );
+                            if (isEditing) {
+                              await notifier.actualizar(presentacion);
+                            } else {
+                              await notifier.guardar(presentacion);
+                            }
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext);
+                            }
+                          } catch (e) {
+                            FiscoGestNotifications.show(
+                              SnackBar(
+                                content: Text(
+                                  e.toString().replaceAll('Exception: ', ''),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              AppLayout.vM,
-              AppTextField(
-                label: 'Abreviatura (ej. UND, CAJ)',
-                controller: abreviaturaController,
-              ),
-            ],
+            ),
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
-        AppButton(
-          text: isEditing ? 'Actualizar' : 'Guardar',
-          onPressed: () {
-            if (formKey.currentState!.validate()) {
-              try {
-                final pres = Presentacion(
-                  id: presentacionToEdit?.id,
-                  nombre: nombreController.text.trim(),
-                  abreviatura: abreviaturaController.text.trim().toUpperCase(),
-                );
-                if (isEditing) {
-                  ref
-                      .read(presentacionControllerProvider.notifier)
-                      .actualizar(pres);
-                } else {
-                  ref
-                      .read(presentacionControllerProvider.notifier)
-                      .guardar(pres);
-                }
-                Navigator.pop(context);
-              } catch (e) {
-                FiscoGestNotifications.show(
-                  SnackBar(
-                    content: Text(e.toString().replaceAll('Exception: ', '')),
-                  ),
-                );
-              }
-            }
-          },
-        ),
-      ],
-    );
+    ).whenComplete(() {
+      nombreController.dispose();
+      abreviaturaController.dispose();
+      codigoController.dispose();
+      factorController.dispose();
+      activoN.dispose();
+    });
   }
+
 }
 
 

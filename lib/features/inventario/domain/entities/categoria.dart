@@ -9,6 +9,10 @@ class Categoria with _$Categoria {
     int? id,
     required String nombre,
     String? descripcion,
+    @Default('') String codigo,
+    int? padreId,
+    double? itbisPorCiento,
+    @Default(true) bool activo,
     required DateTime creadoEn,
     DateTime? actualizadoEn,
   }) = _Categoria;

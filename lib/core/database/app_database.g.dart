@@ -7948,6 +7948,51 @@ class $CategoriasTable extends Categorias
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _padreIdMeta = const VerificationMeta(
+    'padreId',
+  );
+  @override
+  late final GeneratedColumn<int> padreId = GeneratedColumn<int>(
+    'padre_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _itbisPorCientoMeta = const VerificationMeta(
+    'itbisPorCiento',
+  );
+  @override
+  late final GeneratedColumn<double> itbisPorCiento = GeneratedColumn<double>(
+    'itbis_por_ciento',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _creadoEnMeta = const VerificationMeta(
     'creadoEn',
   );
@@ -7976,6 +8021,10 @@ class $CategoriasTable extends Categorias
     id,
     nombre,
     descripcion,
+    codigo,
+    padreId,
+    itbisPorCiento,
+    activo,
     creadoEn,
     actualizadoEn,
   ];
@@ -8009,6 +8058,33 @@ class $CategoriasTable extends Categorias
           data['descripcion']!,
           _descripcionMeta,
         ),
+      );
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    }
+    if (data.containsKey('padre_id')) {
+      context.handle(
+        _padreIdMeta,
+        padreId.isAcceptableOrUnknown(data['padre_id']!, _padreIdMeta),
+      );
+    }
+    if (data.containsKey('itbis_por_ciento')) {
+      context.handle(
+        _itbisPorCientoMeta,
+        itbisPorCiento.isAcceptableOrUnknown(
+          data['itbis_por_ciento']!,
+          _itbisPorCientoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
       );
     }
     if (data.containsKey('creado_en')) {
@@ -8049,6 +8125,22 @@ class $CategoriasTable extends Categorias
         DriftSqlType.string,
         data['${effectivePrefix}descripcion'],
       ),
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      padreId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}padre_id'],
+      ),
+      itbisPorCiento: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}itbis_por_ciento'],
+      ),
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
       creadoEn: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}creado_en'],
@@ -8070,12 +8162,20 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
   final int id;
   final String nombre;
   final String? descripcion;
+  final String codigo;
+  final int? padreId;
+  final double? itbisPorCiento;
+  final bool activo;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
   const CategoriaData({
     required this.id,
     required this.nombre,
     this.descripcion,
+    required this.codigo,
+    this.padreId,
+    this.itbisPorCiento,
+    required this.activo,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -8087,6 +8187,14 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
     if (!nullToAbsent || descripcion != null) {
       map['descripcion'] = Variable<String>(descripcion);
     }
+    map['codigo'] = Variable<String>(codigo);
+    if (!nullToAbsent || padreId != null) {
+      map['padre_id'] = Variable<int>(padreId);
+    }
+    if (!nullToAbsent || itbisPorCiento != null) {
+      map['itbis_por_ciento'] = Variable<double>(itbisPorCiento);
+    }
+    map['activo'] = Variable<bool>(activo);
     map['creado_en'] = Variable<DateTime>(creadoEn);
     if (!nullToAbsent || actualizadoEn != null) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
@@ -8101,6 +8209,14 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
       descripcion: descripcion == null && nullToAbsent
           ? const Value.absent()
           : Value(descripcion),
+      codigo: Value(codigo),
+      padreId: padreId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(padreId),
+      itbisPorCiento: itbisPorCiento == null && nullToAbsent
+          ? const Value.absent()
+          : Value(itbisPorCiento),
+      activo: Value(activo),
       creadoEn: Value(creadoEn),
       actualizadoEn: actualizadoEn == null && nullToAbsent
           ? const Value.absent()
@@ -8117,6 +8233,10 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
       id: serializer.fromJson<int>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
       descripcion: serializer.fromJson<String?>(json['descripcion']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      padreId: serializer.fromJson<int?>(json['padreId']),
+      itbisPorCiento: serializer.fromJson<double?>(json['itbisPorCiento']),
+      activo: serializer.fromJson<bool>(json['activo']),
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
     );
@@ -8128,6 +8248,10 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
       'id': serializer.toJson<int>(id),
       'nombre': serializer.toJson<String>(nombre),
       'descripcion': serializer.toJson<String?>(descripcion),
+      'codigo': serializer.toJson<String>(codigo),
+      'padreId': serializer.toJson<int?>(padreId),
+      'itbisPorCiento': serializer.toJson<double?>(itbisPorCiento),
+      'activo': serializer.toJson<bool>(activo),
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
     };
@@ -8137,12 +8261,22 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
     int? id,
     String? nombre,
     Value<String?> descripcion = const Value.absent(),
+    String? codigo,
+    Value<int?> padreId = const Value.absent(),
+    Value<double?> itbisPorCiento = const Value.absent(),
+    bool? activo,
     DateTime? creadoEn,
     Value<DateTime?> actualizadoEn = const Value.absent(),
   }) => CategoriaData(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
     descripcion: descripcion.present ? descripcion.value : this.descripcion,
+    codigo: codigo ?? this.codigo,
+    padreId: padreId.present ? padreId.value : this.padreId,
+    itbisPorCiento: itbisPorCiento.present
+        ? itbisPorCiento.value
+        : this.itbisPorCiento,
+    activo: activo ?? this.activo,
     creadoEn: creadoEn ?? this.creadoEn,
     actualizadoEn: actualizadoEn.present
         ? actualizadoEn.value
@@ -8155,6 +8289,12 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
       descripcion: data.descripcion.present
           ? data.descripcion.value
           : this.descripcion,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      padreId: data.padreId.present ? data.padreId.value : this.padreId,
+      itbisPorCiento: data.itbisPorCiento.present
+          ? data.itbisPorCiento.value
+          : this.itbisPorCiento,
+      activo: data.activo.present ? data.activo.value : this.activo,
       creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
       actualizadoEn: data.actualizadoEn.present
           ? data.actualizadoEn.value
@@ -8168,6 +8308,10 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('descripcion: $descripcion, ')
+          ..write('codigo: $codigo, ')
+          ..write('padreId: $padreId, ')
+          ..write('itbisPorCiento: $itbisPorCiento, ')
+          ..write('activo: $activo, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -8175,8 +8319,17 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nombre, descripcion, creadoEn, actualizadoEn);
+  int get hashCode => Object.hash(
+    id,
+    nombre,
+    descripcion,
+    codigo,
+    padreId,
+    itbisPorCiento,
+    activo,
+    creadoEn,
+    actualizadoEn,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -8184,6 +8337,10 @@ class CategoriaData extends DataClass implements Insertable<CategoriaData> {
           other.id == this.id &&
           other.nombre == this.nombre &&
           other.descripcion == this.descripcion &&
+          other.codigo == this.codigo &&
+          other.padreId == this.padreId &&
+          other.itbisPorCiento == this.itbisPorCiento &&
+          other.activo == this.activo &&
           other.creadoEn == this.creadoEn &&
           other.actualizadoEn == this.actualizadoEn);
 }
@@ -8192,12 +8349,20 @@ class CategoriasCompanion extends UpdateCompanion<CategoriaData> {
   final Value<int> id;
   final Value<String> nombre;
   final Value<String?> descripcion;
+  final Value<String> codigo;
+  final Value<int?> padreId;
+  final Value<double?> itbisPorCiento;
+  final Value<bool> activo;
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
   const CategoriasCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
     this.descripcion = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.padreId = const Value.absent(),
+    this.itbisPorCiento = const Value.absent(),
+    this.activo = const Value.absent(),
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
   });
@@ -8205,6 +8370,10 @@ class CategoriasCompanion extends UpdateCompanion<CategoriaData> {
     this.id = const Value.absent(),
     required String nombre,
     this.descripcion = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.padreId = const Value.absent(),
+    this.itbisPorCiento = const Value.absent(),
+    this.activo = const Value.absent(),
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
   }) : nombre = Value(nombre),
@@ -8213,6 +8382,10 @@ class CategoriasCompanion extends UpdateCompanion<CategoriaData> {
     Expression<int>? id,
     Expression<String>? nombre,
     Expression<String>? descripcion,
+    Expression<String>? codigo,
+    Expression<int>? padreId,
+    Expression<double>? itbisPorCiento,
+    Expression<bool>? activo,
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
   }) {
@@ -8220,6 +8393,10 @@ class CategoriasCompanion extends UpdateCompanion<CategoriaData> {
       if (id != null) 'id': id,
       if (nombre != null) 'nombre': nombre,
       if (descripcion != null) 'descripcion': descripcion,
+      if (codigo != null) 'codigo': codigo,
+      if (padreId != null) 'padre_id': padreId,
+      if (itbisPorCiento != null) 'itbis_por_ciento': itbisPorCiento,
+      if (activo != null) 'activo': activo,
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
     });
@@ -8229,6 +8406,10 @@ class CategoriasCompanion extends UpdateCompanion<CategoriaData> {
     Value<int>? id,
     Value<String>? nombre,
     Value<String?>? descripcion,
+    Value<String>? codigo,
+    Value<int?>? padreId,
+    Value<double?>? itbisPorCiento,
+    Value<bool>? activo,
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
   }) {
@@ -8236,6 +8417,10 @@ class CategoriasCompanion extends UpdateCompanion<CategoriaData> {
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
       descripcion: descripcion ?? this.descripcion,
+      codigo: codigo ?? this.codigo,
+      padreId: padreId ?? this.padreId,
+      itbisPorCiento: itbisPorCiento ?? this.itbisPorCiento,
+      activo: activo ?? this.activo,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
     );
@@ -8253,6 +8438,18 @@ class CategoriasCompanion extends UpdateCompanion<CategoriaData> {
     if (descripcion.present) {
       map['descripcion'] = Variable<String>(descripcion.value);
     }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (padreId.present) {
+      map['padre_id'] = Variable<int>(padreId.value);
+    }
+    if (itbisPorCiento.present) {
+      map['itbis_por_ciento'] = Variable<double>(itbisPorCiento.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
     if (creadoEn.present) {
       map['creado_en'] = Variable<DateTime>(creadoEn.value);
     }
@@ -8268,6 +8465,10 @@ class CategoriasCompanion extends UpdateCompanion<CategoriaData> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('descripcion: $descripcion, ')
+          ..write('codigo: $codigo, ')
+          ..write('padreId: $padreId, ')
+          ..write('itbisPorCiento: $itbisPorCiento, ')
+          ..write('activo: $activo, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -8314,6 +8515,40 @@ class $MarcasTable extends Marcas with TableInfo<$MarcasTable, MarcaData> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _fabricanteMeta = const VerificationMeta(
+    'fabricante',
+  );
+  @override
+  late final GeneratedColumn<String> fabricante = GeneratedColumn<String>(
+    'fabricante',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _creadoEnMeta = const VerificationMeta(
     'creadoEn',
   );
@@ -8342,6 +8577,9 @@ class $MarcasTable extends Marcas with TableInfo<$MarcasTable, MarcaData> {
     id,
     nombre,
     descripcion,
+    codigo,
+    fabricante,
+    activo,
     creadoEn,
     actualizadoEn,
   ];
@@ -8375,6 +8613,24 @@ class $MarcasTable extends Marcas with TableInfo<$MarcasTable, MarcaData> {
           data['descripcion']!,
           _descripcionMeta,
         ),
+      );
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    }
+    if (data.containsKey('fabricante')) {
+      context.handle(
+        _fabricanteMeta,
+        fabricante.isAcceptableOrUnknown(data['fabricante']!, _fabricanteMeta),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
       );
     }
     if (data.containsKey('creado_en')) {
@@ -8415,6 +8671,18 @@ class $MarcasTable extends Marcas with TableInfo<$MarcasTable, MarcaData> {
         DriftSqlType.string,
         data['${effectivePrefix}descripcion'],
       ),
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      fabricante: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fabricante'],
+      ),
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
       creadoEn: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}creado_en'],
@@ -8436,12 +8704,18 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
   final int id;
   final String nombre;
   final String? descripcion;
+  final String codigo;
+  final String? fabricante;
+  final bool activo;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
   const MarcaData({
     required this.id,
     required this.nombre,
     this.descripcion,
+    required this.codigo,
+    this.fabricante,
+    required this.activo,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -8453,6 +8727,11 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
     if (!nullToAbsent || descripcion != null) {
       map['descripcion'] = Variable<String>(descripcion);
     }
+    map['codigo'] = Variable<String>(codigo);
+    if (!nullToAbsent || fabricante != null) {
+      map['fabricante'] = Variable<String>(fabricante);
+    }
+    map['activo'] = Variable<bool>(activo);
     map['creado_en'] = Variable<DateTime>(creadoEn);
     if (!nullToAbsent || actualizadoEn != null) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
@@ -8467,6 +8746,11 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
       descripcion: descripcion == null && nullToAbsent
           ? const Value.absent()
           : Value(descripcion),
+      codigo: Value(codigo),
+      fabricante: fabricante == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fabricante),
+      activo: Value(activo),
       creadoEn: Value(creadoEn),
       actualizadoEn: actualizadoEn == null && nullToAbsent
           ? const Value.absent()
@@ -8483,6 +8767,9 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
       id: serializer.fromJson<int>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
       descripcion: serializer.fromJson<String?>(json['descripcion']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      fabricante: serializer.fromJson<String?>(json['fabricante']),
+      activo: serializer.fromJson<bool>(json['activo']),
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
     );
@@ -8494,6 +8781,9 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
       'id': serializer.toJson<int>(id),
       'nombre': serializer.toJson<String>(nombre),
       'descripcion': serializer.toJson<String?>(descripcion),
+      'codigo': serializer.toJson<String>(codigo),
+      'fabricante': serializer.toJson<String?>(fabricante),
+      'activo': serializer.toJson<bool>(activo),
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
     };
@@ -8503,12 +8793,18 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
     int? id,
     String? nombre,
     Value<String?> descripcion = const Value.absent(),
+    String? codigo,
+    Value<String?> fabricante = const Value.absent(),
+    bool? activo,
     DateTime? creadoEn,
     Value<DateTime?> actualizadoEn = const Value.absent(),
   }) => MarcaData(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
     descripcion: descripcion.present ? descripcion.value : this.descripcion,
+    codigo: codigo ?? this.codigo,
+    fabricante: fabricante.present ? fabricante.value : this.fabricante,
+    activo: activo ?? this.activo,
     creadoEn: creadoEn ?? this.creadoEn,
     actualizadoEn: actualizadoEn.present
         ? actualizadoEn.value
@@ -8521,6 +8817,11 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
       descripcion: data.descripcion.present
           ? data.descripcion.value
           : this.descripcion,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      fabricante: data.fabricante.present
+          ? data.fabricante.value
+          : this.fabricante,
+      activo: data.activo.present ? data.activo.value : this.activo,
       creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
       actualizadoEn: data.actualizadoEn.present
           ? data.actualizadoEn.value
@@ -8534,6 +8835,9 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('descripcion: $descripcion, ')
+          ..write('codigo: $codigo, ')
+          ..write('fabricante: $fabricante, ')
+          ..write('activo: $activo, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -8541,8 +8845,16 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nombre, descripcion, creadoEn, actualizadoEn);
+  int get hashCode => Object.hash(
+    id,
+    nombre,
+    descripcion,
+    codigo,
+    fabricante,
+    activo,
+    creadoEn,
+    actualizadoEn,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -8550,6 +8862,9 @@ class MarcaData extends DataClass implements Insertable<MarcaData> {
           other.id == this.id &&
           other.nombre == this.nombre &&
           other.descripcion == this.descripcion &&
+          other.codigo == this.codigo &&
+          other.fabricante == this.fabricante &&
+          other.activo == this.activo &&
           other.creadoEn == this.creadoEn &&
           other.actualizadoEn == this.actualizadoEn);
 }
@@ -8558,12 +8873,18 @@ class MarcasCompanion extends UpdateCompanion<MarcaData> {
   final Value<int> id;
   final Value<String> nombre;
   final Value<String?> descripcion;
+  final Value<String> codigo;
+  final Value<String?> fabricante;
+  final Value<bool> activo;
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
   const MarcasCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
     this.descripcion = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.fabricante = const Value.absent(),
+    this.activo = const Value.absent(),
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
   });
@@ -8571,6 +8892,9 @@ class MarcasCompanion extends UpdateCompanion<MarcaData> {
     this.id = const Value.absent(),
     required String nombre,
     this.descripcion = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.fabricante = const Value.absent(),
+    this.activo = const Value.absent(),
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
   }) : nombre = Value(nombre),
@@ -8579,6 +8903,9 @@ class MarcasCompanion extends UpdateCompanion<MarcaData> {
     Expression<int>? id,
     Expression<String>? nombre,
     Expression<String>? descripcion,
+    Expression<String>? codigo,
+    Expression<String>? fabricante,
+    Expression<bool>? activo,
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
   }) {
@@ -8586,6 +8913,9 @@ class MarcasCompanion extends UpdateCompanion<MarcaData> {
       if (id != null) 'id': id,
       if (nombre != null) 'nombre': nombre,
       if (descripcion != null) 'descripcion': descripcion,
+      if (codigo != null) 'codigo': codigo,
+      if (fabricante != null) 'fabricante': fabricante,
+      if (activo != null) 'activo': activo,
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
     });
@@ -8595,6 +8925,9 @@ class MarcasCompanion extends UpdateCompanion<MarcaData> {
     Value<int>? id,
     Value<String>? nombre,
     Value<String?>? descripcion,
+    Value<String>? codigo,
+    Value<String?>? fabricante,
+    Value<bool>? activo,
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
   }) {
@@ -8602,6 +8935,9 @@ class MarcasCompanion extends UpdateCompanion<MarcaData> {
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
       descripcion: descripcion ?? this.descripcion,
+      codigo: codigo ?? this.codigo,
+      fabricante: fabricante ?? this.fabricante,
+      activo: activo ?? this.activo,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
     );
@@ -8619,6 +8955,15 @@ class MarcasCompanion extends UpdateCompanion<MarcaData> {
     if (descripcion.present) {
       map['descripcion'] = Variable<String>(descripcion.value);
     }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (fabricante.present) {
+      map['fabricante'] = Variable<String>(fabricante.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
     if (creadoEn.present) {
       map['creado_en'] = Variable<DateTime>(creadoEn.value);
     }
@@ -8634,6 +8979,9 @@ class MarcasCompanion extends UpdateCompanion<MarcaData> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('descripcion: $descripcion, ')
+          ..write('codigo: $codigo, ')
+          ..write('fabricante: $fabricante, ')
+          ..write('activo: $activo, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -8692,6 +9040,54 @@ class $UnidadesMedidaTable extends UnidadesMedida
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _factorABaseMeta = const VerificationMeta(
+    'factorABase',
+  );
+  @override
+  late final GeneratedColumn<double> factorABase = GeneratedColumn<double>(
+    'factor_a_base',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _esBaseMeta = const VerificationMeta('esBase');
+  @override
+  late final GeneratedColumn<bool> esBase = GeneratedColumn<bool>(
+    'es_base',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("es_base" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _creadoEnMeta = const VerificationMeta(
     'creadoEn',
   );
@@ -8721,6 +9117,10 @@ class $UnidadesMedidaTable extends UnidadesMedida
     nombre,
     abreviatura,
     descripcion,
+    codigo,
+    factorABase,
+    esBase,
+    activo,
     creadoEn,
     actualizadoEn,
   ];
@@ -8765,6 +9165,33 @@ class $UnidadesMedidaTable extends UnidadesMedida
         ),
       );
     }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    }
+    if (data.containsKey('factor_a_base')) {
+      context.handle(
+        _factorABaseMeta,
+        factorABase.isAcceptableOrUnknown(
+          data['factor_a_base']!,
+          _factorABaseMeta,
+        ),
+      );
+    }
+    if (data.containsKey('es_base')) {
+      context.handle(
+        _esBaseMeta,
+        esBase.isAcceptableOrUnknown(data['es_base']!, _esBaseMeta),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+      );
+    }
     if (data.containsKey('creado_en')) {
       context.handle(
         _creadoEnMeta,
@@ -8807,6 +9234,22 @@ class $UnidadesMedidaTable extends UnidadesMedida
         DriftSqlType.string,
         data['${effectivePrefix}descripcion'],
       ),
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      factorABase: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}factor_a_base'],
+      )!,
+      esBase: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}es_base'],
+      )!,
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
       creadoEn: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}creado_en'],
@@ -8830,6 +9273,10 @@ class UnidadMedidaData extends DataClass
   final String nombre;
   final String? abreviatura;
   final String? descripcion;
+  final String codigo;
+  final double factorABase;
+  final bool esBase;
+  final bool activo;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
   const UnidadMedidaData({
@@ -8837,6 +9284,10 @@ class UnidadMedidaData extends DataClass
     required this.nombre,
     this.abreviatura,
     this.descripcion,
+    required this.codigo,
+    required this.factorABase,
+    required this.esBase,
+    required this.activo,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -8851,6 +9302,10 @@ class UnidadMedidaData extends DataClass
     if (!nullToAbsent || descripcion != null) {
       map['descripcion'] = Variable<String>(descripcion);
     }
+    map['codigo'] = Variable<String>(codigo);
+    map['factor_a_base'] = Variable<double>(factorABase);
+    map['es_base'] = Variable<bool>(esBase);
+    map['activo'] = Variable<bool>(activo);
     map['creado_en'] = Variable<DateTime>(creadoEn);
     if (!nullToAbsent || actualizadoEn != null) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
@@ -8868,6 +9323,10 @@ class UnidadMedidaData extends DataClass
       descripcion: descripcion == null && nullToAbsent
           ? const Value.absent()
           : Value(descripcion),
+      codigo: Value(codigo),
+      factorABase: Value(factorABase),
+      esBase: Value(esBase),
+      activo: Value(activo),
       creadoEn: Value(creadoEn),
       actualizadoEn: actualizadoEn == null && nullToAbsent
           ? const Value.absent()
@@ -8885,6 +9344,10 @@ class UnidadMedidaData extends DataClass
       nombre: serializer.fromJson<String>(json['nombre']),
       abreviatura: serializer.fromJson<String?>(json['abreviatura']),
       descripcion: serializer.fromJson<String?>(json['descripcion']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      factorABase: serializer.fromJson<double>(json['factorABase']),
+      esBase: serializer.fromJson<bool>(json['esBase']),
+      activo: serializer.fromJson<bool>(json['activo']),
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
     );
@@ -8897,6 +9360,10 @@ class UnidadMedidaData extends DataClass
       'nombre': serializer.toJson<String>(nombre),
       'abreviatura': serializer.toJson<String?>(abreviatura),
       'descripcion': serializer.toJson<String?>(descripcion),
+      'codigo': serializer.toJson<String>(codigo),
+      'factorABase': serializer.toJson<double>(factorABase),
+      'esBase': serializer.toJson<bool>(esBase),
+      'activo': serializer.toJson<bool>(activo),
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
     };
@@ -8907,6 +9374,10 @@ class UnidadMedidaData extends DataClass
     String? nombre,
     Value<String?> abreviatura = const Value.absent(),
     Value<String?> descripcion = const Value.absent(),
+    String? codigo,
+    double? factorABase,
+    bool? esBase,
+    bool? activo,
     DateTime? creadoEn,
     Value<DateTime?> actualizadoEn = const Value.absent(),
   }) => UnidadMedidaData(
@@ -8914,6 +9385,10 @@ class UnidadMedidaData extends DataClass
     nombre: nombre ?? this.nombre,
     abreviatura: abreviatura.present ? abreviatura.value : this.abreviatura,
     descripcion: descripcion.present ? descripcion.value : this.descripcion,
+    codigo: codigo ?? this.codigo,
+    factorABase: factorABase ?? this.factorABase,
+    esBase: esBase ?? this.esBase,
+    activo: activo ?? this.activo,
     creadoEn: creadoEn ?? this.creadoEn,
     actualizadoEn: actualizadoEn.present
         ? actualizadoEn.value
@@ -8929,6 +9404,12 @@ class UnidadMedidaData extends DataClass
       descripcion: data.descripcion.present
           ? data.descripcion.value
           : this.descripcion,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      factorABase: data.factorABase.present
+          ? data.factorABase.value
+          : this.factorABase,
+      esBase: data.esBase.present ? data.esBase.value : this.esBase,
+      activo: data.activo.present ? data.activo.value : this.activo,
       creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
       actualizadoEn: data.actualizadoEn.present
           ? data.actualizadoEn.value
@@ -8943,6 +9424,10 @@ class UnidadMedidaData extends DataClass
           ..write('nombre: $nombre, ')
           ..write('abreviatura: $abreviatura, ')
           ..write('descripcion: $descripcion, ')
+          ..write('codigo: $codigo, ')
+          ..write('factorABase: $factorABase, ')
+          ..write('esBase: $esBase, ')
+          ..write('activo: $activo, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -8955,6 +9440,10 @@ class UnidadMedidaData extends DataClass
     nombre,
     abreviatura,
     descripcion,
+    codigo,
+    factorABase,
+    esBase,
+    activo,
     creadoEn,
     actualizadoEn,
   );
@@ -8966,6 +9455,10 @@ class UnidadMedidaData extends DataClass
           other.nombre == this.nombre &&
           other.abreviatura == this.abreviatura &&
           other.descripcion == this.descripcion &&
+          other.codigo == this.codigo &&
+          other.factorABase == this.factorABase &&
+          other.esBase == this.esBase &&
+          other.activo == this.activo &&
           other.creadoEn == this.creadoEn &&
           other.actualizadoEn == this.actualizadoEn);
 }
@@ -8975,6 +9468,10 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
   final Value<String> nombre;
   final Value<String?> abreviatura;
   final Value<String?> descripcion;
+  final Value<String> codigo;
+  final Value<double> factorABase;
+  final Value<bool> esBase;
+  final Value<bool> activo;
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
   const UnidadesMedidaCompanion({
@@ -8982,6 +9479,10 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
     this.nombre = const Value.absent(),
     this.abreviatura = const Value.absent(),
     this.descripcion = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.factorABase = const Value.absent(),
+    this.esBase = const Value.absent(),
+    this.activo = const Value.absent(),
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
   });
@@ -8990,6 +9491,10 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
     required String nombre,
     this.abreviatura = const Value.absent(),
     this.descripcion = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.factorABase = const Value.absent(),
+    this.esBase = const Value.absent(),
+    this.activo = const Value.absent(),
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
   }) : nombre = Value(nombre),
@@ -8999,6 +9504,10 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
     Expression<String>? nombre,
     Expression<String>? abreviatura,
     Expression<String>? descripcion,
+    Expression<String>? codigo,
+    Expression<double>? factorABase,
+    Expression<bool>? esBase,
+    Expression<bool>? activo,
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
   }) {
@@ -9007,6 +9516,10 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
       if (nombre != null) 'nombre': nombre,
       if (abreviatura != null) 'abreviatura': abreviatura,
       if (descripcion != null) 'descripcion': descripcion,
+      if (codigo != null) 'codigo': codigo,
+      if (factorABase != null) 'factor_a_base': factorABase,
+      if (esBase != null) 'es_base': esBase,
+      if (activo != null) 'activo': activo,
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
     });
@@ -9017,6 +9530,10 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
     Value<String>? nombre,
     Value<String?>? abreviatura,
     Value<String?>? descripcion,
+    Value<String>? codigo,
+    Value<double>? factorABase,
+    Value<bool>? esBase,
+    Value<bool>? activo,
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
   }) {
@@ -9025,6 +9542,10 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
       nombre: nombre ?? this.nombre,
       abreviatura: abreviatura ?? this.abreviatura,
       descripcion: descripcion ?? this.descripcion,
+      codigo: codigo ?? this.codigo,
+      factorABase: factorABase ?? this.factorABase,
+      esBase: esBase ?? this.esBase,
+      activo: activo ?? this.activo,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
     );
@@ -9045,6 +9566,18 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
     if (descripcion.present) {
       map['descripcion'] = Variable<String>(descripcion.value);
     }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (factorABase.present) {
+      map['factor_a_base'] = Variable<double>(factorABase.value);
+    }
+    if (esBase.present) {
+      map['es_base'] = Variable<bool>(esBase.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
     if (creadoEn.present) {
       map['creado_en'] = Variable<DateTime>(creadoEn.value);
     }
@@ -9061,6 +9594,10 @@ class UnidadesMedidaCompanion extends UpdateCompanion<UnidadMedidaData> {
           ..write('nombre: $nombre, ')
           ..write('abreviatura: $abreviatura, ')
           ..write('descripcion: $descripcion, ')
+          ..write('codigo: $codigo, ')
+          ..write('factorABase: $factorABase, ')
+          ..write('esBase: $esBase, ')
+          ..write('activo: $activo, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
@@ -35020,6 +35557,572 @@ class TransferenciasTableCompanion extends UpdateCompanion<TransferenciaData> {
   }
 }
 
+class $PresentacionesTableTable extends PresentacionesTable
+    with TableInfo<$PresentacionesTableTable, PresentacionData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PresentacionesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
+  @override
+  late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
+    'nombre',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _abreviaturaMeta = const VerificationMeta(
+    'abreviatura',
+  );
+  @override
+  late final GeneratedColumn<String> abreviatura = GeneratedColumn<String>(
+    'abreviatura',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _factorUnidadesMeta = const VerificationMeta(
+    'factorUnidades',
+  );
+  @override
+  late final GeneratedColumn<double> factorUnidades = GeneratedColumn<double>(
+    'factor_unidades',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _unidadMedidaIdMeta = const VerificationMeta(
+    'unidadMedidaId',
+  );
+  @override
+  late final GeneratedColumn<int> unidadMedidaId = GeneratedColumn<int>(
+    'unidad_medida_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    nombre,
+    abreviatura,
+    codigo,
+    factorUnidades,
+    unidadMedidaId,
+    activo,
+    creadoEn,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'presentaciones';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PresentacionData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('nombre')) {
+      context.handle(
+        _nombreMeta,
+        nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nombreMeta);
+    }
+    if (data.containsKey('abreviatura')) {
+      context.handle(
+        _abreviaturaMeta,
+        abreviatura.isAcceptableOrUnknown(
+          data['abreviatura']!,
+          _abreviaturaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    }
+    if (data.containsKey('factor_unidades')) {
+      context.handle(
+        _factorUnidadesMeta,
+        factorUnidades.isAcceptableOrUnknown(
+          data['factor_unidades']!,
+          _factorUnidadesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('unidad_medida_id')) {
+      context.handle(
+        _unidadMedidaIdMeta,
+        unidadMedidaId.isAcceptableOrUnknown(
+          data['unidad_medida_id']!,
+          _unidadMedidaIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PresentacionData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PresentacionData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      nombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre'],
+      )!,
+      abreviatura: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}abreviatura'],
+      )!,
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      factorUnidades: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}factor_unidades'],
+      )!,
+      unidadMedidaId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}unidad_medida_id'],
+      ),
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      ),
+    );
+  }
+
+  @override
+  $PresentacionesTableTable createAlias(String alias) {
+    return $PresentacionesTableTable(attachedDatabase, alias);
+  }
+}
+
+class PresentacionData extends DataClass
+    implements Insertable<PresentacionData> {
+  final int id;
+  final String nombre;
+  final String abreviatura;
+  final String codigo;
+  final double factorUnidades;
+  final int? unidadMedidaId;
+  final bool activo;
+  final DateTime creadoEn;
+  final DateTime? actualizadoEn;
+  const PresentacionData({
+    required this.id,
+    required this.nombre,
+    required this.abreviatura,
+    required this.codigo,
+    required this.factorUnidades,
+    this.unidadMedidaId,
+    required this.activo,
+    required this.creadoEn,
+    this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['nombre'] = Variable<String>(nombre);
+    map['abreviatura'] = Variable<String>(abreviatura);
+    map['codigo'] = Variable<String>(codigo);
+    map['factor_unidades'] = Variable<double>(factorUnidades);
+    if (!nullToAbsent || unidadMedidaId != null) {
+      map['unidad_medida_id'] = Variable<int>(unidadMedidaId);
+    }
+    map['activo'] = Variable<bool>(activo);
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || actualizadoEn != null) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    }
+    return map;
+  }
+
+  PresentacionesTableCompanion toCompanion(bool nullToAbsent) {
+    return PresentacionesTableCompanion(
+      id: Value(id),
+      nombre: Value(nombre),
+      abreviatura: Value(abreviatura),
+      codigo: Value(codigo),
+      factorUnidades: Value(factorUnidades),
+      unidadMedidaId: unidadMedidaId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unidadMedidaId),
+      activo: Value(activo),
+      creadoEn: Value(creadoEn),
+      actualizadoEn: actualizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualizadoEn),
+    );
+  }
+
+  factory PresentacionData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PresentacionData(
+      id: serializer.fromJson<int>(json['id']),
+      nombre: serializer.fromJson<String>(json['nombre']),
+      abreviatura: serializer.fromJson<String>(json['abreviatura']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      factorUnidades: serializer.fromJson<double>(json['factorUnidades']),
+      unidadMedidaId: serializer.fromJson<int?>(json['unidadMedidaId']),
+      activo: serializer.fromJson<bool>(json['activo']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'nombre': serializer.toJson<String>(nombre),
+      'abreviatura': serializer.toJson<String>(abreviatura),
+      'codigo': serializer.toJson<String>(codigo),
+      'factorUnidades': serializer.toJson<double>(factorUnidades),
+      'unidadMedidaId': serializer.toJson<int?>(unidadMedidaId),
+      'activo': serializer.toJson<bool>(activo),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+    };
+  }
+
+  PresentacionData copyWith({
+    int? id,
+    String? nombre,
+    String? abreviatura,
+    String? codigo,
+    double? factorUnidades,
+    Value<int?> unidadMedidaId = const Value.absent(),
+    bool? activo,
+    DateTime? creadoEn,
+    Value<DateTime?> actualizadoEn = const Value.absent(),
+  }) => PresentacionData(
+    id: id ?? this.id,
+    nombre: nombre ?? this.nombre,
+    abreviatura: abreviatura ?? this.abreviatura,
+    codigo: codigo ?? this.codigo,
+    factorUnidades: factorUnidades ?? this.factorUnidades,
+    unidadMedidaId: unidadMedidaId.present
+        ? unidadMedidaId.value
+        : this.unidadMedidaId,
+    activo: activo ?? this.activo,
+    creadoEn: creadoEn ?? this.creadoEn,
+    actualizadoEn: actualizadoEn.present
+        ? actualizadoEn.value
+        : this.actualizadoEn,
+  );
+  PresentacionData copyWithCompanion(PresentacionesTableCompanion data) {
+    return PresentacionData(
+      id: data.id.present ? data.id.value : this.id,
+      nombre: data.nombre.present ? data.nombre.value : this.nombre,
+      abreviatura: data.abreviatura.present
+          ? data.abreviatura.value
+          : this.abreviatura,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      factorUnidades: data.factorUnidades.present
+          ? data.factorUnidades.value
+          : this.factorUnidades,
+      unidadMedidaId: data.unidadMedidaId.present
+          ? data.unidadMedidaId.value
+          : this.unidadMedidaId,
+      activo: data.activo.present ? data.activo.value : this.activo,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PresentacionData(')
+          ..write('id: $id, ')
+          ..write('nombre: $nombre, ')
+          ..write('abreviatura: $abreviatura, ')
+          ..write('codigo: $codigo, ')
+          ..write('factorUnidades: $factorUnidades, ')
+          ..write('unidadMedidaId: $unidadMedidaId, ')
+          ..write('activo: $activo, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    nombre,
+    abreviatura,
+    codigo,
+    factorUnidades,
+    unidadMedidaId,
+    activo,
+    creadoEn,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PresentacionData &&
+          other.id == this.id &&
+          other.nombre == this.nombre &&
+          other.abreviatura == this.abreviatura &&
+          other.codigo == this.codigo &&
+          other.factorUnidades == this.factorUnidades &&
+          other.unidadMedidaId == this.unidadMedidaId &&
+          other.activo == this.activo &&
+          other.creadoEn == this.creadoEn &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class PresentacionesTableCompanion extends UpdateCompanion<PresentacionData> {
+  final Value<int> id;
+  final Value<String> nombre;
+  final Value<String> abreviatura;
+  final Value<String> codigo;
+  final Value<double> factorUnidades;
+  final Value<int?> unidadMedidaId;
+  final Value<bool> activo;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> actualizadoEn;
+  const PresentacionesTableCompanion({
+    this.id = const Value.absent(),
+    this.nombre = const Value.absent(),
+    this.abreviatura = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.factorUnidades = const Value.absent(),
+    this.unidadMedidaId = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  PresentacionesTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String nombre,
+    this.abreviatura = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.factorUnidades = const Value.absent(),
+    this.unidadMedidaId = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  }) : nombre = Value(nombre);
+  static Insertable<PresentacionData> custom({
+    Expression<int>? id,
+    Expression<String>? nombre,
+    Expression<String>? abreviatura,
+    Expression<String>? codigo,
+    Expression<double>? factorUnidades,
+    Expression<int>? unidadMedidaId,
+    Expression<bool>? activo,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (nombre != null) 'nombre': nombre,
+      if (abreviatura != null) 'abreviatura': abreviatura,
+      if (codigo != null) 'codigo': codigo,
+      if (factorUnidades != null) 'factor_unidades': factorUnidades,
+      if (unidadMedidaId != null) 'unidad_medida_id': unidadMedidaId,
+      if (activo != null) 'activo': activo,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  PresentacionesTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? nombre,
+    Value<String>? abreviatura,
+    Value<String>? codigo,
+    Value<double>? factorUnidades,
+    Value<int?>? unidadMedidaId,
+    Value<bool>? activo,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? actualizadoEn,
+  }) {
+    return PresentacionesTableCompanion(
+      id: id ?? this.id,
+      nombre: nombre ?? this.nombre,
+      abreviatura: abreviatura ?? this.abreviatura,
+      codigo: codigo ?? this.codigo,
+      factorUnidades: factorUnidades ?? this.factorUnidades,
+      unidadMedidaId: unidadMedidaId ?? this.unidadMedidaId,
+      activo: activo ?? this.activo,
+      creadoEn: creadoEn ?? this.creadoEn,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (nombre.present) {
+      map['nombre'] = Variable<String>(nombre.value);
+    }
+    if (abreviatura.present) {
+      map['abreviatura'] = Variable<String>(abreviatura.value);
+    }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (factorUnidades.present) {
+      map['factor_unidades'] = Variable<double>(factorUnidades.value);
+    }
+    if (unidadMedidaId.present) {
+      map['unidad_medida_id'] = Variable<int>(unidadMedidaId.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PresentacionesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('nombre: $nombre, ')
+          ..write('abreviatura: $abreviatura, ')
+          ..write('codigo: $codigo, ')
+          ..write('factorUnidades: $factorUnidades, ')
+          ..write('unidadMedidaId: $unidadMedidaId, ')
+          ..write('activo: $activo, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -35115,6 +36218,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $StockAlmacenTableTable(this);
   late final $TransferenciasTableTable transferenciasTable =
       $TransferenciasTableTable(this);
+  late final $PresentacionesTableTable presentacionesTable =
+      $PresentacionesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -35173,6 +36278,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     almacenesTable,
     stockAlmacenTable,
     transferenciasTable,
+    presentacionesTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -39930,6 +41036,10 @@ typedef $$CategoriasTableCreateCompanionBuilder =
       Value<int> id,
       required String nombre,
       Value<String?> descripcion,
+      Value<String> codigo,
+      Value<int?> padreId,
+      Value<double?> itbisPorCiento,
+      Value<bool> activo,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -39938,6 +41048,10 @@ typedef $$CategoriasTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> nombre,
       Value<String?> descripcion,
+      Value<String> codigo,
+      Value<int?> padreId,
+      Value<double?> itbisPorCiento,
+      Value<bool> activo,
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -39963,6 +41077,26 @@ class $$CategoriasTableFilterComposer
 
   ColumnFilters<String> get descripcion => $composableBuilder(
     column: $table.descripcion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get padreId => $composableBuilder(
+    column: $table.padreId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get itbisPorCiento => $composableBuilder(
+    column: $table.itbisPorCiento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -40001,6 +41135,26 @@ class $$CategoriasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get padreId => $composableBuilder(
+    column: $table.padreId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get itbisPorCiento => $composableBuilder(
+    column: $table.itbisPorCiento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
     column: $table.creadoEn,
     builder: (column) => ColumnOrderings(column),
@@ -40031,6 +41185,20 @@ class $$CategoriasTableAnnotationComposer
     column: $table.descripcion,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<int> get padreId =>
+      $composableBuilder(column: $table.padreId, builder: (column) => column);
+
+  GeneratedColumn<double> get itbisPorCiento => $composableBuilder(
+    column: $table.itbisPorCiento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
 
   GeneratedColumn<DateTime> get creadoEn =>
       $composableBuilder(column: $table.creadoEn, builder: (column) => column);
@@ -40075,12 +41243,20 @@ class $$CategoriasTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> nombre = const Value.absent(),
                 Value<String?> descripcion = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<int?> padreId = const Value.absent(),
+                Value<double?> itbisPorCiento = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => CategoriasCompanion(
                 id: id,
                 nombre: nombre,
                 descripcion: descripcion,
+                codigo: codigo,
+                padreId: padreId,
+                itbisPorCiento: itbisPorCiento,
+                activo: activo,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
@@ -40089,12 +41265,20 @@ class $$CategoriasTableTableManager
                 Value<int> id = const Value.absent(),
                 required String nombre,
                 Value<String?> descripcion = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<int?> padreId = const Value.absent(),
+                Value<double?> itbisPorCiento = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => CategoriasCompanion.insert(
                 id: id,
                 nombre: nombre,
                 descripcion: descripcion,
+                codigo: codigo,
+                padreId: padreId,
+                itbisPorCiento: itbisPorCiento,
+                activo: activo,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
@@ -40128,6 +41312,9 @@ typedef $$MarcasTableCreateCompanionBuilder =
       Value<int> id,
       required String nombre,
       Value<String?> descripcion,
+      Value<String> codigo,
+      Value<String?> fabricante,
+      Value<bool> activo,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -40136,6 +41323,9 @@ typedef $$MarcasTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> nombre,
       Value<String?> descripcion,
+      Value<String> codigo,
+      Value<String?> fabricante,
+      Value<bool> activo,
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -40161,6 +41351,21 @@ class $$MarcasTableFilterComposer
 
   ColumnFilters<String> get descripcion => $composableBuilder(
     column: $table.descripcion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fabricante => $composableBuilder(
+    column: $table.fabricante,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -40199,6 +41404,21 @@ class $$MarcasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fabricante => $composableBuilder(
+    column: $table.fabricante,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
     column: $table.creadoEn,
     builder: (column) => ColumnOrderings(column),
@@ -40229,6 +41449,17 @@ class $$MarcasTableAnnotationComposer
     column: $table.descripcion,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<String> get fabricante => $composableBuilder(
+    column: $table.fabricante,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
 
   GeneratedColumn<DateTime> get creadoEn =>
       $composableBuilder(column: $table.creadoEn, builder: (column) => column);
@@ -40270,12 +41501,18 @@ class $$MarcasTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> nombre = const Value.absent(),
                 Value<String?> descripcion = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<String?> fabricante = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => MarcasCompanion(
                 id: id,
                 nombre: nombre,
                 descripcion: descripcion,
+                codigo: codigo,
+                fabricante: fabricante,
+                activo: activo,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
@@ -40284,12 +41521,18 @@ class $$MarcasTableTableManager
                 Value<int> id = const Value.absent(),
                 required String nombre,
                 Value<String?> descripcion = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<String?> fabricante = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => MarcasCompanion.insert(
                 id: id,
                 nombre: nombre,
                 descripcion: descripcion,
+                codigo: codigo,
+                fabricante: fabricante,
+                activo: activo,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
@@ -40321,6 +41564,10 @@ typedef $$UnidadesMedidaTableCreateCompanionBuilder =
       required String nombre,
       Value<String?> abreviatura,
       Value<String?> descripcion,
+      Value<String> codigo,
+      Value<double> factorABase,
+      Value<bool> esBase,
+      Value<bool> activo,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -40330,6 +41577,10 @@ typedef $$UnidadesMedidaTableUpdateCompanionBuilder =
       Value<String> nombre,
       Value<String?> abreviatura,
       Value<String?> descripcion,
+      Value<String> codigo,
+      Value<double> factorABase,
+      Value<bool> esBase,
+      Value<bool> activo,
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
     });
@@ -40360,6 +41611,26 @@ class $$UnidadesMedidaTableFilterComposer
 
   ColumnFilters<String> get descripcion => $composableBuilder(
     column: $table.descripcion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get factorABase => $composableBuilder(
+    column: $table.factorABase,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get esBase => $composableBuilder(
+    column: $table.esBase,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -40403,6 +41674,26 @@ class $$UnidadesMedidaTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get factorABase => $composableBuilder(
+    column: $table.factorABase,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get esBase => $composableBuilder(
+    column: $table.esBase,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
     column: $table.creadoEn,
     builder: (column) => ColumnOrderings(column),
@@ -40438,6 +41729,20 @@ class $$UnidadesMedidaTableAnnotationComposer
     column: $table.descripcion,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<double> get factorABase => $composableBuilder(
+    column: $table.factorABase,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get esBase =>
+      $composableBuilder(column: $table.esBase, builder: (column) => column);
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
 
   GeneratedColumn<DateTime> get creadoEn =>
       $composableBuilder(column: $table.creadoEn, builder: (column) => column);
@@ -40489,6 +41794,10 @@ class $$UnidadesMedidaTableTableManager
                 Value<String> nombre = const Value.absent(),
                 Value<String?> abreviatura = const Value.absent(),
                 Value<String?> descripcion = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<double> factorABase = const Value.absent(),
+                Value<bool> esBase = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => UnidadesMedidaCompanion(
@@ -40496,6 +41805,10 @@ class $$UnidadesMedidaTableTableManager
                 nombre: nombre,
                 abreviatura: abreviatura,
                 descripcion: descripcion,
+                codigo: codigo,
+                factorABase: factorABase,
+                esBase: esBase,
+                activo: activo,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
@@ -40505,6 +41818,10 @@ class $$UnidadesMedidaTableTableManager
                 required String nombre,
                 Value<String?> abreviatura = const Value.absent(),
                 Value<String?> descripcion = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<double> factorABase = const Value.absent(),
+                Value<bool> esBase = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
               }) => UnidadesMedidaCompanion.insert(
@@ -40512,6 +41829,10 @@ class $$UnidadesMedidaTableTableManager
                 nombre: nombre,
                 abreviatura: abreviatura,
                 descripcion: descripcion,
+                codigo: codigo,
+                factorABase: factorABase,
+                esBase: esBase,
+                activo: activo,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
               ),
@@ -57817,6 +59138,300 @@ typedef $$TransferenciasTableTableProcessedTableManager =
       TransferenciaData,
       PrefetchHooks Function()
     >;
+typedef $$PresentacionesTableTableCreateCompanionBuilder =
+    PresentacionesTableCompanion Function({
+      Value<int> id,
+      required String nombre,
+      Value<String> abreviatura,
+      Value<String> codigo,
+      Value<double> factorUnidades,
+      Value<int?> unidadMedidaId,
+      Value<bool> activo,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+typedef $$PresentacionesTableTableUpdateCompanionBuilder =
+    PresentacionesTableCompanion Function({
+      Value<int> id,
+      Value<String> nombre,
+      Value<String> abreviatura,
+      Value<String> codigo,
+      Value<double> factorUnidades,
+      Value<int?> unidadMedidaId,
+      Value<bool> activo,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+
+class $$PresentacionesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PresentacionesTableTable> {
+  $$PresentacionesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get abreviatura => $composableBuilder(
+    column: $table.abreviatura,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get factorUnidades => $composableBuilder(
+    column: $table.factorUnidades,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get unidadMedidaId => $composableBuilder(
+    column: $table.unidadMedidaId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PresentacionesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PresentacionesTableTable> {
+  $$PresentacionesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get abreviatura => $composableBuilder(
+    column: $table.abreviatura,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get factorUnidades => $composableBuilder(
+    column: $table.factorUnidades,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get unidadMedidaId => $composableBuilder(
+    column: $table.unidadMedidaId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PresentacionesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PresentacionesTableTable> {
+  $$PresentacionesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get nombre =>
+      $composableBuilder(column: $table.nombre, builder: (column) => column);
+
+  GeneratedColumn<String> get abreviatura => $composableBuilder(
+    column: $table.abreviatura,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<double> get factorUnidades => $composableBuilder(
+    column: $table.factorUnidades,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get unidadMedidaId => $composableBuilder(
+    column: $table.unidadMedidaId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$PresentacionesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PresentacionesTableTable,
+          PresentacionData,
+          $$PresentacionesTableTableFilterComposer,
+          $$PresentacionesTableTableOrderingComposer,
+          $$PresentacionesTableTableAnnotationComposer,
+          $$PresentacionesTableTableCreateCompanionBuilder,
+          $$PresentacionesTableTableUpdateCompanionBuilder,
+          (
+            PresentacionData,
+            BaseReferences<
+              _$AppDatabase,
+              $PresentacionesTableTable,
+              PresentacionData
+            >,
+          ),
+          PresentacionData,
+          PrefetchHooks Function()
+        > {
+  $$PresentacionesTableTableTableManager(
+    _$AppDatabase db,
+    $PresentacionesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PresentacionesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PresentacionesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PresentacionesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> nombre = const Value.absent(),
+                Value<String> abreviatura = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<double> factorUnidades = const Value.absent(),
+                Value<int?> unidadMedidaId = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => PresentacionesTableCompanion(
+                id: id,
+                nombre: nombre,
+                abreviatura: abreviatura,
+                codigo: codigo,
+                factorUnidades: factorUnidades,
+                unidadMedidaId: unidadMedidaId,
+                activo: activo,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String nombre,
+                Value<String> abreviatura = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<double> factorUnidades = const Value.absent(),
+                Value<int?> unidadMedidaId = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => PresentacionesTableCompanion.insert(
+                id: id,
+                nombre: nombre,
+                abreviatura: abreviatura,
+                codigo: codigo,
+                factorUnidades: factorUnidades,
+                unidadMedidaId: unidadMedidaId,
+                activo: activo,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PresentacionesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PresentacionesTableTable,
+      PresentacionData,
+      $$PresentacionesTableTableFilterComposer,
+      $$PresentacionesTableTableOrderingComposer,
+      $$PresentacionesTableTableAnnotationComposer,
+      $$PresentacionesTableTableCreateCompanionBuilder,
+      $$PresentacionesTableTableUpdateCompanionBuilder,
+      (
+        PresentacionData,
+        BaseReferences<
+          _$AppDatabase,
+          $PresentacionesTableTable,
+          PresentacionData
+        >,
+      ),
+      PresentacionData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -57945,4 +59560,6 @@ class $AppDatabaseManager {
       $$StockAlmacenTableTableTableManager(_db, _db.stockAlmacenTable);
   $$TransferenciasTableTableTableManager get transferenciasTable =>
       $$TransferenciasTableTableTableManager(_db, _db.transferenciasTable);
+  $$PresentacionesTableTableTableManager get presentacionesTable =>
+      $$PresentacionesTableTableTableManager(_db, _db.presentacionesTable);
 }

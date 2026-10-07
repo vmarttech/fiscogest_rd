@@ -396,6 +396,13 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
     final descripcionController = TextEditingController(
       text: marcaToEdit?.descripcion ?? '',
     );
+    final codigoController = TextEditingController(
+      text: marcaToEdit?.codigo ?? '',
+    );
+    final fabricanteController = TextEditingController(
+      text: marcaToEdit?.fabricante ?? '',
+    );
+    final activoN = ValueNotifier<bool>(marcaToEdit?.activo ?? true);
     final isEditing = marcaToEdit != null;
 
     AppDialog.show<void>(
@@ -421,6 +428,26 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                    AppTextField(
+                      controller: codigoController,
+                      label: 'Código',
+                      hint: 'MRC-01',
+                    ),
+                    const SizedBox(height: 10),
+                    AppTextField(
+                      controller: fabricanteController,
+                      label: 'Fabricante (opcional)',
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: activoN,
+                      builder: (_, v, __) => SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Activa'),
+                        value: v,
+                        onChanged: (nv) => activoN.value = nv,
+                      ),
+                    ),
+
                   FormField<String>(
                     initialValue: nombreController.text,
                     validator: (value) {
@@ -534,6 +561,13 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                 final mar = Marca(
                                   id: marcaToEdit?.id,
                                   nombre: nombreController.text.trim(),
+                                  codigo: codigoController.text.trim(),
+                                  fabricante: fabricanteController.text
+                                          .trim()
+                                          .isEmpty
+                                      ? null
+                                      : fabricanteController.text.trim(),
+                                  activo: activoN.value,
                                   descripcion: descripcionController.text
                                       .trim(),
                                   creadoEn:
@@ -609,9 +643,13 @@ class _MarcaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final desc = (marca.descripcion?.isEmpty ?? true)
-        ? 'Sin descripción'
-        : marca.descripcion!;
+    final parts = <String>[
+      if (marca.codigo.isNotEmpty) marca.codigo,
+      marca.activo ? 'Activa' : 'Inactiva',
+      if ((marca.fabricante ?? '').isNotEmpty) marca.fabricante!,
+      if ((marca.descripcion ?? '').isNotEmpty) marca.descripcion!,
+    ];
+    final desc = parts.isEmpty ? 'Sin descripción' : parts.join(' · ');
 
     return Container(
       padding: const EdgeInsets.all(14),

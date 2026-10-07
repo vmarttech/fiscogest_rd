@@ -9,6 +9,9 @@ class Marca with _$Marca {
     int? id,
     required String nombre,
     String? descripcion,
+    @Default('') String codigo,
+    String? fabricante,
+    @Default(true) bool activo,
     required DateTime creadoEn,
     DateTime? actualizadoEn,
   }) = _Marca;

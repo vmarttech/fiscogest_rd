@@ -166,7 +166,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                 item: u,
                                 badge: (u.abreviatura != null && u.abreviatura!.isNotEmpty) ? u.abreviatura! : '—',
                                 title: u.nombre,
-                                subtitle: (u.abreviatura != null && u.abreviatura!.isNotEmpty) ? 'Abreviatura: ${u.abreviatura}' : ((u.descripcion?.isNotEmpty ?? false) ? u.descripcion! : 'Sin descripción'),
+                                subtitle: (u.abreviatura != null && u.abreviatura!.isNotEmpty) ? '${u.abreviatura ?? '—'} · factor ${u.factorABase}' : ((u.descripcion?.isNotEmpty ?? false) ? u.descripcion! : 'Sin descripción'),
                                 onEdit: () => _mostrarModalRegistro(
                                   context,
                                   unidadToEdit: u,
@@ -385,6 +385,16 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
     final descripcionController = TextEditingController(
       text: unidadToEdit?.descripcion ?? '',
     );
+    final codigoController = TextEditingController(
+      text: unidadToEdit?.codigo ?? '',
+    );
+    final factorController = TextEditingController(
+      text: unidadToEdit == null
+          ? '1'
+          : unidadToEdit.factorABase.toString(),
+    );
+    final esBaseN = ValueNotifier<bool>(unidadToEdit?.esBase ?? false);
+    final activoN = ValueNotifier<bool>(unidadToEdit?.activo ?? true);
     final isEditing = unidadToEdit != null;
 
     AppDialog.show<void>(
@@ -410,6 +420,36 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                    AppTextField(
+                      controller: codigoController,
+                      label: 'Código',
+                      hint: 'UND',
+                    ),
+                    const SizedBox(height: 10),
+                    AppTextField(
+                      controller: factorController,
+                      label: 'Factor a unidad base',
+                      hint: '1  (ej. caja = 12)',
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: esBaseN,
+                      builder: (_, v, __) => SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Es unidad base'),
+                        value: v,
+                        onChanged: (nv) => esBaseN.value = nv,
+                      ),
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: activoN,
+                      builder: (_, v, __) => SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Activa'),
+                        value: v,
+                        onChanged: (nv) => activoN.value = nv,
+                      ),
+                    ),
+
                   FormField<String>(
                     initialValue: nombreController.text,
                     validator: (value) {
@@ -583,6 +623,15 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                                       descripcionController.text.trim().isEmpty
                                       ? null
                                       : descripcionController.text.trim(),
+                                  codigo: codigoController.text.trim(),
+                                  factorABase: double.tryParse(
+                                        factorController.text
+                                            .trim()
+                                            .replaceAll(',', '.'),
+                                      ) ??
+                                      1,
+                                  esBase: esBaseN.value,
+                                  activo: activoN.value,
                                   creadoEn:
                                       unidadToEdit?.creadoEn ?? DateTime.now(),
                                   actualizadoEn: isEditing

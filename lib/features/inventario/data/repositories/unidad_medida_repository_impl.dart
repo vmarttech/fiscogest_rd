@@ -7,48 +7,44 @@ class UnidadMedidaRepositoryImpl implements UnidadMedidaRepository {
   UnidadMedidaRepositoryImpl(this._db);
   final AppDatabase _db;
 
+  UnidadMedida _map(UnidadMedidaData d) => UnidadMedida(
+        id: d.id,
+        nombre: d.nombre,
+        abreviatura: d.abreviatura,
+        descripcion: d.descripcion,
+        codigo: d.codigo,
+        factorABase: d.factorABase,
+        esBase: d.esBase,
+        activo: d.activo,
+        creadoEn: d.creadoEn,
+        actualizadoEn: d.actualizadoEn,
+      );
+
   @override
   Future<List<UnidadMedida>> obtenerTodos() async {
     final datos = await _db.select(_db.unidadesMedida).get();
-    return datos
-        .map(
-          (d) => UnidadMedida(
-            id: d.id,
-            nombre: d.nombre,
-            abreviatura: d.abreviatura,
-            descripcion: d.descripcion,
-            creadoEn: d.creadoEn,
-            actualizadoEn: d.actualizadoEn,
-          ),
-        )
-        .toList();
+    return datos.map(_map).toList();
   }
 
   @override
   Future<UnidadMedida?> obtenerPorId(int id) async {
-    final d = await (_db.select(
-      _db.unidadesMedida,
-    )..where((t) => t.id.equals(id))).getSingleOrNull();
-    if (d == null) return null;
-    return UnidadMedida(
-      id: d.id,
-      nombre: d.nombre,
-      abreviatura: d.abreviatura,
-      descripcion: d.descripcion,
-      creadoEn: d.creadoEn,
-      actualizadoEn: d.actualizadoEn,
-    );
+    final d = await (_db.select(_db.unidadesMedida)
+          ..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    return d == null ? null : _map(d);
   }
 
   @override
   Future<void> guardar(UnidadMedida unidad) async {
-    await _db
-        .into(_db.unidadesMedida)
-        .insert(
+    await _db.into(_db.unidadesMedida).insert(
           UnidadesMedidaCompanion(
             nombre: Value(unidad.nombre),
             abreviatura: Value(unidad.abreviatura),
             descripcion: Value(unidad.descripcion),
+            codigo: Value(unidad.codigo),
+            factorABase: Value(unidad.factorABase),
+            esBase: Value(unidad.esBase),
+            activo: Value(unidad.activo),
             creadoEn: Value(unidad.creadoEn),
           ),
         );
@@ -56,13 +52,17 @@ class UnidadMedidaRepositoryImpl implements UnidadMedidaRepository {
 
   @override
   Future<void> actualizar(UnidadMedida unidad) async {
-    await (_db.update(
-      _db.unidadesMedida,
-    )..where((t) => t.id.equals(unidad.id!))).write(
+    await (_db.update(_db.unidadesMedida)
+          ..where((t) => t.id.equals(unidad.id!)))
+        .write(
       UnidadesMedidaCompanion(
         nombre: Value(unidad.nombre),
         abreviatura: Value(unidad.abreviatura),
         descripcion: Value(unidad.descripcion),
+        codigo: Value(unidad.codigo),
+        factorABase: Value(unidad.factorABase),
+        esBase: Value(unidad.esBase),
+        activo: Value(unidad.activo),
         actualizadoEn: Value(DateTime.now()),
       ),
     );

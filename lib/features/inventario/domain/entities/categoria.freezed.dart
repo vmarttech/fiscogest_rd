@@ -24,6 +24,10 @@ mixin _$Categoria {
   int? get id => throw _privateConstructorUsedError;
   String get nombre => throw _privateConstructorUsedError;
   String? get descripcion => throw _privateConstructorUsedError;
+  String get codigo => throw _privateConstructorUsedError;
+  int? get padreId => throw _privateConstructorUsedError;
+  double? get itbisPorCiento => throw _privateConstructorUsedError;
+  bool get activo => throw _privateConstructorUsedError;
   DateTime get creadoEn => throw _privateConstructorUsedError;
   DateTime? get actualizadoEn => throw _privateConstructorUsedError;
 
@@ -46,6 +50,10 @@ abstract class $CategoriaCopyWith<$Res> {
     int? id,
     String nombre,
     String? descripcion,
+    String codigo,
+    int? padreId,
+    double? itbisPorCiento,
+    bool activo,
     DateTime creadoEn,
     DateTime? actualizadoEn,
   });
@@ -69,6 +77,10 @@ class _$CategoriaCopyWithImpl<$Res, $Val extends Categoria>
     Object? id = freezed,
     Object? nombre = null,
     Object? descripcion = freezed,
+    Object? codigo = null,
+    Object? padreId = freezed,
+    Object? itbisPorCiento = freezed,
+    Object? activo = null,
     Object? creadoEn = null,
     Object? actualizadoEn = freezed,
   }) {
@@ -86,6 +98,22 @@ class _$CategoriaCopyWithImpl<$Res, $Val extends Categoria>
                 ? _value.descripcion
                 : descripcion // ignore: cast_nullable_to_non_nullable
                       as String?,
+            codigo: null == codigo
+                ? _value.codigo
+                : codigo // ignore: cast_nullable_to_non_nullable
+                      as String,
+            padreId: freezed == padreId
+                ? _value.padreId
+                : padreId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            itbisPorCiento: freezed == itbisPorCiento
+                ? _value.itbisPorCiento
+                : itbisPorCiento // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            activo: null == activo
+                ? _value.activo
+                : activo // ignore: cast_nullable_to_non_nullable
+                      as bool,
             creadoEn: null == creadoEn
                 ? _value.creadoEn
                 : creadoEn // ignore: cast_nullable_to_non_nullable
@@ -113,6 +141,10 @@ abstract class _$$CategoriaImplCopyWith<$Res>
     int? id,
     String nombre,
     String? descripcion,
+    String codigo,
+    int? padreId,
+    double? itbisPorCiento,
+    bool activo,
     DateTime creadoEn,
     DateTime? actualizadoEn,
   });
@@ -135,6 +167,10 @@ class __$$CategoriaImplCopyWithImpl<$Res>
     Object? id = freezed,
     Object? nombre = null,
     Object? descripcion = freezed,
+    Object? codigo = null,
+    Object? padreId = freezed,
+    Object? itbisPorCiento = freezed,
+    Object? activo = null,
     Object? creadoEn = null,
     Object? actualizadoEn = freezed,
   }) {
@@ -152,6 +188,22 @@ class __$$CategoriaImplCopyWithImpl<$Res>
             ? _value.descripcion
             : descripcion // ignore: cast_nullable_to_non_nullable
                   as String?,
+        codigo: null == codigo
+            ? _value.codigo
+            : codigo // ignore: cast_nullable_to_non_nullable
+                  as String,
+        padreId: freezed == padreId
+            ? _value.padreId
+            : padreId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        itbisPorCiento: freezed == itbisPorCiento
+            ? _value.itbisPorCiento
+            : itbisPorCiento // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        activo: null == activo
+            ? _value.activo
+            : activo // ignore: cast_nullable_to_non_nullable
+                  as bool,
         creadoEn: null == creadoEn
             ? _value.creadoEn
             : creadoEn // ignore: cast_nullable_to_non_nullable
@@ -172,6 +224,10 @@ class _$CategoriaImpl implements _Categoria {
     this.id,
     required this.nombre,
     this.descripcion,
+    this.codigo = '',
+    this.padreId,
+    this.itbisPorCiento,
+    this.activo = true,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -186,13 +242,23 @@ class _$CategoriaImpl implements _Categoria {
   @override
   final String? descripcion;
   @override
+  @JsonKey()
+  final String codigo;
+  @override
+  final int? padreId;
+  @override
+  final double? itbisPorCiento;
+  @override
+  @JsonKey()
+  final bool activo;
+  @override
   final DateTime creadoEn;
   @override
   final DateTime? actualizadoEn;
 
   @override
   String toString() {
-    return 'Categoria(id: $id, nombre: $nombre, descripcion: $descripcion, creadoEn: $creadoEn, actualizadoEn: $actualizadoEn)';
+    return 'Categoria(id: $id, nombre: $nombre, descripcion: $descripcion, codigo: $codigo, padreId: $padreId, itbisPorCiento: $itbisPorCiento, activo: $activo, creadoEn: $creadoEn, actualizadoEn: $actualizadoEn)';
   }
 
   @override
@@ -204,6 +270,11 @@ class _$CategoriaImpl implements _Categoria {
             (identical(other.nombre, nombre) || other.nombre == nombre) &&
             (identical(other.descripcion, descripcion) ||
                 other.descripcion == descripcion) &&
+            (identical(other.codigo, codigo) || other.codigo == codigo) &&
+            (identical(other.padreId, padreId) || other.padreId == padreId) &&
+            (identical(other.itbisPorCiento, itbisPorCiento) ||
+                other.itbisPorCiento == itbisPorCiento) &&
+            (identical(other.activo, activo) || other.activo == activo) &&
             (identical(other.creadoEn, creadoEn) ||
                 other.creadoEn == creadoEn) &&
             (identical(other.actualizadoEn, actualizadoEn) ||
@@ -217,6 +288,10 @@ class _$CategoriaImpl implements _Categoria {
     id,
     nombre,
     descripcion,
+    codigo,
+    padreId,
+    itbisPorCiento,
+    activo,
     creadoEn,
     actualizadoEn,
   );
@@ -240,6 +315,10 @@ abstract class _Categoria implements Categoria {
     final int? id,
     required final String nombre,
     final String? descripcion,
+    final String codigo,
+    final int? padreId,
+    final double? itbisPorCiento,
+    final bool activo,
     required final DateTime creadoEn,
     final DateTime? actualizadoEn,
   }) = _$CategoriaImpl;
@@ -253,6 +332,14 @@ abstract class _Categoria implements Categoria {
   String get nombre;
   @override
   String? get descripcion;
+  @override
+  String get codigo;
+  @override
+  int? get padreId;
+  @override
+  double? get itbisPorCiento;
+  @override
+  bool get activo;
   @override
   DateTime get creadoEn;
   @override

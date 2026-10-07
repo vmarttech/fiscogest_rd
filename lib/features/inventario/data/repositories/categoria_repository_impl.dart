@@ -7,45 +7,42 @@ class CategoriaRepositoryImpl implements CategoriaRepository {
   CategoriaRepositoryImpl(this._db);
   final AppDatabase _db;
 
+  Categoria _map(CategoriaData d) => Categoria(
+        id: d.id,
+        nombre: d.nombre,
+        descripcion: d.descripcion,
+        codigo: d.codigo,
+        padreId: d.padreId,
+        itbisPorCiento: d.itbisPorCiento,
+        activo: d.activo,
+        creadoEn: d.creadoEn,
+        actualizadoEn: d.actualizadoEn,
+      );
+
   @override
   Future<List<Categoria>> obtenerTodos() async {
     final datos = await _db.select(_db.categorias).get();
-    return datos
-        .map(
-          (d) => Categoria(
-            id: d.id,
-            nombre: d.nombre,
-            descripcion: d.descripcion,
-            creadoEn: d.creadoEn,
-            actualizadoEn: d.actualizadoEn,
-          ),
-        )
-        .toList();
+    return datos.map(_map).toList();
   }
 
   @override
   Future<Categoria?> obtenerPorId(int id) async {
-    final d = await (_db.select(
-      _db.categorias,
-    )..where((t) => t.id.equals(id))).getSingleOrNull();
-    if (d == null) return null;
-    return Categoria(
-      id: d.id,
-      nombre: d.nombre,
-      descripcion: d.descripcion,
-      creadoEn: d.creadoEn,
-      actualizadoEn: d.actualizadoEn,
-    );
+    final d = await (_db.select(_db.categorias)
+          ..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    return d == null ? null : _map(d);
   }
 
   @override
   Future<void> guardar(Categoria categoria) async {
-    await _db
-        .into(_db.categorias)
-        .insert(
+    await _db.into(_db.categorias).insert(
           CategoriasCompanion(
             nombre: Value(categoria.nombre),
             descripcion: Value(categoria.descripcion),
+            codigo: Value(categoria.codigo),
+            padreId: Value(categoria.padreId),
+            itbisPorCiento: Value(categoria.itbisPorCiento),
+            activo: Value(categoria.activo),
             creadoEn: Value(categoria.creadoEn),
           ),
         );
@@ -53,12 +50,16 @@ class CategoriaRepositoryImpl implements CategoriaRepository {
 
   @override
   Future<void> actualizar(Categoria categoria) async {
-    await (_db.update(
-      _db.categorias,
-    )..where((t) => t.id.equals(categoria.id!))).write(
+    await (_db.update(_db.categorias)
+          ..where((t) => t.id.equals(categoria.id!)))
+        .write(
       CategoriasCompanion(
         nombre: Value(categoria.nombre),
         descripcion: Value(categoria.descripcion),
+        codigo: Value(categoria.codigo),
+        padreId: Value(categoria.padreId),
+        itbisPorCiento: Value(categoria.itbisPorCiento),
+        activo: Value(categoria.activo),
         actualizadoEn: Value(DateTime.now()),
       ),
     );

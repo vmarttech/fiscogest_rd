@@ -24,6 +24,9 @@ mixin _$Marca {
   int? get id => throw _privateConstructorUsedError;
   String get nombre => throw _privateConstructorUsedError;
   String? get descripcion => throw _privateConstructorUsedError;
+  String get codigo => throw _privateConstructorUsedError;
+  String? get fabricante => throw _privateConstructorUsedError;
+  bool get activo => throw _privateConstructorUsedError;
   DateTime get creadoEn => throw _privateConstructorUsedError;
   DateTime? get actualizadoEn => throw _privateConstructorUsedError;
 
@@ -45,6 +48,9 @@ abstract class $MarcaCopyWith<$Res> {
     int? id,
     String nombre,
     String? descripcion,
+    String codigo,
+    String? fabricante,
+    bool activo,
     DateTime creadoEn,
     DateTime? actualizadoEn,
   });
@@ -68,6 +74,9 @@ class _$MarcaCopyWithImpl<$Res, $Val extends Marca>
     Object? id = freezed,
     Object? nombre = null,
     Object? descripcion = freezed,
+    Object? codigo = null,
+    Object? fabricante = freezed,
+    Object? activo = null,
     Object? creadoEn = null,
     Object? actualizadoEn = freezed,
   }) {
@@ -85,6 +94,18 @@ class _$MarcaCopyWithImpl<$Res, $Val extends Marca>
                 ? _value.descripcion
                 : descripcion // ignore: cast_nullable_to_non_nullable
                       as String?,
+            codigo: null == codigo
+                ? _value.codigo
+                : codigo // ignore: cast_nullable_to_non_nullable
+                      as String,
+            fabricante: freezed == fabricante
+                ? _value.fabricante
+                : fabricante // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            activo: null == activo
+                ? _value.activo
+                : activo // ignore: cast_nullable_to_non_nullable
+                      as bool,
             creadoEn: null == creadoEn
                 ? _value.creadoEn
                 : creadoEn // ignore: cast_nullable_to_non_nullable
@@ -111,6 +132,9 @@ abstract class _$$MarcaImplCopyWith<$Res> implements $MarcaCopyWith<$Res> {
     int? id,
     String nombre,
     String? descripcion,
+    String codigo,
+    String? fabricante,
+    bool activo,
     DateTime creadoEn,
     DateTime? actualizadoEn,
   });
@@ -133,6 +157,9 @@ class __$$MarcaImplCopyWithImpl<$Res>
     Object? id = freezed,
     Object? nombre = null,
     Object? descripcion = freezed,
+    Object? codigo = null,
+    Object? fabricante = freezed,
+    Object? activo = null,
     Object? creadoEn = null,
     Object? actualizadoEn = freezed,
   }) {
@@ -150,6 +177,18 @@ class __$$MarcaImplCopyWithImpl<$Res>
             ? _value.descripcion
             : descripcion // ignore: cast_nullable_to_non_nullable
                   as String?,
+        codigo: null == codigo
+            ? _value.codigo
+            : codigo // ignore: cast_nullable_to_non_nullable
+                  as String,
+        fabricante: freezed == fabricante
+            ? _value.fabricante
+            : fabricante // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        activo: null == activo
+            ? _value.activo
+            : activo // ignore: cast_nullable_to_non_nullable
+                  as bool,
         creadoEn: null == creadoEn
             ? _value.creadoEn
             : creadoEn // ignore: cast_nullable_to_non_nullable
@@ -170,6 +209,9 @@ class _$MarcaImpl implements _Marca {
     this.id,
     required this.nombre,
     this.descripcion,
+    this.codigo = '',
+    this.fabricante,
+    this.activo = true,
     required this.creadoEn,
     this.actualizadoEn,
   });
@@ -184,13 +226,21 @@ class _$MarcaImpl implements _Marca {
   @override
   final String? descripcion;
   @override
+  @JsonKey()
+  final String codigo;
+  @override
+  final String? fabricante;
+  @override
+  @JsonKey()
+  final bool activo;
+  @override
   final DateTime creadoEn;
   @override
   final DateTime? actualizadoEn;
 
   @override
   String toString() {
-    return 'Marca(id: $id, nombre: $nombre, descripcion: $descripcion, creadoEn: $creadoEn, actualizadoEn: $actualizadoEn)';
+    return 'Marca(id: $id, nombre: $nombre, descripcion: $descripcion, codigo: $codigo, fabricante: $fabricante, activo: $activo, creadoEn: $creadoEn, actualizadoEn: $actualizadoEn)';
   }
 
   @override
@@ -202,6 +252,10 @@ class _$MarcaImpl implements _Marca {
             (identical(other.nombre, nombre) || other.nombre == nombre) &&
             (identical(other.descripcion, descripcion) ||
                 other.descripcion == descripcion) &&
+            (identical(other.codigo, codigo) || other.codigo == codigo) &&
+            (identical(other.fabricante, fabricante) ||
+                other.fabricante == fabricante) &&
+            (identical(other.activo, activo) || other.activo == activo) &&
             (identical(other.creadoEn, creadoEn) ||
                 other.creadoEn == creadoEn) &&
             (identical(other.actualizadoEn, actualizadoEn) ||
@@ -215,6 +269,9 @@ class _$MarcaImpl implements _Marca {
     id,
     nombre,
     descripcion,
+    codigo,
+    fabricante,
+    activo,
     creadoEn,
     actualizadoEn,
   );
@@ -238,6 +295,9 @@ abstract class _Marca implements Marca {
     final int? id,
     required final String nombre,
     final String? descripcion,
+    final String codigo,
+    final String? fabricante,
+    final bool activo,
     required final DateTime creadoEn,
     final DateTime? actualizadoEn,
   }) = _$MarcaImpl;
@@ -250,6 +310,12 @@ abstract class _Marca implements Marca {
   String get nombre;
   @override
   String? get descripcion;
+  @override
+  String get codigo;
+  @override
+  String? get fabricante;
+  @override
+  bool get activo;
   @override
   DateTime get creadoEn;
   @override

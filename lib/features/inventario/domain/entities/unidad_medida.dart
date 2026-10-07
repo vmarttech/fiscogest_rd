@@ -10,6 +10,10 @@ class UnidadMedida with _$UnidadMedida {
     required String nombre,
     String? abreviatura,
     String? descripcion,
+    @Default('') String codigo,
+    @Default(1.0) double factorABase,
+    @Default(false) bool esBase,
+    @Default(true) bool activo,
     required DateTime creadoEn,
     DateTime? actualizadoEn,
   }) = _UnidadMedida;

@@ -7,45 +7,39 @@ class MarcaRepositoryImpl implements MarcaRepository {
   MarcaRepositoryImpl(this._db);
   final AppDatabase _db;
 
+  Marca _map(MarcaData d) => Marca(
+        id: d.id,
+        nombre: d.nombre,
+        descripcion: d.descripcion,
+        codigo: d.codigo,
+        fabricante: d.fabricante,
+        activo: d.activo,
+        creadoEn: d.creadoEn,
+        actualizadoEn: d.actualizadoEn,
+      );
+
   @override
   Future<List<Marca>> obtenerTodos() async {
     final datos = await _db.select(_db.marcas).get();
-    return datos
-        .map(
-          (d) => Marca(
-            id: d.id,
-            nombre: d.nombre,
-            descripcion: d.descripcion,
-            creadoEn: d.creadoEn,
-            actualizadoEn: d.actualizadoEn,
-          ),
-        )
-        .toList();
+    return datos.map(_map).toList();
   }
 
   @override
   Future<Marca?> obtenerPorId(int id) async {
-    final d = await (_db.select(
-      _db.marcas,
-    )..where((t) => t.id.equals(id))).getSingleOrNull();
-    if (d == null) return null;
-    return Marca(
-      id: d.id,
-      nombre: d.nombre,
-      descripcion: d.descripcion,
-      creadoEn: d.creadoEn,
-      actualizadoEn: d.actualizadoEn,
-    );
+    final d = await (_db.select(_db.marcas)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    return d == null ? null : _map(d);
   }
 
   @override
   Future<void> guardar(Marca marca) async {
-    await _db
-        .into(_db.marcas)
-        .insert(
+    await _db.into(_db.marcas).insert(
           MarcasCompanion(
             nombre: Value(marca.nombre),
             descripcion: Value(marca.descripcion),
+            codigo: Value(marca.codigo),
+            fabricante: Value(marca.fabricante),
+            activo: Value(marca.activo),
             creadoEn: Value(marca.creadoEn),
           ),
         );
@@ -57,6 +51,9 @@ class MarcaRepositoryImpl implements MarcaRepository {
       MarcasCompanion(
         nombre: Value(marca.nombre),
         descripcion: Value(marca.descripcion),
+        codigo: Value(marca.codigo),
+        fabricante: Value(marca.fabricante),
+        activo: Value(marca.activo),
         actualizadoEn: Value(DateTime.now()),
       ),
     );

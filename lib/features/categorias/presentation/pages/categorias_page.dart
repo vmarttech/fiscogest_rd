@@ -404,6 +404,15 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
     final descripcionController = TextEditingController(
       text: categoriaToEdit?.descripcion ?? '',
     );
+    final codigoController = TextEditingController(
+      text: categoriaToEdit?.codigo ?? '',
+    );
+    final itbisController = TextEditingController(
+      text: categoriaToEdit?.itbisPorCiento?.toString() ?? '',
+    );
+    final padreN = ValueNotifier<int?>(categoriaToEdit?.padreId);
+    final activoN = ValueNotifier<bool>(categoriaToEdit?.activo ?? true);
+
     final isEditing = categoriaToEdit != null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -433,6 +442,62 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                    AppTextField(
+                      controller: codigoController,
+                      label: 'Código',
+                      hint: 'CAT-01',
+                    ),
+                    const SizedBox(height: 10),
+                    ValueListenableBuilder<int?>(
+                      valueListenable: padreN,
+                      builder: (_, padre, __) {
+                        final cats =
+                            ref.read(categoriaControllerProvider).valueOrNull ??
+                            [];
+                        return InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Categoría padre (opcional)',
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<int?>(
+                              isExpanded: true,
+                              value: padre,
+                              hint: const Text('Ninguna (raíz)'),
+                              items: [
+                                const DropdownMenuItem<int?>(
+                                  value: null,
+                                  child: Text('Ninguna (raíz)'),
+                                ),
+                                for (final c in cats)
+                                  if (c.id != null &&
+                                      c.id != categoriaToEdit?.id)
+                                    DropdownMenuItem<int?>(
+                                      value: c.id,
+                                      child: Text(c.nombre),
+                                    ),
+                              ],
+                              onChanged: (v) => padreN.value = v,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    AppTextField(
+                      controller: itbisController,
+                      label: 'ITBIS % (opcional)',
+                      hint: '18',
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: activoN,
+                      builder: (_, v, __) => SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Activa'),
+                        value: v,
+                        onChanged: (nv) => activoN.value = nv,
+                      ),
+                    ),
+
                   FormField<String>(
                     initialValue: nombreController.text,
                     validator: (value) {
@@ -546,6 +611,12 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                 final cat = Categoria(
                                   id: categoriaToEdit?.id,
                                   nombre: nombreController.text.trim(),
+                                  codigo: codigoController.text.trim(),
+                                  padreId: padreN.value,
+                                  itbisPorCiento: double.tryParse(
+                                    itbisController.text.trim().replaceAll(',', '.'),
+                                  ),
+                                  activo: activoN.value,
                                   descripcion: descripcionController.text
                                       .trim(),
                                   creadoEn:
@@ -626,9 +697,12 @@ class _CategoriaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final desc = (categoria.descripcion?.isEmpty ?? true)
-        ? 'Sin descripción'
-        : categoria.descripcion!;
+    final parts = <String>[
+      if (categoria.codigo.isNotEmpty) categoria.codigo,
+      categoria.activo ? 'Activa' : 'Inactiva',
+      if ((categoria.descripcion ?? '').isNotEmpty) categoria.descripcion!,
+    ];
+    final desc = parts.isEmpty ? 'Sin descripción' : parts.join(' · ');
 
     return Container(
       padding: const EdgeInsets.all(14),
