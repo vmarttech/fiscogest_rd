@@ -1,3 +1,5 @@
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,7 +51,7 @@ class DatosVenta extends ConsumerWidget {
           ),
           const Divider(height: AppSpacing.l),
           _buildFilaTotal('Subtotal', estadoLocal.subtotal),
-          _buildFilaTotal('ITBIS (16%)', estadoLocal.itbis),
+          _buildFilaTotal(etiquetaItbis(ref.watch(tasaItbisVigenteProvider)), estadoLocal.itbis),
           const Divider(),
           _buildFilaTotal('TOTAL A PAGAR', estadoLocal.total, esTotal: true),
         ],

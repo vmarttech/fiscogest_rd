@@ -54,5 +54,6 @@ class ProductosTable extends Table {
   IntColumn get categoriaId => integer().named('categoria_id')();
   IntColumn get marcaId => integer().named('marca_id')();
   IntColumn get unidadMedidaId => integer().named('unidad_medida_id')();
+  IntColumn get impuestoId => integer().nullable().named('impuesto_id')();
   IntColumn get activo => integer().withDefault(const Constant(1))();
 }

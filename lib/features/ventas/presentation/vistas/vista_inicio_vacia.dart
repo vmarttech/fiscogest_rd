@@ -1,3 +1,5 @@
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
 import 'package:flutter/foundation.dart';
@@ -497,7 +499,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                                   ?.modoSimplificado ??
                               false))
                             _FilaResumen(
-                              label: 'ITBIS (18%)',
+                              label: etiquetaItbis(ref.watch(tasaItbisVigenteProvider)),
                               value: _formatearMonto(estado.itbis),
                             ),
                         ],

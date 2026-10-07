@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/marca_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -49,6 +50,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   final _precioEspCtrl = TextEditingController(text: '0.00');
 
   int? _catSel;
+  int? _impSel;
   int? _marcaSel;
   int? _unidadSel;
   bool _activo = true;
@@ -89,6 +91,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     _catSel = p.categoriaId;
     _marcaSel = p.marcaId;
     _unidadSel = p.unidadMedidaId;
+    _impSel = p.impuestoId;
     _activo = p.activo;
     _precioManual = false;
   }
@@ -377,6 +380,8 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         categoriaId: _catSel!,
         marcaId: _marcaSel ?? 1,
         unidadMedidaId: _unidadSel!,
+        impuestoId: _impSel,
+        clearImpuesto: _impSel == null,
         activo: _activo,
       );
       ref.read(productoControllerProvider.notifier).guardar(actualizado);
@@ -400,6 +405,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         categoriaId: _catSel!,
         marcaId: _marcaSel ?? 1,
         unidadMedidaId: _unidadSel!,
+        impuestoId: _impSel,
         activo: _activo,
       );
       ref.read(productoControllerProvider.notifier).guardar(nuevoProd);
@@ -429,6 +435,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
             child: Consumer(
               builder: (ctx, ref, _) {
                 final cats = ref.watch(categoriaControllerProvider);
+                final imps = ref.watch(impuestoControllerProvider);
                 final marcas = ref.watch(marcaControllerProvider);
                 final unids = ref.watch(unidadMedidaControllerProvider);
                 return Column(
@@ -546,6 +553,35 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                           ),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 12),
+                    imps.when(
+                      data: (lista) {
+                        final activos = lista.where((i) => i.activo).toList();
+                        return AppDropdown<int?>(
+                          label: 'ITBIS / impuesto',
+                          hint: 'Automático (categoría o default)',
+                          initialValue: _impSel,
+                          items: [
+                            const DropdownMenuItem<int?>(
+                              value: null,
+                              child: Text('Automático (categoría / default)'),
+                            ),
+                            ...activos.map(
+                              (i) => DropdownMenuItem<int?>(
+                                value: i.id,
+                                child: Text(
+                                  '${i.nombre} (${i.porcentaje.toStringAsFixed(i.porcentaje == i.porcentaje.roundToDouble() ? 0 : 2)}%)',
+                                ),
+                              ),
+                            ),
+                          ],
+                          onChanged: (v) => setState(() => _impSel = v),
+                        );
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Text('Error impuestos: $e'),
                     ),
                     AppLayout.vL,
 

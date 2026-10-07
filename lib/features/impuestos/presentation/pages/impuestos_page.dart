@@ -303,7 +303,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
       ),
     );
     if (ok == true && impuesto.id != null && mounted) {
-      ref.read(impuestoControllerProvider.notifier).eliminar(impuesto.id!);
+      await ref.read(impuestoControllerProvider.notifier).eliminar(impuesto.id!);
     }
   }
 
@@ -321,8 +321,13 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
     final descripcionController = TextEditingController(
       text: impuestoToEdit?.descripcion ?? '',
     );
+    final codigoController = TextEditingController(
+      text: impuestoToEdit?.codigo ?? '',
+    );
     String tipoSeleccionado = impuestoToEdit?.tipo ?? 'ITBIS';
     bool esExento = impuestoToEdit?.esExento ?? false;
+    bool esDefault = impuestoToEdit?.esDefault ?? false;
+    bool activo = impuestoToEdit?.activo ?? true;
     final isEditing = impuestoToEdit != null;
     final mobile = AppBreakpoints.isMobile(context);
 
@@ -446,7 +451,28 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                             });
                           },
                         ),
+
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Predeterminado para ventas'),
+                          subtitle: const Text('Solo un ITBIS puede ser el de la caja'),
+                          value: esDefault,
+                          onChanged: tipoSeleccionado == 'ITBIS'
+                              ? (v) => setModal(() => esDefault = v)
+                              : null,
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Activo'),
+                          value: activo,
+                          onChanged: (v) => setModal(() => activo = v),
+                        ),
                         const SizedBox(height: 8),
+                        TextFormField(
+                          controller: codigoController,
+                          decoration: _inputDeco('Código (ej. ITBIS-18)'),
+                        ),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: descripcionController,
                           maxLines: 2,
@@ -469,7 +495,10 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                               try {
                                 final impuesto = ImpuestoEntity(
                                   id: impuestoToEdit?.id,
+                                  codigo: codigoController.text.trim(),
                                   nombre: nombreController.text.trim(),
+                                  esDefault: tipoSeleccionado == 'ITBIS' && esDefault,
+                                  activo: activo,
                                   porcentaje: double.parse(
                                     porcentajeController.text.trim(),
                                   ),

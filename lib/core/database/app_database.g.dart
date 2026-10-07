@@ -5986,6 +5986,17 @@ class $ProductosTableTable extends ProductosTable
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _impuestoIdMeta = const VerificationMeta(
+    'impuestoId',
+  );
+  @override
+  late final GeneratedColumn<int> impuestoId = GeneratedColumn<int>(
+    'impuesto_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _activoMeta = const VerificationMeta('activo');
   @override
   late final GeneratedColumn<int> activo = GeneratedColumn<int>(
@@ -6017,6 +6028,7 @@ class $ProductosTableTable extends ProductosTable
     categoriaId,
     marcaId,
     unidadMedidaId,
+    impuestoId,
     activo,
   ];
   @override
@@ -6194,6 +6206,12 @@ class $ProductosTableTable extends ProductosTable
     } else if (isInserting) {
       context.missing(_unidadMedidaIdMeta);
     }
+    if (data.containsKey('impuesto_id')) {
+      context.handle(
+        _impuestoIdMeta,
+        impuestoId.isAcceptableOrUnknown(data['impuesto_id']!, _impuestoIdMeta),
+      );
+    }
     if (data.containsKey('activo')) {
       context.handle(
         _activoMeta,
@@ -6285,6 +6303,10 @@ class $ProductosTableTable extends ProductosTable
         DriftSqlType.int,
         data['${effectivePrefix}unidad_medida_id'],
       )!,
+      impuestoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}impuesto_id'],
+      ),
       activo: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}activo'],
@@ -6318,6 +6340,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
   final int categoriaId;
   final int marcaId;
   final int unidadMedidaId;
+  final int? impuestoId;
   final int activo;
   const ProductoData({
     required this.id,
@@ -6339,6 +6362,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     required this.categoriaId,
     required this.marcaId,
     required this.unidadMedidaId,
+    this.impuestoId,
     required this.activo,
   });
   @override
@@ -6389,6 +6413,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     map['categoria_id'] = Variable<int>(categoriaId);
     map['marca_id'] = Variable<int>(marcaId);
     map['unidad_medida_id'] = Variable<int>(unidadMedidaId);
+    if (!nullToAbsent || impuestoId != null) {
+      map['impuesto_id'] = Variable<int>(impuestoId);
+    }
     map['activo'] = Variable<int>(activo);
     return map;
   }
@@ -6440,6 +6467,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       categoriaId: Value(categoriaId),
       marcaId: Value(marcaId),
       unidadMedidaId: Value(unidadMedidaId),
+      impuestoId: impuestoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(impuestoId),
       activo: Value(activo),
     );
   }
@@ -6469,6 +6499,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       categoriaId: serializer.fromJson<int>(json['categoriaId']),
       marcaId: serializer.fromJson<int>(json['marcaId']),
       unidadMedidaId: serializer.fromJson<int>(json['unidadMedidaId']),
+      impuestoId: serializer.fromJson<int?>(json['impuestoId']),
       activo: serializer.fromJson<int>(json['activo']),
     );
   }
@@ -6495,6 +6526,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       'categoriaId': serializer.toJson<int>(categoriaId),
       'marcaId': serializer.toJson<int>(marcaId),
       'unidadMedidaId': serializer.toJson<int>(unidadMedidaId),
+      'impuestoId': serializer.toJson<int?>(impuestoId),
       'activo': serializer.toJson<int>(activo),
     };
   }
@@ -6519,6 +6551,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     int? categoriaId,
     int? marcaId,
     int? unidadMedidaId,
+    Value<int?> impuestoId = const Value.absent(),
     int? activo,
   }) => ProductoData(
     id: id ?? this.id,
@@ -6550,6 +6583,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     categoriaId: categoriaId ?? this.categoriaId,
     marcaId: marcaId ?? this.marcaId,
     unidadMedidaId: unidadMedidaId ?? this.unidadMedidaId,
+    impuestoId: impuestoId.present ? impuestoId.value : this.impuestoId,
     activo: activo ?? this.activo,
   );
   ProductoData copyWithCompanion(ProductosTableCompanion data) {
@@ -6601,6 +6635,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
       unidadMedidaId: data.unidadMedidaId.present
           ? data.unidadMedidaId.value
           : this.unidadMedidaId,
+      impuestoId: data.impuestoId.present
+          ? data.impuestoId.value
+          : this.impuestoId,
       activo: data.activo.present ? data.activo.value : this.activo,
     );
   }
@@ -6627,13 +6664,14 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           ..write('categoriaId: $categoriaId, ')
           ..write('marcaId: $marcaId, ')
           ..write('unidadMedidaId: $unidadMedidaId, ')
+          ..write('impuestoId: $impuestoId, ')
           ..write('activo: $activo')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     codigo,
     codigoBarras,
@@ -6653,8 +6691,9 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
     categoriaId,
     marcaId,
     unidadMedidaId,
+    impuestoId,
     activo,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6678,6 +6717,7 @@ class ProductoData extends DataClass implements Insertable<ProductoData> {
           other.categoriaId == this.categoriaId &&
           other.marcaId == this.marcaId &&
           other.unidadMedidaId == this.unidadMedidaId &&
+          other.impuestoId == this.impuestoId &&
           other.activo == this.activo);
 }
 
@@ -6701,6 +6741,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
   final Value<int> categoriaId;
   final Value<int> marcaId;
   final Value<int> unidadMedidaId;
+  final Value<int?> impuestoId;
   final Value<int> activo;
   const ProductosTableCompanion({
     this.id = const Value.absent(),
@@ -6722,6 +6763,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     this.categoriaId = const Value.absent(),
     this.marcaId = const Value.absent(),
     this.unidadMedidaId = const Value.absent(),
+    this.impuestoId = const Value.absent(),
     this.activo = const Value.absent(),
   });
   ProductosTableCompanion.insert({
@@ -6744,6 +6786,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     required int categoriaId,
     required int marcaId,
     required int unidadMedidaId,
+    this.impuestoId = const Value.absent(),
     this.activo = const Value.absent(),
   }) : codigo = Value(codigo),
        nombre = Value(nombre),
@@ -6770,6 +6813,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Expression<int>? categoriaId,
     Expression<int>? marcaId,
     Expression<int>? unidadMedidaId,
+    Expression<int>? impuestoId,
     Expression<int>? activo,
   }) {
     return RawValuesInsertable({
@@ -6792,6 +6836,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
       if (categoriaId != null) 'categoria_id': categoriaId,
       if (marcaId != null) 'marca_id': marcaId,
       if (unidadMedidaId != null) 'unidad_medida_id': unidadMedidaId,
+      if (impuestoId != null) 'impuesto_id': impuestoId,
       if (activo != null) 'activo': activo,
     });
   }
@@ -6816,6 +6861,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     Value<int>? categoriaId,
     Value<int>? marcaId,
     Value<int>? unidadMedidaId,
+    Value<int?>? impuestoId,
     Value<int>? activo,
   }) {
     return ProductosTableCompanion(
@@ -6838,6 +6884,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
       categoriaId: categoriaId ?? this.categoriaId,
       marcaId: marcaId ?? this.marcaId,
       unidadMedidaId: unidadMedidaId ?? this.unidadMedidaId,
+      impuestoId: impuestoId ?? this.impuestoId,
       activo: activo ?? this.activo,
     );
   }
@@ -6902,6 +6949,9 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
     if (unidadMedidaId.present) {
       map['unidad_medida_id'] = Variable<int>(unidadMedidaId.value);
     }
+    if (impuestoId.present) {
+      map['impuesto_id'] = Variable<int>(impuestoId.value);
+    }
     if (activo.present) {
       map['activo'] = Variable<int>(activo.value);
     }
@@ -6930,6 +6980,7 @@ class ProductosTableCompanion extends UpdateCompanion<ProductoData> {
           ..write('categoriaId: $categoriaId, ')
           ..write('marcaId: $marcaId, ')
           ..write('unidadMedidaId: $unidadMedidaId, ')
+          ..write('impuestoId: $impuestoId, ')
           ..write('activo: $activo')
           ..write(')'))
         .toString();
@@ -36123,6 +36174,656 @@ class PresentacionesTableCompanion extends UpdateCompanion<PresentacionData> {
   }
 }
 
+class $ImpuestosTableTable extends ImpuestosTable
+    with TableInfo<$ImpuestosTableTable, ImpuestoData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImpuestosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
+  @override
+  late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
+    'nombre',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _porcentajeMeta = const VerificationMeta(
+    'porcentaje',
+  );
+  @override
+  late final GeneratedColumn<double> porcentaje = GeneratedColumn<double>(
+    'porcentaje',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
+  @override
+  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
+    'tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('ITBIS'),
+  );
+  static const VerificationMeta _esExentoMeta = const VerificationMeta(
+    'esExento',
+  );
+  @override
+  late final GeneratedColumn<bool> esExento = GeneratedColumn<bool>(
+    'es_exento',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("es_exento" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _esDefaultMeta = const VerificationMeta(
+    'esDefault',
+  );
+  @override
+  late final GeneratedColumn<bool> esDefault = GeneratedColumn<bool>(
+    'es_default',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("es_default" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _descripcionMeta = const VerificationMeta(
+    'descripcion',
+  );
+  @override
+  late final GeneratedColumn<String> descripcion = GeneratedColumn<String>(
+    'descripcion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    codigo,
+    nombre,
+    porcentaje,
+    tipo,
+    esExento,
+    esDefault,
+    activo,
+    descripcion,
+    creadoEn,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'impuestos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ImpuestoData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    }
+    if (data.containsKey('nombre')) {
+      context.handle(
+        _nombreMeta,
+        nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nombreMeta);
+    }
+    if (data.containsKey('porcentaje')) {
+      context.handle(
+        _porcentajeMeta,
+        porcentaje.isAcceptableOrUnknown(data['porcentaje']!, _porcentajeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_porcentajeMeta);
+    }
+    if (data.containsKey('tipo')) {
+      context.handle(
+        _tipoMeta,
+        tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
+      );
+    }
+    if (data.containsKey('es_exento')) {
+      context.handle(
+        _esExentoMeta,
+        esExento.isAcceptableOrUnknown(data['es_exento']!, _esExentoMeta),
+      );
+    }
+    if (data.containsKey('es_default')) {
+      context.handle(
+        _esDefaultMeta,
+        esDefault.isAcceptableOrUnknown(data['es_default']!, _esDefaultMeta),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+      );
+    }
+    if (data.containsKey('descripcion')) {
+      context.handle(
+        _descripcionMeta,
+        descripcion.isAcceptableOrUnknown(
+          data['descripcion']!,
+          _descripcionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ImpuestoData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImpuestoData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      nombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre'],
+      )!,
+      porcentaje: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}porcentaje'],
+      )!,
+      tipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo'],
+      )!,
+      esExento: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}es_exento'],
+      )!,
+      esDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}es_default'],
+      )!,
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
+      descripcion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}descripcion'],
+      )!,
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      ),
+    );
+  }
+
+  @override
+  $ImpuestosTableTable createAlias(String alias) {
+    return $ImpuestosTableTable(attachedDatabase, alias);
+  }
+}
+
+class ImpuestoData extends DataClass implements Insertable<ImpuestoData> {
+  final int id;
+  final String codigo;
+  final String nombre;
+  final double porcentaje;
+  final String tipo;
+  final bool esExento;
+  final bool esDefault;
+  final bool activo;
+  final String descripcion;
+  final DateTime creadoEn;
+  final DateTime? actualizadoEn;
+  const ImpuestoData({
+    required this.id,
+    required this.codigo,
+    required this.nombre,
+    required this.porcentaje,
+    required this.tipo,
+    required this.esExento,
+    required this.esDefault,
+    required this.activo,
+    required this.descripcion,
+    required this.creadoEn,
+    this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['codigo'] = Variable<String>(codigo);
+    map['nombre'] = Variable<String>(nombre);
+    map['porcentaje'] = Variable<double>(porcentaje);
+    map['tipo'] = Variable<String>(tipo);
+    map['es_exento'] = Variable<bool>(esExento);
+    map['es_default'] = Variable<bool>(esDefault);
+    map['activo'] = Variable<bool>(activo);
+    map['descripcion'] = Variable<String>(descripcion);
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || actualizadoEn != null) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    }
+    return map;
+  }
+
+  ImpuestosTableCompanion toCompanion(bool nullToAbsent) {
+    return ImpuestosTableCompanion(
+      id: Value(id),
+      codigo: Value(codigo),
+      nombre: Value(nombre),
+      porcentaje: Value(porcentaje),
+      tipo: Value(tipo),
+      esExento: Value(esExento),
+      esDefault: Value(esDefault),
+      activo: Value(activo),
+      descripcion: Value(descripcion),
+      creadoEn: Value(creadoEn),
+      actualizadoEn: actualizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualizadoEn),
+    );
+  }
+
+  factory ImpuestoData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImpuestoData(
+      id: serializer.fromJson<int>(json['id']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      nombre: serializer.fromJson<String>(json['nombre']),
+      porcentaje: serializer.fromJson<double>(json['porcentaje']),
+      tipo: serializer.fromJson<String>(json['tipo']),
+      esExento: serializer.fromJson<bool>(json['esExento']),
+      esDefault: serializer.fromJson<bool>(json['esDefault']),
+      activo: serializer.fromJson<bool>(json['activo']),
+      descripcion: serializer.fromJson<String>(json['descripcion']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'codigo': serializer.toJson<String>(codigo),
+      'nombre': serializer.toJson<String>(nombre),
+      'porcentaje': serializer.toJson<double>(porcentaje),
+      'tipo': serializer.toJson<String>(tipo),
+      'esExento': serializer.toJson<bool>(esExento),
+      'esDefault': serializer.toJson<bool>(esDefault),
+      'activo': serializer.toJson<bool>(activo),
+      'descripcion': serializer.toJson<String>(descripcion),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+    };
+  }
+
+  ImpuestoData copyWith({
+    int? id,
+    String? codigo,
+    String? nombre,
+    double? porcentaje,
+    String? tipo,
+    bool? esExento,
+    bool? esDefault,
+    bool? activo,
+    String? descripcion,
+    DateTime? creadoEn,
+    Value<DateTime?> actualizadoEn = const Value.absent(),
+  }) => ImpuestoData(
+    id: id ?? this.id,
+    codigo: codigo ?? this.codigo,
+    nombre: nombre ?? this.nombre,
+    porcentaje: porcentaje ?? this.porcentaje,
+    tipo: tipo ?? this.tipo,
+    esExento: esExento ?? this.esExento,
+    esDefault: esDefault ?? this.esDefault,
+    activo: activo ?? this.activo,
+    descripcion: descripcion ?? this.descripcion,
+    creadoEn: creadoEn ?? this.creadoEn,
+    actualizadoEn: actualizadoEn.present
+        ? actualizadoEn.value
+        : this.actualizadoEn,
+  );
+  ImpuestoData copyWithCompanion(ImpuestosTableCompanion data) {
+    return ImpuestoData(
+      id: data.id.present ? data.id.value : this.id,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      nombre: data.nombre.present ? data.nombre.value : this.nombre,
+      porcentaje: data.porcentaje.present
+          ? data.porcentaje.value
+          : this.porcentaje,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      esExento: data.esExento.present ? data.esExento.value : this.esExento,
+      esDefault: data.esDefault.present ? data.esDefault.value : this.esDefault,
+      activo: data.activo.present ? data.activo.value : this.activo,
+      descripcion: data.descripcion.present
+          ? data.descripcion.value
+          : this.descripcion,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImpuestoData(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('porcentaje: $porcentaje, ')
+          ..write('tipo: $tipo, ')
+          ..write('esExento: $esExento, ')
+          ..write('esDefault: $esDefault, ')
+          ..write('activo: $activo, ')
+          ..write('descripcion: $descripcion, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    codigo,
+    nombre,
+    porcentaje,
+    tipo,
+    esExento,
+    esDefault,
+    activo,
+    descripcion,
+    creadoEn,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImpuestoData &&
+          other.id == this.id &&
+          other.codigo == this.codigo &&
+          other.nombre == this.nombre &&
+          other.porcentaje == this.porcentaje &&
+          other.tipo == this.tipo &&
+          other.esExento == this.esExento &&
+          other.esDefault == this.esDefault &&
+          other.activo == this.activo &&
+          other.descripcion == this.descripcion &&
+          other.creadoEn == this.creadoEn &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class ImpuestosTableCompanion extends UpdateCompanion<ImpuestoData> {
+  final Value<int> id;
+  final Value<String> codigo;
+  final Value<String> nombre;
+  final Value<double> porcentaje;
+  final Value<String> tipo;
+  final Value<bool> esExento;
+  final Value<bool> esDefault;
+  final Value<bool> activo;
+  final Value<String> descripcion;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> actualizadoEn;
+  const ImpuestosTableCompanion({
+    this.id = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.nombre = const Value.absent(),
+    this.porcentaje = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.esExento = const Value.absent(),
+    this.esDefault = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.descripcion = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  ImpuestosTableCompanion.insert({
+    this.id = const Value.absent(),
+    this.codigo = const Value.absent(),
+    required String nombre,
+    required double porcentaje,
+    this.tipo = const Value.absent(),
+    this.esExento = const Value.absent(),
+    this.esDefault = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.descripcion = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  }) : nombre = Value(nombre),
+       porcentaje = Value(porcentaje);
+  static Insertable<ImpuestoData> custom({
+    Expression<int>? id,
+    Expression<String>? codigo,
+    Expression<String>? nombre,
+    Expression<double>? porcentaje,
+    Expression<String>? tipo,
+    Expression<bool>? esExento,
+    Expression<bool>? esDefault,
+    Expression<bool>? activo,
+    Expression<String>? descripcion,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (codigo != null) 'codigo': codigo,
+      if (nombre != null) 'nombre': nombre,
+      if (porcentaje != null) 'porcentaje': porcentaje,
+      if (tipo != null) 'tipo': tipo,
+      if (esExento != null) 'es_exento': esExento,
+      if (esDefault != null) 'es_default': esDefault,
+      if (activo != null) 'activo': activo,
+      if (descripcion != null) 'descripcion': descripcion,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  ImpuestosTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? codigo,
+    Value<String>? nombre,
+    Value<double>? porcentaje,
+    Value<String>? tipo,
+    Value<bool>? esExento,
+    Value<bool>? esDefault,
+    Value<bool>? activo,
+    Value<String>? descripcion,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? actualizadoEn,
+  }) {
+    return ImpuestosTableCompanion(
+      id: id ?? this.id,
+      codigo: codigo ?? this.codigo,
+      nombre: nombre ?? this.nombre,
+      porcentaje: porcentaje ?? this.porcentaje,
+      tipo: tipo ?? this.tipo,
+      esExento: esExento ?? this.esExento,
+      esDefault: esDefault ?? this.esDefault,
+      activo: activo ?? this.activo,
+      descripcion: descripcion ?? this.descripcion,
+      creadoEn: creadoEn ?? this.creadoEn,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (nombre.present) {
+      map['nombre'] = Variable<String>(nombre.value);
+    }
+    if (porcentaje.present) {
+      map['porcentaje'] = Variable<double>(porcentaje.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(tipo.value);
+    }
+    if (esExento.present) {
+      map['es_exento'] = Variable<bool>(esExento.value);
+    }
+    if (esDefault.present) {
+      map['es_default'] = Variable<bool>(esDefault.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
+    if (descripcion.present) {
+      map['descripcion'] = Variable<String>(descripcion.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImpuestosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('porcentaje: $porcentaje, ')
+          ..write('tipo: $tipo, ')
+          ..write('esExento: $esExento, ')
+          ..write('esDefault: $esDefault, ')
+          ..write('activo: $activo, ')
+          ..write('descripcion: $descripcion, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -36220,6 +36921,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $TransferenciasTableTable(this);
   late final $PresentacionesTableTable presentacionesTable =
       $PresentacionesTableTable(this);
+  late final $ImpuestosTableTable impuestosTable = $ImpuestosTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -36279,6 +36981,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     stockAlmacenTable,
     transferenciasTable,
     presentacionesTable,
+    impuestosTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -39406,6 +40109,7 @@ typedef $$ProductosTableTableCreateCompanionBuilder =
       required int categoriaId,
       required int marcaId,
       required int unidadMedidaId,
+      Value<int?> impuestoId,
       Value<int> activo,
     });
 typedef $$ProductosTableTableUpdateCompanionBuilder =
@@ -39429,6 +40133,7 @@ typedef $$ProductosTableTableUpdateCompanionBuilder =
       Value<int> categoriaId,
       Value<int> marcaId,
       Value<int> unidadMedidaId,
+      Value<int?> impuestoId,
       Value<int> activo,
     });
 
@@ -39702,6 +40407,11 @@ class $$ProductosTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get impuestoId => $composableBuilder(
+    column: $table.impuestoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get activo => $composableBuilder(
     column: $table.activo,
     builder: (column) => ColumnFilters(column),
@@ -39967,6 +40677,11 @@ class $$ProductosTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get impuestoId => $composableBuilder(
+    column: $table.impuestoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get activo => $composableBuilder(
     column: $table.activo,
     builder: (column) => ColumnOrderings(column),
@@ -40064,6 +40779,11 @@ class $$ProductosTableTableAnnotationComposer
 
   GeneratedColumn<int> get unidadMedidaId => $composableBuilder(
     column: $table.unidadMedidaId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get impuestoId => $composableBuilder(
+    column: $table.impuestoId,
     builder: (column) => column,
   );
 
@@ -40284,6 +41004,7 @@ class $$ProductosTableTableTableManager
                 Value<int> categoriaId = const Value.absent(),
                 Value<int> marcaId = const Value.absent(),
                 Value<int> unidadMedidaId = const Value.absent(),
+                Value<int?> impuestoId = const Value.absent(),
                 Value<int> activo = const Value.absent(),
               }) => ProductosTableCompanion(
                 id: id,
@@ -40305,6 +41026,7 @@ class $$ProductosTableTableTableManager
                 categoriaId: categoriaId,
                 marcaId: marcaId,
                 unidadMedidaId: unidadMedidaId,
+                impuestoId: impuestoId,
                 activo: activo,
               ),
           createCompanionCallback:
@@ -40328,6 +41050,7 @@ class $$ProductosTableTableTableManager
                 required int categoriaId,
                 required int marcaId,
                 required int unidadMedidaId,
+                Value<int?> impuestoId = const Value.absent(),
                 Value<int> activo = const Value.absent(),
               }) => ProductosTableCompanion.insert(
                 id: id,
@@ -40349,6 +41072,7 @@ class $$ProductosTableTableTableManager
                 categoriaId: categoriaId,
                 marcaId: marcaId,
                 unidadMedidaId: unidadMedidaId,
+                impuestoId: impuestoId,
                 activo: activo,
               ),
           withReferenceMapper: (p0) => p0
@@ -59432,6 +60156,322 @@ typedef $$PresentacionesTableTableProcessedTableManager =
       PresentacionData,
       PrefetchHooks Function()
     >;
+typedef $$ImpuestosTableTableCreateCompanionBuilder =
+    ImpuestosTableCompanion Function({
+      Value<int> id,
+      Value<String> codigo,
+      required String nombre,
+      required double porcentaje,
+      Value<String> tipo,
+      Value<bool> esExento,
+      Value<bool> esDefault,
+      Value<bool> activo,
+      Value<String> descripcion,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+typedef $$ImpuestosTableTableUpdateCompanionBuilder =
+    ImpuestosTableCompanion Function({
+      Value<int> id,
+      Value<String> codigo,
+      Value<String> nombre,
+      Value<double> porcentaje,
+      Value<String> tipo,
+      Value<bool> esExento,
+      Value<bool> esDefault,
+      Value<bool> activo,
+      Value<String> descripcion,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+
+class $$ImpuestosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ImpuestosTableTable> {
+  $$ImpuestosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get porcentaje => $composableBuilder(
+    column: $table.porcentaje,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get esExento => $composableBuilder(
+    column: $table.esExento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get esDefault => $composableBuilder(
+    column: $table.esDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ImpuestosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ImpuestosTableTable> {
+  $$ImpuestosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get porcentaje => $composableBuilder(
+    column: $table.porcentaje,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get esExento => $composableBuilder(
+    column: $table.esExento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get esDefault => $composableBuilder(
+    column: $table.esDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ImpuestosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ImpuestosTableTable> {
+  $$ImpuestosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<String> get nombre =>
+      $composableBuilder(column: $table.nombre, builder: (column) => column);
+
+  GeneratedColumn<double> get porcentaje => $composableBuilder(
+    column: $table.porcentaje,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<bool> get esExento =>
+      $composableBuilder(column: $table.esExento, builder: (column) => column);
+
+  GeneratedColumn<bool> get esDefault =>
+      $composableBuilder(column: $table.esDefault, builder: (column) => column);
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
+
+  GeneratedColumn<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$ImpuestosTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ImpuestosTableTable,
+          ImpuestoData,
+          $$ImpuestosTableTableFilterComposer,
+          $$ImpuestosTableTableOrderingComposer,
+          $$ImpuestosTableTableAnnotationComposer,
+          $$ImpuestosTableTableCreateCompanionBuilder,
+          $$ImpuestosTableTableUpdateCompanionBuilder,
+          (
+            ImpuestoData,
+            BaseReferences<_$AppDatabase, $ImpuestosTableTable, ImpuestoData>,
+          ),
+          ImpuestoData,
+          PrefetchHooks Function()
+        > {
+  $$ImpuestosTableTableTableManager(
+    _$AppDatabase db,
+    $ImpuestosTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImpuestosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ImpuestosTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ImpuestosTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<String> nombre = const Value.absent(),
+                Value<double> porcentaje = const Value.absent(),
+                Value<String> tipo = const Value.absent(),
+                Value<bool> esExento = const Value.absent(),
+                Value<bool> esDefault = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<String> descripcion = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => ImpuestosTableCompanion(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                porcentaje: porcentaje,
+                tipo: tipo,
+                esExento: esExento,
+                esDefault: esDefault,
+                activo: activo,
+                descripcion: descripcion,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                required String nombre,
+                required double porcentaje,
+                Value<String> tipo = const Value.absent(),
+                Value<bool> esExento = const Value.absent(),
+                Value<bool> esDefault = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<String> descripcion = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => ImpuestosTableCompanion.insert(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                porcentaje: porcentaje,
+                tipo: tipo,
+                esExento: esExento,
+                esDefault: esDefault,
+                activo: activo,
+                descripcion: descripcion,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ImpuestosTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ImpuestosTableTable,
+      ImpuestoData,
+      $$ImpuestosTableTableFilterComposer,
+      $$ImpuestosTableTableOrderingComposer,
+      $$ImpuestosTableTableAnnotationComposer,
+      $$ImpuestosTableTableCreateCompanionBuilder,
+      $$ImpuestosTableTableUpdateCompanionBuilder,
+      (
+        ImpuestoData,
+        BaseReferences<_$AppDatabase, $ImpuestosTableTable, ImpuestoData>,
+      ),
+      ImpuestoData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -59562,4 +60602,6 @@ class $AppDatabaseManager {
       $$TransferenciasTableTableTableManager(_db, _db.transferenciasTable);
   $$PresentacionesTableTableTableManager get presentacionesTable =>
       $$PresentacionesTableTableTableManager(_db, _db.presentacionesTable);
+  $$ImpuestosTableTableTableManager get impuestosTable =>
+      $$ImpuestosTableTableTableManager(_db, _db.impuestosTable);
 }

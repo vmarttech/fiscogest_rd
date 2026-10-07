@@ -23,6 +23,7 @@ class ProductoDataMapper {
       categoriaId: fila.categoriaId,
       marcaId: fila.marcaId,
       unidadMedidaId: fila.unidadMedidaId,
+      impuestoId: fila.impuestoId,
       activo: fila.activo == 1,
     );
   }
@@ -57,6 +58,7 @@ class ProductoDataMapper {
       categoriaId: drift.Value(entidad.categoriaId),
       marcaId: drift.Value(entidad.marcaId),
       unidadMedidaId: drift.Value(entidad.unidadMedidaId),
+      impuestoId: drift.Value(entidad.impuestoId),
       activo: drift.Value(entidad.activo ? 1 : 0),
     );
   }

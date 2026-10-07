@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/core/database/migrations/migracion_002_agregar_camp
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
 import 'package:fiscogest_rd/features/almacenes/data/dao/almacenes_table.dart';
 import 'package:fiscogest_rd/features/presentaciones/data/dao/presentaciones_table.dart';
+import 'package:fiscogest_rd/features/impuestos/data/dao/impuestos_table.dart';
 import 'package:fiscogest_rd/features/transferencias/data/dao/transferencias_table.dart';
 import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_table.dart';
 import 'package:fiscogest_rd/features/configuracion/data/dao/configuracion_table.dart';
@@ -117,6 +118,7 @@ part 'app_database.g.dart';
     StockAlmacenTable,
     TransferenciasTable,
     PresentacionesTable,
+    ImpuestosTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -125,7 +127,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 59;
+  int get schemaVersion => 61;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -134,6 +136,12 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 60) {
+        await m.createTable(impuestosTable);
+      }
+      if (from < 61) {
+        await m.addColumn(productosTable, productosTable.impuestoId);
+      }
       if (from < 59) {
         await customStatement(
           "ALTER TABLE categorias ADD COLUMN codigo TEXT NOT NULL DEFAULT '';",

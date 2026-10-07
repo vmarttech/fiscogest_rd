@@ -1,3 +1,5 @@
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
@@ -1206,7 +1208,7 @@ class _NuevaVentaBorradorPageState
           const SizedBox(height: 12),
           _filaResumen('Subtotal', formatRd(estado.subtotal), tamanoCuerpo),
           if (!(ref.watch(modoColmadoProvider)))
-            _filaResumen('ITBIS (18%)', formatRd(estado.itbis), tamanoCuerpo),
+            _filaResumen(etiquetaItbis(ref.watch(tasaItbisVigenteProvider)), formatRd(estado.itbis), tamanoCuerpo),
           if (estado.costoEnvio > 0)
             _filaResumen(
               'Envío / Delivery',

@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
-import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 class RegistrarVentaState {
   const RegistrarVentaState({
@@ -90,9 +92,17 @@ class RegistrarVentaState {
 class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   /// 0 en modo simplificado; 0.18 en operación fiscal.
   double get tasaItbis {
-    final cfg = ref.read(configuracionControllerProvider).valueOrNull;
-    if (cfg?.modoSimplificado == true) return 0.0;
-    return 0.18;
+    return ref.read(tasaItbisVigenteProvider);
+  }
+
+  double _tasaDeProducto(Producto producto) {
+    return resolverTasaItbisProducto(
+      impuestoId: producto.impuestoId,
+      categoriaId: producto.categoriaId,
+      impuestos: ref.read(impuestoControllerProvider).valueOrNull ?? const [],
+      categorias: ref.read(categoriaControllerProvider).valueOrNull ?? const [],
+      tasaGlobal: tasaItbis,
+    );
   }
 
   late IProductoRepository productoRepo;
@@ -118,11 +128,11 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 
   double precioUnitarioConImpuesto(DetalleVenta linea) {
-    return linea.precioUnitario * (1 + tasaItbis);
+    return linea.precioUnitario * (1 + linea.tasaImpuesto);
   }
 
   double subtotalLineaConImpuesto(DetalleVenta linea) {
-    return linea.subtotal * (1 + tasaItbis);
+    return linea.subtotal * (1 + linea.tasaImpuesto);
   }
 
   bool tieneDescuentoAplicado() {
@@ -389,7 +399,11 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
 
   void recalcularTotales(List<DetalleVenta> lista) {
     final subtotal = lista.fold<double>(0.0, (sum, l) => sum + l.subtotal);
-    final itbis = subtotal * tasaItbis;
+    final itbis = itbisDeLineas(
+      subtotales: lista.map((l) => l.subtotal),
+      tasas: lista.map((l) => l.tasaImpuesto),
+      descuentoGeneral: state.montoDescuento,
+    );
     final total = subtotal + itbis + state.costoEnvio - state.montoDescuento;
     state = state.copyWith(
       detalles: lista,
@@ -425,7 +439,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
         precioUnitario: precioFinal,
         subtotal: precioFinal,
         nombreProducto: producto.nombre,
-        tasaImpuesto: tasaItbis,
+        tasaImpuesto: _tasaDeProducto(producto),
       );
     }).toList();
     state = state.copyWith(resultadosBusqueda: resultados);

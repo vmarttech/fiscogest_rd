@@ -191,7 +191,7 @@ class FacturaImprimible extends StatelessWidget {
               ),
             ],
             Text(
-              'ITBIS (18%):       ${_formatearMonto(venta.itbis)}',
+              'ITBIS:       ${_formatearMonto(venta.itbis)}',
               style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
             ),
             const SizedBox(height: 4),
@@ -298,7 +298,7 @@ class FacturaImprimible extends StatelessWidget {
       buffer.writeln('Descuento:         -${_formatearMonto(descuentoTotal)}');
       buffer.writeln('Base Gravable:     ${_formatearMonto(baseGravable)}');
     }
-    buffer.writeln('ITBIS (18%):       ${_formatearMonto(venta.itbis)}');
+    buffer.writeln('ITBIS:       ${_formatearMonto(venta.itbis)}');
     buffer.writeln('========================================');
     buffer.writeln('TOTAL A PAGAR:     ${_formatearMonto(venta.total)}');
     buffer.writeln('========================================');

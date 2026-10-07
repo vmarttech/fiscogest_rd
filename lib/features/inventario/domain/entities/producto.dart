@@ -21,6 +21,7 @@ class Producto {
     required this.categoriaId,
     required this.marcaId,
     required this.unidadMedidaId,
+    this.impuestoId,
     required this.activo,
   });
 
@@ -45,6 +46,7 @@ class Producto {
   final int categoriaId;
   final int marcaId;
   final int unidadMedidaId;
+  final int? impuestoId;
   final bool activo;
 
   double get costoReal => precioCompra + gastosAsociados;
@@ -108,6 +110,8 @@ class Producto {
     int? categoriaId,
     int? marcaId,
     int? unidadMedidaId,
+    int? impuestoId,
+    bool clearImpuesto = false,
     bool? activo,
   }) {
     return Producto(
@@ -132,6 +136,7 @@ class Producto {
       categoriaId: categoriaId ?? this.categoriaId,
       marcaId: marcaId ?? this.marcaId,
       unidadMedidaId: unidadMedidaId ?? this.unidadMedidaId,
+      impuestoId: clearImpuesto ? null : (impuestoId ?? this.impuestoId),
       activo: activo ?? this.activo,
     );
   }

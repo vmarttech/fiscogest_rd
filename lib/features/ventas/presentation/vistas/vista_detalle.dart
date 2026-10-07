@@ -1,3 +1,5 @@
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/widgets/ecfe_estado_chip.dart';
 
@@ -712,7 +714,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                               ?.modoSimplificado ??
                           false))
                         _FilaResumen(
-                          'ITBIS (18%)',
+                          etiquetaItbis(ref.watch(tasaItbisVigenteProvider)),
                           _formatearMonto(venta.itbis),
                           fontSize: tamanoCuerpo,
                         ),

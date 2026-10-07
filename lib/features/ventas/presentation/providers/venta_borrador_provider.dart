@@ -1,6 +1,8 @@
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -131,13 +133,31 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
 
   /// 0 en modo simplificado; 18% en operación fiscal.
   double get _tasaItbis {
-    final simp =
-        _ref
-            .read(configuracionControllerProvider)
-            .valueOrNull
-            ?.modoSimplificado ??
-        false;
-    return simp ? 0.0 : 0.18;
+    return _ref.read(tasaItbisVigenteProvider);
+  }
+
+  double _tasaDeProducto(Producto producto) {
+    return resolverTasaItbisProducto(
+      impuestoId: producto.impuestoId,
+      categoriaId: producto.categoriaId,
+      impuestos: _ref.read(impuestoControllerProvider).valueOrNull ?? const [],
+      categorias: _ref.read(categoriaControllerProvider).valueOrNull ?? const [],
+      tasaGlobal: _tasaItbis,
+    );
+  }
+
+  double _itbisDetalles(
+    List<Map<String, dynamic>> detalles, {
+    required double subtotal,
+    required double descuento,
+  }) {
+    return itbisDeLineas(
+      subtotales: detalles.map(_subtotalLineaNeto),
+      tasas: detalles.map(
+        (item) => (item['tasaImpuesto'] as num?)?.toDouble() ?? _tasaItbis,
+      ),
+      descuentoGeneral: descuento,
+    );
   }
 
   void establecerModoCotizacion() {
@@ -332,6 +352,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     detalle.addAll({
       'cantidad': cantidadFinal,
       'precioUnitario': precio.precio,
+      'tasaImpuesto': _tasaDeProducto(producto),
       'precioVentaBase': producto.precioVenta,
       'precioMayorista': producto.precioMayorista,
       'precioEspecial': producto.precioEspecial,
@@ -477,8 +498,10 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     List<Map<String, dynamic>>? detalles,
   }) {
     final subt = nuevoSubtotal ?? state.subtotal;
-    final tasaItbis = _tasaItbis;
-    final itb = nuevoItbis ?? subt * tasaItbis;
+    final dets = detalles ?? state.detalles;
+    final desc0 = nuevoDescuento ?? state.montoDescuento;
+    final itb = nuevoItbis ??
+        _itbisDetalles(dets, subtotal: subt, descuento: desc0);
     final env = nuevoEnvio ?? state.costoEnvio;
     final desc = nuevoDescuento ?? state.montoDescuento;
     final total = subt + itb + env - desc;
@@ -507,8 +530,11 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     if (bloqueo != null) return bloqueo;
     if (valor > state.subtotal) valor = state.subtotal;
     final baseImponible = state.subtotal - valor;
-    final tasaItbis = _tasaItbis;
-    final nuevoItbis = baseImponible * tasaItbis;
+    final nuevoItbis = _itbisDetalles(
+      state.detalles,
+      subtotal: state.subtotal,
+      descuento: valor,
+    );
     final subtMasItbis = baseImponible + nuevoItbis;
     final nuevoTotal = subtMasItbis + state.costoEnvio;
     state = state.copyWith(
@@ -522,8 +548,11 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
 
   void quitarDescuento() {
     final baseImponible = state.subtotal;
-    final tasaItbis = _tasaItbis;
-    final nuevoItbis = baseImponible * tasaItbis;
+    final nuevoItbis = _itbisDetalles(
+      state.detalles,
+      subtotal: state.subtotal,
+      descuento: 0,
+    );
     final subtMasItbis = baseImponible + nuevoItbis;
     final nuevoTotal = subtMasItbis + state.costoEnvio;
     state = state.copyWith(
