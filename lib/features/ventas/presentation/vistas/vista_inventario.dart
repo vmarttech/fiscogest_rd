@@ -1,4 +1,3 @@
-import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
@@ -78,7 +77,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
       precioUnitario: precioUnitario,
       subtotal: subtotal,
       subtotalLinea: subtotal,
-      tasaImpuesto: ref.watch(tasaItbisVigenteProvider) * 100,
+      tasaImpuesto: ref.read(registrarVentaProvider.notifier).tasaPara(producto),
     );
     ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
     ref

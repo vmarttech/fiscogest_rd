@@ -180,97 +180,106 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                   media.viewInsets.bottom -
                   media.padding.top -
                   media.padding.bottom;
-              return SafeArea(
-                top: false,
-                child: SizedBox(
-                  height: (availableHeight * 0.96)
-                      .clamp(0.0, availableHeight)
-                      .toDouble(),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 8, 10),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.receipt_long_rounded,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    edit == null
-                                        ? 'Nuevo gasto'
-                                        : 'Editar gasto',
-                                    style: AppTypography.h4.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                    ),
+              // El modal conserva el tamaño completo mientras aparece el
+              // teclado; desplazarlo por el inset evita que quede detrás.
+              return Padding(
+                padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+                child: SafeArea(
+                  top: false,
+                  child: SizedBox(
+                    height: (availableHeight * 0.96)
+                        .clamp(0.0, availableHeight)
+                        .toDouble(),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 8, 10),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.1,
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Registre el egreso de su negocio',
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              icon: const Icon(Icons.close),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Divider(height: 1),
-                      Expanded(child: formBody(setLocal)),
-                      const Divider(height: 1),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: OutlinedButton(
-                                  onPressed: () => Navigator.pop(ctx),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: AppColors.textSecondary,
-                                    side: const BorderSide(color: AppColors.divider),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                  ),
-                                  child: const Text('Cancelar'),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.receipt_long_rounded,
+                                  color: AppColors.primary,
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: AppButton(
-                                  text: 'Guardar',
-                                  onPressed: () => guardar(ctx),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      edit == null
+                                          ? 'Nuevo gasto'
+                                          : 'Editar gasto',
+                                      style: AppTypography.h4.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Registre el egreso de su negocio',
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                          ],
+                              IconButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                icon: const Icon(Icons.close),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        const Divider(height: 1),
+                        Expanded(child: formBody(setLocal)),
+                        const Divider(height: 1),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 48,
+                                  child: OutlinedButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.textSecondary,
+                                      side: const BorderSide(
+                                        color: AppColors.divider,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                    ),
+                                    child: const Text('Cancelar'),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 48,
+                                  child: AppButton(
+                                    text: 'Guardar',
+                                    onPressed: () => guardar(ctx),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

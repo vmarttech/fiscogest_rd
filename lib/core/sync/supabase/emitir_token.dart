@@ -51,8 +51,9 @@ class EmitirToken {
       final token = map['token']?.toString() ?? '';
       final exp = (map['expires_in'] as num?)?.toInt() ?? 43200;
       if (token.isEmpty) return;
-      await SesionNube.guardar(token: token, expiresInSec: exp);
-      debugPrint('EmitirToken: JWT guardado (${exp}s)');
+      await SesionNube.guardar(token: token, expiresInSec: exp, refreshToken: map['refresh_token']?.toString());
+      final refreshOk = (map['refresh_token']?.toString() ?? '').isNotEmpty;
+      debugPrint('EmitirToken: JWT guardado${refreshOk ? '' : ' SIN refresh'} (${exp}s)');
     } catch (e) {
       debugPrint('EmitirToken: $e');
     }

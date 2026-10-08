@@ -11,7 +11,7 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
-import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
+import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_scheduler.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
@@ -165,8 +165,8 @@ void main() async {
     if (SupabaseConfig.isConfigured) {
       try {
         unawaited(() async {
-          final jwt = await SesionNube.tokenVigente();
-          if (jwt == null || jwt.isEmpty) {
+                    final jwtOk = await RenovarToken.asegurar();
+          if (!jwtOk) {
             debugPrint('main: sin JWT → push tras login');
             return;
           }

@@ -95,6 +95,8 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     return ref.read(tasaItbisVigenteProvider);
   }
 
+  double tasaPara(Producto producto) => _tasaDeProducto(producto);
+
   double _tasaDeProducto(Producto producto) {
     return resolverTasaItbisProducto(
       impuestoId: producto.impuestoId,
@@ -128,11 +130,11 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
   }
 
   double precioUnitarioConImpuesto(DetalleVenta linea) {
-    return linea.precioUnitario * (1 + linea.tasaImpuesto);
+    return linea.precioUnitario * (1 + tasaComoFraccion(linea.tasaImpuesto));
   }
 
   double subtotalLineaConImpuesto(DetalleVenta linea) {
-    return linea.subtotal * (1 + linea.tasaImpuesto);
+    return linea.subtotal * (1 + tasaComoFraccion(linea.tasaImpuesto));
   }
 
   bool tieneDescuentoAplicado() {

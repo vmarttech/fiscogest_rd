@@ -39,6 +39,14 @@ function posEmail(username: string, negocioId: string) {
   return `pos.${n}.${u}@fiscogest.local`;
 }
 
+function esDueno(username: string): boolean {
+  const list = (Deno.env.get("PLATAFORMA_DUENOS") ?? "mrtn,mrtnpascual")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  return list.includes(username.trim().toLowerCase());
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "method" }, 405);
@@ -54,12 +62,7 @@ serve(async (req) => {
     const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
     if (!url || !service || !anon) {
-      return json({
-        error: "server_misconfigured",
-        has_url: !!url,
-        has_service: !!service,
-        has_anon: !!anon,
-      }, 500);
+      return json({ error: "server_misconfigured" }, 500);
     }
 
     const admin = {
@@ -88,6 +91,12 @@ serve(async (req) => {
 
     const negocioId = String(u.negocio_id);
     const email = posEmail(username, negocioId);
+    const meta = {
+      negocio_id: negocioId,
+      username,
+      rol: u.rol ?? "",
+      es_dueno: esDueno(username),
+    };
 
     const created = await fetch(`${url}/auth/v1/admin/users`, {
       method: "POST",
@@ -96,38 +105,24 @@ serve(async (req) => {
         email,
         password,
         email_confirm: true,
-        app_metadata: { negocio_id: negocioId, username },
+        app_metadata: meta,
         user_metadata: { username },
       }),
     });
     if (!created.ok && created.status !== 422) {
-      const t = await created.text();
-      return json({ error: "auth_create", status: created.status, body: t }, 502);
+      return json({ error: "auth_create", status: created.status, body: await created.text() }, 502);
     }
     if (created.status === 422) {
-      const listed = await fetch(
-        `${url}/auth/v1/admin/users?page=1&per_page=200`,
-        { headers: admin },
-      );
+      const listed = await fetch(`${url}/auth/v1/admin/users?page=1&per_page=200`, { headers: admin });
       const data = await listed.json();
-      const existing = (data.users ?? []).find((x: { email?: string }) =>
-        x.email === email
-      );
-      if (!existing?.id) {
-        return json({ error: "auth_lookup" }, 502);
-      }
+      const existing = (data.users ?? []).find((x: { email?: string }) => x.email === email);
+      if (!existing?.id) return json({ error: "auth_lookup" }, 502);
       const upd = await fetch(`${url}/auth/v1/admin/users/${existing.id}`, {
         method: "PUT",
         headers: admin,
-        body: JSON.stringify({
-          password,
-          email_confirm: true,
-          app_metadata: { negocio_id: negocioId, username },
-        }),
+        body: JSON.stringify({ password, email_confirm: true, app_metadata: meta }),
       });
-      if (!upd.ok) {
-        return json({ error: "auth_update", status: upd.status }, 502);
-      }
+      if (!upd.ok) return json({ error: "auth_update", status: upd.status }, 502);
     }
 
     const tok = await fetch(`${url}/auth/v1/token?grant_type=password`, {
@@ -147,9 +142,11 @@ serve(async (req) => {
 
     return json({
       token,
+      refresh_token: tj.refresh_token ?? "",
       expires_in: tj.expires_in ?? 3600,
       negocio_id: negocioId,
       username,
+      es_dueno: meta.es_dueno,
     });
   } catch (e) {
     return json({ error: String(e) }, 500);

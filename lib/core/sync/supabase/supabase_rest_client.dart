@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
+import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 
 class SupabaseRestClient {
@@ -42,14 +42,12 @@ class SupabaseRestClient {
     required bool upsert,
     required bool usarJwt,
   }) async {
+    await RenovarToken.asegurar();
     var bearer = SupabaseConfig.anonKey;
     if (usarJwt) {
-      final jwt = await SesionNube.tokenVigente();
+            final jwt = await SesionNube.tokenVigente();
       if (jwt != null && jwt.isNotEmpty) bearer = jwt;
     }
-    debugPrint(
-      'REST headers jwt=${usarJwt && bearer != SupabaseConfig.anonKey} prefix=${bearer.length >= 8 ? bearer.substring(0, 8) : bearer}',
-    );
     return {
       'apikey': SupabaseConfig.anonKey,
       'Authorization': 'Bearer $bearer',

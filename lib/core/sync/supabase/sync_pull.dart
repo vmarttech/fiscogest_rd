@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -12,6 +13,7 @@ class SyncPull {
   final _client = SupabaseRestClient();
 
   Future<void> pullTodoElNegocio() async {
+    await RenovarToken.asegurar();
     if (!SupabaseConfig.isConfigured) {
       debugPrint('SyncPull: Supabase no configurado');
       return;

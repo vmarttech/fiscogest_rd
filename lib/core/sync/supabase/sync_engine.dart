@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/cliente_sync.dart';
@@ -21,11 +22,12 @@ class SyncEngine {
 
   /// Local → Supabase (todas las tablas registradas).
   Future<void> pushAll() async {
+    await RenovarToken.asegurar();
     if (!SupabaseConfig.isConfigured) {
       debugPrint('SyncEngine.pushAll: Supabase no configurado');
       return;
     }
-    debugPrint('SyncEngine.pushAll: inicio');
+        debugPrint('SyncEngine.pushAll: inicio');
     Future<void> step(String name, Future<void> Function() fn) async {
       try {
         await fn();
@@ -52,7 +54,7 @@ class SyncEngine {
       debugPrint('SyncEngine.pullAll: Supabase no configurado');
       return;
     }
-    debugPrint('SyncEngine.pullAll: inicio');
+        debugPrint('SyncEngine.pullAll: inicio');
     try {
       await SyncPull(_db).pullTodoElNegocio();
       // Cuando existan pulls de ventas/caja, se llaman aquí o dentro de SyncPull.

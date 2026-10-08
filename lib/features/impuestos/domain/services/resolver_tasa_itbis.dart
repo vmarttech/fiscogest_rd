@@ -30,6 +30,13 @@ double resolverTasaItbisProducto({
   return tasaGlobal;
 }
 
+/// 0.18 o, si viene el legado, 18 → 0.18.
+double tasaComoFraccion(double tasa) {
+  if (tasa > 1) return tasa / 100.0;
+  if (tasa < 0) return 0;
+  return tasa;
+}
+
 double itbisDeLineas({
   required Iterable<double> subtotales,
   required Iterable<double> tasas,
@@ -46,7 +53,7 @@ double itbisDeLineas({
       subtotal > 0 ? (1 - (descuentoGeneral / subtotal).clamp(0.0, 1.0)) : 1.0;
   var itbis = 0.0;
   for (var i = 0; i < n; i++) {
-    itbis += subs[i] * factor * tas[i];
+    itbis += subs[i] * factor * tasaComoFraccion(tas[i]);
   }
   return itbis;
 }

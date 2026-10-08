@@ -21,7 +21,6 @@ import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
-import 'package:fiscogest_rd/core/sync/supabase/negocio_remote.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -191,14 +190,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (res == null) {
         if (await SupabaseConfig.hayRed()) {
           try {
-            debugPrint('Login: local falló → resolver negocio + pull');
-            final remoto = await NegocioRemote().negocioIdDeUsername(user);
-            if (remoto != null && remoto.isNotEmpty) {
-              await NegocioLocal.setId(remoto);
-              debugPrint('Login: NegocioLocal ← $remoto');
+            debugPrint('Login: local falló → token + pull');
+            await EmitirToken.trasLogin(username: user, password: pass);
+            final nid = await NegocioLocal.getId();
+            if (nid != null && nid.isNotEmpty) {
+              await SyncPull(db).pullTodoElNegocio();
+              res = await AuthService(db).login(user, pass);
             }
-            await SyncPull(db).pullTodoElNegocio();
-            res = await AuthService(db).login(user, pass);
           } catch (e, st) {
             debugPrint('Login: pull antes de reintento: $e');
             debugPrint('$st');
