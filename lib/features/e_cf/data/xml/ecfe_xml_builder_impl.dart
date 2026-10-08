@@ -79,10 +79,31 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
         });
         builder.element('Totales', nest: () {
           builder.element('MontoGravadoTotal', nest: _money(p.montoGravadoTotal));
-          builder.element('MontoGravadoI1', nest: _money(p.montoGravadoTotal));
-          builder.element('ITBIS1', nest: _rate(p.tasaItbis));
+          final g1 = p.bandasItbis ? p.montoGravadoI1 : p.montoGravadoTotal;
+          final i1 = p.bandasItbis ? p.totalItbis1 : p.totalItbis;
+          final tasa1 = p.bandasItbis ? 18.0 : p.tasaItbis;
+          if (!p.bandasItbis || g1 > 0.004) {
+            builder.element('MontoGravadoI1', nest: _money(g1));
+          }
+          if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+            builder.element('MontoGravadoI2', nest: _money(p.montoGravadoI2));
+          }
+          if (p.bandasItbis && p.montoExento > 0.004) {
+            builder.element('MontoExento', nest: _money(p.montoExento));
+          }
+          if (!p.bandasItbis || g1 > 0.004) {
+            builder.element('ITBIS1', nest: _rate(tasa1));
+          }
+          if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+            builder.element('ITBIS2', nest: _rate(16));
+          }
           builder.element('TotalITBIS', nest: _money(p.totalItbis));
-          builder.element('TotalITBIS1', nest: _money(p.totalItbis));
+          if (!p.bandasItbis || g1 > 0.004) {
+            builder.element('TotalITBIS1', nest: _money(i1));
+          }
+          if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+            builder.element('TotalITBIS2', nest: _money(p.totalItbis2));
+          }
           builder.element('MontoTotal', nest: _money(p.montoTotal));
         });
       });

@@ -114,9 +114,11 @@ class SyncPull {
       final precioVenta = _toDouble(r['precio_venta']);
       final precioCompra = _toDouble(r['precio_compra']);
       final stock = _toDouble(r['stock']);
-      final activo = r['activo'] == true ? 1 : 0;
+      final rawActivo = r['activo'];
+      final activo = (rawActivo == false || rawActivo == 0) ? 0 : 1;
 
       if (existing == null) {
+        if (activo == 0) continue;
         await _db.into(_db.productosTable).insert(
               ProductosTableCompanion.insert(
                 codigo: codigo.isEmpty ? 'P-${DateTime.now().millisecondsSinceEpoch}' : codigo,

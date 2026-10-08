@@ -12,7 +12,6 @@ import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
-import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_scheduler.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
@@ -165,21 +164,8 @@ void main() async {
     if (SupabaseConfig.isConfigured) {
       try {
         unawaited(() async {
-                    final jwtOk = await RenovarToken.asegurar();
-          if (!jwtOk) {
-            debugPrint('main: sin JWT → push tras login');
-            return;
-          }
-          var ok = await SupabaseConfig.hayRed();
-          if (!ok) {
-            await Future<void>.delayed(const Duration(seconds: 1));
-            ok = await SupabaseConfig.hayRed();
-          }
-          if (ok) {
-            await SyncEngine(db).pushAll();
-          } else {
-            debugPrint('main: sin red → skip pushAll');
-          }
+          await RenovarToken.asegurar();
+          debugPrint('main: push al entrar o cada 5 min');
         }());
       } catch (e, st) {
         debugPrint('Sync nube: $e');

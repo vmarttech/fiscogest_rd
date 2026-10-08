@@ -22,6 +22,12 @@ class EcfePayload {
     required this.items,
     this.formaPagoCodigo = '1',
     this.montoPago,
+    this.montoGravadoI1 = 0,
+    this.totalItbis1 = 0,
+    this.montoGravadoI2 = 0,
+    this.totalItbis2 = 0,
+    this.montoExento = 0,
+    this.bandasItbis = false,
   });
 
   final int tipoEcfCodigo;
@@ -47,6 +53,14 @@ class EcfePayload {
   final List<EcfePayloadItem> items;
   final String formaPagoCodigo;
   final double? montoPago;
+  final double montoGravadoI1;
+  final double totalItbis1;
+  final double montoGravadoI2;
+  final double totalItbis2;
+  final double montoExento;
+
+  /// true = totales partidos (18 / 16 / exento). false = todo en ITBIS 1.
+  final bool bandasItbis;
 }
 
 class EcfePayloadItem {

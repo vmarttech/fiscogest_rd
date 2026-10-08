@@ -1,6 +1,7 @@
 import 'package:fiscogest_rd/features/e_cf/domain/services/certificado_info_service.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_spec_version.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/ecfe_solo_lectura.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/e_cf/application/encolar_desde_venta.dart';
 import 'package:fiscogest_rd/features/e_cf/application/generar_xml_ecfe.dart';
@@ -84,6 +85,7 @@ Future<void> intentarEncolarEcfe({
   required String rncCliente,
   required String nombreCliente,
 }) async {
+    if (ecfeSoloLectura) return;
   try {
     final encolar = ref.read(encolarEcfeDesdeVentaProvider);
     await encolar(

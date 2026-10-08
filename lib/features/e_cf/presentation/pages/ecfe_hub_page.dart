@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/e_cf/presentation/ecfe_solo_lectura.dart';
 import 'dart:io';
 import 'package:fiscogest_rd/features/e_cf/domain/services/certificado_info_service.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_documento.dart';
@@ -100,6 +101,7 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
             constraints: BoxConstraints(maxWidth: mobile ? 720 : 960),
             child: Column(
               children: [
+                const EcfeSoloLecturaBanner(),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: Container(
@@ -362,6 +364,10 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
   }
 
   Future<void> _guardar() async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     final c = EcfeConfig(
       habilitado: _habilitado,
       ambiente: _ambiente,
@@ -740,6 +746,10 @@ class _SecuenciasEncfSection extends ConsumerWidget {
     WidgetRef ref,
     EcfeSecuenciaInfo? existing,
   ) async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     final tipoCtrl = TextEditingController(
       text: '${existing?.tipoEcf ?? 31}',
     );

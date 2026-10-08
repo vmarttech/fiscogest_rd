@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/e_cf/presentation/ecfe_solo_lectura.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/tipo_ecf.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_documento.dart';
 import 'package:fiscogest_rd/features/e_cf/application/anular_ecfe.dart';
@@ -79,10 +80,18 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _generarXml() async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     await _generarXmlCore();
   }
 
   Future<void> _generarXmlCore() async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     setState(() => _generando = true);
     try {
       final repoEcfe = ref.read(ecfeRepositoryProvider);
@@ -163,6 +172,10 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
 
   /// Generar XML → Firmar → Enviar a DGII (un solo flujo).
   Future<void> _procesarEcfe() async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     setState(() => _generando = true);
     final pasos = <String>[];
     try {
@@ -254,6 +267,10 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
 
 
   Future<void> _firmarXml() async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     setState(() => _generando = true);
     try {
       final result = await FirmarXmlEcfe(repo: ref.read(ecfeRepositoryProvider))
@@ -293,6 +310,10 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _enviarDgii() async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     setState(() => _generando = true);
     try {
       final result = await EnviarEcfe(repo: ref.read(ecfeRepositoryProvider))
@@ -319,6 +340,10 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _consultarEstado() async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     setState(() => _generando = true);
     try {
       final result = await ConsultarEcfe(repo: ref.read(ecfeRepositoryProvider))
@@ -345,6 +370,10 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
 
 
   Future<void> _editarEncfReferencia(EcfeDocumento doc) async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     final ctrl = TextEditingController(text: doc.encfReferencia ?? '');
     final ok = await showDialog<bool>(
       context: context,
@@ -382,6 +411,10 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _anularDocumento(EcfeDocumento doc) async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     final ctrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
@@ -473,6 +506,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    const EcfeSoloLecturaBanner(),
                     _card(
                       children: [
                         _row(

@@ -104,11 +104,31 @@ class GenerarXmlEcfe {
           : fmt.format(DateTime(DateTime.now().year + 1, 12, 31));
 
       final items = <EcfePayloadItem>[];
+      // Líneas en 0 y la venta sí cobró ITBIS: documento viejo, una sola tasa.
+      final usarTasaDocumento = detalles.every((d) => d.tasaImpuesto <= 0.0001) &&
+          venta.itbis > 0.009;
+      var gravado18 = 0.0;
+      var itbis18 = 0.0;
+      var gravado16 = 0.0;
+      var itbis16 = 0.0;
+      var exento = 0.0;
       for (var i = 0; i < detalles.length; i++) {
         final d = detalles[i];
         final monto = d.subtotalLinea ?? d.subtotal;
+        final tasaLinea = usarTasaDocumento ? tasaItbis : d.tasaImpuesto;
+        final pct = tasaLinea > 1.5 ? tasaLinea : tasaLinea * 100.0;
         final indFact =
-            tasaItbis >= 17.5 ? '1' : (tasaItbis >= 15.5 ? '2' : '3');
+            pct >= 17.5 ? '1' : (pct >= 15.5 ? '2' : '4');
+        final fr = pct / 100.0;
+        if (indFact == '1') {
+          gravado18 += monto;
+          itbis18 += monto * fr;
+        } else if (indFact == '2') {
+          gravado16 += monto;
+          itbis16 += monto * fr;
+        } else {
+          exento += monto;
+        }
         final nombre = (d.nombreProducto ?? '').trim();
         items.add(
           EcfePayloadItem(
@@ -146,10 +166,16 @@ class GenerarXmlEcfe {
             ? (venta.nombreCliente ?? 'CONSUMIDOR FINAL')
             : nombreCliente.trim(),
         direccionComprador: venta.clienteDireccion,
-        montoGravadoTotal: venta.montoSubtotal,
-        totalItbis: venta.itbis,
+        montoGravadoTotal: gravado18 + gravado16,
+        totalItbis: itbis18 + itbis16,
         montoTotal: venta.montoTotal,
-        tasaItbis: tasaItbis,
+        tasaItbis: gravado18 > 0 ? 18 : (gravado16 > 0 ? 16 : 0),
+        montoGravadoI1: gravado18,
+        totalItbis1: itbis18,
+        montoGravadoI2: gravado16,
+        totalItbis2: itbis16,
+        montoExento: exento,
+        bandasItbis: true,
         items: items,
         montoPago: venta.montoTotal,
       );

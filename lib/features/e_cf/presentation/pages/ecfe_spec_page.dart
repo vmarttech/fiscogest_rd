@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/features/e_cf/presentation/ecfe_solo_lectura.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -24,7 +25,7 @@ class EcfeSpecPage extends ConsumerWidget {
 
     return AppScaffold(
       title: 'Especificación e-CF',
-      subtitle: 'Versiones, circulares DGII y checklist de certificación',
+      subtitle: 'Solo consulta. Para emitir, FiscoGest versión PC',
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -115,6 +116,10 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
     bool cert = false,
     bool prod = false,
   }) async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     setState(() => _busy = true);
     try {
       await _repo.activarSpec(
@@ -139,6 +144,10 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
   }
 
   Future<void> _nuevaVersion() async {
+    if (ecfeSoloLectura) {
+      avisoEcfeVersionPc(context);
+      return;
+    }
     final codigo = TextEditingController();
     final nombre = TextEditingController();
     final circular = TextEditingController();

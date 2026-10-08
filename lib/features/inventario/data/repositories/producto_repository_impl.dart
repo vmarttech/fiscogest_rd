@@ -6,6 +6,9 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/data/mappers/producto_mapper.dart';
+import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
+import 'package:fiscogest_rd/core/sync/supabase/producto_sync.dart';
 
 class ProductoRepositoryImpl implements IProductoRepository {
   ProductoRepositoryImpl(this._db, this._kardexRepo);
@@ -14,7 +17,9 @@ class ProductoRepositoryImpl implements IProductoRepository {
 
   @override
   Future<List<Producto>> obtenerProductos() async {
-    final results = await _db.select(_db.productosTable).get();
+    final results = await (_db.select(_db.productosTable)
+          ..where((t) => t.activo.equals(1)))
+        .get();
     return results.map(ProductoDataMapper.toDomain).toList();
   }
 
@@ -84,9 +89,16 @@ class ProductoRepositoryImpl implements IProductoRepository {
 
   @override
   Future<bool> eliminarProducto(int id) async {
-    final rowsAffected = await (_db.delete(
-      _db.productosTable,
-    )..where((t) => t.id.equals(id))).go();
+    final rowsAffected = await (_db.update(_db.productosTable)
+          ..where((t) => t.id.equals(id)))
+        .write(ProductosTableCompanion(activo: Value(0)));
+    if (rowsAffected > 0) {
+      try {
+        await ProductoSync(_db).pushTodos();
+      } catch (e) {
+        debugPrint('ProductoSync tras eliminar: $e');
+      }
+    }
     return rowsAffected > 0;
   }
 }
