@@ -1,5 +1,3 @@
-import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
-import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/widgets/ecfe_estado_chip.dart';
 
@@ -22,6 +20,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class VistaDetalle extends ConsumerWidget {
   const VistaDetalle({super.key});
@@ -714,7 +713,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                               ?.modoSimplificado ??
                           false))
                         _FilaResumen(
-                          etiquetaItbis(ref.watch(tasaItbisVigenteProvider)),
+                          etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto)),
                           _formatearMonto(venta.itbis),
                           fontSize: tamanoCuerpo,
                         ),

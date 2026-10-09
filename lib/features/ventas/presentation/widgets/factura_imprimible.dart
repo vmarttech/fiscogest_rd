@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class FacturaImprimible extends StatelessWidget {
   const FacturaImprimible({
@@ -150,7 +151,7 @@ class FacturaImprimible extends StatelessWidget {
                     style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
                   ),
                   Text(
-                    '   Subtotal: ${_formatearMonto(subtotalLinea)}',
+                    '   Subtotal: ${_formatearMonto(subtotalLinea)}${sufijoTasaLinea(linea.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))}',
                     style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
                   ),
                   if (tieneDescuento)
@@ -191,7 +192,7 @@ class FacturaImprimible extends StatelessWidget {
               ),
             ],
             Text(
-              'ITBIS:       ${_formatearMonto(venta.itbis)}',
+              '${etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto))}:       ${_formatearMonto(venta.itbis)}',
               style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
             ),
             const SizedBox(height: 4),
@@ -285,7 +286,7 @@ class FacturaImprimible extends StatelessWidget {
       buffer.writeln(
         '   Cant: ${linea.cantidad}  x  ${_formatearMonto(linea.precioUnitario)}',
       );
-      buffer.writeln('   Subtotal: ${_formatearMonto(subtotalLinea)}');
+      buffer.writeln('   Subtotal: ${_formatearMonto(subtotalLinea)}${sufijoTasaLinea(linea.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))}');
       if (linea.montoDescuento != 0.0) {
         buffer.writeln(
           '   Descuento: -${_formatearMonto(linea.montoDescuento)}',
@@ -298,7 +299,7 @@ class FacturaImprimible extends StatelessWidget {
       buffer.writeln('Descuento:         -${_formatearMonto(descuentoTotal)}');
       buffer.writeln('Base Gravable:     ${_formatearMonto(baseGravable)}');
     }
-    buffer.writeln('ITBIS:       ${_formatearMonto(venta.itbis)}');
+    buffer.writeln('${etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto))}:       ${_formatearMonto(venta.itbis)}');
     buffer.writeln('========================================');
     buffer.writeln('TOTAL A PAGAR:     ${_formatearMonto(venta.total)}');
     buffer.writeln('========================================');

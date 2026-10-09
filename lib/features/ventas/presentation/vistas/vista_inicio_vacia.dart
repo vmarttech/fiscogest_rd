@@ -1,5 +1,3 @@
-import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
-import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
 import 'package:flutter/foundation.dart';
@@ -27,6 +25,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_carrito.
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
@@ -499,7 +498,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                                   ?.modoSimplificado ??
                               false))
                             _FilaResumen(
-                              label: etiquetaItbis(ref.watch(tasaItbisVigenteProvider)),
+                              label: etiquetaItbisLineas(estado.detalles.map((d) => d.tasaImpuesto)),
                               value: _formatearMonto(estado.itbis),
                             ),
                         ],

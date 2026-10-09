@@ -1,5 +1,3 @@
-import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
-import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class DatosVenta extends ConsumerWidget {
   const DatosVenta({
@@ -51,7 +50,7 @@ class DatosVenta extends ConsumerWidget {
           ),
           const Divider(height: AppSpacing.l),
           _buildFilaTotal('Subtotal', estadoLocal.subtotal),
-          _buildFilaTotal(etiquetaItbis(ref.watch(tasaItbisVigenteProvider)), estadoLocal.itbis),
+          _buildFilaTotal(etiquetaItbisLineas(estadoLocal.detalles.map((d) => d.tasaImpuesto)), estadoLocal.itbis),
           const Divider(),
           _buildFilaTotal('TOTAL A PAGAR', estadoLocal.total, esTotal: true),
         ],

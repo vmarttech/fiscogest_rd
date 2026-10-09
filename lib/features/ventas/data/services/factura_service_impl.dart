@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_factura_service.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class FacturaServiceImpl implements IFacturaService {
   FacturaServiceImpl();
@@ -53,7 +54,7 @@ class FacturaServiceImpl implements IFacturaService {
       b.writeln('${i + 1}. ${d.nombreProducto ?? "Producto"}');
       b.writeln('   Cant: ${d.cantidad}  x  ${_monto(d.precioUnitario)}');
       final sub = d.subtotalLinea ?? d.subtotal;
-      b.writeln('   Subtotal: ${_monto(sub)}');
+      b.writeln('   Subtotal: ${_monto(sub)}${sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))}');
       b.writeln('');
     }
     b.writeln('----------------------------------------');
@@ -61,7 +62,7 @@ class FacturaServiceImpl implements IFacturaService {
     if (venta.montoDescuento > 0) {
       b.writeln('Descuento:         ${_monto(venta.montoDescuento)}');
     }
-    b.writeln('ITBIS (18%):       ${_monto(venta.itbis)}');
+    b.writeln('${etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto))}:       ${_monto(venta.itbis)}');
     if (venta.costoEnvio > 0) {
       b.writeln('Envío:             ${_monto(venta.costoEnvio)}');
     }
@@ -171,7 +172,7 @@ class FacturaServiceImpl implements IFacturaService {
                   _tot('Subtotal', _monto(venta.subtotal)),
                   if (venta.montoDescuento > 0)
                     _tot('Descuento', _monto(venta.montoDescuento)),
-                  _tot('ITBIS (18%)', _monto(venta.itbis)),
+                  _tot(etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto)), _monto(venta.itbis)),
                   if (venta.costoEnvio > 0)
                     _tot('Envío', _monto(venta.costoEnvio)),
                   pw.Divider(),

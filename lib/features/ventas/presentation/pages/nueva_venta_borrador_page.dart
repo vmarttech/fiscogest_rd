@@ -1,5 +1,3 @@
-import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
-import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
@@ -19,6 +17,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_contado_
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_anotar_fiao.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -1208,7 +1207,7 @@ class _NuevaVentaBorradorPageState
           const SizedBox(height: 12),
           _filaResumen('Subtotal', formatRd(estado.subtotal), tamanoCuerpo),
           if (!(ref.watch(modoColmadoProvider)))
-            _filaResumen(etiquetaItbis(ref.watch(tasaItbisVigenteProvider)), formatRd(estado.itbis), tamanoCuerpo),
+            _filaResumen(etiquetaItbisLineas(estado.detalles.map((d) => ((d['tasaImpuesto'] as num?) ?? 0).toDouble())), formatRd(estado.itbis), tamanoCuerpo),
           if (estado.costoEnvio > 0)
             _filaResumen(
               'Envío / Delivery',

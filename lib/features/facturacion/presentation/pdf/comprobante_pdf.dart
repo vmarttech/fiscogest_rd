@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 /// Comprobante fiscal impreso (B01 crédito fiscal · B02 consumidor final).
 /// Estructura orientada a uso comercial en RD (DGII serie B).
@@ -53,7 +54,7 @@ class ComprobantePdf {
           d.ofertaNombre ?? '',
           if (d.precioOriginal != null) _money(d.precioOriginal!),
           _money(d.precioUnitario),
-          _money(d.subtotalLinea ?? d.subtotal),
+          (_money(d.subtotalLinea ?? d.subtotal) + sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))),
         ],
       ),
       _money(venta.montoSubtotal),
@@ -552,6 +553,7 @@ class ComprobantePdf {
     required String formaPago,
     double costoEnvio = 0,
     double montoDescuento = 0,
+    String etiquetaItbis = 'ITBIS',
   }) {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -568,7 +570,7 @@ class ComprobantePdf {
               if ((_empresa?.modoSimplificado != true) &&
                   (_empresa?.docMostrarItbisDesglose ?? true))
                 pw.Text(
-                  'ITBIS discriminado al 18%.',
+                  '$etiquetaItbis discriminado en esta factura.',
                   style: const pw.TextStyle(
                     fontSize: 8,
                     color: PdfColors.grey700,
@@ -593,7 +595,7 @@ class ComprobantePdf {
                   _totalRow('Descuento', '- ${_money(montoDescuento)}'),
                 if (costoEnvio > 0.001)
                   _totalRow('Envío / delivery', _money(costoEnvio)),
-                _totalRow('ITBIS (18%)', _money(itbis)),
+                _totalRow(etiquetaItbis, _money(itbis)),
                 pw.Divider(color: PdfColors.grey600),
               ],
               _totalRow('TOTAL', _money(total), bold: true),
@@ -1153,7 +1155,7 @@ class ComprobantePdf {
           ),
         );
       }
-      kids.add(nums(cant.toStringAsFixed(2), _money(precio), _money(sub)));
+      kids.add(nums(cant.toStringAsFixed(2), _money(precio), (_money(sub) + sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(v.detalles.map((e) => e.tasaImpuesto), v.itbis)))));
       if (d.montoDescuento > 0.001) {
         kids.add(
           pw.Text(
@@ -1285,7 +1287,7 @@ class ComprobantePdf {
             '- ${_money(descGlobal)}',
           ),
         if (showItbis)
-          totalRow(simple ? 'Impuesto' : 'ITBIS', '+ ${_money(v.itbis)}'),
+          totalRow(simple ? 'Impuesto' : etiquetaItbisLineas(v.detalles.map((d) => d.tasaImpuesto)), '+ ${_money(v.itbis)}'),
         if (envio > 0.0001) totalRow('Envío', _money(envio)),
         gap(2),
         totalRow('TOTAL', _money(v.montoTotal), bold: true),

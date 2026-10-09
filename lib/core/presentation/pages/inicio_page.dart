@@ -146,8 +146,167 @@ class InicioPage extends ConsumerWidget {
                         onFiao: () => _go(context, '/ventas/fios'),
                         onStock: () => _go(context, '/inventario'),
                       )
-                    else if (desktop)
+                    else if (desktop) ...[
+                      // ═══════════════════════════════════════
+                      // ORDEN 365:
+                      // 1) Pastillas pequeñas (accesos)
+                      // 2) 3 tarjetas grandes
+                      // 3) KPIs / info inferior horizontal
+                      // ═══════════════════════════════════════
+
+                      // ── 1. PASTILLAS PEQUEÑAS (entre banner y tarjetas grandes) ──
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          _Acceso(
+                            icon: Icons.point_of_sale,
+                            titulo: 'Ventas',
+                            sub: 'Cotizaciones',
+                            color: AppColors.primary,
+                            onTap: () => _go(context, '/ventas'),
+                          ),
+                          _Acceso(
+                            icon: Icons.payments_outlined,
+                            titulo: 'Caja',
+                            sub: 'Cobros y turnos',
+                            color: AppColors.success,
+                            onTap: () => _go(context, '/ventas/cobro'),
+                          ),
+                          _Acceso(
+                            icon: Icons.receipt_long_outlined,
+                            titulo: 'Facturación',
+                            sub: 'NCF B01/B02/B04',
+                            color: AppColors.info,
+                            onTap: () => _go(context, '/sales'),
+                          ),
+                          if (mostrarCredito)
+                            _Acceso(
+                              icon: Icons.credit_score_outlined,
+                              titulo: 'Crédito',
+                              sub: 'Solicitudes CxC',
+                              color: AppColors.warning,
+                              onTap: () => _go(context, '/creditos'),
+                            ),
+                          _Acceso(
+                            icon: Icons.people_outline,
+                            titulo: 'Clientes',
+                            sub: 'Cartera',
+                            color: const Color(0xFF7C3AED),
+                            onTap: () => _go(context, '/clientes'),
+                          ),
+                          _Acceso(
+                            icon: Icons.inventory_2_outlined,
+                            titulo: 'Inventario',
+                            sub: 'Existencias',
+                            color: AppColors.info,
+                            onTap: () => _go(context, '/inventario'),
+                          ),
+                          _Acceso(
+                            icon: Icons.local_shipping_outlined,
+                            titulo: 'Proveedores',
+                            sub: 'Compras y CxP',
+                            color: AppColors.primary,
+                            onTap: () => _go(context, '/proveedores'),
+                          ),
+                          _Acceso(
+                            icon: Icons.shopping_cart_outlined,
+                            titulo: 'Compras',
+                            sub: 'Al proveedor',
+                            color: AppColors.success,
+                            onTap: () => _go(context, '/compras'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── 2. TRES TARJETAS GRANDES ──
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _ActionBigCard(
+                              title: 'Nueva cotización',
+                              subtitle: 'Genera una cotización o venta',
+                              icon: Icons.add_circle_outline,
+                              gradient: const [
+                                Color(0xFF0F766E),
+                                Color(0xFF0D9488),
+                              ],
+                              onTap: () =>
+                                  _go(context, '/ventas/cotizaciones/nueva'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _ActionBigCard(
+                              title: 'Ir a caja',
+                              subtitle: 'Cobros y turnos del día',
+                              icon: Icons.payments_outlined,
+                              gradient: const [
+                                Color(0xFF2563EB),
+                                Color(0xFF3B82F6),
+                              ],
+                              onTap: () => _go(context, '/ventas/cobro'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              constraints: const BoxConstraints(minHeight: 168),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Color(0xFF7C3AED),
+                                    Color(0xFFA855F7),
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF7C3AED)
+                                        .withValues(alpha: 0.25),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              padding: const EdgeInsets.all(3),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: ColoredBox(
+                                  color: Colors.white,
+                                  child: _InsightsCarousel(
+                                    onNuevaCotizacion: () => _go(
+                                      context,
+                                      '/ventas/cotizaciones/nueva',
+                                    ),
+                                    onVerCobros: () =>
+                                        _go(context, CuentasCobrarPage.path),
+                                    puedeVerCobros: sesion?.puede(
+                                          Permiso.creditosGestionar,
+                                        ) ??
+                                        false,
+                                    puedeVerInventario: sesion?.puede(
+                                          Permiso.inventarioVer,
+                                        ) ??
+                                        false,
+                                    onVerInventario: () =>
+                                        _go(context, '/inventario'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── 3. BLOQUE INFERIOR HORIZONTAL (2 columnas) ──
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Expanded(
                             child: _KpiTile(
@@ -194,189 +353,8 @@ class InicioPage extends ConsumerWidget {
                             ),
                           ),
                         ],
-                      )
-                    else
-                      // Móvil: 2+1 evita ancho <30px y overflow vertical
-                      Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _KpiTile(
-                                  label: 'Caja',
-                                  value: 'Turno',
-                                  hint: 'Cobros',
-                                  icon: Icons.payments_outlined,
-                                  color: AppColors.success,
-                                  onTap: () => _go(context, '/ventas/cobro'),
-                                  compact: true,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              if (mostrarCredito)
-                                Expanded(
-                                  child: _KpiTile(
-                                    label: 'Crédito',
-                                    value: 'CxC',
-                                    hint: 'Cartera',
-                                    icon: Icons.credit_score_outlined,
-                                    color: AppColors.warning,
-                                    onTap: () => _go(context, '/creditos'),
-                                    compact: true,
-                                  ),
-                                )
-                              else
-                                const Expanded(child: SizedBox.shrink()),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          _KpiTile(
-                            label: 'Stock',
-                            value: 'Inventario',
-                            hint: 'Existencias y kárdex',
-                            icon: Icons.inventory_2_outlined,
-                            color: AppColors.info,
-                            onTap: () => _go(context, '/inventario'),
-                            compact: true,
-                          ),
-                        ],
                       ),
-                    const SizedBox(height: 24),
-                    // Accesos
-                    if (simplificado)
-                      _AccesosSimplificado(
-                        mobile: mobile,
-                        desktop: desktop,
-                        onProveedores: () => _go(context, '/proveedores'),
-                        onCaja: () => _go(context, '/ventas/cobro'),
-                        onFiao: () => _go(context, '/ventas/fios'),
-                        onProductos: () => _go(context, '/inventario'),
-                        onCompras: () => _go(context, '/compras'),
-                        onClientes: () => _go(context, '/clientes'),
-                        onNuevaVenta: () =>
-                            _go(context, '/ventas/cotizaciones/nueva'),
-                      )
-                    else if (desktop)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const SectionHeader(
-                                  title: 'Accesos rápidos',
-                                  subtitle: 'Operación del día',
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _Acceso(
-                                        icon: Icons.point_of_sale,
-                                        titulo: 'Ventas',
-                                        sub: 'Cotizaciones y pedidos',
-                                        color: AppColors.primary,
-                                        onTap: () => _go(context, '/ventas'),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: _Acceso(
-                                        icon: Icons.payments_outlined,
-                                        titulo: 'Caja',
-                                        sub: 'Cobrar y turnos',
-                                        color: AppColors.success,
-                                        onTap: () =>
-                                            _go(context, '/ventas/cobro'),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: _Acceso(
-                                        icon: Icons.receipt_long_outlined,
-                                        titulo: 'Facturación',
-                                        sub: 'NCF B01 / B02 / B04',
-                                        color: AppColors.info,
-                                        onTap: () => _go(context, '/sales'),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    if (mostrarCredito)
-                                      Expanded(
-                                        child: _Acceso(
-                                          icon: Icons.credit_score_outlined,
-                                          titulo: 'Crédito',
-                                          sub: 'Solicitudes y CxC',
-                                          color: AppColors.warning,
-                                          onTap: () => _go(context, '/creditos'),
-                                        ),
-                                      ),
-                                    if (mostrarCredito) const SizedBox(width: 12),
-                                    Expanded(
-                                      child: _Acceso(
-                                        icon: Icons.people_outline,
-                                        titulo: 'Clientes',
-                                        sub: 'Cartera',
-                                        color: AppColors.primary,
-                                        onTap: () => _go(context, '/clientes'),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: _Acceso(
-                                        icon: Icons.inventory_2_outlined,
-                                        titulo: 'Inventario',
-                                        sub: 'Existencias',
-                                        color: AppColors.info,
-                                        onTap: () =>
-                                            _go(context, '/inventario'),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const SectionHeader(
-                                  title: 'Hoy en el negocio',
-                                  subtitle: 'Indicadores en vivo',
-                                ),
-                                const SizedBox(height: 8),
-                                _InsightsCarousel(
-                                  onNuevaCotizacion: () => _go(
-                                    context,
-                                    '/ventas/cotizaciones/nueva',
-                                  ),
-                                  onVerCobros: () =>
-                                      _go(context, CuentasCobrarPage.path),
-                                  puedeVerCobros:
-                                      sesion?.puede(
-                                        Permiso.creditosGestionar,
-                                      ) ??
-                                      false,
-                                  puedeVerInventario:
-                                      sesion?.puede(Permiso.inventarioVer) ??
-                                      false,
-                                  onVerInventario: () =>
-                                      _go(context, '/inventario'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )
+                    ]
                     else ...[
                       Text(
                         'Operación del día',
@@ -1169,48 +1147,7 @@ class _HeroBanner extends StatelessWidget {
                   height: 1.35,
                 ),
               ),
-              if (!compact) ...[
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    FilledButton.icon(
-                      onPressed: onNuevaVenta,
-                      icon: const Icon(Icons.add, size: 18),
-                      label: const Text('Nueva cotización'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppColors.primaryDark,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    OutlinedButton.icon(
-                      onPressed: onCaja,
-                      icon: const Icon(Icons.payments_outlined, size: 18),
-                      label: const Text('Ir a caja'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.55),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+
             ],
           ),
         ],
@@ -1314,9 +1251,7 @@ class _KpiTile extends StatelessWidget {
     required this.icon,
     required this.color,
     this.onTap,
-
-    this.compact = false,
-  });
+  }) : compact = false;
 
   final String label;
   final String value;
@@ -1431,55 +1366,107 @@ class _Acceso extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mobile = MediaQuery.of(context).size.width < 600;
-    final tituloWidget = Text(
-      titulo,
-      maxLines: 1,
-      softWrap: false,
-      style: AppTypography.labelLarge.copyWith(
-        fontWeight: FontWeight.w700,
-      ),
-    );
-    return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+
+    // Móvil: lista horizontal compacta (sin cambiar UX táctil)
+    if (mobile) {
+      return AppCard(
+        onTap: onTap,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 22),
             ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titulo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelLarge.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    sub,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: AppColors.grey400,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Desktop: pastilla fija estilo 365 (no se estira)
+    return SizedBox(
+      width: 128,
+      height: 92,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: color.withValues(alpha: 0.14)),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (mobile)
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: tituloWidget,
-                  )
-                else
-                  tituloWidget,
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: color, size: 18),
+                ),
+                const Spacer(),
+                Text(
+                  titulo,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.labelMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 2),
                 Text(
                   sub,
-                  style: AppTypography.bodySmall.copyWith(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.labelSmall.copyWith(
                     color: AppColors.textSecondary,
+                    fontSize: 10,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 14,
-            color: AppColors.grey400,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -1960,3 +1947,90 @@ class _FondoPuntosPainter extends CustomPainter {
   bool shouldRepaint(covariant _FondoPuntosPainter oldDelegate) =>
       oldDelegate.color != color;
 }
+
+
+class _ActionBigCard extends StatelessWidget {
+  const _ActionBigCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.gradient,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final List<Color> gradient;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          height: 168,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradient,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: gradient.first.withValues(alpha: 0.28),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 22),
+                  ),
+                  Icon(
+                    Icons.arrow_outward_rounded,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    size: 20,
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                title,
+                style: AppTypography.h4.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: AppTypography.bodySmall.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+

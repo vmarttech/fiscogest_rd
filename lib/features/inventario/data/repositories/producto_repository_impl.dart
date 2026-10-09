@@ -91,7 +91,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
   Future<bool> eliminarProducto(int id) async {
     final rowsAffected = await (_db.update(_db.productosTable)
           ..where((t) => t.id.equals(id)))
-        .write(ProductosTableCompanion(activo: Value(0)));
+        .write(const ProductosTableCompanion(activo: Value(0)));
     if (rowsAffected > 0) {
       try {
         await ProductoSync(_db).pushTodos();
