@@ -36,6 +36,9 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
   void initState() {
     super.initState();
     _tabs = TabController(length: 3, vsync: this);
+    _tabs.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -102,37 +105,6 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
             child: Column(
               children: [
                 const EcfeSoloLecturaBanner(),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.warning.withValues(alpha: 0.35),
-                      ),
-                    ),
-                    child: Text(
-                      'Este módulo es independiente de ventas y caja. '
-                      'Mientras esté deshabilitado o en preparación, '
-                      'las operaciones diarias no se ven afectadas.',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-                TabBar(
-                  controller: _tabs,
-                  labelColor: AppColors.primary,
-                  tabs: const [
-                    Tab(text: 'Cola'),
-                    Tab(text: 'Configuración'),
-                    Tab(text: 'Cómo usar'),
-                  ],
-                ),
                 Expanded(
                   child: TabBarView(
                     controller: _tabs,
@@ -201,126 +173,517 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
   Widget build(BuildContext context) {
     final async = ref.watch(ecfeColaProvider);
     final certAsync = ref.watch(certificadoInfoProvider);
+    final mobile = AppBreakpoints.isMobile(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        certAsync.when(
-          loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
-          data: (info) {
-            if (info == null || !info.requiereAviso) {
-              return const SizedBox.shrink();
-            }
-            return Material(
-              color: info.vencido
-                  ? AppColors.error.withValues(alpha: 0.12)
-                  : const Color(0xFFFFF3E0),
-              child: ListTile(
-                dense: true,
-                leading: Icon(
-                  Icons.warning_amber_rounded,
-                  color: info.vencido ? AppColors.error : const Color(0xFFE65100),
-                ),
-                title: Text(
-                  info.mensaje,
-                  style: AppTypography.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: const Text(
-                  'Renueva el certificado del PSC antes de firmar/enviar.',
-                ),
-              ),
-            );
-          },
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          child: Row(
-            children: [
-              for (final entry in _filtros)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(entry.$2),
-                    selected: _filtro == entry.$1,
-                    onSelected: (_) => setState(() => _filtro = entry.$1),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: async.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
-            data: (lista) {
-              final view = _filtrar(lista);
-              if (view.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      lista.isEmpty
-                          ? 'Sin comprobantes e-CF en cola.\n'
-                              'Se encolan al facturar si el módulo está habilitado.'
-                          : 'No hay documentos en este filtro.',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(ecfeColaProvider);
+        ref.invalidate(certificadoInfoProvider);
+        await ref.read(ecfeColaProvider.future);
+      },
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          // ── Panel + KPIs + accesos (scroll unificado) ──
+          SliverToBoxAdapter(
+            child: Builder(
+              builder: (context) {
+                final colaAsync = ref.watch(ecfeColaProvider);
+                final cfgAsync = ref.watch(ecfeConfigProvider);
+                int nPend = 0, nEnv = 0, nErr = 0, nAcept = 0, nTotal = 0;
+                final listaCola = colaAsync.valueOrNull;
+                if (listaCola != null) {
+                  nTotal = listaCola.length;
+                  for (final d in listaCola) {
+                    final e = d.estado;
+                    if (e == EstadoEcfInterno.borrador ||
+                        e == EstadoEcfInterno.validacionFallida ||
+                        e == EstadoEcfInterno.xmlListo ||
+                        e == EstadoEcfInterno.firmado) {
+                      nPend++;
+                    } else if (e == EstadoEcfInterno.enviado ||
+                        e == EstadoEcfInterno.enProceso) {
+                      nEnv++;
+                    } else if (e == EstadoEcfInterno.errorTecnico ||
+                        e == EstadoEcfInterno.rechazado) {
+                      nErr++;
+                    } else if (e.esTerminalExito) {
+                      nAcept++;
+                    }
+                  }
+                }
+                final cfg = cfgAsync.valueOrNull;
+                final habilitado = cfg?.habilitado ?? false;
+                final ambienteLabel = cfg?.ambiente.name ?? '—';
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        mobile ? 12 : 16,
+                        mobile ? 10 : 14,
+                        mobile ? 12 : 16,
+                        0,
                       ),
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(mobile ? 16 : 22),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF0F172A),
+                              Color(0xFF0D9488),
+                              Color(0xFF14B8A6),
+                            ],
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'PANEL e-CF',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: Colors.white70,
+                                letterSpacing: 1.2,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Comprobantes electrónicos DGII',
+                              style: AppTypography.h4.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: mobile ? 18 : 22,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              habilitado
+                                  ? 'Módulo habilitado · ambiente $ambienteLabel'
+                                  : 'Módulo en preparación o deshabilitado · ventas y caja no se afectan',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: Colors.white70,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                _EcfeHeroPill(
+                                  icon: Icons.inbox_outlined,
+                                  label: 'En cola: $nTotal',
+                                ),
+                                _EcfeHeroPill(
+                                  icon: habilitado
+                                      ? Icons.check_circle_outline
+                                      : Icons.pause_circle_outline,
+                                  label: habilitado ? 'Activo' : 'Inactivo',
+                                ),
+                                _EcfeHeroPill(
+                                  icon: Icons.cloud_outlined,
+                                  label: ambienteLabel,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        mobile ? 12 : 16,
+                        12,
+                        mobile ? 12 : 16,
+                        0,
+                      ),
+                      child: mobile
+                          ? Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _EcfeKpiCard(
+                                        label: 'Pendientes',
+                                        value: '$nPend',
+                                        color: AppColors.warning,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: _EcfeKpiCard(
+                                        label: 'Enviados',
+                                        value: '$nEnv',
+                                        color: AppColors.info,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _EcfeKpiCard(
+                                        label: 'Errores',
+                                        value: '$nErr',
+                                        color: AppColors.error,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: _EcfeKpiCard(
+                                        label: 'Aceptados',
+                                        value: '$nAcept',
+                                        color: AppColors.success,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                Expanded(
+                                  child: _EcfeKpiCard(
+                                    label: 'Pendientes',
+                                    value: '$nPend',
+                                    color: AppColors.warning,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _EcfeKpiCard(
+                                    label: 'Enviados',
+                                    value: '$nEnv',
+                                    color: AppColors.info,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _EcfeKpiCard(
+                                    label: 'Errores',
+                                    value: '$nErr',
+                                    color: AppColors.error,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _EcfeKpiCard(
+                                    label: 'Aceptados',
+                                    value: '$nAcept',
+                                    color: AppColors.success,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+
+
+                    // Nav: Cola · Configuración · Cómo usar (debajo del panel/KPIs)
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        mobile ? 12 : 16,
+                        12,
+                        mobile ? 12 : 16,
+                        0,
+                      ),
+                      child: Builder(
+                        builder: (ctx) {
+                          final hub = ctx.findAncestorStateOfType<_EcfeHubPageState>();
+                          final tabIdx = hub?._tabs.index ?? 0;
+                          Widget card(IconData icon, String t, String s, int idx) {
+                            return _EcfeAccesoCard(
+                              icon: icon,
+                              titulo: t,
+                              subtitulo: s,
+                              destacado: tabIdx == idx,
+                              onTap: () => hub?._tabs.animateTo(idx),
+                            );
+                          }
+                          if (mobile) {
+                            return Column(
+                              children: [
+                                card(Icons.inbox_outlined, 'Cola', 'Comprobantes en pipeline', 0),
+                                const SizedBox(height: 8),
+                                card(Icons.settings_outlined, 'Configuración', 'Emisor y certificado', 1),
+                                const SizedBox(height: 8),
+                                card(Icons.menu_book_outlined, 'Cómo usar', 'Guía rápida', 2),
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: card(Icons.inbox_outlined, 'Cola', 'Comprobantes en pipeline', 0),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: card(Icons.settings_outlined, 'Configuración', 'Emisor y certificado', 1),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: card(Icons.menu_book_outlined, 'Cómo usar', 'Guía rápida', 2),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          // Certificado PSC
+          SliverToBoxAdapter(
+            child: certAsync.when(
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+              data: (info) {
+                if (info == null || !info.requiereAviso) {
+                  return const SizedBox.shrink();
+                }
+                return Material(
+                  color: info.vencido
+                      ? AppColors.error.withValues(alpha: 0.12)
+                      : const Color(0xFFFFF3E0),
+                  child: ListTile(
+                    dense: true,
+                    leading: Icon(
+                      Icons.warning_amber_rounded,
+                      color: info.vencido
+                          ? AppColors.error
+                          : const Color(0xFFE65100),
+                    ),
+                    title: Text(
+                      info.mensaje,
+                      style: AppTypography.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Renueva el certificado del PSC antes de firmar/enviar.',
                     ),
                   ),
                 );
-              }
-              return RefreshIndicator(
-                onRefresh: () async {
-                  ref.invalidate(ecfeColaProvider);
-                  ref.invalidate(certificadoInfoProvider);
-                  await ref.read(ecfeColaProvider.future);
-                },
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: view.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (_, i) {
-                    final EcfeDocumento d = view[i];
-                    final String accion = EcfeSiguienteAccion.etiqueta(
-                      d.estado,
-                      trackId: d.trackId,
-                    );
-                    final String err =
-                        (d.ultimoError ?? d.mensajeDgii ?? '').trim();
-                    final String track = (d.trackId ?? '').trim();
-                    return ListTile(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: AppColors.border),
-                      ),
-                      title: Text(
-                        '${d.tipoEcf.codigo} · ${d.tipoEcf.descripcion}',
-                      ),
-                      subtitle: Text(
-                        '${d.estado.etiqueta}'
-                        '${d.encf != null ? ' · ${d.encf}' : ''}'
-                        '${d.ventaId != null ? ' · venta #${d.ventaId}' : ''}'
-                        '${track.isNotEmpty ? ' · Track $track' : ''}'
-                        '\n→ $accion'
-                        '${err.isNotEmpty ? '\n⚠ $err' : ''}',
-                      ),
-                      isThreeLine: true,
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.push('/ecfe/${d.id}'),
-                    );
-                  },
+              },
+            ),
+          ),
+          // Filtros en tarjeta
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border),
                 ),
-              );
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final entry in _filtros)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(
+                              entry.$2,
+                              style: TextStyle(
+                                fontWeight: _filtro == entry.$1
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                fontSize: 13,
+                              ),
+                            ),
+                            selected: _filtro == entry.$1,
+                            showCheckmark: true,
+                            selectedColor:
+                                AppColors.primary.withValues(alpha: 0.14),
+                            backgroundColor: AppColors.grey50,
+                            side: BorderSide(
+                              color: _filtro == entry.$1
+                                  ? AppColors.primary
+                                  : AppColors.border,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            onSelected: (_) =>
+                                setState(() => _filtro = entry.$1),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Lista / vacío
+          ...async.when(
+            loading: () => [
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+            error: (e, _) => [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: Text('$e')),
+              ),
+            ],
+            data: (lista) {
+              final view = _filtrar(lista);
+              if (view.isEmpty) {
+                return [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.receipt_long_outlined,
+                              size: 48,
+                              color: AppColors.grey400,
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              lista.isEmpty
+                                  ? 'Sin comprobantes e-CF en cola'
+                                  : 'No hay documentos en este filtro',
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              lista.isEmpty
+                                  ? 'Se encolan al facturar si el módulo está habilitado.'
+                                  : 'Prueba otro estado o actualiza la cola.',
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ];
+              }
+              return [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    mobile ? 12 : 16,
+                    8,
+                    mobile ? 12 : 16,
+                    24,
+                  ),
+                  sliver: SliverList.separated(
+                    itemCount: view.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (_, i) {
+                      final EcfeDocumento d = view[i];
+                      final String accion = EcfeSiguienteAccion.etiqueta(
+                        d.estado,
+                        trackId: d.trackId,
+                      );
+                      final String err =
+                          (d.ultimoError ?? d.mensajeDgii ?? '').trim();
+                      final String track = (d.trackId ?? '').trim();
+                      return Material(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: () => context.push('/ecfe/${d.id}'),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: mobile ? 12 : 16,
+                              vertical: mobile ? 12 : 14,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${d.tipoEcf.codigo} · ${d.tipoEcf.descripcion}',
+                                        style: AppTypography.bodyMedium
+                                            .copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${d.estado.etiqueta}'
+                                        '${d.encf != null ? ' · ${d.encf}' : ''}'
+                                        '${d.ventaId != null ? ' · venta #${d.ventaId}' : ''}'
+                                        '${track.isNotEmpty ? ' · Track $track' : ''}',
+                                        style: AppTypography.bodySmall
+                                            .copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '→ $accion',
+                                        style: AppTypography.bodySmall
+                                            .copyWith(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      if (err.isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '⚠ $err',
+                                          style: AppTypography.bodySmall
+                                              .copyWith(
+                                            color: AppColors.error,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right,
+                                  color: AppColors.grey400,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ];
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1147,6 +1510,159 @@ class _GuiaMini extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Solo presentación UI — no afecta pipeline e-CF.
+class _EcfeHeroPill extends StatelessWidget {
+  const _EcfeHeroPill({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EcfeKpiCard extends StatelessWidget {
+  const _EcfeKpiCard({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+  final String label;
+  final String value;
+  final Color color;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.4,
+              fontSize: 10,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: AppTypography.h3.copyWith(
+              fontWeight: FontWeight.w800,
+              color: color,
+              fontSize: 26,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EcfeAccesoCard extends StatelessWidget {
+  const _EcfeAccesoCard({
+    required this.icon,
+    required this.titulo,
+    required this.subtitulo,
+    required this.onTap,
+    this.destacado = false,
+  });
+  final IconData icon;
+  final String titulo;
+  final String subtitulo;
+  final VoidCallback onTap;
+  final bool destacado;
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: destacado ? AppColors.primary : AppColors.border,
+              width: destacado ? 1.5 : 1,
+            ),
+            color: destacado
+                ? AppColors.primary.withValues(alpha: 0.06)
+                : AppColors.white,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      titulo,
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitulo,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.grey400),
+            ],
+          ),
+        ),
       ),
     );
   }

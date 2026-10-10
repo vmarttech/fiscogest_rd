@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
 /// true en esta app. La emisión vive en FiscoGest versión PC.
 bool get ecfeSoloLectura => true;
@@ -28,6 +29,11 @@ class EcfeSoloLecturaBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Solo visible en móvil/tablet estrecha — en PC la app ya es versión escritorio.
+    if (!AppBreakpoints.isMobile(context)) {
+      return const SizedBox.shrink();
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Material(

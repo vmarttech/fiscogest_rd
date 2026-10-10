@@ -60,6 +60,8 @@ class AppDashboardHero extends ConsumerWidget {
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (icon != null) ...[

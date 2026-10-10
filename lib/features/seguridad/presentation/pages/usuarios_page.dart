@@ -138,6 +138,8 @@ class UsuariosPage extends ConsumerWidget {
                                       style: AppTypography.bodySmall.copyWith(
                                         color: AppColors.textSecondary,
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
@@ -273,6 +275,10 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
       setState(() => _error = 'Indique el nombre');
       return;
     }
+    if (nombre.length > 80) {
+      setState(() => _error = 'El nombre no puede superar 80 caracteres');
+      return;
+    }
     if (esNuevo && pass.length < 6) {
       setState(() => _error = 'Contraseña: mínimo 6 caracteres');
       return;
@@ -382,6 +388,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
               const SizedBox(height: 10),
               TextField(
                 controller: _nombreCtrl,
+                maxLength: 80,
                 decoration: const InputDecoration(
                   labelText: 'Nombre *',
                   border: OutlineInputBorder(),

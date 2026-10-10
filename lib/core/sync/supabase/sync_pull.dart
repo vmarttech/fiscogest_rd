@@ -11,6 +11,7 @@ class SyncPull {
   SyncPull(this._db);
   final AppDatabase _db;
   final _client = SupabaseRestClient();
+  static const _maxNombreUsuarioLength = 80;
 
   Future<void> pullTodoElNegocio() async {
     await RenovarToken.asegurar();
@@ -50,7 +51,12 @@ class SyncPull {
             ..where((t) => t.username.equals(username)))
           .getSingleOrNull();
 
-      final nombre = (r['nombre'] as String?)?.trim() ?? username;
+      final nombreRecibido = (r['nombre'] as String?)?.trim() ?? '';
+      // Do not let malformed remote data replace a valid local name.
+      final nombreSeguro = nombreRecibido.isNotEmpty &&
+              nombreRecibido.length <= _maxNombreUsuarioLength
+          ? nombreRecibido
+          : null;
       final rol = (r['rol'] as String?) ?? 'Vendedor';
       final activo = r['activo'] == true;
       final hash = (r['password_hash'] as String?)?.trim() ?? '';
@@ -58,7 +64,7 @@ class SyncPull {
       if (existing == null) {
         await _db.into(_db.usuariosTable).insert(
               UsuariosTableCompanion.insert(
-                nombre: nombre,
+                nombre: nombreSeguro ?? username,
                 username: username,
                 passwordHash: hash,
                 apellido: const Value(''),
@@ -73,7 +79,9 @@ class SyncPull {
               ..where((t) => t.id.equals(existing.id)))
             .write(
           UsuariosTableCompanion(
-            nombre: Value(nombre),
+            nombre: nombreSeguro == null
+                ? const Value.absent()
+                : Value(nombreSeguro),
             rol: Value(rol),
             estado: Value(activo ? 'Activo' : 'Inactivo'),
             // Si la nube trae hash, SIEMPRE actualizar local

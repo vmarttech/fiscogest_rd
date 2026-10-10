@@ -496,12 +496,12 @@ class _KpiCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: AppTypography.h4.copyWith(
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 2),
@@ -862,8 +862,6 @@ class _TopProductosCard extends StatelessWidget {
                         children: [
                           Text(
                             p.nombre,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                             style: AppTypography.labelMedium.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
