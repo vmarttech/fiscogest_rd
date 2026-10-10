@@ -57,8 +57,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               padding: AppLayout.pantallaPadding.add(
                 const EdgeInsets.only(bottom: 12),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              child: ListView(
                 children: [
                   const AppHubHero(
                     title: 'Kárdex de inventario',
@@ -67,7 +66,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     icon: Icons.history_edu_rounded,
                   ),
                   SizedBox(height: isMobile ? 14 : 18),
-                  Container(
+                  Align(
+                    alignment: isMobile
+                        ? Alignment.centerLeft
+                        : Alignment.centerRight,
+                    child: Container(
                     padding: EdgeInsets.all(isMobile ? 8 : 14),
                     decoration: BoxDecoration(
                       color: AppColors.white,
@@ -82,15 +85,16 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                       ],
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: isMobile
+                          ? CrossAxisAlignment.stretch
+                          : CrossAxisAlignment.start,
                       children: [
                         // En móvil, los filtros comparten una sola fila para
                         // dejar más altura disponible al historial.
                         if (isMobile) ...[
-                          Row(
-                            children: [
-                              Expanded(
-                                child: AppTextField(
+                          SizedBox(
+                            width: double.infinity,
+                            child: AppTextField(
                                   height: 48,
                                   prefixIcon: Icons.search_rounded,
                                   hint: 'Producto o documento',
@@ -100,11 +104,13 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                         .toLowerCase(),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              SizedBox(
-                                width: 138,
-                                child: AppDropdown<TipoMovimiento>(
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: SizedBox(
+                              width: 200,
+                              child: AppDropdown<TipoMovimiento>(
                                   initialValue: _filtroTipo,
                                   hint: 'Tipo',
                                   items: TipoMovimiento.values
@@ -132,16 +138,18 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                   onChanged: (valor) =>
                                       setState(() => _filtroTipo = valor),
                                 ),
-                              ),
-                            ],
+                            ),
                           ),
                         ] else
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(
+                              SizedBox(
+                                width: 460,
                                 child: AppTextField(
-                                  hint:
-                                      'Buscar por producto, documento o fecha...',
+                                  height: 48,
+                                  prefixIcon: Icons.search_rounded,
+                                  hint: 'Buscar producto o documento',
                                   onChanged: (valor) => setState(
                                     () => _filtroBusqueda = valor
                                         .trim()
@@ -159,12 +167,12 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                       .map(
                                         (tipo) =>
                                             DropdownMenuItem<TipoMovimiento>(
-                                              value: tipo,
-                                              child: Text(
-                                                tipo.name.toUpperCase(),
-                                                style: AppTypography.bodySmall,
-                                              ),
-                                            ),
+                                          value: tipo,
+                                          child: Text(
+                                            tipo.name.toUpperCase(),
+                                            style: AppTypography.bodySmall,
+                                          ),
+                                        ),
                                       )
                                       .toList(),
                                   onChanged: (valor) =>
@@ -175,11 +183,12 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                           ),
                       ],
                     ),
-                  ),
+                    ),
+                    ),
                   const SizedBox(height: 12),
                   // Lista de movimientos
-                  Expanded(
-                    child: Container(
+                  
+                    Container(
                       decoration: BoxDecoration(
                         color: AppColors.white,
                         borderRadius: BorderRadius.circular(16),
@@ -194,12 +203,12 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: movimientosAsync.when(
-                        loading: () => const Center(
+                        loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 40),
                           child: CircularProgressIndicator(
                             color: AppColors.primary,
                           ),
                         ),
-                        error: (error, _) => Center(
+                        error: (error, _) => Padding(padding: const EdgeInsets.symmetric(vertical: 40),
                           child: Padding(
                             padding: AppSpacing.allM,
                             child: Text(
@@ -231,7 +240,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                           }).toList();
 
                           if (filtrados.isEmpty) {
-                            return Center(
+                            return Padding(padding: const EdgeInsets.symmetric(vertical: 40),
                               child: Padding(
                                 padding: AppSpacing.allL,
                                 child: Column(
@@ -265,9 +274,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                     vertical: 10,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(
-                                      alpha: 0.07,
-                                    ),
+                                    color: AppColors.white,
                                     border: const Border(
                                       bottom: BorderSide(
                                         color: AppColors.border,
@@ -278,77 +285,47 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                     children: [
                                       SizedBox(
                                         width: 110,
-                                        child: Text(
+                                        child: _kardexHeaderCell(
                                           'TIPO',
-                                          style: AppTypography.labelSmall
-                                              .copyWith(
-                                                color: AppColors.textPrimary,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.4,
-                                                fontSize: 11,
-                                              ),
+                                          AppColors.primary,
                                         ),
                                       ),
                                       Expanded(
                                         flex: 3,
-                                        child: Text(
+                                        child: _kardexHeaderCell(
                                           'DOCUMENTO',
-                                          style: AppTypography.labelSmall
-                                              .copyWith(
-                                                color: AppColors.textPrimary,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.4,
-                                                fontSize: 11,
-                                              ),
+                                          AppColors.info,
                                         ),
                                       ),
                                       SizedBox(
                                         width: 72,
-                                        child: Text(
+                                        child: _kardexHeaderCell(
                                           'CANT.',
+                                          AppColors.warning,
                                           textAlign: TextAlign.right,
-                                          style: AppTypography.labelSmall
-                                              .copyWith(
-                                                color: AppColors.textPrimary,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.4,
-                                                fontSize: 11,
-                                              ),
                                         ),
                                       ),
                                       SizedBox(
                                         width: 120,
-                                        child: Text(
+                                        child: _kardexHeaderCell(
                                           'SALDO',
+                                          AppColors.success,
                                           textAlign: TextAlign.right,
-                                          style: AppTypography.labelSmall
-                                              .copyWith(
-                                                color: AppColors.textPrimary,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.4,
-                                                fontSize: 11,
-                                              ),
                                         ),
                                       ),
                                       SizedBox(
                                         width: 100,
-                                        child: Text(
+                                        child: _kardexHeaderCell(
                                           'FECHA',
+                                          AppColors.secondary,
                                           textAlign: TextAlign.right,
-                                          style: AppTypography.labelSmall
-                                              .copyWith(
-                                                color: AppColors.textPrimary,
-                                                fontWeight: FontWeight.w800,
-                                                letterSpacing: 0.4,
-                                                fontSize: 11,
-                                              ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              Expanded(
-                                child: ListView.separated(
+                              
+                                ListView.separated(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), 
                                   padding: EdgeInsets.zero,
                                   itemCount: filtrados.length,
                                   separatorBuilder: (_, __) => isMobile
@@ -620,14 +597,36 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                             ),
                                             SizedBox(
                                               width: 120,
-                                              child: Text(
-                                                '${mov.saldoAnterior} → ${mov.saldoNuevo}',
-                                                textAlign: TextAlign.right,
-                                                style: AppTypography.bodySmall
-                                                    .copyWith(
-                                                      color: AppColors
-                                                          .textSecondary,
+                                              child: Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: colorTipo.withValues(
+                                                      alpha: 0.12,
                                                     ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    '${mov.saldoAnterior} → ${mov.saldoNuevo}',
+                                                    textAlign: TextAlign.right,
+                                                    style: AppTypography
+                                                        .bodySmall
+                                                        .copyWith(
+                                                          color: colorTipo,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
+                                                  ),
+                                                ),
                                               ),
                                             ),
                                             SizedBox(
@@ -638,7 +637,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                                 style: AppTypography.bodySmall
                                                     .copyWith(
                                                       color: AppColors
-                                                          .textDisabled,
+                                                          .textSecondary,
+                                                      fontWeight:
+                                                          FontWeight.w600,
                                                     ),
                                               ),
                                             ),
@@ -647,14 +648,14 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                                       ),
                                     );
                                   },
-                                ),
-                              ),
+                                )
+                              ,
                             ],
                           );
                         },
                       ),
-                    ),
-                  ),
+                    )
+                  ,
                 ],
               ),
             ),
@@ -663,4 +664,29 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       ),
     );
   }
+}
+
+Widget _kardexHeaderCell(
+  String label,
+  Color color, {
+  TextAlign textAlign = TextAlign.left,
+}) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.11),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: color.withValues(alpha: 0.24)),
+    ),
+    child: Text(
+      label,
+      textAlign: textAlign,
+      style: AppTypography.labelSmall.copyWith(
+        color: color,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.4,
+        fontSize: 11,
+      ),
+    ),
+  );
 }

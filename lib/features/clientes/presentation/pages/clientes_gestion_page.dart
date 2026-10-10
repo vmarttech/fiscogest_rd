@@ -35,9 +35,12 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
 
     return AppScaffold(
       title: 'CLIENTES',
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: SafeArea(
+        child: ListView(
           children: [
             Padding(
               padding: EdgeInsets.fromLTRB(
@@ -181,8 +184,8 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                 ),
               ),
             ),
-            Expanded(
-              child: clientesAsync.when(
+            
+              clientesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
                   child: Text(
@@ -236,7 +239,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                     );
                   }
 
-                  return ListView.separated(
+                  return ListView.separated(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), 
                     padding: EdgeInsets.fromLTRB(
                       mobile ? 16 : 24,
                       4,
@@ -257,9 +260,11 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                     },
                   );
                 },
-              ),
-            ),
+              )
+            ,
           ],
+        ),
+      ),
         ),
       ),
     );

@@ -91,167 +91,216 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
           ),
           data: (todos) => SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
-              isMobile ? 16 : 8,
+              isMobile ? 16 : 24,
               isMobile ? 12 : 16,
-              isMobile ? 16 : 8,
+              isMobile ? 16 : 24,
               24,
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Producto', style: AppTypography.labelLarge),
-                  const SizedBox(height: AppSpacing.s),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: AppTextField(
-                          controller: _codigoCtrl,
-                          hint: 'Seleccione o escriba el código',
-                          onChanged: (val) {
-                            setState(() => _productoSeleccionado = null);
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.search,
-                          color: AppColors.primary,
-                        ),
-                        onPressed: () => _abrirBuscador(todos),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: Container(
+                  padding: EdgeInsets.all(isMobile ? 18 : 28),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.grey900.withValues(alpha: 0.05),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
-                  if (_productoSeleccionado != null)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 6,
-                        bottom: AppSpacing.m,
-                      ),
-                      child: Text(
-                        '✅ ${_productoSeleccionado!.nombre} | Stock actual: ${_productoSeleccionado!.stock ?? 0.0}',
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.success,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: AppSpacing.m),
-                  const Text('Tipo de Ajuste', style: AppTypography.labelLarge),
-                  const SizedBox(height: AppSpacing.s),
-                  AppDropdown<String>(
-                    initialValue: _tipoSeleccionado,
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'entrada',
-                        child: Text('Entrada (+)'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'salida',
-                        child: Text('Salida (-)'),
-                      ),
-                    ],
-                    onChanged: (v) => setState(() => _tipoSeleccionado = v!),
-                  ),
-                  const SizedBox(height: AppSpacing.m),
-                  const Text('Cantidad', style: AppTypography.labelLarge),
-                  const SizedBox(height: AppSpacing.s),
-                  AppTextField(
-                    controller: _cantidadCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    hint: 'Ej: 5.5',
-                  ),
-                  const SizedBox(height: AppSpacing.m),
-                  const Text('Motivo', style: AppTypography.labelLarge),
-                  const SizedBox(height: AppSpacing.s),
-                  AppTextField(
-                    controller: _motivoCtrl,
-                    hint: 'Ej: Conteo físico / Pérdida',
-                  ),
-                  const SizedBox(height: AppSpacing.m),
-                  const Text('Observaciones', style: AppTypography.labelLarge),
-                  const SizedBox(height: AppSpacing.s),
-                  AppTextField(
-                    controller: _observacionesCtrl,
-                    hint: 'Comentarios adicionales (opcional)',
-                  ),
-                  const SizedBox(height: AppSpacing.l),
-                  SizedBox(
-                    width: double.infinity,
-                    child: AppButton(
-                      text: 'Guardar Ajuste',
-                      onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
-                        final codigo = _codigoCtrl.text.trim();
-                        final producto =
-                            _productoSeleccionado ??
-                            todos.firstWhere(
-                              (p) => p.codigo == codigo,
-                              orElse: () =>
-                                  throw Exception('Producto no encontrado'),
-                            );
-                        final cant = double.tryParse(_cantidadCtrl.text) ?? 0.0;
-                        if (cant <= 0) {
-                          FiscoGestNotifications.show(
-                            const SnackBar(
-                              content: Text(
-                                'La cantidad debe ser mayor a cero',
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Producto', style: AppTypography.labelLarge),
+                        const SizedBox(height: AppSpacing.s),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _abrirBuscador(todos),
+                            icon: const Icon(Icons.search_rounded),
+                            label: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                _productoSeleccionado == null
+                                    ? 'Buscar y seleccionar producto'
+                                    : '${_productoSeleccionado!.codigo} · ${_productoSeleccionado!.nombre}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                          );
-                          return;
-                        }
-                        final stockActual = producto.stock ?? 0.0;
-                        if (_tipoSeleccionado == 'salida' &&
-                            cant > stockActual) {
-                          FiscoGestNotifications.show(
-                            SnackBar(
-                              content: Text(
-                                'Stock insuficiente. Disponible: $stockActual',
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _productoSeleccionado == null
+                                  ? AppColors.textSecondary
+                                  : AppColors.primaryDark,
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
                               ),
-                            ),
-                          );
-                          return;
-                        }
-                        final usuarioId = ref.read(usuarioAutenticadoProvider);
-                        if (usuarioId == null) {
-                          FiscoGestNotifications.show(
-                            const SnackBar(
-                              content: Text('Usuario no autenticado'),
-                            ),
-                          );
-                          return;
-                        }
-                        final ajuste = AjusteInventario(
-                          productoId: producto.id!,
-                          codigoBusqueda: codigo,
-                          cantidad: cant,
-                          tipoAjuste: _tipoSeleccionado,
-                          motivo: _motivoCtrl.text,
-                          observaciones: _observacionesCtrl.text.trim(),
-                          usuarioId: usuarioId,
-                          fechaCreacion: DateTime.now(),
-                        );
-                        final exito = await ref
-                            .read(ajusteInventarioProvider)
-                            .registrar(ajuste);
-                        if (!exito || !context.mounted) return;
-                        FiscoGestNotifications.show(
-                          const SnackBar(
-                            content: Text(
-                              '✅ Ajuste guardado — stock actualizado',
+                              side: const BorderSide(color: AppColors.border),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
-                        );
-                        context.pop();
-                      },
+                        ),
+                        if (_productoSeleccionado != null)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 6,
+                              bottom: AppSpacing.m,
+                            ),
+                            child: Text(
+                              '✅ ${_productoSeleccionado!.nombre} | Stock actual: ${_productoSeleccionado!.stock ?? 0.0}',
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.success,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: AppSpacing.m),
+                        const Text(
+                          'Tipo de Ajuste',
+                          style: AppTypography.labelLarge,
+                        ),
+                        const SizedBox(height: AppSpacing.s),
+                        AppDropdown<String>(
+                          initialValue: _tipoSeleccionado,
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'entrada',
+                              child: Text('Entrada (+)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'salida',
+                              child: Text('Salida (-)'),
+                            ),
+                          ],
+                          onChanged: (v) =>
+                              setState(() => _tipoSeleccionado = v!),
+                        ),
+                        const SizedBox(height: AppSpacing.m),
+                        const Text('Cantidad', style: AppTypography.labelLarge),
+                        const SizedBox(height: AppSpacing.s),
+                        AppTextField(
+                          controller: _cantidadCtrl,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          hint: 'Ej: 5.5',
+                        ),
+                        const SizedBox(height: AppSpacing.m),
+                        const Text('Motivo', style: AppTypography.labelLarge),
+                        const SizedBox(height: AppSpacing.s),
+                        AppTextField(
+                          controller: _motivoCtrl,
+                          hint: 'Ej: Conteo físico / Pérdida',
+                        ),
+                        const SizedBox(height: AppSpacing.m),
+                        const Text(
+                          'Observaciones',
+                          style: AppTypography.labelLarge,
+                        ),
+                        const SizedBox(height: AppSpacing.s),
+                        AppTextField(
+                          controller: _observacionesCtrl,
+                          hint: 'Comentarios adicionales (opcional)',
+                        ),
+                        const SizedBox(height: AppSpacing.l),
+                        Align(
+                          alignment: isMobile
+                              ? Alignment.center
+                              : Alignment.centerRight,
+                          child: SizedBox(
+                            width: isMobile ? double.infinity : 220,
+                            child: AppButton(
+                              text: 'Guardar Ajuste',
+                              onPressed: () async {
+                                if (!_formKey.currentState!.validate()) return;
+                                final codigo = _codigoCtrl.text.trim();
+                                final producto = _productoSeleccionado;
+                                if (producto == null) {
+                                  FiscoGestNotifications.show(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Seleccione un producto usando la lupa',
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                final cant =
+                                    double.tryParse(_cantidadCtrl.text) ?? 0.0;
+                                if (cant <= 0) {
+                                  FiscoGestNotifications.show(
+                                    const SnackBar(
+                                      content: Text(
+                                        'La cantidad debe ser mayor a cero',
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                final stockActual = producto.stock ?? 0.0;
+                                if (_tipoSeleccionado == 'salida' &&
+                                    cant > stockActual) {
+                                  FiscoGestNotifications.show(
+                                    SnackBar(
+                                      content: Text(
+                                        'Stock insuficiente. Disponible: $stockActual',
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                final usuarioId = ref.read(
+                                  usuarioAutenticadoProvider,
+                                );
+                                if (usuarioId == null) {
+                                  FiscoGestNotifications.show(
+                                    const SnackBar(
+                                      content: Text('Usuario no autenticado'),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                final ajuste = AjusteInventario(
+                                  productoId: producto.id!,
+                                  codigoBusqueda: codigo,
+                                  cantidad: cant,
+                                  tipoAjuste: _tipoSeleccionado,
+                                  motivo: _motivoCtrl.text,
+                                  observaciones: _observacionesCtrl.text.trim(),
+                                  usuarioId: usuarioId,
+                                  fechaCreacion: DateTime.now(),
+                                );
+                                final exito = await ref
+                                    .read(ajusteInventarioProvider)
+                                    .registrar(ajuste);
+                                if (!exito || !context.mounted) return;
+                                FiscoGestNotifications.show(
+                                  const SnackBar(
+                                    content: Text(
+                                      '✅ Ajuste guardado — stock actualizado',
+                                    ),
+                                  ),
+                                );
+                                context.pop();
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),

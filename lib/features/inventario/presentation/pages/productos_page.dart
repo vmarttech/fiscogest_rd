@@ -168,15 +168,18 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     final puedeVerCostos = _puedeVerCostos();
     final puedeEliminar = _puedeEliminar();
 
-    return Padding(
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: Padding(
       padding: EdgeInsets.fromLTRB(
         isMobile ? 16 : 24,
         isMobile ? 12 : 20,
         isMobile ? 16 : 24,
         24,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListView(
         children: [
           // Buscador + Filtros
           if (isMobile) ...[
@@ -220,52 +223,75 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               ),
             ),
           ] else
-            Row(
-              children: [
-                Expanded(
-                  child: AppTextField(
-                    hint: 'Buscar por código, nombre...',
-                    onChanged: (v) => setState(() => _filtroProductos = v),
-                  ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.grey900.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                _FilterChip(
-                  label: 'Todos',
-                  selected: _filtroEstado == 'todos',
-                  onTap: () => setState(() => _filtroEstado = 'todos'),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 440,
+                      child: AppTextField(
+                        height: 48,
+                        prefixIcon: Icons.search_rounded,
+                        hint: 'Buscar por código o nombre...',
+                        onChanged: (v) =>
+                            setState(() => _filtroProductos = v),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _FilterChip(
+                      label: 'Todos',
+                      selected: _filtroEstado == 'todos',
+                      onTap: () => setState(() => _filtroEstado = 'todos'),
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'En Stock',
+                      selected: _filtroEstado == 'en_stock',
+                      color: AppColors.success,
+                      onTap: () => setState(() => _filtroEstado = 'en_stock'),
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Bajo',
+                      selected: _filtroEstado == 'bajo',
+                      color: AppColors.warning,
+                      onTap: () => setState(() => _filtroEstado = 'bajo'),
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Agotado',
+                      selected: _filtroEstado == 'agotado',
+                      color: AppColors.error,
+                      onTap: () => setState(() => _filtroEstado = 'agotado'),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: 'En Stock',
-                  selected: _filtroEstado == 'en_stock',
-                  color: AppColors.success,
-                  onTap: () => setState(() => _filtroEstado = 'en_stock'),
-                ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: 'Bajo',
-                  selected: _filtroEstado == 'bajo',
-                  color: AppColors.warning,
-                  onTap: () => setState(() => _filtroEstado = 'bajo'),
-                ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: 'Agotado',
-                  selected: _filtroEstado == 'agotado',
-                  color: AppColors.error,
-                  onTap: () => setState(() => _filtroEstado = 'agotado'),
-                ),
-              ],
+              ),
             ),
           SizedBox(height: isMobile ? 14 : 20),
-          Expanded(
-            child: ref
+          
+            ref
                 .watch(productoControllerProvider)
                 .when(
-                  loading: () => const Center(
+                  loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 40),
                     child: CircularProgressIndicator(color: AppColors.primary),
                   ),
-                  error: (e, _) => Center(
+                  error: (e, _) => Padding(padding: const EdgeInsets.symmetric(vertical: 40),
                     child: Text(
                       'Error: $e',
                       style: AppTypography.bodyMedium.copyWith(
@@ -293,7 +319,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                     }).toList();
 
                     if (filtrados.isEmpty) {
-                      return Center(
+                      return Padding(padding: const EdgeInsets.symmetric(vertical: 40),
                         child: Padding(
                           padding: const EdgeInsets.only(top: 60),
                           child: Column(
@@ -326,7 +352,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                     }
 
                     if (isMobile) {
-                      return ListView.separated(
+                      return ListView.separated(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), 
                         padding: EdgeInsets.zero,
                         itemCount: filtrados.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -340,13 +366,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       );
                     }
 
-                    final alturaTabla = (62 + filtrados.length * 64)
-                        .clamp(128, 600)
-                        .toDouble();
                     return Align(
                       alignment: Alignment.topCenter,
                       child: SizedBox(
-                        height: alturaTabla,
+                        
                         child: _buildTablaDesktop(
                           filtrados,
                           puedeVerCostos,
@@ -355,11 +378,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       ),
                     );
                   },
-                ),
-          ),
+                )
+          ,
         ],
       ),
-    );
+    )));
   }
 
   Widget _buildTablaDesktop(
@@ -387,60 +410,66 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.04),
+              color: AppColors.white,
               border: const Border(bottom: BorderSide(color: AppColors.border)),
             ),
             child: Row(
               children: [
-                Expanded(flex: 3, child: Text('PRODUCTO', style: _headerStyle)),
-                Expanded(flex: 2, child: Text('CÓDIGO', style: _headerStyle)),
+                Expanded(
+                  flex: 3,
+                  child: _inventoryHeaderCell('PRODUCTO', AppColors.primary),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: _inventoryHeaderCell('CÓDIGO', AppColors.info),
+                ),
                 Expanded(
                   flex: 1,
-                  child: Text(
+                  child: _inventoryHeaderCell(
                     'STOCK',
-                    style: _headerStyle,
+                    AppColors.warning,
                     textAlign: TextAlign.center,
                   ),
                 ),
                 Expanded(
                   flex: 1,
-                  child: Text(
+                  child: _inventoryHeaderCell(
                     'ESTADO',
-                    style: _headerStyle,
+                    AppColors.success,
                     textAlign: TextAlign.center,
                   ),
                 ),
                 if (puedeVerCostos) ...[
                   Expanded(
                     flex: 1,
-                    child: Text(
+                    child: _inventoryHeaderCell(
                       'COSTO',
-                      style: _headerStyle,
+                      AppColors.secondary,
                       textAlign: TextAlign.right,
                     ),
                   ),
                   Expanded(
                     flex: 1,
-                    child: Text(
+                    child: _inventoryHeaderCell(
                       'VENTA',
-                      style: _headerStyle,
+                      AppColors.info,
                       textAlign: TextAlign.right,
                     ),
                   ),
                 ],
                 SizedBox(
                   width: 100,
-                  child: Text(
+                  child: _inventoryHeaderCell(
                     'ACCIONES',
-                    style: _headerStyle,
+                    AppColors.grey600,
                     textAlign: TextAlign.center,
                   ),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: ListView.separated(
+          
+            ListView.separated(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), 
               itemCount: productos.length,
               separatorBuilder: (_, __) =>
                   const Divider(height: 1, color: AppColors.border),
@@ -485,7 +514,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                           child: Text(
                             p.nombre,
                             style: AppTypography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -496,7 +525,8 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                           child: Text(
                             p.codigo,
                             style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
+                              color: AppColors.grey700,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -505,15 +535,25 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                stock.toStringAsFixed(
-                                  stock.truncateToDouble() == stock ? 0 : 2,
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
                                 ),
-                                style: AppTypography.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                textAlign: TextAlign.center,
+                                child: Text(
+                                  stock.toStringAsFixed(
+                                    stock.truncateToDouble() == stock ? 0 : 2,
+                                  ),
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: statusColor,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                               if (indicadores != null && cantidadSugerida > 0)
                                 Tooltip(
@@ -560,6 +600,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                               formatRd(p.precioCompra),
                               style: AppTypography.bodySmall.copyWith(
                                 color: AppColors.success,
+                                fontWeight: FontWeight.w700,
                               ),
                               textAlign: TextAlign.right,
                             ),
@@ -569,7 +610,8 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                             child: Text(
                               formatRd(p.precioVenta),
                               style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textPrimary,
+                                color: AppColors.primaryDark,
+                                fontWeight: FontWeight.w700,
                               ),
                               textAlign: TextAlign.right,
                             ),
@@ -607,8 +649,8 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                   ),
                 );
               },
-            ),
-          ),
+            )
+          ,
         ],
       ),
     );
@@ -620,10 +662,30 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     return ('En Stock', AppColors.success);
   }
 
-  TextStyle get _headerStyle => AppTypography.labelSmall.copyWith(
-    color: AppColors.textSecondary,
-    fontWeight: FontWeight.w600,
-  );
+  Widget _inventoryHeaderCell(
+    String label,
+    Color color, {
+    TextAlign textAlign = TextAlign.left,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.11),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.24)),
+      ),
+      child: Text(
+        label,
+        textAlign: textAlign,
+        style: AppTypography.labelSmall.copyWith(
+          color: color,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.4,
+          fontSize: 11,
+        ),
+      ),
+    );
+  }
 
   // ─────────────────────────────────────────────
   // SECCIÓN KÁRDEX

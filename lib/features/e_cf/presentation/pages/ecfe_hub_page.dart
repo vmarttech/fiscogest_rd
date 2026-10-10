@@ -552,7 +552,7 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.receipt_long_outlined,
                               size: 48,
                               color: AppColors.grey400,

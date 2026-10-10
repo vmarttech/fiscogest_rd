@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
+import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/widgets/plan_requerido.dart';
@@ -57,11 +58,14 @@ class _RegistrarTransferenciaPageState
     final productos =
         ref.watch(productoControllerProvider).valueOrNull ?? <Producto>[];
     final q = _prodBusca.text.trim().toLowerCase();
-    final filtrados = productos.where((p) {
-      if (q.isEmpty) return true;
-      return p.nombre.toLowerCase().contains(q) ||
-          p.codigo.toLowerCase().contains(q);
-    }).take(80).toList();
+    final filtrados = productos
+        .where((p) {
+          if (q.isEmpty) return true;
+          return p.nombre.toLowerCase().contains(q) ||
+              p.codigo.toLowerCase().contains(q);
+        })
+        .take(80)
+        .toList();
     final fmt = DateFormat('dd/MM/yyyy HH:mm');
 
     return AppScaffold(
@@ -100,9 +104,18 @@ class _RegistrarTransferenciaPageState
                 const SizedBox(height: 12),
                 TextField(
                   controller: _prodBusca,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Buscar producto',
-                    prefixIcon: Icon(Icons.search),
+                    labelStyle: TextStyle(
+                      color: AppColors.primaryDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    hintStyle: TextStyle(color: AppColors.grey600),
+                    prefixIcon: Icon(Icons.search, color: AppColors.primary),
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.white,
@@ -113,6 +126,10 @@ class _RegistrarTransferenciaPageState
                 InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'Producto',
+                    labelStyle: TextStyle(
+                      color: AppColors.primaryDark,
+                      fontWeight: FontWeight.w600,
+                    ),
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.white,
@@ -120,7 +137,16 @@ class _RegistrarTransferenciaPageState
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<int>(
                       isExpanded: true,
-                      hint: const Text('Seleccione producto'),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      hint: Text(
+                        'Seleccione producto',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.grey600,
+                        ),
+                      ),
                       value: filtrados.any((p) => p.id == form.productoId)
                           ? form.productoId
                           : null,
@@ -129,7 +155,12 @@ class _RegistrarTransferenciaPageState
                           if (p.id != null)
                             DropdownMenuItem(
                               value: p.id,
-                              child: Text('${p.codigo} — ${p.nombre}'),
+                              child: Text(
+                                '${p.codigo} — ${p.nombre}',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
                             ),
                       ],
                       onChanged: (v) {
@@ -146,11 +177,24 @@ class _RegistrarTransferenciaPageState
                 stockOrigen.when(
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),
-                  data: (s) => Text(
-                    'Stock en origen: ${s.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: s > 0 ? AppColors.success : AppColors.error,
-                      fontWeight: FontWeight.w600,
+                  data: (s) => Text.rich(
+                    TextSpan(
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      children: [
+                        const TextSpan(text: 'Stock en origen: '),
+                        TextSpan(
+                          text: s.toStringAsFixed(2),
+                          style: TextStyle(
+                            color: s > 0
+                                ? AppColors.successDark
+                                : AppColors.errorDark,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -173,11 +217,19 @@ class _RegistrarTransferenciaPageState
                 ),
                 if (form.error != null) ...[
                   const SizedBox(height: 8),
-                  Text(form.error!, style: const TextStyle(color: AppColors.error)),
+                  Text(
+                    form.error!,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.errorDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
                 const SizedBox(height: 16),
                 AppButton(
-                  text: form.enviando ? 'Procesando…' : 'Procesar transferencia',
+                  text: form.enviando
+                      ? 'Procesando…'
+                      : 'Procesar transferencia',
                   onPressed: form.esValido
                       ? () async {
                           final ok = await ref
@@ -196,13 +248,11 @@ class _RegistrarTransferenciaPageState
                       : null,
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'Historial reciente',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-                ),
+                const Text('Historial reciente', style: AppTypography.h4),
                 const SizedBox(height: 8),
                 historial.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('Error historial: $e'),
                   data: (rows) {
                     if (rows.isEmpty) {
@@ -212,15 +262,33 @@ class _RegistrarTransferenciaPageState
                       children: [
                         for (final t in rows)
                           Card(
+                            color: AppColors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              side: const BorderSide(color: AppColors.border),
+                            ),
+                            elevation: 1,
                             child: ListTile(
-                              leading: const Icon(Icons.swap_horiz),
+                              leading: const Icon(
+                                Icons.swap_horiz,
+                                color: AppColors.primary,
+                              ),
                               title: Text(
                                 '${t.productoCodigo ?? ''} ${t.productoNombre ?? 'Producto ${t.productoId}'}',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                               subtitle: Text(
                                 '${t.origenNombre ?? t.almacenOrigenId} → ${t.destinoNombre ?? t.almacenDestinoId}\n'
                                 '${t.cantidad} · ${fmt.format(t.fecha)}'
                                 '${t.nota == null ? '' : ' · ${t.nota}'}',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.grey700,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.5,
+                                ),
                               ),
                               isThreeLine: true,
                             ),

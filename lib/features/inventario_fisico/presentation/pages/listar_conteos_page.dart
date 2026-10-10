@@ -35,14 +35,14 @@ class ListarConteosPage extends ConsumerWidget {
             isMobile ? 16 : 8,
             12,
           ),
-          child: Center(
+          child: SingleChildScrollView(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1320),
               child: conteosAsync.when(
-                loading: () => const Center(
+                loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 40),
                   child: CircularProgressIndicator(color: AppColors.primary),
                 ),
-                error: (e, _) => Center(
+                error: (e, _) => Padding(padding: const EdgeInsets.symmetric(vertical: 40),
                   child: Text(
                     'Error: $e',
                     style: AppTypography.bodyMedium.copyWith(
@@ -52,7 +52,7 @@ class ListarConteosPage extends ConsumerWidget {
                 ),
                 data: (lista) {
                   if (lista.isEmpty) {
-                    return Center(
+                    return Padding(padding: const EdgeInsets.symmetric(vertical: 40),
                       child: Text(
                         'No hay conteos registrados. Cree el primero.',
                         style: AppTypography.bodyMedium.copyWith(
@@ -77,6 +77,7 @@ class ListarConteosPage extends ConsumerWidget {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         if (!isMobile)
                           Container(
@@ -129,8 +130,8 @@ class ListarConteosPage extends ConsumerWidget {
                               ],
                             ),
                           ),
-                        Expanded(
-                          child: ListView.separated(
+                        
+                          ListView.separated(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), 
                             itemCount: lista.length,
                             separatorBuilder: (_, __) => const Divider(
                               height: 1,
@@ -228,8 +229,8 @@ class ListarConteosPage extends ConsumerWidget {
                                 ),
                               );
                             },
-                          ),
-                        ),
+                          )
+                        ,
                       ],
                     ),
                   );

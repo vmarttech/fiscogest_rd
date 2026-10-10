@@ -140,6 +140,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
               ),
               children: [
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.96),
@@ -163,12 +164,16 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      AppTextField(
-                        controller: _busquedaCtrl,
-                        hint: 'Buscar por código o nombre...',
-                        prefixIcon: Icons.search,
-                        onChanged: (v) =>
-                            setState(() => _filtro = v.trim().toLowerCase()),
+                      SizedBox(
+                        width: isMobile ? double.infinity : 520,
+                        child: AppTextField(
+                          controller: _busquedaCtrl,
+                          hint: 'Buscar por código o nombre...',
+                          prefixIcon: Icons.search,
+                          onChanged: (v) => setState(
+                            () => _filtro = v.trim().toLowerCase(),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       productosAsync.when(
