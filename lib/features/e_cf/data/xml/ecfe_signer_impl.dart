@@ -84,7 +84,9 @@ class EcfeSignerImpl implements EcfeSigner {
         certPem.path,
       ]);
       if (rCert.exitCode != 0) {
-        throw StateError('No se pudo leer el certificado del .p12: ${rCert.stderr}');
+        throw StateError(
+          'No se pudo leer el certificado del .p12: ${rCert.stderr}',
+        );
       }
 
       final x509B64 = _extractCertBase64(await certPem.readAsString());
@@ -93,8 +95,14 @@ class EcfeSignerImpl implements EcfeSigner {
       }
 
       // Documento a firmar: quitar cualquier Signature previa
-      final xmlLimpio = _stripSignature(xmlSinFirma.trim());
-      final digestValue = base64.encode(sha256.convert(utf8.encode(xmlLimpio)).bytes);
+      final xmlLimpio = _conFechaHoraFirma(
+        _stripSignature(xmlSinFirma.trim()),
+        DateTime.now(),
+      );
+      final xmlParaFirma = _canon(xmlLimpio);
+      final digestValue = base64.encode(
+        sha256.convert(utf8.encode(xmlParaFirma)).bytes,
+      );
 
       final signedInfo =
           '<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">'
@@ -110,7 +118,7 @@ class EcfeSignerImpl implements EcfeSigner {
           '</SignedInfo>';
 
       final siFile = File('${tmp.path}/signedinfo.xml');
-      await siFile.writeAsString(signedInfo, flush: true);
+      await siFile.writeAsString(_canon(signedInfo), flush: true);
       final sigOut = File('${tmp.path}/sig.bin');
 
       // RSA-SHA256 sobre SignedInfo
@@ -130,12 +138,12 @@ class EcfeSignerImpl implements EcfeSigner {
 
       final signatureXml =
           '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">'
-          '$signedInfo'
+          '${_canon(signedInfo)}'
           '<SignatureValue>$signatureValue</SignatureValue>'
           '<KeyInfo><X509Data><X509Certificate>$x509B64</X509Certificate></X509Data></KeyInfo>'
           '</Signature>';
 
-      return _insertSignature(xmlLimpio, signatureXml);
+      return '<?xml version="1.0" encoding="UTF-8"?>${_insertSignature(xmlParaFirma, signatureXml)}';
     } finally {
       try {
         await tmp.delete(recursive: true);
@@ -187,6 +195,88 @@ class EcfeSignerImpl implements EcfeSigner {
         '',
       );
     }
+  }
+
+  static String _conFechaHoraFirma(String xml, DateTime firma) {
+    String dos(int n) => n.toString().padLeft(2, '0');
+    final texto =
+        '${dos(firma.day)}-${dos(firma.month)}-${firma.year} '
+        '${dos(firma.hour)}:${dos(firma.minute)}:${dos(firma.second)}';
+    final limpio = xml.replaceAll(
+      RegExp(r'<FechaHoraFirma>[\s\S]*?</FechaHoraFirma>'),
+      '',
+    );
+    final cierre = RegExp(r'</([A-Za-z_][\w.-]*)>\s*$');
+    final m = cierre.firstMatch(limpio.trimRight());
+    if (m == null) return limpio;
+    final raiz = m.group(1)!;
+    final idx = limpio.lastIndexOf('</$raiz>');
+    if (idx < 0) return limpio;
+    return '${limpio.substring(0, idx)}<FechaHoraFirma>$texto</FechaHoraFirma></$raiz>';
+  }
+
+  static String _canon(String xml) {
+    final doc = XmlDocument.parse(xml);
+    return _escribir(doc.rootElement);
+  }
+
+  static String _esc(String s, {required bool attr}) {
+    final b = StringBuffer();
+    for (final unidad in s.runes) {
+      final ch = String.fromCharCode(unidad);
+      if (ch == '&') {
+        b.write('&amp;');
+      } else if (ch == '<') {
+        b.write('&lt;');
+      } else if (ch == '>') {
+        b.write('&gt;');
+      } else if (ch == '\r') {
+        b.write('&#xD;');
+      } else if (attr && ch == '"') {
+        b.write('&quot;');
+      } else if (attr && ch == '\t') {
+        b.write('&#x9;');
+      } else if (attr && ch == '\n') {
+        b.write('&#xA;');
+      } else {
+        b.write(ch);
+      }
+    }
+    return b.toString();
+  }
+
+  static String _escribir(XmlElement e) {
+    final ns = <XmlAttribute>[];
+    final attrs = <XmlAttribute>[];
+    for (final a in e.attributes) {
+      if (a.name.local == 'xmlns' || a.name.prefix == 'xmlns') {
+        ns.add(a);
+      } else {
+        attrs.add(a);
+      }
+    }
+    ns.sort((a, b) => a.name.qualified.compareTo(b.name.qualified));
+    attrs.sort((a, b) {
+      final c = (a.name.namespaceUri ?? '').compareTo(
+        b.name.namespaceUri ?? '',
+      );
+      return c != 0 ? c : a.name.local.compareTo(b.name.local);
+    });
+    final nombre = e.name.qualified;
+    final buf = StringBuffer('<$nombre');
+    for (final a in <XmlAttribute>[...ns, ...attrs]) {
+      buf.write(' ${a.name.qualified}="${_esc(a.value, attr: true)}"');
+    }
+    buf.write('>');
+    for (final c in e.children) {
+      if (c is XmlElement) {
+        buf.write(_escribir(c));
+      } else if (c is XmlText && c.value.trim().isNotEmpty) {
+        buf.write(_esc(c.value, attr: false));
+      }
+    }
+    buf.write('</$nombre>');
+    return buf.toString();
   }
 
   static String _insertSignature(String xml, String signatureXml) {

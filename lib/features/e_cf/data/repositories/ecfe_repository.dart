@@ -68,7 +68,9 @@ class EcfeRepository {
   Future<void> guardarConfig(EcfeConfig c) async {
     final existing = await _db.select(_db.ecfeConfigTable).get();
     if (existing.isEmpty) {
-      await _db.into(_db.ecfeConfigTable).insert(
+      await _db
+          .into(_db.ecfeConfigTable)
+          .insert(
             EcfeConfigTableCompanion.insert(
               habilitado: Value(c.habilitado),
               ambiente: Value(c.ambiente.name),
@@ -81,9 +83,9 @@ class EcfeRepository {
             ),
           );
     } else {
-      await (_db.update(_db.ecfeConfigTable)
-            ..where((t) => t.id.equals(existing.first.id)))
-          .write(
+      await (_db.update(
+        _db.ecfeConfigTable,
+      )..where((t) => t.id.equals(existing.first.id))).write(
         EcfeConfigTableCompanion(
           habilitado: Value(c.habilitado),
           ambiente: Value(c.ambiente.name),
@@ -114,17 +116,18 @@ class EcfeRepository {
   }
 
   Future<EcfeDocumento?> obtenerPorId(int id) async {
-    final row = await (_db.select(_db.ecfeDocumentosTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return row == null ? null : _mapDoc(row);
   }
 
   Future<EcfeDocumento?> buscarPorVentaId(int ventaId) async {
-    final row = await (_db.select(_db.ecfeDocumentosTable)
-          ..where((t) => t.ventaId.equals(ventaId))
-          ..limit(1))
-        .getSingleOrNull();
+    final row =
+        await (_db.select(_db.ecfeDocumentosTable)
+              ..where((t) => t.ventaId.equals(ventaId))
+              ..limit(1))
+            .getSingleOrNull();
     return row == null ? null : _mapDoc(row);
   }
 
@@ -137,7 +140,9 @@ class EcfeRepository {
     String? encfReferencia,
   }) async {
     final now = DateTime.now();
-    return _db.into(_db.ecfeDocumentosTable).insert(
+    return _db
+        .into(_db.ecfeDocumentosTable)
+        .insert(
           EcfeDocumentosTableCompanion.insert(
             ventaId: Value(ventaId),
             tipoEcf: tipoEcf.codigo,
@@ -159,16 +164,19 @@ class EcfeRepository {
     String? codigoRespuesta,
     String? mensajeDgii,
   }) async {
-    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
-        .write(
+    await (_db.update(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).write(
       EcfeDocumentosTableCompanion(
         estado: Value(estado.name),
         ultimoError: Value(ultimoError),
         trackId: trackId != null ? Value(trackId) : const Value.absent(),
-        codigoRespuesta:
-            codigoRespuesta != null ? Value(codigoRespuesta) : const Value.absent(),
-        mensajeDgii:
-            mensajeDgii != null ? Value(mensajeDgii) : const Value.absent(),
+        codigoRespuesta: codigoRespuesta != null
+            ? Value(codigoRespuesta)
+            : const Value.absent(),
+        mensajeDgii: mensajeDgii != null
+            ? Value(mensajeDgii)
+            : const Value.absent(),
         actualizadoEn: Value(DateTime.now()),
       ),
     );
@@ -180,7 +188,9 @@ class EcfeRepository {
     required bool ok,
     String? detalle,
   }) async {
-    await _db.into(_db.ecfeEventosTable).insert(
+    await _db
+        .into(_db.ecfeEventosTable)
+        .insert(
           EcfeEventosTableCompanion.insert(
             documentoId: documentoId,
             paso: paso,
@@ -192,18 +202,21 @@ class EcfeRepository {
   }
 
   Future<List<({String paso, bool ok, String? detalle, DateTime creadoEn})>>
-      listarEventos(int documentoId) async {
-    final rows = await (_db.select(_db.ecfeEventosTable)
-          ..where((t) => t.documentoId.equals(documentoId))
-          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
-        .get();
+  listarEventos(int documentoId) async {
+    final rows =
+        await (_db.select(_db.ecfeEventosTable)
+              ..where((t) => t.documentoId.equals(documentoId))
+              ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+            .get();
     return rows
-        .map((r) => (
-              paso: r.paso,
-              ok: r.ok,
-              detalle: r.detalle,
-              creadoEn: r.creadoEn,
-            ))
+        .map(
+          (r) => (
+            paso: r.paso,
+            ok: r.ok,
+            detalle: r.detalle,
+            creadoEn: r.creadoEn,
+          ),
+        )
         .toList();
   }
 
@@ -214,8 +227,9 @@ class EcfeRepository {
     required EstadoEcfInterno estado,
     String? ultimoError,
   }) async {
-    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
-        .write(
+    await (_db.update(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).write(
       EcfeDocumentosTableCompanion(
         xmlSinFirma: Value(xmlSinFirma),
         encf: Value(encf),
@@ -227,9 +241,9 @@ class EcfeRepository {
   }
 
   Future<String?> obtenerXmlSinFirma(int id) async {
-    final row = await (_db.select(_db.ecfeDocumentosTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return row?.xmlSinFirma;
   }
 
@@ -240,8 +254,9 @@ class EcfeRepository {
     String? ultimoError,
     String? codigoSeguridad,
   }) async {
-    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
-        .write(
+    await (_db.update(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).write(
       EcfeDocumentosTableCompanion(
         xmlFirmado: Value(xmlFirmado),
         estado: Value(estado.name),
@@ -255,9 +270,9 @@ class EcfeRepository {
   }
 
   Future<String?> obtenerXmlFirmado(int id) async {
-    final row = await (_db.select(_db.ecfeDocumentosTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return row?.xmlFirmado;
   }
 
@@ -281,26 +296,32 @@ class EcfeRepository {
   }
 
   Future<List<EcfeSpecVersion>> listarSpecVersions() async {
-    final rows = await (_db.select(_db.ecfeSpecVersionTable)
-          ..orderBy([(t) => OrderingTerm.desc(t.creadoEn)]))
-        .get();
+    final rows = await (_db.select(
+      _db.ecfeSpecVersionTable,
+    )..orderBy([(t) => OrderingTerm.desc(t.creadoEn)])).get();
     return rows.map(_mapSpec).toList();
   }
 
   Future<EcfeSpecVersion?> obtenerSpecPorId(int id) async {
-    final r = await (_db.select(_db.ecfeSpecVersionTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final r = await (_db.select(
+      _db.ecfeSpecVersionTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return r == null ? null : _mapSpec(r);
   }
 
   /// Spec activa para el ambiente actual de config (si ninguna, null).
-  Future<EcfeSpecVersion?> obtenerSpecActivaParaAmbiente(String ambienteName) async {
+  Future<EcfeSpecVersion?> obtenerSpecActivaParaAmbiente(
+    String ambienteName,
+  ) async {
     final rows = await _db.select(_db.ecfeSpecVersionTable).get();
     for (final r in rows) {
-      if (ambienteName == 'precertificacion' && r.activaPrecert) return _mapSpec(r);
+      if (ambienteName == 'precertificacion' && r.activaPrecert) {
+        return _mapSpec(r);
+      }
       if (ambienteName == 'certificacion' && r.activaCert) return _mapSpec(r);
-      if (ambienteName == 'produccion' && r.activaProduccion) return _mapSpec(r);
+      if (ambienteName == 'produccion' && r.activaProduccion) {
+        return _mapSpec(r);
+      }
     }
     return null;
   }
@@ -315,7 +336,9 @@ class EcfeRepository {
   }) async {
     final items = checklist ?? EcfeChecklistCatalog.plantillaBase();
     final json = jsonEncode(items.map((e) => e.toJson()).toList());
-    return _db.into(_db.ecfeSpecVersionTable).insert(
+    return _db
+        .into(_db.ecfeSpecVersionTable)
+        .insert(
           EcfeSpecVersionTableCompanion.insert(
             codigo: codigo,
             nombre: nombre,
@@ -362,14 +385,14 @@ class EcfeRepository {
       if (produccion) {
         apo = isTarget;
       }
-      await (_db.update(_db.ecfeSpecVersionTable)..where((t) => t.id.equals(r.id)))
-          .write(
+      await (_db.update(
+        _db.ecfeSpecVersionTable,
+      )..where((t) => t.id.equals(r.id))).write(
         EcfeSpecVersionTableCompanion(
           activaPrecert: Value(ap),
           activaCert: Value(ac),
           activaProduccion: Value(apo),
-          activadoEn:
-              isTarget ? Value(DateTime.now()) : const Value.absent(),
+          activadoEn: isTarget ? Value(DateTime.now()) : const Value.absent(),
         ),
       );
     }
@@ -379,7 +402,10 @@ class EcfeRepository {
     try {
       final list = jsonDecode(json) as List<dynamic>;
       return list
-          .map((e) => EcfeChecklistItem.fromJson(Map<String, dynamic>.from(e as Map)))
+          .map(
+            (e) =>
+                EcfeChecklistItem.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
           .toList();
     } catch (_) {
       return EcfeChecklistCatalog.plantillaBase();
@@ -391,26 +417,22 @@ class EcfeRepository {
     required String itemId,
     required bool done,
   }) async {
-    final row = await (_db.select(_db.ecfeSpecVersionTable)
-          ..where((t) => t.id.equals(specId)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.ecfeSpecVersionTable,
+    )..where((t) => t.id.equals(specId))).getSingleOrNull();
     if (row == null) return;
     final items = parseChecklist(row.checklistJson);
     final out = <EcfeChecklistItem>[];
     for (final it in items) {
       if (it.id == itemId) {
-        out.add(
-          it.copyWith(
-            done: done,
-            doneAt: done ? DateTime.now() : null,
-          ),
-        );
+        out.add(it.copyWith(done: done, doneAt: done ? DateTime.now() : null));
       } else {
         out.add(it);
       }
     }
-    await (_db.update(_db.ecfeSpecVersionTable)..where((t) => t.id.equals(specId)))
-        .write(
+    await (_db.update(
+      _db.ecfeSpecVersionTable,
+    )..where((t) => t.id.equals(specId))).write(
       EcfeSpecVersionTableCompanion(
         checklistJson: Value(jsonEncode(out.map((e) => e.toJson()).toList())),
       ),
@@ -419,8 +441,9 @@ class EcfeRepository {
 
   Future<void> resetChecklist(int specId) async {
     final items = EcfeChecklistCatalog.plantillaBase();
-    await (_db.update(_db.ecfeSpecVersionTable)..where((t) => t.id.equals(specId)))
-        .write(
+    await (_db.update(
+      _db.ecfeSpecVersionTable,
+    )..where((t) => t.id.equals(specId))).write(
       EcfeSpecVersionTableCompanion(
         checklistJson: Value(jsonEncode(items.map((e) => e.toJson()).toList())),
       ),
@@ -433,8 +456,9 @@ class EcfeRepository {
   }) async {
     final c = codigoSeguridad.trim().toUpperCase();
     if (c.isEmpty) return;
-    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
-        .write(
+    await (_db.update(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).write(
       EcfeDocumentosTableCompanion(
         codigoSeguridad: Value(c),
         actualizadoEn: Value(DateTime.now()),
@@ -456,13 +480,26 @@ class EcfeRepository {
       }
     }
     if (cero.isEmpty) return {};
-    final productos = await (_db.select(_db.productosTable)
-          ..where((t) => t.id.isIn(lista)))
-        .get();
+    final productos = await (_db.select(
+      _db.productosTable,
+    )..where((t) => t.id.isIn(lista))).get();
     return {
       for (final p in productos)
         if (p.impuestoId != null && cero.contains(p.impuestoId)) p.id,
     };
+  }
+
+  Future<DateTime?> fechaVentaPorEncf(String encf) async {
+    final doc =
+        await (_db.select(_db.ecfeDocumentosTable)
+              ..where((t) => t.encf.equals(encf.trim().toUpperCase())))
+            .getSingleOrNull();
+    final ventaId = doc?.ventaId;
+    if (ventaId == null) return null;
+    final venta = await (_db.select(
+      _db.ventasTable,
+    )..where((t) => t.id.equals(ventaId))).getSingleOrNull();
+    return venta?.fecha;
   }
 
   Future<void> anularDocumento({
@@ -471,8 +508,9 @@ class EcfeRepository {
   }) async {
     final m = motivo.trim();
     if (m.isEmpty) throw ArgumentError('Indica el motivo de anulación');
-    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
-        .write(
+    await (_db.update(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).write(
       EcfeDocumentosTableCompanion(
         estado: Value(EstadoEcfInterno.anulado.name),
         motivoAnulacion: Value(m),
@@ -485,8 +523,9 @@ class EcfeRepository {
     required int id,
     required String encfReferencia,
   }) async {
-    await (_db.update(_db.ecfeDocumentosTable)..where((t) => t.id.equals(id)))
-        .write(
+    await (_db.update(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.id.equals(id))).write(
       EcfeDocumentosTableCompanion(
         encfReferencia: Value(encfReferencia.trim().toUpperCase()),
         actualizadoEn: Value(DateTime.now()),

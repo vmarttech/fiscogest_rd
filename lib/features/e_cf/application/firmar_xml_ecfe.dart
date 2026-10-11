@@ -60,11 +60,14 @@ class FirmarXmlEcfe {
       final firmadoCompleto = await signer.firmar(xml);
       final codigoSeg = CodigoSeguridadEcf.empaquetar(
         CodigoSeguridadEcf.desdeXmlFirmado(firmadoCompleto),
-        DateTime.now(),
+        CodigoSeguridadEcf.fechaDeXml(firmadoCompleto),
       );
       final firmado = RfceXml.esResumenConsumo(firmadoCompleto)
           ? await signer.firmar(
-              RfceXml.desdeEcfFirmado(firmadoCompleto, codigoSeg),
+              RfceXml.desdeEcfFirmado(
+                firmadoCompleto,
+                CodigoSeguridadEcf.soloCodigo(codigoSeg),
+              ),
             )
           : firmadoCompleto;
 

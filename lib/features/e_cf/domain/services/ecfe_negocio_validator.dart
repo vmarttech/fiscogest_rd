@@ -70,6 +70,14 @@ class EcfeNegocioValidator {
       }
     }
 
+    if (tipoEcf == TipoEcf.facturaConsumo && total >= 250000) {
+      if (!esIdentificadorValido(rncReceptor)) {
+        errs.add('Consumo desde 250000 requiere RNC o cedula del comprador');
+      }
+      if (nombreReceptor.trim().isEmpty) {
+        errs.add('Consumo desde 250000 requiere nombre del comprador');
+      }
+    }
     if (subtotal < 0 || itbis < 0 || total < 0) {
       errs.add('Montos no pueden ser negativos');
     }

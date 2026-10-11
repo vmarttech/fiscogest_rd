@@ -155,6 +155,25 @@ class GenerarXmlEcfe {
         );
       }
 
+      var fechaNcfModificado = '';
+      var indicadorNota = '0';
+      if (doc.tipoEcf == TipoEcf.notaDebito ||
+          doc.tipoEcf == TipoEcf.notaCredito) {
+        final original = await repo.fechaVentaPorEncf(doc.encfReferencia ?? '');
+        if (original == null) {
+          return const GenerarXmlResultado(
+            ok: false,
+            errores: [
+              'No esta en este equipo el comprobante que modifica la nota. '
+                  'Genera primero ese e-CF aqui.',
+            ],
+          );
+        }
+        fechaNcfModificado = fmt.format(original);
+        if (DateTime.now().difference(original).inDays > 30) {
+          indicadorNota = '1';
+        }
+      }
       final tipoPago = venta.formaPago.toLowerCase().contains('cred')
           ? '2'
           : '1';
@@ -163,7 +182,13 @@ class GenerarXmlEcfe {
         tipoEcfCodigo: doc.tipoEcf.codigo,
         encf: encfAsignado,
         encfReferencia: doc.encfReferencia,
+        fechaNcfModificado: fechaNcfModificado,
+        codigoModificacion: '3',
+        indicadorNotaCredito: indicadorNota,
         fechaVencimientoSecuencia: fechaVenc,
+        fechaLimitePago: venta.formaPago.toLowerCase().contains('cred')
+            ? fmt.format(venta.vencimiento ?? venta.fecha)
+            : '',
         fechaEmision: fechaEmision,
         tipoIngresos: '01',
         tipoPago: tipoPago,

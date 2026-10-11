@@ -3,8 +3,12 @@ class EcfePayload {
     required this.tipoEcfCodigo,
     required this.encf,
     this.encfReferencia,
+    this.fechaNcfModificado = '',
+    this.codigoModificacion = '3',
+    this.indicadorNotaCredito = '0',
     required this.fechaVencimientoSecuencia,
     required this.fechaEmision,
+    this.fechaLimitePago = '',
     required this.tipoIngresos,
     required this.tipoPago,
     required this.rncEmisor,
@@ -38,8 +42,12 @@ class EcfePayload {
 
   /// e-NCF modificado (obligatorio en NC 34 / ND 33).
   final String? encfReferencia;
+  final String fechaNcfModificado;
+  final String codigoModificacion;
+  final String indicadorNotaCredito;
   final String fechaVencimientoSecuencia;
   final String fechaEmision;
+  final String fechaLimitePago;
   final String tipoIngresos;
   final String tipoPago;
   final String rncEmisor;

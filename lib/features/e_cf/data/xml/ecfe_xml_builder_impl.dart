@@ -32,17 +32,24 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
               nest: () {
                 builder.element('TipoeCF', nest: p.tipoEcfCodigo.toString());
                 builder.element('eNCF', nest: p.encf);
-                final ref = (p.encfReferencia ?? '').trim();
-                if (ref.isNotEmpty) {
-                  builder.element('eNCFModificado', nest: ref);
+                if (p.tipoEcfCodigo != 34) {
+                  builder.element(
+                    'FechaVencimientoSecuencia',
+                    nest: p.fechaVencimientoSecuencia,
+                  );
                 }
-                builder.element(
-                  'FechaVencimientoSecuencia',
-                  nest: p.fechaVencimientoSecuencia,
-                );
+                if (p.tipoEcfCodigo == 34) {
+                  builder.element(
+                    'IndicadorNotaCredito',
+                    nest: p.indicadorNotaCredito,
+                  );
+                }
                 builder.element('IndicadorMontoGravado', nest: '0');
                 builder.element('TipoIngresos', nest: p.tipoIngresos);
                 builder.element('TipoPago', nest: p.tipoPago);
+                if (p.tipoPago == '2' && p.fechaLimitePago.trim().isNotEmpty) {
+                  builder.element('FechaLimitePago', nest: p.fechaLimitePago);
+                }
                 builder.element(
                   'TablaFormasPago',
                   nest: () {
@@ -73,7 +80,15 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                   nest: _safe(p.direccionEmisor),
                 );
                 if ((p.telefonoEmisor ?? '').isNotEmpty) {
-                  builder.element('TelefonoEmisor', nest: p.telefonoEmisor!);
+                  builder.element(
+                    'TablaTelefonoEmisor',
+                    nest: () {
+                      builder.element(
+                        'TelefonoEmisor',
+                        nest: p.telefonoEmisor!,
+                      );
+                    },
+                  );
                 }
                 if ((p.correoEmisor ?? '').isNotEmpty) {
                   builder.element('CorreoEmisor', nest: p.correoEmisor!);
@@ -178,7 +193,10 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                     nest: it.indicadorBienoServicio,
                   );
                   builder.element('CantidadItem', nest: _qty(it.cantidad));
-                  builder.element('UnidadMedida', nest: it.unidadMedida);
+                  builder.element(
+                    'UnidadMedida',
+                    nest: _unidadDgii(it.unidadMedida),
+                  );
                   builder.element(
                     'PrecioUnitarioItem',
                     nest: _money(it.precioUnitario),
@@ -189,9 +207,28 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
             }
           },
         );
+        if (p.tipoEcfCodigo == 33 || p.tipoEcfCodigo == 34) {
+          builder.element(
+            'InformacionReferencia',
+            nest: () {
+              builder.element(
+                'NCFModificado',
+                nest: (p.encfReferencia ?? '').trim(),
+              );
+              builder.element('FechaNCFModificado', nest: p.fechaNcfModificado);
+              builder.element('CodigoModificacion', nest: p.codigoModificacion);
+            },
+          );
+        }
       },
     );
     return builder.buildDocument().toXmlString(pretty: true);
+  }
+
+  String _unidadDgii(String raw) {
+    final t = raw.trim();
+    if (RegExp(r'^\d{1,2}$').hasMatch(t)) return t;
+    return '43';
   }
 
   static String _money(double v) => v.toStringAsFixed(2);
@@ -225,6 +262,9 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                 builder.element('eNCF', nest: p.encf);
                 builder.element('TipoIngresos', nest: p.tipoIngresos);
                 builder.element('TipoPago', nest: p.tipoPago);
+                if (p.tipoPago == '2' && p.fechaLimitePago.trim().isNotEmpty) {
+                  builder.element('FechaLimitePago', nest: p.fechaLimitePago);
+                }
               },
             );
             builder.element(
