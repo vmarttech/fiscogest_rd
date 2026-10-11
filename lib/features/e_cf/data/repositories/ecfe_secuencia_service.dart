@@ -75,6 +75,7 @@ class EcfeSecuenciaService {
     for (final tipo in [
       TipoEcf.facturaCreditoFiscal,
       TipoEcf.facturaConsumo,
+      TipoEcf.notaDebito,
       TipoEcf.notaCredito,
     ]) {
       final rows = await (_db.select(_db.ecfeSecuenciasTable)

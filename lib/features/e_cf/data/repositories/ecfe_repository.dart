@@ -442,6 +442,29 @@ class EcfeRepository {
     );
   }
 
+  /// Productos cuyo impuesto es ITBIS 0 % y no está marcado exento.
+  Future<Set<int>> productosGravadosCero(Iterable<int> ids) async {
+    final lista = ids.where((id) => id > 0).toSet();
+    if (lista.isEmpty) return {};
+    final impuestos = await _db.select(_db.impuestosTable).get();
+    final cero = <int>{};
+    for (final i in impuestos) {
+      final tipo = i.tipo.toLowerCase();
+      final exento = i.esExento;
+      if (!exento && tipo != 'exento' && i.porcentaje.abs() < 0.001) {
+        cero.add(i.id);
+      }
+    }
+    if (cero.isEmpty) return {};
+    final productos = await (_db.select(_db.productosTable)
+          ..where((t) => t.id.isIn(lista)))
+        .get();
+    return {
+      for (final p in productos)
+        if (p.impuestoId != null && cero.contains(p.impuestoId)) p.id,
+    };
+  }
+
   Future<void> anularDocumento({
     required int id,
     required String motivo,

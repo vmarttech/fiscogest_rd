@@ -34,7 +34,8 @@ class RepresentacionImpresaPdf {
       ambiente: ambiente,
       rncEmisor: rncEmisor,
       encf: encf,
-      codigoSeguridad: codigo,
+      xmlFirmado: xmlFirmado,
+            codigoSeguridad: codigo,
     );
     final rfce = RfceRules.esCandidatoRfce(
       tipo: tipoEcf,

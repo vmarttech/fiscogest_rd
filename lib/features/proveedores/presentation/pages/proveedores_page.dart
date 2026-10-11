@@ -210,9 +210,9 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                   horizontal: 16,
                                   vertical: 12,
                                 ),
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: AppColors.white,
-                                  border: const Border(
+                                  border: Border(
                                     bottom: BorderSide(color: AppColors.border),
                                   ),
                                 ),

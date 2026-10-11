@@ -28,8 +28,9 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
 
   Future<DgiiRecepcionResultado> enviarConNombre(
     String xmlFirmado,
-    String? nombreArchivo,
-  ) async {
+    String? nombreArchivo, {
+    bool rfce = false,
+  }) async {
     if (!ambiente.permiteEnvio) {
       return const DgiiRecepcionResultado(
         ok: false,
@@ -57,7 +58,11 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
 
         final req = http.MultipartRequest(
           'POST',
-          Uri.parse(DgiiEndpoints.apiRecepcion(ambiente)),
+          Uri.parse(
+            rfce
+                ? DgiiEndpoints.apiRecepcionFc(ambiente)
+                : DgiiEndpoints.apiRecepcion(ambiente),
+          ),
         );
         req.headers['Accept'] = 'application/json';
         req.headers['Authorization'] = 'Bearer ${tok.token}';
@@ -67,6 +72,7 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
 
         final streamed = await _http.send(req);
         final body = await streamed.stream.bytesToString();
+        if (rfce) return _resultadoRfce(streamed.statusCode, body);
 
         if (streamed.statusCode < 200 || streamed.statusCode >= 300) {
           return DgiiRecepcionResultado(
@@ -81,11 +87,11 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
         String? mensaje;
         try {
           final map = jsonDecode(body) as Map<String, dynamic>;
-          trackId =
-              (map['trackId'] ?? map['TrackId'] ?? map['trackID'])?.toString();
+          trackId = (map['trackId'] ?? map['TrackId'] ?? map['trackID'])
+              ?.toString();
           codigo = (map['codigo'] ?? map['Codigo'])?.toString();
-          mensaje =
-              (map['mensaje'] ?? map['Mensaje'] ?? map['error'])?.toString();
+          mensaje = (map['mensaje'] ?? map['Mensaje'] ?? map['error'])
+              ?.toString();
         } catch (_) {
           final m = RegExp(
             r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
@@ -121,9 +127,46 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
   String _nombreDesdeXml(String xml) {
     final rnc =
         RegExp(r'<RNCEmisor>([^<]+)</RNCEmisor>').firstMatch(xml)?.group(1) ??
-            rncEmisor;
+        rncEmisor;
     final encf =
         RegExp(r'<eNCF>([^<]+)</eNCF>').firstMatch(xml)?.group(1) ?? 'ENCF';
     return '${rnc.replaceAll(RegExp(r'\D'), '')}$encf.xml';
+  }
+
+  DgiiRecepcionResultado _resultadoRfce(int status, String body) {
+    if (status < 200 || status >= 300) {
+      return DgiiRecepcionResultado(
+        ok: false,
+        codigo: '$status',
+        mensaje: body.length > 500 ? body.substring(0, 500) : body,
+      );
+    }
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is! Map) {
+        return DgiiRecepcionResultado(ok: false, mensaje: body);
+      }
+      final estado = (decoded['estado'] ?? '').toString();
+      final codigo = (decoded['codigo'] ?? '').toString();
+      var mensaje = estado;
+      final mensajes = decoded['mensajes'];
+      if (mensajes is List && mensajes.isNotEmpty && mensajes.first is Map) {
+        final primero = mensajes.first as Map;
+        mensaje = (primero['valor'] ?? primero['mensaje'] ?? estado).toString();
+      }
+      final bajo = estado.toLowerCase();
+      final ok = bajo.contains('aceptado') && !bajo.contains('rechazado');
+      return DgiiRecepcionResultado(
+        ok: ok,
+        codigo: codigo,
+        mensaje: mensaje.isEmpty ? estado : mensaje,
+      );
+    } catch (_) {
+      final bajo = body.toLowerCase();
+      return DgiiRecepcionResultado(
+        ok: bajo.contains('aceptado') && !bajo.contains('rechazado'),
+        mensaje: body.length > 500 ? body.substring(0, 500) : body,
+      );
+    }
   }
 }

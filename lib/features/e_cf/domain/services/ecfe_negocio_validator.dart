@@ -51,10 +51,14 @@ class EcfeNegocioValidator {
       errs.add('Razón social del emisor requerida');
     }
 
-    // Tipos soportados en Fase 1
-    if (tipoEcf != TipoEcf.facturaCreditoFiscal &&
-        tipoEcf != TipoEcf.facturaConsumo) {
-      errs.add('Tipo e-CF ${tipoEcf.codigo} aún no soportado en Fase 1');
+    const soportados = {
+      TipoEcf.facturaCreditoFiscal,
+      TipoEcf.facturaConsumo,
+      TipoEcf.notaDebito,
+      TipoEcf.notaCredito,
+    };
+    if (!soportados.contains(tipoEcf)) {
+      errs.add('Tipo e-CF ${tipoEcf.codigo} aún no soportado');
     }
 
     if (tipoEcf == TipoEcf.facturaCreditoFiscal) {
@@ -82,8 +86,11 @@ class EcfeNegocioValidator {
     final ncf = ncfLocal.trim().toUpperCase();
     if (ncf.isEmpty) {
       errs.add('NCF local vacío');
-    } else if (!ncf.startsWith('B01') && !ncf.startsWith('B02')) {
-      errs.add('NCF local no es B01/B02: $ncf');
+    } else if (!ncf.startsWith('B01') &&
+        !ncf.startsWith('B02') &&
+        !ncf.startsWith('B03') &&
+        !ncf.startsWith('B04')) {
+      errs.add('NCF local no es B01/B02/B03/B04: $ncf');
     }
 
     if (tipoEcf == TipoEcf.facturaCreditoFiscal && !ncf.startsWith('B01')) {
@@ -91,6 +98,12 @@ class EcfeNegocioValidator {
     }
     if (tipoEcf == TipoEcf.facturaConsumo && !ncf.startsWith('B02')) {
       errs.add('Tipo 32 debería corresponder a NCF B02');
+    }
+    if (tipoEcf == TipoEcf.notaDebito && !ncf.startsWith('B03')) {
+      errs.add('Tipo 33 debería corresponder a NCF B03');
+    }
+    if (tipoEcf == TipoEcf.notaCredito && !ncf.startsWith('B04')) {
+      errs.add('Tipo 34 debería corresponder a NCF B04');
     }
 
     if (errs.isEmpty) return EcfeValidacionResultado.ok();

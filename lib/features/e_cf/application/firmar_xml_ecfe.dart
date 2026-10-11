@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dar
 import 'package:fiscogest_rd/features/e_cf/data/xml/ecfe_signer_impl.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/ports/ecfe_signer.dart';
+import 'package:fiscogest_rd/features/e_cf/data/xml/rfce_xml.dart';
 
 class FirmarXmlResultado {
   const FirmarXmlResultado({
@@ -56,8 +57,16 @@ class FirmarXmlEcfe {
               claveCertificado: cfg.claveCertificado,
             );
 
-      final firmado = await signer.firmar(xml);
-      final codigoSeg = CodigoSeguridadEcf.desdeXmlFirmado(firmado);
+      final firmadoCompleto = await signer.firmar(xml);
+      final codigoSeg = CodigoSeguridadEcf.empaquetar(
+        CodigoSeguridadEcf.desdeXmlFirmado(firmadoCompleto),
+        DateTime.now(),
+      );
+      final firmado = RfceXml.esResumenConsumo(firmadoCompleto)
+          ? await signer.firmar(
+              RfceXml.desdeEcfFirmado(firmadoCompleto, codigoSeg),
+            )
+          : firmadoCompleto;
 
       await repo.guardarXmlFirmado(
         id: documentoId,

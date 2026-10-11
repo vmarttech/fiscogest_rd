@@ -16,14 +16,28 @@ class DgiiEndpoints {
     }
   }
 
-  static String autenticacion(AmbienteDgii a) =>
-      '${baseEcf(a)}/autenticacion';
+  static String autenticacion(AmbienteDgii a) => '${baseEcf(a)}/autenticacion';
   static String recepcion(AmbienteDgii a) => '${baseEcf(a)}/recepcion';
   static String consultaResultado(AmbienteDgii a) =>
       '${baseEcf(a)}/consultaresultado';
 
   static String apiRecepcion(AmbienteDgii a) =>
       '${recepcion(a)}/api/facturaselectronicas';
+
+  /// Resumen de factura de consumo, menor de RD$250,000.
+  static String apiRecepcionFc(AmbienteDgii a) {
+    final url = apiRecepcion(a);
+    final conHost = url.contains('ecf.dgii.gov.do')
+        ? url.replaceFirst('ecf.dgii.gov.do', 'fc.dgii.gov.do')
+        : url;
+    final cola = conHost.contains('/Recepcion/')
+        ? '/RecepcionFC/api/recepcion/ecf'
+        : '/recepcionfc/api/recepcion/ecf';
+    return conHost.replaceFirst(
+      RegExp(r'/recepcion/api/.*', caseSensitive: false),
+      cola,
+    );
+  }
 
   static String apiEstadoTrackId(AmbienteDgii a, String trackId) =>
       '${consultaResultado(a)}/api/Consultas/Estado?TrackId=${Uri.encodeQueryComponent(trackId)}';

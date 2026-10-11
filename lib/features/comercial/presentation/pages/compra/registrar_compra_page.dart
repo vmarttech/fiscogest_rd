@@ -15,6 +15,10 @@ import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart
 import 'package:fiscogest_rd/features/proveedores/presentation/providers/proveedor_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 
 class RegistrarCompraPage extends ConsumerStatefulWidget {
   const RegistrarCompraPage({super.key});
@@ -82,11 +86,31 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   }
 
   /// ✅ FUNCIÓN CLAVE: Leer controlador → actualizar modelo → recálculo automático
+
+  double _tasaParaProducto(Producto producto) {
+    return resolverTasaItbisProducto(
+      impuestoId: producto.impuestoId,
+      categoriaId: producto.categoriaId,
+      impuestos: ref.read(impuestoControllerProvider).valueOrNull ?? const [],
+      categorias: ref.read(categoriaControllerProvider).valueOrNull ?? const [],
+      tasaGlobal: _tasaImpuesto,
+    );
+  }
+
   void _actualizarLineaEnTiempoReal(int index, String campo) {
     setState(() {
-      _lineas[index] = _controladores[index].haciaLinea(
-        tasaItbis: _tasaImpuesto,
+      final previa = _lineas[index];
+      final tasaLinea = previa.productoId != null
+          ? previa.tasaImpuestoLinea
+          : _tasaImpuesto;
+      final actualizada = _controladores[index].haciaLinea(
+        tasaItbis: tasaLinea,
       );
+      if (previa.productoId != null) {
+        actualizada.productoId = previa.productoId;
+        actualizada.tasaImpuestoLinea = tasaLinea;
+      }
+      _lineas[index] = actualizada;
     });
   }
 
@@ -252,7 +276,13 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                     ctrl.productoId.text =
                                         prod.id?.toString() ?? '';
                                     ctrl.nombreProducto.text = prod.nombre;
-                                    _lineas[indexLinea].productoId = prod.id;
+                                    final tasa = _tasaParaProducto(prod);
+                                    final actualizada = ctrl.haciaLinea(
+                                      tasaItbis: tasa,
+                                    );
+                                    actualizada.productoId = prod.id;
+                                    actualizada.tasaImpuestoLinea = tasa;
+                                    _lineas[indexLinea] = actualizada;
                                   });
                                   Navigator.pop(context);
                                 },

@@ -13,6 +13,7 @@ class EnviarEcfeResultado {
   final bool ok;
   final String? trackId;
   final List<String> errores;
+
   /// True si no se reenvió porque ya había TrackId.
   final bool yaEnviado;
 }
@@ -58,7 +59,8 @@ class EnviarEcfe {
           documentoId: documentoId,
           paso: 'enviar_recepcion',
           ok: true,
-          detalle: 'Omitido: ya tiene TrackId $trackExistente (use forzar si aplica)',
+          detalle:
+              'Omitido: ya tiene TrackId $trackExistente (use forzar si aplica)',
         );
         return EnviarEcfeResultado(
           ok: true,
@@ -79,10 +81,12 @@ class EnviarEcfe {
       }
 
       // Enviado/en proceso sin TrackId es inconsistente → permitir reintento.
-      final puedeEnviar = doc.estado == EstadoEcfInterno.firmado ||
+      final puedeEnviar =
+          doc.estado == EstadoEcfInterno.firmado ||
           doc.estado == EstadoEcfInterno.errorTecnico ||
           (doc.estado == EstadoEcfInterno.enviado && trackExistente.isEmpty) ||
-          (doc.estado == EstadoEcfInterno.enProceso && trackExistente.isEmpty) ||
+          (doc.estado == EstadoEcfInterno.enProceso &&
+              trackExistente.isEmpty) ||
           (forzarReenvio &&
               (doc.estado == EstadoEcfInterno.enviado ||
                   doc.estado == EstadoEcfInterno.enProceso ||
@@ -93,7 +97,7 @@ class EnviarEcfe {
           ok: false,
           errores: [
             'Estado ${doc.estado.etiqueta}: se requiere XML firmado '
-            'sin TrackId previo (o forzar reenvío)',
+                'sin TrackId previo (o forzar reenvío)',
           ],
         );
       }
@@ -115,9 +119,22 @@ class EnviarEcfe {
       final rnc = cfg.rncEmisor.replaceAll(RegExp(r'\D'), '');
       final encf = doc.encf ?? 'ENCF';
       final nombre = '$rnc$encf.xml';
-      final res = await gw.enviarConNombre(xml, nombre);
+      final res = await gw.enviarConNombre(
+        xml,
+        nombre,
+        rfce: xml.contains('<RFCE'),
+      );
 
-      if (!res.ok || (res.trackId ?? '').isEmpty) {
+      final esRfce = xml.contains('<RFCE');
+      if (esRfce && res.ok) {
+        await repo.actualizarEstado(
+          id: documentoId,
+          estado: EstadoEcfInterno.aceptado,
+          codigoRespuesta: res.codigo,
+        );
+        return EnviarEcfeResultado(ok: true, trackId: res.trackId);
+      }
+      if (!res.ok || (!esRfce && (res.trackId ?? '').isEmpty)) {
         await repo.actualizarEstado(
           id: documentoId,
           estado: EstadoEcfInterno.errorTecnico,

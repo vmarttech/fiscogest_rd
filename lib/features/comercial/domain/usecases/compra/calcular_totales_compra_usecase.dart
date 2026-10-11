@@ -1,6 +1,8 @@
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
-/// Totales de compra. [tasaItbis] = 0.0 en modo simplificado; 0.18 en fiscal.
+/// Totales de compra. [tasaItbis] en 0 anula el impuesto (modo simplificado).
+/// En modo fiscal cada linea conserva su tasaImpuestoLinea.
 class CalcularTotalesCompraUseCase {
   const CalcularTotalesCompraUseCase({this.tasaItbis = 0.18});
 
@@ -11,7 +13,10 @@ class CalcularTotalesCompraUseCase {
     final montoDescuento = importeBruto * (linea.descuentoPorcentaje / 100);
     final subtotalLinea = importeBruto - montoDescuento;
     final baseImponible = subtotalLinea;
-    final itbis = baseImponible * tasaItbis;
+    final tasa = tasaItbis <= 0
+        ? 0.0
+        : tasaComoFraccion(linea.tasaImpuestoLinea);
+    final itbis = baseImponible * tasa;
     final gastosAsociados =
         (linea.fleteUnitario * linea.cantidad) +
         (linea.seguroUnitario * linea.cantidad) +
@@ -22,7 +27,7 @@ class CalcularTotalesCompraUseCase {
       montoDescuentoLinea: montoDescuento,
       subtotalLinea: subtotalLinea,
       baseImponibleLinea: baseImponible,
-      tasaImpuestoLinea: tasaItbis,
+      tasaImpuestoLinea: tasa,
       itbisLinea: itbis,
       totalLinea: totalLinea,
     );
@@ -45,6 +50,13 @@ class CalcularTotalesCompraUseCase {
       0.0,
       (sum, linea) => sum + linea.itbisLinea,
     );
+    final tasas = {
+      for (final linea in lineasCalculadas)
+        (linea.tasaImpuestoLinea * 10000).round(),
+    };
+    final tasaDocumento = tasas.length == 1
+        ? lineasCalculadas.first.tasaImpuestoLinea
+        : tasaItbis;
     final totalCompra = lineasCalculadas.fold<double>(
       0.0,
       (sum, linea) => sum + linea.totalLinea,
@@ -53,7 +65,7 @@ class CalcularTotalesCompraUseCase {
       subtotalSinImpuestos: subtotalSinImpuestos,
       montoDescuentoGlobal: montoDescuentoGlobal,
       montoImpuesto: montoItbis,
-      tasaImpuesto: tasaItbis,
+      tasaImpuesto: tasaDocumento,
       totalCompra: totalCompra,
     );
   }

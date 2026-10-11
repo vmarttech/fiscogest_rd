@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/tipos_linea.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class LineaProductoWidget extends StatelessWidget {
   const LineaProductoWidget({
@@ -205,7 +206,7 @@ class LineaProductoWidget extends StatelessWidget {
                       ),
                       if (!modoSimplificado)
                         Text(
-                          'ITBIS (18%): ${formatRdNumero(linea.itbisLinea)}',
+                          '${etiquetaItbisLineas([linea.tasaImpuestoLinea])}: ${formatRdNumero(linea.itbisLinea)}',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.textSecondary,
                           ),

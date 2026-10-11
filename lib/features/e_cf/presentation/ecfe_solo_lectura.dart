@@ -1,8 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
-/// true en esta app. La emisión vive en FiscoGest versión PC.
-bool get ecfeSoloLectura => true;
+/// Solo lectura en Android e iOS. En escritorio se emite.
+bool get ecfeSoloLectura {
+  if (kIsWeb) return false;
+  return defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
+}
 
 const String avisoEcfePc =
     'Esta área es solo de consulta. Para generar, firmar, enviar o anular '
@@ -29,6 +34,7 @@ class EcfeSoloLecturaBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!ecfeSoloLectura) return const SizedBox.shrink();
     // Solo visible en móvil/tablet estrecha — en PC la app ya es versión escritorio.
     if (!AppBreakpoints.isMobile(context)) {
       return const SizedBox.shrink();

@@ -29,6 +29,8 @@ enum TipoEcf {
         return TipoEcf.facturaCreditoFiscal;
       case 'B02':
         return TipoEcf.facturaConsumo;
+      case 'B03':
+        return TipoEcf.notaDebito;
       case 'B04':
         return TipoEcf.notaCredito;
       default:

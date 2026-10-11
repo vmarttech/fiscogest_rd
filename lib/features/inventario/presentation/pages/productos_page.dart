@@ -409,9 +409,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.white,
-              border: const Border(bottom: BorderSide(color: AppColors.border)),
+              border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
             child: Row(
               children: [

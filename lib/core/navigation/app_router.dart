@@ -122,13 +122,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             print('ROUTER: invitado OK → continuar a $path');
           } else {
             // ignore: avoid_print
-            print('ROUTER: hay usuarios → /login');
+            // print('ROUTER: hay usuarios → /login');
             return '/login';
           }
-        } catch (e, st) {
+        } catch (e) {
           // ignore: avoid_print
-          print('ROUTER: error al leer usuarios: $e');
-          print(st);
+          // print('ROUTER: error al leer usuarios: $e');
+          // print(st);
           return '/login';
         }
       }

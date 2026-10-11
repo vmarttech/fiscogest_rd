@@ -26,12 +26,16 @@ class EcfePayload {
     this.totalItbis1 = 0,
     this.montoGravadoI2 = 0,
     this.totalItbis2 = 0,
+    this.montoGravadoI3 = 0,
+    this.totalItbis3 = 0,
+    this.esRfce = false,
     this.montoExento = 0,
     this.bandasItbis = false,
   });
 
   final int tipoEcfCodigo;
   final String encf;
+
   /// e-NCF modificado (obligatorio en NC 34 / ND 33).
   final String? encfReferencia;
   final String fechaVencimientoSecuencia;
@@ -57,6 +61,9 @@ class EcfePayload {
   final double totalItbis1;
   final double montoGravadoI2;
   final double totalItbis2;
+  final double montoGravadoI3;
+  final double totalItbis3;
+  final bool esRfce;
   final double montoExento;
 
   /// true = totales partidos (18 / 16 / exento). false = todo en ITBIS 1.

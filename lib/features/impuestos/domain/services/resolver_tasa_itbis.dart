@@ -83,3 +83,12 @@ String sufijoTasaLinea(double tasa, {bool ceroEsExento = false}) {
   if (ceroEsExento) return ' (exento)';
   return '';
 }
+
+/// 1 = 18 %, 2 = 16 %, 3 = gravado al 0 %, 4 = exento.
+String indicadorFacturacionDgii(double tasa, {bool gravadoTasaCero = false}) {
+  final pct = tasa > 1.5 ? tasa : tasa * 100.0;
+  if (pct >= 17.5) return '1';
+  if (pct >= 15.5) return '2';
+  if (pct <= 0.001) return gravadoTasaCero ? '3' : '4';
+  return '4';
+}

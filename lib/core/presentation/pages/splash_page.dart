@@ -60,10 +60,10 @@ class _SplashPageState extends ConsumerState<SplashPage>
           if (!mounted) return;
           context.go('/login');
         }
-      } catch (e, st) {
+      } catch (e) {
         // ignore: avoid_print
-        print('SPLASH: error $e');
-        print(st);
+        // print('SPLASH: error $e');
+        // print(st);
         if (!mounted) return;
         context.go('/login');
       }

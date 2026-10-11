@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/e_cf/domain/enums/tipo_ecf.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/value_objects/ecfe_payload.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class GenerarXmlResultado {
   const GenerarXmlResultado({
@@ -58,12 +59,13 @@ class GenerarXmlEcfe {
       }
       if (doc.tipoEcf != TipoEcf.facturaCreditoFiscal &&
           doc.tipoEcf != TipoEcf.facturaConsumo &&
+          doc.tipoEcf != TipoEcf.notaDebito &&
           doc.tipoEcf != TipoEcf.notaCredito) {
         return GenerarXmlResultado(
           ok: false,
           errores: [
             'Tipo ${doc.tipoEcf.codigo} aún no soportado en generación XML '
-            '(soportados: 31, 32, 34)',
+                '(soportados: 31, 32, 33, 34)',
           ],
         );
       }
@@ -74,14 +76,16 @@ class GenerarXmlEcfe {
         );
       }
 
-      if (doc.tipoEcf == TipoEcf.notaCredito) {
+      if (doc.tipoEcf == TipoEcf.notaCredito ||
+          doc.tipoEcf == TipoEcf.notaDebito) {
         final ref = (doc.encfReferencia ?? '').trim();
         if (ref.isEmpty) {
-          return const GenerarXmlResultado(
+          final cual = doc.tipoEcf == TipoEcf.notaDebito ? '33' : '34';
+          return GenerarXmlResultado(
             ok: false,
             errores: [
-              'Nota de crédito (34): indica el e-NCF de referencia '
-              '(comprobante modificado) en el detalle e-CF',
+              'Nota ($cual): indica el e-NCF de referencia '
+                  '(comprobante modificado) en el detalle e-CF',
             ],
           );
         }
@@ -105,20 +109,27 @@ class GenerarXmlEcfe {
 
       final items = <EcfePayloadItem>[];
       // Líneas en 0 y la venta sí cobró ITBIS: documento viejo, una sola tasa.
-      final usarTasaDocumento = detalles.every((d) => d.tasaImpuesto <= 0.0001) &&
+      final usarTasaDocumento =
+          detalles.every((d) => d.tasaImpuesto <= 0.0001) &&
           venta.itbis > 0.009;
       var gravado18 = 0.0;
       var itbis18 = 0.0;
       var gravado16 = 0.0;
       var itbis16 = 0.0;
       var exento = 0.0;
+      var gravado0 = 0.0;
+      final gravadosCero = await repo.productosGravadosCero(
+        detalles.map((d) => d.productoId),
+      );
       for (var i = 0; i < detalles.length; i++) {
         final d = detalles[i];
         final monto = d.subtotalLinea ?? d.subtotal;
         final tasaLinea = usarTasaDocumento ? tasaItbis : d.tasaImpuesto;
         final pct = tasaLinea > 1.5 ? tasaLinea : tasaLinea * 100.0;
-        final indFact =
-            pct >= 17.5 ? '1' : (pct >= 15.5 ? '2' : '4');
+        final indFact = indicadorFacturacionDgii(
+          tasaLinea,
+          gravadoTasaCero: gravadosCero.contains(d.productoId),
+        );
         final fr = pct / 100.0;
         if (indFact == '1') {
           gravado18 += monto;
@@ -126,6 +137,8 @@ class GenerarXmlEcfe {
         } else if (indFact == '2') {
           gravado16 += monto;
           itbis16 += monto * fr;
+        } else if (indFact == '3') {
+          gravado0 += monto;
         } else {
           exento += monto;
         }
@@ -166,7 +179,7 @@ class GenerarXmlEcfe {
             ? (venta.nombreCliente ?? 'CONSUMIDOR FINAL')
             : nombreCliente.trim(),
         direccionComprador: venta.clienteDireccion,
-        montoGravadoTotal: gravado18 + gravado16,
+        montoGravadoTotal: gravado18 + gravado16 + gravado0,
         totalItbis: itbis18 + itbis16,
         montoTotal: venta.montoTotal,
         tasaItbis: gravado18 > 0 ? 18 : (gravado16 > 0 ? 16 : 0),
@@ -174,8 +187,11 @@ class GenerarXmlEcfe {
         totalItbis1: itbis18,
         montoGravadoI2: gravado16,
         totalItbis2: itbis16,
+        montoGravadoI3: gravado0,
+        totalItbis3: 0,
         montoExento: exento,
         bandasItbis: true,
+        esRfce: false,
         items: items,
         montoPago: venta.montoTotal,
       );

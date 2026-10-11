@@ -25,7 +25,9 @@ class EcfeSpecPage extends ConsumerWidget {
 
     return AppScaffold(
       title: 'Especificación e-CF',
-      subtitle: 'Solo consulta. Para emitir, FiscoGest versión PC',
+      subtitle: ecfeSoloLectura
+          ? 'Solo consulta. Para emitir, FiscoGest versión PC'
+          : 'Versiones, circulares DGII y checklist de certificación',
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -224,7 +226,9 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
                 Expanded(
                   child: Text(
                     '${s.codigo} · ${s.nombre}',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -273,9 +277,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
               children: [
                 AppButton(
                   text: 'Activar TesteCF',
-                  onPressed: _busy
-                      ? null
-                      : () => _activar(precert: true),
+                  onPressed: _busy ? null : () => _activar(precert: true),
                 ),
                 AppButton(
                   text: 'Activar CerteCF',
@@ -296,6 +298,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
                                 backgroundColor: AppColors.warning,
                               ),
                             );
+                            return;
                           }
                           await _activar(prod: true);
                         },
@@ -314,9 +317,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
               CheckboxListTile(
                 dense: true,
                 value: it.done,
-                onChanged: _busy
-                    ? null
-                    : (v) => _toggle(it.id, v ?? false),
+                onChanged: _busy ? null : (v) => _toggle(it.id, v ?? false),
                 title: Text(it.label, style: AppTypography.bodySmall),
                 subtitle: it.doneAt != null
                     ? Text(widget.fmt.format(it.doneAt!))

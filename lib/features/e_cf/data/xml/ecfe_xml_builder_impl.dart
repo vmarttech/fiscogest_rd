@@ -17,117 +17,180 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
   }
 
   String construirDesdePayload(EcfePayload p) {
+    if (p.esRfce) return _buildRfce(p);
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="utf-8"');
-    builder.element('ECF', nest: () {
-      builder.element('Encabezado', nest: () {
-        builder.element('Version', nest: '1.0');
-        builder.element('IdDoc', nest: () {
-          builder.element('TipoeCF', nest: p.tipoEcfCodigo.toString());
-          builder.element('eNCF', nest: p.encf);
-          final ref = (p.encfReferencia ?? '').trim();
-          if (ref.isNotEmpty) {
-            builder.element('eNCFModificado', nest: ref);
-          }
-          builder.element(
-            'FechaVencimientoSecuencia',
-            nest: p.fechaVencimientoSecuencia,
-          );
-          builder.element('IndicadorMontoGravado', nest: '0');
-          builder.element('TipoIngresos', nest: p.tipoIngresos);
-          builder.element('TipoPago', nest: p.tipoPago);
-          builder.element('TablaFormasPago', nest: () {
-            builder.element('FormaDePago', nest: () {
-              builder.element('FormaPago', nest: p.formaPagoCodigo);
+    builder.element(
+      'ECF',
+      nest: () {
+        builder.element(
+          'Encabezado',
+          nest: () {
+            builder.element('Version', nest: '1.0');
+            builder.element(
+              'IdDoc',
+              nest: () {
+                builder.element('TipoeCF', nest: p.tipoEcfCodigo.toString());
+                builder.element('eNCF', nest: p.encf);
+                final ref = (p.encfReferencia ?? '').trim();
+                if (ref.isNotEmpty) {
+                  builder.element('eNCFModificado', nest: ref);
+                }
+                builder.element(
+                  'FechaVencimientoSecuencia',
+                  nest: p.fechaVencimientoSecuencia,
+                );
+                builder.element('IndicadorMontoGravado', nest: '0');
+                builder.element('TipoIngresos', nest: p.tipoIngresos);
+                builder.element('TipoPago', nest: p.tipoPago);
+                builder.element(
+                  'TablaFormasPago',
+                  nest: () {
+                    builder.element(
+                      'FormaDePago',
+                      nest: () {
+                        builder.element('FormaPago', nest: p.formaPagoCodigo);
+                        builder.element(
+                          'MontoPago',
+                          nest: _money(p.montoPago ?? p.montoTotal),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+            builder.element(
+              'Emisor',
+              nest: () {
+                builder.element('RNCEmisor', nest: p.rncEmisor);
+                builder.element(
+                  'RazonSocialEmisor',
+                  nest: _safe(p.razonSocialEmisor),
+                );
+                builder.element(
+                  'DireccionEmisor',
+                  nest: _safe(p.direccionEmisor),
+                );
+                if ((p.telefonoEmisor ?? '').isNotEmpty) {
+                  builder.element('TelefonoEmisor', nest: p.telefonoEmisor!);
+                }
+                if ((p.correoEmisor ?? '').isNotEmpty) {
+                  builder.element('CorreoEmisor', nest: p.correoEmisor!);
+                }
+                builder.element('FechaEmision', nest: p.fechaEmision);
+              },
+            );
+            builder.element(
+              'Comprador',
+              nest: () {
+                if ((p.rncComprador ?? '').isNotEmpty) {
+                  builder.element('RNCComprador', nest: p.rncComprador!);
+                }
+                builder.element(
+                  'RazonSocialComprador',
+                  nest: _safe(
+                    (p.razonSocialComprador ?? '').isEmpty
+                        ? 'CONSUMIDOR FINAL'
+                        : p.razonSocialComprador!,
+                  ),
+                );
+                if ((p.direccionComprador ?? '').isNotEmpty) {
+                  builder.element(
+                    'DireccionComprador',
+                    nest: _safe(p.direccionComprador!),
+                  );
+                }
+              },
+            );
+            builder.element(
+              'Totales',
+              nest: () {
+                builder.element(
+                  'MontoGravadoTotal',
+                  nest: _money(p.montoGravadoTotal),
+                );
+                final g1 = p.bandasItbis
+                    ? p.montoGravadoI1
+                    : p.montoGravadoTotal;
+                final i1 = p.bandasItbis ? p.totalItbis1 : p.totalItbis;
+                final tasa1 = p.bandasItbis ? 18.0 : p.tasaItbis;
+                if (!p.bandasItbis || g1 > 0.004) {
+                  builder.element('MontoGravadoI1', nest: _money(g1));
+                }
+                if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+                  builder.element(
+                    'MontoGravadoI2',
+                    nest: _money(p.montoGravadoI2),
+                  );
+                }
+                if (p.bandasItbis && p.montoGravadoI3 > 0.004) {
+                  builder.element(
+                    'MontoGravadoI3',
+                    nest: _money(p.montoGravadoI3),
+                  );
+                }
+                if (p.bandasItbis && p.montoExento > 0.004) {
+                  builder.element('MontoExento', nest: _money(p.montoExento));
+                }
+                if (!p.bandasItbis || g1 > 0.004) {
+                  builder.element('ITBIS1', nest: _rate(tasa1));
+                }
+                if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+                  builder.element('ITBIS2', nest: _rate(16));
+                }
+                if (p.bandasItbis && p.montoGravadoI3 > 0.004) {
+                  builder.element('ITBIS3', nest: _rate(0));
+                }
+                builder.element('TotalITBIS', nest: _money(p.totalItbis));
+                if (!p.bandasItbis || g1 > 0.004) {
+                  builder.element('TotalITBIS1', nest: _money(i1));
+                }
+                if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+                  builder.element('TotalITBIS2', nest: _money(p.totalItbis2));
+                }
+                if (p.bandasItbis && p.montoGravadoI3 > 0.004) {
+                  builder.element('TotalITBIS3', nest: _money(p.totalItbis3));
+                }
+                builder.element('MontoTotal', nest: _money(p.montoTotal));
+              },
+            );
+          },
+        );
+        builder.element(
+          'DetallesItems',
+          nest: () {
+            for (final it in p.items) {
               builder.element(
-                'MontoPago',
-                nest: _money(p.montoPago ?? p.montoTotal),
+                'Item',
+                nest: () {
+                  builder.element(
+                    'NumeroLinea',
+                    nest: it.numeroLinea.toString(),
+                  );
+                  builder.element(
+                    'IndicadorFacturacion',
+                    nest: it.indicadorFacturacion,
+                  );
+                  builder.element('NombreItem', nest: _safe(it.nombreItem));
+                  builder.element(
+                    'IndicadorBienoServicio',
+                    nest: it.indicadorBienoServicio,
+                  );
+                  builder.element('CantidadItem', nest: _qty(it.cantidad));
+                  builder.element('UnidadMedida', nest: it.unidadMedida);
+                  builder.element(
+                    'PrecioUnitarioItem',
+                    nest: _money(it.precioUnitario),
+                  );
+                  builder.element('MontoItem', nest: _money(it.montoItem));
+                },
               );
-            });
-          });
-        });
-        builder.element('Emisor', nest: () {
-          builder.element('RNCEmisor', nest: p.rncEmisor);
-          builder.element('RazonSocialEmisor', nest: _safe(p.razonSocialEmisor));
-          builder.element('DireccionEmisor', nest: _safe(p.direccionEmisor));
-          if ((p.telefonoEmisor ?? '').isNotEmpty) {
-            builder.element('TelefonoEmisor', nest: p.telefonoEmisor!);
-          }
-          if ((p.correoEmisor ?? '').isNotEmpty) {
-            builder.element('CorreoEmisor', nest: p.correoEmisor!);
-          }
-          builder.element('FechaEmision', nest: p.fechaEmision);
-        });
-        builder.element('Comprador', nest: () {
-          if ((p.rncComprador ?? '').isNotEmpty) {
-            builder.element('RNCComprador', nest: p.rncComprador!);
-          }
-          builder.element(
-            'RazonSocialComprador',
-            nest: _safe(
-              (p.razonSocialComprador ?? '').isEmpty
-                  ? 'CONSUMIDOR FINAL'
-                  : p.razonSocialComprador!,
-            ),
-          );
-          if ((p.direccionComprador ?? '').isNotEmpty) {
-            builder.element(
-              'DireccionComprador',
-              nest: _safe(p.direccionComprador!),
-            );
-          }
-        });
-        builder.element('Totales', nest: () {
-          builder.element('MontoGravadoTotal', nest: _money(p.montoGravadoTotal));
-          final g1 = p.bandasItbis ? p.montoGravadoI1 : p.montoGravadoTotal;
-          final i1 = p.bandasItbis ? p.totalItbis1 : p.totalItbis;
-          final tasa1 = p.bandasItbis ? 18.0 : p.tasaItbis;
-          if (!p.bandasItbis || g1 > 0.004) {
-            builder.element('MontoGravadoI1', nest: _money(g1));
-          }
-          if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
-            builder.element('MontoGravadoI2', nest: _money(p.montoGravadoI2));
-          }
-          if (p.bandasItbis && p.montoExento > 0.004) {
-            builder.element('MontoExento', nest: _money(p.montoExento));
-          }
-          if (!p.bandasItbis || g1 > 0.004) {
-            builder.element('ITBIS1', nest: _rate(tasa1));
-          }
-          if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
-            builder.element('ITBIS2', nest: _rate(16));
-          }
-          builder.element('TotalITBIS', nest: _money(p.totalItbis));
-          if (!p.bandasItbis || g1 > 0.004) {
-            builder.element('TotalITBIS1', nest: _money(i1));
-          }
-          if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
-            builder.element('TotalITBIS2', nest: _money(p.totalItbis2));
-          }
-          builder.element('MontoTotal', nest: _money(p.montoTotal));
-        });
-      });
-      builder.element('DetallesItems', nest: () {
-        for (final it in p.items) {
-          builder.element('Item', nest: () {
-            builder.element('NumeroLinea', nest: it.numeroLinea.toString());
-            builder.element('IndicadorFacturacion', nest: it.indicadorFacturacion);
-            builder.element('NombreItem', nest: _safe(it.nombreItem));
-            builder.element(
-              'IndicadorBienoServicio',
-              nest: it.indicadorBienoServicio,
-            );
-            builder.element('CantidadItem', nest: _qty(it.cantidad));
-            builder.element('UnidadMedida', nest: it.unidadMedida);
-            builder.element(
-              'PrecioUnitarioItem',
-              nest: _money(it.precioUnitario),
-            );
-            builder.element('MontoItem', nest: _money(it.montoItem));
-          });
-        }
-      });
-    });
+            }
+          },
+        );
+      },
+    );
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
@@ -143,5 +206,98 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&apos;');
+  }
+
+  String _buildRfce(EcfePayload p) {
+    final builder = XmlBuilder();
+    builder.processing('xml', 'version="1.0" encoding="utf-8"');
+    builder.element(
+      'RFCE',
+      nest: () {
+        builder.element(
+          'Encabezado',
+          nest: () {
+            builder.element('Version', nest: '1.0');
+            builder.element(
+              'IdDoc',
+              nest: () {
+                builder.element('TipoeCF', nest: p.tipoEcfCodigo.toString());
+                builder.element('eNCF', nest: p.encf);
+                builder.element('TipoIngresos', nest: p.tipoIngresos);
+                builder.element('TipoPago', nest: p.tipoPago);
+              },
+            );
+            builder.element(
+              'Emisor',
+              nest: () {
+                builder.element('RNCEmisor', nest: p.rncEmisor);
+                builder.element(
+                  'RazonSocialEmisor',
+                  nest: _safe(p.razonSocialEmisor),
+                );
+                builder.element('FechaEmision', nest: p.fechaEmision);
+              },
+            );
+            if ((p.rncComprador ?? '').isNotEmpty) {
+              builder.element('RNCComprador', nest: p.rncComprador!);
+            }
+
+            builder.element(
+              'Totales',
+              nest: () {
+                builder.element(
+                  'MontoGravadoTotal',
+                  nest: _money(p.montoGravadoTotal),
+                );
+                final g1 = p.bandasItbis
+                    ? p.montoGravadoI1
+                    : p.montoGravadoTotal;
+                final i1 = p.bandasItbis ? p.totalItbis1 : p.totalItbis;
+                final tasa1 = p.bandasItbis ? 18.0 : p.tasaItbis;
+                if (!p.bandasItbis || g1 > 0.004) {
+                  builder.element('MontoGravadoI1', nest: _money(g1));
+                }
+                if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+                  builder.element(
+                    'MontoGravadoI2',
+                    nest: _money(p.montoGravadoI2),
+                  );
+                }
+                if (p.bandasItbis && p.montoGravadoI3 > 0.004) {
+                  builder.element(
+                    'MontoGravadoI3',
+                    nest: _money(p.montoGravadoI3),
+                  );
+                }
+                if (p.bandasItbis && p.montoExento > 0.004) {
+                  builder.element('MontoExento', nest: _money(p.montoExento));
+                }
+                if (!p.bandasItbis || g1 > 0.004) {
+                  builder.element('ITBIS1', nest: _rate(tasa1));
+                }
+                if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+                  builder.element('ITBIS2', nest: _rate(16));
+                }
+                if (p.bandasItbis && p.montoGravadoI3 > 0.004) {
+                  builder.element('ITBIS3', nest: _rate(0));
+                }
+                builder.element('TotalITBIS', nest: _money(p.totalItbis));
+                if (!p.bandasItbis || g1 > 0.004) {
+                  builder.element('TotalITBIS1', nest: _money(i1));
+                }
+                if (p.bandasItbis && p.montoGravadoI2 > 0.004) {
+                  builder.element('TotalITBIS2', nest: _money(p.totalItbis2));
+                }
+                if (p.bandasItbis && p.montoGravadoI3 > 0.004) {
+                  builder.element('TotalITBIS3', nest: _money(p.totalItbis3));
+                }
+                builder.element('MontoTotal', nest: _money(p.montoTotal));
+              },
+            );
+          },
+        );
+      },
+    );
+    return builder.buildDocument().toXmlString(pretty: true);
   }
 }

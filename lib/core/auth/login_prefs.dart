@@ -10,9 +10,7 @@ class LoginPrefs {
   static const _secUser = 'bio_username';
   static const _secPass = 'bio_password';
 
-  static const _secure = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  static const _secure = FlutterSecureStorage();
 
   static Future<String?> getRememberedUser() async {
     final p = await SharedPreferences.getInstance();

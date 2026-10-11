@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_cotizacion_service.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 class CotizacionServiceImpl implements ICotizacionService {
   CotizacionServiceImpl();
@@ -32,9 +33,13 @@ class CotizacionServiceImpl implements ICotizacionService {
     texto.writeln('----------------------------------------');
     texto.writeln('DETALLE DE PRODUCTOS');
     texto.writeln('----------------------------------------');
+    final ceroExento = lineasCeroSonExentas(
+      cotizacion.detalles.map((d) => d.tasaImpuesto),
+      cotizacion.itbis,
+    );
     for (var i = 0; i < cotizacion.detalles.length; i++) {
       final detalle = cotizacion.detalles[i];
-      texto.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}');
+      texto.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}${sufijoTasaLinea(detalle.tasaImpuesto, ceroEsExento: ceroExento)}');
       texto.writeln(
         '   Cant: ${detalle.cantidad}  x  ${formatearMonto(detalle.precioUnitario)}',
       );
@@ -52,7 +57,7 @@ class CotizacionServiceImpl implements ICotizacionService {
     }
     texto.writeln('----------------------------------------');
     texto.writeln('Subtotal:          ${formatearMonto(cotizacion.subtotal)}');
-    texto.writeln('ITBIS (18%):       ${formatearMonto(cotizacion.itbis)}');
+    texto.writeln('${etiquetaItbisLineas(cotizacion.detalles.map((d) => d.tasaImpuesto))}:       ${formatearMonto(cotizacion.itbis)}');
     texto.writeln('========================================');
     texto.writeln('TOTAL COTIZACIÓN:  ${formatearMonto(cotizacion.total)}');
     texto.writeln('========================================');
