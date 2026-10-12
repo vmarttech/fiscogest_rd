@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_venta
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 
 final historialFacturasProvider = FutureProvider.autoDispose<List<Venta>>((
   ref,
@@ -343,11 +344,23 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                                 }
                                 return;
                               }
+                              final codigoTicketH1 = paraPdf.id == null
+                                  ? null
+                                  : await ref
+                                        .read(ecfeRepositoryProvider)
+                                        .codigoSeguridadPorVenta(paraPdf.id!);
+                              final ambienteTicketH1 =
+                                  (await ref
+                                          .read(ecfeRepositoryProvider)
+                                          .obtenerConfig())
+                                      .ambiente;
                               await ComprobantePdf.imprimirFactura(
                                 paraPdf,
                                 empresa: ref
                                     .read(configuracionControllerProvider)
                                     .valueOrNull,
+                                codigoSeguridad: codigoTicketH1,
+                                ambienteDgii: ambienteTicketH1,
                               );
                             } catch (e) {
                               if (context.mounted) {
