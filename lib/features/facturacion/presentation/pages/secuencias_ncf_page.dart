@@ -196,6 +196,9 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
       'B01' => 'B01 — Crédito fiscal',
       'B02' => 'B02 — Consumidor final',
       'B04' => 'B04 — Nota de crédito',
+      'B11' => 'B11 — Compras',
+      'B13' => 'B13 — Gastos menores',
+      'B14' => 'B14 — Regímenes especiales',
       _ => widget.tipo,
     };
   }

@@ -102,7 +102,11 @@ class EmitirNcService {
     final hook = onPostEmision;
     if (hook != null) {
       try {
-        await hook(venta: ventaEcfe, tipoNcf: 'B04', rncCliente: '');
+        await hook(
+          venta: ventaEcfe.copyWith(numeroFactura: ncfNc),
+          tipoNcf: 'B04',
+          rncCliente: '',
+        );
       } catch (e) {
         avisoEcfe =
             'La nota quedo registrada, pero el e-CF 34 no se genero: $e';
@@ -152,6 +156,9 @@ Venta _ventaDevolucion(Venta venta, Map<int, double> cantidades) {
   var itbis = 0.0;
   for (var i = 0; i < venta.detalles.length; i++) {
     final q = cantidades[i] ?? 0;
+    if ((q - q.round()).abs() > 0.001) {
+      throw StateError('La cantidad a devolver tiene que ser un numero entero');
+    }
     if (q <= 0) continue;
     final d = venta.detalles[i];
     if (q > d.cantidad.toDouble() + 0.001) {

@@ -23,7 +23,7 @@ class SecuenciasNcfDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> asegurarDefaults() async {
-    for (final tipo in const ['B01', 'B02', 'B04']) {
+    for (final tipo in const ['B01', 'B02', 'B04', 'B11', 'B13', 'B14']) {
       final existe = await porTipo(tipo);
       if (existe != null) continue;
       await into(secuenciasNcfTable).insert(

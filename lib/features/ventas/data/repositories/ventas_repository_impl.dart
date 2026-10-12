@@ -291,7 +291,7 @@ class VentasRepositoryImpl implements IVentasRepository {
   @override
   Future<Venta> registrarVenta(Venta venta) async {
     await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
-final id = await _ventasDao.insertarVenta(
+    final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
         numeroCotizacion: Value(venta.numeroCotizacion),
         numeroFactura: Value(venta.numeroFactura),
@@ -505,7 +505,8 @@ final id = await _ventasDao.insertarVenta(
       throw StateError('Documento $ventaId no encontrado');
     }
     final ya = (actual.numeroFactura ?? '').trim();
-    final yaFiscal = ya.startsWith('B01') || ya.startsWith('B02');
+    final yaFiscal =
+        ya.startsWith('B01') || ya.startsWith('B02') || ya.startsWith('B14');
     if (yaFiscal) {
       throw StateError('Ya tiene NCF fiscal: $ya');
     }

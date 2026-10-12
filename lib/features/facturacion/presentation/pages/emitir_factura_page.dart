@@ -471,6 +471,11 @@ class _PanelEmitir extends StatelessWidget {
                 selected: tipoNcf == 'B01',
                 onSelected: (_) => onTipo('B01'),
               ),
+              ChoiceChip(
+                label: const Text('B14 · Regímenes especiales'),
+                selected: tipoNcf == 'B14',
+                onSelected: (_) => onTipo('B14'),
+              ),
             ],
           ),
           const SizedBox(height: 8),

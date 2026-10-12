@@ -497,7 +497,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         _dirCliente = (cli?.direccion ?? '').trim();
         _telCliente = (cli?.telefono ?? '').trim();
         // Solo el cajero elige B01/B02. Cliente en ficha ≠ crédito fiscal automático.
-        if (_tipoNcf != 'B01' && _tipoNcf != 'B02') {
+        if (_tipoNcf != 'B01' && _tipoNcf != 'B02' && _tipoNcf != 'B14') {
           _tipoNcf = 'B02';
         }
       });
@@ -518,7 +518,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     final repo = ref.read(venta_providers.ventasRepositoryProvider);
     final doc = await repo.obtenerVentaPorId(ventaIdDoc);
     final actual = (doc?.numeroFactura ?? '').trim();
-    final yaFiscal = actual.startsWith('B01') || actual.startsWith('B02');
+    final yaFiscal =
+        actual.startsWith('B01') ||
+        actual.startsWith('B02') ||
+        actual.startsWith('B14');
     if (yaFiscal) return;
 
     if (_tipoNcf == 'B01') {
@@ -1304,6 +1307,13 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 selected: _tipoNcf == 'B01',
                                 onSelected: (sel) {
                                   if (sel) setState(() => _tipoNcf = 'B01');
+                                },
+                              ),
+                              ChoiceChip(
+                                label: const Text('B14 · Regímenes especiales'),
+                                selected: _tipoNcf == 'B14',
+                                onSelected: (sel) {
+                                  if (sel) setState(() => _tipoNcf = 'B14');
                                 },
                               ),
                             ],

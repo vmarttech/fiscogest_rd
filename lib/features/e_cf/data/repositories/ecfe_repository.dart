@@ -122,6 +122,13 @@ class EcfeRepository {
     return row == null ? null : _mapDoc(row);
   }
 
+  Future<List<EcfeDocumento>> listarPorVentaId(int ventaId) async {
+    final rows = await (_db.select(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.ventaId.equals(ventaId))).get();
+    return [for (final row in rows) _mapDoc(row)];
+  }
+
   Future<EcfeDocumento?> buscarPorVentaId(int ventaId) async {
     final row =
         await (_db.select(_db.ecfeDocumentosTable)

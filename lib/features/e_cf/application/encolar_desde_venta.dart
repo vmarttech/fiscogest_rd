@@ -23,10 +23,7 @@ class EcfeEncolarResultado {
 /// Encola un e-CF desde una venta ya facturada localmente.
 /// Si el módulo está off o falla validación → no lanza; solo reporta.
 class EncolarEcfeDesdeVenta {
-  EncolarEcfeDesdeVenta({
-    required this.repo,
-    required this.validator,
-  });
+  EncolarEcfeDesdeVenta({required this.repo, required this.validator});
 
   final EcfeRepository repo;
   final EcfeNegocioValidator validator;
@@ -47,21 +44,39 @@ class EncolarEcfeDesdeVenta {
       }
 
       // Evitar duplicados por venta
-      final existente = await repo.buscarPorVentaId(venta.id!);
-      if (existente != null) {
-        return EcfeEncolarResultado(
-          encolado: false,
-          documentoId: existente.id,
-          omitidoPor: 'Ya existe documento e-CF para esta venta',
-        );
-      }
-
       final tipo = TipoEcf.desdeTipoNcfLocal(tipoNcf);
       if (tipo == null) {
         return EcfeEncolarResultado(
           encolado: false,
           omitidoPor: 'Tipo NCF $tipoNcf sin mapeo e-CF',
         );
+      }
+
+      final previos = await repo.listarPorVentaId(venta.id!);
+      final esNota = tipo == TipoEcf.notaCredito || tipo == TipoEcf.notaDebito;
+      if (!esNota && previos.isNotEmpty) {
+        return EcfeEncolarResultado(
+          encolado: false,
+          documentoId: previos.first.id,
+          omitidoPor: 'Ya existe documento e-CF para esta venta',
+        );
+      }
+      if (esNota && previos.any((previo) => previo.tipoEcf == tipo)) {
+        final ya = previos.firstWhere((previo) => previo.tipoEcf == tipo);
+        return EcfeEncolarResultado(
+          encolado: false,
+          documentoId: ya.id,
+          omitidoPor: 'Ya existe esta nota electronica para la venta',
+        );
+      }
+
+      var encfOrigen = '';
+      for (final previo in previos) {
+        final esFactura =
+            previo.tipoEcf != TipoEcf.notaCredito &&
+            previo.tipoEcf != TipoEcf.notaDebito;
+        if (esFactura && encfOrigen.isEmpty)
+          encfOrigen = (previo.encf ?? '').trim();
       }
 
       final ncf = (venta.numeroFactura ?? '').trim();
@@ -85,8 +100,8 @@ class EncolarEcfeDesdeVenta {
         tipoEcf: tipo,
         estado: estado,
         ncfLocal: ncf,
-        ultimoError:
-            validacion.ok ? null : validacion.errores.join(' · '),
+        encfReferencia: esNota && encfOrigen.isNotEmpty ? encfOrigen : null,
+        ultimoError: validacion.ok ? null : validacion.errores.join(' · '),
       );
 
       await repo.registrarEvento(

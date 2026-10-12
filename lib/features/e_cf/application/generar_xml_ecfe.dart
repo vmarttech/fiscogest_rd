@@ -60,7 +60,10 @@ class GenerarXmlEcfe {
       if (doc.tipoEcf != TipoEcf.facturaCreditoFiscal &&
           doc.tipoEcf != TipoEcf.facturaConsumo &&
           doc.tipoEcf != TipoEcf.notaDebito &&
-          doc.tipoEcf != TipoEcf.notaCredito) {
+          doc.tipoEcf != TipoEcf.notaCredito &&
+          doc.tipoEcf != TipoEcf.compras &&
+          doc.tipoEcf != TipoEcf.gastosMenores &&
+          doc.tipoEcf != TipoEcf.regimenesEspeciales) {
         return GenerarXmlResultado(
           ok: false,
           errores: [

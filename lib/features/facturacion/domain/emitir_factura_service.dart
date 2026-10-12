@@ -4,11 +4,12 @@ import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 
 /// Callback opcional post-NCF. Debe ser a prueba de fallos (el caller también lo envuelve).
-typedef EcfePostEmisionHook = Future<void> Function({
-  required Venta venta,
-  required String tipoNcf,
-  required String rncCliente,
-});
+typedef EcfePostEmisionHook =
+    Future<void> Function({
+      required Venta venta,
+      required String tipoNcf,
+      required String rncCliente,
+    });
 
 class EmitirFacturaService {
   EmitirFacturaService({
@@ -43,7 +44,10 @@ class EmitirFacturaService {
       throw StateError('Documento no encontrado');
     }
     final ncfActual = (venta.numeroFactura ?? '').trim();
-    final yaFiscal = ncfActual.startsWith('B01') || ncfActual.startsWith('B02');
+    final yaFiscal =
+        ncfActual.startsWith('B01') ||
+        ncfActual.startsWith('B02') ||
+        ncfActual.startsWith('B14');
     if (yaFiscal) {
       throw StateError('Ya tiene NCF fiscal: $ncfActual');
     }
@@ -56,10 +60,10 @@ class EmitirFacturaService {
     if (!okEstado) {
       throw StateError('Estado no válido para facturar: ${est.name}');
     }
-    if (tipoNcf != 'B01' && tipoNcf != 'B02') {
+    if (tipoNcf != 'B01' && tipoNcf != 'B02' && tipoNcf != 'B14') {
       throw StateError('Tipo NCF no soportado: $tipoNcf');
     }
-    if (tipoNcf == 'B01') {
+    if (tipoNcf == 'B01' || tipoNcf == 'B14') {
       final rnc = rncCliente.trim();
       final okRnc =
           (rnc.length == 9 || rnc.length == 11) &&

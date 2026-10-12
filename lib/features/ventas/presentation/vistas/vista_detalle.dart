@@ -86,6 +86,9 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     if (n.startsWith('B01')) return 'Crédito fiscal (B01)';
     if (n.startsWith('B02')) return 'Consumidor final (B02)';
     if (n.startsWith('B04')) return 'Nota de crédito (B04)';
+    if (n.startsWith('B11')) return 'Compras (B11)';
+    if (n.startsWith('B13')) return 'Gastos menores (B13)';
+    if (n.startsWith('B14')) return 'Regímenes especiales (B14)';
     if (n.isEmpty) return 'Sin NCF';
     return 'Comprobante: $n';
   }

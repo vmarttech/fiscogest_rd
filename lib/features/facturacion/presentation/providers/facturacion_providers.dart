@@ -26,22 +26,23 @@ final emitirFacturaServiceProvider = Provider<EmitirFacturaService>((ref) {
   return EmitirFacturaService(
     ventasRepo: ref.watch(ventasRepositoryProvider),
     secuenciasDao: ref.watch(secuenciasNcfDaoProvider),
-    onPostEmision: ({
-      required Venta venta,
-      required String tipoNcf,
-      required String rncCliente,
-    }) async {
-      try {
-        final encolar = ref.read(encolarEcfeDesdeVentaProvider);
-        await encolar(
-          venta: venta,
-          tipoNcf: tipoNcf,
-          rncCliente: rncCliente,
-          nombreCliente: venta.nombreCliente ?? '',
-        );
-        ref.invalidate(ecfeColaProvider);
-      } catch (_) {}
-    },
+    onPostEmision:
+        ({
+          required Venta venta,
+          required String tipoNcf,
+          required String rncCliente,
+        }) async {
+          try {
+            final encolar = ref.read(encolarEcfeDesdeVentaProvider);
+            await encolar(
+              venta: venta,
+              tipoNcf: tipoNcf,
+              rncCliente: rncCliente,
+              nombreCliente: venta.nombreCliente ?? '',
+            );
+            ref.invalidate(ecfeColaProvider);
+          } catch (_) {}
+        },
   );
 });
 
@@ -51,7 +52,10 @@ final documentosPendientesFacturaProvider =
       final list = await repo.listarCotizaciones();
       return list.where((v) {
         final ncf = (v.numeroFactura ?? '').trim();
-        final ncfFiscal = ncf.startsWith('B01') || ncf.startsWith('B02');
+        final ncfFiscal =
+            ncf.startsWith('B01') ||
+            ncf.startsWith('B02') ||
+            ncf.startsWith('B14');
         if (ncfFiscal) return false;
         // Cotizado/aprobado, o ya cobrado en Caja sin NCF DGII
         return v.estadoDocumento == EstadoDocumento.cotizado ||
@@ -72,22 +76,23 @@ final emitirNcServiceProvider = Provider<EmitirNcService>((ref) {
     notasDao: ref.watch(notasCreditoDaoProvider),
     inventarioService: ref.watch(ventaInventarioServiceProvider),
     cuentasCobrarDao: ref.watch(_cuentasCobrarDaoFactProvider),
-    onPostEmision: ({
-      required Venta venta,
-      required String tipoNcf,
-      required String rncCliente,
-    }) async {
-      try {
-        final encolar = ref.read(encolarEcfeDesdeVentaProvider);
-        await encolar(
-          venta: venta,
-          tipoNcf: tipoNcf,
-          rncCliente: rncCliente,
-          nombreCliente: venta.nombreCliente ?? '',
-        );
-        ref.invalidate(ecfeColaProvider);
-      } catch (_) {}
-    },
+    onPostEmision:
+        ({
+          required Venta venta,
+          required String tipoNcf,
+          required String rncCliente,
+        }) async {
+          try {
+            final encolar = ref.read(encolarEcfeDesdeVentaProvider);
+            await encolar(
+              venta: venta,
+              tipoNcf: tipoNcf,
+              rncCliente: rncCliente,
+              nombreCliente: venta.nombreCliente ?? '',
+            );
+            ref.invalidate(ecfeColaProvider);
+          } catch (_) {}
+        },
   );
 });
 

@@ -56,6 +56,9 @@ class EcfeNegocioValidator {
       TipoEcf.facturaConsumo,
       TipoEcf.notaDebito,
       TipoEcf.notaCredito,
+      TipoEcf.compras,
+      TipoEcf.gastosMenores,
+      TipoEcf.regimenesEspeciales,
     };
     if (!soportados.contains(tipoEcf)) {
       errs.add('Tipo e-CF ${tipoEcf.codigo} aún no soportado');
@@ -97,8 +100,11 @@ class EcfeNegocioValidator {
     } else if (!ncf.startsWith('B01') &&
         !ncf.startsWith('B02') &&
         !ncf.startsWith('B03') &&
-        !ncf.startsWith('B04')) {
-      errs.add('NCF local no es B01/B02/B03/B04: $ncf');
+        !ncf.startsWith('B04') &&
+        !ncf.startsWith('B11') &&
+        !ncf.startsWith('B13') &&
+        !ncf.startsWith('B14')) {
+      errs.add('NCF local no es B01/B02/B03/B04/B11/B13/B14: $ncf');
     }
 
     if (tipoEcf == TipoEcf.facturaCreditoFiscal && !ncf.startsWith('B01')) {
@@ -112,6 +118,20 @@ class EcfeNegocioValidator {
     }
     if (tipoEcf == TipoEcf.notaCredito && !ncf.startsWith('B04')) {
       errs.add('Tipo 34 debería corresponder a NCF B04');
+      if (tipoEcf == TipoEcf.compras && !ncf.startsWith('B11')) {
+        errs.add('Tipo 41 debería corresponder a NCF B11');
+      }
+      if (tipoEcf == TipoEcf.gastosMenores && !ncf.startsWith('B13')) {
+        errs.add('Tipo 43 debería corresponder a NCF B13');
+      }
+      if (tipoEcf == TipoEcf.regimenesEspeciales && !ncf.startsWith('B14')) {
+        errs.add('Tipo 44 debería corresponder a NCF B14');
+      }
+      if ((tipoEcf == TipoEcf.compras ||
+              tipoEcf == TipoEcf.regimenesEspeciales) &&
+          !esIdentificadorValido(rncReceptor)) {
+        errs.add('Este comprobante requiere RNC o cédula');
+      }
     }
 
     if (errs.isEmpty) return EcfeValidacionResultado.ok();

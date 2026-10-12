@@ -33,6 +33,12 @@ enum TipoEcf {
         return TipoEcf.notaDebito;
       case 'B04':
         return TipoEcf.notaCredito;
+      case 'B11':
+        return TipoEcf.compras;
+      case 'B13':
+        return TipoEcf.gastosMenores;
+      case 'B14':
+        return TipoEcf.regimenesEspeciales;
       default:
         return null;
     }

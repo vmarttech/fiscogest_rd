@@ -45,7 +45,9 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                   );
                 }
                 builder.element('IndicadorMontoGravado', nest: '0');
-                builder.element('TipoIngresos', nest: p.tipoIngresos);
+                if (p.tipoEcfCodigo != 41 && p.tipoEcfCodigo != 43) {
+                  builder.element('TipoIngresos', nest: p.tipoIngresos);
+                }
                 builder.element('TipoPago', nest: p.tipoPago);
                 if (p.tipoPago == '2' && p.fechaLimitePago.trim().isNotEmpty) {
                   builder.element('FechaLimitePago', nest: p.fechaLimitePago);
@@ -96,28 +98,30 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                 builder.element('FechaEmision', nest: p.fechaEmision);
               },
             );
-            builder.element(
-              'Comprador',
-              nest: () {
-                if ((p.rncComprador ?? '').isNotEmpty) {
-                  builder.element('RNCComprador', nest: p.rncComprador!);
-                }
-                builder.element(
-                  'RazonSocialComprador',
-                  nest: _safe(
-                    (p.razonSocialComprador ?? '').isEmpty
-                        ? 'CONSUMIDOR FINAL'
-                        : p.razonSocialComprador!,
-                  ),
-                );
-                if ((p.direccionComprador ?? '').isNotEmpty) {
+            if (p.tipoEcfCodigo != 43) {
+              builder.element(
+                'Comprador',
+                nest: () {
+                  if ((p.rncComprador ?? '').isNotEmpty) {
+                    builder.element('RNCComprador', nest: p.rncComprador!);
+                  }
                   builder.element(
-                    'DireccionComprador',
-                    nest: _safe(p.direccionComprador!),
+                    'RazonSocialComprador',
+                    nest: _safe(
+                      (p.razonSocialComprador ?? '').isEmpty
+                          ? 'CONSUMIDOR FINAL'
+                          : p.razonSocialComprador!,
+                    ),
                   );
-                }
-              },
-            );
+                  if ((p.direccionComprador ?? '').isNotEmpty) {
+                    builder.element(
+                      'DireccionComprador',
+                      nest: _safe(p.direccionComprador!),
+                    );
+                  }
+                },
+              );
+            }
             builder.element(
               'Totales',
               nest: () {
@@ -260,7 +264,9 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
               nest: () {
                 builder.element('TipoeCF', nest: p.tipoEcfCodigo.toString());
                 builder.element('eNCF', nest: p.encf);
-                builder.element('TipoIngresos', nest: p.tipoIngresos);
+                if (p.tipoEcfCodigo != 41 && p.tipoEcfCodigo != 43) {
+                  builder.element('TipoIngresos', nest: p.tipoIngresos);
+                }
                 builder.element('TipoPago', nest: p.tipoPago);
                 if (p.tipoPago == '2' && p.fechaLimitePago.trim().isNotEmpty) {
                   builder.element('FechaLimitePago', nest: p.fechaLimitePago);
