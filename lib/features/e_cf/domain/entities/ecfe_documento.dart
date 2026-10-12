@@ -8,6 +8,7 @@ class EcfeDocumento {
     this.ventaId,
     required this.tipoEcf,
     this.encf,
+    this.rncReceptor,
     required this.estado,
     this.trackId,
     this.codigoRespuesta,
@@ -21,15 +22,18 @@ class EcfeDocumento {
   });
 
   final int? id;
+
   /// Referencia opcional a ventas_table.id — solo lectura lateral.
   final int? ventaId;
   final TipoEcf tipoEcf;
   final String? encf;
+  final String? rncReceptor;
   final EstadoEcfInterno estado;
   final String? trackId;
   final String? codigoRespuesta;
   final String? mensajeDgii;
   final String? ultimoError;
+
   /// Código de seguridad para RI/QR (oficial o derivado de firma).
   final String? codigoSeguridad;
   final String? encfReferencia;

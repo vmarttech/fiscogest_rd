@@ -30196,6 +30196,17 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _rncReceptorMeta = const VerificationMeta(
+    'rncReceptor',
+  );
+  @override
+  late final GeneratedColumn<String> rncReceptor = GeneratedColumn<String>(
+    'rnc_receptor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -30214,6 +30225,7 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
     motivoAnulacion,
     creadoEn,
     actualizadoEn,
+    rncReceptor,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -30348,6 +30360,15 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
         ),
       );
     }
+    if (data.containsKey('rnc_receptor')) {
+      context.handle(
+        _rncReceptorMeta,
+        rncReceptor.isAcceptableOrUnknown(
+          data['rnc_receptor']!,
+          _rncReceptorMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -30424,6 +30445,10 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}actualizado_en'],
       ),
+      rncReceptor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rnc_receptor'],
+      ),
     );
   }
 
@@ -30457,6 +30482,7 @@ class EcfeDocumentosTableData extends DataClass
   final String? motivoAnulacion;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
+  final String? rncReceptor;
   const EcfeDocumentosTableData({
     required this.id,
     this.ventaId,
@@ -30474,6 +30500,7 @@ class EcfeDocumentosTableData extends DataClass
     this.motivoAnulacion,
     required this.creadoEn,
     this.actualizadoEn,
+    this.rncReceptor,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -30518,6 +30545,9 @@ class EcfeDocumentosTableData extends DataClass
     if (!nullToAbsent || actualizadoEn != null) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
     }
+    if (!nullToAbsent || rncReceptor != null) {
+      map['rnc_receptor'] = Variable<String>(rncReceptor);
+    }
     return map;
   }
 
@@ -30561,6 +30591,9 @@ class EcfeDocumentosTableData extends DataClass
       actualizadoEn: actualizadoEn == null && nullToAbsent
           ? const Value.absent()
           : Value(actualizadoEn),
+      rncReceptor: rncReceptor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rncReceptor),
     );
   }
 
@@ -30586,6 +30619,7 @@ class EcfeDocumentosTableData extends DataClass
       motivoAnulacion: serializer.fromJson<String?>(json['motivoAnulacion']),
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+      rncReceptor: serializer.fromJson<String?>(json['rncReceptor']),
     );
   }
   @override
@@ -30608,6 +30642,7 @@ class EcfeDocumentosTableData extends DataClass
       'motivoAnulacion': serializer.toJson<String?>(motivoAnulacion),
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+      'rncReceptor': serializer.toJson<String?>(rncReceptor),
     };
   }
 
@@ -30628,6 +30663,7 @@ class EcfeDocumentosTableData extends DataClass
     Value<String?> motivoAnulacion = const Value.absent(),
     DateTime? creadoEn,
     Value<DateTime?> actualizadoEn = const Value.absent(),
+    Value<String?> rncReceptor = const Value.absent(),
   }) => EcfeDocumentosTableData(
     id: id ?? this.id,
     ventaId: ventaId.present ? ventaId.value : this.ventaId,
@@ -30655,6 +30691,7 @@ class EcfeDocumentosTableData extends DataClass
     actualizadoEn: actualizadoEn.present
         ? actualizadoEn.value
         : this.actualizadoEn,
+    rncReceptor: rncReceptor.present ? rncReceptor.value : this.rncReceptor,
   );
   EcfeDocumentosTableData copyWithCompanion(EcfeDocumentosTableCompanion data) {
     return EcfeDocumentosTableData(
@@ -30692,6 +30729,9 @@ class EcfeDocumentosTableData extends DataClass
       actualizadoEn: data.actualizadoEn.present
           ? data.actualizadoEn.value
           : this.actualizadoEn,
+      rncReceptor: data.rncReceptor.present
+          ? data.rncReceptor.value
+          : this.rncReceptor,
     );
   }
 
@@ -30713,7 +30753,8 @@ class EcfeDocumentosTableData extends DataClass
           ..write('encfReferencia: $encfReferencia, ')
           ..write('motivoAnulacion: $motivoAnulacion, ')
           ..write('creadoEn: $creadoEn, ')
-          ..write('actualizadoEn: $actualizadoEn')
+          ..write('actualizadoEn: $actualizadoEn, ')
+          ..write('rncReceptor: $rncReceptor')
           ..write(')'))
         .toString();
   }
@@ -30736,6 +30777,7 @@ class EcfeDocumentosTableData extends DataClass
     motivoAnulacion,
     creadoEn,
     actualizadoEn,
+    rncReceptor,
   );
   @override
   bool operator ==(Object other) =>
@@ -30756,7 +30798,8 @@ class EcfeDocumentosTableData extends DataClass
           other.encfReferencia == this.encfReferencia &&
           other.motivoAnulacion == this.motivoAnulacion &&
           other.creadoEn == this.creadoEn &&
-          other.actualizadoEn == this.actualizadoEn);
+          other.actualizadoEn == this.actualizadoEn &&
+          other.rncReceptor == this.rncReceptor);
 }
 
 class EcfeDocumentosTableCompanion
@@ -30777,6 +30820,7 @@ class EcfeDocumentosTableCompanion
   final Value<String?> motivoAnulacion;
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
+  final Value<String?> rncReceptor;
   const EcfeDocumentosTableCompanion({
     this.id = const Value.absent(),
     this.ventaId = const Value.absent(),
@@ -30794,6 +30838,7 @@ class EcfeDocumentosTableCompanion
     this.motivoAnulacion = const Value.absent(),
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
+    this.rncReceptor = const Value.absent(),
   });
   EcfeDocumentosTableCompanion.insert({
     this.id = const Value.absent(),
@@ -30812,6 +30857,7 @@ class EcfeDocumentosTableCompanion
     this.motivoAnulacion = const Value.absent(),
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
+    this.rncReceptor = const Value.absent(),
   }) : tipoEcf = Value(tipoEcf),
        creadoEn = Value(creadoEn);
   static Insertable<EcfeDocumentosTableData> custom({
@@ -30831,6 +30877,7 @@ class EcfeDocumentosTableCompanion
     Expression<String>? motivoAnulacion,
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
+    Expression<String>? rncReceptor,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -30849,6 +30896,7 @@ class EcfeDocumentosTableCompanion
       if (motivoAnulacion != null) 'motivo_anulacion': motivoAnulacion,
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+      if (rncReceptor != null) 'rnc_receptor': rncReceptor,
     });
   }
 
@@ -30869,6 +30917,7 @@ class EcfeDocumentosTableCompanion
     Value<String?>? motivoAnulacion,
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
+    Value<String?>? rncReceptor,
   }) {
     return EcfeDocumentosTableCompanion(
       id: id ?? this.id,
@@ -30887,6 +30936,7 @@ class EcfeDocumentosTableCompanion
       motivoAnulacion: motivoAnulacion ?? this.motivoAnulacion,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+      rncReceptor: rncReceptor ?? this.rncReceptor,
     );
   }
 
@@ -30941,6 +30991,9 @@ class EcfeDocumentosTableCompanion
     if (actualizadoEn.present) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
     }
+    if (rncReceptor.present) {
+      map['rnc_receptor'] = Variable<String>(rncReceptor.value);
+    }
     return map;
   }
 
@@ -30962,7 +31015,8 @@ class EcfeDocumentosTableCompanion
           ..write('encfReferencia: $encfReferencia, ')
           ..write('motivoAnulacion: $motivoAnulacion, ')
           ..write('creadoEn: $creadoEn, ')
-          ..write('actualizadoEn: $actualizadoEn')
+          ..write('actualizadoEn: $actualizadoEn, ')
+          ..write('rncReceptor: $rncReceptor')
           ..write(')'))
         .toString();
   }
@@ -57106,6 +57160,7 @@ typedef $$EcfeDocumentosTableTableCreateCompanionBuilder =
       Value<String?> motivoAnulacion,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
+      Value<String?> rncReceptor,
     });
 typedef $$EcfeDocumentosTableTableUpdateCompanionBuilder =
     EcfeDocumentosTableCompanion Function({
@@ -57125,6 +57180,7 @@ typedef $$EcfeDocumentosTableTableUpdateCompanionBuilder =
       Value<String?> motivoAnulacion,
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
+      Value<String?> rncReceptor,
     });
 
 class $$EcfeDocumentosTableTableFilterComposer
@@ -57213,6 +57269,11 @@ class $$EcfeDocumentosTableTableFilterComposer
 
   ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
     column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rncReceptor => $composableBuilder(
+    column: $table.rncReceptor,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -57305,6 +57366,11 @@ class $$EcfeDocumentosTableTableOrderingComposer
     column: $table.actualizadoEn,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get rncReceptor => $composableBuilder(
+    column: $table.rncReceptor,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EcfeDocumentosTableTableAnnotationComposer
@@ -57381,6 +57447,11 @@ class $$EcfeDocumentosTableTableAnnotationComposer
     column: $table.actualizadoEn,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get rncReceptor => $composableBuilder(
+    column: $table.rncReceptor,
+    builder: (column) => column,
+  );
 }
 
 class $$EcfeDocumentosTableTableTableManager
@@ -57442,6 +57513,7 @@ class $$EcfeDocumentosTableTableTableManager
                 Value<String?> motivoAnulacion = const Value.absent(),
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
+                Value<String?> rncReceptor = const Value.absent(),
               }) => EcfeDocumentosTableCompanion(
                 id: id,
                 ventaId: ventaId,
@@ -57459,6 +57531,7 @@ class $$EcfeDocumentosTableTableTableManager
                 motivoAnulacion: motivoAnulacion,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
+                rncReceptor: rncReceptor,
               ),
           createCompanionCallback:
               ({
@@ -57478,6 +57551,7 @@ class $$EcfeDocumentosTableTableTableManager
                 Value<String?> motivoAnulacion = const Value.absent(),
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
+                Value<String?> rncReceptor = const Value.absent(),
               }) => EcfeDocumentosTableCompanion.insert(
                 id: id,
                 ventaId: ventaId,
@@ -57495,6 +57569,7 @@ class $$EcfeDocumentosTableTableTableManager
                 motivoAnulacion: motivoAnulacion,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
+                rncReceptor: rncReceptor,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

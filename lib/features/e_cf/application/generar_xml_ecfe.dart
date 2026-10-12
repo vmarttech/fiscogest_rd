@@ -202,7 +202,12 @@ class GenerarXmlEcfe {
             : direccionEmisor.trim(),
         telefonoEmisor: telefonoEmisor,
         correoEmisor: correoEmisor,
-        rncComprador: rncCliente.trim().isEmpty ? null : rncCliente.trim(),
+        rncComprador: () {
+          final escrito = rncCliente.trim();
+          if (escrito.isNotEmpty) return escrito;
+          final guardado = (doc.rncReceptor ?? '').trim();
+          return guardado.isEmpty ? null : guardado;
+        }(),
         razonSocialComprador: nombreCliente.trim().isEmpty
             ? (venta.nombreCliente ?? 'CONSUMIDOR FINAL')
             : nombreCliente.trim(),

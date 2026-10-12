@@ -79,11 +79,22 @@ class EncolarEcfeDesdeVenta {
           encfOrigen = (previo.encf ?? '').trim();
       }
 
+      var rncNota = rncCliente.trim();
+      if (rncNota.isEmpty) {
+        for (final previo in previos) {
+          final guardado = (previo.rncReceptor ?? '').trim();
+          if (guardado.isNotEmpty) {
+            rncNota = guardado;
+            break;
+          }
+        }
+      }
+
       final ncf = (venta.numeroFactura ?? '').trim();
       final validacion = validator.validarParaEncolar(
         config: cfg,
         tipoEcf: tipo,
-        rncReceptor: rncCliente,
+        rncReceptor: rncNota,
         nombreReceptor: nombreCliente,
         subtotal: venta.montoSubtotal,
         itbis: venta.itbis,
@@ -100,6 +111,7 @@ class EncolarEcfeDesdeVenta {
         tipoEcf: tipo,
         estado: estado,
         ncfLocal: ncf,
+        rncReceptor: rncNota.isEmpty ? null : rncNota,
         encfReferencia: esNota && encfOrigen.isNotEmpty ? encfOrigen : null,
         ultimoError: validacion.ok ? null : validacion.errores.join(' · '),
       );

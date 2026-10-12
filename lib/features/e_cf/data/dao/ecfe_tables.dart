@@ -4,12 +4,12 @@ import 'package:drift/drift.dart';
 class EcfeConfigTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   BoolColumn get habilitado => boolean().withDefault(const Constant(false))();
+
   /// deshabilitado | precertificacion | certificacion | produccion
   TextColumn get ambiente =>
       text().withDefault(const Constant('deshabilitado'))();
   TextColumn get rncEmisor => text().withDefault(const Constant(''))();
-  TextColumn get razonSocialEmisor =>
-      text().withDefault(const Constant(''))();
+  TextColumn get razonSocialEmisor => text().withDefault(const Constant(''))();
   TextColumn get rutaCertificado => text().withDefault(const Constant(''))();
   TextColumn get aliasCertificado => text().withDefault(const Constant(''))();
   TextColumn get claveCertificado => text().withDefault(const Constant(''))();
@@ -20,25 +20,29 @@ class EcfeConfigTable extends Table {
 
 class EcfeDocumentosTable extends Table {
   IntColumn get id => integer().autoIncrement()();
+
   /// Solo referencia; no FK estricta para no acoplar borrados de ventas.
   IntColumn get ventaId => integer().nullable()();
   IntColumn get tipoEcf => integer()();
   TextColumn get encf => text().nullable()();
-  TextColumn get estado =>
-      text().withDefault(const Constant('borrador'))();
+  TextColumn get estado => text().withDefault(const Constant('borrador'))();
   TextColumn get trackId => text().nullable()();
   TextColumn get codigoRespuesta => text().nullable()();
   TextColumn get mensajeDgii => text().nullable()();
   TextColumn get ultimoError => text().nullable()();
   TextColumn get xmlSinFirma => text().nullable()();
   TextColumn get xmlFirmado => text().nullable()();
+
   /// Código de seguridad RI (6 chars). Persistido al firmar / consulta DGII.
   TextColumn get codigoSeguridad => text().nullable()();
+
   /// e-NCF del comprobante modificado (NC/ND).
   TextColumn get encfReferencia => text().nullable()();
   TextColumn get motivoAnulacion => text().nullable()();
   DateTimeColumn get creadoEn => dateTime()();
   DateTimeColumn get actualizadoEn => dateTime().nullable()();
+
+  TextColumn get rncReceptor => text().nullable()();
 }
 
 class EcfeEventosTable extends Table {
@@ -49,7 +53,6 @@ class EcfeEventosTable extends Table {
   BoolColumn get ok => boolean().withDefault(const Constant(true))();
   DateTimeColumn get creadoEn => dateTime()();
 }
-
 
 class EcfeSecuenciasTable extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -75,8 +78,7 @@ class EcfeSpecVersionTable extends Table {
   BoolColumn get activaCert => boolean().withDefault(const Constant(false))();
   BoolColumn get activaProduccion =>
       boolean().withDefault(const Constant(false))();
-  TextColumn get checklistJson =>
-      text().withDefault(const Constant('[]'))();
+  TextColumn get checklistJson => text().withDefault(const Constant('[]'))();
   DateTimeColumn get creadoEn => dateTime()();
   DateTimeColumn get activadoEn => dateTime().nullable()();
 }

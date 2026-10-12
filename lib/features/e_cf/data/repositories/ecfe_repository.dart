@@ -34,6 +34,7 @@ class EcfeRepository {
       id: r.id,
       ventaId: r.ventaId,
       tipoEcf: tipo,
+      rncReceptor: r.rncReceptor,
       encf: r.encf,
       estado: _est(r.estado),
       trackId: r.trackId,
@@ -143,6 +144,7 @@ class EcfeRepository {
     required TipoEcf tipoEcf,
     required EstadoEcfInterno estado,
     String? ncfLocal,
+    String? rncReceptor,
     String? ultimoError,
     String? encfReferencia,
   }) async {
@@ -153,7 +155,8 @@ class EcfeRepository {
           EcfeDocumentosTableCompanion.insert(
             ventaId: Value(ventaId),
             tipoEcf: tipoEcf.codigo,
-            encf: const Value(null), // e-NCF se asigna al generar XML
+            encf: const Value(null),
+            rncReceptor: Value(rncReceptor), // e-NCF se asigna al generar XML
             encfReferencia: Value(encfReferencia),
             estado: Value(estado.name),
             ultimoError: Value(ultimoError),
