@@ -37,7 +37,6 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   bool _generando = false;
   String? _xmlPreview;
 
-
   Future<void> _imprimirRi() async {
     setState(() => _generando = true);
     try {
@@ -45,18 +44,23 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
       final doc = await repo.obtenerPorId(widget.documentoId);
       if (doc == null) throw StateError('Documento no encontrado');
       if (doc.ventaId == null) throw StateError('Sin venta asociada');
-      final venta = await ref.read(ventasRepositoryProvider).obtenerVentaPorId(doc.ventaId!);
+      final venta = await ref
+          .read(ventasRepositoryProvider)
+          .obtenerVentaPorId(doc.ventaId!);
       if (venta == null) throw StateError('Venta no encontrada');
       final cfg = await repo.obtenerConfig();
       final empresa = ref.read(configuracionControllerProvider).valueOrNull;
       final xml = await repo.obtenerXmlFirmado(doc.id!);
       final encf = (doc.encf ?? '').trim();
-      if (encf.isEmpty) throw StateError('Sin e-NCF aún; genera/firma el XML primero');
+      if (encf.isEmpty)
+        throw StateError('Sin e-NCF aún; genera/firma el XML primero');
       await RepresentacionImpresaPdf.imprimir(
         venta: venta,
         encf: encf,
         tipoEcf: doc.tipoEcf,
-        rncEmisor: cfg.rncEmisor.isNotEmpty ? cfg.rncEmisor : (empresa?.rnc ?? ''),
+        rncEmisor: cfg.rncEmisor.isNotEmpty
+            ? cfg.rncEmisor
+            : (empresa?.rnc ?? ''),
         razonSocialEmisor: cfg.razonSocialEmisor.isNotEmpty
             ? cfg.razonSocialEmisor
             : (empresa?.razonSocial ?? ''),
@@ -69,10 +73,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(
-        SnackBar(
-          content: Text('RI: $e'),
-          backgroundColor: AppColors.error,
-        ),
+        SnackBar(content: Text('RI: $e'), backgroundColor: AppColors.error),
       );
     } finally {
       if (mounted) setState(() => _generando = false);
@@ -80,18 +81,10 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _generarXml() async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     await _generarXmlCore();
   }
 
   Future<void> _generarXmlCore() async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     setState(() => _generando = true);
     try {
       final repoEcfe = ref.read(ecfeRepositoryProvider);
@@ -108,8 +101,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         throw StateError('La venta no tiene líneas de detalle');
       }
 
-      final ConfiguracionEntity? empresa =
-          ref.read(configuracionControllerProvider).valueOrNull;
+      final ConfiguracionEntity? empresa = ref
+          .read(configuracionControllerProvider)
+          .valueOrNull;
       final ecfeCfg = await repoEcfe.obtenerConfig();
 
       final rncEmisor = ecfeCfg.rncEmisor.isNotEmpty
@@ -132,7 +126,8 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         nombreCliente: venta.nombreCliente ?? '',
         tasaItbis: empresa?.impuestoPorcentaje ?? 18.0,
         rutaXsd: ecfeCfg.xsdVersion.isEmpty ? null : ecfeCfg.xsdVersion,
-        exigirXsd: ecfeCfg.ambiente == AmbienteDgii.certificacion ||
+        exigirXsd:
+            ecfeCfg.ambiente == AmbienteDgii.certificacion ||
             ecfeCfg.ambiente == AmbienteDgii.produccion,
       );
 
@@ -150,8 +145,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                 ? 'XML generado (${result.encf}) · validación OK'
                 : 'XML con errores: ${result.errores.take(2).join('; ')}',
           ),
-          backgroundColor:
-              result.ok ? AppColors.success : AppColors.warning,
+          backgroundColor: result.ok ? AppColors.success : AppColors.warning,
         ),
       );
     } catch (e) {
@@ -167,15 +161,8 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
     }
   }
 
-
-
-
   /// Generar XML → Firmar → Enviar a DGII (un solo flujo).
   Future<void> _procesarEcfe() async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     setState(() => _generando = true);
     final pasos = <String>[];
     try {
@@ -211,9 +198,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
       if (doc != null &&
           (doc.estado == EstadoEcfInterno.xmlListo ||
               doc.estado == EstadoEcfInterno.errorTecnico)) {
-        final fr = await FirmarXmlEcfe(repo: repo).call(
-          documentoId: widget.documentoId,
-        );
+        final fr = await FirmarXmlEcfe(
+          repo: repo,
+        ).call(documentoId: widget.documentoId);
         if (!fr.ok) {
           throw StateError(fr.errores.join(' · '));
         }
@@ -226,9 +213,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
       }
 
       // 3) Enviar
-      final er = await EnviarEcfe(repo: repo).call(
-        documentoId: widget.documentoId,
-      );
+      final er = await EnviarEcfe(
+        repo: repo,
+      ).call(documentoId: widget.documentoId);
       if (!er.ok) {
         throw StateError(er.errores.join(' · '));
       }
@@ -265,16 +252,12 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
     }
   }
 
-
   Future<void> _firmarXml() async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     setState(() => _generando = true);
     try {
-      final result = await FirmarXmlEcfe(repo: ref.read(ecfeRepositoryProvider))
-          .call(documentoId: widget.documentoId);
+      final result = await FirmarXmlEcfe(
+        repo: ref.read(ecfeRepositoryProvider),
+      ).call(documentoId: widget.documentoId);
       ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
       ref.invalidate(ecfeEventosProvider(widget.documentoId));
       ref.invalidate(ecfeColaProvider);
@@ -310,14 +293,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _enviarDgii() async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     setState(() => _generando = true);
     try {
-      final result = await EnviarEcfe(repo: ref.read(ecfeRepositoryProvider))
-          .call(documentoId: widget.documentoId);
+      final result = await EnviarEcfe(
+        repo: ref.read(ecfeRepositoryProvider),
+      ).call(documentoId: widget.documentoId);
       ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
       ref.invalidate(ecfeEventosProvider(widget.documentoId));
       ref.invalidate(ecfeColaProvider);
@@ -328,11 +308,18 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
             : 'Enviado a DGII · TrackId ${result.trackId}';
         FiscoGestNotifications.show(SnackBar(content: Text(msg)));
       } else {
-        FiscoGestNotifications.show(SnackBar(content: Text(result.errores.join(' · ')), backgroundColor: AppColors.error));
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text(result.errores.join(' · ')),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
-        FiscoGestNotifications.show(SnackBar(content: Text('$e'), backgroundColor: AppColors.error));
+        FiscoGestNotifications.show(
+          SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
+        );
       }
     } finally {
       if (mounted) setState(() => _generando = false);
@@ -340,14 +327,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _consultarEstado() async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     setState(() => _generando = true);
     try {
-      final result = await ConsultarEcfe(repo: ref.read(ecfeRepositoryProvider))
-          .call(documentoId: widget.documentoId);
+      final result = await ConsultarEcfe(
+        repo: ref.read(ecfeRepositoryProvider),
+      ).call(documentoId: widget.documentoId);
       ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
       ref.invalidate(ecfeEventosProvider(widget.documentoId));
       ref.invalidate(ecfeColaProvider);
@@ -355,25 +339,29 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
       if (result.ok) {
         final label = result.estado?.etiqueta ?? result.estadoDgii ?? 'OK';
         final extra = result.mensaje != null ? ' · ${result.mensaje}' : '';
-        FiscoGestNotifications.show(SnackBar(content: Text('DGII: $label$extra')));
+        FiscoGestNotifications.show(
+          SnackBar(content: Text('DGII: $label$extra')),
+        );
       } else {
-        FiscoGestNotifications.show(SnackBar(content: Text(result.errores.join(' · ')), backgroundColor: AppColors.error));
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text(result.errores.join(' · ')),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
-        FiscoGestNotifications.show(SnackBar(content: Text('$e'), backgroundColor: AppColors.error));
+        FiscoGestNotifications.show(
+          SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
+        );
       }
     } finally {
       if (mounted) setState(() => _generando = false);
     }
   }
 
-
   Future<void> _editarEncfReferencia(EcfeDocumento doc) async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     final ctrl = TextEditingController(text: doc.encfReferencia ?? '');
     final ok = await showDialog<bool>(
       context: context,
@@ -388,14 +376,22 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Guardar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Guardar'),
+          ),
         ],
       ),
     );
     if (ok != true || !mounted) return;
     try {
-      await ref.read(ecfeRepositoryProvider).guardarEncfReferencia(
+      await ref
+          .read(ecfeRepositoryProvider)
+          .guardarEncfReferencia(
             id: widget.documentoId,
             encfReferencia: ctrl.text,
           );
@@ -411,10 +407,6 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _anularDocumento(EcfeDocumento doc) async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     final ctrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
@@ -430,18 +422,23 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Anular')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Anular'),
+          ),
         ],
       ),
     );
     if (ok != true || !mounted) return;
     setState(() => _generando = true);
     try {
-      final r = await AnularEcfe(repo: ref.read(ecfeRepositoryProvider)).call(
-        documentoId: widget.documentoId,
-        motivo: ctrl.text,
-      );
+      final r = await AnularEcfe(
+        repo: ref.read(ecfeRepositoryProvider),
+      ).call(documentoId: widget.documentoId, motivo: ctrl.text);
       ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
       ref.invalidate(ecfeEventosProvider(widget.documentoId));
       ref.invalidate(ecfeColaProvider);
@@ -489,16 +486,14 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: mobile ? 720 : 800),
             child: async.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('$e')),
               data: (doc) {
                 if (doc == null) {
-                  return const Center(
-                    child: Text('Documento no encontrado'),
-                  );
+                  return const Center(child: Text('Documento no encontrado'));
                 }
-                final puedeXml = doc.estado == EstadoEcfInterno.borrador ||
+                final puedeXml =
+                    doc.estado == EstadoEcfInterno.borrador ||
                     doc.estado == EstadoEcfInterno.validacionFallida ||
                     doc.estado == EstadoEcfInterno.errorTecnico ||
                     doc.estado == EstadoEcfInterno.xmlListo;
@@ -507,6 +502,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     const EcfeSoloLecturaBanner(),
+                    const EcfePracticaBanner(),
                     _card(
                       children: [
                         _row(
@@ -557,8 +553,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                         children: [
                           Text(
                             'Vista previa XML',
-                            style: AppTypography.h4
-                                .copyWith(fontWeight: FontWeight.w700),
+                            style: AppTypography.h4.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           const Spacer(),
                           TextButton.icon(
@@ -567,9 +564,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                                 ClipboardData(text: _xmlPreview!),
                               );
                               FiscoGestNotifications.show(
-                                const SnackBar(
-                                  content: Text('XML copiado'),
-                                ),
+                                const SnackBar(content: Text('XML copiado')),
                               );
                             },
                             icon: const Icon(Icons.copy, size: 18),
@@ -641,16 +636,18 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                           !doc.estado.esTerminalExito)
                         AppButton(
                           text: 'Anular e-CF (interno)',
-                          onPressed:
-                              _generando ? null : () => _anularDocumento(doc),
+                          onPressed: _generando
+                              ? null
+                              : () => _anularDocumento(doc),
                         ),
                     ],
 
                     const SizedBox(height: 16),
                     Text(
                       'Historial de eventos',
-                      style: AppTypography.h4
-                          .copyWith(fontWeight: FontWeight.w700),
+                      style: AppTypography.h4.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     eventos.when(

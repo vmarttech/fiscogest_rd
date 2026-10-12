@@ -18,6 +18,8 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_config.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
+import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_endpoints.dart';
+import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo.dart';
 
 /// Hub del módulo e-CF. No interviene en ventas ni caja.
 class EcfeHubPage extends ConsumerStatefulWidget {
@@ -105,14 +107,11 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
             child: Column(
               children: [
                 const EcfeSoloLecturaBanner(),
+                const EcfePracticaBanner(),
                 Expanded(
                   child: TabBarView(
                     controller: _tabs,
-                    children: const [
-                      _ColaTab(),
-                      _ConfigTab(),
-          _GuiaTab(),
-                    ],
+                    children: const [_ColaTab(), _ConfigTab(), _GuiaTab()],
                   ),
                 ),
               ],
@@ -123,8 +122,6 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
     );
   }
 }
-
-
 
 class _ColaTab extends ConsumerStatefulWidget {
   const _ColaTab();
@@ -382,7 +379,6 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                             ),
                     ),
 
-
                     // Nav: Cola · Configuración · Cómo usar (debajo del panel/KPIs)
                     Padding(
                       padding: EdgeInsets.fromLTRB(
@@ -393,9 +389,15 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                       ),
                       child: Builder(
                         builder: (ctx) {
-                          final hub = ctx.findAncestorStateOfType<_EcfeHubPageState>();
+                          final hub = ctx
+                              .findAncestorStateOfType<_EcfeHubPageState>();
                           final tabIdx = hub?._tabs.index ?? 0;
-                          Widget card(IconData icon, String t, String s, int idx) {
+                          Widget card(
+                            IconData icon,
+                            String t,
+                            String s,
+                            int idx,
+                          ) {
                             return _EcfeAccesoCard(
                               icon: icon,
                               titulo: t,
@@ -404,29 +406,60 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                               onTap: () => hub?._tabs.animateTo(idx),
                             );
                           }
+
                           if (mobile) {
                             return Column(
                               children: [
-                                card(Icons.inbox_outlined, 'Cola', 'Comprobantes en pipeline', 0),
+                                card(
+                                  Icons.inbox_outlined,
+                                  'Cola',
+                                  'Comprobantes en pipeline',
+                                  0,
+                                ),
                                 const SizedBox(height: 8),
-                                card(Icons.settings_outlined, 'Configuración', 'Emisor y certificado', 1),
+                                card(
+                                  Icons.settings_outlined,
+                                  'Configuración',
+                                  'Emisor y certificado',
+                                  1,
+                                ),
                                 const SizedBox(height: 8),
-                                card(Icons.menu_book_outlined, 'Cómo usar', 'Guía rápida', 2),
+                                card(
+                                  Icons.menu_book_outlined,
+                                  'Cómo usar',
+                                  'Guía rápida',
+                                  2,
+                                ),
                               ],
                             );
                           }
                           return Row(
                             children: [
                               Expanded(
-                                child: card(Icons.inbox_outlined, 'Cola', 'Comprobantes en pipeline', 0),
+                                child: card(
+                                  Icons.inbox_outlined,
+                                  'Cola',
+                                  'Comprobantes en pipeline',
+                                  0,
+                                ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: card(Icons.settings_outlined, 'Configuración', 'Emisor y certificado', 1),
+                                child: card(
+                                  Icons.settings_outlined,
+                                  'Configuración',
+                                  'Emisor y certificado',
+                                  1,
+                                ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: card(Icons.menu_book_outlined, 'Cómo usar', 'Guía rápida', 2),
+                                child: card(
+                                  Icons.menu_book_outlined,
+                                  'Cómo usar',
+                                  'Guía rápida',
+                                  2,
+                                ),
                               ),
                             ],
                           );
@@ -479,8 +512,10 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
               child: Container(
                 width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(14),
@@ -505,8 +540,9 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                             ),
                             selected: _filtro == entry.$1,
                             showCheckmark: true,
-                            selectedColor:
-                                AppColors.primary.withValues(alpha: 0.14),
+                            selectedColor: AppColors.primary.withValues(
+                              alpha: 0.14,
+                            ),
                             backgroundColor: AppColors.grey50,
                             side: BorderSide(
                               color: _filtro == entry.$1
@@ -601,8 +637,8 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                         d.estado,
                         trackId: d.trackId,
                       );
-                      final String err =
-                          (d.ultimoError ?? d.mensajeDgii ?? '').trim();
+                      final String err = (d.ultimoError ?? d.mensajeDgii ?? '')
+                          .trim();
                       final String track = (d.trackId ?? '').trim();
                       return Material(
                         color: AppColors.white,
@@ -631,8 +667,8 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                                         '${d.tipoEcf.codigo} · ${d.tipoEcf.descripcion}',
                                         style: AppTypography.bodyMedium
                                             .copyWith(
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -640,16 +676,14 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                                         '${d.encf != null ? ' · ${d.encf}' : ''}'
                                         '${d.ventaId != null ? ' · venta #${d.ventaId}' : ''}'
                                         '${track.isNotEmpty ? ' · Track $track' : ''}',
-                                        style: AppTypography.bodySmall
-                                            .copyWith(
+                                        style: AppTypography.bodySmall.copyWith(
                                           color: AppColors.textSecondary,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         '→ $accion',
-                                        style: AppTypography.bodySmall
-                                            .copyWith(
+                                        style: AppTypography.bodySmall.copyWith(
                                           color: AppColors.primary,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -659,9 +693,7 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                                         Text(
                                           '⚠ $err',
                                           style: AppTypography.bodySmall
-                                              .copyWith(
-                                            color: AppColors.error,
-                                          ),
+                                              .copyWith(color: AppColors.error),
                                         ),
                                       ],
                                     ],
@@ -727,10 +759,6 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
   }
 
   Future<void> _guardar() async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     final c = EcfeConfig(
       habilitado: _habilitado,
       ambiente: _ambiente,
@@ -882,7 +910,8 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
     if (xsd.isEmpty) {
       xsdDetail = 'Sin ruta XSD — solo validación estructural interna';
       // no bloquea checklist como error duro
-      xsdOk = c.ambiente != AmbienteDgii.certificacion &&
+      xsdOk =
+          c.ambiente != AmbienteDgii.certificacion &&
           c.ambiente != AmbienteDgii.produccion;
       if (!xsdOk) {
         xsdDetail = 'En certificación/producción configure el XSD oficial DGII';
@@ -938,6 +967,19 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
               onChanged: (v) => setState(() => _habilitado = v),
             ),
             const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Modo practica'),
+              subtitle: const Text(
+                'Revisa el comprobante en este equipo. Apagado, se envia a la DGII.',
+              ),
+              value: DgiiEndpoints.modoPractica,
+              onChanged: (valor) async {
+                await DgiiEspejo.guardarModo(valor);
+                if (mounted) setState(() {});
+              },
+            ),
+            const SizedBox(height: 8),
             DropdownButtonFormField<AmbienteDgii>(
               initialValue: _ambiente,
               decoration: const InputDecoration(
@@ -986,8 +1028,8 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                     final color = info.vencido
                         ? AppColors.error
                         : (info.requiereAviso
-                            ? const Color(0xFFE65100)
-                            : AppColors.success);
+                              ? const Color(0xFFE65100)
+                              : AppColors.success);
                     return Text(
                       info.mensaje,
                       style: AppTypography.bodySmall.copyWith(
@@ -1022,10 +1064,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
               ),
             ),
             const SizedBox(height: 20),
-            AppButton(
-              text: 'Guardar configuración',
-              onPressed: _guardar,
-            ),
+            AppButton(text: 'Guardar configuración', onPressed: _guardar),
             const SizedBox(height: 16),
             Text(
               'Configure certificado .p12, clave, XSD oficial y secuencias e-NCF. '
@@ -1064,9 +1103,9 @@ class _SecuenciasEncfSection extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               'Secuencias e-NCF',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
             Text(
@@ -1109,13 +1148,7 @@ class _SecuenciasEncfSection extends ConsumerWidget {
     WidgetRef ref,
     EcfeSecuenciaInfo? existing,
   ) async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
-    final tipoCtrl = TextEditingController(
-      text: '${existing?.tipoEcf ?? 31}',
-    );
+    final tipoCtrl = TextEditingController(text: '${existing?.tipoEcf ?? 31}');
     final actualCtrl = TextEditingController(
       text: '${existing?.secuenciaActual ?? 0}',
     );
@@ -1126,8 +1159,8 @@ class _SecuenciasEncfSection extends ConsumerWidget {
       text: '${existing?.secuenciaHasta ?? 100}',
     );
     var activo = existing?.activo ?? true;
-    DateTime? venc = existing?.fechaVencimiento ??
-        DateTime(DateTime.now().year + 1, 12, 31);
+    DateTime? venc =
+        existing?.fechaVencimiento ?? DateTime(DateTime.now().year + 1, 12, 31);
 
     final ok = await showDialog<bool>(
       context: context,
@@ -1135,7 +1168,9 @@ class _SecuenciasEncfSection extends ConsumerWidget {
         return StatefulBuilder(
           builder: (ctx, setSt) {
             return AlertDialog(
-              title: Text(existing == null ? 'Nueva secuencia' : 'Editar secuencia'),
+              title: Text(
+                existing == null ? 'Nueva secuencia' : 'Editar secuencia',
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1218,7 +1253,9 @@ class _SecuenciasEncfSection extends ConsumerWidget {
     );
     if (ok != true) return;
     try {
-      await ref.read(ecfeSecuenciaServiceProvider).guardar(
+      await ref
+          .read(ecfeSecuenciaServiceProvider)
+          .guardar(
             id: existing?.id,
             tipoEcf: int.parse(tipoCtrl.text.trim()),
             secuenciaActual: int.parse(actualCtrl.text.trim()),
@@ -1242,7 +1279,6 @@ class _SecuenciasEncfSection extends ConsumerWidget {
     }
   }
 }
-
 
 class _GuiaTab extends StatelessWidget {
   const _GuiaTab();
@@ -1375,7 +1411,9 @@ class _GuiaTab extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.25),
+            ),
           ),
           child: Text(
             'Resumen en una frase:\n'

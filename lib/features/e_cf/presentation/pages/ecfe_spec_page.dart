@@ -118,10 +118,6 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
     bool cert = false,
     bool prod = false,
   }) async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     setState(() => _busy = true);
     try {
       await _repo.activarSpec(
@@ -146,10 +142,6 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
   }
 
   Future<void> _nuevaVersion() async {
-    if (ecfeSoloLectura) {
-      avisoEcfeVersionPc(context);
-      return;
-    }
     final codigo = TextEditingController();
     final nombre = TextEditingController();
     final circular = TextEditingController();

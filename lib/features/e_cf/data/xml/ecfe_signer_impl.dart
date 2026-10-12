@@ -1,9 +1,11 @@
+import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/ports/ecfe_signer.dart';
 import 'package:xml/xml.dart';
+import 'package:fiscogest_rd/features/e_cf/data/xml/pkcs12_movil.dart';
 
 /// Firma XML e-CF con certificado PKCS#12 (.p12/.pfx).
 ///
@@ -41,8 +43,9 @@ class EcfeSignerImpl implements EcfeSigner {
 
     final openssl = await _whichOpenssl();
     if (openssl == null) {
+      if (Platform.isAndroid || Platform.isIOS) return _firmarEnMovil(xmlSinFirma);
       throw StateError(
-        'OpenSSL no está en el PATH. Instálalo para firmar e-CF en este equipo.',
+        'OpenSSL no esta en el PATH. Instalalo para firmar e-CF en esta computadora.',
       );
     }
 
@@ -149,6 +152,43 @@ class EcfeSignerImpl implements EcfeSigner {
         await tmp.delete(recursive: true);
       } catch (_) {}
     }
+  }
+
+
+  Future<String> _firmarEnMovil(String xmlSinFirma) async {
+    final xmlLimpio = _conFechaHoraFirma(
+      _stripSignature(xmlSinFirma.trim()),
+      DateTime.now(),
+    );
+    final xmlParaFirma = _canon(xmlLimpio);
+    final digestValue = base64.encode(sha256.convert(utf8.encode(xmlParaFirma)).bytes);
+    final signedInfo =
+          '<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">'
+          '<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>'
+          '<SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>'
+          '<Reference URI="">'
+          '<Transforms>'
+          '<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>'
+          '</Transforms>'
+          '<DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>'
+          '<DigestValue>$digestValue</DigestValue>'
+          '</Reference>'
+          '</SignedInfo>';
+    final firmado = await Pkcs12Movil.firmar(
+      ruta: rutaCertificado,
+      clave: claveCertificado,
+      datos: Uint8List.fromList(utf8.encode(_canon(signedInfo))),
+    );
+    final signatureValue = firmado.firma;
+    final x509B64 = firmado.certificado;
+    final signatureXml =
+        '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">'
+        '${_canon(signedInfo)}'
+        '<SignatureValue>$signatureValue</SignatureValue>'
+        '<KeyInfo><X509Data><X509Certificate>$x509B64</X509Certificate></X509Data></KeyInfo>'
+        '</Signature>';
+    return '<?xml version="1.0" encoding="UTF-8"?>'
+        '${_insertSignature(xmlParaFirma, signatureXml)}';
   }
 
   static Future<String?> _whichOpenssl() async {

@@ -23,6 +23,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/aju
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart'
     as ajuste_prov;
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo.dart';
 
 class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   _InventarioRepositoryAdapter(this._db);
@@ -147,6 +148,7 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
 }
 
 void main() async {
+  await DgiiEspejo.cargar();
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_DO', null);
   final db = AppDatabase();

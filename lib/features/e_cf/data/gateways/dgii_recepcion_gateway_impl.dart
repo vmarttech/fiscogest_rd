@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_auth_client.dart';
 import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_endpoints.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/ports/dgii_recepcion_gateway.dart';
+import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo_local.dart';
 
 class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
   DgiiRecepcionGatewayImpl({
@@ -31,6 +32,16 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
     String? nombreArchivo, {
     bool rfce = false,
   }) async {
+    if (DgiiEndpoints.modoPractica) {
+      final local = DgiiEspejoLocal.recibir(xmlFirmado, resumen: rfce);
+      return DgiiRecepcionResultado(
+        ok: local.ok,
+        codigo: local.codigo,
+        mensaje: local.mensaje,
+        trackId: local.trackId,
+      );
+    }
+
     if (!ambiente.permiteEnvio) {
       return const DgiiRecepcionResultado(
         ok: false,
