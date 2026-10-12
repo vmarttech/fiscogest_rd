@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 
 class EmitirFacturaPage extends ConsumerStatefulWidget {
   const EmitirFacturaPage({super.key});
@@ -117,9 +118,19 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
               ),
             );
           } else {
+            final codigoTicket1 = pdfVenta.id == null
+                ? null
+                : await ref
+                      .read(ecfeRepositoryProvider)
+                      .codigoSeguridadPorVenta(pdfVenta.id!);
+            final ambienteTicket1 =
+                (await ref.read(ecfeRepositoryProvider).obtenerConfig())
+                    .ambiente;
             await ComprobantePdf.imprimirFactura(
               pdfVenta,
               empresa: ref.read(configuracionControllerProvider).valueOrNull,
+              codigoSeguridad: codigoTicket1,
+              ambienteDgii: ambienteTicket1,
             );
           }
         } catch (e) {

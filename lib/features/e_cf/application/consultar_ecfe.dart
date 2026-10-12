@@ -1,6 +1,8 @@
 import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_consulta_gateway_impl.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
+import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_endpoints.dart';
+import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo_local.dart';
 
 class ConsultarEcfeResultado {
   const ConsultarEcfeResultado({
@@ -23,6 +25,40 @@ class ConsultarEcfe {
   final EcfeRepository repo;
 
   Future<ConsultarEcfeResultado> call({required int documentoId}) async {
+    if (DgiiEndpoints.modoPractica) {
+      final doc = await repo.obtenerPorId(documentoId);
+      if (doc == null) {
+        return ConsultarEcfeResultado(
+          ok: false,
+          errores: const ['Documento no encontrado'],
+        );
+      }
+      final crudo = DgiiEspejoLocal.consultar((doc.trackId ?? '').trim());
+      final aceptado = crudo == 'Aceptado';
+      final proceso = crudo == 'En Proceso';
+      await repo.actualizarEstado(
+        id: doc.id!,
+        estado: aceptado
+            ? EstadoEcfInterno.aceptado
+            : proceso
+            ? EstadoEcfInterno.enProceso
+            : EstadoEcfInterno.errorTecnico,
+        ultimoError: aceptado || proceso ? null : crudo,
+        codigoRespuesta: aceptado ? '1' : '0',
+      );
+      return ConsultarEcfeResultado(
+        ok: aceptado || proceso,
+        estado: aceptado
+            ? EstadoEcfInterno.aceptado
+            : proceso
+            ? EstadoEcfInterno.enProceso
+            : EstadoEcfInterno.errorTecnico,
+        estadoDgii: crudo,
+        mensaje: 'Practica: $crudo. No se consulto a la DGII.',
+        errores: const <String>[],
+      );
+    }
+
     try {
       final cfg = await repo.obtenerConfig();
       if (!cfg.listoParaPipeline) {
@@ -104,7 +140,8 @@ class ConsultarEcfe {
       await repo.registrarEvento(
         documentoId: documentoId,
         paso: 'consultar_estado',
-        ok: interno.esTerminalExito ||
+        ok:
+            interno.esTerminalExito ||
             interno == EstadoEcfInterno.enProceso ||
             interno == EstadoEcfInterno.enviado,
         detalle:
@@ -129,7 +166,6 @@ class ConsultarEcfe {
       return ConsultarEcfeResultado(ok: false, errores: ['$e']);
     }
   }
-
 
   static String? _extraerCodigoSeguridad(String? raw) {
     if (raw == null || raw.trim().isEmpty) return null;

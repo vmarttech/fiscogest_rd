@@ -21,6 +21,7 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 
 class VistaDetalle extends ConsumerWidget {
   const VistaDetalle({super.key});
@@ -164,9 +165,18 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
+      final codigoTicket2 = venta.id == null
+          ? null
+          : await ref
+                .read(ecfeRepositoryProvider)
+                .codigoSeguridadPorVenta(venta.id!);
+      final ambienteTicket2 =
+          (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
       await ComprobantePdf.imprimirFactura(
         venta,
         empresa: ref.read(configuracionControllerProvider).valueOrNull,
+        codigoSeguridad: codigoTicket2,
+        ambienteDgii: ambienteTicket2,
       );
     } catch (e) {
       if (context.mounted) {
@@ -189,10 +199,19 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         final repo = ref.read(venta_providers.ventasRepositoryProvider);
         v = await repo.obtenerVentaPorId(v.id!) ?? v;
       }
+      final codigoTicket3 = v.id == null
+          ? null
+          : await ref
+                .read(ecfeRepositoryProvider)
+                .codigoSeguridadPorVenta(v.id!);
+      final ambienteTicket3 =
+          (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
       await ComprobantePdf.imprimirFactura(
         v,
         compartir: true,
         empresa: ref.read(configuracionControllerProvider).valueOrNull,
+        codigoSeguridad: codigoTicket3,
+        ambienteDgii: ambienteTicket3,
       );
       if (context.mounted) {
         FiscoGestNotifications.show(
@@ -713,7 +732,9 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                               ?.modoSimplificado ??
                           false))
                         _FilaResumen(
-                          etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto)),
+                          etiquetaItbisLineas(
+                            venta.detalles.map((d) => d.tasaImpuesto),
+                          ),
                           _formatearMonto(venta.itbis),
                           fontSize: tamanoCuerpo,
                         ),

@@ -47,6 +47,13 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
       final r = await ref
           .read(emitirNcServiceProvider)
           .emitir(facturaVentaId: _sel!.id!, motivo: _motivo.text);
+      final avisoNc = (r.avisoEcfe ?? '').trim();
+      if (avisoNc.isNotEmpty && mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(avisoNc)));
+      }
+
       ref.invalidate(secuenciasNcfListProvider);
       ref.invalidate(notasCreditoListProvider);
       if (!mounted) return;

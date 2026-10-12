@@ -91,17 +91,18 @@ class EmitirNcService {
       ),
     );
 
-        // Hook e-CF (B04→E34), aislado
+    // Hook e-CF (B04→E34), aislado
+    String? avisoEcfe;
     final hook = onPostEmision;
     if (hook != null) {
       try {
-        final ventaNc = await ventasRepo.obtenerVentaPorId(facturaVentaId) ?? venta;
-        await hook(
-          venta: ventaNc,
-          tipoNcf: 'B04',
-          rncCliente: '',
-        );
-      } catch (_) {}
+        final ventaNc =
+            await ventasRepo.obtenerVentaPorId(facturaVentaId) ?? venta;
+        await hook(venta: ventaNc, tipoNcf: 'B04', rncCliente: '');
+      } catch (e) {
+        avisoEcfe =
+            'La nota quedo registrada, pero el e-CF 34 no se genero: $e';
+      }
     }
     return EmitirNcResultado(
       ncfNc: ncfNc,
@@ -112,6 +113,7 @@ class EmitirNcService {
       montoTotal: venta.montoTotal,
       motivo: motivo.trim(),
       inventarioRevertido: true,
+      avisoEcfe: avisoEcfe,
       cxcAnulada: true,
     );
   }
@@ -128,6 +130,7 @@ class EmitirNcResultado {
     required this.motivo,
     this.inventarioRevertido = false,
     this.cxcAnulada = false,
+    this.avisoEcfe,
   });
 
   final String ncfNc;
@@ -139,4 +142,5 @@ class EmitirNcResultado {
   final String motivo;
   final bool inventarioRevertido;
   final bool cxcAnulada;
+  final String? avisoEcfe;
 }

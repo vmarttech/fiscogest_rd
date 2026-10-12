@@ -301,6 +301,13 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     if (accion == null || !mounted) return;
     try {
       if (accion == 'enviar') {
+        final codigoTicket4 = ventaConDetalle.id == null
+            ? null
+            : await ref
+                  .read(ecfeRepositoryProvider)
+                  .codigoSeguridadPorVenta(ventaConDetalle.id!);
+        final ambienteTicket4 =
+            (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
         await ComprobantePdf.imprimirFactura(
           ventaConDetalle,
           compartir: true,
@@ -308,8 +315,17 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           rncCliente: _rncFiscalController.text.trim(),
           direccionCliente: _dirCliente,
           telefonoCliente: _telCliente,
+          codigoSeguridad: codigoTicket4,
+          ambienteDgii: ambienteTicket4,
         );
       } else {
+        final codigoTicket5 = ventaConDetalle.id == null
+            ? null
+            : await ref
+                  .read(ecfeRepositoryProvider)
+                  .codigoSeguridadPorVenta(ventaConDetalle.id!);
+        final ambienteTicket5 =
+            (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
         await ComprobantePdf.imprimirFactura(
           ventaConDetalle,
           compartir: false,
@@ -317,6 +333,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           rncCliente: _rncFiscalController.text.trim(),
           direccionCliente: _dirCliente,
           telefonoCliente: _telCliente,
+          codigoSeguridad: codigoTicket5,
+          ambienteDgii: ambienteTicket5,
         );
       }
     } catch (e) {
@@ -413,7 +431,6 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     }
     return true;
   }
-
 
   Future<void> _buscarRncFiscalEnLinea() async {
     final raw = _rncFiscalController.text.trim();

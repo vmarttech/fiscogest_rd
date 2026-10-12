@@ -11,6 +11,8 @@ import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracio
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/services/codigo_seguridad_ecf.dart';
 
 /// Comprobante fiscal impreso (B01 crédito fiscal · B02 consumidor final).
 /// Estructura orientada a uso comercial en RD (DGII serie B).
@@ -29,7 +31,8 @@ class ComprobantePdf {
     ConfiguracionEntity? empresa,
   ) {
     final valores = <String>[
-      if ((empresa?.docMostrarLogo ?? true) && (empresa?.logoUrl ?? '').isNotEmpty)
+      if ((empresa?.docMostrarLogo ?? true) &&
+          (empresa?.logoUrl ?? '').isNotEmpty)
         'logo',
       emisorNombre,
       if ((empresa?.docMostrarRnc ?? true)) empresa?.rnc ?? '',
@@ -54,7 +57,14 @@ class ComprobantePdf {
           d.ofertaNombre ?? '',
           if (d.precioOriginal != null) _money(d.precioOriginal!),
           _money(d.precioUnitario),
-          (_money(d.subtotalLinea ?? d.subtotal) + sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))),
+          (_money(d.subtotalLinea ?? d.subtotal) +
+              sufijoTasaLinea(
+                d.tasaImpuesto,
+                ceroEsExento: lineasCeroSonExentas(
+                  venta.detalles.map((e) => e.tasaImpuesto),
+                  venta.itbis,
+                ),
+              )),
         ],
       ),
       _money(venta.montoSubtotal),
@@ -66,9 +76,23 @@ class ComprobantePdf {
     ];
     final lineas = valores.fold<int>(0, (total, texto) {
       final largo = texto.trim().length;
-      return total + (largo == 0 ? 0 : (largo / 42).ceil());
+      return total + (largo == 0 ? 0 : (largo / 32).ceil());
     });
-    final altoMm = 64 + lineas * 3.1 + venta.detalles.length * 1.5;
+    var altoMm = 96 + lineas * 4.0;
+    for (final d in venta.detalles) {
+      altoMm += 14;
+      if ((d.ofertaNombre ?? '').trim().isNotEmpty) altoMm += 4;
+      if (d.precioOriginal != null) altoMm += 4;
+      if (d.montoDescuento > 0.001 || d.descuentoPorcentaje > 0.001) {
+        altoMm += 4;
+      }
+    }
+    if (venta.costoEnvio > 0.0001) altoMm += 12;
+    final ncfTicket = (venta.numeroFactura ?? '').trim();
+    if (ncfTicket.isNotEmpty) {
+      altoMm += ncfTicket.startsWith('E') ? 78 : 16;
+    }
+    if ((empresa?.docPiePagina ?? '').trim().isEmpty) altoMm += 14;
     return PdfPageFormat(
       _anchoTicket80,
       altoMm * PdfPageFormat.mm,
@@ -99,6 +123,9 @@ class ComprobantePdf {
     String? rncCliente,
     String? direccionCliente,
     String? telefonoCliente,
+
+    String? codigoSeguridad,
+    AmbienteDgii? ambienteDgii,
   }) async {
     final ncf = (v.numeroFactura ?? '').trim();
     final simple = empresa?.modoSimplificado == true;
@@ -118,6 +145,8 @@ class ComprobantePdf {
       rncCliente: rncCliente,
       direccionCliente: direccionCliente,
       telefonoCliente: telefonoCliente,
+      codigoSeguridad: codigoSeguridad,
+      ambienteDgii: ambienteDgii,
     );
     final bytes = await doc.save();
     if (compartir) {
@@ -135,13 +164,21 @@ class ComprobantePdf {
   static Future<({Uint8List bytes, String filename})> prepararFactura(
     Venta v, {
     ConfiguracionEntity? empresa,
+
+    String? codigoSeguridad,
+    AmbienteDgii? ambienteDgii,
   }) async {
     final ncf = (v.numeroFactura ?? '').trim();
     final simple = empresa?.modoSimplificado == true;
     if (ncf.isEmpty && !simple) {
       throw StateError('Sin NCF: no se puede generar comprobante fiscal');
     }
-    final doc = await _buildDocumento(v, empresa: empresa);
+    final doc = await _buildDocumento(
+      v,
+      empresa: empresa,
+      codigoSeguridad: codigoSeguridad,
+      ambienteDgii: ambienteDgii,
+    );
     final bytes = await doc.save();
     return (bytes: bytes, filename: 'Factura_$ncf.pdf');
   }
@@ -162,8 +199,16 @@ class ComprobantePdf {
   static Future<Uint8List> generarBytes(
     Venta v, {
     ConfiguracionEntity? empresa,
+
+    String? codigoSeguridad,
+    AmbienteDgii? ambienteDgii,
   }) async {
-    final doc = await _buildDocumento(v, empresa: empresa);
+    final doc = await _buildDocumento(
+      v,
+      empresa: empresa,
+      codigoSeguridad: codigoSeguridad,
+      ambienteDgii: ambienteDgii,
+    );
     return doc.save();
   }
 
@@ -173,6 +218,9 @@ class ComprobantePdf {
     String? rncCliente,
     String? direccionCliente,
     String? telefonoCliente,
+
+    String? codigoSeguridad,
+    AmbienteDgii? ambienteDgii,
   }) async {
     _empresa = empresa;
     // Modo simplificado: no mostrar NCF ni desglose ITBIS aunque flags docs digan sí
@@ -243,6 +291,8 @@ class ComprobantePdf {
           formaPago: formaPago,
           fecha: fecha,
           logoImage: logoImage,
+          codigoSeguridad: codigoSeguridad,
+          ambienteDgii: ambienteDgii,
         ),
       ),
     );
@@ -477,10 +527,7 @@ class ComprobantePdf {
           pw.Expanded(
             child: pw.Text(
               val,
-              style: pw.TextStyle(
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-              ),
+              style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
             ),
           ),
         ],
@@ -710,10 +757,7 @@ class ComprobantePdf {
         build: (ctx) => [
           pw.Text(
             'NOTA DE CRÉDITO',
-            style: pw.TextStyle(
-              fontSize: 16,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
@@ -730,10 +774,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 8),
           pw.Text(
             'Monto: ${_money(monto)}',
-            style: pw.TextStyle(
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           if (motivo != null && motivo.isNotEmpty) ...[
             pw.SizedBox(height: 6),
@@ -790,10 +831,7 @@ class ComprobantePdf {
         build: (ctx) => [
           pw.Text(
             emisorNombre,
-            style: pw.TextStyle(
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           if (emisorTel.isNotEmpty)
             pw.Text('Tel: $emisorTel', style: const pw.TextStyle(fontSize: 9)),
@@ -801,10 +839,7 @@ class ComprobantePdf {
           pw.Center(
             child: pw.Text(
               'COMPROBANTE DE ENTREGA',
-              style: pw.TextStyle(
-                fontSize: 16,
-                fontWeight: pw.FontWeight.bold,
-              ),
+              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
             ),
           ),
           pw.SizedBox(height: 4),
@@ -832,18 +867,12 @@ class ComprobantePdf {
           pw.SizedBox(height: 12),
           pw.Text(
             'ENTREGAR A',
-            style: pw.TextStyle(
-              fontSize: 11,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
             cliente,
-            style: pw.TextStyle(
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           if (tel.isNotEmpty)
             pw.Text('Teléfono: $tel', style: const pw.TextStyle(fontSize: 10)),
@@ -852,10 +881,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 6),
           pw.Text(
             'Dirección de entrega:',
-            style: pw.TextStyle(
-              fontSize: 10,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
           ),
           pw.Text(
             dir.isNotEmpty
@@ -866,10 +892,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 14),
           pw.Text(
             'ARTÍCULOS A ENTREGAR',
-            style: pw.TextStyle(
-              fontSize: 11,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 6),
           _tablaEntrega(v.detalles),
@@ -881,10 +904,7 @@ class ComprobantePdf {
           pw.SizedBox(height: 28),
           pw.Text(
             'CONFIRMACIÓN DE ENTREGA',
-            style: pw.TextStyle(
-              fontSize: 11,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
           pw.Text(
@@ -998,10 +1018,7 @@ class ComprobantePdf {
       children: [
         pw.Text(
           titulo,
-          style: pw.TextStyle(
-            fontSize: 9,
-            fontWeight: pw.FontWeight.bold,
-          ),
+          style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
         ),
         pw.SizedBox(height: 28),
         pw.Container(height: 0.8, color: PdfColors.black),
@@ -1024,6 +1041,9 @@ class ComprobantePdf {
     required String formaPago,
     required DateTime fecha,
     pw.MemoryImage? logoImage,
+
+    String? codigoSeguridad,
+    AmbienteDgii? ambienteDgii,
   }) {
     // —— Configuración documentos (editable en Configuración global) ——
     final showLogo = empresa?.docMostrarLogo ?? true;
@@ -1084,10 +1104,7 @@ class ComprobantePdf {
         children: [
           pw.Text(
             k,
-            style: pw.TextStyle(
-              fontSize: 8,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(width: 6),
           pw.Expanded(
@@ -1133,10 +1150,7 @@ class ComprobantePdf {
       final kids = <pw.Widget>[
         pw.Text(
           desc,
-          style: pw.TextStyle(
-            fontSize: 8,
-            fontWeight: pw.FontWeight.bold,
-          ),
+          style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
         ),
       ];
       if ((d.ofertaNombre ?? '').trim().isNotEmpty) {
@@ -1155,7 +1169,20 @@ class ComprobantePdf {
           ),
         );
       }
-      kids.add(nums(cant.toStringAsFixed(2), _money(precio), (_money(sub) + sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(v.detalles.map((e) => e.tasaImpuesto), v.itbis)))));
+      kids.add(
+        nums(
+          cant.toStringAsFixed(2),
+          _money(precio),
+          (_money(sub) +
+              sufijoTasaLinea(
+                d.tasaImpuesto,
+                ceroEsExento: lineasCeroSonExentas(
+                  v.detalles.map((e) => e.tasaImpuesto),
+                  v.itbis,
+                ),
+              )),
+        ),
+      );
       if (d.montoDescuento > 0.001) {
         kids.add(
           pw.Text(
@@ -1227,6 +1254,24 @@ class ComprobantePdf {
           ),
         );
 
+    final codigoVisible = (codigoSeguridad ?? '').split('|').first.trim();
+    final ambienteQr = ambienteDgii;
+    final urlQr = (codigoVisible.isEmpty || ambienteQr == null)
+        ? null
+        : CodigoSeguridadEcf.urlConsulta(
+            ambiente: ambienteQr,
+            rncEmisor: rncEmp,
+            rncComprador: (rncCliente ?? '').trim(),
+            encf: ncf,
+            codigoSeguridad: codigoSeguridad ?? '',
+            montoTotal: v.montoTotal,
+            fechaEmision:
+                '${fecha.day.toString().padLeft(2, '0')}-'
+                '${fecha.month.toString().padLeft(2, '0')}-'
+                '${fecha.year}',
+            resumenConsumo:
+                ncf.toUpperCase().startsWith('E32') && v.montoTotal < 250000,
+          );
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
@@ -1245,10 +1290,7 @@ class ComprobantePdf {
         if (showCliente) ...[
           pw.Text(
             'Cliente',
-            style: pw.TextStyle(
-              fontSize: 9,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
           ),
           pw.Text(cliente, style: const pw.TextStyle(fontSize: 9)),
           if (telCli.isNotEmpty)
@@ -1271,10 +1313,7 @@ class ComprobantePdf {
         sep(),
         pw.Text(
           'Descripción',
-          style: pw.TextStyle(
-            fontSize: 8,
-            fontWeight: pw.FontWeight.bold,
-          ),
+          style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
         ),
         nums('Cant.', 'Precio', 'Subtotal', header: true),
         gap(3),
@@ -1287,10 +1326,49 @@ class ComprobantePdf {
             '- ${_money(descGlobal)}',
           ),
         if (showItbis)
-          totalRow(simple ? 'Impuesto' : etiquetaItbisLineas(v.detalles.map((d) => d.tasaImpuesto)), '+ ${_money(v.itbis)}'),
+          totalRow(
+            simple
+                ? 'Impuesto'
+                : etiquetaItbisLineas(v.detalles.map((d) => d.tasaImpuesto)),
+            '+ ${_money(v.itbis)}',
+          ),
         if (envio > 0.0001) totalRow('Envío', _money(envio)),
         gap(2),
         totalRow('TOTAL', _money(v.montoTotal), bold: true),
+        if (ncf.isNotEmpty) ...[
+          gap(4),
+          center(
+            ncf.startsWith('E')
+                ? 'COMPROBANTE ELECTRONICO'
+                : 'COMPROBANTE FISCAL',
+            size: 8,
+            bold: true,
+          ),
+          kv(ncf.startsWith('E') ? 'e-NCF:' : 'NCF:', ncf),
+          if (ncf.startsWith('E')) ...[
+            center('Representacion impresa del e-CF.', size: 6),
+            center('Consulte este comprobante en la DGII.', size: 6),
+            if (codigoVisible.isNotEmpty) ...[
+              kv('Codigo:', codigoVisible),
+              if (urlQr != null)
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(top: 4),
+                  child: pw.Center(
+                    child: pw.BarcodeWidget(
+                      barcode: pw.Barcode.qrCode(),
+                      data: urlQr,
+                      width: 90,
+                      height: 90,
+                    ),
+                  ),
+                ),
+            ] else
+              center(
+                'El codigo de seguridad va en la representacion con QR.',
+                size: 6,
+              ),
+          ],
+        ],
         sep(),
         if (pie.isNotEmpty)
           center(pie, size: 7)

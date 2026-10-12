@@ -54,7 +54,9 @@ class FacturaServiceImpl implements IFacturaService {
       b.writeln('${i + 1}. ${d.nombreProducto ?? "Producto"}');
       b.writeln('   Cant: ${d.cantidad}  x  ${_monto(d.precioUnitario)}');
       final sub = d.subtotalLinea ?? d.subtotal;
-      b.writeln('   Subtotal: ${_monto(sub)}${sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))}');
+      b.writeln(
+        '   Subtotal: ${_monto(sub)}${sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))}',
+      );
       b.writeln('');
     }
     b.writeln('----------------------------------------');
@@ -62,7 +64,9 @@ class FacturaServiceImpl implements IFacturaService {
     if (venta.montoDescuento > 0) {
       b.writeln('Descuento:         ${_monto(venta.montoDescuento)}');
     }
-    b.writeln('${etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto))}:       ${_monto(venta.itbis)}');
+    b.writeln(
+      '${etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto))}:       ${_monto(venta.itbis)}',
+    );
     if (venta.costoEnvio > 0) {
       b.writeln('Envío:             ${_monto(venta.costoEnvio)}');
     }
@@ -139,10 +143,7 @@ class FacturaServiceImpl implements IFacturaService {
           pw.SizedBox(height: 16),
           pw.Text(
             'Detalle',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 12,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12),
           ),
           pw.SizedBox(height: 8),
           pw.TableHelper.fromTextArray(
@@ -172,7 +173,12 @@ class FacturaServiceImpl implements IFacturaService {
                   _tot('Subtotal', _monto(venta.subtotal)),
                   if (venta.montoDescuento > 0)
                     _tot('Descuento', _monto(venta.montoDescuento)),
-                  _tot(etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto)), _monto(venta.itbis)),
+                  _tot(
+                    etiquetaItbisLineas(
+                      venta.detalles.map((d) => d.tasaImpuesto),
+                    ),
+                    _monto(venta.itbis),
+                  ),
                   if (venta.costoEnvio > 0)
                     _tot('Envío', _monto(venta.costoEnvio)),
                   pw.Divider(),
@@ -185,10 +191,7 @@ class FacturaServiceImpl implements IFacturaService {
           pw.Center(
             child: pw.Text(
               '¡Gracias por su compra!',
-              style: pw.TextStyle(
-                fontSize: 11,
-                fontStyle: pw.FontStyle.italic,
-              ),
+              style: pw.TextStyle(fontSize: 11, fontStyle: pw.FontStyle.italic),
             ),
           ),
           pw.SizedBox(height: 8),
@@ -215,10 +218,7 @@ class FacturaServiceImpl implements IFacturaService {
             width: 120,
             child: pw.Text(
               k,
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 10,
-              ),
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
             ),
           ),
           pw.Expanded(

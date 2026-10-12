@@ -502,6 +502,15 @@ class EcfeRepository {
     return venta?.fecha;
   }
 
+  Future<String?> codigoSeguridadPorVenta(int ventaId) async {
+    final rows = await (_db.select(
+      _db.ecfeDocumentosTable,
+    )..where((t) => t.ventaId.equals(ventaId))).get();
+    if (rows.isEmpty) return null;
+    final codigo = (rows.first.codigoSeguridad ?? '').trim();
+    return codigo.isEmpty ? null : codigo;
+  }
+
   Future<void> anularDocumento({
     required int id,
     required String motivo,
