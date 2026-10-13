@@ -109,12 +109,8 @@ final registrarAbonoProvider = Provider.autoDispose<
       ref.invalidate(historialAbonosProvider(cuentaPagarId));
       return true;
     } catch (e) {
-      assert(() {
-        // ignore: avoid_print
-        print('registrarAbono: $e');
-        return true;
-      }());
-      return false;
+      // Deja que la UI muestre el motivo (p. ej. caja cerrada)
+      rethrow;
     }
   };
 });

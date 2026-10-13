@@ -85,7 +85,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
         if (!mounted) return;
         FiscoGestNotifications.show(
           const SnackBar(
-            content: Text('No se pudo registrar el abono'),
+            content: Text('No se pudo registrar el abono. ¿Caja abierta?'),
             backgroundColor: Colors.red,
           ),
         );

@@ -159,14 +159,32 @@ class CajaRepositoryImpl implements ICajaRepository {
     final saldoNuevo =
         esIngreso ? saldoAnterior + monto : saldoAnterior - monto;
 
+    final refTipo = _parseReferenciaTipo(referencia, descripcion);
+    final refId =
+        int.tryParse(referencia.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+
+    // Idempotencia: no registrar dos veces el mismo cobro/egreso en la sesión
+    if (refId > 0) {
+      final existente = await cajaMovimientosDao.obtenerPorReferenciaEnSesion(
+        sesionId: sesion.id,
+        referenciaId: refId,
+        referenciaTipoName: refTipo.name,
+      );
+      if (existente != null &&
+          existente.tipo ==
+              (esIngreso ? MovimientoCaja.ingreso : MovimientoCaja.egreso) &&
+          (existente.monto - monto).abs() < 0.01) {
+        // Ya registrado en este turno → no-op
+        return;
+      }
+    }
+
     await cajaMovimientosDao.registrarMovimiento(
       CajaMovimientosTableCompanion(
         sesionId: Value(sesion.id),
         tipo: Value(esIngreso ? MovimientoCaja.ingreso : MovimientoCaja.egreso),
-        referenciaTipo: Value(_parseReferenciaTipo(referencia, descripcion)),
-        referenciaId: Value(
-          int.tryParse(referencia.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
-        ),
+        referenciaTipo: Value(refTipo),
+        referenciaId: Value(refId),
         monto: Value(monto),
         formaPago: Value(_parseFormaPago(formaPago)),
         saldoAnterior: Value(saldoAnterior),
