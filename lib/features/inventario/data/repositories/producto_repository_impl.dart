@@ -42,7 +42,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
 
   @override
   Future<int> guardarProducto(Producto producto, int idUsuario) async {
-    return await _db.transaction(() async {
+    final id = await _db.transaction(() async {
       final companion = ProductoDataMapper.toCompanion(producto);
 
       // ✅ DECISIÓN: INSERT si es nuevo, UPDATE si ya existe
@@ -75,6 +75,12 @@ class ProductoRepositoryImpl implements IProductoRepository {
         return producto.id!;
       }
     });
+    try {
+      await ProductoSync(_db).pushTodos();
+    } catch (e) {
+      debugPrint('ProductoSync tras guardar: $e');
+    }
+    return id;
   }
 
   @override
@@ -84,6 +90,13 @@ class ProductoRepositoryImpl implements IProductoRepository {
         await (_db.update(_db.productosTable)
               ..where((t) => t.id.equals(producto.id!)))
             .write(ProductoDataMapper.toCompanion(producto));
+    if (rowsAffected > 0) {
+      try {
+        await ProductoSync(_db).pushTodos();
+      } catch (e) {
+        debugPrint('ProductoSync tras actualizar: $e');
+      }
+    }
     return rowsAffected > 0;
   }
 

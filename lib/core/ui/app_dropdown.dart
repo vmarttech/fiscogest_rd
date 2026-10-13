@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 class AppDropdown<T> extends StatelessWidget {
   const AppDropdown({
     super.key,
+    this.value,
     this.initialValue,
     this.label,
     this.hint,
@@ -14,6 +15,8 @@ class AppDropdown<T> extends StatelessWidget {
     this.enabled = true,
   });
 
+  /// Preferido: se refleja vía Key + initialValue (Flutter ≥ 3.33).
+  final T? value;
   final T? initialValue;
   final String? label;
   final String? hint;
@@ -24,14 +27,18 @@ class AppDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final raw = value ?? initialValue;
+    T? safe = raw;
+    if (safe != null && items.every((i) => i.value != safe)) {
+      safe = null;
+    }
+    final itemsKey = items.map((i) => '${i.value}').join('|');
     return DropdownButtonFormField<T>(
-      initialValue: initialValue,
+      key: ValueKey('dd_${safe}_$itemsKey'),
+      initialValue: safe,
       decoration: InputDecoration(
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 14,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         labelText: label,
         labelStyle: AppTypography.labelMedium,
         hintText: hint,
@@ -48,11 +55,7 @@ class AppDropdown<T> extends StatelessWidget {
         ),
       ),
       isExpanded: isExpanded,
-      icon: const Icon(
-        Icons.arrow_drop_down,
-        color: AppColors.grey600,
-        size: 20,
-      ),
+      icon: const Icon(Icons.arrow_drop_down, color: AppColors.grey600, size: 20),
       style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
       items: items,
       onChanged: enabled ? onChanged : null,

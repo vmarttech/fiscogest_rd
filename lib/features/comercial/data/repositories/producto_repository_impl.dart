@@ -18,7 +18,9 @@ class ProductoRepositoryImpl extends IProductoRepository {
 
   @override
   Future<List<Producto>> obtenerProductos() async {
-    final filas = await db.select(db.productosTable).get();
+    final filas = await (db.select(db.productosTable)
+          ..where((tbl) => tbl.activo.equals(1)))
+        .get();
     return filas
         .map(
           (p) => Producto(
@@ -109,7 +111,9 @@ class ProductoRepositoryImpl extends IProductoRepository {
   }
 
   @override
-  Future<void> eliminarProducto(int id) async {
-    await (db.delete(db.productosTable)..where((p) => p.id.equals(id))).go();
+    Future<void> eliminarProducto(int id) async {
+    await (db.update(db.productosTable)..where((t) => t.id.equals(id))).write(
+      const ProductosTableCompanion(activo: Value(0)),
+    );
   }
 }

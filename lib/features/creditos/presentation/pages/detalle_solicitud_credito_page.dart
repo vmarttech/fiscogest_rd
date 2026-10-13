@@ -425,6 +425,67 @@ class _DetalleSolicitudCreditoPageState
     }
   }
 
+
+  Future<bool> _exigirListoParaDocumento({required bool exigeCondiciones}) async {
+    final v = _venta;
+    if (v == null || v.id == null) return false;
+    if (exigeCondiciones) {
+      final abono = _abono > 0 ? _abono : v.abonoInicial;
+      if (_numeroCuotas < 1) {
+        FiscoGestNotifications.show(
+          const SnackBar(
+            content: Text('Defina al menos 1 cuota'),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return false;
+      }
+      if (abono < 0 || abono > v.montoTotal + 0.01) {
+        FiscoGestNotifications.show(
+          const SnackBar(
+            content: Text('Abono inicial inválido'),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return false;
+      }
+    }
+    try {
+      final exp = await ref.read(
+        expedienteCreditoPorVentaProvider((
+          ventaId: v.id!,
+          nombre: v.nombreCliente ?? '',
+          clienteId: v.clienteId,
+        )).future,
+      );
+      final faltan = exp.camposFaltantes;
+      if (faltan.isNotEmpty) {
+        if (!mounted) return false;
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text('Expediente incompleto: ${faltan.join(', ')}'),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return false;
+      }
+    } catch (e) {
+      if (!mounted) return false;
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text('No se pudo validar expediente: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
+
   Future<void> _imprimirContrato() async {
     final v = _venta;
     final cond = _condicionesEfectivas;
@@ -439,11 +500,26 @@ class _DetalleSolicitudCreditoPageState
       );
       return;
     }
+    if (!await _exigirListoParaDocumento(exigeCondiciones: true)) return;
     setState(() => _procesando = true);
     try {
+      SolicitudCreditoExpediente? expC;
+      try {
+        expC = await ref.read(
+          expedienteCreditoPorVentaProvider((
+            ventaId: v.id!,
+            nombre: v.nombreCliente ?? '',
+            clienteId: v.clienteId,
+          )).future,
+        );
+      } catch (_) {}
       await (await ref.read(
         creditoDocumentoServiceProvider.future,
-      )).imprimirContrato(venta: v, condiciones: cond);
+      )).imprimirContrato(
+        venta: v,
+        condiciones: cond,
+        expediente: expC,
+      );
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(
@@ -496,6 +572,7 @@ class _DetalleSolicitudCreditoPageState
       );
       return;
     }
+    if (!await _exigirListoParaDocumento(exigeCondiciones: true)) return;
     setState(() => _procesando = true);
     try {
       final svc = await ref.read(creditoDocumentoServiceProvider.future);

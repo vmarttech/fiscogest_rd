@@ -16,7 +16,9 @@ class ProductoNotifier extends StateNotifier<List<ProductoData>> {
   final AppDatabase _db;
 
   Future<void> cargarTodos() async {
-    state = await _db.select(_db.productosTable).get();
+    state = await (_db.select(_db.productosTable)
+          ..where((x) => x.activo.equals(1)))
+        .get();
   }
 
   Future<ProductoData?> buscarPorId(int productoId) async {

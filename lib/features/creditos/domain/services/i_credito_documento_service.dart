@@ -15,6 +15,7 @@ abstract class ICreditoDocumentoService {
   Future<Uint8List> generarPdfContrato({
     required Venta venta,
     required CuentaPorCobrar condiciones,
+    SolicitudCreditoExpediente? expediente,
   });
 
   Future<void> imprimirSolicitud({
@@ -26,6 +27,7 @@ abstract class ICreditoDocumentoService {
   Future<void> imprimirContrato({
     required Venta venta,
     required CuentaPorCobrar condiciones,
+    SolicitudCreditoExpediente? expediente,
   });
 
   Future<String> exportarSolicitudPdf({
@@ -37,6 +39,7 @@ abstract class ICreditoDocumentoService {
   Future<String> exportarContratoPdf({
     required Venta venta,
     required CuentaPorCobrar condiciones,
+    SolicitudCreditoExpediente? expediente,
   });
 
   Future<void> enviarSolicitudPorCorreo({

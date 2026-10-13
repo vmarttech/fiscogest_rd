@@ -141,6 +141,9 @@ class SyncPull {
               ),
             );
       } else {
+        // Soft-delete local gana: no reactivar con activo=1 del remoto
+        // (si el push aún no propagó activo=false).
+        final activoFinal = existing.activo == 0 ? 0 : activo;
         await (_db.update(_db.productosTable)
               ..where((t) => t.id.equals(existing!.id)))
             .write(
@@ -150,7 +153,7 @@ class SyncPull {
             precioVenta: Value(precioVenta),
             precioCompra: Value(precioCompra),
             stock: Value(stock),
-            activo: Value(activo),
+            activo: Value(activoFinal),
           ),
         );
       }

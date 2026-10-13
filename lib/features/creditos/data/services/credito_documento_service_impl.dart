@@ -517,6 +517,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   Future<Uint8List> generarPdfContrato({
     required Venta venta,
     required CuentaPorCobrar condiciones,
+    SolicitudCreditoExpediente? expediente,
   }) async {
     final doc = pw.Document();
     final nro = venta.numeroCotizacion;
@@ -555,6 +556,8 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           ),
           pw.SizedBox(height: 4),
           ..._bloqueCliente(venta),
+          pw.SizedBox(height: 8),
+          ..._bloqueExpediente(expediente),
           pw.SizedBox(height: 10),
           pw.Text(
             '2. Objeto y monto',
@@ -637,6 +640,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 4),
           ..._cuerpoContratoLegal(venta: venta, condiciones: condiciones),
           ..._anexoCronograma(condiciones),
+          ..._anexoCronograma(condiciones),
           pw.SizedBox(height: 28),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
@@ -676,10 +680,12 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   Future<void> imprimirContrato({
     required Venta venta,
     required CuentaPorCobrar condiciones,
+    SolicitudCreditoExpediente? expediente,
   }) async {
     final bytes = await generarPdfContrato(
       venta: venta,
       condiciones: condiciones,
+      expediente: expediente,
     );
     await Printing.layoutPdf(
       onLayout: (_) async => bytes,
@@ -709,10 +715,12 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   Future<String> exportarContratoPdf({
     required Venta venta,
     required CuentaPorCobrar condiciones,
+    SolicitudCreditoExpediente? expediente,
   }) async {
     final bytes = await generarPdfContrato(
       venta: venta,
       condiciones: condiciones,
+      expediente: expediente,
     );
     final dir = await getTemporaryDirectory();
     final ref = venta.numeroCotizacion.replaceAll(RegExp(r'[^\w-]'), '_');
@@ -746,11 +754,13 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   Future<void> enviarContratoPorCorreo({
     required Venta venta,
     required CuentaPorCobrar condiciones,
+    SolicitudCreditoExpediente? expediente,
     String correoDestinatario = '',
   }) async {
     final ruta = await exportarContratoPdf(
       venta: venta,
       condiciones: condiciones,
+      expediente: expediente,
     );
     final nro = venta.numeroCotizacion;
     await Share.shareXFiles(

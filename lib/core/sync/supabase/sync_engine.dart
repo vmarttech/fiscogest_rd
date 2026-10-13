@@ -56,6 +56,7 @@ class SyncEngine {
     }
         debugPrint('SyncEngine.pullAll: inicio');
     try {
+      await ProductoSync(_db).pushTodos();
       await SyncPull(_db).pullTodoElNegocio();
       // Cuando existan pulls de ventas/caja, se llaman aquí o dentro de SyncPull.
       debugPrint('SyncEngine.pullAll: OK');

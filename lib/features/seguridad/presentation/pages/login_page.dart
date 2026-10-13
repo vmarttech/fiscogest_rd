@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/fisco_aurora_background.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_pull.dart';
+import 'package:fiscogest_rd/core/sync/supabase/producto_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
@@ -165,6 +166,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
     if (!requiereSetup) {
       try {
+        await ProductoSync(db).pushTodos();
         await SyncPull(db).pullTodoElNegocio();
       } catch (e, st) {
         debugPrint('Pull post-login: $e');
@@ -194,7 +196,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             await EmitirToken.trasLogin(username: user, password: pass);
             final nid = await NegocioLocal.getId();
             if (nid != null && nid.isNotEmpty) {
-              await SyncPull(db).pullTodoElNegocio();
+              await ProductoSync(db).pushTodos();
+        await SyncPull(db).pullTodoElNegocio();
               res = await AuthService(db).login(user, pass);
             }
           } catch (e, st) {
