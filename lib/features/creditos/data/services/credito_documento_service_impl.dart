@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/i_credito_documento_service.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/creditos/domain/entities/solicitud_credito_expediente.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
 
@@ -380,10 +381,69 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
     ];
   }
 
+  List<pw.Widget> _bloqueExpediente(SolicitudCreditoExpediente? e) {
+    if (e == null) {
+      return [
+        pw.Text(
+          'Referencias (completar a mano si aplica)',
+          style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
+        ),
+        pw.SizedBox(height: 8),
+        _fila('Referencia 1', 'Nombre: _____________  Tel: _____________'),
+        _fila('Referencia 2', 'Nombre: _____________  Tel: _____________'),
+        pw.SizedBox(height: 8),
+        _fila('Cédula / RNC', '_______________________________'),
+        _fila('Dirección', '_______________________________'),
+        _fila('Teléfono', '_______________________________'),
+      ];
+    }
+    final sectorCiudad = [
+      if (e.sector.trim().isNotEmpty) e.sector.trim(),
+      if (e.ciudad.trim().isNotEmpty) e.ciudad.trim(),
+    ].join(' / ');
+    final out = <pw.Widget>[
+      pw.Text(
+        'Expediente del solicitante',
+        style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
+      ),
+      pw.SizedBox(height: 6),
+      _fila('Nombre', e.nombreCompleto),
+      _fila('Cédula / RNC', e.cedula),
+      _fila('Estado civil', e.estadoCivil.isEmpty ? '—' : e.estadoCivil),
+      _fila('Teléfono', e.telefono.isEmpty ? '—' : e.telefono),
+      _fila('Celular', e.celular.isEmpty ? '—' : e.celular),
+      _fila('Email', e.email.isEmpty ? '—' : e.email),
+      _fila('Dirección', e.direccion),
+      _fila('Sector / Ciudad', sectorCiudad.isEmpty ? '—' : sectorCiudad),
+      _fila('Empresa', e.empresa),
+      _fila('Cargo', e.cargo.isEmpty ? '—' : e.cargo),
+      _fila('Ingreso mensual', e.ingresoMensual.toStringAsFixed(2)),
+      pw.SizedBox(height: 10),
+      pw.Text(
+        'Referencias',
+        style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
+      ),
+      pw.SizedBox(height: 6),
+    ];
+    final refs =
+        e.referencias.where((r) => r.nombre.trim().isNotEmpty).toList();
+    if (refs.isEmpty) {
+      out.add(_fila('Referencias', 'Sin datos'));
+    } else {
+      for (var i = 0; i < refs.length; i++) {
+        final r = refs[i];
+        final rel = r.relacion.trim().isNotEmpty ? ' · ${r.relacion}' : '';
+        out.add(_fila('Ref. ${i + 1}', '${r.nombre} · ${r.telefono}$rel'));
+      }
+    }
+    return out;
+  }
+
   @override
   Future<Uint8List> generarPdfSolicitud({
     required Venta venta,
     CuentaPorCobrar? condiciones,
+    SolicitudCreditoExpediente? expediente,
   }) async {
     final doc = pw.Document(title: 'Solicitud de crédito');
     doc.addPage(
@@ -431,20 +491,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 6),
           ..._cuerpoSolicitud(venta: venta, condiciones: condiciones),
           pw.SizedBox(height: 12),
-          pw.Text(
-            'Referencias (completar a mano si aplica)',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 10,
-            ),
-          ),
-          pw.SizedBox(height: 8),
-          _fila('Referencia 1', 'Nombre: _____________  Tel: _____________'),
-          _fila('Referencia 2', 'Nombre: _____________  Tel: _____________'),
-          pw.SizedBox(height: 8),
-          _fila('Cédula / RNC', '_______________________________'),
-          _fila('Dirección', '_______________________________'),
-          _fila('Teléfono', '_______________________________'),
+          ..._bloqueExpediente(expediente),
           pw.SizedBox(height: 24),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
@@ -612,10 +659,12 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   Future<void> imprimirSolicitud({
     required Venta venta,
     CuentaPorCobrar? condiciones,
+    SolicitudCreditoExpediente? expediente,
   }) async {
     final bytes = await generarPdfSolicitud(
       venta: venta,
       condiciones: condiciones,
+      expediente: expediente,
     );
     await Printing.layoutPdf(
       onLayout: (_) async => bytes,
@@ -642,10 +691,12 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   Future<String> exportarSolicitudPdf({
     required Venta venta,
     CuentaPorCobrar? condiciones,
+    SolicitudCreditoExpediente? expediente,
   }) async {
     final bytes = await generarPdfSolicitud(
       venta: venta,
       condiciones: condiciones,
+      expediente: expediente,
     );
     final dir = await getTemporaryDirectory();
     final ref = venta.numeroCotizacion.replaceAll(RegExp(r'[^\w-]'), '_');
@@ -674,6 +725,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   Future<void> enviarSolicitudPorCorreo({
     required Venta venta,
     CuentaPorCobrar? condiciones,
+    SolicitudCreditoExpediente? expediente,
     String correoDestinatario = '',
   }) async {
     final ruta = await exportarSolicitudPdf(

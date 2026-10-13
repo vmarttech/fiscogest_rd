@@ -103,4 +103,24 @@ class SolicitudCreditoExpediente {
       referencias: referencias ?? this.referencias,
     );
   }
+
+  /// Campos mínimos para análisis / aprobación.
+  List<String> get camposFaltantes {
+    final f = <String>[];
+    if (nombreCompleto.trim().isEmpty) f.add('Nombre completo');
+    if (cedula.trim().length < 5) f.add('Cédula / RNC');
+    if (celular.trim().isEmpty && telefono.trim().isEmpty) {
+      f.add('Teléfono o celular');
+    }
+    if (direccion.trim().isEmpty) f.add('Dirección');
+    if (ingresoMensual <= 0) f.add('Ingreso mensual');
+    if (empresa.trim().isEmpty) f.add('Empresa / ocupación');
+    final refsOk = referencias
+        .where((r) => r.nombre.trim().isNotEmpty && r.telefono.trim().isNotEmpty)
+        .length;
+    if (refsOk < 2) f.add('Al menos 2 referencias (nombre y teléfono)');
+    return f;
+  }
+
+  bool get estaCompleto => camposFaltantes.isEmpty;
 }

@@ -52,8 +52,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
       final empresa = ref.read(configuracionControllerProvider).valueOrNull;
       final xml = await repo.obtenerXmlFirmado(doc.id!);
       final encf = (doc.encf ?? '').trim();
-      if (encf.isEmpty)
+      if (encf.isEmpty) {
         throw StateError('Sin e-NCF aún; genera/firma el XML primero');
+      }
       await RepresentacionImpresaPdf.imprimir(
         venta: venta,
         encf: encf,

@@ -1,9 +1,9 @@
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 
 class DgiiEndpoints {
-  static bool modoPractica = false;
 
   const DgiiEndpoints._();
+  static bool modoPractica = false;
 
   static String baseEcf(AmbienteDgii a) {
     switch (a) {

@@ -26,12 +26,16 @@ class _DevolucionesPageState extends ConsumerState<DevolucionesPage> {
   void dispose() {
     _ncf.dispose();
     _motivo.dispose();
-    for (final c in _cants) c.dispose();
+    for (final c in _cants) {
+      c.dispose();
+    }
     super.dispose();
   }
 
   void _ponerVenta(Venta? venta) {
-    for (final c in _cants) c.dispose();
+    for (final c in _cants) {
+      c.dispose();
+    }
     _cants.clear();
     if (venta != null) {
       for (final d in venta.detalles) {

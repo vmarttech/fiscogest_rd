@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credi
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/expediente_solicitante_form.dart';
+import 'package:fiscogest_rd/features/creditos/domain/entities/solicitud_credito_expediente.dart';
 // creditoDocumentoServiceProvider está en el mismo archivo de providers
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -201,6 +202,63 @@ class _DetalleSolicitudCreditoPageState
     setState(() => _procesando = true);
     try {
       if (nuevo == EstadoDocumento.aprobado) {
+        // Condiciones de crédito
+        final abono = _abono > 0 ? _abono : v.abonoInicial;
+        final total = v.montoTotal;
+        if (_numeroCuotas < 1) {
+          FiscoGestNotifications.show(
+            const SnackBar(
+              content: Text('Defina al menos 1 cuota antes de aprobar'),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+        if (abono < 0 || abono > total + 0.01) {
+          FiscoGestNotifications.show(
+            const SnackBar(
+              content: Text('Abono inicial inválido respecto al total'),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+        // Expediente completo (usa el mismo v no-null del inicio del método)
+        try {
+          final exp = await ref.read(
+            expedienteCreditoPorVentaProvider((
+              ventaId: v.id!,
+              nombre: v.nombreCliente ?? '',
+              clienteId: v.clienteId,
+            )).future,
+          );
+          final faltan = exp.camposFaltantes;
+          if (faltan.isNotEmpty) {
+            if (!mounted) return;
+            FiscoGestNotifications.show(
+              SnackBar(
+                content: Text(
+                  'Expediente incompleto: ${faltan.join(', ')}',
+                ),
+                backgroundColor: AppColors.warning,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            return;
+          }
+        } catch (e) {
+          if (!mounted) return;
+          FiscoGestNotifications.show(
+            SnackBar(
+              content: Text('No se pudo validar expediente: $e'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
         final conCond = v.copyWith(
           abonoInicial: _abono > 0 ? _abono : v.abonoInicial,
           vencimiento: _primerVencimiento ?? v.vencimiento,
@@ -334,9 +392,25 @@ class _DetalleSolicitudCreditoPageState
     if (v == null) return;
     setState(() => _procesando = true);
     try {
+      SolicitudCreditoExpediente? exp;
+      if (v.id != null) {
+        try {
+          exp = await ref.read(
+            expedienteCreditoPorVentaProvider((
+              ventaId: v.id!,
+              nombre: v.nombreCliente ?? '',
+              clienteId: v.clienteId,
+            )).future,
+          );
+        } catch (_) {}
+      }
       await (await ref.read(
         creditoDocumentoServiceProvider.future,
-      )).imprimirSolicitud(venta: v, condiciones: _condicionesEfectivas);
+      )).imprimirSolicitud(
+        venta: v,
+        condiciones: _condicionesEfectivas,
+        expediente: exp,
+      );
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(

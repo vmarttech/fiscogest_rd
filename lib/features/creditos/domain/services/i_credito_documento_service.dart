@@ -3,11 +3,13 @@ import 'dart:typed_data';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/features/creditos/domain/entities/solicitud_credito_expediente.dart';
 
 abstract class ICreditoDocumentoService {
   Future<Uint8List> generarPdfSolicitud({
     required Venta venta,
     CuentaPorCobrar? condiciones,
+    SolicitudCreditoExpediente? expediente,
   });
 
   Future<Uint8List> generarPdfContrato({
@@ -18,6 +20,7 @@ abstract class ICreditoDocumentoService {
   Future<void> imprimirSolicitud({
     required Venta venta,
     CuentaPorCobrar? condiciones,
+    SolicitudCreditoExpediente? expediente,
   });
 
   Future<void> imprimirContrato({
@@ -28,6 +31,7 @@ abstract class ICreditoDocumentoService {
   Future<String> exportarSolicitudPdf({
     required Venta venta,
     CuentaPorCobrar? condiciones,
+    SolicitudCreditoExpediente? expediente,
   });
 
   Future<String> exportarContratoPdf({
@@ -38,6 +42,7 @@ abstract class ICreditoDocumentoService {
   Future<void> enviarSolicitudPorCorreo({
     required Venta venta,
     CuentaPorCobrar? condiciones,
+    SolicitudCreditoExpediente? expediente,
     String correoDestinatario = '',
   });
 

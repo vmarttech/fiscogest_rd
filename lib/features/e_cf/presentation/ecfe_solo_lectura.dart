@@ -23,7 +23,7 @@ class EcfePracticaBanner extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
-      color: Color(0xFFFFF4D6),
+      color: const Color(0xFFFFF4D6),
       child: const Text(
         'Modo practica. Se revisa en este equipo y no llega a la DGII.',
       ),

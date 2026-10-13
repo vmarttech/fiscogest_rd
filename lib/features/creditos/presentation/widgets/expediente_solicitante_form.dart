@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/referencia_solicitante.dart';
@@ -214,6 +215,19 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
   }
 
   Future<void> _guardar() async {
+    final exp = _leer();
+    final faltan = exp.camposFaltantes;
+    if (faltan.isNotEmpty) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text('Complete: ${faltan.join(', ')}'),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     setState(() => _guardando = true);
     try {
       await widget.onGuardar(_leer());

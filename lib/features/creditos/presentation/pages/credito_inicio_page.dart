@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart'
+    show creditoTotalesProvider;
 
 /// Hub de Crédito — layout SaaS premium (PC) alineado al mockup.
 class CreditoInicioPage extends ConsumerWidget {
@@ -15,11 +17,30 @@ class CreditoInicioPage extends ConsumerWidget {
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
 
-    // Fase A: placeholders visuales. Conectar providers reales en Fase B.
-    const String porCobrarStr = 'RD\$—';
-    const String vencidoStr = 'RD\$—';
-    const String alDiaStr = 'RD\$—';
-    const String solicitudesStr = '—';
+    final totalesAsync = ref.watch(creditoTotalesProvider);
+    final porCobrarStr = totalesAsync.when(
+      data: (t) => formatRd(t.porCobrar),
+      loading: () => '…',
+      error: (_, __) => '—',
+    );
+    final vencidoStr = totalesAsync.when(
+      data: (t) => formatRd(t.vencido),
+      loading: () => '…',
+      error: (_, __) => '—',
+    );
+    final alDiaStr = totalesAsync.when(
+      data: (t) {
+        final alDia = t.porCobrar - t.vencido;
+        return formatRd(alDia < 0 ? 0.0 : alDia);
+      },
+      loading: () => '…',
+      error: (_, __) => '—',
+    );
+    final clientesStr = totalesAsync.when(
+      data: (t) => '${t.clientes}',
+      loading: () => '…',
+      error: (_, __) => '—',
+    );
 
     return AppScaffold(
       title: 'CRÉDITO',
@@ -44,45 +65,45 @@ class CreditoInicioPage extends ConsumerWidget {
 
                   // ── KPIs ──
                   if (desktop)
-                    const Row(
+                    Row(
                       children: [
                         Expanded(
                           child: _KpiPill(
                             icon: Icons.account_balance_wallet_outlined,
                             value: porCobrarStr,
                             label: 'POR COBRAR',
-                            bg: Color(0xFFECFDF5),
+                            bg: const Color(0xFFECFDF5),
                             fg: AppColors.success,
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: _KpiPill(
                             icon: Icons.warning_amber_rounded,
                             value: vencidoStr,
                             label: 'VENCIDO',
-                            bg: Color(0xFFFEF2F2),
+                            bg: const Color(0xFFFEF2F2),
                             fg: AppColors.error,
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: _KpiPill(
                             icon: Icons.verified_outlined,
                             value: alDiaStr,
                             label: 'AL DÍA',
-                            bg: Color(0xFFEFF6FF),
+                            bg: const Color(0xFFEFF6FF),
                             fg: AppColors.info,
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: _KpiPill(
                             icon: Icons.assignment_outlined,
-                            value: solicitudesStr,
-                            label: 'SOLICITUDES',
-                            bg: Color(0xFFF5F3FF),
-                            fg: Color(0xFF7C3AED),
+                            value: clientesStr,
+                            label: 'CLIENTES',
+                            bg: const Color(0xFFF5F3FF),
+                            fg: const Color(0xFF7C3AED),
                           ),
                         ),
                       ],
@@ -95,34 +116,34 @@ class CreditoInicioPage extends ConsumerWidget {
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
                       childAspectRatio: 1.55,
-                      children: const [
+                      children: [
                         _KpiPill(
                           icon: Icons.account_balance_wallet_outlined,
                           value: porCobrarStr,
                           label: 'POR COBRAR',
-                          bg: Color(0xFFECFDF5),
+                          bg: const Color(0xFFECFDF5),
                           fg: AppColors.success,
                         ),
                         _KpiPill(
                           icon: Icons.warning_amber_rounded,
                           value: vencidoStr,
                           label: 'VENCIDO',
-                          bg: Color(0xFFFEF2F2),
+                          bg: const Color(0xFFFEF2F2),
                           fg: AppColors.error,
                         ),
                         _KpiPill(
                           icon: Icons.verified_outlined,
                           value: alDiaStr,
                           label: 'AL DÍA',
-                          bg: Color(0xFFEFF6FF),
+                          bg: const Color(0xFFEFF6FF),
                           fg: AppColors.info,
                         ),
                         _KpiPill(
                           icon: Icons.assignment_outlined,
-                          value: solicitudesStr,
-                          label: 'SOLICITUDES',
-                          bg: Color(0xFFF5F3FF),
-                          fg: Color(0xFF7C3AED),
+                          value: clientesStr,
+                          label: 'CLIENTES',
+                          bg: const Color(0xFFF5F3FF),
+                          fg: const Color(0xFF7C3AED),
                         ),
                       ],
                     ),
@@ -683,4 +704,3 @@ class _ListaItem extends StatelessWidget {
     );
   }
 }
-

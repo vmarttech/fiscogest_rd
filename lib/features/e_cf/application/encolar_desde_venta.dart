@@ -75,8 +75,9 @@ class EncolarEcfeDesdeVenta {
         final esFactura =
             previo.tipoEcf != TipoEcf.notaCredito &&
             previo.tipoEcf != TipoEcf.notaDebito;
-        if (esFactura && encfOrigen.isEmpty)
+        if (esFactura && encfOrigen.isEmpty) {
           encfOrigen = (previo.encf ?? '').trim();
+        }
       }
 
       var rncNota = rncCliente.replaceAll(RegExp(r'\D'), '');

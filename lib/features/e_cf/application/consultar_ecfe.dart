@@ -28,9 +28,9 @@ class ConsultarEcfe {
     if (DgiiEndpoints.modoPractica) {
       final doc = await repo.obtenerPorId(documentoId);
       if (doc == null) {
-        return ConsultarEcfeResultado(
+        return const ConsultarEcfeResultado(
           ok: false,
-          errores: const ['Documento no encontrado'],
+          errores: ['Documento no encontrado'],
         );
       }
       final crudo = DgiiEspejoLocal.consultar((doc.trackId ?? '').trim());
