@@ -127,7 +127,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 63;
+  int get schemaVersion => 64;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -136,6 +136,18 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 64) {
+        try {
+          await m.addColumn(cajaMovimientosTable, cajaMovimientosTable.sesionId);
+        } catch (_) {
+          try {
+            await m.database.customStatement(
+              'ALTER TABLE caja_movimientos_table ADD COLUMN sesion_id INTEGER NULL',
+            );
+          } catch (_) {}
+        }
+      }
+
       if (from < 62) {
         await customStatement(
           'ALTER TABLE ecfe_documentos_table ADD COLUMN rnc_receptor TEXT NULL;',

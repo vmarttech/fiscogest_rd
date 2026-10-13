@@ -26301,6 +26301,17 @@ class $CajaMovimientosTableTable extends CajaMovimientosTable
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _sesionIdMeta = const VerificationMeta(
+    'sesionId',
+  );
+  @override
+  late final GeneratedColumn<int> sesionId = GeneratedColumn<int>(
+    'sesion_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<MovimientoCaja, String> tipo =
       GeneratedColumn<String>(
@@ -26390,6 +26401,7 @@ class $CajaMovimientosTableTable extends CajaMovimientosTable
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    sesionId,
     tipo,
     referenciaTipo,
     referenciaId,
@@ -26413,6 +26425,12 @@ class $CajaMovimientosTableTable extends CajaMovimientosTable
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('sesion_id')) {
+      context.handle(
+        _sesionIdMeta,
+        sesionId.isAcceptableOrUnknown(data['sesion_id']!, _sesionIdMeta),
+      );
     }
     if (data.containsKey('referencia_id')) {
       context.handle(
@@ -26471,6 +26489,10 @@ class $CajaMovimientosTableTable extends CajaMovimientosTable
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      sesionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sesion_id'],
+      ),
       tipo: $CajaMovimientosTableTable.$convertertipo.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -26531,16 +26553,22 @@ class $CajaMovimientosTableTable extends CajaMovimientosTable
 class CajaMovimientoData extends DataClass
     implements Insertable<CajaMovimientoData> {
   final int id;
+
+  /// Turno al que pertenece. Null = histórico anterior a la migración.
+  final int? sesionId;
   final MovimientoCaja tipo;
   final ReferenciaTipo referenciaTipo;
   final int referenciaId;
   final double monto;
   final FormaPago formaPago;
+
+  /// Ledger global (opcional / legado). El cuadre del cajero NO usa esto.
   final double saldoAnterior;
   final double saldoNuevo;
   final DateTime fecha;
   const CajaMovimientoData({
     required this.id,
+    this.sesionId,
     required this.tipo,
     required this.referenciaTipo,
     required this.referenciaId,
@@ -26554,6 +26582,9 @@ class CajaMovimientoData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || sesionId != null) {
+      map['sesion_id'] = Variable<int>(sesionId);
+    }
     {
       map['tipo'] = Variable<String>(
         $CajaMovimientosTableTable.$convertertipo.toSql(tipo),
@@ -26582,6 +26613,9 @@ class CajaMovimientoData extends DataClass
   CajaMovimientosTableCompanion toCompanion(bool nullToAbsent) {
     return CajaMovimientosTableCompanion(
       id: Value(id),
+      sesionId: sesionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sesionId),
       tipo: Value(tipo),
       referenciaTipo: Value(referenciaTipo),
       referenciaId: Value(referenciaId),
@@ -26600,6 +26634,7 @@ class CajaMovimientoData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CajaMovimientoData(
       id: serializer.fromJson<int>(json['id']),
+      sesionId: serializer.fromJson<int?>(json['sesionId']),
       tipo: $CajaMovimientosTableTable.$convertertipo.fromJson(
         serializer.fromJson<String>(json['tipo']),
       ),
@@ -26620,6 +26655,7 @@ class CajaMovimientoData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'sesionId': serializer.toJson<int?>(sesionId),
       'tipo': serializer.toJson<String>(
         $CajaMovimientosTableTable.$convertertipo.toJson(tipo),
       ),
@@ -26641,6 +26677,7 @@ class CajaMovimientoData extends DataClass
 
   CajaMovimientoData copyWith({
     int? id,
+    Value<int?> sesionId = const Value.absent(),
     MovimientoCaja? tipo,
     ReferenciaTipo? referenciaTipo,
     int? referenciaId,
@@ -26651,6 +26688,7 @@ class CajaMovimientoData extends DataClass
     DateTime? fecha,
   }) => CajaMovimientoData(
     id: id ?? this.id,
+    sesionId: sesionId.present ? sesionId.value : this.sesionId,
     tipo: tipo ?? this.tipo,
     referenciaTipo: referenciaTipo ?? this.referenciaTipo,
     referenciaId: referenciaId ?? this.referenciaId,
@@ -26663,6 +26701,7 @@ class CajaMovimientoData extends DataClass
   CajaMovimientoData copyWithCompanion(CajaMovimientosTableCompanion data) {
     return CajaMovimientoData(
       id: data.id.present ? data.id.value : this.id,
+      sesionId: data.sesionId.present ? data.sesionId.value : this.sesionId,
       tipo: data.tipo.present ? data.tipo.value : this.tipo,
       referenciaTipo: data.referenciaTipo.present
           ? data.referenciaTipo.value
@@ -26686,6 +26725,7 @@ class CajaMovimientoData extends DataClass
   String toString() {
     return (StringBuffer('CajaMovimientoData(')
           ..write('id: $id, ')
+          ..write('sesionId: $sesionId, ')
           ..write('tipo: $tipo, ')
           ..write('referenciaTipo: $referenciaTipo, ')
           ..write('referenciaId: $referenciaId, ')
@@ -26701,6 +26741,7 @@ class CajaMovimientoData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    sesionId,
     tipo,
     referenciaTipo,
     referenciaId,
@@ -26715,6 +26756,7 @@ class CajaMovimientoData extends DataClass
       identical(this, other) ||
       (other is CajaMovimientoData &&
           other.id == this.id &&
+          other.sesionId == this.sesionId &&
           other.tipo == this.tipo &&
           other.referenciaTipo == this.referenciaTipo &&
           other.referenciaId == this.referenciaId &&
@@ -26728,6 +26770,7 @@ class CajaMovimientoData extends DataClass
 class CajaMovimientosTableCompanion
     extends UpdateCompanion<CajaMovimientoData> {
   final Value<int> id;
+  final Value<int?> sesionId;
   final Value<MovimientoCaja> tipo;
   final Value<ReferenciaTipo> referenciaTipo;
   final Value<int> referenciaId;
@@ -26738,6 +26781,7 @@ class CajaMovimientosTableCompanion
   final Value<DateTime> fecha;
   const CajaMovimientosTableCompanion({
     this.id = const Value.absent(),
+    this.sesionId = const Value.absent(),
     this.tipo = const Value.absent(),
     this.referenciaTipo = const Value.absent(),
     this.referenciaId = const Value.absent(),
@@ -26749,6 +26793,7 @@ class CajaMovimientosTableCompanion
   });
   CajaMovimientosTableCompanion.insert({
     this.id = const Value.absent(),
+    this.sesionId = const Value.absent(),
     required MovimientoCaja tipo,
     required ReferenciaTipo referenciaTipo,
     required int referenciaId,
@@ -26766,6 +26811,7 @@ class CajaMovimientosTableCompanion
        saldoNuevo = Value(saldoNuevo);
   static Insertable<CajaMovimientoData> custom({
     Expression<int>? id,
+    Expression<int>? sesionId,
     Expression<String>? tipo,
     Expression<String>? referenciaTipo,
     Expression<int>? referenciaId,
@@ -26777,6 +26823,7 @@ class CajaMovimientosTableCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (sesionId != null) 'sesion_id': sesionId,
       if (tipo != null) 'tipo': tipo,
       if (referenciaTipo != null) 'referencia_tipo': referenciaTipo,
       if (referenciaId != null) 'referencia_id': referenciaId,
@@ -26790,6 +26837,7 @@ class CajaMovimientosTableCompanion
 
   CajaMovimientosTableCompanion copyWith({
     Value<int>? id,
+    Value<int?>? sesionId,
     Value<MovimientoCaja>? tipo,
     Value<ReferenciaTipo>? referenciaTipo,
     Value<int>? referenciaId,
@@ -26801,6 +26849,7 @@ class CajaMovimientosTableCompanion
   }) {
     return CajaMovimientosTableCompanion(
       id: id ?? this.id,
+      sesionId: sesionId ?? this.sesionId,
       tipo: tipo ?? this.tipo,
       referenciaTipo: referenciaTipo ?? this.referenciaTipo,
       referenciaId: referenciaId ?? this.referenciaId,
@@ -26817,6 +26866,9 @@ class CajaMovimientosTableCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (sesionId.present) {
+      map['sesion_id'] = Variable<int>(sesionId.value);
     }
     if (tipo.present) {
       map['tipo'] = Variable<String>(
@@ -26857,6 +26909,7 @@ class CajaMovimientosTableCompanion
   String toString() {
     return (StringBuffer('CajaMovimientosTableCompanion(')
           ..write('id: $id, ')
+          ..write('sesionId: $sesionId, ')
           ..write('tipo: $tipo, ')
           ..write('referenciaTipo: $referenciaTipo, ')
           ..write('referenciaId: $referenciaId, ')
@@ -55312,6 +55365,7 @@ typedef $$KardexComercialTableTableProcessedTableManager =
 typedef $$CajaMovimientosTableTableCreateCompanionBuilder =
     CajaMovimientosTableCompanion Function({
       Value<int> id,
+      Value<int?> sesionId,
       required MovimientoCaja tipo,
       required ReferenciaTipo referenciaTipo,
       required int referenciaId,
@@ -55324,6 +55378,7 @@ typedef $$CajaMovimientosTableTableCreateCompanionBuilder =
 typedef $$CajaMovimientosTableTableUpdateCompanionBuilder =
     CajaMovimientosTableCompanion Function({
       Value<int> id,
+      Value<int?> sesionId,
       Value<MovimientoCaja> tipo,
       Value<ReferenciaTipo> referenciaTipo,
       Value<int> referenciaId,
@@ -55345,6 +55400,11 @@ class $$CajaMovimientosTableTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sesionId => $composableBuilder(
+    column: $table.sesionId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -55406,6 +55466,11 @@ class $$CajaMovimientosTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sesionId => $composableBuilder(
+    column: $table.sesionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get tipo => $composableBuilder(
     column: $table.tipo,
     builder: (column) => ColumnOrderings(column),
@@ -55458,6 +55523,9 @@ class $$CajaMovimientosTableTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get sesionId =>
+      $composableBuilder(column: $table.sesionId, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<MovimientoCaja, String> get tipo =>
       $composableBuilder(column: $table.tipo, builder: (column) => column);
@@ -55537,6 +55605,7 @@ class $$CajaMovimientosTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<int?> sesionId = const Value.absent(),
                 Value<MovimientoCaja> tipo = const Value.absent(),
                 Value<ReferenciaTipo> referenciaTipo = const Value.absent(),
                 Value<int> referenciaId = const Value.absent(),
@@ -55547,6 +55616,7 @@ class $$CajaMovimientosTableTableTableManager
                 Value<DateTime> fecha = const Value.absent(),
               }) => CajaMovimientosTableCompanion(
                 id: id,
+                sesionId: sesionId,
                 tipo: tipo,
                 referenciaTipo: referenciaTipo,
                 referenciaId: referenciaId,
@@ -55559,6 +55629,7 @@ class $$CajaMovimientosTableTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<int?> sesionId = const Value.absent(),
                 required MovimientoCaja tipo,
                 required ReferenciaTipo referenciaTipo,
                 required int referenciaId,
@@ -55569,6 +55640,7 @@ class $$CajaMovimientosTableTableTableManager
                 Value<DateTime> fecha = const Value.absent(),
               }) => CajaMovimientosTableCompanion.insert(
                 id: id,
+                sesionId: sesionId,
                 tipo: tipo,
                 referenciaTipo: referenciaTipo,
                 referenciaId: referenciaId,

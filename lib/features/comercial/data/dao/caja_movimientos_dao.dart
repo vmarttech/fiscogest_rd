@@ -12,6 +12,15 @@ class CajaMovimientosDao extends DatabaseAccessor<AppDatabase>
   Future<List<CajaMovimientoData>> obtenerTodos() =>
       select(cajaMovimientosTable).get();
 
+  Future<List<CajaMovimientoData>> obtenerPorSesion(int sesionId) {
+    return (select(cajaMovimientosTable)
+          ..where((t) => t.sesionId.equals(sesionId))
+          ..orderBy([
+            (t) => OrderingTerm(expression: t.fecha, mode: OrderingMode.desc),
+          ]))
+        .get();
+  }
+
   Future<List<CajaMovimientoData>> obtenerPorFecha(DateTime fecha) {
     final inicio = DateTime(fecha.year, fecha.month, fecha.day);
     final fin = inicio.add(const Duration(days: 1));
@@ -44,7 +53,8 @@ class CajaMovimientosDao extends DatabaseAccessor<AppDatabase>
             ..limit(1))
           .getSingleOrNull();
 
-  Future<double?> obtenerSaldoActual() async {
+  /// Solo para ledger global legado (no usar en cuadre de turno).
+  Future<double?> obtenerSaldoLedgerGlobal() async {
     final ultimo = await obtenerUltimoMovimiento();
     return ultimo?.saldoNuevo;
   }

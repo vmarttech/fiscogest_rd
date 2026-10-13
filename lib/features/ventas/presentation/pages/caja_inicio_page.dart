@@ -25,6 +25,7 @@ class CajaInicioPage extends ConsumerStatefulWidget {
 
 class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   double? _saldo;
+  ResumenSesionCaja? _resumen;
   CajaSesionResumen? _sesion;
   bool _cargando = true;
   String? _error;
@@ -46,12 +47,18 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     });
     try {
       final repo = ref.read(cajaRepositoryProvider);
-      final saldo = await repo.obtenerSaldoActual();
       final sesion = await repo.obtenerSesionAbierta();
+      ResumenSesionCaja? resumen;
+      double saldo = 0.0;
+      if (sesion != null) {
+        resumen = await repo.obtenerResumenSesion(sesion.id);
+        saldo = resumen.efectivoEsperado;
+      }
       if (!mounted) return;
       setState(() {
-        _saldo = saldo ?? 0.0;
         _sesion = sesion;
+        _resumen = resumen;
+        _saldo = saldo;
         _cargando = false;
       });
     } catch (e) {
@@ -217,7 +224,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   Future<void> _dialogoCerrarCaja() async {
     if (_sesion == null) return;
-    final teorico = _saldo ?? 0.0;
+    final resumenCierre = await ref
+        .read(cajaRepositoryProvider)
+        .obtenerResumenSesion(_sesion!.id);
+    final teorico = resumenCierre.efectivoEsperado;
     final controller = TextEditingController(text: teorico.toStringAsFixed(2));
     final obsController = TextEditingController();
     final ancho = MediaQuery.of(context).size.width;
@@ -267,9 +277,27 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Sesión #${_sesion!.id} · Fondo inicial ${formatRd(_sesion!.fondoInicial)}',
+                          'Sesión #${_sesion!.id} · Fondo ${formatRd(resumenCierre.fondoInicial)}',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.textSecondary,
+                          ),
+                        ),
+                        AppLayout.vS,
+                        Text(
+                          '+ Ingresos efectivo ${formatRd(resumenCierre.ingresosEfectivo)}'
+                          '  − Egresos ${formatRd(resumenCierre.egresosEfectivo)}',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          'Tarjeta ${formatRd(resumenCierre.ingresosTarjeta)} · '
+                          'Transfer ${formatRd(resumenCierre.ingresosTransferencia)} · '
+                          'Cheque ${formatRd(resumenCierre.ingresosCheque)}'
+                          ' (no se cuentan en el cajón)',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
                           ),
                         ),
                         AppLayout.vM,
@@ -283,7 +311,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text(
-                                'Saldo teórico',
+                                'Efectivo esperado',
                                 style: AppTypography.labelMedium,
                               ),
                               Text(
@@ -702,7 +730,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Saldo registrado',
+            'Efectivo en cajón',
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
@@ -734,6 +762,26 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 height: 1.1,
               ),
             ),
+          if (abierta && _resumen != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Tarjeta ${formatRd(_resumen!.ingresosTarjeta)} · '
+              'Transfer ${formatRd(_resumen!.ingresosTransferencia)} · '
+              'Cheque ${formatRd(_resumen!.ingresosCheque)}',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (_resumen!.egresosEfectivo > 0.001)
+              Text(
+                'Egresos efectivo ${formatRd(_resumen!.egresosEfectivo)}',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+          ],
           if (abierta && _sesion != null) ...[
             const SizedBox(height: 20),
             // 3 chips

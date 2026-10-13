@@ -52,7 +52,10 @@ class _CajaHistorialTurnoPageState
               DateTime.now().day,
             );
       }
-      final lista = await repo.listarMovimientosDesde(desde);
+      final abierta = await repo.obtenerSesionAbierta();
+      final lista = abierta != null
+          ? await repo.listarMovimientosPorSesion(abierta.id)
+          : await repo.listarMovimientosDesde(desde);
       if (!mounted) return;
       setState(() {
         _desdeUsado = desde;
