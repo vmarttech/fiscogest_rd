@@ -540,11 +540,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     try {
       final ventaEcfe = await repo.obtenerVentaPorId(ventaIdDoc);
       if (ventaEcfe != null) {
-        final tipo = ncf.startsWith('B14')
-            ? 'B14'
-            : ncf.startsWith('B01')
-            ? 'B01'
-            : 'B02';
+        final tipo = ncf.length >= 3 ? ncf.substring(0, 3) : ncf;
         final resultadoEcfe = await ref.read(encolarEcfeDesdeVentaProvider)(
           venta: ventaEcfe,
           tipoNcf: tipo,
@@ -570,7 +566,13 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         }
         ref.invalidate(ecfeColaProvider);
       }
-    } catch (_) {}
+    } catch (errorEcfe) {
+      if (mounted) {
+        FiscoGestNotifications.show(
+          SnackBar(content: Text('e-CF no quedó listo: $errorEcfe')),
+        );
+      }
+    }
   }
 
   Future<void> _cobrarYGenerarFactura() async {

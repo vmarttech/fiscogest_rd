@@ -152,7 +152,12 @@ class GenerarXmlEcfe {
         vencSeq = seq.vencimiento;
       }
       final fmt = DateFormat('dd-MM-yyyy');
-      final fechaEmision = fmt.format(venta.fecha);
+      final fechaEmision = fmt.format(
+        (doc.tipoEcf == TipoEcf.notaCredito ||
+                doc.tipoEcf == TipoEcf.notaDebito)
+            ? doc.creadoEn
+            : venta.fecha,
+      );
       final fechaVenc = vencSeq != null
           ? fmt.format(vencSeq)
           : fmt.format(DateTime(DateTime.now().year + 1, 12, 31));
