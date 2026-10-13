@@ -102,7 +102,8 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
               builder.element(
                 'Comprador',
                 nest: () {
-                  if ((p.rncComprador ?? '').isNotEmpty) {
+                  if (p.tipoEcfCodigo != 43 &&
+                      (p.rncComprador ?? '').isNotEmpty) {
                     builder.element('RNCComprador', nest: p.rncComprador!);
                   }
                   builder.element(
@@ -284,7 +285,7 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                 builder.element('FechaEmision', nest: p.fechaEmision);
               },
             );
-            if ((p.rncComprador ?? '').isNotEmpty) {
+            if (p.tipoEcfCodigo != 43 && (p.rncComprador ?? '').isNotEmpty) {
               builder.element('RNCComprador', nest: p.rncComprador!);
             }
 

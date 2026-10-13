@@ -147,7 +147,7 @@ class EncolarEcfeDesdeVenta {
         estado: estado,
         ncfLocal: ncf,
         rncReceptor: rncNota.isEmpty ? null : rncNota,
-        notaFiscalJson: '{"montoTotal":${venta.montoTotal.toStringAsFixed(2)}}',
+        notaFiscalJson: notaFiscalJsonDe(venta),
         encfReferencia: esNota && encfOrigen.isNotEmpty ? encfOrigen : null,
         ultimoError: notaOk ? null : notaErrores.join(' · '),
       );
@@ -183,4 +183,20 @@ class EncolarEcfeDesdeVenta {
       );
     }
   }
+}
+
+String notaFiscalJsonDe(Venta venta) {
+  final lineas = <String>[];
+  for (final d in venta.detalles) {
+    final monto = (d.subtotalLinea ?? d.subtotal).toStringAsFixed(2);
+    final nombre = (d.nombreProducto ?? '')
+        .replaceAll(RegExp(r'["\\$]'), '')
+        .replaceAll('\n', ' ');
+    lineas.add(
+      '{"nombre":"$nombre","cantidad":${d.cantidad},"precio":${d.precioUnitario},"monto":$monto,"tasa":${d.tasaImpuesto}}',
+    );
+  }
+  return '{"montoTotal":${venta.montoTotal.toStringAsFixed(2)},'
+      '"itbis":${venta.itbis.toStringAsFixed(2)},'
+      '"lineas":[${lineas.join(',')}]}';
 }

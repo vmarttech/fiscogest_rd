@@ -58,6 +58,12 @@ class GenerarXmlEcfe {
           errores: ['Documento e-CF no encontrado'],
         );
       }
+      final lineasGuardadas =
+          (doc.tipoEcf == TipoEcf.notaCredito ||
+              doc.tipoEcf == TipoEcf.notaDebito)
+          ? _lineasGuardadas(doc.notaFiscalJson, doc.ventaId)
+          : null;
+
       if (doc.tipoEcf != TipoEcf.facturaCreditoFiscal &&
           doc.tipoEcf != TipoEcf.facturaConsumo &&
           doc.tipoEcf != TipoEcf.notaDebito &&
@@ -122,6 +128,7 @@ class GenerarXmlEcfe {
             codigoModificacionNota = '1';
           }
           if (totalNota != null &&
+              lineasGuardadas == null &&
               (totalNota - venta.montoTotal).abs() > 0.02) {
             throw StateError(
               'El total de la nota no coincide con la venta usada para armar el XML. No se genera para no enviar el monto de la factura completa.',
@@ -176,8 +183,8 @@ class GenerarXmlEcfe {
       final gravadosCero = await repo.productosGravadosCero(
         detalles.map((d) => d.productoId),
       );
-      for (var i = 0; i < detalles.length; i++) {
-        final d = detalles[i];
+      for (var i = 0; i < (lineasGuardadas ?? detalles).length; i++) {
+        final d = (lineasGuardadas ?? detalles)[i];
         final monto = d.subtotalLinea ?? d.subtotal;
         final tasaLinea = usarTasaDocumento ? tasaItbis : d.tasaImpuesto;
         final pct = tasaLinea > 1.5 ? tasaLinea : tasaLinea * 100.0;
@@ -233,6 +240,20 @@ class GenerarXmlEcfe {
           ? '2'
           : '1';
 
+      final totalGuardado = lineasGuardadas == null
+          ? null
+          : _montoNotaFiscal(doc.notaFiscalJson);
+      if (lineasGuardadas != null && totalGuardado != null) {
+        final sumaLineas =
+            gravado18 + gravado16 + gravado0 + exento + itbis18 + itbis16;
+        final esParcial = (totalGuardado - venta.montoTotal).abs() > 0.02;
+        if (esParcial && (sumaLineas - totalGuardado).abs() > 0.05) {
+          throw StateError(
+            'Las líneas guardadas de la nota no cuadran con su total. No se genera el XML.',
+          );
+        }
+      }
+      final totalXml = totalGuardado ?? venta.montoTotal;
       final payload = EcfePayload(
         tipoEcfCodigo: doc.tipoEcf.codigo,
         encf: encfAsignado,
@@ -266,7 +287,7 @@ class GenerarXmlEcfe {
         direccionComprador: venta.clienteDireccion,
         montoGravadoTotal: gravado18 + gravado16 + gravado0,
         totalItbis: itbis18 + itbis16,
-        montoTotal: venta.montoTotal,
+        montoTotal: totalXml,
         tasaItbis: gravado18 > 0 ? 18 : (gravado16 > 0 ? 16 : 0),
         montoGravadoI1: gravado18,
         totalItbis1: itbis18,
@@ -278,7 +299,7 @@ class GenerarXmlEcfe {
         bandasItbis: true,
         esRfce: false,
         items: items,
-        montoPago: venta.montoTotal,
+        montoPago: totalXml,
       );
 
       final xml = builder.construirDesdePayload(payload);
@@ -346,6 +367,45 @@ class GenerarXmlEcfe {
       } catch (_) {}
       return GenerarXmlResultado(ok: false, errores: ['$e']);
     }
+  }
+
+  List<DetalleVenta>? _lineasGuardadas(String? json, int? ventaId) {
+    if (json == null || !json.contains('"lineas"')) return null;
+    final cuerpo = RegExp(r'"lineas"\s*:\s*\[(.*)\]').firstMatch(json);
+    if (cuerpo == null) return null;
+    final out = <DetalleVenta>[];
+    for (final objeto in RegExp(r'\{[^{}]*\}').allMatches(cuerpo.group(1)!)) {
+      final texto = objeto.group(0)!;
+      String textoDe(String campo) {
+        final hallado = RegExp('"$campo"\\s*:\\s*"([^"]*)"').firstMatch(texto);
+        return hallado?.group(1) ?? '';
+      }
+
+      double numeroDe(String campo) {
+        final hallado = RegExp(
+          '"$campo"\\s*:\\s*(-?\\d+(?:\\.\\d+)?)',
+        ).firstMatch(texto);
+        return double.tryParse(hallado?.group(1) ?? '') ?? 0;
+      }
+
+      final nombre = textoDe('nombre');
+      final cantNum = numeroDe('cantidad');
+      final precioNum = numeroDe('precio');
+      final montoNum = numeroDe('monto');
+      final tasaNum = numeroDe('tasa');
+      out.add(
+        DetalleVenta(
+          productoId: 0,
+          cantidad: cantNum.round(),
+          precioUnitario: precioNum,
+          subtotal: montoNum,
+          nombreProducto: nombre,
+          subtotalLinea: montoNum,
+          tasaImpuesto: tasaNum,
+        ),
+      );
+    }
+    return out.isEmpty ? null : out;
   }
 
   double? _montoNotaFiscal(String? json) {
