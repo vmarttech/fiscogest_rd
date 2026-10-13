@@ -232,7 +232,11 @@ class GenerarXmlEcfe {
           );
         }
         fechaNcfModificado = fmt.format(original);
-        if (DateTime.now().difference(original).inDays > 30) {
+        final hoyNota = DateTime.now();
+        final diasNota = DateTime(hoyNota.year, hoyNota.month, hoyNota.day)
+            .difference(DateTime(original.year, original.month, original.day))
+            .inDays;
+        if (diasNota > 30) {
           indicadorNota = '1';
         }
       }

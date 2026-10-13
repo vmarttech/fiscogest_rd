@@ -433,7 +433,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   }
 
   Future<void> _buscarRncFiscalEnLinea() async {
-    final raw = _rncFiscalController.text.trim();
+    final raw = _rncFiscalController.text.replaceAll(RegExp(r'\D'), '');
     if (!DgiiRncConsultaService.esFormatoValido(raw)) {
       if (!mounted) return;
       FiscoGestNotifications.show(
@@ -544,7 +544,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         final resultadoEcfe = await ref.read(encolarEcfeDesdeVentaProvider)(
           venta: ventaEcfe,
           tipoNcf: tipo,
-          rncCliente: _rncFiscalController.text.trim(),
+          rncCliente: _rncFiscalController.text.replaceAll(RegExp(r'\D'), ''),
           nombreCliente: ventaEcfe.nombreCliente ?? '',
         );
         final detalleEcfe = resultadoEcfe.erroresValidacion.join(' · ');

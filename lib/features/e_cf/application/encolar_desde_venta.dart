@@ -79,7 +79,7 @@ class EncolarEcfeDesdeVenta {
           encfOrigen = (previo.encf ?? '').trim();
       }
 
-      var rncNota = rncCliente.trim();
+      var rncNota = rncCliente.replaceAll(RegExp(r'\D'), '');
       if (rncNota.isEmpty) {
         for (final previo in previos) {
           final guardado = (previo.rncReceptor ?? '').trim();

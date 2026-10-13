@@ -132,12 +132,15 @@ class EcfeRepository {
   }
 
   Future<EcfeDocumento?> buscarPorVentaId(int ventaId) async {
-    final row =
-        await (_db.select(_db.ecfeDocumentosTable)
-              ..where((t) => t.ventaId.equals(ventaId))
-              ..limit(1))
-            .getSingleOrNull();
-    return row == null ? null : _mapDoc(row);
+    final docs = await listarPorVentaId(ventaId);
+    if (docs.isEmpty) return null;
+    for (final doc in docs) {
+      final esNota =
+          doc.tipoEcf == TipoEcf.notaCredito ||
+          doc.tipoEcf == TipoEcf.notaDebito;
+      if (!esNota) return doc;
+    }
+    return docs.last;
   }
 
   Future<int> insertarDocumento({
@@ -516,9 +519,10 @@ class EcfeRepository {
   }
 
   Future<String?> xmlPorEncf(String encf) async {
-    final doc = await (_db.select(_db.ecfeDocumentosTable)
-          ..where((t) => t.encf.equals(encf.trim().toUpperCase())))
-        .getSingleOrNull();
+    final doc =
+        await (_db.select(_db.ecfeDocumentosTable)
+              ..where((t) => t.encf.equals(encf.trim().toUpperCase())))
+            .getSingleOrNull();
     if (doc == null) return null;
     final firmado = (doc.xmlFirmado ?? '').trim();
     if (firmado.isNotEmpty) return firmado;
@@ -526,14 +530,19 @@ class EcfeRepository {
     return plano.isEmpty ? null : plano;
   }
 
-
   Future<String?> codigoSeguridadPorVenta(int ventaId) async {
-    final rows = await (_db.select(
-      _db.ecfeDocumentosTable,
-    )..where((t) => t.ventaId.equals(ventaId))).get();
-    if (rows.isEmpty) return null;
-    final codigo = (rows.first.codigoSeguridad ?? '').trim();
-    return codigo.isEmpty ? null : codigo;
+    final docs = await listarPorVentaId(ventaId);
+    String? deNota;
+    for (final doc in docs) {
+      final codigo = (doc.codigoSeguridad ?? '').trim();
+      if (codigo.isEmpty) continue;
+      final esNota =
+          doc.tipoEcf == TipoEcf.notaCredito ||
+          doc.tipoEcf == TipoEcf.notaDebito;
+      if (!esNota) return codigo;
+      deNota ??= codigo;
+    }
+    return deNota;
   }
 
   Future<void> anularDocumento({
