@@ -524,15 +524,13 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         actual.startsWith('B14');
     if (yaFiscal) return;
 
-    if (_tipoNcf == 'B01') {
+    if (_tipoNcf == 'B01' || _tipoNcf == 'B14') {
       final rnc = _rncFiscalController.text.trim().replaceAll(
         RegExp(r'[^0-9]'),
         '',
       );
       if (rnc.length != 9 && rnc.length != 11) {
-        throw StateError(
-          'B01 (crédito fiscal) requiere RNC (9) o cédula (11 dígitos)',
-        );
+        throw StateError('B01 o B14 requiere RNC (9) o cédula (11 dígitos)');
       }
     }
 
@@ -542,13 +540,34 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     try {
       final ventaEcfe = await repo.obtenerVentaPorId(ventaIdDoc);
       if (ventaEcfe != null) {
-        final tipo = ncf.startsWith('B01') ? 'B01' : 'B02';
-        await ref.read(encolarEcfeDesdeVentaProvider)(
+        final tipo = ncf.startsWith('B14')
+            ? 'B14'
+            : ncf.startsWith('B01')
+            ? 'B01'
+            : 'B02';
+        final resultadoEcfe = await ref.read(encolarEcfeDesdeVentaProvider)(
           venta: ventaEcfe,
           tipoNcf: tipo,
-          rncCliente: '',
+          rncCliente: _rncFiscalController.text.trim(),
           nombreCliente: ventaEcfe.nombreCliente ?? '',
         );
+        final detalleEcfe = resultadoEcfe.erroresValidacion.join(' · ');
+        final omisionEcfe = (resultadoEcfe.omitidoPor ?? '').trim();
+        final silencioso =
+            omisionEcfe.contains('deshabilitado') ||
+            omisionEcfe.contains('sin envío');
+        if (mounted &&
+            !silencioso &&
+            (detalleEcfe.isNotEmpty ||
+                (!resultadoEcfe.encolado && omisionEcfe.isNotEmpty))) {
+          FiscoGestNotifications.show(
+            SnackBar(
+              content: Text(
+                'e-CF no quedó listo: ${detalleEcfe.isNotEmpty ? detalleEcfe : omisionEcfe}',
+              ),
+            ),
+          );
+        }
         ref.invalidate(ecfeColaProvider);
       }
     } catch (_) {}

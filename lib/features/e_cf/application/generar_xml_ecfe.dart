@@ -49,6 +49,7 @@ class GenerarXmlEcfe {
     String? rutaXsd,
     bool exigirXsd = false,
   }) async {
+    var codigoModificacionNota = '3';
     try {
       final doc = await repo.obtenerPorId(documentoId);
       if (doc == null) {
@@ -82,6 +83,52 @@ class GenerarXmlEcfe {
       if (doc.tipoEcf == TipoEcf.notaCredito ||
           doc.tipoEcf == TipoEcf.notaDebito) {
         final ref = (doc.encfReferencia ?? '').trim();
+        if ((doc.tipoEcf == TipoEcf.notaCredito ||
+                doc.tipoEcf == TipoEcf.notaDebito) &&
+            ref.isEmpty) {
+          throw StateError(
+            'La nota no tiene el e-NCF de la factura original. No se genera el XML.',
+          );
+        }
+        if (doc.tipoEcf == TipoEcf.notaCredito ||
+            doc.tipoEcf == TipoEcf.notaDebito) {
+          final totalNota = _montoNotaFiscal(doc.notaFiscalJson);
+          double? totalFactura;
+          if (doc.ventaId != null) {
+            final hermanos = await repo.listarPorVentaId(doc.ventaId!);
+            for (final previo in hermanos) {
+              final esFactura =
+                  previo.tipoEcf != TipoEcf.notaCredito &&
+                  previo.tipoEcf != TipoEcf.notaDebito;
+              final encfPrevio = (previo.encf ?? '').trim().toUpperCase();
+              if (!esFactura || encfPrevio != ref.toUpperCase()) continue;
+              if (previo.estado == EstadoEcfInterno.rechazado) {
+                throw StateError(
+                  'La factura electrónica fue rechazada. No se genera la nota contra un e-NCF rechazado.',
+                );
+              }
+              totalFactura = _montoNotaFiscal(previo.notaFiscalJson);
+              break;
+            }
+          }
+          if (totalFactura == null && ref.isNotEmpty) {
+            totalFactura = _montoTotalXml(await repo.xmlPorEncf(ref));
+          }
+          if (doc.tipoEcf == TipoEcf.notaCredito &&
+              totalNota != null &&
+              totalFactura != null &&
+              totalFactura > 0 &&
+              (totalNota - totalFactura).abs() < 0.02) {
+            codigoModificacionNota = '1';
+          }
+          if (totalNota != null &&
+              (totalNota - venta.montoTotal).abs() > 0.02) {
+            throw StateError(
+              'El total de la nota no coincide con la venta usada para armar el XML. No se genera para no enviar el monto de la factura completa.',
+            );
+          }
+        }
+
         if (ref.isEmpty) {
           final cual = doc.tipoEcf == TipoEcf.notaDebito ? '33' : '34';
           return GenerarXmlResultado(
@@ -186,7 +233,7 @@ class GenerarXmlEcfe {
         encf: encfAsignado,
         encfReferencia: doc.encfReferencia,
         fechaNcfModificado: fechaNcfModificado,
-        codigoModificacion: '3',
+        codigoModificacion: codigoModificacionNota,
         indicadorNotaCredito: indicadorNota,
         fechaVencimientoSecuencia: fechaVenc,
         fechaLimitePago: venta.formaPago.toLowerCase().contains('cred')
@@ -294,5 +341,23 @@ class GenerarXmlEcfe {
       } catch (_) {}
       return GenerarXmlResultado(ok: false, errores: ['$e']);
     }
+  }
+
+  double? _montoNotaFiscal(String? json) {
+    if (json == null || json.trim().isEmpty) return null;
+    final coincidencia = RegExp(
+      r'"montoTotal"\s*:\s*(-?\d+(?:\.\d+)?)',
+    ).firstMatch(json);
+    if (coincidencia == null) return null;
+    return double.tryParse(coincidencia.group(1)!);
+  }
+
+  double? _montoTotalXml(String? xml) {
+    if (xml == null || xml.trim().isEmpty) return null;
+    final coincidencias = RegExp(
+      r'<MontoTotal>([^<]+)</MontoTotal>',
+    ).allMatches(xml);
+    if (coincidencias.isEmpty) return null;
+    return double.tryParse(coincidencias.last.group(1)!.trim());
   }
 }

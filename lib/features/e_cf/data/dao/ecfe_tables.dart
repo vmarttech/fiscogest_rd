@@ -43,6 +43,7 @@ class EcfeDocumentosTable extends Table {
   DateTimeColumn get actualizadoEn => dateTime().nullable()();
 
   TextColumn get rncReceptor => text().nullable()();
+  TextColumn get notaFiscalJson => text().nullable()();
 }
 
 class EcfeEventosTable extends Table {

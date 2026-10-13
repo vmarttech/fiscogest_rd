@@ -35,6 +35,7 @@ class EcfeRepository {
       ventaId: r.ventaId,
       tipoEcf: tipo,
       rncReceptor: r.rncReceptor,
+      notaFiscalJson: r.notaFiscalJson,
       encf: r.encf,
       estado: _est(r.estado),
       trackId: r.trackId,
@@ -145,6 +146,7 @@ class EcfeRepository {
     required EstadoEcfInterno estado,
     String? ncfLocal,
     String? rncReceptor,
+    String? notaFiscalJson,
     String? ultimoError,
     String? encfReferencia,
   }) async {
@@ -157,6 +159,7 @@ class EcfeRepository {
             tipoEcf: tipoEcf.codigo,
             encf: const Value(null),
             rncReceptor: Value(rncReceptor), // e-NCF se asigna al generar XML
+            notaFiscalJson: Value(notaFiscalJson),
             encfReferencia: Value(encfReferencia),
             estado: Value(estado.name),
             ultimoError: Value(ultimoError),
@@ -511,6 +514,18 @@ class EcfeRepository {
     )..where((t) => t.id.equals(ventaId))).getSingleOrNull();
     return venta?.fecha;
   }
+
+  Future<String?> xmlPorEncf(String encf) async {
+    final doc = await (_db.select(_db.ecfeDocumentosTable)
+          ..where((t) => t.encf.equals(encf.trim().toUpperCase())))
+        .getSingleOrNull();
+    if (doc == null) return null;
+    final firmado = (doc.xmlFirmado ?? '').trim();
+    if (firmado.isNotEmpty) return firmado;
+    final plano = (doc.xmlSinFirma ?? '').trim();
+    return plano.isEmpty ? null : plano;
+  }
+
 
   Future<String?> codigoSeguridadPorVenta(int ventaId) async {
     final rows = await (_db.select(

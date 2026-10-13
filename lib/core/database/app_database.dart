@@ -127,7 +127,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 62;
+  int get schemaVersion => 63;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -139,6 +139,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 62) {
         await customStatement(
           'ALTER TABLE ecfe_documentos_table ADD COLUMN rnc_receptor TEXT NULL;',
+        );
+      }
+      if (from < 63) {
+        await customStatement(
+          'ALTER TABLE ecfe_documentos_table ADD COLUMN nota_fiscal_json TEXT NULL;',
         );
       }
       if (from < 60) {

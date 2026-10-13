@@ -30207,6 +30207,17 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _notaFiscalJsonMeta = const VerificationMeta(
+    'notaFiscalJson',
+  );
+  @override
+  late final GeneratedColumn<String> notaFiscalJson = GeneratedColumn<String>(
+    'nota_fiscal_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -30226,6 +30237,7 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
     creadoEn,
     actualizadoEn,
     rncReceptor,
+    notaFiscalJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -30369,6 +30381,15 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
         ),
       );
     }
+    if (data.containsKey('nota_fiscal_json')) {
+      context.handle(
+        _notaFiscalJsonMeta,
+        notaFiscalJson.isAcceptableOrUnknown(
+          data['nota_fiscal_json']!,
+          _notaFiscalJsonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -30449,6 +30470,10 @@ class $EcfeDocumentosTableTable extends EcfeDocumentosTable
         DriftSqlType.string,
         data['${effectivePrefix}rnc_receptor'],
       ),
+      notaFiscalJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nota_fiscal_json'],
+      ),
     );
   }
 
@@ -30483,6 +30508,7 @@ class EcfeDocumentosTableData extends DataClass
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
   final String? rncReceptor;
+  final String? notaFiscalJson;
   const EcfeDocumentosTableData({
     required this.id,
     this.ventaId,
@@ -30501,6 +30527,7 @@ class EcfeDocumentosTableData extends DataClass
     required this.creadoEn,
     this.actualizadoEn,
     this.rncReceptor,
+    this.notaFiscalJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -30548,6 +30575,9 @@ class EcfeDocumentosTableData extends DataClass
     if (!nullToAbsent || rncReceptor != null) {
       map['rnc_receptor'] = Variable<String>(rncReceptor);
     }
+    if (!nullToAbsent || notaFiscalJson != null) {
+      map['nota_fiscal_json'] = Variable<String>(notaFiscalJson);
+    }
     return map;
   }
 
@@ -30594,6 +30624,9 @@ class EcfeDocumentosTableData extends DataClass
       rncReceptor: rncReceptor == null && nullToAbsent
           ? const Value.absent()
           : Value(rncReceptor),
+      notaFiscalJson: notaFiscalJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notaFiscalJson),
     );
   }
 
@@ -30620,6 +30653,7 @@ class EcfeDocumentosTableData extends DataClass
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
       rncReceptor: serializer.fromJson<String?>(json['rncReceptor']),
+      notaFiscalJson: serializer.fromJson<String?>(json['notaFiscalJson']),
     );
   }
   @override
@@ -30643,6 +30677,7 @@ class EcfeDocumentosTableData extends DataClass
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
       'rncReceptor': serializer.toJson<String?>(rncReceptor),
+      'notaFiscalJson': serializer.toJson<String?>(notaFiscalJson),
     };
   }
 
@@ -30664,6 +30699,7 @@ class EcfeDocumentosTableData extends DataClass
     DateTime? creadoEn,
     Value<DateTime?> actualizadoEn = const Value.absent(),
     Value<String?> rncReceptor = const Value.absent(),
+    Value<String?> notaFiscalJson = const Value.absent(),
   }) => EcfeDocumentosTableData(
     id: id ?? this.id,
     ventaId: ventaId.present ? ventaId.value : this.ventaId,
@@ -30692,6 +30728,9 @@ class EcfeDocumentosTableData extends DataClass
         ? actualizadoEn.value
         : this.actualizadoEn,
     rncReceptor: rncReceptor.present ? rncReceptor.value : this.rncReceptor,
+    notaFiscalJson: notaFiscalJson.present
+        ? notaFiscalJson.value
+        : this.notaFiscalJson,
   );
   EcfeDocumentosTableData copyWithCompanion(EcfeDocumentosTableCompanion data) {
     return EcfeDocumentosTableData(
@@ -30732,6 +30771,9 @@ class EcfeDocumentosTableData extends DataClass
       rncReceptor: data.rncReceptor.present
           ? data.rncReceptor.value
           : this.rncReceptor,
+      notaFiscalJson: data.notaFiscalJson.present
+          ? data.notaFiscalJson.value
+          : this.notaFiscalJson,
     );
   }
 
@@ -30754,7 +30796,8 @@ class EcfeDocumentosTableData extends DataClass
           ..write('motivoAnulacion: $motivoAnulacion, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn, ')
-          ..write('rncReceptor: $rncReceptor')
+          ..write('rncReceptor: $rncReceptor, ')
+          ..write('notaFiscalJson: $notaFiscalJson')
           ..write(')'))
         .toString();
   }
@@ -30778,6 +30821,7 @@ class EcfeDocumentosTableData extends DataClass
     creadoEn,
     actualizadoEn,
     rncReceptor,
+    notaFiscalJson,
   );
   @override
   bool operator ==(Object other) =>
@@ -30799,7 +30843,8 @@ class EcfeDocumentosTableData extends DataClass
           other.motivoAnulacion == this.motivoAnulacion &&
           other.creadoEn == this.creadoEn &&
           other.actualizadoEn == this.actualizadoEn &&
-          other.rncReceptor == this.rncReceptor);
+          other.rncReceptor == this.rncReceptor &&
+          other.notaFiscalJson == this.notaFiscalJson);
 }
 
 class EcfeDocumentosTableCompanion
@@ -30821,6 +30866,7 @@ class EcfeDocumentosTableCompanion
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
   final Value<String?> rncReceptor;
+  final Value<String?> notaFiscalJson;
   const EcfeDocumentosTableCompanion({
     this.id = const Value.absent(),
     this.ventaId = const Value.absent(),
@@ -30839,6 +30885,7 @@ class EcfeDocumentosTableCompanion
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
     this.rncReceptor = const Value.absent(),
+    this.notaFiscalJson = const Value.absent(),
   });
   EcfeDocumentosTableCompanion.insert({
     this.id = const Value.absent(),
@@ -30858,6 +30905,7 @@ class EcfeDocumentosTableCompanion
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
     this.rncReceptor = const Value.absent(),
+    this.notaFiscalJson = const Value.absent(),
   }) : tipoEcf = Value(tipoEcf),
        creadoEn = Value(creadoEn);
   static Insertable<EcfeDocumentosTableData> custom({
@@ -30878,6 +30926,7 @@ class EcfeDocumentosTableCompanion
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
     Expression<String>? rncReceptor,
+    Expression<String>? notaFiscalJson,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -30897,6 +30946,7 @@ class EcfeDocumentosTableCompanion
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
       if (rncReceptor != null) 'rnc_receptor': rncReceptor,
+      if (notaFiscalJson != null) 'nota_fiscal_json': notaFiscalJson,
     });
   }
 
@@ -30918,6 +30968,7 @@ class EcfeDocumentosTableCompanion
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
     Value<String?>? rncReceptor,
+    Value<String?>? notaFiscalJson,
   }) {
     return EcfeDocumentosTableCompanion(
       id: id ?? this.id,
@@ -30937,6 +30988,7 @@ class EcfeDocumentosTableCompanion
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
       rncReceptor: rncReceptor ?? this.rncReceptor,
+      notaFiscalJson: notaFiscalJson ?? this.notaFiscalJson,
     );
   }
 
@@ -30994,6 +31046,9 @@ class EcfeDocumentosTableCompanion
     if (rncReceptor.present) {
       map['rnc_receptor'] = Variable<String>(rncReceptor.value);
     }
+    if (notaFiscalJson.present) {
+      map['nota_fiscal_json'] = Variable<String>(notaFiscalJson.value);
+    }
     return map;
   }
 
@@ -31016,7 +31071,8 @@ class EcfeDocumentosTableCompanion
           ..write('motivoAnulacion: $motivoAnulacion, ')
           ..write('creadoEn: $creadoEn, ')
           ..write('actualizadoEn: $actualizadoEn, ')
-          ..write('rncReceptor: $rncReceptor')
+          ..write('rncReceptor: $rncReceptor, ')
+          ..write('notaFiscalJson: $notaFiscalJson')
           ..write(')'))
         .toString();
   }
@@ -57161,6 +57217,7 @@ typedef $$EcfeDocumentosTableTableCreateCompanionBuilder =
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
       Value<String?> rncReceptor,
+      Value<String?> notaFiscalJson,
     });
 typedef $$EcfeDocumentosTableTableUpdateCompanionBuilder =
     EcfeDocumentosTableCompanion Function({
@@ -57181,6 +57238,7 @@ typedef $$EcfeDocumentosTableTableUpdateCompanionBuilder =
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
       Value<String?> rncReceptor,
+      Value<String?> notaFiscalJson,
     });
 
 class $$EcfeDocumentosTableTableFilterComposer
@@ -57274,6 +57332,11 @@ class $$EcfeDocumentosTableTableFilterComposer
 
   ColumnFilters<String> get rncReceptor => $composableBuilder(
     column: $table.rncReceptor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notaFiscalJson => $composableBuilder(
+    column: $table.notaFiscalJson,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -57371,6 +57434,11 @@ class $$EcfeDocumentosTableTableOrderingComposer
     column: $table.rncReceptor,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get notaFiscalJson => $composableBuilder(
+    column: $table.notaFiscalJson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EcfeDocumentosTableTableAnnotationComposer
@@ -57452,6 +57520,11 @@ class $$EcfeDocumentosTableTableAnnotationComposer
     column: $table.rncReceptor,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get notaFiscalJson => $composableBuilder(
+    column: $table.notaFiscalJson,
+    builder: (column) => column,
+  );
 }
 
 class $$EcfeDocumentosTableTableTableManager
@@ -57514,6 +57587,7 @@ class $$EcfeDocumentosTableTableTableManager
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
                 Value<String?> rncReceptor = const Value.absent(),
+                Value<String?> notaFiscalJson = const Value.absent(),
               }) => EcfeDocumentosTableCompanion(
                 id: id,
                 ventaId: ventaId,
@@ -57532,6 +57606,7 @@ class $$EcfeDocumentosTableTableTableManager
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
                 rncReceptor: rncReceptor,
+                notaFiscalJson: notaFiscalJson,
               ),
           createCompanionCallback:
               ({
@@ -57552,6 +57627,7 @@ class $$EcfeDocumentosTableTableTableManager
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
                 Value<String?> rncReceptor = const Value.absent(),
+                Value<String?> notaFiscalJson = const Value.absent(),
               }) => EcfeDocumentosTableCompanion.insert(
                 id: id,
                 ventaId: ventaId,
@@ -57570,6 +57646,7 @@ class $$EcfeDocumentosTableTableTableManager
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
                 rncReceptor: rncReceptor,
+                notaFiscalJson: notaFiscalJson,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

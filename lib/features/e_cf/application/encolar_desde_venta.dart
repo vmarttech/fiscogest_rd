@@ -101,8 +101,43 @@ class EncolarEcfeDesdeVenta {
         total: venta.montoTotal,
         ncfLocal: ncf,
       );
+      final notaErrores = <String>[...validacion.errores];
+      if (esNota && encfOrigen.isEmpty) {
+        notaErrores.add(
+          'La factura todavía no tiene e-NCF. El e-CF de la nota no se envía hasta que la factura electrónica lo tenga.',
+        );
+      }
+      if (esNota && rncNota.isEmpty) {
+        for (final previo in previos) {
+          final exigeRnc =
+              previo.tipoEcf == TipoEcf.facturaCreditoFiscal ||
+              previo.tipoEcf == TipoEcf.regimenesEspeciales;
+          if (exigeRnc) {
+            notaErrores.add(
+              'Esa factura es crédito fiscal o regímenes especiales y no tiene RNC guardado. No se envía el e-CF de la nota.',
+            );
+            break;
+          }
+        }
+      }
+      if (esNota && encfOrigen.isNotEmpty) {
+        for (final previo in previos) {
+          final mismo =
+              (previo.encf ?? '').trim().toUpperCase() ==
+              encfOrigen.toUpperCase();
+          if (mismo && previo.estado == EstadoEcfInterno.rechazado) {
+            notaErrores.add(
+              'La factura electrónica fue rechazada. No se envía la nota contra un e-NCF rechazado.',
+            );
+            break;
+          }
+        }
+      }
 
-      final estado = validacion.ok
+      final notaOk =
+          validacion.ok && notaErrores.length == validacion.errores.length;
+
+      final estado = notaOk
           ? EstadoEcfInterno.borrador
           : EstadoEcfInterno.validacionFallida;
 
@@ -112,19 +147,20 @@ class EncolarEcfeDesdeVenta {
         estado: estado,
         ncfLocal: ncf,
         rncReceptor: rncNota.isEmpty ? null : rncNota,
+        notaFiscalJson: '{"montoTotal":${venta.montoTotal.toStringAsFixed(2)}}',
         encfReferencia: esNota && encfOrigen.isNotEmpty ? encfOrigen : null,
-        ultimoError: validacion.ok ? null : validacion.errores.join(' · '),
+        ultimoError: notaOk ? null : notaErrores.join(' · '),
       );
 
       await repo.registrarEvento(
         documentoId: id,
-        paso: validacion.ok ? 'encolar' : 'validacion_negocio',
-        ok: validacion.ok,
-        detalle: validacion.ok
+        paso: notaOk ? 'encolar' : 'validacion_negocio',
+        ok: notaOk,
+        detalle: notaOk
             ? 'Encolado desde venta #${venta.id}'
-            : validacion.errores.join(' · '),
+            : notaErrores.join(' · '),
       );
-      if (validacion.ok &&
+      if (notaOk &&
           RfceRules.esCandidatoRfce(tipo: tipo, total: venta.montoTotal)) {
         await repo.registrarEvento(
           documentoId: id,
@@ -137,7 +173,7 @@ class EncolarEcfeDesdeVenta {
       return EcfeEncolarResultado(
         encolado: true,
         documentoId: id,
-        erroresValidacion: validacion.errores,
+        erroresValidacion: notaErrores,
       );
     } catch (e) {
       // Aislamiento total: no propagar a ventas

@@ -9,6 +9,7 @@ class EcfeDocumento {
     required this.tipoEcf,
     this.encf,
     this.rncReceptor,
+    this.notaFiscalJson,
     required this.estado,
     this.trackId,
     this.codigoRespuesta,
@@ -28,6 +29,7 @@ class EcfeDocumento {
   final TipoEcf tipoEcf;
   final String? encf;
   final String? rncReceptor;
+  final String? notaFiscalJson;
   final EstadoEcfInterno estado;
   final String? trackId;
   final String? codigoRespuesta;
