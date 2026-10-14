@@ -222,6 +222,12 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
               );
               builder.element('FechaNCFModificado', nest: p.fechaNcfModificado);
               builder.element('CodigoModificacion', nest: p.codigoModificacion);
+              if (p.razonModificacion.trim().isNotEmpty) {
+                builder.element(
+                  'RazonModificacion',
+                  nest: _safe(p.razonModificacion.trim()),
+                );
+              }
             },
           );
         }

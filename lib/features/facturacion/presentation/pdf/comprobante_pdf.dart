@@ -1300,7 +1300,8 @@ class ComprobantePdf {
           gap(4),
         ],
         kv('Cotización:', cotizacion),
-        if (showNcf && ncf.isNotEmpty) kv('NCF:', ncf),
+        if (ncf.isNotEmpty && (showNcf || simple))
+          kv(ncf.startsWith('E') ? 'e-NCF:' : 'NCF:', ncf),
         kv('Fecha:', fechaStr),
         kv('Status:', status),
         kv('Forma Pago:', formaPago.toUpperCase()),
@@ -1335,39 +1336,29 @@ class ComprobantePdf {
         if (envio > 0.0001) totalRow('Envío', _money(envio)),
         gap(2),
         totalRow('TOTAL', _money(v.montoTotal), bold: true),
-        if (ncf.isNotEmpty) ...[
-          gap(4),
-          center(
-            ncf.startsWith('E')
-                ? 'COMPROBANTE ELECTRONICO'
-                : 'COMPROBANTE FISCAL',
-            size: 8,
-            bold: true,
-          ),
-          kv(ncf.startsWith('E') ? 'e-NCF:' : 'NCF:', ncf),
-          if (ncf.startsWith('E')) ...[
-            center('Representacion impresa del e-CF.', size: 6),
-            center('Consulte este comprobante en la DGII.', size: 6),
-            if (codigoVisible.isNotEmpty) ...[
-              kv('Codigo:', codigoVisible),
-              if (urlQr != null)
-                pw.Padding(
-                  padding: const pw.EdgeInsets.only(top: 4),
-                  child: pw.Center(
-                    child: pw.BarcodeWidget(
-                      barcode: pw.Barcode.qrCode(),
-                      data: urlQr,
-                      width: 90,
-                      height: 90,
-                    ),
+        if (ncf.startsWith('E')) ...[
+          center('COMPROBANTE ELECTRONICO', size: 8, bold: true),
+          center('Representacion impresa del e-CF.', size: 6),
+          center('Consulte este comprobante en la DGII.', size: 6),
+          if (codigoVisible.isNotEmpty) ...[
+            kv('Codigo:', codigoVisible),
+            if (urlQr != null)
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(top: 4),
+                child: pw.Center(
+                  child: pw.BarcodeWidget(
+                    barcode: pw.Barcode.qrCode(),
+                    data: urlQr,
+                    width: 90,
+                    height: 90,
                   ),
                 ),
-            ] else
-              center(
-                'El codigo de seguridad va en la representacion con QR.',
-                size: 6,
               ),
-          ],
+          ] else
+            center(
+              'El codigo de seguridad va en la representacion con QR.',
+              size: 6,
+            ),
         ],
         sep(),
         if (pie.isNotEmpty)

@@ -208,7 +208,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
             }
             return ListView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               itemCount: lista.length,
               itemBuilder: (context, i) {
                 final prod = lista[i];

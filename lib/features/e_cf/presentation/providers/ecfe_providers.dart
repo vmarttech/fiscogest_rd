@@ -8,15 +8,12 @@ import 'package:fiscogest_rd/features/e_cf/application/generar_xml_ecfe.dart';
 import 'package:fiscogest_rd/features/e_cf/application/firmar_xml_ecfe.dart';
 import 'package:fiscogest_rd/features/e_cf/application/enviar_ecfe.dart';
 import 'package:fiscogest_rd/features/e_cf/application/consultar_estado_ecfe.dart';
-import 'package:fiscogest_rd/features/e_cf/data/gateways/ecfe_stubs.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_secuencia_service.dart';
 import 'package:fiscogest_rd/features/e_cf/data/xml/ecfe_xml_builder_impl.dart';
-import 'package:fiscogest_rd/features/e_cf/data/xml/ecfe_xsd_validator_impl.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_config.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_documento.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/services/ecfe_negocio_validator.dart';
-import 'package:fiscogest_rd/features/e_cf/domain/services/ecfe_pipeline.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 
 final ecfeRepositoryProvider = Provider<EcfeRepository>((ref) {
@@ -61,15 +58,6 @@ final generarXmlEcfeProvider = Provider<GenerarXmlEcfe>((ref) {
   );
 });
 
-final ecfePipelineProvider = Provider<EcfePipeline>((ref) {
-  return EcfePipeline(
-    xmlBuilder: EcfeXmlBuilderImpl(),
-    xsdValidator: EcfeXsdValidatorImpl(),
-    signer: StubEcfeSigner(),
-    recepcion: StubDgiiRecepcionGateway(),
-    consulta: StubDgiiConsultaGateway(),
-  );
-});
 
 final encolarEcfeDesdeVentaProvider = Provider<EncolarEcfeDesdeVenta>((ref) {
   return EncolarEcfeDesdeVenta(

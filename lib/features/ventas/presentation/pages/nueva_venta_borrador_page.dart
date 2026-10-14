@@ -1207,7 +1207,15 @@ class _NuevaVentaBorradorPageState
           const SizedBox(height: 12),
           _filaResumen('Subtotal', formatRd(estado.subtotal), tamanoCuerpo),
           if (!(ref.watch(modoColmadoProvider)))
-            _filaResumen(etiquetaItbisLineas(estado.detalles.map((d) => ((d['tasaImpuesto'] as num?) ?? 0).toDouble())), formatRd(estado.itbis), tamanoCuerpo),
+            _filaResumen(
+              etiquetaItbisLineas(
+                estado.detalles.map(
+                  (d) => ((d['tasaImpuesto'] as num?) ?? 0).toDouble(),
+                ),
+              ),
+              formatRd(estado.itbis),
+              tamanoCuerpo,
+            ),
           if (estado.costoEnvio > 0)
             _filaResumen(
               'Envío / Delivery',
@@ -1309,7 +1317,7 @@ class _NuevaVentaBorradorPageState
     return Center(
       child: TextButton.icon(
         icon: const Icon(Icons.history, size: 18),
-        label: const Text('Ver Historial de Cotizaciones'),
+        label: const Text('Ver Historial de ventas'),
         onPressed: () => context.push('/ventas/cotizaciones/historial'),
         style: TextButton.styleFrom(foregroundColor: AppColors.primary),
       ),

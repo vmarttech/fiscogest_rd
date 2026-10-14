@@ -2,6 +2,10 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
+import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
+import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
+import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_repository_impl.dart';
 
 class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
   AjusteInventarioRepositoryImpl(this._db);
@@ -62,11 +66,36 @@ class AjusteInventarioRepositoryImpl implements AjusteInventarioRepository {
     await (_db.update(_db.productosTable)
           ..where((p) => p.id.equals(productoId)))
         .write(ProductosTableCompanion(stock: Value(nuevoStock)));
+
+    final deltaAjuste = tipo == 'entrada'
+        ? cantidad.toDouble()
+        : -cantidad.toDouble();
+    if (deltaAjuste.abs() > 0.0001) {
+      await registrarEnKardex(
+        Kardex(
+          productoId: productoId,
+          tipoMovimiento: deltaAjuste > 0
+              ? TipoMovimiento.entrada
+              : TipoMovimiento.salida,
+          cantidad: deltaAjuste.abs(),
+          saldoAnterior: stockActual.toDouble(),
+          saldoNuevo: nuevoStock.toDouble(),
+          costoUnitario: 0,
+          totalMovimiento: 0,
+          fechaMovimiento: DateTime.now(),
+          documentoReferencia: 'Ajuste inventario',
+          observacion: 'Ajuste de inventario',
+          usuarioId: 0,
+        ),
+      );
+    }
   }
 
   @override
   Future<void> registrarEnKardex(dynamic movimiento) async {
-    // Implementación de registro en kardex según estructura del proyecto
-    // Por ahora se mantiene como operación no-op para cumplir contrato
+    if (movimiento is! Kardex) return;
+    await KardexRepositoryImpl(
+      DriftKardexDatasource(_db),
+    ).registrarMovimiento(movimiento);
   }
 }

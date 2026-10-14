@@ -13,7 +13,8 @@ class FacturacionInicioPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final simple = ref
+    final simple =
+        ref
             .watch(configuracionControllerProvider)
             .valueOrNull
             ?.modoSimplificado ==
@@ -168,8 +169,9 @@ class FacturacionInicioPage extends ConsumerWidget {
 
                   Text(
                     'Operaciones',
-                    style:
-                        AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -265,8 +267,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                       _OpCard(
                         icon: Icons.note_alt_outlined,
                         title: 'Emitir NC',
-                        subtitle:
-                            'Emite una nota de crédito sobre una factura',
+                        subtitle: 'Emite una nota de crédito sobre una factura',
                         color: const Color(0xFF6366F1),
                         onTap: () => context.push('/sales/emitir-nc'),
                       ),
@@ -282,8 +283,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () =>
-                            context.push('/sales/secuencias-ncf'),
+                        onPressed: () => context.push('/sales/secuencias-ncf'),
                         child: Text(
                           'Secuencias NCF →',
                           style: AppTypography.labelMedium.copyWith(
@@ -302,111 +302,107 @@ class FacturacionInicioPage extends ConsumerWidget {
                       ),
                   ],
 
-                  if (!simple) ...[
-                    const SizedBox(height: 24),
-                    if (desktop)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _ListaPanel(
-                              title: 'Últimos comprobantes',
-                              footerLabel: 'Ver historial completo →',
-                              onFooter: () =>
-                                  context.push('/sales/historial'),
-                              children: const [
-                                _ListaItem(
-                                  nombre: 'Factura B01',
-                                  detalle:
-                                      'Consulta el historial para el detalle',
-                                  valor: '—',
-                                  chip: 'Factura',
-                                  chipColor: AppColors.primary,
-                                ),
-                                _ListaItem(
-                                  nombre: 'Nota de crédito',
-                                  detalle: 'Vinculada a factura',
-                                  valor: '—',
-                                  chip: 'NC',
-                                  chipColor: Color(0xFF6366F1),
-                                ),
-                                _ListaItem(
-                                  nombre: 'Comprobante fiscal',
-                                  detalle: 'NCF e impacto en inventario',
-                                  valor: '—',
-                                  chip: 'NCF',
-                                  chipColor: AppColors.info,
-                                ),
-                              ],
-                            ),
+                  if (desktop)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _ListaPanel(
+                            title: 'Últimos comprobantes',
+                            footerLabel: 'Ver historial completo →',
+                            onFooter: () => context.push('/sales/historial'),
+                            children: const [
+                              _ListaItem(
+                                nombre: 'Factura B01',
+                                detalle:
+                                    'Consulta el historial para el detalle',
+                                valor: '—',
+                                chip: 'Factura',
+                                chipColor: AppColors.primary,
+                              ),
+                              _ListaItem(
+                                nombre: 'Nota de crédito',
+                                detalle: 'Vinculada a factura',
+                                valor: '—',
+                                chip: 'NC',
+                                chipColor: Color(0xFF6366F1),
+                              ),
+                              _ListaItem(
+                                nombre: 'Comprobante fiscal',
+                                detalle: 'NCF e impacto en inventario',
+                                valor: '—',
+                                chip: 'NCF',
+                                chipColor: AppColors.info,
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: _ListaPanel(
-                              title: 'Estado de secuencias',
-                              footerLabel: 'Gestionar secuencias NCF →',
-                              onFooter: () =>
-                                  context.push('/sales/secuencias-ncf'),
-                              children: const [
-                                _ListaItem(
-                                  nombre: 'B01 · Crédito fiscal',
-                                  detalle: 'Rango autorizado vs usado',
-                                  valor: '—',
-                                  chip: 'B01',
-                                  chipColor: AppColors.success,
-                                ),
-                                _ListaItem(
-                                  nombre: 'B02 · Consumidor final',
-                                  detalle: 'Rango autorizado vs usado',
-                                  valor: '—',
-                                  chip: 'B02',
-                                  chipColor: AppColors.info,
-                                ),
-                                _ListaItem(
-                                  nombre: 'B04 · Nota de crédito',
-                                  detalle: 'Rango autorizado vs usado',
-                                  valor: '—',
-                                  chip: 'B04',
-                                  chipColor: Color(0xFF7C3AED),
-                                ),
-                              ],
-                            ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: _ListaPanel(
+                            title: 'Estado de secuencias',
+                            footerLabel: 'Gestionar secuencias NCF →',
+                            onFooter: () =>
+                                context.push('/sales/secuencias-ncf'),
+                            children: const [
+                              _ListaItem(
+                                nombre: 'B01 · Crédito fiscal',
+                                detalle: 'Rango autorizado vs usado',
+                                valor: '—',
+                                chip: 'B01',
+                                chipColor: AppColors.success,
+                              ),
+                              _ListaItem(
+                                nombre: 'B02 · Consumidor final',
+                                detalle: 'Rango autorizado vs usado',
+                                valor: '—',
+                                chip: 'B02',
+                                chipColor: AppColors.info,
+                              ),
+                              _ListaItem(
+                                nombre: 'B04 · Nota de crédito',
+                                detalle: 'Rango autorizado vs usado',
+                                valor: '—',
+                                chip: 'B04',
+                                chipColor: Color(0xFF7C3AED),
+                              ),
+                            ],
                           ),
-                        ],
-                      )
-                    else ...[
-                      _ListaPanel(
-                        title: 'Últimos comprobantes',
-                        footerLabel: 'Ver historial completo →',
-                        onFooter: () => context.push('/sales/historial'),
-                        children: const [
-                          _ListaItem(
-                            nombre: 'Historial de facturas y NC',
-                            detalle: 'Consulta comprobantes emitidos',
-                            valor: '—',
-                            chip: 'Ver',
-                            chipColor: AppColors.primary,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _ListaPanel(
-                        title: 'Estado de secuencias',
-                        footerLabel: 'Gestionar secuencias NCF →',
-                        onFooter: () =>
-                            context.push('/sales/secuencias-ncf'),
-                        children: const [
-                          _ListaItem(
-                            nombre: 'Secuencias NCF',
-                            detalle: 'B01 · B02 · B04',
-                            valor: '—',
-                            chip: 'NCF',
-                            chipColor: Color(0xFF7C3AED),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    )
+                  else ...[
+                    _ListaPanel(
+                      title: 'Últimos comprobantes',
+                      footerLabel: 'Ver historial completo →',
+                      onFooter: () => context.push('/sales/historial'),
+                      children: const [
+                        _ListaItem(
+                          nombre: 'Historial de facturas y NC',
+                          detalle: 'Consulta comprobantes emitidos',
+                          valor: '—',
+                          chip: 'Ver',
+                          chipColor: AppColors.primary,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _ListaPanel(
+                      title: 'Estado de secuencias',
+                      footerLabel: 'Gestionar secuencias NCF →',
+                      onFooter: () => context.push('/sales/secuencias-ncf'),
+                      children: const [
+                        _ListaItem(
+                          nombre: 'Secuencias NCF',
+                          detalle: 'B01 · B02 · B04',
+                          valor: '—',
+                          chip: 'NCF',
+                          chipColor: Color(0xFF7C3AED),
+                        ),
+                      ],
+                    ),
                   ],
+                  if (!simple) ...[const SizedBox(height: 24)],
                 ],
               ),
             ),
@@ -466,10 +462,11 @@ class _BannerFacturacion extends StatelessWidget {
               children: [
                 Text(
                   simple ? 'Ventas / Comprobantes' : 'Facturación y NC',
-                  style: (mobile ? AppTypography.h4 : AppTypography.h3).copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: (mobile ? AppTypography.h4 : AppTypography.h3)
+                      .copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -662,8 +659,9 @@ class _ListaPanel extends StatelessWidget {
         children: [
           Text(
             title,
-            style:
-                AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w800),
+            style: AppTypography.labelLarge.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 8),
           ...children,

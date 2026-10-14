@@ -24,6 +24,7 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_action_bar.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
   const NuevoProductoPage({super.key, this.producto});
@@ -39,6 +40,8 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
   final _formKey = GlobalKey<FormState>();
   final _nombreCtrl = TextEditingController();
   final _skuCtrl = TextEditingController();
+  bool _skuAutomatico = true;
+  bool _actualizandoSkuAutomaticamente = false;
   final _stockCtrl = TextEditingController(text: '0');
   final _stockMinCtrl = TextEditingController(text: '0');
 
@@ -72,7 +75,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     }).toList();
   }
 
-
   /// Si [id] no está en [opciones], añade un ítem placeholder para que el dropdown lo muestre.
   List<DropdownMenuItem<int>> _itemsConSeleccion({
     required List<dynamic> opciones,
@@ -94,7 +96,10 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         0,
         DropdownMenuItem(
           value: seleccionado,
-          child: Text('#$seleccionado (no listada)', style: AppTypography.bodyMedium),
+          child: Text(
+            '#$seleccionado (no listada)',
+            style: AppTypography.bodyMedium,
+          ),
         ),
       );
     }
@@ -123,7 +128,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       _productoEditar = args;
       _esEdicion = true;
       _cargarDatosProducto(args);
+      _skuAutomatico = false;
     }
+    _skuCtrl.addListener(_alCambiarSkuManualmente);
   }
 
   void _cargarDatosProducto(Producto p) {
@@ -144,7 +151,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     _catSel = p.categoriaId > 0 ? p.categoriaId : null;
     _marcaSel = p.marcaId > 0 ? p.marcaId : null;
     _unidadSel = p.unidadMedidaId > 0 ? p.unidadMedidaId : null;
-    debugPrint('EDIT producto id=${p.id} cat=${p.categoriaId} marca=${p.marcaId} uni=${p.unidadMedidaId}');
+    debugPrint(
+      'EDIT producto id=${p.id} cat=${p.categoriaId} marca=${p.marcaId} uni=${p.unidadMedidaId}',
+    );
     _impSel = p.impuestoId;
     _activo = p.activo;
     _precioManual = false;
@@ -360,6 +369,71 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     );
   }
 
+  void _alCambiarSkuManualmente() {
+    if (!_actualizandoSkuAutomaticamente) {
+      _skuAutomatico = false;
+    }
+  }
+
+  void _actualizarSkuAutomatico() {
+    if (!_skuAutomatico || _catSel == null) return;
+
+    final categorias = ref.read(categoriaControllerProvider).valueOrNull ?? [];
+    final productos = ref.read(productoControllerProvider).valueOrNull ?? [];
+
+    Categoria? categoria;
+    for (final c in categorias) {
+      if (c.id == _catSel) {
+        categoria = c;
+        break;
+      }
+    }
+    if (categoria == null) return;
+
+    // Si la categoría no tiene código, buscar el de su categoría padre.
+    var prefijo = categoria.codigo.trim().toUpperCase();
+    var padreId = categoria.padreId;
+    var intentos = 0;
+
+    while (prefijo.isEmpty && padreId != null && intentos < 20) {
+      Categoria? padre;
+      for (final c in categorias) {
+        if (c.id == padreId) {
+          padre = c;
+          break;
+        }
+      }
+      if (padre == null) break;
+      prefijo = padre.codigo.trim().toUpperCase();
+      padreId = padre.padreId;
+      intentos++;
+    }
+
+    // Respaldo si ninguna categoría de la jerarquía tiene código.
+    if (prefijo.isEmpty) prefijo = 'SKU';
+
+    // El siguiente número se calcula con los códigos ya utilizados.
+    final patron = RegExp('^${RegExp.escape(prefijo)}-(\\d+)\$');
+    var mayor = 0;
+
+    for (final producto in productos) {
+      final coincidencia = patron.firstMatch(producto.codigo.trim());
+      if (coincidencia != null) {
+        final numero = int.tryParse(coincidencia.group(1) ?? '');
+        if (numero != null && numero > mayor) mayor = numero;
+      }
+    }
+
+    final sugerido = '$prefijo-${(mayor + 1).toString().padLeft(4, '0')}';
+    _actualizandoSkuAutomaticamente = true;
+    _skuCtrl.value = _skuCtrl.value.copyWith(
+      text: sugerido,
+      selection: TextSelection.collapsed(offset: sugerido.length),
+      composing: TextRange.empty,
+    );
+    _actualizandoSkuAutomaticamente = false;
+  }
+
   void _guardarProducto() {
     if (!_formKey.currentState!.validate()) return;
     final categorias = ref.read(categoriaControllerProvider).valueOrNull ?? [];
@@ -432,9 +506,33 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       return;
     }
 
+    if (_skuCtrl.text.trim().isEmpty) {
+      _skuAutomatico = true;
+      _actualizarSkuAutomatico();
+    }
+
     final sku = _skuCtrl.text.trim().isEmpty
         ? 'SKU-${DateTime.now().millisecondsSinceEpoch}'
         : _skuCtrl.text.trim();
+
+    // Evitar códigos repetidos entre los productos cargados.
+    final productosActuales =
+        ref.read(productoControllerProvider).valueOrNull ?? [];
+    final skuDuplicado = productosActuales.any(
+      (p) =>
+          p.codigo.trim().toLowerCase() == sku.toLowerCase() &&
+          p.id != _productoEditar?.id,
+    );
+
+    if (skuDuplicado) {
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('Ese SKU ya está asignado a otro producto.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
 
     if (_esEdicion && _productoEditar?.id != null) {
       final actualizado = _productoEditar!.copyWith(
@@ -491,7 +589,6 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       if (context.canPop()) context.pop();
     });
   }
-
 
   Widget _seccionCard({
     required String titulo,
@@ -551,422 +648,475 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                    _seccionCard(
-                      titulo: 'Información General',
-                      icono: Icons.info_outline,
-                      children: [
-                    AppTextField(
-                      label: 'Nombre del Producto',
-                      hint: 'Nombre comercial del producto',
-                      controller: _nombreCtrl,
-                      prefixIcon: Icons.shopping_bag_outlined,
-                    ),
-                    AppLayout.vM,
-                    ResponsiveRow(
-                      child1: AppTextField(
-                        label: 'SKU / Código de Barra',
-                        hint: 'Código único del producto',
-                        controller: _skuCtrl,
-                        prefixIcon: Icons.qr_code,
-                      ),
-                      child2: cats.when(
-                        data: (lista) {
-                          final opciones = _unicosPorId(lista, (c) => c.id);
-                          final items = _itemsConSeleccion(
-                            opciones: opciones,
-                            idOf: (c) => c.id as int?,
-                            nombreOf: (c) => (c as dynamic).nombre as String,
-                            seleccionado: _catSel,
-                          );
-                          return _campoConCreacionRapida(
-                            tooltip: 'Crear categoría',
-                            onCrear: _crearCategoriaRapida,
-                            campo: AppDropdown<int>(
-                              key: ValueKey('cat_${_catSel}_${items.length}'),
-                              label: 'Categoría',
-                              hint: 'Seleccione categoría',
-                              value: _catSel != null &&
-                                      items.any((i) => i.value == _catSel)
-                                  ? _catSel
-                                  : null,
-                              items: items,
-                              onChanged: (v) => setState(() => _catSel = v),
-                            ),
-                          );
-                        },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
-                        error: (e, _) => Text(
-                          'Error: $e',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.error,
+                      _seccionCard(
+                        titulo: 'Información General',
+                        icono: Icons.info_outline,
+                        children: [
+                          AppTextField(
+                            label: 'Nombre del Producto',
+                            hint: 'Nombre comercial del producto',
+                            controller: _nombreCtrl,
+                            prefixIcon: Icons.shopping_bag_outlined,
                           ),
-                        ),
-                      ),
-                    ),
-                    AppLayout.vM,
-                    ResponsiveRow(
-                      child1: marcas.when(
-                        data: (lista) {
-                          final opciones = _unicosPorId(lista, (m) => m.id);
-                          final items = _itemsConSeleccion(
-                            opciones: opciones,
-                            idOf: (m) => m.id as int?,
-                            nombreOf: (m) => (m as dynamic).nombre as String,
-                            seleccionado: _marcaSel,
-                          );
-                          return _campoConCreacionRapida(
-                            tooltip: 'Crear marca',
-                            onCrear: _crearMarcaRapida,
-                            campo: AppDropdown<int>(
-                              key: ValueKey('marca_${_marcaSel}_${items.length}'),
-                              label: 'Marca',
-                              hint: 'Seleccione marca',
-                              value: _marcaSel != null &&
-                                      items.any((i) => i.value == _marcaSel)
-                                  ? _marcaSel
-                                  : null,
-                              items: items,
-                              onChanged: (v) => setState(() => _marcaSel = v),
+                          AppLayout.vM,
+                          ResponsiveRow(
+                            child1: AppTextField(
+                              label: 'SKU / Código de Barra',
+                              hint: 'Código único del producto',
+                              controller: _skuCtrl,
+                              prefixIcon: Icons.qr_code,
                             ),
-                          );
-                        },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
-                        error: (e, _) => Text(
-                          'Error: $e',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.error,
-                          ),
-                        ),
-                      ),
-                      child2: unids.when(
-                        data: (lista) {
-                          final opciones = _unicosPorId(lista, (u) => u.id);
-                          final items = _itemsConSeleccion(
-                            opciones: opciones,
-                            idOf: (u) => u.id as int?,
-                            nombreOf: (u) => (u as dynamic).nombre as String,
-                            seleccionado: _unidadSel,
-                          );
-                          return _campoConCreacionRapida(
-                            tooltip: 'Crear unidad',
-                            onCrear: _crearUnidadRapida,
-                            campo: AppDropdown<int>(
-                              key: ValueKey('uni_${_unidadSel}_${items.length}'),
-                              label: 'Unidad de Medida',
-                              hint: 'Seleccione unidad',
-                              value: _unidadSel != null &&
-                                      items.any((i) => i.value == _unidadSel)
-                                  ? _unidadSel
-                                  : null,
-                              items: items,
-                              onChanged: (v) => setState(() => _unidadSel = v),
-                            ),
-                          );
-                        },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
-                        error: (e, _) => Text(
-                          'Error: $e',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.error,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    imps.when(
-                      data: (lista) {
-                        final activos = _unicosPorId(
-                          lista.where((i) => i.activo).toList(),
-                          (i) => i.id,
-                        );
-                        return AppDropdown<int?>(
-                          key: ValueKey('imp_${_impSel}_${activos.length}'),
-                          label: 'ITBIS / impuesto',
-                          hint: 'Automático (categoría o default)',
-                          value:
-                              _impSel == null ||
-                                  activos
-                                          .where((i) => i.id == _impSel)
-                                          .length ==
-                                      1
-                              ? _impSel
-                              : null,
-                          items: [
-                            const DropdownMenuItem<int?>(
-                              value: null,
-                              child: Text('Automático (categoría / default)'),
-                            ),
-                            ...activos.map(
-                              (i) => DropdownMenuItem<int?>(
-                                value: i.id,
-                                child: Text(
-                                  '${i.nombre} (${i.porcentaje.toStringAsFixed(i.porcentaje == i.porcentaje.roundToDouble() ? 0 : 2)}%)',
+                            child2: cats.when(
+                              data: (lista) {
+                                final opciones = _unicosPorId(
+                                  lista,
+                                  (c) => c.id,
+                                );
+                                final items = _itemsConSeleccion(
+                                  opciones: opciones,
+                                  idOf: (c) => c.id as int?,
+                                  nombreOf: (c) =>
+                                      (c as dynamic).nombre as String,
+                                  seleccionado: _catSel,
+                                );
+                                return _campoConCreacionRapida(
+                                  tooltip: 'Crear categoría',
+                                  onCrear: _crearCategoriaRapida,
+                                  campo: AppDropdown<int>(
+                                    key: ValueKey(
+                                      'cat_${_catSel}_${items.length}',
+                                    ),
+                                    label: 'Categoría',
+                                    hint: 'Seleccione categoría',
+                                    value:
+                                        _catSel != null &&
+                                            items.any((i) => i.value == _catSel)
+                                        ? _catSel
+                                        : null,
+                                    items: items,
+                                    onChanged: (v) {
+                                      setState(() {
+                                        _catSel = v;
+                                        _actualizarSkuAutomatico();
+                                      });
+                                    },
+                                  ),
+                                );
+                              },
+                              loading: () => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              error: (e, _) => Text(
+                                'Error: $e',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.error,
                                 ),
                               ),
                             ),
-                          ],
-                          onChanged: (v) => setState(() => _impSel = v),
-                        );
-                      },
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Text('Error impuestos: $e'),
-                    ),
-                      ],
-                    ),
-                    _seccionCard(
-                      titulo: 'Costos y Precios',
-                      icono: Icons.attach_money,
-                      children: [
-                    ResponsiveRow(
-                      child1: AppTextField(
-                        label: 'Costo de Compra',
-                        controller: _precioCompraCtrl,
-                        enabled: !_costesSoloLectura,
-                        prefixIcon: Icons.shopping_cart,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
                           ),
-                        ],
-                        onChanged: (_) =>
-                            setState(() => _recalcularPrecioVenta()),
-                      ),
-                      child2: AppTextField(
-                        label: 'Gastos Asociados',
-                        controller: _gastosAsocCtrl,
-                        enabled: !_costesSoloLectura,
-                        prefixIcon: Icons.receipt_long,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
+                          AppLayout.vM,
+                          ResponsiveRow(
+                            child1: marcas.when(
+                              data: (lista) {
+                                final opciones = _unicosPorId(
+                                  lista,
+                                  (m) => m.id,
+                                );
+                                final items = _itemsConSeleccion(
+                                  opciones: opciones,
+                                  idOf: (m) => m.id as int?,
+                                  nombreOf: (m) =>
+                                      (m as dynamic).nombre as String,
+                                  seleccionado: _marcaSel,
+                                );
+                                return _campoConCreacionRapida(
+                                  tooltip: 'Crear marca',
+                                  onCrear: _crearMarcaRapida,
+                                  campo: AppDropdown<int>(
+                                    key: ValueKey(
+                                      'marca_${_marcaSel}_${items.length}',
+                                    ),
+                                    label: 'Marca',
+                                    hint: 'Seleccione marca',
+                                    value:
+                                        _marcaSel != null &&
+                                            items.any(
+                                              (i) => i.value == _marcaSel,
+                                            )
+                                        ? _marcaSel
+                                        : null,
+                                    items: items,
+                                    onChanged: (v) =>
+                                        setState(() => _marcaSel = v),
+                                  ),
+                                );
+                              },
+                              loading: () => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              error: (e, _) => Text(
+                                'Error: $e',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.error,
+                                ),
+                              ),
+                            ),
+                            child2: unids.when(
+                              data: (lista) {
+                                final opciones = _unicosPorId(
+                                  lista,
+                                  (u) => u.id,
+                                );
+                                final items = _itemsConSeleccion(
+                                  opciones: opciones,
+                                  idOf: (u) => u.id as int?,
+                                  nombreOf: (u) =>
+                                      (u as dynamic).nombre as String,
+                                  seleccionado: _unidadSel,
+                                );
+                                return _campoConCreacionRapida(
+                                  tooltip: 'Crear unidad',
+                                  onCrear: _crearUnidadRapida,
+                                  campo: AppDropdown<int>(
+                                    key: ValueKey(
+                                      'uni_${_unidadSel}_${items.length}',
+                                    ),
+                                    label: 'Unidad de Medida',
+                                    hint: 'Seleccione unidad',
+                                    value:
+                                        _unidadSel != null &&
+                                            items.any(
+                                              (i) => i.value == _unidadSel,
+                                            )
+                                        ? _unidadSel
+                                        : null,
+                                    items: items,
+                                    onChanged: (v) =>
+                                        setState(() => _unidadSel = v),
+                                  ),
+                                );
+                              },
+                              loading: () => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              error: (e, _) => Text(
+                                'Error: $e',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.error,
+                                ),
+                              ),
+                            ),
                           ),
+                          const SizedBox(height: 12),
+                          if (!(ref
+                                  .watch(configuracionControllerProvider)
+                                  .valueOrNull
+                                  ?.modoSimplificado ==
+                              true))
+                            imps.when(
+                              data: (lista) {
+                                final activos = _unicosPorId(
+                                  lista.where((i) => i.activo).toList(),
+                                  (i) => i.id,
+                                );
+                                return AppDropdown<int?>(
+                                  key: ValueKey(
+                                    'imp_${_impSel}_${activos.length}',
+                                  ),
+                                  label: 'ITBIS / impuesto',
+                                  hint: 'Automático (categoría o default)',
+                                  value:
+                                      _impSel == null ||
+                                          activos
+                                                  .where((i) => i.id == _impSel)
+                                                  .length ==
+                                              1
+                                      ? _impSel
+                                      : null,
+                                  items: [
+                                    const DropdownMenuItem<int?>(
+                                      value: null,
+                                      child: Text(
+                                        'Automático (categoría / default)',
+                                      ),
+                                    ),
+                                    ...activos.map(
+                                      (i) => DropdownMenuItem<int?>(
+                                        value: i.id,
+                                        child: Text(
+                                          '${i.nombre} (${i.porcentaje.toStringAsFixed(i.porcentaje == i.porcentaje.roundToDouble() ? 0 : 2)}%)',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  onChanged: (v) => setState(() => _impSel = v),
+                                );
+                              },
+                              loading: () => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              error: (e, _) => Text('Error impuestos: $e'),
+                            ),
                         ],
-                        onChanged: (_) =>
-                            setState(() => _recalcularPrecioVenta()),
                       ),
-                    ),
-                    AppLayout.vM,
+                      _seccionCard(
+                        titulo: 'Costos y Precios',
+                        icono: Icons.attach_money,
+                        children: [
+                          ResponsiveRow(
+                            child1: AppTextField(
+                              label: 'Costo de Compra',
+                              controller: _precioCompraCtrl,
+                              enabled: !_costesSoloLectura,
+                              prefixIcon: Icons.shopping_cart,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                              onChanged: (_) =>
+                                  setState(() => _recalcularPrecioVenta()),
+                            ),
+                            child2: AppTextField(
+                              label: 'Gastos Asociados',
+                              controller: _gastosAsocCtrl,
+                              enabled: !_costesSoloLectura,
+                              prefixIcon: Icons.receipt_long,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                              onChanged: (_) =>
+                                  setState(() => _recalcularPrecioVenta()),
+                            ),
+                          ),
+                          AppLayout.vM,
 
-                    // Costo Real calculado
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(6),
+                          // Costo Real calculado
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Costo Real Total:',
+                                  style: AppTypography.labelMedium.copyWith(
+                                    color: Colors.blue.shade800,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  formatRd(costoReal),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '(Compra + Gastos = Base para margen)',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: Colors.blue.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          AppLayout.vM,
+
+                          ResponsiveRow(
+                            child1: AppTextField(
+                              label: 'Margen de Ganancia %',
+                              controller: _margenCtrl,
+                              prefixIcon: Icons.percent,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                              onChanged: (_) =>
+                                  setState(() => _recalcularPrecioVenta()),
+                            ),
+                            child2: AppTextField(
+                              label: 'Precio de Venta',
+                              controller: _precioVentaCtrl,
+                              prefixIcon: Icons.attach_money,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                              onChanged: (_) =>
+                                  _marcarPrecioManual(), // Si edita, dejar de recalcular
+                            ),
+                          ),
+                          AppLayout.vS,
+                          if (!_precioManual && costoReal > 0)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                '💡 Precio sugerido calculado automáticamente',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: Colors.green.shade700,
+                                ),
+                              ),
+                            ),
+                          if (_precioManual)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                '✏️ Precio establecido manualmente — ya no se recalcula',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: Colors.orange.shade700,
+                                ),
+                              ),
+                            ),
+                          AppLayout.vS,
+
+                          ResponsiveRow(
+                            child1: AppTextField(
+                              label: 'Precio Mínimo',
+                              controller: _precioMinCtrl,
+                              prefixIcon: Icons.trending_down,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                            ),
+                            child2: AppTextField(
+                              label: 'Precio Mayorista',
+                              controller: _precioMayCtrl,
+                              prefixIcon: Icons.people,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          AppLayout.vM,
+
+                          AppTextField(
+                            label: 'Precio Especial / Oferta',
+                            controller: _precioEspCtrl,
+                            prefixIcon: Icons.local_offer,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d+\.?\d{0,2}'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      _seccionCard(
+                        titulo: 'Inventario',
+                        icono: Icons.inventory_2_outlined,
+                        children: [
+                          ResponsiveRow(
+                            child1: AppTextField(
+                              label: 'Existencia Actual',
+                              controller: _stockCtrl,
+                              enabled: !_costesSoloLectura,
+                              prefixIcon: Icons.format_list_numbered,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                            ),
+                            child2: AppTextField(
+                              label: 'Stock Mínimo (Alerta)',
+                              controller: _stockMinCtrl,
+                              prefixIcon: Icons.warning_amber_outlined,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      _seccionCard(
+                        titulo: 'Estado',
+                        icono: Icons.toggle_on_outlined,
                         children: [
                           Text(
-                            'Costo Real Total:',
-                            style: AppTypography.labelMedium.copyWith(
-                              color: Colors.blue.shade800,
+                            'Producto Activo para la Venta',
+                            style: AppTypography.labelLarge.copyWith(
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            formatRd(costoReal),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '(Compra + Gastos = Base para margen)',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: Colors.blue.shade700,
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Switch(
+                              value: _activo,
+                              activeThumbColor: AppColors.primary,
+                              onChanged: (v) => setState(() => _activo = v),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    AppLayout.vM,
+                      AppLayout.vL,
 
-                    ResponsiveRow(
-                      child1: AppTextField(
-                        label: 'Margen de Ganancia %',
-                        controller: _margenCtrl,
-                        prefixIcon: Icons.percent,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
+                      AppActionBar(
+                        actions: [
+                          AppButton(
+                            text: 'Cancelar',
+                            icon: Icons.close,
+                            onPressed: () => context.pop(),
                           ),
-                        ],
-                        onChanged: (_) =>
-                            setState(() => _recalcularPrecioVenta()),
-                      ),
-                      child2: AppTextField(
-                        label: 'Precio de Venta',
-                        controller: _precioVentaCtrl,
-                        prefixIcon: Icons.attach_money,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
-                          ),
-                        ],
-                        onChanged: (_) =>
-                            _marcarPrecioManual(), // Si edita, dejar de recalcular
-                      ),
-                    ),
-                    AppLayout.vS,
-                    if (!_precioManual && costoReal > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          '💡 Precio sugerido calculado automáticamente',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: Colors.green.shade700,
-                          ),
-                        ),
-                      ),
-                    if (_precioManual)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          '✏️ Precio establecido manualmente — ya no se recalcula',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: Colors.orange.shade700,
-                          ),
-                        ),
-                      ),
-                    AppLayout.vS,
-
-                    ResponsiveRow(
-                      child1: AppTextField(
-                        label: 'Precio Mínimo',
-                        controller: _precioMinCtrl,
-                        prefixIcon: Icons.trending_down,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
+                          AppButton(
+                            text: _esEdicion ? 'Actualizar' : 'Guardar',
+                            icon: Icons.check_circle_outline,
+                            onPressed: _guardarProducto,
                           ),
                         ],
                       ),
-                      child2: AppTextField(
-                        label: 'Precio Mayorista',
-                        controller: _precioMayCtrl,
-                        prefixIcon: Icons.people,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    AppLayout.vM,
-
-                    AppTextField(
-                      label: 'Precio Especial / Oferta',
-                      controller: _precioEspCtrl,
-                      prefixIcon: Icons.local_offer,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,2}'),
-                        ),
-                      ],
-                    ),
-                      ],
-                    ),
-                    _seccionCard(
-                      titulo: 'Inventario',
-                      icono: Icons.inventory_2_outlined,
-                      children: [
-                    ResponsiveRow(
-                      child1: AppTextField(
-                        label: 'Existencia Actual',
-                        controller: _stockCtrl,
-                        enabled: !_costesSoloLectura,
-                        prefixIcon: Icons.format_list_numbered,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
-                          ),
-                        ],
-                      ),
-                      child2: AppTextField(
-                        label: 'Stock Mínimo (Alerta)',
-                        controller: _stockMinCtrl,
-                        prefixIcon: Icons.warning_amber_outlined,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
-                          ),
-                        ],
-                      ),
-                    ),
-                      ],
-                    ),
-                    _seccionCard(
-                      titulo: 'Estado',
-                      icono: Icons.toggle_on_outlined,
-                      children: [
-                        Text(
-                          'Producto Activo para la Venta',
-                          style: AppTypography.labelLarge.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Switch(
-                            value: _activo,
-                            activeThumbColor: AppColors.primary,
-                            onChanged: (v) => setState(() => _activo = v),
-                          ),
-                        ),
-                      ],
-                    ),
-                    AppLayout.vL,
-
-                    AppActionBar(
-                      actions: [
-                        AppButton(
-                          text: 'Cancelar',
-                          icon: Icons.close,
-                          onPressed: () => context.pop(),
-                        ),
-                        AppButton(
-                          text: _esEdicion ? 'Actualizar' : 'Guardar',
-                          icon: Icons.check_circle_outline,
-                          onPressed: _guardarProducto,
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
                   );
                 },
               ),

@@ -65,6 +65,41 @@ class DgiiEspejoLocal {
         _tag(xml, 'eNCFModificado').isEmpty) {
       return 'La nota requiere el e-NCF que modifica';
     }
+    if ((tipo == '41' || tipo == '43') &&
+        _tag(xml, 'TipoIngresos').isNotEmpty) {
+      return 'El tipo $tipo no lleva TipoIngresos';
+    }
+    if (tipo == '34' &&
+        _tag(xml, 'IndicadorNotaCredito') != '0' &&
+        _tag(xml, 'IndicadorNotaCredito') != '1') {
+      return 'La nota de credito debe indicar si pasan de 30 dias (0 o 1)';
+    }
+    if (tipo == '43' && comprador.isNotEmpty) {
+      return 'El gasto menor no lleva RNC del comprador';
+    }
+    if (tipo == '44' && comprador.length != 9 && comprador.length != 11) {
+      return 'El regimen especial requiere RNC o cedula';
+    }
+    if (tipo == '32' &&
+        total >= 250000 &&
+        comprador.length != 9 &&
+        comprador.length != 11) {
+      return 'Desde 250000 el consumo requiere RNC o cedula';
+    }
+    if ((tipo == '33' || tipo == '34') &&
+        _tag(xml, 'FechaNCFModificado').isEmpty) {
+      return 'La nota no trae la fecha del e-NCF modificado';
+    }
+    if (tipo == '33' || tipo == '34') {
+      final codigoModificado = _tag(xml, 'CodigoModificacion');
+      if (codigoModificado.isEmpty) {
+        return 'La nota no trae el codigo de modificacion';
+      }
+      const codigosModificacion = {'1', '2', '3', '4', '5'};
+      if (!codigosModificacion.contains(codigoModificado)) {
+        return 'CodigoModificacion $codigoModificado no es valido';
+      }
+    }
     return null;
   }
 

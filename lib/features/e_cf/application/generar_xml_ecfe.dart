@@ -147,17 +147,11 @@ class GenerarXmlEcfe {
           );
         }
       }
-      // Reutilizar e-NCF formal si el documento ya lo tiene (reintento / regenerar).
-      late final String encfAsignado;
-      late final DateTime? vencSeq;
-      if (EcfeSecuenciaService.esEncfFormal(doc.encf)) {
-        encfAsignado = doc.encf!.trim().toUpperCase();
-        vencSeq = null;
-      } else {
-        final seq = await secuencias.siguiente(doc.tipoEcf);
-        encfAsignado = seq.encf;
-        vencSeq = seq.vencimiento;
-      }
+      // e-NCF: reutilizar si ya es formal. Si no, se asignará SOLO después de
+      // pasar validación XSD (evita quemar secuencia por error de estructura).
+      final yaTieneFormal = EcfeSecuenciaService.esEncfFormal(doc.encf);
+      final String? encfAsignado =
+          yaTieneFormal ? doc.encf!.trim().toUpperCase() : null;
       final fmt = DateFormat('dd-MM-yyyy');
       final fechaEmision = fmt.format(
         (doc.tipoEcf == TipoEcf.notaCredito ||
@@ -165,9 +159,9 @@ class GenerarXmlEcfe {
             ? doc.creadoEn
             : venta.fecha,
       );
-      final fechaVenc = vencSeq != null
-          ? fmt.format(vencSeq)
-          : fmt.format(DateTime(DateTime.now().year + 1, 12, 31));
+      // vencSeq solo se conoce después de consumir la secuencia (post-XSD).
+      // Aquí usamos un fallback seguro para el XML temporal de validación.
+      final fechaVenc = fmt.format(DateTime(DateTime.now().year + 1, 12, 31));
 
       final items = <EcfePayloadItem>[];
       // Líneas en 0 y la venta sí cobró ITBIS: documento viejo, una sola tasa.
@@ -258,13 +252,16 @@ class GenerarXmlEcfe {
         }
       }
       final totalXml = totalGuardado ?? venta.montoTotal;
+      // Placeholder mientras no tengamos e-NCF formal (se reemplaza tras XSD OK)
+      final encfParaBuild = encfAsignado ?? 'E${doc.tipoEcf.codigo}0000000000';
       final payload = EcfePayload(
         tipoEcfCodigo: doc.tipoEcf.codigo,
-        encf: encfAsignado,
+        encf: encfParaBuild,
         encfReferencia: doc.encfReferencia,
         fechaNcfModificado: fechaNcfModificado,
         codigoModificacion: codigoModificacionNota,
         indicadorNotaCredito: indicadorNota,
+        razonModificacion: _razonModificacion(codigoModificacionNota),
         fechaVencimientoSecuencia: fechaVenc,
         fechaLimitePago: venta.formaPago.toLowerCase().contains('cred')
             ? fmt.format(venta.vencimiento ?? venta.fecha)
@@ -306,17 +303,18 @@ class GenerarXmlEcfe {
         montoPago: totalXml,
       );
 
-      final xml = builder.construirDesdePayload(payload);
+      var xml = builder.construirDesdePayload(payload);
       final val = await EcfeXsdValidatorImpl(
         rutaXsd: rutaXsd,
         exigirXsd: exigirXsd,
       ).validar(xml);
 
       if (!val.ok) {
+        // No consumimos secuencia. Guardamos el XML de diagnóstico sin e-NCF formal.
         await repo.guardarXml(
           id: documentoId,
           xmlSinFirma: xml,
-          encf: encfAsignado,
+          encf: encfAsignado ?? '', // vacío si aún no se consumió secuencia
           estado: EstadoEcfInterno.validacionFallida,
           ultimoError: val.errores.join(' · '),
         );
@@ -334,10 +332,61 @@ class GenerarXmlEcfe {
         );
       }
 
+      // XSD OK → ahora sí consumimos la secuencia (si aún no tenía formal)
+      late final String encfFinal;
+      if (encfAsignado == null) {
+        final seq = await secuencias.siguiente(doc.tipoEcf);
+        encfFinal = seq.encf;
+        final venc = seq.vencimiento;
+        // Reconstruir el XML con el e-NCF real (el placeholder no se envió)
+        final payloadFinal = EcfePayload(
+          tipoEcfCodigo: payload.tipoEcfCodigo,
+          encf: encfFinal,
+          encfReferencia: payload.encfReferencia,
+          fechaNcfModificado: payload.fechaNcfModificado,
+          codigoModificacion: payload.codigoModificacion,
+          indicadorNotaCredito: payload.indicadorNotaCredito,
+          razonModificacion: payload.razonModificacion,
+          fechaVencimientoSecuencia: venc != null
+              ? fmt.format(venc)
+              : payload.fechaVencimientoSecuencia,
+          fechaLimitePago: payload.fechaLimitePago,
+          fechaEmision: payload.fechaEmision,
+          tipoIngresos: payload.tipoIngresos,
+          tipoPago: payload.tipoPago,
+          rncEmisor: payload.rncEmisor,
+          razonSocialEmisor: payload.razonSocialEmisor,
+          direccionEmisor: payload.direccionEmisor,
+          telefonoEmisor: payload.telefonoEmisor,
+          correoEmisor: payload.correoEmisor,
+          rncComprador: payload.rncComprador,
+          razonSocialComprador: payload.razonSocialComprador,
+          direccionComprador: payload.direccionComprador,
+          montoGravadoTotal: payload.montoGravadoTotal,
+          totalItbis: payload.totalItbis,
+          montoTotal: payload.montoTotal,
+          tasaItbis: payload.tasaItbis,
+          montoGravadoI1: payload.montoGravadoI1,
+          totalItbis1: payload.totalItbis1,
+          montoGravadoI2: payload.montoGravadoI2,
+          totalItbis2: payload.totalItbis2,
+          montoGravadoI3: payload.montoGravadoI3,
+          totalItbis3: payload.totalItbis3,
+          montoExento: payload.montoExento,
+          bandasItbis: payload.bandasItbis,
+          esRfce: payload.esRfce,
+          items: payload.items,
+          montoPago: payload.montoPago,
+        );
+        xml = builder.construirDesdePayload(payloadFinal);
+      } else {
+        encfFinal = encfAsignado;
+      }
+
       await repo.guardarXml(
         id: documentoId,
         xmlSinFirma: xml,
-        encf: encfAsignado,
+        encf: encfFinal,
         estado: EstadoEcfInterno.xmlListo,
         ultimoError: null,
       );
@@ -354,7 +403,7 @@ class GenerarXmlEcfe {
         detalle: 'Validación estructural OK',
       );
 
-      return GenerarXmlResultado(ok: true, xml: xml, encf: encfAsignado);
+      return GenerarXmlResultado(ok: true, xml: xml, encf: encfFinal);
     } catch (e) {
       try {
         await repo.actualizarEstado(
@@ -429,4 +478,21 @@ class GenerarXmlEcfe {
     if (coincidencias.isEmpty) return null;
     return double.tryParse(coincidencias.last.group(1)!.trim());
   }
+  String _razonModificacion(String codigo) {
+    switch (codigo) {
+      case '1':
+        return 'Anulacion total del comprobante';
+      case '2':
+        return 'Correccion de texto';
+      case '3':
+        return 'Correccion de montos / devolucion';
+      case '4':
+        return 'Reemplazo NCF de contingencia';
+      case '5':
+        return 'Referencia a Factura de Consumo';
+      default:
+        return 'Ajuste del comprobante';
+    }
+  }
+
 }

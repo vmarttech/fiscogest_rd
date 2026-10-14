@@ -173,216 +173,226 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1100),
         child: Padding(
-      padding: EdgeInsets.fromLTRB(
-        isMobile ? 16 : 24,
-        isMobile ? 12 : 20,
-        isMobile ? 16 : 24,
-        24,
-      ),
-      child: ListView(
-        children: [
-          // Buscador + Filtros
-          if (isMobile) ...[
-            AppTextField(
-              hint: 'Buscar por código, nombre...',
-              onChanged: (v) => setState(() => _filtroProductos = v),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _FilterChip(
-                    label: 'Todos',
-                    selected: _filtroEstado == 'todos',
-                    onTap: () => setState(() => _filtroEstado = 'todos'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'En Stock',
-                    selected: _filtroEstado == 'en_stock',
-                    color: AppColors.success,
-                    onTap: () => setState(() => _filtroEstado = 'en_stock'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Bajo',
-                    selected: _filtroEstado == 'bajo',
-                    color: AppColors.warning,
-                    onTap: () => setState(() => _filtroEstado = 'bajo'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Agotado',
-                    selected: _filtroEstado == 'agotado',
-                    color: AppColors.error,
-                    onTap: () => setState(() => _filtroEstado = 'agotado'),
-                  ),
-                ],
-              ),
-            ),
-          ] else
-            Align(
-              alignment: Alignment.centerRight,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.grey900.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+          padding: EdgeInsets.fromLTRB(
+            isMobile ? 16 : 24,
+            isMobile ? 12 : 20,
+            isMobile ? 16 : 24,
+            24,
+          ),
+          child: ListView(
+            children: [
+              // Buscador + Filtros
+              if (isMobile) ...[
+                AppTextField(
+                  hint: 'Buscar por código, nombre...',
+                  onChanged: (v) => setState(() => _filtroProductos = v),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 440,
-                      child: AppTextField(
-                        height: 48,
-                        prefixIcon: Icons.search_rounded,
-                        hint: 'Buscar por código o nombre...',
-                        onChanged: (v) =>
-                            setState(() => _filtroProductos = v),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 40,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      _FilterChip(
+                        label: 'Todos',
+                        selected: _filtroEstado == 'todos',
+                        onTap: () => setState(() => _filtroEstado = 'todos'),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    _FilterChip(
-                      label: 'Todos',
-                      selected: _filtroEstado == 'todos',
-                      onTap: () => setState(() => _filtroEstado = 'todos'),
-                    ),
-                    const SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'En Stock',
-                      selected: _filtroEstado == 'en_stock',
-                      color: AppColors.success,
-                      onTap: () => setState(() => _filtroEstado = 'en_stock'),
-                    ),
-                    const SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'Bajo',
-                      selected: _filtroEstado == 'bajo',
-                      color: AppColors.warning,
-                      onTap: () => setState(() => _filtroEstado = 'bajo'),
-                    ),
-                    const SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'Agotado',
-                      selected: _filtroEstado == 'agotado',
-                      color: AppColors.error,
-                      onTap: () => setState(() => _filtroEstado = 'agotado'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          SizedBox(height: isMobile ? 14 : 20),
-          
-            ref
-                .watch(productoControllerProvider)
-                .when(
-                  loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 40),
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  ),
-                  error: (e, _) => Padding(padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Text(
-                      'Error: $e',
-                      style: AppTypography.bodyMedium.copyWith(
+                      const SizedBox(width: 8),
+                      _FilterChip(
+                        label: 'En Stock',
+                        selected: _filtroEstado == 'en_stock',
+                        color: AppColors.success,
+                        onTap: () => setState(() => _filtroEstado = 'en_stock'),
+                      ),
+                      const SizedBox(width: 8),
+                      _FilterChip(
+                        label: 'Bajo',
+                        selected: _filtroEstado == 'bajo',
+                        color: AppColors.warning,
+                        onTap: () => setState(() => _filtroEstado = 'bajo'),
+                      ),
+                      const SizedBox(width: 8),
+                      _FilterChip(
+                        label: 'Agotado',
+                        selected: _filtroEstado == 'agotado',
                         color: AppColors.error,
+                        onTap: () => setState(() => _filtroEstado = 'agotado'),
                       ),
+                    ],
+                  ),
+                ),
+              ] else
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.grey900.withValues(alpha: 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 440,
+                          child: AppTextField(
+                            height: 48,
+                            prefixIcon: Icons.search_rounded,
+                            hint: 'Buscar por código o nombre...',
+                            onChanged: (v) =>
+                                setState(() => _filtroProductos = v),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        _FilterChip(
+                          label: 'Todos',
+                          selected: _filtroEstado == 'todos',
+                          onTap: () => setState(() => _filtroEstado = 'todos'),
+                        ),
+                        const SizedBox(width: 8),
+                        _FilterChip(
+                          label: 'En Stock',
+                          selected: _filtroEstado == 'en_stock',
+                          color: AppColors.success,
+                          onTap: () =>
+                              setState(() => _filtroEstado = 'en_stock'),
+                        ),
+                        const SizedBox(width: 8),
+                        _FilterChip(
+                          label: 'Bajo',
+                          selected: _filtroEstado == 'bajo',
+                          color: AppColors.warning,
+                          onTap: () => setState(() => _filtroEstado = 'bajo'),
+                        ),
+                        const SizedBox(width: 8),
+                        _FilterChip(
+                          label: 'Agotado',
+                          selected: _filtroEstado == 'agotado',
+                          color: AppColors.error,
+                          onTap: () =>
+                              setState(() => _filtroEstado = 'agotado'),
+                        ),
+                      ],
                     ),
                   ),
-                  data: (productos) {
-                    final filtrados = productos.where((p) {
-                      final matchTexto =
-                          p.codigo.toLowerCase().contains(
-                            _filtroProductos.toLowerCase(),
-                          ) ||
-                          p.nombre.toLowerCase().contains(
-                            _filtroProductos.toLowerCase(),
-                          );
-                      if (!matchTexto) return false;
-                      final stock = p.stock ?? 0;
-                      return switch (_filtroEstado) {
-                        'en_stock' => stock > (p.stockMinimo ?? 10),
-                        'bajo' => stock > 0 && stock <= (p.stockMinimo ?? 10),
-                        'agotado' => stock <= 0,
-                        _ => true,
-                      };
-                    }).toList();
+                ),
+              SizedBox(height: isMobile ? 14 : 20),
 
-                    if (filtrados.isEmpty) {
-                      return Padding(padding: const EdgeInsets.symmetric(vertical: 40),
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 60),
-                          child: Column(
-                            children: [
-                              const Icon(
-                                Icons.inventory_2_outlined,
-                                size: 48,
-                                color: AppColors.grey300,
-                              ),
+              ref
+                  .watch(productoControllerProvider)
+                  .when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    error: (e, _) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Text(
+                        'Error: $e',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                    data: (productos) {
+                      final filtrados = productos.where((p) {
+                        final matchTexto =
+                            p.codigo.toLowerCase().contains(
+                              _filtroProductos.toLowerCase(),
+                            ) ||
+                            p.nombre.toLowerCase().contains(
+                              _filtroProductos.toLowerCase(),
+                            );
+                        if (!matchTexto) return false;
+                        final stock = p.stock ?? 0;
+                        return switch (_filtroEstado) {
+                          'en_stock' => stock > (p.stockMinimo ?? 10),
+                          'bajo' => stock > 0 && stock <= (p.stockMinimo ?? 10),
+                          'agotado' => stock <= 0,
+                          _ => true,
+                        };
+                      }).toList();
+
+                      if (filtrados.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 40),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 60),
+                            child: Column(
+                              children: [
+                                const Icon(
+                                  Icons.inventory_2_outlined,
+                                  size: 48,
+                                  color: AppColors.grey300,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No se encontraron productos',
+                                  style: AppTypography.bodyLarge.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  isMobile
+                                      ? 'Presiona el botón + para registrar el primero'
+                                      : 'Usa "Nuevo Producto" en la barra superior para registrar el primero',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (isMobile) {
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: filtrados.length,
+                          separatorBuilder: (_, __) =>
                               const SizedBox(height: 12),
-                              Text(
-                                'No se encontraron productos',
-                                style: AppTypography.bodyLarge.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                isMobile
-                                    ? 'Presiona el botón + para registrar el primero'
-                                    : 'Usa "Nuevo Producto" en la barra superior para registrar el primero',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
+                          itemBuilder: (_, i) => _ProductoCardMobile(
+                            producto: filtrados[i],
+                            puedeVerCostos: puedeVerCostos,
+                            puedeEliminar: puedeEliminar,
+                            onEditar: () => _editarProducto(filtrados[i]),
+                            onEliminar: () => _confirmarEliminar(filtrados[i]),
+                          ),
+                        );
+                      }
+
+                      return Align(
+                        alignment: Alignment.topCenter,
+                        child: SizedBox(
+                          child: _buildTablaDesktop(
+                            filtrados,
+                            puedeVerCostos,
+                            puedeEliminar,
                           ),
                         ),
                       );
-                    }
-
-                    if (isMobile) {
-                      return ListView.separated(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), 
-                        padding: EdgeInsets.zero,
-                        itemCount: filtrados.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (_, i) => _ProductoCardMobile(
-                          producto: filtrados[i],
-                          puedeVerCostos: puedeVerCostos,
-                          puedeEliminar: puedeEliminar,
-                          onEditar: () => _editarProducto(filtrados[i]),
-                          onEliminar: () => _confirmarEliminar(filtrados[i]),
-                        ),
-                      );
-                    }
-
-                    return Align(
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        
-                        child: _buildTablaDesktop(
-                          filtrados,
-                          puedeVerCostos,
-                          puedeEliminar,
-                        ),
-                      ),
-                    );
-                  },
-                )
-          ,
-        ],
+                    },
+                  ),
+            ],
+          ),
+        ),
       ),
-    )));
+    );
   }
 
   Widget _buildTablaDesktop(
@@ -468,189 +478,189 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               ],
             ),
           ),
-          
-            ListView.separated(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), 
-              itemCount: productos.length,
-              separatorBuilder: (_, __) =>
-                  const Divider(height: 1, color: AppColors.border),
-              itemBuilder: (_, i) {
-                final p = productos[i];
-                final stock = p.stock ?? 0;
-                final minimo = p.stockMinimo ?? 10;
-                final indicadoresProducto = p.id == null
-                    ? null
-                    : indicadores?[p.id!];
-                final vendidos30Dias = indicadoresProducto?.vendidos30Dias ?? 0;
-                final compraPendiente =
-                    indicadoresProducto?.compraPendiente ?? 0;
-                var objetivoReposicion = vendidos30Dias + minimo;
-                if (objetivoReposicion < minimo) {
-                  objetivoReposicion = minimo;
-                }
-                if (p.stockMaximo != null &&
-                    p.stockMaximo! >= minimo &&
-                    objetivoReposicion > p.stockMaximo!) {
-                  objetivoReposicion = p.stockMaximo!;
-                }
-                final cantidadSugerida =
-                    (objetivoReposicion - stock - compraPendiente).clamp(
-                      0.0,
-                      double.infinity,
-                    );
-                final (statusText, statusColor) = _getStatus(stock, minimo);
-                return Material(
-                  color: i.isEven
-                      ? AppColors.white
-                      : AppColors.grey50.withValues(alpha: 0.55),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            p.nombre,
-                            style: AppTypography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: productos.length,
+            separatorBuilder: (_, __) =>
+                const Divider(height: 1, color: AppColors.border),
+            itemBuilder: (_, i) {
+              final p = productos[i];
+              final stock = p.stock ?? 0;
+              final minimo = p.stockMinimo ?? 10;
+              final indicadoresProducto = p.id == null
+                  ? null
+                  : indicadores?[p.id!];
+              final vendidos30Dias = indicadoresProducto?.vendidos30Dias ?? 0;
+              final compraPendiente = indicadoresProducto?.compraPendiente ?? 0;
+              var objetivoReposicion = vendidos30Dias + minimo;
+              if (objetivoReposicion < minimo) {
+                objetivoReposicion = minimo;
+              }
+              if (p.stockMaximo != null &&
+                  p.stockMaximo! >= minimo &&
+                  objetivoReposicion > p.stockMaximo!) {
+                objetivoReposicion = p.stockMaximo!;
+              }
+              final cantidadSugerida =
+                  (objetivoReposicion - stock - compraPendiente).clamp(
+                    0.0,
+                    double.infinity,
+                  );
+              final (statusText, statusColor) = _getStatus(stock, minimo);
+              return Material(
+                color: i.isEven
+                    ? AppColors.white
+                    : AppColors.grey50.withValues(alpha: 0.55),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          p.nombre,
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          p.codigo,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.grey700,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            p.codigo,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.grey700,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  stock.toStringAsFixed(
-                                    stock.truncateToDouble() == stock ? 0 : 2,
-                                  ),
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: statusColor,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              if (indicadores != null && cantidadSugerida > 0)
-                                Tooltip(
-                                  message:
-                                      'Sugerencia con ventas de 30 días y compras pendientes; respeta el stock máximo configurado.',
-                                  child: Text(
-                                    'Reponer ${cantidadSugerida.toStringAsFixed(cantidadSugerida.truncateToDouble() == cantidadSugerida ? 0 : 2)}',
-                                    style: AppTypography.labelSmall.copyWith(
-                                      color: AppColors.warning,
-                                      fontSize: 10,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Center(
-                            child: Container(
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
                                 color: statusColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                statusText,
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w600,
+                                stock.toStringAsFixed(
+                                  stock.truncateToDouble() == stock ? 0 : 2,
                                 ),
+                                style: AppTypography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: statusColor,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            if (indicadores != null && cantidadSugerida > 0)
+                              Tooltip(
+                                message:
+                                    'Sugerencia con ventas de 30 días y compras pendientes; respeta el stock máximo configurado.',
+                                child: Text(
+                                  'Reponer ${cantidadSugerida.toStringAsFixed(cantidadSugerida.truncateToDouble() == cantidadSugerida ? 0 : 2)}',
+                                  style: AppTypography.labelSmall.copyWith(
+                                    color: AppColors.warning,
+                                    fontSize: 10,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              statusText,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: statusColor,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                         ),
-                        if (puedeVerCostos) ...[
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              formatRd(p.precioCompra),
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.success,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textAlign: TextAlign.right,
+                      ),
+                      if (puedeVerCostos) ...[
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            formatRd(p.precioCompra),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.w700,
                             ),
+                            textAlign: TextAlign.right,
                           ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              formatRd(p.precioVenta),
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.primaryDark,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textAlign: TextAlign.right,
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            formatRd(p.precioVenta),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.primaryDark,
+                              fontWeight: FontWeight.w700,
                             ),
-                          ),
-                        ],
-                        SizedBox(
-                          width: 96,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                visualDensity: VisualDensity.compact,
-                                icon: const Icon(Icons.edit_outlined, size: 18),
-                                color: AppColors.primary,
-                                onPressed: () => _editarProducto(p),
-                                tooltip: 'Editar',
-                              ),
-                              if (puedeEliminar)
-                                IconButton(
-                                  visualDensity: VisualDensity.compact,
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    size: 18,
-                                  ),
-                                  color: AppColors.error,
-                                  onPressed: () => _confirmarEliminar(p),
-                                  tooltip: 'Eliminar',
-                                ),
-                            ],
+                            textAlign: TextAlign.right,
                           ),
                         ),
                       ],
-                    ),
+                      SizedBox(
+                        width: 96,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(Icons.edit_outlined, size: 18),
+                              color: AppColors.primary,
+                              onPressed: () => _editarProducto(p),
+                              tooltip: 'Editar',
+                            ),
+                            if (puedeEliminar)
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                ),
+                                color: AppColors.error,
+                                onPressed: () => _confirmarEliminar(p),
+                                tooltip: 'Eliminar',
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-            )
-          ,
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

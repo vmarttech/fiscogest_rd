@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
 
 class RegistrarAjustePage extends ConsumerStatefulWidget {
   const RegistrarAjustePage({super.key});
@@ -284,6 +285,21 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                                 final exito = await ref
                                     .read(ajusteInventarioProvider)
                                     .registrar(ajuste);
+                                setState(() {
+                                  final stockBase =
+                                      _productoSeleccionado?.stock ?? 0;
+                                  final cantAjuste = (cant).toDouble();
+                                  final tipoTxt = (_tipoSeleccionado)
+                                      .toString();
+                                  final stockNuevo = tipoTxt == 'entrada'
+                                      ? stockBase + cantAjuste
+                                      : stockBase - cantAjuste;
+                                  _productoSeleccionado = _productoSeleccionado
+                                      ?.copyWith(stock: stockNuevo);
+                                });
+                                ref.invalidate(productoControllerProvider);
+                                ref.invalidate(kardexHistorialCompletoProvider);
+                                ref.invalidate(kardexPorProductoProvider);
                                 if (!exito || !context.mounted) return;
                                 FiscoGestNotifications.show(
                                   const SnackBar(
@@ -365,27 +381,31 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
             ),
             const SizedBox(height: AppSpacing.s),
             Flexible(
-              child: _resultados.isEmpty
-                  ? const Center(
-                      child: Padding(
-                        padding: AppSpacing.allM,
-                        child: Text('Sin resultados'),
+              child: SizedBox(
+                height: 340,
+                child: _resultados.isEmpty
+                    ? const Center(
+                        child: Padding(
+                          padding: AppSpacing.allM,
+                          child: Text('Sin resultados'),
+                        ),
+                      )
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+
+                        itemCount: _resultados.length,
+                        itemBuilder: (_, i) {
+                          final p = _resultados[i];
+                          return ListTile(
+                            title: Text('${p.codigo} • ${p.nombre}'),
+                            subtitle: Text(
+                              'Stock: ${p.stock ?? 0.0} | Compra: ${p.precioCompra} | Venta: ${p.precioVenta}',
+                            ),
+                            onTap: () => widget.onSeleccionar(p),
+                          );
+                        },
                       ),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _resultados.length,
-                      itemBuilder: (_, i) {
-                        final p = _resultados[i];
-                        return ListTile(
-                          title: Text('${p.codigo} • ${p.nombre}'),
-                          subtitle: Text(
-                            'Stock: ${p.stock ?? 0.0} | Compra: ${p.precioCompra} | Venta: ${p.precioVenta}',
-                          ),
-                          onTap: () => widget.onSeleccionar(p),
-                        );
-                      },
-                    ),
+              ),
             ),
           ],
         ),

@@ -6,6 +6,7 @@ class EcfePayload {
     this.fechaNcfModificado = '',
     this.codigoModificacion = '3',
     this.indicadorNotaCredito = '0',
+    this.razonModificacion = '',
     required this.fechaVencimientoSecuencia,
     required this.fechaEmision,
     this.fechaLimitePago = '',
@@ -45,6 +46,7 @@ class EcfePayload {
   final String fechaNcfModificado;
   final String codigoModificacion;
   final String indicadorNotaCredito;
+  final String razonModificacion;
   final String fechaVencimientoSecuencia;
   final String fechaEmision;
   final String fechaLimitePago;
