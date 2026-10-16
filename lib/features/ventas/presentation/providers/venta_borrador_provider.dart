@@ -188,6 +188,11 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     state = state.copyWith(clienteId: 0, clienteNombre: 'Consumidor Final');
   }
 
+
+  void establecerUsuarioId(int usuarioId) {
+    state = state.copyWith(usuarioId: usuarioId);
+  }
+
   void establecerVencimiento(DateTime fecha) {
     state = state.copyWith(vencimiento: fecha);
   }
@@ -346,10 +351,15 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
         : <String, dynamic>{
             'productoId': producto.id,
             'productoNombre': producto.nombre,
+            'productoCodigo': producto.codigo,
+            'codigoBarras': producto.codigoBarras,
             'descuentoPorcentaje': 0.0,
             'montoDescuento': 0.0,
           };
     detalle.addAll({
+      'productoCodigo': producto.codigo,
+      'codigoBarras': producto.codigoBarras,
+      'productoNombre': producto.nombre,
       'cantidad': cantidadFinal,
       'precioUnitario': precio.precio,
       'tasaImpuesto': _tasaDeProducto(producto),

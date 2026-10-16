@@ -104,3 +104,75 @@ final notasCreditoDaoProvider = Provider<NotasCreditoDao>((ref) {
 final notasCreditoListProvider = FutureProvider.autoDispose((ref) async {
   return ref.watch(notasCreditoDaoProvider).listar();
 });
+
+
+class FacturacionKpis {
+  const FacturacionKpis({
+    required this.facturasHoy,
+    required this.ncHoy,
+    required this.ncfDisponibles,
+    required this.alertasNcf,
+  });
+  final int facturasHoy;
+  final int ncHoy;
+  final int ncfDisponibles;
+  final int alertasNcf;
+}
+
+/// KPIs del hub Facturación: hoy + stock NCF.
+final facturacionKpisProvider =
+    FutureProvider.autoDispose<FacturacionKpis>((ref) async {
+  final repo = ref.watch(ventasRepositoryProvider);
+  final notasDao = ref.watch(notasCreditoDaoProvider);
+  final seqDao = ref.watch(secuenciasNcfDaoProvider);
+
+  await seqDao.asegurarDefaults();
+
+  final ahora = DateTime.now();
+  final inicioHoy = DateTime(ahora.year, ahora.month, ahora.day);
+  final finHoy = inicioHoy.add(const Duration(days: 1));
+
+  // Facturas hoy: ventas con NCF fiscal emitido hoy
+  final ventas = await repo.listarVentas();
+  final facturasHoy = ventas.where((v) {
+    final ncf = (v.numeroFactura ?? '').trim();
+    final tieneNcf = ncf.startsWith('B01') ||
+        ncf.startsWith('B02') ||
+        ncf.startsWith('B14') ||
+        ncf.startsWith('E');
+    if (!tieneNcf && v.estadoDocumento != EstadoDocumento.facturado) {
+      return false;
+    }
+    final f = v.fecha;
+    return !f.isBefore(inicioHoy) && f.isBefore(finHoy);
+  }).length;
+
+  // NC hoy
+  final notas = await notasDao.listar();
+  final ncHoy = notas.where((n) {
+    final f = n.creadoEn;
+    return !f.isBefore(inicioHoy) && f.isBefore(finHoy);
+  }).length;
+
+  // NCF disponibles: solo rangos realmente asignados (no defaults del sistema)
+  final secuencias = await seqDao.listar();
+  var ncfDisponibles = 0;
+  var alertas = 0;
+  const umbralAlerta = 100;
+  for (final s in secuencias) {
+    if (!s.activo) continue;
+    // Tope del sistema (asegurarDefaults) = sin rango DGII asignado por el negocio
+    if (s.secuenciaHasta >= 99999999) continue;
+    final rest = s.secuenciaHasta - s.secuenciaActual;
+    if (rest > 0) ncfDisponibles += rest;
+    if (rest <= umbralAlerta) alertas += 1;
+  }
+
+  return FacturacionKpis(
+    facturasHoy: facturasHoy,
+    ncHoy: ncHoy,
+    ncfDisponibles: ncfDisponibles,
+    alertasNcf: alertas,
+  );
+});
+

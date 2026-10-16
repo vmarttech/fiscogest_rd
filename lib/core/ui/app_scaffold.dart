@@ -111,7 +111,11 @@ class AppScaffold extends StatelessWidget {
 
     Widget? resolvedLeading = leading;
     if (resolvedLeading == null && showBackButton) {
-      if (principal && underShell) {
+      // Con menú fijo (AppShell) nunca mostrar hamburguesa en desktop/tablet
+      final isDesktop = MediaQuery.of(context).size.width >= 900;
+
+      if (principal && underShell && !isDesktop) {
+        // Solo mostrar hamburguesa en móvil/tablet
         resolvedLeading = IconButton(
           icon: const Icon(Icons.menu),
           tooltip: 'Menú',

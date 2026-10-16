@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 
 /// Hub Facturación y NC — SaaS premium (ruta real /sales).
 class FacturacionInicioPage extends ConsumerWidget {
@@ -22,14 +23,21 @@ class FacturacionInicioPage extends ConsumerWidget {
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
 
-    // Fase A: placeholders. Conectar providers en Fase B.
-    const facturasHoyStr = '—';
-    const ncHoyStr = '—';
-    const ncfDisponiblesStr = '—';
-    const alertasStr = '—';
+    final kpisAsync = ref.watch(facturacionKpisProvider);
+    final kpis = kpisAsync.valueOrNull;
+    final facturasHoyStr =
+        kpisAsync.isLoading && kpis == null ? '…' : '${kpis?.facturasHoy ?? 0}';
+    final ncHoyStr =
+        kpisAsync.isLoading && kpis == null ? '…' : '${kpis?.ncHoy ?? 0}';
+    final ncfDisponiblesStr = kpisAsync.isLoading && kpis == null
+        ? '…'
+        : '${kpis?.ncfDisponibles ?? 0}';
+    final alertasStr =
+        kpisAsync.isLoading && kpis == null ? '…' : '${kpis?.alertasNcf ?? 0}';
 
     return AppScaffold(
       title: simple ? 'VENTAS / COMPROBANTES' : 'FACTURACIÓN Y NC',
+      showAppBar: !desktop, // Desktop: solo barra shell (como Dashboard)
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -45,50 +53,86 @@ class FacturacionInicioPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _BannerFacturacion(mobile: mobile, simple: simple),
-                  const SizedBox(height: 18),
+                  if (desktop) ...[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                simple ? 'Ventas / Comprobantes' : 'Facturación y NC',
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0F172A),
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                simple
+                                    ? 'Comprobantes y operaciones del día.'
+                                    : 'Emisión fiscal, notas de crédito y secuencias NCF.',
+                                style: const TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                  ] else ...[
+                    _BannerFacturacion(mobile: mobile, simple: simple),
+                    const SizedBox(height: 18),
+                  ],
 
                   // KPIs (en modo simple se ocultan los fiscales de NC/NCF alert)
                   if (desktop)
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: _KpiPill(
                             icon: Icons.receipt_long_outlined,
                             value: facturasHoyStr,
                             label: 'FACTURAS HOY',
-                            bg: Color(0xFFECFDF5),
+                            bg: const Color(0xFFECFDF5),
                             fg: AppColors.success,
                           ),
                         ),
                         const SizedBox(width: 10),
                         if (!simple) ...[
-                          const Expanded(
+                          Expanded(
                             child: _KpiPill(
                               icon: Icons.note_alt_outlined,
                               value: ncHoyStr,
                               label: 'NC HOY',
-                              bg: Color(0xFFEFF6FF),
+                              bg: const Color(0xFFEFF6FF),
                               fg: AppColors.info,
                             ),
                           ),
                           const SizedBox(width: 10),
-                          const Expanded(
+                          Expanded(
                             child: _KpiPill(
                               icon: Icons.qr_code_2_outlined,
                               value: ncfDisponiblesStr,
                               label: 'NCF DISPONIBLES',
-                              bg: Color(0xFFF5F3FF),
-                              fg: Color(0xFF7C3AED),
+                              bg: const Color(0xFFF5F3FF),
+                              fg: const Color(0xFF7C3AED),
                             ),
                           ),
                           const SizedBox(width: 10),
-                          const Expanded(
+                          Expanded(
                             child: _KpiPill(
                               icon: Icons.warning_amber_rounded,
                               value: alertasStr,
                               label: 'ALERTAS NCF',
-                              bg: Color(0xFFFFF7ED),
+                              bg: const Color(0xFFFFF7ED),
                               fg: AppColors.warning,
                             ),
                           ),
@@ -124,33 +168,33 @@ class FacturacionInicioPage extends ConsumerWidget {
                       crossAxisSpacing: 10,
                       childAspectRatio: 1.55,
                       children: [
-                        const _KpiPill(
+                        _KpiPill(
                           icon: Icons.receipt_long_outlined,
                           value: facturasHoyStr,
                           label: 'FACTURAS HOY',
-                          bg: Color(0xFFECFDF5),
+                          bg: const Color(0xFFECFDF5),
                           fg: AppColors.success,
                         ),
                         if (!simple) ...[
-                          const _KpiPill(
+                          _KpiPill(
                             icon: Icons.note_alt_outlined,
                             value: ncHoyStr,
                             label: 'NC HOY',
-                            bg: Color(0xFFEFF6FF),
+                            bg: const Color(0xFFEFF6FF),
                             fg: AppColors.info,
                           ),
-                          const _KpiPill(
+                          _KpiPill(
                             icon: Icons.qr_code_2_outlined,
                             value: ncfDisponiblesStr,
                             label: 'NCF DISPONIBLES',
-                            bg: Color(0xFFF5F3FF),
-                            fg: Color(0xFF7C3AED),
+                            bg: const Color(0xFFF5F3FF),
+                            fg: const Color(0xFF7C3AED),
                           ),
-                          const _KpiPill(
+                          _KpiPill(
                             icon: Icons.warning_amber_rounded,
                             value: alertasStr,
                             label: 'ALERTAS NCF',
-                            bg: Color(0xFFFFF7ED),
+                            bg: const Color(0xFFFFF7ED),
                             fg: AppColors.warning,
                           ),
                         ] else ...[
@@ -499,61 +543,84 @@ class _KpiPill extends StatelessWidget {
   final IconData icon;
   final String value;
   final String label;
-  final Color bg;
+  final Color bg; // compatibilidad con llamadas existentes
   final Color fg;
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(10),
+    // Copia 1:1 del lenguaje visual de _EnterpriseKpiCard (Dashboard)
+    final color = fg;
+    return Material(
+      color: color.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: color.withValues(alpha: 0.08),
+          border: Border.all(color: color.withValues(alpha: 0.22)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, color: Colors.white, size: 23),
             ),
-            child: Icon(icon, color: fg, size: 20),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.h4.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: fg,
-                    fontSize: 16,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: color,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.15,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  label,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 10,
-                    letterSpacing: 0.4,
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
+                      letterSpacing: -0.3,
+                      height: 1.1,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 3),
+                  Text(
+                    'Hoy',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
 
 class _OpCard extends StatelessWidget {
   const _OpCard({
@@ -573,57 +640,61 @@ class _OpCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(14),
+      color: color.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(12),
+            color: color.withValues(alpha: 0.08),
+            border: Border.all(color: color.withValues(alpha: 0.22)),
           ),
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 46,
+                height: 46,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  color: color,
+                  borderRadius: BorderRadius.circular(11),
                 ),
-                child: Icon(icon, color: color, size: 22),
+                child: Icon(icon, color: Colors.white, size: 23),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       title,
-                      style: AppTypography.bodyMedium.copyWith(
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: color,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: 0.15,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0F172A),
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
+              Icon(Icons.chevron_right, color: color, size: 22),
             ],
           ),
         ),
@@ -631,6 +702,7 @@ class _OpCard extends StatelessWidget {
     );
   }
 }
+
 
 class _ListaPanel extends StatelessWidget {
   const _ListaPanel({

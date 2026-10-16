@@ -170,6 +170,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
 
     return AppScaffold(
       title: 'EMITIR FACTURA',
+      showAppBar: !desktop,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {

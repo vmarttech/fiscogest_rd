@@ -39,10 +39,8 @@ class VentasNavegacionNotifier extends StateNotifier<VentasNavegacionState> {
   }
 
   void establecerModoOperacion(ModoOperacion modo) {
-    state = state.copiarCon(
-      modoOperacion: modo,
-      vistaActual: VistaActual.inicio,
-    );
+    if (state.modoOperacion == modo) return;
+    state = state.copiarCon(modoOperacion: modo);
   }
 
   void cambiarCategoria(CategoriaProducto categoria) {

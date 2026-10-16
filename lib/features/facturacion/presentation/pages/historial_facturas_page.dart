@@ -49,6 +49,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
 
     return AppScaffold(
       title: 'HISTORIAL',
+      showAppBar: !desktop,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {

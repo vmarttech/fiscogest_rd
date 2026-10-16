@@ -7,7 +7,6 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
-import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 
 class CotizacionesHistorialPage extends ConsumerStatefulWidget {
   const CotizacionesHistorialPage({super.key});
@@ -56,7 +55,7 @@ class _CotizacionesHistorialPageState
     final padding = esPantallaPequena ? 12.0 : 16.0;
 
     return AppScaffold(
-      title: 'HISTORIAL DE VENTAS',
+      title: 'HISTORIAL DE COTIZACIONES',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         tooltip: 'Atrás',
@@ -322,12 +321,6 @@ class _CotizacionesHistorialPageState
                       esPantallaPequena: esPantallaPequena,
                     ),
                   _chipAccion(
-                    icon: Icons.picture_as_pdf_outlined,
-                    label: 'PDF',
-                    onTap: () => _exportarPDF(cot),
-                    esPantallaPequena: esPantallaPequena,
-                  ),
-                  _chipAccion(
                     icon: Icons.email_outlined,
                     label: 'Correo',
                     onTap: () => _enviarPorCorreo(numero),
@@ -405,20 +398,6 @@ class _CotizacionesHistorialPageState
     );
   }
 
-  Future<void> _exportarPDF(Venta doc) async {
-    try {
-      await ComprobantePdf.imprimirFactura(doc, compartir: true);
-    } catch (e) {
-      if (!mounted) return;
-      FiscoGestNotifications.show(
-        SnackBar(
-          content: Text('No se pudo generar el PDF: $e'),
-          backgroundColor: AppColors.info,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 
   void _enviarPorCorreo(String numero) {
     FiscoGestNotifications.show(

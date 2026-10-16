@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_dao.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
@@ -27,6 +29,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   double? _saldo;
   ResumenSesionCaja? _resumen;
   CajaSesionResumen? _sesion;
+  List<CajaMovimientoResumen> _movimientos = [];
+  String? _nombreCajeroCache;
   bool _cargando = true;
   String? _error;
   bool _procesando = false;
@@ -54,11 +58,52 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         resumen = await repo.obtenerResumenSesion(sesion.id);
         saldo = resumen.efectivoEsperado;
       }
+      List<CajaMovimientoResumen> movs = [];
+      if (sesion != null) {
+        try {
+          movs = await repo.listarMovimientosPorSesion(sesion.id);
+        } catch (_) {}
+      }
+
+      // Nombre real del cajero (usuarios.nombre / username)
+      String? nombreCajero;
+      final uid = sesion?.usuarioId;
+      if (uid != null) {
+        try {
+          final auth = ref.read(sesionProvider);
+          if (auth != null && auth.id == uid) {
+            final n = auth.nombre.trim();
+            final u = auth.username.trim();
+            if (n.isNotEmpty) {
+              nombreCajero = n;
+            } else if (u.isNotEmpty) {
+              nombreCajero = u;
+            }
+          }
+          if (nombreCajero == null || nombreCajero!.isEmpty) {
+            final db = ref.read(appDatabaseProvider);
+            final row = await UsuariosDao(db).obtenerPorId(uid);
+            if (row != null) {
+              final n = row.nombre.trim();
+              final u = row.username.trim();
+              if (n.isNotEmpty) {
+                nombreCajero = n;
+              } else if (u.isNotEmpty) {
+                nombreCajero = u;
+              }
+            }
+          }
+        } catch (_) {}
+        nombreCajero ??= 'Cajero #$uid';
+      }
+
       if (!mounted) return;
       setState(() {
         _sesion = sesion;
         _resumen = resumen;
         _saldo = saldo;
+        _movimientos = movs;
+        _nombreCajeroCache = nombreCajero;
         _cargando = false;
       });
     } catch (e) {
@@ -71,6 +116,46 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   }
 
   bool get _cajaAbierta => _sesion != null && _sesion!.estaAbierta;
+
+  UsuarioSesion? get _usuarioActual => ref.read(sesionProvider);
+
+  /// Solo rol Cajero opera el turno. Admin supervisa / crea usuarios.
+  bool get _esCajero {
+    final u = _usuarioActual;
+    if (u == null) return false;
+    return u.rolNorm == 'Cajero';
+  }
+
+  bool get _esAdmin {
+    final u = _usuarioActual;
+    return u?.esAdmin == true;
+  }
+
+  /// ¿La sesión abierta pertenece al usuario logueado?
+  bool get _sesionEsMia {
+    final s = _sesion;
+    final u = _usuarioActual;
+    if (s == null || u == null) return false;
+    return s.usuarioId == u.id;
+  }
+
+
+  /// Usuario de la sesión de caja (cajero del turno).
+  String get _nombreUsuarioCaja {
+    final c = _nombreCajeroCache?.trim();
+    if (c != null && c.isNotEmpty) return c;
+    final sid = _sesion?.usuarioId;
+    if (sid == null) return '—';
+    final auth = ref.read(sesionProvider);
+    if (auth != null && auth.id == sid) {
+      final n = auth.nombre.trim();
+      if (n.isNotEmpty) return n;
+      final u = auth.username.trim();
+      if (u.isNotEmpty) return u;
+    }
+    return 'Cajero #$sid';
+  }
+
 
   double? _parseMonto(String raw) {
     final s = raw.trim().replaceAll(' ', '').replaceAll(',', '.');
@@ -114,6 +199,31 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   void _irAHistorialTurno() => context.push('/ventas/cobro/historial-turno');
 
   Future<void> _dialogoAbrirCaja() async {
+    // Regla: el turno de caja lo abre el CAJERO logueado (no Admin).
+    if (!_esCajero) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(
+            _esAdmin
+                ? 'El administrador no opera caja. Use un usuario con rol Cajero para abrir el turno.'
+                : 'Solo un usuario con rol Cajero puede abrir caja.',
+          ),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    final uid = _usuarioActual?.id;
+    if (uid == null) {
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('No hay sesión de usuario. Vuelva a iniciar sesión.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     final controller = TextEditingController(text: '0');
     final ancho = MediaQuery.of(context).size.width;
     final fondo = await showDialog<double>(
@@ -188,7 +298,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     try {
       final sesionId = await ref
           .read(cajaRepositoryProvider)
-          .abrirSesion(fondoInicial: fondo);
+          .abrirSesion(
+            fondoInicial: fondo,
+            usuarioId: _usuarioActual!.id,
+          );
       try {
         await ref.read(bitacoraOperacionesServiceProvider).registrar(
               accion: 'caja_abierta',
@@ -223,6 +336,19 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   }
 
   Future<void> _dialogoCerrarCaja() async {
+    if (_sesion == null) return;
+    // El cajero del turno cierra su caja. Admin puede cerrar en supervisión.
+    if (!_esAdmin && !_sesionEsMia) {
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text(
+            'Esta caja pertenece a otro cajero. Solo él o un administrador pueden cerrarla.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     if (_sesion == null) return;
     final resumenCierre = await ref
         .read(cajaRepositoryProvider)
@@ -507,12 +633,15 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
     return AppScaffold(
       title: 'CAJA',
+      showAppBar: !desktop, // PC: solo shell (sin barra teal CAJA)
       showBackButton: false,
-      leading: IconButton(
-        icon: const Icon(Icons.menu),
-        tooltip: 'Menú',
-        onPressed: () => ShellDrawerScope.open(context),
-      ),
+      leading: desktop
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.menu),
+              tooltip: 'Menú',
+              onPressed: () => ShellDrawerScope.open(context),
+            ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refrescar,
@@ -540,287 +669,208 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   // DESKTOP — layout de la imagen
   // ─────────────────────────────────────────────
   Widget _buildDesktop(bool abierta) {
+    // 3 | 6 | 3 — mockup HTML / captura
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Izquierda: card de saldo (más vertical / estrecha) ──
         Expanded(
-          flex: 4,
-          child: _buildSaldoCard(mobile: false, abierta: abierta),
-        ),
-        const SizedBox(width: 28),
-        // ── Derecha: operaciones + movimientos ──
-        Expanded(
-          flex: 6,
+          flex: 3,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Operaciones',
-                style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Accesos rápidos del turno',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
+              _buildFondoSesionCard(abierta: abierta),
               const SizedBox(height: 14),
-              _CajaOpTile(
-                icon: Icons.point_of_sale_outlined,
-                title: 'Cobrar cotización',
-                subtitle: _puedeCobrar
-                    ? 'Registra un pago y aplica cotizaciones activas.'
-                    : 'Requiere caja abierta',
-                color: _puedeCobrar ? AppColors.primary : AppColors.grey500,
-                onTap: _irACobrarCotizacion,
-              ),
-              const SizedBox(height: 10),
-              _CajaOpTile(
-                icon: Icons.description_outlined,
-                title: 'Cuentas por cobrar',
-                subtitle: 'Gestiona facturas pendientes y pagos de clientes.',
-                color: const Color(0xFF6366F1),
-                onTap: _irACuentasPorCobrar,
-              ),
-              const SizedBox(height: 10),
-              _CajaOpTile(
-                icon: Icons.history_rounded,
-                title: 'Historial del turno',
-                subtitle: abierta
-                    ? 'Revisa la actividad completa de esta sesión.'
-                    : 'Movimientos desde hoy 00:00',
-                color: const Color(0xFF64748B),
-                onTap: _irAHistorialTurno,
-              ),
-              const SizedBox(height: 24),
-              _buildUltimosMovimientos(),
+              _buildEstadoCajaCard(abierta: abierta),
             ],
           ),
         ),
+        const SizedBox(width: 14),
+        Expanded(flex: 6, child: _buildUltimosMovimientos()),
+        const SizedBox(width: 14),
+        Expanded(flex: 3, child: _buildOperacionesRapidas(abierta)),
       ],
     );
   }
 
-  // ─────────────────────────────────────────────
-  // MÓVIL
-  // ─────────────────────────────────────────────
   Widget _buildMobile(bool abierta) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSaldoCard(mobile: true, abierta: abierta),
-        const SizedBox(height: 20),
-        Text(
-          'Operaciones',
-          style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Accesos rápidos del turno',
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
+        _buildFondoSesionCard(abierta: abierta),
         const SizedBox(height: 12),
-        _CajaOpTile(
-          icon: Icons.point_of_sale_outlined,
-          title: 'Cobrar cotización',
-          subtitle: _puedeCobrar
-              ? 'Registra un pago y aplica cotizaciones activas.'
-              : 'Requiere caja abierta',
-          color: _puedeCobrar ? AppColors.primary : AppColors.grey500,
-          onTap: _irACobrarCotizacion,
-        ),
-        const SizedBox(height: 10),
-        _CajaOpTile(
-          icon: Icons.description_outlined,
-          title: 'Cuentas por cobrar',
-          subtitle: 'Gestiona facturas pendientes y pagos de clientes.',
-          color: const Color(0xFF6366F1),
-          onTap: _irACuentasPorCobrar,
-        ),
-        const SizedBox(height: 10),
-        _CajaOpTile(
-          icon: Icons.history_rounded,
-          title: 'Historial del turno',
-          subtitle: abierta
-              ? 'Revisa la actividad completa de esta sesión.'
-              : 'Movimientos desde hoy 00:00',
-          color: const Color(0xFF64748B),
-          onTap: _irAHistorialTurno,
-        ),
-        const SizedBox(height: 20),
+        _buildEstadoCajaCard(abierta: abierta),
+        const SizedBox(height: 12),
+        _buildOperacionesRapidas(abierta),
+        const SizedBox(height: 12),
         _buildUltimosMovimientos(),
       ],
     );
   }
 
-  // ─────────────────────────────────────────────
-  // CARD SALDO (hero)
-  // ─────────────────────────────────────────────
-  Widget _buildSaldoCard({required bool mobile, required bool abierta}) {
+  Widget _cardShell({required Widget child}) {
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        mobile ? 20 : 28,
-        mobile ? 20 : 36,
-        mobile ? 20 : 28,
-        mobile ? 20 : 32,
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: child,
+    );
+  }
+
+  Widget _sectionLabel(String s) => Text(
+        s,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: Color(0xFF64748B),
+          letterSpacing: 0.6,
+        ),
+      );
+
+  Widget _kvLine(String k, String v, {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Badge estado
-          Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: abierta
-                      ? AppColors.success.withValues(alpha: 0.12)
-                      : AppColors.grey200,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: abierta ? AppColors.success : AppColors.grey500,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      abierta ? 'ABIERTA' : 'CERRADA',
-                      style: AppTypography.labelSmall.copyWith(
-                        color:
-                            abierta ? AppColors.success : AppColors.textSecondary,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              if (_procesando)
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-            ],
-          ),
-          const SizedBox(height: 20),
           Text(
-            'Efectivo en cajón',
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+            k,
+            style: const TextStyle(
+              fontSize: 12,
               fontWeight: FontWeight.w500,
+              color: Color(0xFF64748B),
             ),
           ),
-          const SizedBox(height: 6),
-          if (_cargando)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: SizedBox(
-                width: 28,
-                height: 28,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
-              ),
-            )
-          else if (_error != null)
-            Text(
-              'Error: $_error',
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
-            )
-          else
-            Text(
-              formatRd(_saldo ?? 0),
-              style: AppTypography.h1.copyWith(
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF0F3D3A),
-                fontSize: mobile ? 32 : 42,
-                letterSpacing: -1.2,
-                height: 1.1,
-              ),
+          Text(
+            v,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+              color: valueColor ?? const Color(0xFF334155),
             ),
-          if (abierta && _resumen != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Tarjeta ${formatRd(_resumen!.ingresosTarjeta)} · '
-              'Transfer ${formatRd(_resumen!.ingresosTransferencia)} · '
-              'Cheque ${formatRd(_resumen!.ingresosCheque)}',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _metodoPill(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF475569),
             ),
-            if (_resumen!.egresosEfectivo > 0.001)
-              Text(
-                'Egresos efectivo ${formatRd(_resumen!.egresosEfectivo)}',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-          ],
-          if (abierta && _sesion != null) ...[
-            const SizedBox(height: 20),
-            // 3 chips
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFondoSesionCard({required bool abierta}) {
+    return _cardShell(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionLabel('FONDO Y SESIÓN'),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFF1F5F9)),
+            ),
+            child: Column(
               children: [
-                _MetricChip(
-                  icon: Icons.account_balance_wallet_outlined,
-                  label: 'Fondo inicial',
-                  value: formatRd(_sesion!.fondoInicial),
+                const Text(
+                  'Efectivo en cajón',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF94A3B8),
+                  ),
                 ),
-                _MetricChip(
-                  icon: Icons.schedule_outlined,
-                  label: 'Apertura',
-                  value: _fmtFecha.format(_sesion!.fechaApertura),
-                ),
-                _MetricChip(
-                  icon: Icons.work_outline_rounded,
-                  label: 'Sesión',
-                  value: '#${_sesion!.id}',
-                ),
+                const SizedBox(height: 6),
+                if (_cargando)
+                  const SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                else if (_error != null)
+                  Text(
+                    'Error: $_error',
+                    style: const TextStyle(
+                      color: Color(0xFFDC2626),
+                      fontSize: 12,
+                    ),
+                  )
+                else
+                  Text(
+                    formatRd(_saldo ?? 0),
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
+                      letterSpacing: -0.8,
+                    ),
+                  ),
               ],
             ),
+          ),
+          if (abierta && _sesion != null) ...[
+            const SizedBox(height: 14),
+            _kvLine('Fondo inicial', formatRd(_sesion!.fondoInicial)),
+            _kvLine('Apertura', _fmtFecha.format(_sesion!.fechaApertura)),
+            _kvLine(
+              'Sesión #',
+              '${_sesion!.id}',
+              valueColor: const Color(0xFF10B981),
+            ),
           ],
-          SizedBox(height: mobile ? 24 : 48),
-          if (!abierta)
+          if (!abierta) ...[
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              height: mobile ? 48 : 56,
+              height: 44,
               child: ElevatedButton.icon(
                 onPressed: _procesando ? null : _dialogoAbrirCaja,
-                icon: const Icon(Icons.lock_open_rounded, size: 20),
+                icon: const Icon(Icons.lock_open_rounded, size: 18),
                 label: const Text(
                   'Abrir Caja',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                  style: TextStyle(fontWeight: FontWeight.w800),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
+                  backgroundColor: const Color(0xFF10B981),
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -828,24 +878,84 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   ),
                 ),
               ),
-            )
-          else
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEstadoCajaCard({required bool abierta}) {
+    final tarjeta = _resumen?.ingresosTarjeta ?? 0.0;
+    final transfer = _resumen?.ingresosTransferencia ?? 0.0;
+    final cheque = _resumen?.ingresosCheque ?? 0.0;
+
+    return _cardShell(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _sectionLabel('ESTADO DE CAJA')),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: abierta
+                      ? const Color(0xFFD1FAE5)
+                      : const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: abierta
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFF94A3B8),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      abierta ? 'ABIERTA' : 'CERRADA',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: abierta
+                            ? const Color(0xFF047857)
+                            : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _metodoPill('Tarjeta', formatRd(tarjeta)),
+          const SizedBox(height: 8),
+          _metodoPill('Transfer', formatRd(transfer)),
+          const SizedBox(height: 8),
+          _metodoPill('Cheque', formatRd(cheque)),
+          if (abierta) ...[
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              height: mobile ? 48 : 56,
+              height: 44,
               child: OutlinedButton.icon(
                 onPressed: _procesando ? null : _dialogoCerrarCaja,
-                icon: const Icon(Icons.lock_outline_rounded, size: 20),
+                icon: const Icon(Icons.lock_outline_rounded, size: 18),
                 label: const Text(
                   'Cerrar Caja',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                  style: TextStyle(fontWeight: FontWeight.w800),
                 ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFB45309),
-                  side: const BorderSide(
-                    color: Color(0xFFF59E0B),
-                    width: 1.5,
-                  ),
+                  side: const BorderSide(color: Color(0xFFFDE68A)),
                   backgroundColor: const Color(0xFFFFFBEB),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -853,127 +963,471 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 ),
               ),
             ),
+          ],
         ],
       ),
     );
   }
 
-  // ─────────────────────────────────────────────
-  // ÚLTIMOS MOVIMIENTOS (UI; datos reales vía historial)
-  // ─────────────────────────────────────────────
-  Widget _buildUltimosMovimientos() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget _totLine(String k, String v, {bool emphasize = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Text(
-                'Últimos movimientos',
-                style: AppTypography.labelLarge.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+          Expanded(
+            child: Text(
+              k,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: emphasize ? 13 : 12,
+                fontWeight: emphasize ? FontWeight.w900 : FontWeight.w600,
+                color: emphasize
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFF64748B),
               ),
-              const Spacer(),
-              TextButton(
-                onPressed: _irAHistorialTurno,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Ver todos →',
-                  style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              v,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: emphasize ? 15 : 12.5,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF0F172A),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Placeholder visual; el detalle real está en Historial del turno
-          _MovimientoRow(
-            hora: _cajaAbierta && _sesion != null
-                ? _fmtHora.format(_sesion!.fechaApertura)
-                : '--:--',
-            icon: Icons.lock_open_rounded,
-            iconColor: AppColors.info,
-            titulo: _cajaAbierta && _sesion != null
-                ? 'Apertura de caja · Sesión #${_sesion!.id}'
-                : 'Sin sesión abierta',
-            subtitulo: _cajaAbierta && _sesion != null
-                ? 'Fondo inicial'
-                : 'Abre la caja para registrar movimientos',
-            monto: _cajaAbierta && _sesion != null
-                ? formatRd(_sesion!.fondoInicial)
-                : '—',
-            montoColor: AppColors.textPrimary,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Consulta el historial del turno para ver cobros, retiros y ajustes.',
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
             ),
           ),
         ],
       ),
     );
   }
-}
 
-// ─────────────────────────────────────────────
-// CHIPS DE MÉTRICAS
-// ─────────────────────────────────────────────
-class _MetricChip extends StatelessWidget {
-  const _MetricChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildOperacionesRapidas(bool abierta) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.grey50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(icon, size: 16, color: AppColors.textSecondary),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.textSecondary,
-                  fontSize: 10,
+          const Text(
+            'OPERACIONES RÁPIDAS',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF64748B),
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _CajaOpTile(
+            icon: Icons.point_of_sale_outlined,
+            title: 'Cobrar cotización',
+            subtitle: _puedeCobrar
+                ? 'Pago + cotizaciones activas'
+                : 'Requiere caja abierta',
+            color: _puedeCobrar ? AppColors.primary : AppColors.grey500,
+            onTap: _irACobrarCotizacion,
+          ),
+          const SizedBox(height: 10),
+          _CajaOpTile(
+            icon: Icons.description_outlined,
+            title: 'Cuentas por cobrar',
+            subtitle: 'Facturas pendientes',
+            color: const Color(0xFF6366F1),
+            onTap: _irACuentasPorCobrar,
+          ),
+          const SizedBox(height: 10),
+          _CajaOpTile(
+            icon: Icons.history_rounded,
+            title: 'Historial del turno',
+            subtitle:
+                abierta ? 'Actividad de esta sesión' : 'Desde hoy 00:00',
+            color: const Color(0xFF64748B),
+            onTap: _irAHistorialTurno,
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const SizedBox(height: 12),
+          _totLine('Subtotal', formatRd(0)),
+          _totLine('ITBIS', formatRd(0)),
+          _totLine('Descuentos', formatRd(0)),
+          const SizedBox(height: 4),
+          _totLine('Total', formatRd(0), emphasize: true),
+          const SizedBox(height: 14),
+          // Botones apilados: no se cortan en columna estrecha
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: ElevatedButton(
+              onPressed: abierta ? _irACobrarCotizacion : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F766E),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              Text(
-                value,
-                style: AppTypography.labelMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+              child: const Text(
+                'F12 · Procesar cobro',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            height: 40,
+            child: OutlinedButton(
+              onPressed: abierta
+                  ? () {
+                      // Cancelar cobro en curso / limpiar selección futura
+                      FiscoGestNotifications.show(
+                        const SnackBar(
+                          content: Text('Sin cobro en curso'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  : null,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF475569),
+                side: const BorderSide(color: Color(0xFFE2E8F0)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
+              ),
+              child: const Text(
+                'F5 · Cancelar',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _labelTipoMov(String tipo) {
+    final u = tipo.toUpperCase();
+    if (u.contains('APERTURA')) return 'Apertura de caja';
+    if (u.contains('CIERRE')) return 'Cierre de caja';
+    if (u.contains('INGRESO') || u.contains('VENTA') || u.contains('COBRO')) {
+      return 'Ingreso';
+    }
+    if (u.contains('EGRESO') || u.contains('RETIRO')) return 'Egreso';
+    return tipo.isEmpty ? 'Movimiento' : tipo;
+  }
+
+  Widget _buildUltimosMovimientos() {
+    final items = _movimientos.length > 8
+        ? _movimientos.sublist(0, 8)
+        : _movimientos;
+
+    Widget h(String text, {int flex = 1, TextAlign a = TextAlign.left}) =>
+        Expanded(
+          flex: flex,
+          child: Text(
+            text,
+            textAlign: a,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF475569),
+            ),
+          ),
+        );
+
+    Widget dataRow({
+      required String fecha,
+      required String usuario,
+      required String accion,
+      required String referencia,
+      required String detalle,
+      required String monto,
+      bool muted = false,
+    }) {
+      final c = muted ? const Color(0xFFCBD5E1) : const Color(0xFF334155);
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        decoration: BoxDecoration(
+          color: muted ? Colors.white : const Color(0xFFF8FAFC),
+          border: const Border(
+            bottom: BorderSide(color: Color(0xFFF1F5F9)),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Text(
+                fecha,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: muted ? c : const Color(0xFF64748B),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                usuario,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, color: c),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: muted
+                  ? Text(accion, style: TextStyle(fontSize: 11, color: c))
+                  : Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: Text(
+                          accion,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1D4ED8),
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                referencia,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, color: c),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                detalle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, color: c),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                monto,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: muted ? c : const Color(0xFF0F172A),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final rows = <Widget>[];
+    if (items.isEmpty) {
+      if (_cajaAbierta && _sesion != null) {
+        rows.add(dataRow(
+          fecha: _fmtHora.format(_sesion!.fechaApertura),
+          usuario: _nombreUsuarioCaja,
+          accion: 'Apertura de caja',
+          referencia: 'Sesión #${_sesion!.id}',
+          detalle: 'Fondo inicial',
+          monto: formatRd(_sesion!.fondoInicial),
+        ));
+      }
+      rows.add(dataRow(
+        fecha: '--:--',
+        usuario: '--',
+        accion: '--',
+        referencia: '—',
+        detalle: 'Sin movimientos adicionales',
+        monto: 'RD\$0.00',
+        muted: true,
+      ));
+    } else {
+      for (final m in items) {
+        final ref = m.referenciaTipo.isNotEmpty
+            ? '${m.referenciaTipo} #${m.referenciaId}'
+            : (_sesion != null ? 'Sesión #${_sesion!.id}' : '—');
+        final det = m.formaPago.isNotEmpty ? m.formaPago : m.tipo;
+        rows.add(dataRow(
+          fecha: _fmtHora.format(m.fecha),
+          usuario: _nombreUsuarioCaja,
+          accion: _labelTipoMov(m.tipo),
+          referencia: ref,
+          detalle: det,
+          monto: formatRd(m.monto),
+        ));
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'ÚLTIMOS MOVIMIENTOS (DETALLADO)',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF64748B),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: _irAHistorialTurno,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'Ver todos →',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF10B981),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFFF1F5F9)),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                Container(
+                  color: const Color(0xFFF1F5F9),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(
+                    children: [
+                      h('Fecha', flex: 2),
+                      h('Usuario', flex: 2),
+                      h('Acción/Tipo', flex: 3),
+                      h('Referencia', flex: 2),
+                      h('Comentario/Detalle', flex: 3),
+                      h('Monto', flex: 2, a: TextAlign.right),
+                    ],
+                  ),
+                ),
+                ...rows,
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Buscar ticket/movimiento...',
+                    hintStyle: const TextStyle(fontSize: 12),
+                    prefixIcon: const Icon(Icons.search, size: 18),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 13),
+                  onSubmitted: (_) => _irAHistorialTurno(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Text(
+                  'F2',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                tooltip: 'Escanear',
+                onPressed: _irAHistorialTurno,
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 22),
               ),
             ],
           ),
@@ -983,9 +1437,7 @@ class _MetricChip extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// TILE DE OPERACIÓN
-// ─────────────────────────────────────────────
+
 class _CajaOpTile extends StatelessWidget {
   const _CajaOpTile({
     required this.icon,
@@ -1070,83 +1522,3 @@ class _CajaOpTile extends StatelessWidget {
 // ─────────────────────────────────────────────
 // FILA DE MOVIMIENTO
 // ─────────────────────────────────────────────
-class _MovimientoRow extends StatelessWidget {
-  const _MovimientoRow({
-    required this.hora,
-    required this.icon,
-    required this.iconColor,
-    required this.titulo,
-    required this.subtitulo,
-    required this.monto,
-    required this.montoColor,
-  });
-
-  final String hora;
-  final IconData icon;
-  final Color iconColor;
-  final String titulo;
-  final String subtitulo;
-  final String monto;
-  final Color montoColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 40,
-            child: Text(
-              hora,
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 18, color: iconColor),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  titulo,
-                  style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  subtitulo,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Text(
-            monto,
-            style: AppTypography.labelLarge.copyWith(
-              fontWeight: FontWeight.w700,
-              color: montoColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_dao.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
@@ -18,6 +23,17 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_anotar_f
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+
+
+/// Usuarios activos para el dropdown Vendedor del POS.
+final posUsuariosVentaProvider =
+    FutureProvider.autoDispose<List<UsuarioData>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final todos = await UsuariosDao(db).obtenerTodos();
+  return todos
+      .where((u) => u.estado.toLowerCase() != 'inactivo')
+      .toList();
+});
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -464,13 +480,18 @@ class _NuevaVentaBorradorPageState
     final esPantallaPequena = MediaQuery.of(context).size.width < 600;
     final esPantallaAncha = MediaQuery.of(context).size.width >= 720;
 
+    final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
       title: 'NUEVA COTIZACIÓN',
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        tooltip: 'Atrás',
-        onPressed: () => safeBack(context, fallback: '/ventas'),
-      ),
+      showAppBar: !desktop,
+      // En desktop la entrada es directa: atrás → Dashboard
+      leading: desktop
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.arrow_back),
+              tooltip: 'Atrás',
+              onPressed: () => safeBack(context, fallback: '/inicio'),
+            ),
       body: SafeArea(
         bottom: true,
         maintainBottomViewPadding: true,
@@ -522,6 +543,10 @@ class _NuevaVentaBorradorPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (!esPantallaPequena) ...[
+            _buildAccesosSecundarios(),
+            const SizedBox(height: 12),
+          ],
           _buildSeccionTipoYVencimiento(esPantallaPequena),
           SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildSeccionCliente(estado, esPantallaPequena),
@@ -546,42 +571,991 @@ class _NuevaVentaBorradorPageState
     bool puedeGenerar,
     bool esPantallaPequena,
   ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 6,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    // Layout enterprise 3 columnas (guía POS):
+    // Izq: configuración · Centro: carrito tabla · Der: cierre
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── IZQUIERDA: Configuración de venta (estilo guía) ──
+          SizedBox(
+            width: 250,
+            child: _posCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Configuración de venta',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Contado / Crédito
+                  _buildPosTipoPagoYVence(),
+                  const SizedBox(height: 14),
+                  // Cliente (recuadro)
+                  const Text(
+                    'Cliente',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Material(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(10),
+                    child: InkWell(
+                      onTap: _seleccionarCliente,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              (estado.clienteNombre ?? '').trim().isEmpty
+                                  ? 'Consumidor Final (default)'
+                                  : estado.clienteNombre!.trim(),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: const Color(0xFFE2E8F0),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      (estado.clienteTelefono ?? '')
+                                              .trim()
+                                              .isNotEmpty
+                                          ? estado.clienteTelefono!.trim()
+                                          : 'Cédula / RNC',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: (estado.clienteTelefono ?? '')
+                                                .trim()
+                                                .isNotEmpty
+                                            ? const Color(0xFF0F172A)
+                                            : const Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                TextButton(
+                                  onPressed: _seleccionarCliente,
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: const Color(0xFF0F766E),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 8,
+                                    ),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: const Text(
+                                    'Cambiar',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  // Vendedor (conectado a usuarios del sistema)
+                  const Text(
+                    'Vendedor',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  _buildPosVendedorDropdown(estado),
+                  const SizedBox(height: 14),
+                  // Dirección
+                  const Text(
+                    'Dirección',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: double.infinity,
+                    constraints: const BoxConstraints(minHeight: 72),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Text(
+                      (estado.clienteDireccion ?? '').trim().isEmpty
+                          ? 'Sin dirección registrada'
+                          : estado.clienteDireccion!.trim(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: (estado.clienteDireccion ?? '').trim().isEmpty
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF0F172A),
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      _posMiniChip(
+                        Icons.request_quote_outlined,
+                        'Cotiz.',
+                        () => context.push('/ventas/cotizaciones/historial'),
+                      ),
+                      _posMiniChip(
+                        Icons.receipt_long_outlined,
+                        'Ventas',
+                        () => context.push('/ventas/historial'),
+                      ),
+                      _posMiniChip(
+                        Icons.inventory_2_outlined,
+                        'Stock',
+                        () {
+                          showModalBottomSheet<void>(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (_) => const ConsultaStockLecturaSheet(),
+                          );
+                        },
+                      ),
+                      _posMiniChip(
+                        Icons.calculate_outlined,
+                        'Simular',
+                        () => context.push('/ventas/simulador-credito'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          // ── CENTRO: Carrito de compra (tabla) ──
+          Expanded(
+            child: _posCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        'Carrito de compra',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${estado.detalles.length} ítem(s)',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  // Tabla: ancho mínimo + scroll horizontal → todas las columnas visibles
+                  // Tabla alineada: header y filas con los MISMOS anchos (Table)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Anchos compartidos (header = filas)
+                        // Producto flex | Cant 64 | P.Unit 80 | Desc 48 | ITBIS 76 | Total 84 | Acc 28
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F172A),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                          child: Table(
+                            columnWidths: const {
+                              0: FlexColumnWidth(3),
+                              1: FixedColumnWidth(64),
+                              2: FixedColumnWidth(80),
+                              3: FixedColumnWidth(48),
+                              4: FixedColumnWidth(76),
+                              5: FixedColumnWidth(84),
+                              6: FixedColumnWidth(28),
+                            },
+                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                            children: const [
+                              TableRow(
+                                children: [
+                                  Text('Producto', maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                                  Text('Cant.', textAlign: TextAlign.center, maxLines: 1,
+                                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                                  Text('P.Unit.', textAlign: TextAlign.center, maxLines: 1,
+                                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                                  Text('Desc.%', textAlign: TextAlign.center, maxLines: 1,
+                                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                                  Text('ITBIS', textAlign: TextAlign.center, maxLines: 1,
+                                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                                  Text('Total', textAlign: TextAlign.center, maxLines: 1,
+                                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                                  SizedBox.shrink(),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Expanded(
+                          child: estado.detalles.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    'Carrito vacío — busque un producto abajo',
+                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF94A3B8)),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  itemCount: estado.detalles.length,
+                                  separatorBuilder: (_, __) =>
+                                      const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                                  itemBuilder: (context, i) {
+                                    final item = estado.detalles[i];
+                                    final nombre =
+                                        (item['productoNombre'] as String?)?.trim().isNotEmpty == true
+                                            ? (item['productoNombre'] as String).trim()
+                                            : 'Producto';
+                                    final cant = (item['cantidad'] as num?)?.toDouble() ?? 0.0;
+                                    final precio = (item['precioUnitario'] as num?)?.toDouble() ?? 0.0;
+                                    final descM = (item['montoDescuento'] as num?)?.toDouble() ?? 0.0;
+                                    final descP = (item['descuentoPorcentaje'] as num?)?.toDouble() ?? 0.0;
+                                    final sub = (item['subtotal'] as num?)?.toDouble() ?? (cant * precio);
+                                    final tasa = (item['tasaImpuesto'] as num?)?.toDouble() ?? 0.0;
+                                    final itbisLinea = sub * (tasa > 1 ? tasa / 100.0 : tasa);
+                                    final productoId = item['productoId'] is int
+                                        ? item['productoId'] as int
+                                        : int.tryParse('${item['productoId'] ?? ''}');
+                                    final tieneDesc = descP > 0 || descM > 0;
+                                    final cantLabel = cant % 1 == 0
+                                        ? cant.toInt().toString()
+                                        : cant.toStringAsFixed(2);
+                                    final String descLabel;
+                                    if (descP > 0) {
+                                      descLabel = '${descP.toStringAsFixed(0)}%';
+                                    } else if (descM > 0 && (cant * precio) > 0) {
+                                      descLabel = '${((descM / (cant * precio)) * 100).toStringAsFixed(0)}%';
+                                    } else {
+                                      descLabel = '0%';
+                                    }
+                                    final bg = i.isEven ? Colors.white : const Color(0xFFF8FAFC);
+
+                                    return Container(
+                                      color: bg,
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                                      child: Table(
+                                        columnWidths: const {
+                                          0: FlexColumnWidth(3),
+                                          1: FixedColumnWidth(64),
+                                          2: FixedColumnWidth(80),
+                                          3: FixedColumnWidth(48),
+                                          4: FixedColumnWidth(76),
+                                          5: FixedColumnWidth(84),
+                                          6: FixedColumnWidth(28),
+                                        },
+                                        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                        children: [
+                                          TableRow(
+                                            children: [
+                                              Text(
+                                                nombre,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 12.5,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color(0xFF0F172A),
+                                                  height: 1.2,
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  if (productoId != null)
+                                                    InkWell(
+                                                      onTap: () {
+                                                        final n = cant <= 1
+                                                            ? (cant > 0.001 ? cant - 0.5 : 0.0)
+                                                            : cant - 1;
+                                                        ref.read(ventaBorradorProvider.notifier).cambiarCantidad(
+                                                              productoId,
+                                                              n < 0.001 ? 0.0 : n,
+                                                            );
+                                                      },
+                                                      child: const Icon(Icons.remove, size: 13, color: Color(0xFF64748B)),
+                                                    ),
+                                                  Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                                                    child: Text(
+                                                      cantLabel,
+                                                      style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                                                    ),
+                                                  ),
+                                                  if (productoId != null)
+                                                    InkWell(
+                                                      onTap: () {
+                                                        ref.read(ventaBorradorProvider.notifier).cambiarCantidad(
+                                                              productoId,
+                                                              cant + 1,
+                                                            );
+                                                      },
+                                                      child: const Icon(Icons.add, size: 13, color: Color(0xFF0F766E)),
+                                                    ),
+                                                ],
+                                              ),
+                                              Text(
+                                                formatRd(precio),
+                                                textAlign: TextAlign.right,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                                              ),
+                                              InkWell(
+                                                onTap: productoId == null
+                                                    ? null
+                                                    : () => _abrirDescuentoLineaCotizacion(
+                                                          context,
+                                                          ref,
+                                                          productoId,
+                                                          item,
+                                                        ),
+                                                child: Text(
+                                                  descLabel,
+                                                  textAlign: TextAlign.right,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 11.5,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: tieneDesc
+                                                        ? const Color(0xFF059669)
+                                                        : const Color(0xFF64748B),
+                                                  ),
+                                                ),
+                                              ),
+                                              Text(
+                                                formatRd(itbisLinea),
+                                                textAlign: TextAlign.right,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 11.5,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color(0xFF475569),
+                                                ),
+                                              ),
+                                              Text(
+                                                formatRd(sub),
+                                                textAlign: TextAlign.right,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                              productoId == null
+                                                  ? const SizedBox.shrink()
+                                                  : InkWell(
+                                                      onTap: () {
+                                                        ref.read(ventaBorradorProvider.notifier).quitarProducto(productoId);
+                                                      },
+                                                      child: const Icon(
+                                                        Icons.delete_outline,
+                                                        size: 17,
+                                                        color: Color(0xFFDC2626),
+                                                      ),
+                                                    ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+// Total línea carrito
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: const BoxDecoration(
+                      border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+                    ),
+                    child: Row(
+                      children: [
+                        const Text('TOTAL', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: Color(0xFF475569))),
+                        const Spacer(),
+                        Text(formatRd(estado.montoTotal), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: Color(0xFF0F172A))),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Buscador de productos (abajo, como la guía)
+                  PanelProductos(alAgregar: _agregarProductoACotizacion),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          // ── DERECHA: Cierre de operación ──
+          SizedBox(
+            width: 230,
+            child: _posCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Cierre de operación',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _posCierreField('Subtotal (RD\$)', formatRd(estado.subtotal)),
+                  const SizedBox(height: 8),
+                  _posCierreField(
+                    'Descuento',
+                    estado.montoDescuento > 0 ? '- ${formatRd(estado.montoDescuento)}' : formatRd(0),
+                  ),
+                  const SizedBox(height: 8),
+                  _posCierreField('ITBIS', formatRd(estado.itbis)),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'TOTAL',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF64748B),
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          formatRd(estado.montoTotal),
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () => _abrirDescuentoGeneralCotizacion(context, ref),
+                    icon: const Icon(Icons.discount_outlined, size: 18),
+                    label: Text(
+                      estado.montoDescuento > 0 ? 'Editar descuento' : 'Aplicar descuento',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    style: TextButton.styleFrom(foregroundColor: const Color(0xFF0F766E)),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 52,
+                    child: Builder(
+                      builder: (context) {
+                        final simplificado = ref.watch(modoColmadoProvider);
+                        final onTap = !puedeGenerar || _guardando
+                            ? null
+                            : simplificado
+                                ? _onGenerarVentaSimplificada
+                                : () => _guardarCotizacion(esCredito: _esCredito);
+                        final label = simplificado
+                            ? 'PROCESAR COBRO'
+                            : (_esCredito ? 'CREAR COTIZACIÓN (CR)' : 'CREAR COTIZACIÓN (C)');
+                        final bg = !puedeGenerar || _guardando
+                            ? const Color(0xFF94A3B8)
+                            : (_esCredito ? const Color(0xFFD97706) : const Color(0xFF0F766E));
+                        return ElevatedButton(
+                          onPressed: onTap,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: bg,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: _guardando
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : Text(
+                                  label,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13,
+                                    letterSpacing: 0.3,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _posCard({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _posMiniChip(IconData icon, String label, VoidCallback onTap) {
+    return Material(
+      color: const Color(0xFFF8FAFC),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: const Color(0xFF0F766E)),
+              const SizedBox(width: 4),
+              Text(label, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF0F172A))),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _posCierreField(String label, String value) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF64748B))),
+          const SizedBox(height: 2),
+          Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccesosSecundarios() {
+    Widget chip({
+      required IconData icon,
+      required String label,
+      required VoidCallback onTap,
+    }) {
+      return Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                _buildSeccionTipoYVencimiento(false),
-                const SizedBox(height: 16),
-                _buildSeccionCliente(estado, false),
-                const SizedBox(height: 16),
-                _buildSeccionDelivery(estado, false),
-                const SizedBox(height: 16),
-                _buildSeccionProductos(false),
-                const SizedBox(height: 16),
-                _buildListaItemsCarrito(estado, false),
+                Icon(icon, size: 16, color: const Color(0xFF0F766E)),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
               ],
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          flex: 4,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(0, 16, 16, 16),
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                _buildSeccionResumen(estado, false),
-                const SizedBox(height: 12),
-                _buildEnlaceHistorial(),
-              ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (AppBreakpoints.isDesktop(context)) ...[
+          const Text(
+            'Punto de venta',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF0F172A),
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Capture la venta: cliente · productos · delivery · contado o crédito',
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            chip(
+              icon: Icons.request_quote_outlined,
+              label: 'Historial cotizaciones',
+              onTap: () => context.push('/ventas/cotizaciones/historial'),
+            ),
+            chip(
+              icon: Icons.receipt_long_outlined,
+              label: 'Historial ventas',
+              onTap: () => context.push('/ventas/historial'),
+            ),
+            chip(
+              icon: Icons.inventory_2_outlined,
+              label: 'Consultar stock',
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => const ConsultaStockLecturaSheet(),
+                );
+              },
+            ),
+            chip(
+              icon: Icons.calculate_outlined,
+              label: 'Simular crédito',
+              onTap: () => context.push('/ventas/simulador-credito'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+
+  /// Contado / Crédito + Vence — pensado para columna izquierda del POS (ancho completo, sin truncar).
+
+  Widget _buildPosVendedorDropdown(VentaBorradorState estado) {
+    final asyncUsers = ref.watch(posUsuariosVentaProvider);
+    final sesion = ref.watch(sesionProvider);
+    final currentId = estado.usuarioId;
+
+    return asyncUsers.when(
+      loading: () => Container(
+        height: 44,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: const Text('Cargando…', style: TextStyle(color: Color(0xFF94A3B8))),
+      ),
+      error: (_, __) => Container(
+        height: 44,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Text(
+          sesion?.nombre ?? 'Usuario actual',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      data: (users) {
+        // Solo usuarios con rol Vendedor (los crea el admin en Usuarios)
+        final lista = users
+            .where((u) {
+              final r = u.rol.toLowerCase().trim();
+              return r == 'vendedor' || r.contains('vend');
+            })
+            .toList();
+
+        final ids = lista.map((u) => u.id).toSet();
+        // Solo un id que exista en la lista de vendedores
+        final int? value = ids.contains(currentId)
+            ? currentId
+            : (lista.isNotEmpty ? lista.first.id : null);
+        // Si el borrador tenía un admin, alinear al primer vendedor
+        if (value != null && value != currentId) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(ventaBorradorProvider.notifier).establecerUsuarioId(value);
+          });
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<int>(
+              isExpanded: true,
+              value: value,
+              hint: const Text(
+                'Seleccionar…',
+                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+              ),
+              icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF64748B)),
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F172A),
+              ),
+              items: lista
+                  .map(
+                    (u) => DropdownMenuItem<int>(
+                      value: u.id,
+                      child: Text(
+                        '${u.nombre}${u.apellido != null && u.apellido!.isNotEmpty ? ' ${u.apellido}' : ''} · ${u.rol}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (id) {
+                if (id == null) return;
+                ref.read(ventaBorradorProvider.notifier).establecerUsuarioId(id);
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPosTipoPagoYVence() {
+    Widget chip({
+      required bool credito,
+      required String label,
+      required IconData icon,
+    }) {
+      final sel = _esCredito == credito;
+      final color = credito ? const Color(0xFFD97706) : const Color(0xFF0F766E);
+      return Expanded(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              setState(() => _esCredito = credito);
+              ref.read(ventaBorradorProvider.notifier).establecerFormaPago(esCredito: credito);
+            },
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: sel ? color.withValues(alpha: 0.12) : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: sel ? color : const Color(0xFFE2E8F0),
+                  width: sel ? 1.8 : 1,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 18, color: sel ? color : const Color(0xFF64748B)),
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: sel ? color : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            chip(
+              credito: false,
+              label: 'Contado',
+              icon: Icons.payments_outlined,
+            ),
+            const SizedBox(width: 8),
+            chip(
+              credito: true,
+              label: 'Crédito',
+              icon: Icons.schedule,
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            onTap: _seleccionarVencimiento,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF0F766E)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Vencimiento',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _fechaVencimientoSeleccionada != null
+                              ? '${_fechaVencimientoSeleccionada!.day.toString().padLeft(2, '0')}/${_fechaVencimientoSeleccionada!.month.toString().padLeft(2, '0')}/${_fechaVencimientoSeleccionada!.year}'
+                              : 'Opcional',
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, size: 20, color: Color(0xFF94A3B8)),
+                ],
+              ),
             ),
           ),
         ),
@@ -758,16 +1732,20 @@ class _NuevaVentaBorradorPageState
           child: Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: clienteSeleccionado
+                      ? const Color(0xFF0F766E)
+                      : const Color(0xFF0F766E).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(11),
                 ),
-                child: const Icon(
-                  Icons.person_outline,
+                child: Icon(
+                  clienteSeleccionado ? Icons.person : Icons.person_add_alt_1,
                   size: 22,
-                  color: AppColors.primary,
+                  color: clienteSeleccionado
+                      ? Colors.white
+                      : const Color(0xFF0F766E),
                 ),
               ),
               const SizedBox(width: 12),
@@ -892,11 +1870,20 @@ class _NuevaVentaBorradorPageState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Agregar productos',
-          style: AppTypography.labelMedium.copyWith(
-            fontWeight: FontWeight.w600,
-            fontSize: esPantallaPequena ? 13 : 14,
-            color: AppColors.textPrimary,
+          'Productos',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: esPantallaPequena ? 14 : 15,
+            color: const Color(0xFF0F172A),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Busque por nombre, código o código de barras',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: esPantallaPequena ? 11.5 : 12.5,
+            color: const Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 8),
@@ -1183,26 +2170,45 @@ class _NuevaVentaBorradorPageState
     bool esPantallaPequena,
   ) {
     final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
-    final tamanoTotal = esPantallaPequena ? 20.0 : 22.0;
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(esPantallaPequena ? 14 : 16),
+      padding: EdgeInsets.all(esPantallaPequena ? 14 : 18),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Resumen',
-            style: AppTypography.labelMedium.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: esPantallaPequena ? 13 : 14,
-              color: AppColors.textPrimary,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F766E),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Resumen de la operación',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: esPantallaPequena ? 13.5 : 14.5,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           _filaResumen('Subtotal', formatRd(estado.subtotal), tamanoCuerpo),
@@ -1261,18 +2267,20 @@ class _NuevaVentaBorradorPageState
             children: [
               Text(
                 'TOTAL',
-                style: AppTypography.h4.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: esPantallaPequena ? 15 : 16,
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: esPantallaPequena ? 14 : 15,
+                  color: const Color(0xFF64748B),
+                  letterSpacing: 0.6,
                 ),
               ),
               Text(
                 formatRd(estado.montoTotal),
-                style: AppTypography.h3.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: tamanoTotal,
-                  color: AppColors.primary,
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: esPantallaPequena ? 20.0 : 24.0,
+                  color: const Color(0xFF0F766E),
+                  letterSpacing: -0.4,
                 ),
               ),
             ],
@@ -1317,8 +2325,8 @@ class _NuevaVentaBorradorPageState
     return Center(
       child: TextButton.icon(
         icon: const Icon(Icons.history, size: 18),
-        label: const Text('Ver Historial de ventas'),
-        onPressed: () => context.push('/ventas/cotizaciones/historial'),
+        label: const Text('Ver historial de ventas'),
+        onPressed: () => context.push('/ventas/historial'),
         style: TextButton.styleFrom(foregroundColor: AppColors.primary),
       ),
     );
@@ -1329,246 +2337,92 @@ class _NuevaVentaBorradorPageState
     bool puedeGenerar,
     bool esPantallaPequena,
   ) {
+    // Desktop: CTA en panel "Cierre de operación" (3 columnas)
     if (!esPantallaPequena) {
-      return Align(
-        alignment: Alignment.centerRight,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 24, 12),
-          child: SafeArea(
-            top: false,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 12,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 190,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'TOTAL',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          formatRd(estado.montoTotal),
-                          style: AppTypography.h3.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  SizedBox(
-                    width: 280,
-                    height: 52,
-                    child: Builder(
-                      builder: (context) {
-                        final simplificado = ref.watch(modoColmadoProvider);
-                        final onTap = !puedeGenerar || _guardando
-                            ? null
-                            : simplificado
-                            ? _onGenerarVentaSimplificada
-                            : () => _guardarCotizacion(esCredito: _esCredito);
-                        final label = simplificado
-                            ? 'GENERAR VENTA'
-                            : (_esCredito
-                                  ? 'Crear cotización (CR)'
-                                  : 'Crear cotización (C)');
-                        final bg = simplificado
-                            ? AppColors.primary
-                            : (_esCredito
-                                  ? AppColors.warning
-                                  : AppColors.primary);
-                        return ElevatedButton(
-                          onPressed: onTap,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: bg,
-                            foregroundColor: AppColors.white,
-                            disabledBackgroundColor: AppColors.grey300,
-                            disabledForegroundColor: AppColors.grey500,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: _guardando
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2.5,
-                                  ),
-                                )
-                              : FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    label,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
-    final alturaBoton = esPantallaPequena ? 52.0 : 56.0;
-    final tamanoTotal = esPantallaPequena ? 18.0 : 20.0;
-    final tamanoBoton = esPantallaPequena ? 14.0 : 15.0;
+    // Móvil: barra inferior
+    final simplificado = ref.watch(modoColmadoProvider);
+    final onTap = !puedeGenerar || _guardando
+        ? null
+        : simplificado
+            ? _onGenerarVentaSimplificada
+            : () => _guardarCotizacion(esCredito: _esCredito);
+    final label = simplificado
+        ? 'GENERAR VENTA'
+        : (_esCredito ? 'Crear cotización (CR)' : 'Crear cotización (C)');
+    final bg = simplificado
+        ? AppColors.primary
+        : (_esCredito ? AppColors.warning : AppColors.primary);
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(
-        esPantallaPequena ? 12 : 16,
-        10,
-        esPantallaPequena ? 12 : 16,
-        esPantallaPequena ? 12 : 14,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: const Border(
-          top: BorderSide(color: AppColors.border, width: 1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+    return Material(
+      elevation: 8,
+      color: AppColors.white,
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'TOTAL',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: esPantallaPequena ? 11 : 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    formatRd(estado.montoTotal),
-                    style: AppTypography.h3.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: tamanoTotal,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: SizedBox(
-                height: alturaBoton,
-                child: Builder(
-                  builder: (context) {
-                    final simplificado = ref.watch(modoColmadoProvider);
-                    final onTap = !puedeGenerar || _guardando
-                        ? null
-                        : simplificado
-                        ? _onGenerarVentaSimplificada
-                        : () => _guardarCotizacion(esCredito: _esCredito);
-                    final label = simplificado
-                        ? 'GENERAR VENTA'
-                        : (_esCredito
-                              ? 'Crear cotización (CR)'
-                              : 'Crear cotización (C)');
-                    final bg = simplificado
-                        ? AppColors.primary
-                        : (_esCredito ? AppColors.warning : AppColors.primary);
-                    return ElevatedButton(
-                      onPressed: onTap,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: bg,
-                        foregroundColor: AppColors.white,
-                        disabledBackgroundColor: AppColors.grey300,
-                        disabledForegroundColor: AppColors.grey500,
-                        elevation: 0,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: esPantallaPequena ? 8 : 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'TOTAL',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
                       ),
-                      child: _guardando
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                label,
-                                maxLines: 1,
-                                softWrap: false,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: esPantallaPequena
-                                      ? 12
-                                      : tamanoBoton,
-                                ),
-                              ),
-                            ),
-                    );
-                  },
+                    ),
+                    Text(
+                      formatRd(estado.montoTotal),
+                      style: AppTypography.h4.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: onTap,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: bg,
+                    foregroundColor: AppColors.white,
+                    disabledBackgroundColor: AppColors.grey300,
+                    disabledForegroundColor: AppColors.grey500,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _guardando
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          label,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
 
   Future<void> _abrirDescuentoLineaCotizacion(
     BuildContext context,

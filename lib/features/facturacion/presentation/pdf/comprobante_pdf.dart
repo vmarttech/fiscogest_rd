@@ -1053,9 +1053,7 @@ class ComprobantePdf {
     final showMail = empresa?.docMostrarCorreo ?? true;
     final showCliente = empresa?.docMostrarCliente ?? true;
     final showNcf = !simple && (empresa?.docMostrarNcf ?? true);
-    final showItbis = !simple
-        ? (empresa?.docMostrarItbisDesglose ?? true)
-        : (v.itbis > 0.001);
+    final showItbis = !simple && (empresa?.docMostrarItbisDesglose ?? true);
     final pie = (empresa?.docPiePagina ?? '').trim();
 
     final telEmp = (empresa?.telefono ?? emisorTel).trim();
@@ -1174,13 +1172,15 @@ class ComprobantePdf {
           cant.toStringAsFixed(2),
           _money(precio),
           (_money(sub) +
-              sufijoTasaLinea(
-                d.tasaImpuesto,
-                ceroEsExento: lineasCeroSonExentas(
-                  v.detalles.map((e) => e.tasaImpuesto),
-                  v.itbis,
-                ),
-              )),
+              (simple
+                  ? ''
+                  : sufijoTasaLinea(
+                      d.tasaImpuesto,
+                      ceroEsExento: lineasCeroSonExentas(
+                        v.detalles.map((e) => e.tasaImpuesto),
+                        v.itbis,
+                      ),
+                    ))),
         ),
       );
       if (d.montoDescuento > 0.001) {
@@ -1300,7 +1300,7 @@ class ComprobantePdf {
           gap(4),
         ],
         kv('Cotización:', cotizacion),
-        if (ncf.isNotEmpty && (showNcf || simple))
+        if (ncf.isNotEmpty && showNcf)
           kv(ncf.startsWith('E') ? 'e-NCF:' : 'NCF:', ncf),
         kv('Fecha:', fechaStr),
         kv('Status:', status),

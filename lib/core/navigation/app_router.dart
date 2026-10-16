@@ -33,6 +33,9 @@ import 'package:fiscogest_rd/features/seguridad/presentation/pages/recuperar_cla
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_contenedor_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cotizaciones_historial_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/ventas_historial_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/venta_detalle_page.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/simulador_credito_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
@@ -301,6 +304,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'cotizaciones/nueva',
             builder: (_, __) => const AppShell(child: NuevaVentaBorradorPage()),
+          ),
+          GoRoute(
+            path: 'historial/detalle',
+            name: VentaDetallePage.routeName,
+            builder: (context, state) {
+              final extra = state.extra;
+              final venta = extra is Venta ? extra : null;
+              final idStr = state.uri.queryParameters['id'];
+              return AppShell(
+                child: VentaDetallePage(
+                  venta: venta,
+                  ventaId: idStr != null ? int.tryParse(idStr) : null,
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: 'historial',
+            name: VentasHistorialPage.routeName,
+            builder: (_, __) => const AppShell(child: VentasHistorialPage()),
           ),
           GoRoute(
             path: 'cotizaciones/historial',

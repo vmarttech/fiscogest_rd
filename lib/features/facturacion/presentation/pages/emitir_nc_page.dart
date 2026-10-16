@@ -102,6 +102,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
 
     return AppScaffold(
       title: 'EMITIR NOTA DE CRÉDITO',
+      showAppBar: !desktop,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {

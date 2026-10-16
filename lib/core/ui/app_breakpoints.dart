@@ -5,7 +5,7 @@ abstract class AppBreakpoints {
   static const double mobileLarge = 480;
   static const double tablet = 768;
   static const double tabletLarge = 1024;
-  static const double desktop = 1280;
+  static const double desktop = 1024;
   static const double desktopLarge = 1440;
 
   static bool isMobile(BuildContext context) =>

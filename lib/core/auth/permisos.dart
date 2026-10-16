@@ -14,9 +14,12 @@ bool rutaPermitida(String path, UsuarioSesion? sesion) {
 
   final rol = normalizarRol(sesion.rol);
 
-  // Cajero: ÚNICAMENTE cobro de caja
+  // Cajero: estación de caja + cobro + cuentas por cobrar
   if (rol == 'Cajero') {
-    return p == '/ventas/cobro' || p.startsWith('/ventas/cobro/');
+    return p == '/ventas/cobro' ||
+        p.startsWith('/ventas/cobro/') ||
+        p == '/ventas/cobrar' ||
+        p.startsWith('/ventas/cobrar/');
   }
 
   final required = permisoParaRuta(p);

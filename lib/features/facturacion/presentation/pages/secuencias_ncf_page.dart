@@ -15,8 +15,10 @@ class SecuenciasNcfPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(secuenciasNcfListProvider);
 
+    final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
       title: 'SECUENCIAS NCF',
+      showAppBar: !desktop,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {

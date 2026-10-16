@@ -585,10 +585,13 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
     final simplificado = ref.watch(modoColmadoProvider);
 
     void irNuevaCotizacion() => context.push('/ventas/cotizaciones/nueva');
-    void irHistorial() {
+    void irHistorialVentas() {
       ref
           .read(ventasNavegacionProvider.notifier)
           .cambiarVista(VistaActual.historial);
+    }
+    void irHistorialCotizaciones() {
+      context.push('/ventas/cotizaciones/historial');
     }
 
     void irSimuladorCredito() {
@@ -618,14 +621,22 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
       runSpacing: isMobile ? 8 : 12,
       tileHeight: isMobile ? 72 : 168,
       children: [
-        if (isMobile)
+        if (isMobile) ...[
           AppHubCard(
-            icon: Icons.history_rounded,
-            title: 'Historial',
-            subtitle: simplificado ? 'Ventas del día' : 'Cotizaciones y ventas',
+            icon: Icons.receipt_long_rounded,
+            title: 'Historial de ventas',
+            subtitle: simplificado ? 'Ventas del día' : 'Solo ventas cobradas',
             color: AppColors.info,
-            onTap: irHistorial,
+            onTap: irHistorialVentas,
           ),
+          AppHubCard(
+            icon: Icons.request_quote_outlined,
+            title: 'Historial de cotizaciones',
+            subtitle: 'Presupuestos y estados',
+            color: AppColors.primary,
+            onTap: irHistorialCotizaciones,
+          ),
+        ],
         AppHubCard(
           icon: Icons.inventory_2_outlined,
           title: 'Consultar stock',
@@ -668,7 +679,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                 Expanded(
                   flex: 2,
                   child: _PosContextoCard(
-                    onHistorial: irHistorial,
+                    onHistorial: irHistorialVentas,
                     isMobile: false,
                     simplificado: simplificado,
                   ),
@@ -680,7 +691,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
             if (!isMobile) ...[
               const SizedBox(height: 14),
               _PosContextoCard(
-                onHistorial: irHistorial,
+                onHistorial: irHistorialVentas,
                 simplificado: simplificado,
               ),
             ],
@@ -888,7 +899,7 @@ class _PosContextoCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Historial',
+                      'Historial de ventas',
                       style: AppTypography.bodyLarge.copyWith(
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
@@ -900,7 +911,7 @@ class _PosContextoCard extends StatelessWidget {
                       Text(
                         simplificado
                             ? 'Ventas y pedidos recientes.'
-                            : 'Cotizaciones y ventas del vendedor.',
+                            : 'Ventas cobradas e historial de caja.',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textPrimary.withValues(alpha: 0.75),
                           height: 1.35,
@@ -910,7 +921,7 @@ class _PosContextoCard extends StatelessWidget {
                       Text(
                         simplificado
                             ? 'Ventas recientes'
-                            : 'Cotizaciones y ventas',
+                            : 'Solo ventas',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 11,

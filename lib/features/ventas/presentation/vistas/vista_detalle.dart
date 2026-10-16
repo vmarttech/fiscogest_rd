@@ -168,16 +168,39 @@ class _MostrarDetalleVenta extends ConsumerWidget {
 
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
-      final codigoTicket2 = venta.id == null
+      // Misma ruta que Caja: venta completa + ComprobantePdf + empresa
+      Venta v = venta;
+      if (v.id != null) {
+        final full = await ref
+            .read(venta_providers.ventasRepositoryProvider)
+            .obtenerVentaPorId(v.id!);
+        if (full != null) v = full;
+      }
+      if (v.detalles.isEmpty) {
+        if (context.mounted) {
+          FiscoGestNotifications.show(
+            const SnackBar(
+              content: Text(
+                'Esta venta no tiene líneas de producto. No se puede reimprimir.',
+              ),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+      final emp = ref.read(configuracionControllerProvider).valueOrNull;
+      final codigoTicket2 = v.id == null
           ? null
           : await ref
                 .read(ecfeRepositoryProvider)
-                .codigoSeguridadPorVenta(venta.id!);
+                .codigoSeguridadPorVenta(v.id!);
       final ambienteTicket2 =
           (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
       await ComprobantePdf.imprimirFactura(
-        venta,
-        empresa: ref.read(configuracionControllerProvider).valueOrNull,
+        v,
+        empresa: emp,
         codigoSeguridad: codigoTicket2,
         ambienteDgii: ambienteTicket2,
       );
