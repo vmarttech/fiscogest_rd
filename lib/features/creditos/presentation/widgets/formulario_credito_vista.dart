@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
@@ -564,6 +565,47 @@ class _FormularioCreditoVistaState
           'Cliente',
           widget.estadoVenta.clienteNombre ?? 'Consumidor Final',
         ),
+        if ((widget.estadoVenta.clienteId ?? 0) > 0) ...[
+          const SizedBox(height: AppSpacing.s),
+          FutureBuilder(
+            future: ref
+                .read(clienteRepositoryProvider)
+                .obtenerClientePorId(widget.estadoVenta.clienteId!),
+            builder: (context, snap) {
+              final c = snap.data;
+              if (c == null) return const SizedBox.shrink();
+              final lim = c.limiteCuotaMensual;
+              final ing = c.ingresoMensual;
+              if (lim <= 0 && ing <= 0) {
+                return Text(
+                  'Sin límite de cuota definido en ficha del cliente',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.warning,
+                  ),
+                );
+              }
+              final pct = ing > 0 ? (lim / ing * 100) : 0.0;
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDFA),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFF99F6E4)),
+                ),
+                child: Text(
+                  'Límite cuota: ${_formatearMonto(lim)}'
+                  '${ing > 0 ? ' (${pct.toStringAsFixed(0)}% ingreso ${_formatearMonto(ing)})' : ''}'
+                  '${c.saldoPendiente > 0 ? '\nSaldo cartera: ${_formatearMonto(c.saldoPendiente)}' : ''}',
+                  style: AppTypography.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0F766E),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
         const SizedBox(height: AppSpacing.s),
         _buildFilaDato(
           'Total de venta',

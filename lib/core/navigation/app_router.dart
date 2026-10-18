@@ -39,6 +39,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/simulador_credito_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_cxc_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/credito_inicio_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart';
@@ -342,6 +343,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: CobrarPage.routeName,
             builder: (_, __) => const AppShell(child: CobrarPage()),
           ),
+
+            GoRoute(
+              path: 'cobro/cxc/:id',
+              name: CobroCxcPage.routeName,
+              builder: (context, state) {
+                final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+                return AppShell(child: CobroCxcPage(cuentaId: id));
+              },
+            ),
+
           GoRoute(
             path: 'cobro',
             name: CajaInicioPage.routeName,

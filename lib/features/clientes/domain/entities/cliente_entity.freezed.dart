@@ -30,6 +30,8 @@ mixin _$ClienteEntity {
   String get direccion => throw _privateConstructorUsedError;
   bool get activo => throw _privateConstructorUsedError;
   double get saldoPendiente => throw _privateConstructorUsedError;
+  double get ingresoMensual => throw _privateConstructorUsedError;
+  double get limiteCuotaMensual => throw _privateConstructorUsedError;
 
   /// Serializes this ClienteEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -58,6 +60,8 @@ abstract class $ClienteEntityCopyWith<$Res> {
     String direccion,
     bool activo,
     double saldoPendiente,
+    double ingresoMensual,
+    double limiteCuotaMensual,
   });
 }
 
@@ -85,6 +89,8 @@ class _$ClienteEntityCopyWithImpl<$Res, $Val extends ClienteEntity>
     Object? direccion = null,
     Object? activo = null,
     Object? saldoPendiente = null,
+    Object? ingresoMensual = null,
+    Object? limiteCuotaMensual = null,
   }) {
     return _then(
       _value.copyWith(
@@ -124,6 +130,14 @@ class _$ClienteEntityCopyWithImpl<$Res, $Val extends ClienteEntity>
                 ? _value.saldoPendiente
                 : saldoPendiente // ignore: cast_nullable_to_non_nullable
                       as double,
+            ingresoMensual: null == ingresoMensual
+                ? _value.ingresoMensual
+                : ingresoMensual // ignore: cast_nullable_to_non_nullable
+                      as double,
+            limiteCuotaMensual: null == limiteCuotaMensual
+                ? _value.limiteCuotaMensual
+                : limiteCuotaMensual // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
@@ -149,6 +163,8 @@ abstract class _$$ClienteEntityImplCopyWith<$Res>
     String direccion,
     bool activo,
     double saldoPendiente,
+    double ingresoMensual,
+    double limiteCuotaMensual,
   });
 }
 
@@ -175,6 +191,8 @@ class __$$ClienteEntityImplCopyWithImpl<$Res>
     Object? direccion = null,
     Object? activo = null,
     Object? saldoPendiente = null,
+    Object? ingresoMensual = null,
+    Object? limiteCuotaMensual = null,
   }) {
     return _then(
       _$ClienteEntityImpl(
@@ -214,6 +232,14 @@ class __$$ClienteEntityImplCopyWithImpl<$Res>
             ? _value.saldoPendiente
             : saldoPendiente // ignore: cast_nullable_to_non_nullable
                   as double,
+        ingresoMensual: null == ingresoMensual
+            ? _value.ingresoMensual
+            : ingresoMensual // ignore: cast_nullable_to_non_nullable
+                  as double,
+        limiteCuotaMensual: null == limiteCuotaMensual
+            ? _value.limiteCuotaMensual
+            : limiteCuotaMensual // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -232,6 +258,8 @@ class _$ClienteEntityImpl implements _ClienteEntity {
     required this.direccion,
     this.activo = true,
     this.saldoPendiente = 0.0,
+    this.ingresoMensual = 0.0,
+    this.limiteCuotaMensual = 0.0,
   });
 
   factory _$ClienteEntityImpl.fromJson(Map<String, dynamic> json) =>
@@ -257,10 +285,16 @@ class _$ClienteEntityImpl implements _ClienteEntity {
   @override
   @JsonKey()
   final double saldoPendiente;
+  @override
+  @JsonKey()
+  final double ingresoMensual;
+  @override
+  @JsonKey()
+  final double limiteCuotaMensual;
 
   @override
   String toString() {
-    return 'ClienteEntity(id: $id, codigo: $codigo, nombre: $nombre, rncCedula: $rncCedula, telefono: $telefono, correo: $correo, direccion: $direccion, activo: $activo, saldoPendiente: $saldoPendiente)';
+    return 'ClienteEntity(id: $id, codigo: $codigo, nombre: $nombre, rncCedula: $rncCedula, telefono: $telefono, correo: $correo, direccion: $direccion, activo: $activo, saldoPendiente: $saldoPendiente, ingresoMensual: $ingresoMensual, limiteCuotaMensual: $limiteCuotaMensual)';
   }
 
   @override
@@ -280,7 +314,11 @@ class _$ClienteEntityImpl implements _ClienteEntity {
                 other.direccion == direccion) &&
             (identical(other.activo, activo) || other.activo == activo) &&
             (identical(other.saldoPendiente, saldoPendiente) ||
-                other.saldoPendiente == saldoPendiente));
+                other.saldoPendiente == saldoPendiente) &&
+            (identical(other.ingresoMensual, ingresoMensual) ||
+                other.ingresoMensual == ingresoMensual) &&
+            (identical(other.limiteCuotaMensual, limiteCuotaMensual) ||
+                other.limiteCuotaMensual == limiteCuotaMensual));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -296,6 +334,8 @@ class _$ClienteEntityImpl implements _ClienteEntity {
     direccion,
     activo,
     saldoPendiente,
+    ingresoMensual,
+    limiteCuotaMensual,
   );
 
   /// Create a copy of ClienteEntity
@@ -323,6 +363,8 @@ abstract class _ClienteEntity implements ClienteEntity {
     required final String direccion,
     final bool activo,
     final double saldoPendiente,
+    final double ingresoMensual,
+    final double limiteCuotaMensual,
   }) = _$ClienteEntityImpl;
 
   factory _ClienteEntity.fromJson(Map<String, dynamic> json) =
@@ -346,6 +388,10 @@ abstract class _ClienteEntity implements ClienteEntity {
   bool get activo;
   @override
   double get saldoPendiente;
+  @override
+  double get ingresoMensual;
+  @override
+  double get limiteCuotaMensual;
 
   /// Create a copy of ClienteEntity
   /// with the given fields replaced by the non-null parameter values.

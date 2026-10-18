@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_dao.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -332,6 +333,7 @@ class _NuevaVentaBorradorPageState
             : numeroGuardado;
         final nombreCli = estadoFinal.clienteNombre;
         ref.invalidate(listaCotizacionesProvider);
+      ref.invalidate(listaVentasProvider);
         _limpiarFormulario();
         if (ventaId != null && mounted) {
           await context.push(
@@ -363,6 +365,7 @@ class _NuevaVentaBorradorPageState
         ),
       );
       ref.invalidate(listaCotizacionesProvider);
+      ref.invalidate(listaVentasProvider);
       _limpiarFormulario();
     } catch (e) {
       if (!mounted) return;
@@ -458,6 +461,7 @@ class _NuevaVentaBorradorPageState
         ),
       );
       ref.invalidate(listaCotizacionesProvider);
+      ref.invalidate(listaVentasProvider);
       _limpiarFormulario();
     } catch (e) {
       if (!mounted) return;
@@ -635,6 +639,30 @@ class _NuevaVentaBorradorPageState
                                 color: Color(0xFF0F172A),
                               ),
                             ),
+                            if ((estado.clienteId ?? 0) > 0)
+                              FutureBuilder(
+                                future: ref
+                                    .read(clienteRepositoryProvider)
+                                    .obtenerClientePorId(estado.clienteId!),
+                                builder: (context, snap) {
+                                  final c = snap.data;
+                                  if (c == null || c.limiteCuotaMensual <= 0) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      'Límite cuota RD\$ ${c.limiteCuotaMensual.toStringAsFixed(0)}'
+                                      '${c.saldoPendiente > 0 ? ' · Saldo RD\$ ${c.saldoPendiente.toStringAsFixed(0)}' : ''}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF0F766E),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
@@ -1770,6 +1798,50 @@ class _NuevaVentaBorradorPageState
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (clienteSeleccionado)
+                      FutureBuilder(
+                        future: ref
+                            .read(clienteRepositoryProvider)
+                            .obtenerClientePorId(estado.clienteId!),
+                        builder: (context, snap) {
+                          final c = snap.data;
+                          if (c == null) return const SizedBox.shrink();
+                          final lim = c.limiteCuotaMensual;
+                          final saldo = c.saldoPendiente;
+                          if (lim <= 0 && saldo <= 0) {
+                            return Text(
+                              'Sin límite de cuota',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                              ),
+                            );
+                          }
+                          final partes = <String>[];
+                          if (lim > 0) {
+                            partes.add(
+                              'Límite cuota RD\$ ${lim.toStringAsFixed(0)}',
+                            );
+                          }
+                          if (saldo > 0) {
+                            partes.add(
+                              'Saldo RD\$ ${saldo.toStringAsFixed(0)}',
+                            );
+                          }
+                          return Text(
+                            partes.join(' · '),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: saldo > 0
+                                  ? AppColors.warning
+                                  : AppColors.primary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),

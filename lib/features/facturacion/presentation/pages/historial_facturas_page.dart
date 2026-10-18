@@ -396,6 +396,12 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const EnterprisePageHeader(
+                    title: 'Historial de facturas',
+                    subtitle: 'Comprobantes emitidos · detalle e impresión',
+                    showBack: true,
+                    backFallbackRoute: '/sales',
+                  ),
                   Text(
                     'Facturas emitidas',
                     style: AppTypography.h4.copyWith(

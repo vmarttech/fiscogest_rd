@@ -55,7 +55,7 @@ class FacturaServiceImpl implements IFacturaService {
       b.writeln('   Cant: ${d.cantidad}  x  ${_monto(d.precioUnitario)}');
       final sub = d.subtotalLinea ?? d.subtotal;
       b.writeln(
-        '   Subtotal: ${_monto(sub)}${sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))}',
+        '   Subtotal: ${_monto(sub)}${sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: false)}',
       );
       b.writeln('');
     }

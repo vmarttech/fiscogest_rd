@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:fiscogest_rd/features/creditos/domain/services/capacidad_pago_service.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credito_service.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart';
@@ -259,6 +261,74 @@ class _DetalleSolicitudCreditoPageState
           );
           return;
         }
+        // Límite de cuota: 30% ingresos (o límite aprobado en cliente)
+        final clienteRepo = ref.read(clienteRepositoryProvider);
+        final cliente = await clienteRepo.obtenerClientePorId(v.clienteId);
+        var limite = cliente?.limiteCuotaMensual ?? 0.0;
+        var ingresoCli = cliente?.ingresoMensual ?? 0.0;
+        // Si el cliente no tiene límite, usar ingreso del expediente × 30%
+        if (limite <= 0) {
+          try {
+            final exp2 = await ref.read(
+              expedienteCreditoPorVentaProvider((
+                ventaId: v.id!,
+                nombre: v.nombreCliente ?? '',
+                clienteId: v.clienteId,
+              )).future,
+            );
+            if (exp2.ingresoMensual > 0) {
+              ingresoCli = exp2.ingresoMensual;
+              limite = CapacidadPagoService.limiteCuotaSugerido(
+                ingresoMensual: exp2.ingresoMensual,
+              );
+              // Persistir sugerido en cliente si aún no tiene
+              if (cliente != null && cliente.limiteCuotaMensual <= 0) {
+                await clienteRepo.guardarCliente(
+                  cliente.copyWith(
+                    ingresoMensual: exp2.ingresoMensual,
+                    limiteCuotaMensual: limite,
+                  ),
+                );
+              }
+            }
+          } catch (_) {}
+        }
+        // Cuota del plan a aprobar
+        final abonoVal = _abono > 0 ? _abono : v.abonoInicial;
+        final capital = (v.montoTotal - abonoVal).clamp(0.0, double.infinity);
+        final nC = _numeroCuotas < 1 ? 1 : _numeroCuotas;
+        final cuotaPlan = nC <= 1
+            ? capital
+            : CalculadoraCreditoService.generarPlanPago(
+                capital: capital,
+                tasaMensual: _tasaMensual,
+                numeroCuotas: nC,
+                fechaPrimerVencimiento:
+                    _primerVencimiento ??
+                    DateTime.now().add(const Duration(days: 30)),
+              ).montoPorCuota;
+        if (!CapacidadPagoService.cuotaDentroDelLimite(
+          montoCuota: cuotaPlan,
+          limiteCuotaMensual: limite,
+        )) {
+          if (!mounted) return;
+          FiscoGestNotifications.show(
+            SnackBar(
+              content: Text(
+                CapacidadPagoService.mensajeExcede(
+                  montoCuota: cuotaPlan,
+                  limiteCuotaMensual: limite,
+                  ingresoMensual: ingresoCli,
+                ),
+              ),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 6),
+            ),
+          );
+          return;
+        }
+
         final conCond = v.copyWith(
           abonoInicial: _abono > 0 ? _abono : v.abonoInicial,
           vencimiento: _primerVencimiento ?? v.vencimiento,
@@ -593,8 +663,10 @@ class _DetalleSolicitudCreditoPageState
 
   @override
   Widget build(BuildContext context) {
+    final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
       title: 'SOLICITUD DE CRÉDITO',
+      showAppBar: !desktop,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
@@ -642,34 +714,53 @@ class _DetalleSolicitudCreditoPageState
         ? 1200
         : (AppBreakpoints.isTablet(context) ? 900 : 9999);
 
-    final cardDocumento = AppCard(
-      borderColor: AppColors.border,
+    final estadoLabel = v.estadoDocumento.name.toUpperCase();
+    final cardDocumento = Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            v.numeroCotizacion,
-            style: AppTypography.h4.copyWith(fontWeight: FontWeight.bold),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  'SOLICITUD DE CRÉDITO — EXPEDIENTE ÚNICO',
+                  style: AppTypography.h4.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    letterSpacing: 0.2,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: const Color(0xFFFCD34D)),
+                ),
+                child: Text(
+                  estadoLabel,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF92400E),
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+            ],
           ),
-          AppLayout.vS,
+          const SizedBox(height: 4),
           Text(
-            'Cliente: ${v.nombreCliente ?? "#${v.clienteId}"}',
-            style: AppTypography.bodyMedium,
-          ),
-          Text(
-            'Total: ${formatRd(v.montoTotal)}',
-            style: AppTypography.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
+            '${v.numeroCotizacion}  |  Cliente: ${v.nombreCliente ?? "#${v.clienteId}"}  |  Total: ${formatRd(v.montoTotal)}',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
             ),
-          ),
-          AppLayout.vS,
-          StatusChip(
-            label: v.estadoDocumento.name.toUpperCase(),
-            type: v.estadoDocumento == EstadoDocumento.aprobado
-                ? StatusChipType.success
-                : v.estadoDocumento == EstadoDocumento.enCredito
-                ? StatusChipType.warning
-                : StatusChipType.neutral,
           ),
         ],
       ),
@@ -708,6 +799,32 @@ class _DetalleSolicitudCreditoPageState
                       await ref
                           .read(solicitudCreditoRepositoryProvider)
                           .guardar(exp);
+                      // Sync ingreso + límite de cuota al cliente (sugerido 30% si no hay override)
+                      try {
+                        final repo = ref.read(clienteRepositoryProvider);
+                        final cli = await repo.obtenerClientePorId(v.clienteId);
+                        if (cli != null && exp.ingresoMensual > 0) {
+                          final pct = await ref
+                              .read(parametrosCreditoProvider.future)
+                              .then((p) => p.capacidadPagoPorcentaje)
+                              .catchError((_) => 0.30);
+                          final sugerido =
+                              CapacidadPagoService.limiteCuotaSugerido(
+                            ingresoMensual: exp.ingresoMensual,
+                            porcentaje: pct > 0 ? pct : 0.30,
+                          );
+                          // Solo autocompleta límite si el depto. aún no lo fijó
+                          final nuevoLimite = cli.limiteCuotaMensual > 0
+                              ? cli.limiteCuotaMensual
+                              : sugerido;
+                          await repo.guardarCliente(
+                            cli.copyWith(
+                              ingresoMensual: exp.ingresoMensual,
+                              limiteCuotaMensual: nuevoLimite,
+                            ),
+                          );
+                        }
+                      } catch (_) {}
                       ref.invalidate(
                         expedienteCreditoPorVentaProvider((
                           ventaId: v.id!,
@@ -739,152 +856,253 @@ class _DetalleSolicitudCreditoPageState
             },
           );
 
+    final abonoMostrarR = abonoMostrar;
+    final saldoR = saldo;
+    final cuotaTxt = _numeroCuotas > 1
+        ? formatRd(saldoR / _numeroCuotas)
+        : formatRd(saldoR);
+
+    Widget panelCard({required String title, Widget? trailing, required Widget child}) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                ),
+                if (trailing != null) trailing,
+              ],
+            ),
+            const Divider(height: 14, color: Color(0xFFF1F5F9)),
+            child,
+          ],
+        ),
+      );
+    }
+
+    Widget filaCond(String k, String v, {bool bold = false, Color? valueColor}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                k,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF475569),
+                ),
+              ),
+            ),
+            Text(
+              v,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+                color: valueColor ?? const Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final bloqueCondiciones = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionHeader(
-          title: 'Condiciones de crédito',
-          subtitle: 'Usa el mismo formulario de abono, tasa y cuotas',
-          actionLabel: puedeEditar ? 'Editar' : null,
-          onAction: puedeEditar && !_procesando
-              ? _abrirFormularioCondiciones
-              : null,
-        ),
-        AppCard(
-          borderColor: AppColors.border,
+        panelCard(
+          title: 'Resumen de Condiciones',
+          trailing: const Icon(Icons.calculate_outlined, size: 16, color: Color(0xFF94A3B8)),
           child: Column(
             children: [
-              AppLayout.filaDato(
-                etiqueta: 'Abono inicial',
-                valor: formatRd(abonoMostrar),
-              ),
-              AppLayout.filaDato(
-                etiqueta: 'Saldo a financiar',
-                valor: formatRd(saldo),
-              ),
-              AppLayout.filaDato(
-                etiqueta: 'N° cuotas',
-                valor: '$_numeroCuotas',
-              ),
-              AppLayout.filaDato(
-                etiqueta: 'Tasa mensual',
-                valor: _tasaMensual > 0
+              filaCond('Abono inicial', formatRd(abonoMostrarR)),
+              filaCond('Saldo a financiar', formatRd(saldoR), bold: true),
+              filaCond('N° cuotas', '$_numeroCuotas'),
+              filaCond(
+                'Tasa mensual',
+                _tasaMensual > 0
                     ? '${(_tasaMensual * 100).toStringAsFixed(2)}%'
-                    : (_cuentaBorrador != null ? '0%' : '—'),
-              ),
-              AppLayout.filaDato(
-                etiqueta: 'Cuota mensual',
-                valor: _numeroCuotas > 0 && saldo > 0
-                    ? formatRd(CalculadoraCreditoService.calcularCuotaFija(capital: saldo, tasaMensual: _tasaMensual, numeroCuotas: _numeroCuotas))
                     : '—',
               ),
-              AppLayout.filaDato(
-                etiqueta: 'Vencimiento',
-                valor: (_primerVencimiento ?? v.vencimiento) != null
-                    ? _fmtFecha.format(_primerVencimiento ?? v.vencimiento!)
-                    : '—',
+              filaCond('Cuota mensual', cuotaTxt, bold: true, valueColor: const Color(0xFF1D4ED8)),
+              filaCond(
+                'Vencimiento',
+                _primerVencimiento != null
+                    ? _fmtFecha.format(_primerVencimiento!)
+                    : (v.vencimiento != null
+                        ? _fmtFecha.format(v.vencimiento!)
+                        : '—'),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: puedeEditar && !_procesando
+                      ? _abrirFormularioCondiciones
+                      : null,
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  label: const Text(
+                    'EDITAR ABONO, PLAZO Y CUOTAS',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                  ),
+                ),
               ),
             ],
           ),
         ),
-        if (puedeEditar) ...[
-          AppLayout.vM,
-          SizedBox(
+        panelCard(
+          title: 'Resumen del Cliente',
+          child: Container(
             width: double.infinity,
-            height: 48,
-            child: OutlinedButton.icon(
-              onPressed: _procesando ? null : _abrirFormularioCondiciones,
-              icon: const Icon(Icons.edit_calendar_outlined),
-              label: const Text('EDITAR ABONO, PLAZO Y CUOTAS'),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD1FAE5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFF6EE7B7)),
             ),
-          ),
-          AppLayout.vS,
-          ResponsiveRow(
-            breakpoint: 600,
-            child1: OutlinedButton.icon(
-              onPressed: _procesando ? null : _imprimirSolicitud,
-              icon: const Icon(Icons.description_outlined, size: 18),
-              label: const Text('SOLICITUD'),
-            ),
-            child2: OutlinedButton.icon(
-              onPressed: _procesando ? null : _imprimirContrato,
-              icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-              label: const Text('CONTRATO'),
-            ),
-          ),
-          AppLayout.vS,
-          ResponsiveRow(
-            breakpoint: 600,
-            child1: OutlinedButton.icon(
-              onPressed: _procesando ? null : _enviarSolicitud,
-              icon: const Icon(Icons.email_outlined, size: 18),
-              label: const Text('ENVIAR SOLICITUD'),
-            ),
-            child2: OutlinedButton.icon(
-              onPressed: _procesando ? null : _enviarContrato,
-              icon: const Icon(Icons.attach_email_outlined, size: 18),
-              label: const Text('ENVIAR CONTRATO'),
-            ),
-          ),
-          AppLayout.vL,
-          AppButton(
-            text: 'APROBAR CRÉDITO',
-            icon: Icons.check_circle_outline,
-            onPressed: _procesando
-                ? null
-                : () => _cambiarEstado(EstadoDocumento.aprobado),
-            isDisabled: _procesando,
-            width: double.infinity,
-          ),
-          AppLayout.vS,
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton.icon(
-              onPressed: _procesando
-                  ? null
-                  : () => _cambiarEstado(EstadoDocumento.anulado),
-              icon: const Icon(Icons.cancel_outlined),
-              label: const Text('RECHAZAR'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: const BorderSide(color: AppColors.error),
+            child: const Text(
+              'Score: — (complete expediente)',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF065F46),
               ),
             ),
           ),
-        ],
-        if (puedeReabrir) ...[
-          AppLayout.vM,
-          AppButton(
-            text: 'PASAR A ANÁLISIS DE CRÉDITO',
-            icon: Icons.assignment_turned_in_outlined,
-            onPressed: _procesando
-                ? null
-                : () => _cambiarEstado(EstadoDocumento.enCredito),
-            isDisabled: _procesando,
-            width: double.infinity,
+        ),
+        panelCard(
+          title: 'Acciones y Documentos',
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _procesando ? null : _imprimirSolicitud,
+                      icon: const Icon(Icons.picture_as_pdf, size: 16, color: Color(0xFFDC2626)),
+                      label: const Text('SOLICITUD', style: TextStyle(fontSize: 11)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _procesando ? null : _imprimirContrato,
+                      icon: const Icon(Icons.description_outlined, size: 16, color: Color(0xFF2563EB)),
+                      label: const Text('CONTRATO', style: TextStyle(fontSize: 11)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _procesando ? null : _enviarSolicitud,
+                      icon: const Icon(Icons.send_outlined, size: 16),
+                      label: const Text('ENVIAR SOLICITUD', style: TextStyle(fontSize: 10)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _procesando ? null : _enviarContrato,
+                      icon: const Icon(Icons.mail_outline, size: 16),
+                      label: const Text('ENVIAR CONTRATO', style: TextStyle(fontSize: 10)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          AppLayout.vS,
-          Text(
-            'Este CR- está en estado cotizado. Pásalo a análisis para editar condiciones y aprobar.',
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
+        ),
+        panelCard(
+          title: 'Decisión Final',
+          child: Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF047857),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: !puedeEditar || _procesando
+                      ? null
+                      : () => _cambiarEstado(EstadoDocumento.aprobado),
+                  icon: const Icon(Icons.check_circle, size: 18),
+                  label: const Text(
+                    'APROBAR CRÉDITO',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFDC2626),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: !puedeEditar || _procesando
+                      ? null
+                      : () => _cambiarEstado(EstadoDocumento.anulado),
+                  icon: const Icon(Icons.cancel, size: 18),
+                  label: const Text(
+                    'RECHAZAR CRÉDITO',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFF59E0B),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: _procesando
+                      ? null
+                      : () => _cambiarEstado(EstadoDocumento.enCredito),
+                  icon: const Icon(Icons.warning_amber_rounded, size: 18),
+                  label: const Text(
+                    'DEVOLVER PARA REVISIÓN',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-        if (!puedeEditar && !puedeReabrir) ...[
-          AppLayout.vL,
-          Text(
-            v.estadoDocumento == EstadoDocumento.aprobado
-                ? 'Aprobado. El cajero puede facturar en Caja.'
-                : 'Esta solicitud ya no está en análisis.',
-            textAlign: TextAlign.center,
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
+        ),
       ],
     );
 
@@ -897,7 +1115,31 @@ class _DetalleSolicitudCreditoPageState
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                cardDocumento,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/creditos/solicitudes');
+                  }
+                },
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label: const Text(
+                  'Volver',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.grey700,
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            cardDocumento,
                 AppLayout.vL,
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -906,9 +1148,9 @@ class _DetalleSolicitudCreditoPageState
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(flex: 3, child: bloqueExpediente),
+                          Expanded(flex: 2, child: bloqueExpediente),
                           AppLayout.hL,
-                          Expanded(flex: 2, child: bloqueCondiciones),
+                          Expanded(flex: 1, child: bloqueCondiciones),
                         ],
                       );
                     }

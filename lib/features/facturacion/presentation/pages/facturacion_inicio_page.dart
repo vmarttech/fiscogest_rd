@@ -166,12 +166,12 @@ class FacturacionInicioPage extends ConsumerWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
-                      childAspectRatio: 1.55,
+                      childAspectRatio: 1.45,
                       children: [
                         _KpiPill(
                           icon: Icons.receipt_long_outlined,
                           value: facturasHoyStr,
-                          label: 'FACTURAS HOY',
+                          label: 'FACTURAS',
                           bg: const Color(0xFFECFDF5),
                           fg: AppColors.success,
                         ),
@@ -179,21 +179,21 @@ class FacturacionInicioPage extends ConsumerWidget {
                           _KpiPill(
                             icon: Icons.note_alt_outlined,
                             value: ncHoyStr,
-                            label: 'NC HOY',
+                            label: 'NC',
                             bg: const Color(0xFFEFF6FF),
                             fg: AppColors.info,
                           ),
                           _KpiPill(
                             icon: Icons.qr_code_2_outlined,
                             value: ncfDisponiblesStr,
-                            label: 'NCF DISPONIBLES',
+                            label: 'NCF',
                             bg: const Color(0xFFF5F3FF),
                             fg: const Color(0xFF7C3AED),
                           ),
                           _KpiPill(
                             icon: Icons.warning_amber_rounded,
                             value: alertasStr,
-                            label: 'ALERTAS NCF',
+                            label: 'ALERTAS',
                             bg: const Color(0xFFFFF7ED),
                             fg: AppColors.warning,
                           ),
@@ -547,13 +547,17 @@ class _KpiPill extends StatelessWidget {
   final Color fg;
   @override
   Widget build(BuildContext context) {
-    // Copia 1:1 del lenguaje visual de _EnterpriseKpiCard (Dashboard)
     final color = fg;
+    final narrow = MediaQuery.sizeOf(context).width < 600;
+    final iconBox = narrow ? 36.0 : 46.0;
+    final iconSz = narrow ? 18.0 : 23.0;
+    final padH = narrow ? 10.0 : 14.0;
+    final padV = narrow ? 12.0 : 14.0;
     return Material(
       color: color.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: color.withValues(alpha: 0.08),
@@ -562,15 +566,15 @@ class _KpiPill extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 46,
-              height: 46,
+              width: iconBox,
+              height: iconBox,
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: BorderRadius.circular(11),
               ),
-              child: Icon(icon, color: Colors.white, size: 23),
+              child: Icon(icon, color: Colors.white, size: iconSz),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: narrow ? 8 : 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -579,7 +583,7 @@ class _KpiPill extends StatelessWidget {
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: narrow ? 11 : 13,
                       color: color,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.15,
@@ -587,24 +591,27 @@ class _KpiPill extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF0F172A),
-                      letterSpacing: -0.3,
-                      height: 1.1,
+                  const SizedBox(height: 2),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: narrow ? 16 : 18,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF0F172A),
+                        letterSpacing: -0.3,
+                        height: 1.1,
+                      ),
+                      maxLines: 1,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   Text(
                     'Hoy',
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: narrow ? 11 : 12.5,
                       color: color,
                       fontWeight: FontWeight.w700,
                     ),

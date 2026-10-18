@@ -15,6 +15,8 @@ class ClienteEntity with _$ClienteEntity {
     required String direccion,
     @Default(true) bool activo,
     @Default(0.0) double saldoPendiente,
+    @Default(0.0) double ingresoMensual,
+    @Default(0.0) double limiteCuotaMensual,
   }) = _ClienteEntity;
 
   factory ClienteEntity.fromJson(Map<String, dynamic> json) =>

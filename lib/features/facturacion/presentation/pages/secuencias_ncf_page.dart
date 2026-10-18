@@ -42,22 +42,31 @@ class SecuenciasNcfPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Rangos autorizados DGII',
-                        style: AppTypography.h4.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      const EnterprisePageHeader(
+                        title: 'Secuencias NCF',
+                        subtitle:
+                            'B01 crédito fiscal · B02 consumidor final · prefijo + 8 dígitos',
+                        showBack: true,
+                        backFallbackRoute: '/sales',
                       ),
-                      AppLayout.vXs,
-                      Text(
-                        'B01 = Crédito fiscal (cliente con RNC). '
-                        'B02 = Consumidor final. '
-                        'El NCF se forma: prefijo + 8 dígitos (ej. B0100000001).',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                      if (!desktop) ...[
+                        Text(
+                          'Rangos autorizados DGII',
+                          style: AppTypography.h4.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                      AppLayout.vL,
+                        AppLayout.vXs,
+                        Text(
+                          'B01 = Crédito fiscal (cliente con RNC). '
+                          'B02 = Consumidor final. '
+                          'El NCF se forma: prefijo + 8 dígitos (ej. B0100000001).',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        AppLayout.vL,
+                      ],
                       LayoutBuilder(
                         builder: (context, c) {
                           final w = c.maxWidth;

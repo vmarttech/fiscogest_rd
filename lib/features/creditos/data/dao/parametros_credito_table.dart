@@ -18,6 +18,10 @@ class ParametrosCreditoTable extends Table {
 
   RealColumn get moraPorcentaje =>
       real().named('mora_porcentaje').withDefault(const Constant(0.0))();
+  /// % de ingreso mensual que define el límite de cuota sugerido (0.30 = 30%).
+  RealColumn get capacidadPagoPorcentaje => real()
+      .named('capacidad_pago_porcentaje')
+      .withDefault(const Constant(0.30))();
 
   TextColumn get plantillaSolicitud =>
       text().named('plantilla_solicitud').withDefault(const Constant(''))();

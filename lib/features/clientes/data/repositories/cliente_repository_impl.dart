@@ -19,6 +19,8 @@ class ClienteRepositoryImpl implements IClienteRepository {
       direccion: tabla.direccion,
       activo: tabla.activo,
       saldoPendiente: tabla.saldoPendiente,
+      ingresoMensual: tabla.ingresoMensual,
+      limiteCuotaMensual: tabla.limiteCuotaMensual,
     );
   }
 
@@ -35,6 +37,8 @@ class ClienteRepositoryImpl implements IClienteRepository {
       direccion: Value<String>(entidad.direccion),
       activo: Value<bool>(entidad.activo),
       saldoPendiente: Value<double>(entidad.saldoPendiente),
+      ingresoMensual: Value<double>(entidad.ingresoMensual),
+      limiteCuotaMensual: Value<double>(entidad.limiteCuotaMensual),
     );
   }
 

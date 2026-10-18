@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/presentation/pages/dashboard_desktop_proto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
@@ -12,9 +13,6 @@ import 'package:fiscogest_rd/features/reportes/domain/kpi_models.dart';
 import 'package:fiscogest_rd/features/reportes/presentation/providers/dashboard_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
-import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
@@ -24,7 +22,7 @@ final dashboardCajaProvider =
     FutureProvider.autoDispose<({bool abierta, double efectivo, String label})>((ref) async {
   final repo = ref.watch(cajaRepositoryProvider);
   final sesion = await repo.obtenerSesionAbierta();
-  if (sesion == null) {
+  if (sesion == null || !sesion.estaAbierta) {
     return (abierta: false, efectivo: 0.0, label: 'Caja cerrada');
   }
   try {
@@ -38,7 +36,7 @@ final dashboardCajaProvider =
     return (
       abierta: true,
       efectivo: sesion.fondoInicial,
-      label: 'Fondo inicial · sesión abierta',
+      label: 'Sesión #${sesion.id} · abierta',
     );
   }
 });
@@ -67,24 +65,10 @@ class InicioPage extends ConsumerWidget {
     final desktop = AppBreakpoints.isDesktop(context);
 
     // Datos reales para KPI enterprise
-    final snapshot = ref.watch(dashboardSnapshotProvider).valueOrNull;
-    final creditoTot = ref.watch(creditoTotalesProvider).valueOrNull;
-    final ventasHoy = snapshot?.hoy.ventas ?? 0.0;
-    final deltaVentas = snapshot?.hoy.deltaVentasPct ?? 0.0;
-    final porCobrar = creditoTot?.porCobrar ?? 0.0;
-    final vencido = creditoTot?.vencido ?? 0.0;
-    final numClientesDeuda = creditoTot?.clientes ?? 0;
 
-    // Caja real (turno)
-    final cajaDash = ref.watch(dashboardCajaProvider).valueOrNull;
-    final cajaEfectivo = cajaDash?.efectivo ?? 0.0;
-    final cajaLabel = cajaDash?.label ?? 'Caja principal';
 
     // Actividad reciente = últimas ventas
-    final ventasLista = ref.watch(listaVentasProvider).valueOrNull ?? <Venta>[];
-    final ventasRecientes = [...ventasLista]
-      ..sort((a, b) => b.fecha.compareTo(a.fecha));
-    final topActividad = ventasRecientes.take(6).toList();
+
     final modoCfg = ref.watch(modoSimplificadoProvider);
     final sesion = ref.watch(sesionProvider);
     final esAdmin = sesion?.esAdmin ?? false;
@@ -200,283 +184,8 @@ class InicioPage extends ConsumerWidget {
                         onFiao: () => _go(context, '/ventas/fios'),
                         onStock: () => _go(context, '/inventario'),
                       )
-                    else if (desktop) ...[
-                      // ═══════════════════════════════════════
-                      // DASHBOARD ENTERPRISE (Opción 1)
-                      // ═══════════════════════════════════════
-
-                      // Título + fecha
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Dashboard',
-                                  style: AppTypography.h3.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 24,
-                                    color: const Color(0xFF0F172A),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Bienvenido(a). Aquí tienes el resumen de tu negocio al día de hoy.',
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 13.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                fecha,
-                                style: AppTypography.labelMedium.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ── 4 KPI CARDS (estilo foto) ──
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _EnterpriseKpiCard(
-                              title: 'Ventas del día',
-                              value: formatRd(ventasHoy),
-                              subtitle: ventasHoy <= 0
-                                  ? 'Sin ventas hoy'
-                                  : '${deltaVentas >= 0 ? "↑" : "↓"} ${deltaVentas.abs().toStringAsFixed(1)}% vs ayer',
-                              icon: Icons.trending_up_rounded,
-                              color: const Color(0xFF059669),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _EnterpriseKpiCard(
-                              title: 'Cuentas por cobrar',
-                              value: formatRd(porCobrar),
-                              subtitle: vencido > 0
-                                  ? '${formatRd(vencido)} vencido'
-                                  : (porCobrar <= 0 ? 'Sin saldos pendientes' : 'Al día'),
-                              icon: Icons.receipt_long_outlined,
-                              color: const Color(0xFF2563EB),
-                              onTap: () => _go(context, '/creditos'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _EnterpriseKpiCard(
-                              title: 'Créditos pendientes',
-                              value: formatRd(porCobrar),
-                              subtitle: numClientesDeuda > 0
-                                  ? '$numClientesDeuda cliente(s) con deuda'
-                                  : 'Sin créditos activos',
-                              icon: Icons.schedule_outlined,
-                              color: const Color(0xFFD97706),
-                              onTap: () => _go(context, '/creditos'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _EnterpriseKpiCard(
-                              title: 'Caja actual',
-                              value: formatRd(cajaEfectivo),
-                              subtitle: cajaLabel,
-                              icon: Icons.account_balance_wallet_outlined,
-                              color: const Color(0xFF0F766E),
-                              onTap: () => _go(context, '/ventas/cobro'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-
-                      // ── ACTIVIDAD + ACCIONES ──
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Tabla actividad
-                          Expanded(
-                            flex: 3,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFE2E8F0)),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  // Header tabla
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.history, size: 17, color: Color(0xFF64748B)),
-                                        const SizedBox(width: 8),
-                                        const Text(
-                                          'Actividad reciente',
-                                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: Color(0xFF0F172A)),
-                                        ),
-                                        const Spacer(),
-                                        TextButton(
-                                          onPressed: () => _go(context, '/ventas'),
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: const Color(0xFF0F766E),
-                                            padding: EdgeInsets.zero,
-                                            minimumSize: Size.zero,
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                          ),
-                                          child: const Text('Ver todas las actividades →', style: TextStyle(fontSize: 12.5)),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Columnas
-                                  Container(
-                                    color: const Color(0xFFF8FAFC),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    child: const Row(
-                                      children: [
-                                        SizedBox(width: 100, child: Text('Fecha y hora', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)))),
-                                        SizedBox(width: 70, child: Text('Tipo', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)))),
-                                        Expanded(child: Text('Descripción', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)))),
-                                        SizedBox(width: 110, child: Text('Cliente', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)))),
-                                        SizedBox(width: 90, child: Text('Monto', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)), textAlign: TextAlign.right)),
-                                        SizedBox(width: 90, child: Text('Estado', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)), textAlign: TextAlign.center)),
-                                      ],
-                                    ),
-                                  ),
-                                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                                  // Filas reales (últimas ventas)
-                                  if (topActividad.isEmpty)
-                                    const _ActivityTableRow(
-                                      fecha: '—',
-                                      tipo: '—',
-                                      tipoColor: Color(0xFF94A3B8),
-                                      descripcion: 'Sin actividad reciente',
-                                      cliente: '—',
-                                      monto: '—',
-                                      estado: '—',
-                                      estadoColor: Color(0xFF94A3B8),
-                                    )
-                                  else
-                                    ...topActividad.map((v) {
-                                      final est = v.estadoDocumento;
-                                      final forma = v.formaPago.toLowerCase();
-                                      final esCredito = v.esCredito ||
-                                          forma.contains('credito') ||
-                                          forma.contains('crédito') ||
-                                          forma.contains('fiao');
-
-                                      // TIPO — color distinto según naturaleza
-                                      final String tipoLabel;
-                                      final Color tipoColor;
-                                      if (esCredito) {
-                                        tipoLabel = 'Crédito';
-                                        tipoColor = const Color(0xFFEA580C); // naranja guía
-                                      } else if (forma.contains('tarjeta') ||
-                                          forma.contains('transfer')) {
-                                        tipoLabel = 'Pago';
-                                        tipoColor = const Color(0xFF7C3AED); // morado guía
-                                      } else {
-                                        tipoLabel = 'Venta';
-                                        tipoColor = const Color(0xFF16A34A); // verde guía
-                                      }
-
-                                      // ESTADO — color distinto según estado
-                                      final String estLabel;
-                                      final Color estColor;
-                                      final estName = est.name.toLowerCase();
-                                      if (est == EstadoDocumento.anulado ||
-                                          estName.contains('anul')) {
-                                        estLabel = 'Anulado';
-                                        estColor = const Color(0xFFDC2626); // rojo
-                                      } else if (est == EstadoDocumento.borrador ||
-                                          estName.contains('borrador')) {
-                                        estLabel = 'Borrador';
-                                        estColor = const Color(0xFFD97706); // ámbar
-                                      } else if (estName.contains('envi')) {
-                                        estLabel = 'Enviado';
-                                        estColor = const Color(0xFF0D9488); // teal
-                                      } else if (estName.contains('activ')) {
-                                        estLabel = 'Activo';
-                                        estColor = const Color(0xFF2563EB); // azul
-                                      } else if (estName.contains('factur') ||
-                                          estName.contains('complet') ||
-                                          estName.contains('pagad') ||
-                                          estName.contains('confirm')) {
-                                        estLabel = 'Facturado';
-                                        estColor = const Color(0xFF16A34A); // verde
-                                      } else {
-                                        estLabel = est.name;
-                                        estColor = const Color(0xFF16A34A);
-                                      }
-
-                                      final fechaStr =
-                                          '${v.fecha.day.toString().padLeft(2, '0')}/${v.fecha.month.toString().padLeft(2, '0')} ${v.fecha.hour.toString().padLeft(2, '0')}:${v.fecha.minute.toString().padLeft(2, '0')}';
-                                      return _ActivityTableRow(
-                                        fecha: fechaStr,
-                                        tipo: tipoLabel,
-                                        tipoColor: tipoColor,
-                                        descripcion: v.numeroFactura ?? v.numeroCotizacion,
-                                        cliente: v.nombreCliente ?? 'Consumidor final',
-                                        monto: formatRd(v.montoTotal),
-                                        estado: estLabel,
-                                        estadoColor: estColor,
-                                      );
-                                    }),
-                                  const SizedBox(height: 4),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          // Acciones rápidas
-                          Expanded(
-                            flex: 1,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFE2E8F0)),
-                              ),
-                              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  const Row(
-                                    children: [
-                                      Icon(Icons.bolt_outlined, size: 17, color: Color(0xFF64748B)),
-                                      SizedBox(width: 6),
-                                      Text('Acciones rápidas', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: Color(0xFF0F172A))),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  _QuickAction(icon: Icons.point_of_sale, title: 'Nueva venta', subtitle: 'Iniciar una venta', onTap: () => _go(context, '/ventas/cotizaciones/nueva')),
-                                  _QuickAction(icon: Icons.credit_score_outlined, title: 'Nuevo crédito', subtitle: 'Crear crédito para cliente', onTap: () => _go(context, '/creditos')),
-                                  _QuickAction(icon: Icons.cloud_sync_outlined, title: 'Emitir e-CF', subtitle: 'Generar factura electrónica', onTap: () => _go(context, '/ecfe')),
-                                  _QuickAction(icon: Icons.payments_outlined, title: 'Abrir caja', subtitle: 'Aperturar caja principal', onTap: () => _go(context, '/ventas/cobro')),
-                                  _QuickAction(icon: Icons.person_add_outlined, title: 'Nuevo cliente', subtitle: 'Registrar nuevo cliente', onTap: () => _go(context, '/clientes')),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ]
+                    else if (desktop)
+                      const DashboardDesktopProto()
                     else ...[
                       Text(
                         'Operación del día',
@@ -493,7 +202,6 @@ class InicioPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Grilla 2×2 (mismo ritmo que modo simplificado)
                       Row(
                         children: [
                           Expanded(
@@ -575,7 +283,6 @@ class InicioPage extends ConsumerWidget {
       ),
     );
   }
-
   void _mostrarMasAccionesNormal(BuildContext context, WidgetRef ref) {
     final gates = ref.watch(licenciaActualProvider).maybeWhen(
           data: (lic) => LicenciaGates(lic),
@@ -2038,314 +1745,11 @@ class _ActionBigCard extends StatelessWidget {
 // WIDGETS ENTERPRISE (Opción 1)
 // ═══════════════════════════════════════════════════════════════
 
-class _EnterpriseKpiCard extends StatelessWidget {
-  const _EnterpriseKpiCard({
-    required this.title,
-    required this.value,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    this.onTap,
-  });
-
-  final String title;
-  final String value;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: color.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: color.withValues(alpha: 0.08),
-            border: Border.all(color: color.withValues(alpha: 0.22)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(11),
-                ),
-                child: Icon(icon, color: Colors.white, size: 23),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: color,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.15,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      value,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF0F172A),
-                        letterSpacing: -0.3,
-                        height: 1.1,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: color,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ignore: unused_element
-class _ActivityRow extends StatelessWidget {
-  const _ActivityRow({
-    required this.fecha,
-    required this.tipo,
-    required this.tipoColor,
-    required this.referencia,
-    required this.descripcion,
-    required this.cliente,
-    required this.monto,
-    required this.estado,
-    required this.estadoColor,
-  });
-
-  final String fecha;
-  final String tipo;
-  final Color tipoColor;
-  final String referencia;
-  final String descripcion;
-  final String cliente;
-  final String monto;
-  final String estado;
-  final Color estadoColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 90,
-            child: Text(fecha, style: const TextStyle(fontSize: 12, color: AppColors.grey600)),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: tipoColor.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              tipo,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: tipoColor),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              descripcion,
-              style: const TextStyle(fontSize: 13),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          SizedBox(
-            width: 100,
-            child: Text(
-              cliente,
-              style: const TextStyle(fontSize: 12.5, color: AppColors.grey600),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          SizedBox(
-            width: 90,
-            child: Text(
-              monto,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              textAlign: TextAlign.right,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: estadoColor.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              estado,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: estadoColor),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, size: 17, color: AppColors.primary),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right, size: 18, color: AppColors.grey400),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 
-class _ActivityTableRow extends StatelessWidget {
-  const _ActivityTableRow({
-    required this.fecha,
-    required this.tipo,
-    required this.tipoColor,
-    required this.descripcion,
-    required this.cliente,
-    required this.monto,
-    required this.estado,
-    required this.estadoColor,
-  });
 
-  final String fecha;
-  final String tipo;
-  final Color tipoColor;
-  final String descripcion;
-  final String cliente;
-  final String monto;
-  final String estado;
-  final Color estadoColor;
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-      child: Row(
-        children: [
-          SizedBox(width: 100, child: Text(fecha, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Color(0xFF334155)))),
-          SizedBox(
-            width: 70,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: tipoColor.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Text(tipo, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: tipoColor), textAlign: TextAlign.center),
-            ),
-          ),
-          Expanded(child: Text(descripcion, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)), overflow: TextOverflow.ellipsis)),
-          SizedBox(width: 110, child: Text(cliente, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Color(0xFF334155)), overflow: TextOverflow.ellipsis)),
-          SizedBox(width: 90, child: Text(monto, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)), textAlign: TextAlign.right)),
-          SizedBox(
-            width: 90,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(
-                  color: estadoColor.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Text(estado, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: estadoColor)),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+
+
+
 

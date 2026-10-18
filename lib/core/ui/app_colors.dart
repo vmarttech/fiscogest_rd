@@ -47,11 +47,11 @@ abstract class AppColors {
   // FONDOS Y SUPERFICIES
   // ─────────────────────────────────────────────
   static const Color background = grey50;
-  static const Color pageBackground = Color(0xFFF4F6F9);
+  static const Color pageBackground = Color(0xFFF4F8FF);
   static const Color surface = white;
   static const Color cardBackground = white;
   static const Color darkSurface = grey800;
-  static const Color sidebarBackground = grey900;
+  static const Color sidebarBackground = Color(0xFF081A38);
 
   // ─────────────────────────────────────────────
   // TEXTO

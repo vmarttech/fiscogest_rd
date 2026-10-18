@@ -66,6 +66,7 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
   final _cuotasCtrl = TextEditingController();
   final _plazoCtrl = TextEditingController();
   final _graciaCtrl = TextEditingController();
+  final _capacidadCtrl = TextEditingController();
   final _moraCtrl = TextEditingController();
   final _plantillaSolCtrl = TextEditingController();
   final _plantillaConCtrl = TextEditingController();
@@ -78,6 +79,7 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
     _cuotasCtrl.dispose();
     _plazoCtrl.dispose();
     _graciaCtrl.dispose();
+    _capacidadCtrl.dispose();
     _moraCtrl.dispose();
     _plantillaSolCtrl.dispose();
     _plantillaConCtrl.dispose();
@@ -90,6 +92,12 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
     _cuotasCtrl.text = '${p.cuotasDefault}';
     _plazoCtrl.text = '${p.plazoMaxMeses}';
     _graciaCtrl.text = '${p.diasGracia}';
+    final cap = p.capacidadPagoPorcentaje <= 0
+        ? 30.0
+        : (p.capacidadPagoPorcentaje > 1
+            ? p.capacidadPagoPorcentaje
+            : p.capacidadPagoPorcentaje * 100);
+    _capacidadCtrl.text = cap.toStringAsFixed(0);
     _moraCtrl.text = (p.moraPorcentaje * 100).toStringAsFixed(2);
     _plantillaSolCtrl.text = p.plantillaSolicitud;
     _plantillaConCtrl.text = p.plantillaContrato;
@@ -131,6 +139,7 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
             cuotasDefault: int.tryParse(_cuotasCtrl.text) ?? 12,
             plazoMaxMeses: int.tryParse(_plazoCtrl.text) ?? 24,
             diasGracia: int.tryParse(_graciaCtrl.text) ?? 0,
+            capacidadPagoPorcentaje: ((double.tryParse(_capacidadCtrl.text.replaceAll(',', '.')) ?? 30) / 100).clamp(0.05, 1.0),
             moraPorcentaje: mora,
             plantillaSolicitud: _plantillaSolCtrl.text.trim(),
             plantillaContrato: _plantillaConCtrl.text.trim(),
@@ -163,8 +172,10 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
   Widget build(BuildContext context) {
     final async = ref.watch(parametrosCreditoProvider);
 
+    final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
       title: 'CONFIGURACIÓN CRÉDITO',
+      showAppBar: !desktop,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
@@ -184,12 +195,24 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
             return Align(
               alignment: Alignment.topCenter,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                padding: EdgeInsets.fromLTRB(
+                  desktop ? 24 : 16,
+                  desktop ? 20 : 12,
+                  desktop ? 24 : 16,
+                  28,
+                ),
                 child: AppLayout.centerConstrained(
-                  maxWidth: MediaQuery.sizeOf(context).width < 768 ? 640 : 900,
+                  maxWidth: desktop ? 900 : 640,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      const EnterprisePageHeader(
+                        title: 'Configuración de crédito',
+                        subtitle:
+                            'Tasas, plazos, capacidad de pago y plantillas',
+                        showBack: true,
+                        backFallbackRoute: '/creditos',
+                      ),
                       AppCard(
                         borderColor: AppColors.border,
                         child: Row(
@@ -277,6 +300,25 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                               label: 'Días de gracia',
                               controller: _graciaCtrl,
                               keyboardType: TextInputType.number,
+                            ),
+                            AppLayout.vM,
+                            AppTextField(
+                              label: 'Capacidad de pago (% ingresos)',
+                              controller: _capacidadCtrl,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              hint: '30',
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Límite de cuota sugerido = ingreso mensual × este %. '
+                              'El depto. de crédito puede ajustarlo por cliente.',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                              ),
                             ),
                             AppLayout.vM,
                             AppTextField(

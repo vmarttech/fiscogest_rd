@@ -8,9 +8,6 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart' hide ventasRepositoryProvider;
-import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_cargada_desde_historial_provider.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
 
 /// Historial de ventas — en PC alineado al Dashboard; en móvil vista compacta.
@@ -37,24 +34,38 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
   String _monto(double v) => formatRd(v);
 
   String _tipo(Venta v) {
-    if (v.numero.startsWith('C')) return 'Cotización';
-    if (v.numero.startsWith('A')) return 'Apartado';
+    if (_esCotizacion(v)) return 'Cotización';
+    if (_esApartado(v)) return 'Apartado';
     return 'Venta';
   }
 
   Color _colorTipo(Venta v) {
-    if (v.numero.startsWith('C')) return AppColors.info;
-    if (v.numero.startsWith('A')) return AppColors.warning;
+    if (_esCotizacion(v)) return AppColors.info;
+    if (_esApartado(v)) return AppColors.warning;
     return AppColors.success;
+  }
+
+  bool _esCotizacion(Venta v) {
+    final e = v.estadoDocumento.name.toLowerCase();
+    return e == 'cotizado' || e == 'aprobado';
+  }
+
+  bool _esApartado(Venta v) {
+    final e = v.estadoDocumento.name.toLowerCase();
+    return e == 'apartado' || v.numero.toUpperCase().startsWith('A');
+  }
+
+  bool _esVenta(Venta v) {
+    // Facturada / crédito / pagada — no cotización ni apartado
+    return !_esCotizacion(v) && !_esApartado(v);
   }
 
   List<Venta> _filtrar(List<Venta> ventas) {
     final q = _busqueda.text.trim().toLowerCase();
     return ventas.where((v) {
-      if (_filtro == 'venta' && v.numero.startsWith('C')) return false;
-      if (_filtro == 'venta' && v.numero.startsWith('A')) return false;
-      if (_filtro == 'cotizacion' && !v.numero.startsWith('C')) return false;
-      if (_filtro == 'apartado' && !v.numero.startsWith('A')) return false;
+      if (_filtro == 'venta' && !_esVenta(v)) return false;
+      if (_filtro == 'cotizacion' && !_esCotizacion(v)) return false;
+      if (_filtro == 'apartado' && !_esApartado(v)) return false;
       if (q.isEmpty) return true;
       final cli = (v.nombreCliente ?? '').toLowerCase();
       final ncf = (v.numeroFactura ?? '').toLowerCase();
@@ -72,9 +83,13 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
     var montoHoy = 0.0;
     var cotiz = 0;
     for (final v in ventas) {
-      if (v.numero.startsWith('C')) cotiz++;
+      if (_esCotizacion(v)) {
+        cotiz++;
+        continue;
+      }
+      if (_esApartado(v)) continue;
       final f = v.fecha;
-      if (!f.isBefore(ini) && f.isBefore(fin) && !v.numero.startsWith('C')) {
+      if (!f.isBefore(ini) && f.isBefore(fin)) {
         ventasHoy++;
         montoHoy += v.total;
       }
@@ -209,12 +224,9 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                         style: const TextStyle(color: AppColors.error)),
                   ),
                   data: (ventas) {
-                    // Solo documentos de venta (no cotizaciones C-*)
-                    final soloVentas = ventas
-                        .where((v) => !v.numero.toUpperCase().startsWith('C'))
-                        .toList();
-                    final kpis = _kpis(soloVentas);
-                    final filtradas = _filtrar(soloVentas);
+                    // Toda la lista; el chip/filtro decide venta vs cotización por estado
+                    final kpis = _kpis(ventas);
+                    final filtradas = _filtrar(ventas);
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -406,7 +418,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                                         BorderRadius.circular(10),
                                                   ),
                                                   child: Icon(
-                                                    v.numero.startsWith('C')
+                                                    _esCotizacion(v)
                                                         ? Icons.request_quote_outlined
                                                         : Icons.receipt_long_outlined,
                                                     color: color,

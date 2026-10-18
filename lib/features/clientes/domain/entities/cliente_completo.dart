@@ -9,7 +9,11 @@ class ClienteCompleto {
     this.activo = true,
     this.observaciones = '',
     this.historial = 'Cliente registrado en el sistema.',
+    this.ingresoMensual = 0.0,
+    this.limiteCuotaMensual = 0.0,
+    this.saldoPendiente = 0.0,
   });
+
   final int? id;
   final String nombre;
   final String direccion;
@@ -19,6 +23,9 @@ class ClienteCompleto {
   final bool activo;
   final String observaciones;
   final String historial;
+  final double ingresoMensual;
+  final double limiteCuotaMensual;
+  final double saldoPendiente;
 
   ClienteCompleto copyWith({
     int? id,
@@ -30,6 +37,9 @@ class ClienteCompleto {
     bool? activo,
     String? observaciones,
     String? historial,
+    double? ingresoMensual,
+    double? limiteCuotaMensual,
+    double? saldoPendiente,
   }) {
     return ClienteCompleto(
       id: id ?? this.id,
@@ -41,6 +51,9 @@ class ClienteCompleto {
       activo: activo ?? this.activo,
       observaciones: observaciones ?? this.observaciones,
       historial: historial ?? this.historial,
+      ingresoMensual: ingresoMensual ?? this.ingresoMensual,
+      limiteCuotaMensual: limiteCuotaMensual ?? this.limiteCuotaMensual,
+      saldoPendiente: saldoPendiente ?? this.saldoPendiente,
     );
   }
 }

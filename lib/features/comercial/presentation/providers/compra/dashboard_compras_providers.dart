@@ -26,13 +26,16 @@ class ActividadRecienteItem {
     required this.proveedorNombre,
     required this.total,
     required this.estado,
+    this.ncf = '',
+    this.esCredito = false,
   });
-
   final int compraId;
   final DateTime fecha;
   final String proveedorNombre;
   final double total;
   final EstadoCompra estado;
+  final String ncf;
+  final bool esCredito;
 }
 
 final dashboardComprasKpisProvider =
@@ -128,7 +131,7 @@ final actividadRecienteComprasProvider =
                 .toList()
               ..sort((a, b) => b.fechaEmision.compareTo(a.fechaEmision));
 
-        return recientes.take(8).map((c) {
+        return recientes.take(20).map((c) {
           return ActividadRecienteItem(
             compraId: c.id,
             fecha: c.fechaEmision,
@@ -137,6 +140,8 @@ final actividadRecienteComprasProvider =
                 : c.nombreProveedor,
             total: c.totalCompra,
             estado: c.estado,
+            ncf: c.ncf,
+            esCredito: c.esCredito,
           );
         }).toList();
       } catch (e, st) {

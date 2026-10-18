@@ -151,7 +151,7 @@ class FacturaImprimible extends StatelessWidget {
                     style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
                   ),
                   Text(
-                    '   Subtotal: ${_formatearMonto(subtotalLinea)}${sufijoTasaLinea(linea.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))}',
+                    '   Subtotal: ${_formatearMonto(subtotalLinea)}${sufijoTasaLinea(linea.tasaImpuesto, ceroEsExento: false)}',
                     style: const TextStyle(fontFamily: 'Courier', fontSize: 12),
                   ),
                   if (tieneDescuento)
@@ -286,7 +286,7 @@ class FacturaImprimible extends StatelessWidget {
       buffer.writeln(
         '   Cant: ${linea.cantidad}  x  ${_formatearMonto(linea.precioUnitario)}',
       );
-      buffer.writeln('   Subtotal: ${_formatearMonto(subtotalLinea)}${sufijoTasaLinea(linea.tasaImpuesto, ceroEsExento: lineasCeroSonExentas(venta.detalles.map((e) => e.tasaImpuesto), venta.itbis))}');
+      buffer.writeln('   Subtotal: ${_formatearMonto(subtotalLinea)}${sufijoTasaLinea(linea.tasaImpuesto, ceroEsExento: false)}');
       if (linea.montoDescuento != 0.0) {
         buffer.writeln(
           '   Descuento: -${_formatearMonto(linea.montoDescuento)}',

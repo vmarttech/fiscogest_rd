@@ -140,28 +140,37 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
 
             return Padding(
               padding: EdgeInsets.fromLTRB(
-                mobile ? 16 : 20,
-                mobile ? 12 : 16,
-                mobile ? 16 : 20,
+                mobile ? 16 : 24,
+                mobile ? 12 : 20,
+                mobile ? 16 : 24,
                 20,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Facturas con NCF',
-                    style: AppTypography.h4.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                  const EnterprisePageHeader(
+                    title: 'Emitir nota de crédito',
+                    subtitle:
+                        'Secuencia B04 · Inventario y CxC se ajustan según reglas',
+                    showBack: true,
+                    backFallbackRoute: '/sales',
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Se asigna secuencia B04. Inventario y CxC se ajustan según reglas.',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                  if (!desktop) ...[
+                    Text(
+                      'Facturas con NCF',
+                      style: AppTypography.h4.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Se asigna secuencia B04. Inventario y CxC se ajustan según reglas.',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   Expanded(
                     child: desktop
                         ? Row(

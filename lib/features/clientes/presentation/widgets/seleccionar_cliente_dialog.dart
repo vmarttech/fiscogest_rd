@@ -128,6 +128,10 @@ class _SeleccionarClienteDialogState
                             [
                               if (c.rncCedula.isNotEmpty) c.rncCedula,
                               if (c.telefono.isNotEmpty) c.telefono,
+                              if (c.limiteCuotaMensual > 0)
+                                'Límite cuota: RD\$ ${c.limiteCuotaMensual.toStringAsFixed(0)}',
+                              if (c.saldoPendiente > 0)
+                                'Saldo: RD\$ ${c.saldoPendiente.toStringAsFixed(0)}',
                             ].join(' · '),
                           ),
                           onTap: () => Navigator.of(context).pop(c),

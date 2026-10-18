@@ -35,3 +35,4 @@ export 'status_chip.dart';
 export 'kpi_card.dart';
 export 'section_header.dart';
 export 'app_formatters.dart';
+export 'package:fiscogest_rd/core/ui/enterprise_page_header.dart';

@@ -90,33 +90,33 @@ class SalesPage extends ConsumerWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
-                      childAspectRatio: 1.55,
+                      childAspectRatio: 1.45,
                       children: const [
                         _KpiPill(
                           icon: Icons.receipt_long_outlined,
                           value: facturasHoyStr,
-                          label: 'FACTURAS HOY',
+                          label: 'FACTURAS',
                           bg: Color(0xFFECFDF5),
                           fg: AppColors.success,
                         ),
                         _KpiPill(
                           icon: Icons.note_alt_outlined,
                           value: ncHoyStr,
-                          label: 'NC HOY',
+                          label: 'NC',
                           bg: Color(0xFFEFF6FF),
                           fg: AppColors.info,
                         ),
                         _KpiPill(
                           icon: Icons.qr_code_2_outlined,
                           value: ncfDisponiblesStr,
-                          label: 'NCF DISPONIBLES',
+                          label: 'NCF',
                           bg: Color(0xFFF5F3FF),
                           fg: Color(0xFF7C3AED),
                         ),
                         _KpiPill(
                           icon: Icons.warning_amber_rounded,
                           value: alertasStr,
-                          label: 'ALERTAS NCF',
+                          label: 'ALERTAS',
                           bg: Color(0xFFFFF7ED),
                           fg: AppColors.warning,
                         ),
@@ -448,18 +448,23 @@ class _KpiPill extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.h4.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: fg,
-                    fontSize: 16,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: fg,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
                 Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelSmall.copyWith(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w700,

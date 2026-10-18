@@ -44,6 +44,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/cuotas_cuenta_table.dar
 import 'package:fiscogest_rd/features/creditos/data/dao/parametros_credito_table.dart';
 import 'package:fiscogest_rd/features/creditos/data/dao/referencias_credito_table.dart';
 import 'package:fiscogest_rd/features/creditos/data/dao/solicitudes_credito_table.dart';
+import 'package:fiscogest_rd/features/creditos/data/dao/pronto_pago_acuerdos_table.dart';
 
 import 'package:fiscogest_rd/features/comercial/data/dao/cobros_table.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_table.dart';
@@ -96,6 +97,7 @@ part 'app_database.g.dart';
     ParametrosCreditoTable,
     SolicitudesCreditoTable,
     ReferenciasCreditoTable,
+    ProntoPagoAcuerdosTable,
     CobrosTable,
     CuotasCuentaTable,
     CuentasPagarTable,
@@ -127,7 +129,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 64;
+  int get schemaVersion => 66;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -136,6 +138,66 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+
+      if (from < 66) {
+        try {
+          await m.createTable(prontoPagoAcuerdosTable);
+        } catch (_) {
+          try {
+            await m.database.customStatement("""
+CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  cuenta_id INTEGER NOT NULL REFERENCES cuentas_cobrar_table (id),
+  estado TEXT NOT NULL DEFAULT 'activo',
+  capital_pendiente REAL NOT NULL,
+  interes_pendiente REAL NOT NULL,
+  descuento_interes_pct REAL NOT NULL DEFAULT 0.0,
+  descuento_monto REAL NOT NULL DEFAULT 0.0,
+  interes_tras_descuento REAL NOT NULL,
+  monto_liquidacion REAL NOT NULL,
+  cuotas_pendientes INTEGER NOT NULL DEFAULT 0,
+  notas TEXT NOT NULL DEFAULT '',
+  usuario_id INTEGER NULL,
+  creado_en INTEGER NOT NULL DEFAULT (CAST(strftime('%s','now') AS INTEGER)),
+  aplicado_en INTEGER NULL
+);
+""");
+          } catch (_) {}
+        }
+      }
+
+      if (from < 65) {
+        try {
+          await m.addColumn(clientesTable, clientesTable.ingresoMensual);
+        } catch (_) {
+          try {
+            await m.database.customStatement(
+              'ALTER TABLE clientes ADD COLUMN ingreso_mensual REAL NOT NULL DEFAULT 0.0',
+            );
+          } catch (_) {}
+        }
+        try {
+          await m.addColumn(clientesTable, clientesTable.limiteCuotaMensual);
+        } catch (_) {
+          try {
+            await m.database.customStatement(
+              'ALTER TABLE clientes ADD COLUMN limite_cuota_mensual REAL NOT NULL DEFAULT 0.0',
+            );
+          } catch (_) {}
+        }
+        try {
+          await m.addColumn(
+            parametrosCreditoTable,
+            parametrosCreditoTable.capacidadPagoPorcentaje,
+          );
+        } catch (_) {
+          try {
+            await m.database.customStatement(
+              'ALTER TABLE parametros_credito_table ADD COLUMN capacidad_pago_porcentaje REAL NOT NULL DEFAULT 0.30',
+            );
+          } catch (_) {}
+        }
+      }
       if (from < 64) {
         try {
           await m.addColumn(cajaMovimientosTable, cajaMovimientosTable.sesionId);

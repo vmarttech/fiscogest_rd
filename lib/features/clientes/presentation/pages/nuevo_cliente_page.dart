@@ -29,6 +29,8 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
   late final TextEditingController _correoController;
   late final TextEditingController _rncCedulaController;
   late final TextEditingController _observacionesController;
+  late final TextEditingController _ingresoController;
+  late final TextEditingController _limiteCuotaController;
 
   bool get _esEdicion => widget.cliente != null;
 
@@ -53,6 +55,14 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
     _observacionesController = TextEditingController(
       text: widget.cliente?.observaciones ?? '',
     );
+    final ing = widget.cliente?.ingresoMensual ?? 0.0;
+    final lim = widget.cliente?.limiteCuotaMensual ?? 0.0;
+    _ingresoController = TextEditingController(
+      text: ing > 0 ? ing.toStringAsFixed(2) : '',
+    );
+    _limiteCuotaController = TextEditingController(
+      text: lim > 0 ? lim.toStringAsFixed(2) : '',
+    );
   }
 
   @override
@@ -63,12 +73,26 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
     _correoController.dispose();
     _rncCedulaController.dispose();
     _observacionesController.dispose();
+    _ingresoController.dispose();
+    _limiteCuotaController.dispose();
     super.dispose();
   }
 
   void _guardar() {
     if (!_formKey.currentState!.validate()) return;
 
+    final ingreso = double.tryParse(
+          _ingresoController.text.trim().replaceAll(',', '.'),
+        ) ??
+        0.0;
+    var limite = double.tryParse(
+          _limiteCuotaController.text.trim().replaceAll(',', '.'),
+        ) ??
+        0.0;
+    // Si hay ingreso y no hay límite manual → sugerir 30%
+    if (limite <= 0 && ingreso > 0) {
+      limite = ingreso * 0.30;
+    }
     final cli = ClienteCompleto(
       id: widget.cliente?.id,
       nombre: _nombreController.text.trim(),
@@ -79,6 +103,9 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
       observaciones: _observacionesController.text.trim(),
       historial:
           widget.cliente?.historial ?? 'Cliente registrado en el sistema.',
+      ingresoMensual: ingreso,
+      limiteCuotaMensual: limite,
+      saldoPendiente: widget.cliente?.saldoPendiente ?? 0.0,
     );
 
     try {
@@ -281,6 +308,58 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                                 'Dirección',
                                 hint: 'Calle, sector…',
                               ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _SeccionCard(
+                            titulo: 'Crédito y capacidad de pago',
+                            icon: Icons.account_balance_wallet_outlined,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                TextFormField(
+                                  controller: _ingresoController,
+                                  keyboardType: const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                  decoration: _deco(
+                                    'Ingreso mensual demostrado',
+                                    hint: '10000.00',
+                                  ),
+                                  onChanged: (v) {
+                                    final ing = double.tryParse(
+                                          v.trim().replaceAll(',', '.'),
+                                        ) ??
+                                        0;
+                                    // Autocompleta límite solo si el campo límite está vacío
+                                    if (_limiteCuotaController.text.trim().isEmpty &&
+                                        ing > 0) {
+                                      _limiteCuotaController.text =
+                                          (ing * 0.30).toStringAsFixed(2);
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _limiteCuotaController,
+                                  keyboardType: const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                  decoration: _deco(
+                                    'Límite de cuota mensual',
+                                    hint: '3000.00',
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Sugerido: 30% del ingreso. El depto. de crédito puede subir o bajar este tope. '
+                                  'No se aprueban planes cuya cuota mensuales lo exceda.',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 12),

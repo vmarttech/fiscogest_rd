@@ -30,6 +30,7 @@ class ParametrosCreditoDao extends DatabaseAccessor<AppDatabase>
     required int plazoMaxMeses,
     required int diasGracia,
     required double moraPorcentaje,
+    double capacidadPagoPorcentaje = 0.30,
     required String plantillaSolicitud,
     required String plantillaContrato,
   }) async {
@@ -43,6 +44,7 @@ class ParametrosCreditoDao extends DatabaseAccessor<AppDatabase>
         plazoMaxMeses: Value(plazoMaxMeses),
         diasGracia: Value(diasGracia),
         moraPorcentaje: Value(moraPorcentaje),
+        capacidadPagoPorcentaje: Value(capacidadPagoPorcentaje),
         plantillaSolicitud: Value(plantillaSolicitud),
         plantillaContrato: Value(plantillaContrato),
         actualizadoEn: Value(DateTime.now()),

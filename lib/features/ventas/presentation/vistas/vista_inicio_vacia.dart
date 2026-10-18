@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -398,13 +399,38 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(
-                          nombreCliente,
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nombreCliente,
+                              style: AppTypography.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (!esConsumidorFinal && (estado.clienteId ?? 0) > 0)
+                              FutureBuilder(
+                                future: ref
+                                    .read(clienteRepositoryProvider)
+                                    .obtenerClientePorId(estado.clienteId!),
+                                builder: (context, snap) {
+                                  final c = snap.data;
+                                  if (c == null || c.limiteCuotaMensual <= 0) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Text(
+                                    'Límite cuota RD\$ ${c.limiteCuotaMensual.toStringAsFixed(0)}',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      fontSize: 11,
+                                      color: AppColors.warning,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  );
+                                },
+                              ),
+                          ],
                         ),
                       ),
                       TextButton(

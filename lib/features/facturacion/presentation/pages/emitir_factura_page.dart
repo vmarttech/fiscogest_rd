@@ -209,28 +209,37 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
 
             return Padding(
               padding: EdgeInsets.fromLTRB(
-                mobile ? 16 : 20,
-                mobile ? 12 : 16,
-                mobile ? 16 : 20,
+                mobile ? 16 : 24,
+                mobile ? 12 : 20,
+                mobile ? 16 : 24,
                 20,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Documentos listos',
-                    style: AppTypography.h4.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                  const EnterprisePageHeader(
+                    title: 'Emitir factura',
+                    subtitle:
+                        'Cotizado (contado) o aprobado (crédito), sin NCF · B01 · B02',
+                    showBack: true,
+                    backFallbackRoute: '/sales',
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Cotizado (contado) o aprobado (crédito), sin NCF.  B01 · B02',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                  if (!desktop) ...[
+                    Text(
+                      'Documentos listos',
+                      style: AppTypography.h4.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Cotizado (contado) o aprobado (crédito), sin NCF.  B01 · B02',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   Expanded(
                     child: desktop
                         ? Row(

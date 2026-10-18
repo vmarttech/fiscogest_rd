@@ -5,28 +5,34 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 
 class ClienteCompletoRepository {
-  // ✅ RECIBE LA BASE POR PARÁMETRO
   ClienteCompletoRepository(AppDatabase db)
       : _db = db,
         _dao = ClienteDao(db);
+
   final AppDatabase _db;
   final ClienteDao _dao;
 
+  ClienteCompleto _map(ClientesTableData r) => ClienteCompleto(
+        id: r.id,
+        nombre: r.nombre,
+        direccion: r.direccion,
+        telefono: r.telefono,
+        correo: r.correo,
+        rncCedula: r.rncCedula,
+        activo: r.activo,
+        ingresoMensual: r.ingresoMensual,
+        limiteCuotaMensual: r.limiteCuotaMensual,
+        saldoPendiente: r.saldoPendiente,
+      );
+
   Future<List<ClienteCompleto>> obtenerClientes() async {
     final registros = await _dao.obtenerTodos();
-    return registros
-        .map(
-          (registro) => ClienteCompleto(
-            id: registro.id,
-            nombre: registro.nombre,
-            direccion: registro.direccion,
-            telefono: registro.telefono,
-            correo: registro.correo,
-            rncCedula: registro.rncCedula,
-            activo: registro.activo,
-          ),
-        )
-        .toList();
+    return registros.map(_map).toList();
+  }
+
+  Future<ClienteCompleto?> obtenerPorId(int id) async {
+    final r = await _dao.obtenerPorId(id);
+    return r == null ? null : _map(r);
   }
 
   Future<void> agregarCliente(ClienteCompleto cliente) async {
@@ -41,6 +47,9 @@ class ClienteCompletoRepository {
         correo: cliente.correo,
         rncCedula: cliente.rncCedula,
         activo: Value(cliente.activo),
+        ingresoMensual: Value(cliente.ingresoMensual),
+        limiteCuotaMensual: Value(cliente.limiteCuotaMensual),
+        saldoPendiente: Value(cliente.saldoPendiente),
       ),
     );
   }
@@ -50,7 +59,6 @@ class ClienteCompletoRepository {
     if (identificador == null) {
       throw Exception('No se puede actualizar el cliente: ID nulo');
     }
-    // Update explícito por PK (no insertOnConflict: evita fallos con codigo unique)
     final filas = await _dao.actualizarPorId(
       identificador,
       ClientesTableCompanion(
@@ -60,10 +68,14 @@ class ClienteCompletoRepository {
         correo: Value(cliente.correo),
         rncCedula: Value(cliente.rncCedula),
         activo: Value(cliente.activo),
+        ingresoMensual: Value(cliente.ingresoMensual),
+        limiteCuotaMensual: Value(cliente.limiteCuotaMensual),
       ),
     );
     if (filas == 0) {
-      throw Exception('No se encontró el cliente a actualizar (id=$identificador)');
+      throw Exception(
+        'No se encontró el cliente a actualizar (id=$identificador)',
+      );
     }
   }
 

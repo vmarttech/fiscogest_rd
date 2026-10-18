@@ -106,8 +106,10 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
     final totales = ref.watch(creditoTotalesProvider);
     final mobile = AppBreakpoints.isMobile(context);
 
+    final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
       title: 'CUENTAS POR COBRAR',
+      showAppBar: !desktop,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
@@ -121,14 +123,20 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            mobile ? 16 : 20,
-            mobile ? 12 : 16,
-            mobile ? 16 : 20,
+            mobile ? 16 : 24,
+            mobile ? 12 : 20,
+            mobile ? 16 : 24,
             12,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const EnterprisePageHeader(
+                title: 'Cuentas por cobrar',
+                subtitle: 'Saldos, cuotas y cobros de la cartera',
+                showBack: true,
+                backFallbackRoute: '/creditos',
+              ),
               Expanded(
                 child: Align(
                   alignment: Alignment.topCenter,
@@ -181,21 +189,23 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        Text(
-                          'Cartera',
-                          style: AppTypography.h4.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                        if (mobile) ...[
+                          Text(
+                            'Cartera',
+                            style: AppTypography.h4.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Seleccione una cuenta para ver cuotas y registrar cobros.',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.grey600,
+                          const SizedBox(height: 4),
+                          Text(
+                            'Seleccione una cuenta para ver cuotas y registrar cobros.',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.grey600,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
+                        ],
                         Align(
                           alignment: Alignment.centerRight,
                           child: ConstrainedBox(

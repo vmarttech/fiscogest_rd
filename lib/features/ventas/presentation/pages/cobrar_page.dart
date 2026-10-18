@@ -336,8 +336,9 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                               child: InkWell(
                                 borderRadius: AppRadius.allM,
                                 onTap: () async {
+                                  // Cobro en Caja (no abrir Detalle de Crédito)
                                   await context.push(
-                                    '/creditos/cuentas/${c.id}',
+                                    '/ventas/cobro/cxc/${c.id}',
                                   );
                                   ref.invalidate(
                                     listadoCuentasCobrarProvider(
@@ -420,7 +421,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                       ),
                                       const SizedBox(height: AppSpacing.xs),
                                       Text(
-                                        'Ver cuotas, pagos y estado de cuenta  ›',
+                                        'Cobrar en caja  ›',
                                         style: AppTypography.labelSmall
                                             .copyWith(
                                               color: AppColors.primary,

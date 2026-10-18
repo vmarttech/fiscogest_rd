@@ -60,10 +60,7 @@ class ComprobantePdf {
           (_money(d.subtotalLinea ?? d.subtotal) +
               sufijoTasaLinea(
                 d.tasaImpuesto,
-                ceroEsExento: lineasCeroSonExentas(
-                  venta.detalles.map((e) => e.tasaImpuesto),
-                  venta.itbis,
-                ),
+                ceroEsExento: false,
               )),
         ],
       ),
@@ -1071,7 +1068,6 @@ class ComprobantePdf {
         '${fecha.minute.toString().padLeft(2, '0')}';
     final telCli = (telefonoCliente ?? v.clienteTelefono ?? '').trim();
     final dirCli = (direccionCliente ?? v.clienteDireccion ?? '').trim();
-    final status = ncf.isNotEmpty ? 'Pagado' : 'Pendiente';
     final envio = v.costoEnvio;
     // Descuento general: montoDescuento o descuentoGlobal (el mayor / suma coherente)
     final descGlobal = v.montoDescuento > 0.001
@@ -1116,24 +1112,28 @@ class ComprobantePdf {
       ),
     );
 
-    // Fila numérica con anchos fijos (no se amontona en 80 mm)
-    pw.Widget nums(String a, String b, String c, {bool header = false}) {
+    // Fila numérica: Cant | Precio | ITBIS | Importe (80 mm)
+    pw.Widget nums(String a, String b, String c, String d, {bool header = false}) {
       final st = pw.TextStyle(
-        fontSize: header ? 7 : 8,
+        fontSize: header ? 6.5 : 7.5,
         fontWeight: header ? pw.FontWeight.bold : pw.FontWeight.normal,
       );
       return pw.Row(
         children: [
           pw.SizedBox(
-            width: 42,
+            width: 28,
             child: pw.Text(a, style: st, textAlign: pw.TextAlign.left),
           ),
           pw.Expanded(
             child: pw.Text(b, style: st, textAlign: pw.TextAlign.right),
           ),
           pw.SizedBox(
-            width: 58,
+            width: 48,
             child: pw.Text(c, style: st, textAlign: pw.TextAlign.right),
+          ),
+          pw.SizedBox(
+            width: 52,
+            child: pw.Text(d, style: st, textAlign: pw.TextAlign.right),
           ),
         ],
       );
@@ -1167,20 +1167,17 @@ class ComprobantePdf {
           ),
         );
       }
+      final itbisLinea = simple
+          ? 0.0
+          : sub * tasaComoFraccion(d.tasaImpuesto);
       kids.add(
         nums(
-          cant.toStringAsFixed(2),
+          cant == cant.roundToDouble()
+              ? cant.toInt().toString()
+              : cant.toStringAsFixed(2),
           _money(precio),
-          (_money(sub) +
-              (simple
-                  ? ''
-                  : sufijoTasaLinea(
-                      d.tasaImpuesto,
-                      ceroEsExento: lineasCeroSonExentas(
-                        v.detalles.map((e) => e.tasaImpuesto),
-                        v.itbis,
-                      ),
-                    ))),
+          simple ? '—' : _money(itbisLinea),
+          _money(sub),
         ),
       );
       if (d.montoDescuento > 0.001) {
@@ -1223,7 +1220,7 @@ class ComprobantePdf {
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
-              nums('1.00', _money(envio), _money(envio)),
+              nums('1', _money(envio), simple ? '—' : _money(0), _money(envio)),
             ],
           ),
         ),
@@ -1287,6 +1284,17 @@ class ComprobantePdf {
         if (showMail && mailEmp.isNotEmpty) center(mailEmp, size: 7),
         if (showDir && dirEmp.isNotEmpty) center(dirEmp, size: 7),
         sep(),
+        // Tipo de comprobante (posición DGII: identificar el documento arriba)
+        if (!simple && titulo.isNotEmpty) ...[
+          center(titulo, size: 9, bold: true),
+          gap(2),
+        ],
+        if (ncf.isNotEmpty && showNcf)
+          kv(ncf.startsWith('E') ? 'e-NCF:' : 'NCF:', ncf),
+        kv('Fecha:', fechaStr),
+        kv('Forma Pago:', formaPago.toUpperCase()),
+        if (cotizacion.isNotEmpty) kv('Cotización:', cotizacion),
+        sep(),
         if (showCliente) ...[
           pw.Text(
             'Cliente',
@@ -1297,26 +1305,16 @@ class ComprobantePdf {
             pw.Text(telCli, style: const pw.TextStyle(fontSize: 8)),
           if (dirCli.isNotEmpty)
             pw.Text(dirCli, style: const pw.TextStyle(fontSize: 8)),
+          if (showNcf && (rncCliente ?? '').trim().isNotEmpty)
+            kv('RNC cliente:', rncCliente!.trim()),
           gap(4),
-        ],
-        kv('Cotización:', cotizacion),
-        if (ncf.isNotEmpty && showNcf)
-          kv(ncf.startsWith('E') ? 'e-NCF:' : 'NCF:', ncf),
-        kv('Fecha:', fechaStr),
-        kv('Status:', status),
-        kv('Forma Pago:', formaPago.toUpperCase()),
-        if (showNcf && (rncCliente ?? '').trim().isNotEmpty)
-          kv('RNC cliente:', rncCliente!.trim()),
-        if (!simple && titulo.isNotEmpty) ...[
-          gap(3),
-          center(titulo, size: 8, bold: true),
         ],
         sep(),
         pw.Text(
           'Descripción',
           style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
         ),
-        nums('Cant.', 'Precio', 'Subtotal', header: true),
+        nums('Cant.', 'Precio', 'ITBIS', 'Importe', header: true),
         gap(3),
         ...lineas,
         sep(),

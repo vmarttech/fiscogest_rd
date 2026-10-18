@@ -2,6 +2,8 @@ import 'package:fiscogest_rd/features/configuracion/presentation/providers/confi
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/notificaciones/presentation/campana_notificaciones.dart';
+import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +16,6 @@ import 'package:fiscogest_rd/features/licencias/presentation/providers/pedidos_p
 import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
-import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
@@ -72,52 +73,53 @@ class AppShell extends ConsumerWidget {
     // ESCRITORIO → Menú fijo + Header
     // ─────────────────────────────────────────────
     if (isDesktop) {
+      // Mock: sidebar altura completa + header claro solo sobre el contenido
       return Scaffold(
         backgroundColor: AppColors.pageBackground,
-        body: Column(
+        body: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Una sola barra superior a todo el ancho (como la imagen guía)
-            _buildDesktopHeader(
+            _buildMenu(
+              width: _sidebarWidth,
+              currentPath: currentPath,
               context: context,
-              ref: ref,
               nombreEmpresa: nombreEmpresa,
-              rncEmpresa: rncEmpresa,
-              direccionEmpresa: direccionEmpresa,
+              modoSimplificado: modoSimplificado,
+              esAdmin: esAdmin,
+              esVendedor: esVendedor,
+              esCajero: esCajero,
               operadorLabel: operadorLabel,
+              rolUsuario: sesion?.rol ?? '',
+              usernameSesion: sesion?.username ?? '',
               onLogout: () {
                 ref.read(sesionProvider.notifier).state = null;
                 SesionNube.clear();
                 context.go('/login');
               },
+              permiteFiscalLicencia: permiteFiscalLicencia,
+              permiteFiaoLicencia: permiteFiaoLicencia,
+              permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
+              permiteAlmacenesLicencia: permiteAlmacenesLicencia,
+              pedidosPendientes: pedidosPendientes,
+              isPermanent: true,
+              hideBrandHeader: false,
             ),
             Expanded(
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildMenu(
-                    width: _sidebarWidth,
-                    currentPath: currentPath,
+                  _buildDesktopHeader(
                     context: context,
+                    ref: ref,
                     nombreEmpresa: nombreEmpresa,
-                    modoSimplificado: modoSimplificado,
-                    esAdmin: esAdmin,
-                    esVendedor: esVendedor,
-                    esCajero: esCajero,
+                    rncEmpresa: rncEmpresa,
+                    direccionEmpresa: direccionEmpresa,
                     operadorLabel: operadorLabel,
-                    rolUsuario: sesion?.rol ?? '',
-                    usernameSesion: sesion?.username ?? '',
                     onLogout: () {
                       ref.read(sesionProvider.notifier).state = null;
                       SesionNube.clear();
                       context.go('/login');
                     },
-                    permiteFiscalLicencia: permiteFiscalLicencia,
-                    permiteFiaoLicencia: permiteFiaoLicencia,
-                    permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
-                    permiteAlmacenesLicencia: permiteAlmacenesLicencia,
-                    pedidosPendientes: pedidosPendientes,
-                    isPermanent: true,
-                    hideBrandHeader: true,
                   ),
                   Expanded(child: child),
                 ],
@@ -191,329 +193,162 @@ class AppShell extends ConsumerWidget {
     required String operadorLabel,
     required VoidCallback onLogout,
   }) {
-    final labelCorto = operadorLabel.length > 16
-        ? '${operadorLabel.substring(0, 14)}…'
-        : operadorLabel;
-    final rncText = rncEmpresa.trim();
-    final dirText = direccionEmpresa.trim();
+    final rnc = rncEmpresa;
+    final fecha = DateFormat("EEEE, d 'de' MMMM yyyy", 'es').format(DateTime.now());
+    final fechaCap = fecha.isEmpty ? fecha : '${fecha[0].toUpperCase()}${fecha.substring(1)}';
 
-    Future<void> ejecutarBusqueda(String raw) async {
-      final q = raw.trim();
-      if (q.isEmpty) return;
-      final qLower = q.toLowerCase();
-      try {
-        final productos = ref.read(productoControllerProvider).valueOrNull ?? [];
-        final matchProd = productos.where((p) {
-          final nombre = p.nombre.toLowerCase();
-          final codigo = p.codigo.toLowerCase();
-          final barras = (p.codigoBarras ?? '').toLowerCase();
-          return nombre.contains(qLower) ||
-              codigo.contains(qLower) ||
-              barras.contains(qLower);
-        }).toList();
-        if (matchProd.isNotEmpty) {
-          final exact = matchProd
-              .where((p) => p.nombre.toLowerCase() == qLower)
-              .toList();
-          final elegido = exact.isNotEmpty ? exact.first : matchProd.first;
-          if (context.mounted) {
-            context.push('/inventario');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Producto encontrado: ${elegido.nombre}'),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-          return;
-        }
-      } catch (_) {}
-      if (qLower.contains('cliente')) {
-        context.push('/clientes');
-        return;
-      }
-      if (qLower.contains('venta') ||
-          qLower.contains('historial') ||
-          qLower.contains('factura') ||
-          qLower.contains('cotiz')) {
-        context.push('/ventas');
-        return;
-      }
-      if (qLower.contains('inventario') ||
-          qLower.contains('producto') ||
-          qLower.contains('stock')) {
-        context.push('/inventario');
-        return;
-      }
-      if (qLower.contains('credito') ||
-          qLower.contains('crédito') ||
-          qLower.contains('cxc')) {
-        context.push('/creditos');
-        return;
-      }
-      if (qLower.contains('caja')) {
-        context.push('/ventas/cobro');
-        return;
-      }
-      context.push('/clientes');
-    }
-
-    // Barra superior ÚNICA a todo el ancho — estilo imagen guía
     return Container(
-      height: 56,
-      color: const Color(0xFF0F172A),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 64,
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A), // mismo que sidebar navy-900
+        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          // Logo producto (como FiscoGest en la guía)
+          // Company chip (HTML enterprise)
           Container(
-            width: 34,
-            height: 34,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F766E),
-              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFF334155)),
             ),
-            child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 18),
-          ),
-          const SizedBox(width: 10),
-          const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'FiscoGest',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13.5,
-                  height: 1.1,
-                ),
-              ),
-              Text(
-                'Gestión Fiscal y Créditos',
-                style: TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 10,
-                  height: 1.2,
-                ),
-              ),
-            ],
-          ),
-          // Separador
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 14),
-            width: 1,
-            height: 28,
-            color: const Color(0xFF334155),
-          ),
-          // Empresa + RNC + dirección — pegado al buscador
-          Flexible(
-            flex: 0,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 160, maxWidth: 280),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    nombreEmpresa,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13.5,
-                      height: 1.1,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.business_outlined, size: 15, color: Color(0xFF60A5FA)),
+                const SizedBox(width: 8),
+                Text(
+                  nombreEmpresa,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
                   ),
-                  if (rncText.isNotEmpty || dirText.isNotEmpty)
-                    Text(
-                      [
-                        if (rncText.isNotEmpty) 'RNC: $rncText',
-                        if (dirText.isNotEmpty) dirText,
-                      ].join(' · '),
-                      style: const TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 11,
-                        height: 1.25,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                ),
+                if (rnc.isNotEmpty) ...[
+                  const Text('  •  ', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                  Text(
+                    'RNC: $rnc',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'monospace',
+                      color: Color(0xFF94A3B8),
                     ),
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
-          const SizedBox(width: 10),
-          // Buscador (junto a empresa)
+          const SizedBox(width: 16),
+          // Search
           Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: SizedBox(
-                  height: 36,
-                  child: TextField(
-                    style: const TextStyle(
-                      color: Color(0xFF0F172A),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: SizedBox(
+                height: 40,
+                child: TextField(
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar clientes, facturas, e-CF, créditos...',
+                    hintStyle: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                    prefixIcon: const Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
+                    filled: true,
+                    fillColor: const Color(0xFF1E293B),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF334155)),
                     ),
-                    cursorColor: const Color(0xFF0F766E),
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText: 'Buscar clientes, facturas, créditos, productos...',
-                      hintStyle: const TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        color: Color(0xFF64748B),
-                        size: 18,
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF1F5F9),
-                      contentPadding: EdgeInsets.zero,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF0F766E),
-                          width: 1.5,
-                        ),
-                      ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF334155)),
                     ),
-                    onChanged: (q) {
-                      final s = q.trim();
-                      if (s.length < 2) return;
-                      try {
-                        final productos =
-                            ref.read(productoControllerProvider).valueOrNull ??
-                                [];
-                        final qLower = s.toLowerCase();
-                        final exact = productos
-                            .where((p) =>
-                                p.nombre.toLowerCase() == qLower ||
-                                p.codigo.toLowerCase() == qLower ||
-                                (p.codigoBarras ?? '').toLowerCase() == qLower)
-                            .toList();
-                        if (exact.isNotEmpty) ejecutarBusqueda(s);
-                      } catch (_) {}
-                    },
-                    onSubmitted: (q) => ejecutarBusqueda(q),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            tooltip: 'Notificaciones',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Sin notificaciones nuevas'),
-                  duration: Duration(seconds: 2),
+          const Spacer(),
+          // Date
+          Row(
+            children: [
+              const Icon(Icons.calendar_today_outlined, size: 15, color: Color(0xFF94A3B8)),
+              const SizedBox(width: 6),
+              Text(
+                fechaCap,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFCBD5E1),
                 ),
-              );
-            },
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-          PopupMenuButton<String>(
-            tooltip: 'Cuenta',
-            offset: const Offset(0, 42),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            onSelected: (value) {
-              if (value == 'logout') onLogout();
-              if (value == 'config') context.push('/configuracion');
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                enabled: false,
-                child: Text(
-                  labelCorto,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem(
-                value: 'config',
-                child: Row(children: [
-                  Icon(Icons.settings_outlined, size: 18),
-                  SizedBox(width: 8),
-                  Text('Configuración'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(children: [
-                  Icon(Icons.logout, size: 18, color: Color(0xFFDC2626)),
-                  SizedBox(width: 8),
-                  Text(
-                    'Cerrar sesión',
-                    style: TextStyle(color: Color(0xFFDC2626)),
-                  ),
-                ]),
               ),
             ],
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircleAvatar(
-                    radius: 11,
-                    backgroundColor: Colors.white24,
-                    child: Icon(Icons.person, size: 14, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          // Sistema Operativo badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: const Color(0xFFA7F3D0)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF10B981),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 6),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 90),
-                    child: Text(
-                      labelCorto,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
+                ),
+                const SizedBox(width: 6),
+                const Text(
+                  'Sistema Operativo',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF047857),
                   ),
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    color: Colors.white70,
-                    size: 16,
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Campana de alertas operativas
+          const CampanaNotificaciones(),
+          const SizedBox(width: 4),
+          // Exportar Resumen
+          FilledButton.icon(
+            onPressed: () => context.push('/reports'),
+            icon: const Icon(Icons.download_outlined, size: 16),
+            label: const Text(
+              'Exportar Resumen',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
             ),
           ),
         ],
       ),
     );
   }
+
+
 
   Widget _buildMenu({
     required double width,
@@ -552,47 +387,49 @@ class AppShell extends ConsumerWidget {
               // ─── HEADER DEL MENÚ (oculto en desktop: va en barra superior) ───
               if (!hideBrandHeader)
               Padding(
-                padding: const EdgeInsets.fromLTRB(14, 16, 14, 12),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
                 child: Row(
                   children: [
                     Container(
-                      width: 38,
-                      height: 38,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.22),
-                        borderRadius: BorderRadius.circular(10),
+                        color: const Color(0xFF1268F3),
+                        borderRadius: BorderRadius.circular(11),
                       ),
                       child: const Icon(
-                        Icons.inventory_2_rounded,
-                        color: AppColors.primaryLight,
+                        Icons.grid_view_rounded,
+                        color: Colors.white,
                         size: 20,
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Expanded(
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            nombreEmpresa,
-                            style: AppTypography.h4.copyWith(
-                              color: AppColors.white,
-                              fontSize: 13.5,
+                            'FiscoGest',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
                               fontWeight: FontWeight.w800,
+                              height: 1.15,
                             ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
-                          const SizedBox(height: 1),
+                          SizedBox(height: 2),
                           Text(
-                            operadorLabel,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.grey400,
-                              fontSize: 11,
+                            'Gestión Fiscal y Créditos',
+                            style: TextStyle(
+                              color: Color(0xFF9DB5DA),
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w500,
+                              height: 1.2,
                             ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
-                            softWrap: false,
                           ),
                         ],
                       ),
@@ -765,16 +602,42 @@ class AppShell extends ConsumerWidget {
                 ),
               ),
 
-              // ─── PIE ───
-              const Divider(color: AppColors.divider, height: 1),
+              // ─── PIE (mock) ───
+              const Divider(color: Color(0xFF1A2F52), height: 1),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-                child: Text(
-                  'v3.0 Pro',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.grey500,
-                    fontSize: 10.5,
-                  ),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Tu negocio en',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF9DB5DA),
+                        height: 1.3,
+                      ),
+                    ),
+                    const Text(
+                      'buenas manos',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Tu negocio en buenas manos',
+                    ),
+                    Text(
+                      'FiscoGest v3.0 Pro Enterprise',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: const Color(0xFF6B82A8),
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -815,9 +678,9 @@ class AppShell extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 1.5),
       child: Material(
         color: esSeleccionado
-            ? AppColors.primary.withValues(alpha: 0.18)
+            ? const Color(0xFF1268F3)
             : Colors.transparent,
-        borderRadius: AppRadius.allM,
+        borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: AppRadius.allM,
           onTap: () {
@@ -836,8 +699,8 @@ class AppShell extends ConsumerWidget {
                 Icon(
                   icon,
                   color: esSeleccionado
-                      ? AppColors.primaryLight
-                      : AppColors.grey400,
+                      ? Colors.white
+                      : const Color(0xFF9DB5DA),
                   size: 19,
                 ),
                 const SizedBox(width: 10),
@@ -849,7 +712,7 @@ class AppShell extends ConsumerWidget {
                     style: AppTypography.labelMedium.copyWith(
                       color: esSeleccionado
                           ? AppColors.white
-                          : AppColors.grey400,
+                          : const Color(0xFFA8BAD8),
                       fontWeight:
                           esSeleccionado ? FontWeight.w600 : FontWeight.normal,
                       fontSize: 13,

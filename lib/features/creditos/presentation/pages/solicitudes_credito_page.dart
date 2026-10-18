@@ -38,6 +38,7 @@ class SolicitudesCreditoPage extends ConsumerWidget {
 
     return AppScaffold(
       title: 'SOLICITUDES DE CRÉDITO',
+      showAppBar: !desktop,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
@@ -60,14 +61,20 @@ class SolicitudesCreditoPage extends ConsumerWidget {
           data: (lista) {
             return Padding(
               padding: EdgeInsets.fromLTRB(
-                mobile ? 16 : 20,
-                mobile ? 12 : 16,
-                mobile ? 16 : 20,
+                mobile ? 16 : 24,
+                mobile ? 12 : 20,
+                mobile ? 16 : 24,
                 16,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const EnterprisePageHeader(
+                    title: 'Solicitudes de crédito',
+                    subtitle: 'Pendientes de análisis y aprobación',
+                    showBack: true,
+                    backFallbackRoute: '/creditos',
+                  ),
                   Expanded(
                     child: Align(
                       alignment: Alignment.topCenter,
@@ -78,21 +85,23 @@ class SolicitudesCreditoPage extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text(
-                              'En análisis',
-                              style: AppTypography.h4.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                            if (!desktop) ...[
+                              Text(
+                                'En análisis',
+                                style: AppTypography.h4.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Cotizaciones en crédito pendientes de aprobación.',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.grey600,
+                              const SizedBox(height: 4),
+                              Text(
+                                'Cotizaciones en crédito pendientes de aprobación.',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.grey600,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 12),
+                              const SizedBox(height: 12),
+                            ],
                             Expanded(
                               child: lista.isEmpty
                                   ? AppCard(

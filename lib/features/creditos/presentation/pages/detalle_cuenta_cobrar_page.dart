@@ -5,21 +5,19 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/clientes/domain/interfaces/i_cliente_repository.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
-import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuota.dart';
+import 'package:fiscogest_rd/features/creditos/domain/services/pronto_pago_service.dart';
+import 'package:fiscogest_rd/features/creditos/data/dao/pronto_pago_acuerdos_dao.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/estado_credito.dart';
-import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart'
-    show cuentasCobrarListaProvider, creditoTotalesProvider;
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart'
     as venta_providers;
-import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart'
-    show cajaRepositoryProvider;
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
-import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/services/bitacora_operaciones_service.dart';
 
 class DetalleCuentaCobrarPage extends ConsumerStatefulWidget {
@@ -38,6 +36,7 @@ class DetalleCuentaCobrarPage extends ConsumerStatefulWidget {
 class _DetalleCuentaCobrarPageState
     extends ConsumerState<DetalleCuentaCobrarPage> {
   CuentaPorCobrar? _cuenta;
+  ProntoPagoAcuerdoData? _acuerdoActivo;
   final List<({String nombre, int cantidad, double total})> _lineas = [];
   bool _cargando = true;
   String? _error;
@@ -147,10 +146,21 @@ class _DetalleCuentaCobrarPageState
         } catch (_) {}
       }
       if (!mounted) return;
-      setState(() {
-        _cuenta = cuenta;
-        _cargando = false;
-      });
+      ProntoPagoAcuerdoData? acuerdoDb;
+        try {
+          if (cuenta.id != null) {
+            acuerdoDb = await ProntoPagoAcuerdosDao(ref.read(databaseProvider))
+                .activoPorCuenta(cuenta.id!);
+          }
+        } catch (_) {
+          acuerdoDb = null;
+        }
+        if (!mounted) return;
+        setState(() {
+          _cuenta = cuenta;
+          _acuerdoActivo = acuerdoDb;
+          _cargando = false;
+        });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -164,171 +174,77 @@ class _DetalleCuentaCobrarPageState
     final c = _cuenta;
     if (c == null || c.id == null) return;
 
-    final pendientes =
-        c.planPago?.cuotas.where((q) => !q.pagada).toList() ?? <Cuota>[];
-    final nCuotas = pendientes.isNotEmpty
-        ? pendientes.length
-        : (c.numeroCuotas > 1 ? c.numeroCuotas : 1);
-    final sugerido = pendientes.isNotEmpty
-        ? pendientes.first.saldoDespues.clamp(0.01, c.saldoPendiente).toDouble()
-        : (nCuotas > 1 ? c.saldoPendiente / nCuotas : c.saldoPendiente);
+    final calc0 = ProntoPagoService.calcular(c, descuentoInteresPct: 0);
+    if (!calc0.elegible) {
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(calc0.error ?? 'No aplica pronto pago'),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
 
-    final pago = await showDialog<_PagoCuotaResultado>(
+    final acuerdo = await showDialog<_ProntoPagoResultado>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => _PagoCuotaDialog(
-        saldoPendiente: c.saldoPendiente,
-        montoSugerido: sugerido,
-        numeroProximaCuota: pendientes.isEmpty
-            ? null
-            : pendientes.first.numeroCuota,
-      ),
+      builder: (ctx) => _ProntoPagoDialog(cuenta: c),
     );
-    // Un frame: el diálogo ya se desmontó
     await Future<void>.delayed(Duration.zero);
-    if (pago == null || !mounted) return;
+    if (acuerdo == null || !mounted) return;
 
+    // Solo registra el ACUERDO (no cobra). El plan de cuotas sigue vigente
+    // hasta que Caja cobre la liquidación o el cliente pague cuotas normales.
     setState(() => _pagando = true);
     try {
-      final saldoAnterior = c.saldoPendiente;
-      final notaAuto = pago.nota.isEmpty
-          ? (pendientes.isNotEmpty
-                ? 'Cuota #${pendientes.first.numeroCuota}'
-                      '${c.ventaId != null ? ' · Venta #${c.ventaId}' : ''}'
-                : (c.ventaId != null ? 'Venta #${c.ventaId}' : null))
-          : pago.nota;
-      await ref.read(databaseProvider).transaction(() async {
-        await ref
-            .read(cuentaPorCobrarRepositoryProvider)
-            .registrarAbono(
-              AbonoCredito(
-                cuentaId: c.id!,
-                monto: pago.monto,
-                metodoPago: pago.metodo,
-                fecha: DateTime.now(),
-                nota: notaAuto,
-              ),
-            );
-        await ref
-            .read(cajaRepositoryProvider)
-            .registrarMovimiento(
-              referencia: c.numero ?? 'CXC-${c.id}',
-              monto: pago.monto,
-              tipo: 'ingreso',
-              descripcion:
-                  'Abono ${c.numero ?? c.id} · ${c.clienteNombre ?? ''}',
-              formaPago: pago.metodo,
-            );
-      });
-      var bitacoraRegistrada = true;
+      final calc = acuerdo.calculo;
+      final dao = ProntoPagoAcuerdosDao(ref.read(databaseProvider));
+      await dao.guardarAcuerdo(
+        cuentaId: c.id!,
+        capitalPendiente: calc.capitalPendiente,
+        interesPendiente: calc.interesPendiente,
+        descuentoInteresPct: calc.descuentoInteresPct,
+        descuentoMonto: calc.descuentoSobreInteres,
+        interesTrasDescuento: calc.interesTrasDescuento,
+        montoLiquidacion: calc.montoLiquidacion,
+        cuotasPendientes: calc.cuotasPendientes,
+        notas: acuerdo.nota,
+        usuarioId: ref.read(sesionUsuarioIdProvider),
+      );
+      final activo = await dao.activoPorCuenta(c.id!);
+      if (mounted) {
+        setState(() => _acuerdoActivo = activo);
+      }
       try {
-        await ref
-            .read(bitacoraOperacionesServiceProvider)
-            .registrar(
-              accion: 'pago_registrado',
+        await ref.read(bitacoraOperacionesServiceProvider).registrar(
+              accion: 'pronto_pago_acordado',
               entidad: 'cuenta_por_cobrar',
               entidadId: c.id,
               usuarioId: ref.read(sesionUsuarioIdProvider),
               resumen:
-                  'Pago de ${formatRd(pago.monto)} registrado para ${c.clienteNombre ?? 'cliente #${c.clienteId}'}',
-              datos: {'ventaId': c.ventaId, 'metodoPago': pago.metodo},
+                  'Pronto pago: liquidación ${formatRd(acuerdo.calculo.montoLiquidacion)} '
+                  '(desc. ${acuerdo.calculo.descuentoInteresPct.toStringAsFixed(0)}% interés)',
+              datos: {
+                'capital': acuerdo.calculo.capitalPendiente,
+                'interes': acuerdo.calculo.interesPendiente,
+                'liquidacion': acuerdo.calculo.montoLiquidacion,
+                'descuentoPct': acuerdo.calculo.descuentoInteresPct,
+              },
             );
-      } catch (_) {
-        bitacoraRegistrada = false;
-      }
-      if (!mounted) return;
-      ref.invalidate(cuentasCobrarListaProvider);
-      ref.invalidate(creditoTotalesProvider);
-      await _cargar();
+      } catch (_) {}
+
       if (!mounted) return;
       FiscoGestNotifications.show(
         SnackBar(
           content: Text(
-            bitacoraRegistrada
-                ? 'Pago registrado: ${formatRd(pago.monto)}'
-                : 'Pago registrado: ${formatRd(pago.monto)}. No se pudo guardar en la bitácora.',
+            'Acuerdo de pronto pago registrado. '
+            'Liquidación: ${formatRd(acuerdo.calculo.montoLiquidacion)}. '
+            'Caja puede cobrar ese monto; si no se paga, las cuotas siguen normales.',
           ),
-          backgroundColor: bitacoraRegistrada
-              ? AppColors.success
-              : AppColors.warning,
+          backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-        ),
-      );
-
-      final accion = await showDialog<String>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Pago registrado'),
-          content: Text(
-            'Abono de ${formatRd(pago.monto)}.\n'
-            '¿Imprimir o compartir el comprobante?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, 'cerrar'),
-              child: const Text('Cerrar'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, 'compartir'),
-              child: const Text('Compartir'),
-            ),
-            FilledButton.icon(
-              onPressed: () => Navigator.pop(ctx, 'imprimir'),
-              icon: const Icon(Icons.print_outlined, size: 18),
-              label: const Text('Imprimir'),
-            ),
-          ],
-        ),
-      );
-
-      if ((accion == 'imprimir' || accion == 'compartir') && mounted) {
-        try {
-          final svc = await ref.read(creditoDocumentoServiceProvider.future);
-          final cuentaActual = _cuenta ?? c;
-          final abonoDoc = AbonoCredito(
-            cuentaId: c.id!,
-            monto: pago.monto,
-            metodoPago: pago.metodo,
-            fecha: DateTime.now(),
-            nota: notaAuto,
-          );
-          if (accion == 'imprimir') {
-            await svc.imprimirAbono(
-              cuenta: cuentaActual,
-              abono: abonoDoc,
-              saldoAnterior: saldoAnterior,
-              saldoActual: cuentaActual.saldoPendiente,
-            );
-          } else {
-            await svc.compartirAbono(
-              cuenta: cuentaActual,
-              abono: abonoDoc,
-              saldoAnterior: saldoAnterior,
-              saldoActual: cuentaActual.saldoPendiente,
-            );
-          }
-        } catch (e) {
-          if (mounted) {
-            FiscoGestNotifications.show(
-              SnackBar(
-                content: Text(
-                  'No se pudo generar el comprobante: '
-                  '${'$e'.replaceAll('Exception: ', '')}',
-                ),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        }
-      }
-    } catch (e) {
-      if (!mounted) return;
-      FiscoGestNotifications.show(
-        SnackBar(
-          content: Text('$e'.replaceAll('Exception: ', '')),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 6),
         ),
       );
     } finally {
@@ -336,11 +252,15 @@ class _DetalleCuentaCobrarPageState
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     final c = _cuenta;
+    final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
       title: 'DETALLE DE CUENTA',
+      showAppBar: !desktop,
       actions: c == null
           ? null
           : [
@@ -405,7 +325,7 @@ class _DetalleCuentaCobrarPageState
                               label: Text(
                                 _pagando
                                     ? 'Registrando…'
-                                    : 'Registrar pago / cuota',
+                                    : 'Pronto pago / liquidar',
                               ),
                               style: FilledButton.styleFrom(
                                 backgroundColor: AppColors.success,
@@ -424,8 +344,785 @@ class _DetalleCuentaCobrarPageState
   }
 
   Widget _buildBody(CuentaPorCobrar c) {
-    final desktop = !AppBreakpoints.isMobile(context);
     final mobile = AppBreakpoints.isMobile(context);
+    final pctPagado = c.totalAPagar > 0
+        ? ((c.totalAbonado / c.totalAPagar) * 100).clamp(0.0, 100.0)
+        : 0.0;
+    final estadoLabel = c.estado.nombre.toUpperCase();
+    final esAlDia = c.estado == EstadoCredito.alDia || c.estaPagada;
+
+    Widget cardShell({required Widget child, EdgeInsetsGeometry? padding}) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: padding ?? const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: child,
+      );
+    }
+
+    Widget kpi({
+      required String label,
+      required String value,
+      String? hint,
+      Color? bg,
+      Color? border,
+      Color? valueColor,
+      Color? labelColor,
+    }) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: bg ?? const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: border ?? const Color(0xFFE2E8F0)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: labelColor ?? const Color(0xFF64748B),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: valueColor ?? const Color(0xFF0F172A),
+              ),
+            ),
+            if (hint != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                hint,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: labelColor ?? const Color(0xFF94A3B8),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    // ── Header ──
+    final header = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Breadcrumb
+        Row(
+          children: [
+            TextButton(
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/creditos/cuentas');
+                }
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: const Color(0xFF64748B),
+              ),
+              child: const Text('Crédito', style: TextStyle(fontSize: 12)),
+            ),
+            const Text('  ›  ', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+            TextButton(
+              onPressed: () => context.go('/creditos/cuentas'),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: const Color(0xFF64748B),
+              ),
+              child: const Text('Cuentas por Cobrar', style: TextStyle(fontSize: 12)),
+            ),
+            const Text('  ›  ', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+            const Text(
+              'Detalle de cuenta',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Expanded(
+              child: Text(
+                'Detalle de cuenta',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: esAlDia
+                    ? const Color(0xFFD1FAE5)
+                    : const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: esAlDia
+                      ? const Color(0xFF6EE7B7)
+                      : const Color(0xFFFCD34D),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      color: esAlDia
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFFF59E0B),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    estadoLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: esAlDia
+                          ? const Color(0xFF065F46)
+                          : const Color(0xFF92400E),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Gestión integral de cuotas, saldos pendientes y registro inmediato de cobros.',
+          style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+        ),
+        const SizedBox(height: 12),
+        // Acciones globales
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () {
+                FiscoGestNotifications.show(
+                  const SnackBar(
+                    content: Text('Recordatorio: conectar WhatsApp en una próxima iteración'),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.chat, size: 16, color: Color(0xFF059669)),
+              label: const Text(
+                'Enviar Recordatorio',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF334155),
+                side: const BorderSide(color: Color(0xFFCBD5E1)),
+                backgroundColor: Colors.white,
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: _imprimiendoEstadoCuenta
+                  ? null
+                  : () => _imprimirEstadoCuenta(c),
+              icon: _imprimiendoEstadoCuenta
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.print_outlined, size: 16),
+              label: const Text(
+                'Estado de Cuenta',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF334155),
+                side: const BorderSide(color: Color(0xFFCBD5E1)),
+                backgroundColor: Colors.white,
+              ),
+            ),
+            FilledButton.icon(
+              onPressed: c.estaPagada || _pagando ? null : _dialogoRegistrarPago,
+              icon: const Icon(Icons.payments_outlined, size: 16),
+              label: Text(
+                _pagando ? 'Procesando…' : 'Pronto pago / liquidar',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF059669),
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    // ── Banner cliente + progreso + KPIs ──
+    final banner = cardShell(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (mobile)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _bannerCliente(c),
+                const SizedBox(height: 12),
+                _barraProgreso(c, pctPagado),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _bannerCliente(c)),
+                const SizedBox(width: 16),
+                SizedBox(width: 280, child: _barraProgreso(c, pctPagado)),
+              ],
+            ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 720;
+              final items = [
+                kpi(
+                  label: 'Total Original',
+                  value: formatRd(c.totalOriginal),
+                  hint: 'Monto contratado',
+                ),
+                kpi(
+                  label: 'Total Abonado',
+                  value: formatRd(c.totalAbonado),
+                  hint: '${c.abonos.length} pago${c.abonos.length == 1 ? '' : 's'} registrado${c.abonos.length == 1 ? '' : 's'}',
+                  bg: const Color(0xFFECFDF5),
+                  border: const Color(0xFFA7F3D0),
+                  valueColor: const Color(0xFF047857),
+                  labelColor: const Color(0xFF065F46),
+                ),
+                kpi(
+                  label: 'Saldo Pendiente',
+                  value: formatRd(c.saldoPendiente),
+                  hint: 'Por amortizar',
+                  bg: const Color(0xFFEFF6FF),
+                  border: const Color(0xFFBFDBFE),
+                  valueColor: const Color(0xFF1D4ED8),
+                  labelColor: const Color(0xFF1E40AF),
+                ),
+                kpi(
+                  label: 'Próximo Vencimiento',
+                  value: _fmtFecha.format(c.fechaVencimiento),
+                  hint: esAlDia ? 'En plazo' : 'Revisar atraso',
+                ),
+                kpi(
+                  label: 'Frecuencia / Tasa',
+                  value: c.numeroCuotas <= 1
+                      ? '1 Cuota Única'
+                      : '${c.numeroCuotas} Cuotas',
+                  hint: c.tasaInteres > 0
+                      ? 'Tasa ${(c.tasaInteres * 100).toStringAsFixed(1)}%'
+                      : 'Tasa Fija 0%',
+                ),
+              ];
+              if (wide) {
+                return Row(
+                  children: [
+                    for (var i = 0; i < items.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 10),
+                      Expanded(child: items[i]),
+                    ],
+                  ],
+                );
+              }
+              return GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.55,
+                children: items,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    // ── Acuerdo pronto pago activo ──
+    final acuerdoActivo = _acuerdoActivo;
+    final acuerdoCard = acuerdoActivo == null
+        ? const SizedBox.shrink()
+        : cardShell(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Acuerdo de pronto pago activo',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF047857),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Liquidación acordada: ${formatRd(acuerdoActivo.montoLiquidacion)} '
+                  '(desc. ${acuerdoActivo.descuentoInteresPct.toStringAsFixed(0)}% sobre intereses). '
+                  'Si el cliente no liquida en Caja, las cuotas siguen vigentes.',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
+                ),
+              ],
+            ),
+          );
+
+    // ── Plan de cuotas ──
+    final cuotas = c.planPago?.cuotas ?? const <Cuota>[];
+    final planCard = cardShell(
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
+            child: Row(
+              children: [
+                const Icon(Icons.calendar_month_outlined,
+                    size: 18, color: Color(0xFF2563EB)),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Plan de Cuotas / Cronograma de Pagos',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: _imprimiendoCronograma
+                      ? null
+                      : () => _imprimirCronograma(c),
+                  icon: _imprimiendoCronograma
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.print_outlined, size: 16),
+                  label: const Text('Imprimir Tabla',
+                      style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          if (cuotas.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Sin plan de cuotas estructurado (pago único / sin desglose).',
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
+            )
+          else ...[
+            // Cabecera tabla (desktop)
+            if (!mobile)
+              Container(
+                color: const Color(0xFFF8FAFC),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: const Row(
+                  children: [
+                    Expanded(flex: 2, child: Text('CUOTA #', style: _th)),
+                    Expanded(flex: 2, child: Text('VENCIMIENTO', style: _th)),
+                    Expanded(flex: 2, child: Text('CAPITAL', style: _th)),
+                    Expanded(flex: 2, child: Text('INTERÉS', style: _th)),
+                    Expanded(flex: 2, child: Text('TOTAL', style: _th)),
+                    Expanded(flex: 2, child: Text('ESTADO', style: _th)),
+                    SizedBox(width: 72, child: Text('ACCIÓN', style: _th, textAlign: TextAlign.right)),
+                  ],
+                ),
+              ),
+            for (final q in cuotas)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                  ),
+                ),
+                child: mobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Cuota ${q.numeroCuota}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const Spacer(),
+                              _chipEstadoCuota(q.pagada),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Vence ${_fmtFecha.format(q.fechaVencimiento)}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Text(
+                                formatRd(q.montoTotal),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const Spacer(),
+                              if (!q.pagada && !c.estaPagada)
+                                TextButton(
+                                  onPressed: _pagando
+                                      ? null
+                                      : _dialogoRegistrarPago,
+                                  child: const Text('Cobrar',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700)),
+                                ),
+                            ],
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              'Cuota ${q.numeroCuota}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800, fontSize: 12),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              _fmtFecha.format(q.fechaVencimiento),
+                              style: const TextStyle(
+                                  fontFamily: 'monospace', fontSize: 12),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              formatRd(q.montoCapital),
+                              style: const TextStyle(
+                                  fontFamily: 'monospace', fontSize: 12),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              formatRd(q.montoInteres),
+                              style: const TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontSize: 12,
+                                  color: Color(0xFF94A3B8)),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              formatRd(q.montoTotal),
+                              style: const TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 12),
+                            ),
+                          ),
+                          Expanded(flex: 2, child: _chipEstadoCuota(q.pagada)),
+                          SizedBox(
+                            width: 72,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: q.pagada || c.estaPagada
+                                  ? const SizedBox.shrink()
+                                  : TextButton(
+                                      onPressed: _pagando
+                                          ? null
+                                          : _dialogoRegistrarPago,
+                                      style: TextButton.styleFrom(
+                                        foregroundColor:
+                                            const Color(0xFF047857),
+                                        backgroundColor:
+                                            const Color(0xFFECFDF5),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        minimumSize: Size.zero,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      child: const Text(
+                                        'Cobrar',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            Container(
+              color: const Color(0xFFF8FAFC),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  Text(
+                    'Mostrando ${cuotas.length} cuota${cuotas.length == 1 ? '' : 's'}',
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFF64748B)),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Total pendiente: ${formatRd(c.saldoPendiente)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF334155),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    // ── Pagos realizados ──
+    final pagosCard = cardShell(
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            child: Row(
+              children: [
+                const Icon(Icons.history,
+                    size: 18, color: Color(0xFF059669)),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Pagos Realizados e Historial de Transacciones',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Text(
+                    '${c.abonos.length} Transacción${c.abonos.length == 1 ? '' : 'es'}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF475569),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          if (c.abonos.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                'Aún no hay abonos registrados.',
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
+            )
+          else ...[
+            if (!mobile)
+              Container(
+                color: const Color(0xFFF8FAFC),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: const Row(
+                  children: [
+                    Expanded(flex: 2, child: Text('FECHA', style: _th)),
+                    Expanded(flex: 2, child: Text('MÉTODO', style: _th)),
+                    Expanded(flex: 2, child: Text('MONTO', style: _th)),
+                    Expanded(flex: 2, child: Text('NOTA', style: _th)),
+                    Expanded(flex: 1, child: Text('ESTADO', style: _th)),
+                  ],
+                ),
+              ),
+            for (final a in c.abonos)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                  ),
+                ),
+                child: mobile
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _fmtFecha.format(a.fecha),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13),
+                                ),
+                                Text(
+                                  a.metodoPago,
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF64748B)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            formatRd(a.monto),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF047857),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              _fmtFecha.format(a.fecha),
+                              style: const TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              a.metodoPago,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              formatRd(a.monto),
+                              style: const TextStyle(
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF047857),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              a.nota?.isNotEmpty == true ? a.nota! : '—',
+                              style: const TextStyle(
+                                  fontSize: 12, color: Color(0xFF64748B)),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFD1FAE5),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'APLICADO',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF065F46),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+          ],
+        ],
+      ),
+    );
 
     return Align(
       alignment: Alignment.topCenter,
@@ -434,294 +1131,20 @@ class _DetalleCuentaCobrarPageState
           mobile ? 16 : 20,
           mobile ? 12 : 16,
           mobile ? 16 : 20,
-          24,
+          28,
         ),
         children: [
           AppLayout.centerConstrained(
-            maxWidth: desktop ? 940 : 560,
+            maxWidth: desktopMaxWidth(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Cabecera
-                AppCard(
-                  borderColor: AppColors.border,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.account_balance_wallet_outlined,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              c.numero ?? 'CXC-${c.id}',
-                              style: AppTypography.h4.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              c.clienteNombre ?? 'Cliente #${c.clienteId}',
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: AppColors.grey700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          c.estado.nombre.toUpperCase(),
-                          style: AppTypography.labelSmall.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Resumen importes
-                AppCard(
-                  borderColor: AppColors.border,
-                  child: Column(
-                    children: [
-                      _fila('Total original', formatRd(c.totalOriginal)),
-                      const Divider(height: 16, color: AppColors.border),
-                      _fila(
-                        'Abonado',
-                        formatRd(
-                          c.totalAbonado > 0 ? c.totalAbonado : c.abonoInicial,
-                        ),
-                      ),
-                      const Divider(height: 16, color: AppColors.border),
-                      _fila(
-                        'Saldo pendiente',
-                        formatRd(c.saldoPendiente),
-                        bold: true,
-                        valueColor: AppColors.primary,
-                      ),
-                      const Divider(height: 16, color: AppColors.border),
-                      _fila('Vence', _fmtFecha.format(c.fechaVencimiento)),
-                      if (c.ventaId != null) ...[
-                        const Divider(height: 16, color: AppColors.border),
-                        _fila('Venta', '#${c.ventaId}'),
-                      ],
-                    ],
-                  ),
-                ),
-                if (_lineas.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  Text(
-                    'Qué compró',
-                    style: AppTypography.labelLarge.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  AppCard(
-                    borderColor: AppColors.border,
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < _lineas.length; i++) ...[
-                          if (i > 0)
-                            const Divider(height: 1, color: AppColors.border),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    '${_lineas[i].nombre} × ${_lineas[i].cantidad}',
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  formatRd(_lineas[i].total),
-                                  style: AppTypography.labelMedium.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-                if (c.planPago != null && c.planPago!.cuotas.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Plan de cuotas',
-                          style: AppTypography.labelLarge.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      TextButton.icon(
-                        onPressed: _imprimiendoCronograma
-                            ? null
-                            : () => _imprimirCronograma(c),
-                        icon: _imprimiendoCronograma
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.print_outlined, size: 18),
-                        label: const Text('Imprimir'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  AppCard(
-                    borderColor: AppColors.border,
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < c.planPago!.cuotas.length; i++) ...[
-                          if (i > 0)
-                            const Divider(height: 1, color: AppColors.border),
-                          Builder(
-                            builder: (_) {
-                              final q = c.planPago!.cuotas[i];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        'Cuota ${q.numeroCuota} · ${_fmtFecha.format(q.fechaVencimiento)}',
-                                        style: AppTypography.bodyMedium
-                                            .copyWith(
-                                              color: AppColors.textPrimary,
-                                            ),
-                                      ),
-                                    ),
-                                    Text(
-                                      formatRd(q.montoTotal),
-                                      style: AppTypography.labelMedium.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      q.pagada ? 'PAGADA' : 'PENDIENTE',
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: q.pagada
-                                            ? AppColors.success
-                                            : AppColors.warning,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 20),
-                Text(
-                  'Pagos realizados',
-                  style: AppTypography.labelLarge.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                AppCard(
-                  borderColor: AppColors.border,
-                  padding: EdgeInsets.zero,
-                  child: c.abonos.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            'Aún no hay abonos registrados',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.grey600,
-                            ),
-                          ),
-                        )
-                      : Column(
-                          children: [
-                            for (var i = 0; i < c.abonos.length; i++) ...[
-                              if (i > 0)
-                                const Divider(
-                                  height: 1,
-                                  color: AppColors.border,
-                                ),
-                              ListTile(
-                                dense: true,
-                                title: Text(
-                                  _fmtFecha.format(c.abonos[i].fecha),
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  c.abonos[i].metodoPago,
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: AppColors.grey600,
-                                  ),
-                                ),
-                                trailing: Text(
-                                  formatRd(c.abonos[i].monto),
-                                  style: AppTypography.labelLarge.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                ),
+                header,
                 const SizedBox(height: 16),
+                banner,
+                acuerdoCard,
+                planCard,
+                pagosCard,
               ],
             ),
           ),
@@ -730,223 +1153,352 @@ class _DetalleCuentaCobrarPageState
     );
   }
 
-  Widget _fila(
-    String label,
-    String value, {
-    bool bold = false,
-    Color? valueColor,
-  }) {
+  static const TextStyle _th = TextStyle(
+    fontSize: 10,
+    fontWeight: FontWeight.w700,
+    color: Color(0xFF64748B),
+    letterSpacing: 0.4,
+  );
+
+  int desktopMaxWidth(BuildContext context) {
+    if (AppBreakpoints.isDesktop(context)) return 1100;
+    if (AppBreakpoints.isTablet(context)) return 900;
+    return 560;
+  }
+
+  Widget _bannerCliente(CuentaPorCobrar c) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.grey600,
-            fontWeight: FontWeight.w500,
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF6FF),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFBFDBFE)),
           ),
+          child: const Icon(Icons.folder_open, color: Color(0xFF2563EB)),
         ),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: AppTypography.bodyMedium.copyWith(
-              fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
-              color: valueColor ?? AppColors.textPrimary,
-            ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Text(
+                      c.numero ?? 'CXC-${c.id}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: 'monospace',
+                        color: Color(0xFF334155),
+                      ),
+                    ),
+                  ),
+                  if (c.ventaId != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      'Venta relacionada: #${c.ventaId}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                c.clienteNombre ?? 'Cliente #${c.clienteId}',
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
-}
 
-class _PagoCuotaResultado {
-  const _PagoCuotaResultado({
-    required this.monto,
-    required this.metodo,
-    required this.nota,
-  });
+  Widget _barraProgreso(CuentaPorCobrar c, double pct) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Text(
+                'Progreso de Pago',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF475569),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${pct.toStringAsFixed(1)}% Pagado',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF047857),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: pct / 100,
+              minHeight: 10,
+              backgroundColor: const Color(0xFFE2E8F0),
+              color: const Color(0xFF10B981),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                'Abonado: ${formatRd(c.totalAbonado)}',
+                style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
+              ),
+              const Spacer(),
+              Text(
+                'Total: ${formatRd(c.totalAPagar)}',
+                style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-  final double monto;
-  final String metodo;
+  Widget _chipEstadoCuota(bool pagada) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: pagada ? const Color(0xFFD1FAE5) : const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: pagada ? const Color(0xFF6EE7B7) : const Color(0xFFFDE68A),
+        ),
+      ),
+      child: Text(
+        pagada ? 'PAGADA' : 'PENDIENTE',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          color: pagada ? const Color(0xFF065F46) : const Color(0xFF92400E),
+        ),
+      ),
+    );
+  }}
+
+
+
+
+class _ProntoPagoResultado {
+  const _ProntoPagoResultado({required this.calculo, this.nota = ''});
+  final ProntoPagoCalculo calculo;
   final String nota;
 }
 
-class _PagoCuotaDialog extends StatefulWidget {
-  const _PagoCuotaDialog({
-    required this.saldoPendiente,
-    required this.montoSugerido,
-    required this.numeroProximaCuota,
-  });
-
-  final double saldoPendiente;
-  final double montoSugerido;
-  final int? numeroProximaCuota;
+class _ProntoPagoDialog extends StatefulWidget {
+  const _ProntoPagoDialog({required this.cuenta});
+  final CuentaPorCobrar cuenta;
 
   @override
-  State<_PagoCuotaDialog> createState() => _PagoCuotaDialogState();
+  State<_ProntoPagoDialog> createState() => _ProntoPagoDialogState();
 }
 
-class _PagoCuotaDialogState extends State<_PagoCuotaDialog> {
-  late final TextEditingController _montoController;
-  final _notaController = TextEditingController();
-  String _metodo = 'efectivo';
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _montoController = TextEditingController(
-      text: widget.montoSugerido.toStringAsFixed(2),
-    );
-  }
+class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
+  final _pctCtrl = TextEditingController(text: '0');
+  final _notaCtrl = TextEditingController();
 
   @override
   void dispose() {
-    _montoController.dispose();
-    _notaController.dispose();
+    _pctCtrl.dispose();
+    _notaCtrl.dispose();
     super.dispose();
   }
 
-  void _registrar() {
-    if (!mounted) return;
-    final raw = _montoController.text
-        .trim()
-        .replaceAll(' ', '')
-        .replaceAll(',', '.');
-    final monto = double.tryParse(raw);
-    if (monto == null || monto <= 0) {
-      setState(() => _error = 'Indique un monto válido mayor que cero.');
-      return;
-    }
-    if (monto > widget.saldoPendiente + 0.001) {
-      setState(() => _error = 'El monto supera el saldo pendiente.');
-      return;
-    }
-    final resultado = _PagoCuotaResultado(
-      monto: monto,
-      metodo: _metodo,
-      nota: _notaController.text.trim(),
+  ProntoPagoCalculo get _calc {
+    final pct = double.tryParse(_pctCtrl.text.trim().replaceAll(',', '.')) ?? 0;
+    return ProntoPagoService.calcular(
+      widget.cuenta,
+      descuentoInteresPct: pct,
     );
-    // Cerrar solo el diálogo (no la ruta padre)
-    final nav = Navigator.of(context, rootNavigator: false);
-    if (nav.canPop()) {
-      nav.pop(resultado);
+  }
+
+  void _confirmar() {
+    final calc = _calc;
+    if (!calc.elegible) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(calc.error ?? 'No elegible')),
+      );
+      return;
     }
+    Navigator.of(context).pop(
+      _ProntoPagoResultado(calculo: calc, nota: _notaCtrl.text.trim()),
+    );
+  }
+
+  Widget _row(String k, String v, {bool bold = false, Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              k,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+                color: const Color(0xFF475569),
+              ),
+            ),
+          ),
+          Text(
+            v,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+              color: color ?? const Color(0xFF0F172A),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final numeroCuota = widget.numeroProximaCuota;
+    final calc = _calc;
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-      title: const Text('Registrar pago', style: AppTypography.h4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text(
+        'Pronto pago (descuento sobre intereses)',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+      ),
       content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Saldo pendiente: ${formatRd(widget.saldoPendiente)}',
-              style: AppTypography.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
+        child: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Tabla de liquidación anticipada (estilo bancario): '
+                'el descuento aplica solo a los intereses de las cuotas '
+                'aún no pagadas. El capital se paga completo. '
+                'Si el cliente no liquida, continúa pagando sus cuotas normales.',
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
               ),
-            ),
-            AppLayout.vS,
-            Text(
-              numeroCuota == null
-                  ? 'Monto sugerido: ${formatRd(widget.montoSugerido)}'
-                  : 'Próxima cuota #$numeroCuota: '
-                        '${formatRd(widget.montoSugerido)}',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Puedes pagar más de una cuota, hasta cubrir el saldo pendiente.',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            AppLayout.vM,
-            TextField(
-              controller: _montoController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: const InputDecoration(
-                labelText: 'Monto a pagar',
-                prefixText: 'RD\$ ',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
-              onChanged: (_) {
-                if (_error != null) setState(() => _error = null);
-              },
-            ),
-            AppLayout.vM,
-            DropdownButtonFormField<String>(
-              key: ValueKey<String>(_metodo),
-              initialValue: _metodo,
-              decoration: const InputDecoration(
-                labelText: 'Forma de pago',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'efectivo', child: Text('Efectivo')),
-                DropdownMenuItem(
-                  value: 'transferencia',
-                  child: Text('Transferencia'),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
-                DropdownMenuItem(value: 'tarjeta', child: Text('Tarjeta')),
-                DropdownMenuItem(value: 'otro', child: Text('Otro')),
+                child: Column(
+                  children: [
+                    _row('Cuotas pendientes', '${calc.cuotasPendientes}'),
+                    _row(
+                      'Capital adeudado',
+                      formatRd(calc.capitalPendiente),
+                      bold: true,
+                    ),
+                    _row(
+                      'Intereses adeudados',
+                      formatRd(calc.interesPendiente),
+                    ),
+                    const Divider(height: 16),
+                    _row(
+                      'Descuento sobre intereses',
+                      '- ${formatRd(calc.descuentoSobreInteres)}',
+                      color: const Color(0xFF047857),
+                    ),
+                    _row(
+                      'Interés a pagar',
+                      formatRd(calc.interesTrasDescuento),
+                    ),
+                    const Divider(height: 16),
+                    _row(
+                      'TOTAL LIQUIDACIÓN',
+                      formatRd(calc.montoLiquidacion),
+                      bold: true,
+                      color: const Color(0xFF1D4ED8),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _pctCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: '% descuento sobre intereses',
+                  hintText: '0 – 100',
+                  border: OutlineInputBorder(),
+                  helperText: 'Ej: 50 = condona la mitad de los intereses',
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _notaCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Nota del acuerdo (opcional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              if (calc.error != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  calc.error!,
+                  style: const TextStyle(color: Color(0xFFBE123C), fontSize: 12),
+                ),
               ],
-              onChanged: (value) {
-                if (value != null && mounted) {
-                  setState(() => _metodo = value);
-                }
-              },
-            ),
-            AppLayout.vM,
-            TextField(
-              controller: _notaController,
-              decoration: const InputDecoration(
-                labelText: 'Nota (opcional)',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            if (_error != null) ...[
-              AppLayout.vS,
-              Text(
-                _error!,
-                style: AppTypography.bodySmall.copyWith(color: AppColors.error),
-              ),
             ],
-          ],
+          ),
         ),
       ),
       actions: [
         TextButton(
-          onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            }
-          },
+          onPressed: () => Navigator.pop(context),
           child: const Text('Cancelar'),
         ),
-        ElevatedButton(
-          onPressed: _registrar,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.success,
-            foregroundColor: AppColors.white,
-          ),
-          child: const Text('Registrar'),
+        FilledButton(
+          onPressed: calc.elegible ? _confirmar : null,
+          style: FilledButton.styleFrom(backgroundColor: const Color(0xFF047857)),
+          child: const Text('Aprobar acuerdo'),
         ),
       ],
     );
   }
 }
+
