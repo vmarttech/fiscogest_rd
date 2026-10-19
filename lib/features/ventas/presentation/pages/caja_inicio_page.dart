@@ -1,5 +1,12 @@
 // ignore_for_file: unused_element, unused_field, unused_import, unused_element_parameter
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
+import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart' as venta_providers;
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pdf/comprobante_abono_cuota_pdf.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
@@ -49,6 +56,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   bool _cargando = true;
   String? _error;
   bool _procesando = false;
+  bool _extraCajaAplicado = false;
   final _buscaProductoCtrl = TextEditingController();
   final _recibidoCtrl = TextEditingController(text: '0');
   final _focusBuscaProducto = FocusNode();
@@ -230,7 +238,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           behavior: SnackBarBehavior.floating));
       return;
     }
-    context.push(CobroVentaPage.pathOperacion);
+    // Ya estamos en Caja: foco a búsqueda de ticket
+    FiscoGestNotifications.show(const SnackBar(
+      content: Text('Seleccione o busque el ticket (F2) y pulse Procesar'),
+      behavior: SnackBarBehavior.floating,
+    ));
   }
 
   void _irACuentasPorCobrar() => context.push('/ventas/cobrar');
@@ -811,16 +823,179 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       return;
     }
 
-    // ── Ticket / cotización → flujo fiscal ──
+    // ── Ticket / cotización → cobro EN ESTA pantalla (sin CobroVentaPage) ──
     if (_ticketSeleccionado?.id == null) {
       FiscoGestNotifications.show(const SnackBar(
         content: Text('Busque y seleccione un ticket / cotización (F2)'),
         behavior: SnackBarBehavior.floating));
       return;
     }
-    context.push(CobroVentaPage.pathOperacion);
+    await _procesarCobroTicketEnCaja();
   }
 
+
+
+  /// Emite NCF B01/B02/B14 si aún no hay NCF fiscal (misma lógica CobroVenta).
+  Future<void> _asegurarNcfFiscalCaja(int ventaIdDoc) async {
+    final repo = ref.read(venta_providers.ventasRepositoryProvider);
+    final doc = await repo.obtenerVentaPorId(ventaIdDoc);
+    final actual = (doc?.numeroFactura ?? '').trim();
+    final yaFiscal = actual.startsWith('B01') ||
+        actual.startsWith('B02') ||
+        actual.startsWith('B14');
+    if (yaFiscal) return;
+    if (_tipoNcf == 'B01' || _tipoNcf == 'B14') {
+      final rnc = _rncFiscalController.text
+          .trim()
+          .replaceAll(RegExp(r'[^0-9]'), '');
+      if (rnc.length != 9 && rnc.length != 11) {
+        throw StateError('B01 o B14 requiere RNC (9) o cédula (11 dígitos)');
+      }
+    }
+    final ncf =
+        await ref.read(secuenciasNcfDaoProvider).siguienteNcf(_tipoNcf);
+    await repo.emitirNcfFiscal(ventaIdDoc, ncf);
+  }
+
+  /// Cobra en esta pantalla: NCF + confirmar + inventario + ingreso caja.
+  Future<void> _procesarCobroTicketEnCaja() async {
+    if (!mounted || _procesando) return;
+    final ticket = _ticketSeleccionado;
+    if (ticket == null || ticket.id == null) {
+      FiscoGestNotifications.show(const SnackBar(
+        content: Text('Seleccione un ticket / cotización'),
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+    if (!_puedeCobrar) {
+      FiscoGestNotifications.show(const SnackBar(
+        content: Text('Debe abrir la caja antes de cobrar'),
+        backgroundColor: AppColors.warning,
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+
+    final ventaId = ticket.id!;
+    final tot = _totalesTicketVivo(ticket);
+    final formaPagoNombre = _formaPagoNombre();
+    final recibido = double.tryParse(
+          _recibidoCtrl.text.trim().replaceAll(',', '.'),
+        ) ??
+        0.0;
+    final esEfectivo = formaPagoNombre.toLowerCase().contains('efectivo');
+    if (esEfectivo && recibido + 0.009 < tot.total) {
+      FiscoGestNotifications.show(SnackBar(
+        content: Text('Efectivo insuficiente. Total ${formatRd(tot.total)}'),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+
+    final repoCheck = ref.read(venta_providers.ventasRepositoryProvider);
+    final doc = await repoCheck.obtenerVentaPorId(ventaId);
+    if (doc != null) {
+      final esCr = doc.numeroCotizacion.startsWith('CR-') ||
+          doc.estadoDocumento == EstadoDocumento.enCredito ||
+          doc.formaPago.toLowerCase().contains('credito') ||
+          doc.formaPago.toLowerCase().contains('crédito');
+      if (esCr && doc.estadoDocumento == EstadoDocumento.enCredito) {
+        FiscoGestNotifications.show(const SnackBar(
+          content: Text(
+            'Pendiente de aprobación en Crédito. No se puede facturar aún.',
+          ),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ));
+        return;
+      }
+      if (esCr &&
+          doc.estadoDocumento != EstadoDocumento.aprobado &&
+          doc.estadoDocumento != EstadoDocumento.facturado) {
+        FiscoGestNotifications.show(SnackBar(
+          content: Text(
+            'Estado ${doc.estadoDocumento.name}: no listo para cobro a crédito',
+          ),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ));
+        return;
+      }
+    }
+
+    setState(() => _procesando = true);
+    try {
+      await _asegurarNcfFiscalCaja(ventaId);
+
+      final repositorio = ref.read(venta_providers.ventasRepositoryProvider);
+      final Venta venta = await repositorio.confirmarVentaBorrador(
+        ventaId,
+        formaPago: formaPagoNombre,
+      );
+
+      final ventaConDetalle =
+          await repositorio.obtenerVentaPorId(venta.id ?? ventaId);
+      if (ventaConDetalle == null) {
+        throw Exception('No se pudo recargar la venta facturada');
+      }
+      if (ventaConDetalle.detalles.isEmpty) {
+        throw Exception(
+          'La cotización ${ventaConDetalle.numeroCotizacion} no tiene productos '
+          'en base de datos. Genere una cotización nueva con productos.',
+        );
+      }
+
+      final inv = ref.read(ventaInventarioServiceProvider);
+      await inv.aplicarSalidaInventario(ventaConDetalle);
+      ref.invalidate(productoControllerProvider);
+      try {
+        ref.invalidate(kardexPorProductoProvider);
+      } catch (_) {}
+
+      final montoCaja = tot.total;
+      if (montoCaja > 0) {
+        final cajaRepo = ref.read(cajaRepositoryProvider);
+        final nFactura = venta.numeroFactura ?? venta.numeroCotizacion;
+        await cajaRepo.registrarMovimiento(
+          referencia: nFactura,
+          monto: montoCaja,
+          tipo: 'ingreso',
+          descripcion:
+              'Cobro factura $nFactura (cotización ${venta.numeroCotizacion})',
+          formaPago: formaPagoNombre,
+        );
+      }
+
+      try {
+        ref.invalidate(listaVentasBorradorProvider);
+        ref.invalidate(listaCotizacionesProvider);
+        ref.invalidate(listaVentasProvider);
+      } catch (_) {}
+
+      if (!mounted) return;
+      FiscoGestNotifications.show(SnackBar(
+        content: Text(
+          'Facturado ${venta.numeroFactura ?? venta.numeroCotizacion} · ${formatRd(montoCaja)}',
+        ),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+      ));
+      _limpiarTicket();
+      await _refrescar();
+    } catch (e) {
+      if (mounted) {
+        FiscoGestNotifications.show(SnackBar(
+          content: Text('Error al cobrar: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _procesando = false);
+    }
+  }
 
   String _formaPagoNombre() {
     final v = _formaPagoUi.trim();
@@ -830,6 +1005,61 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   @override
   Widget build(BuildContext context) {
+    // caja-contrast-v3 — contraste alto + negrita vía tema
+    WidgetsBinding.instance.addPostFrameCallback((_) => _aplicarExtraCajaSiHay());
+    final base = Theme.of(context);
+    final cajaTheme = base.copyWith(
+      textTheme: base.textTheme.copyWith(
+        bodyLarge: base.textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF0F172A),
+        ),
+        bodyMedium: base.textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF0F172A),
+        ),
+        bodySmall: base.textTheme.bodySmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF1E293B),
+        ),
+        titleLarge: base.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF0F172A),
+        ),
+        titleMedium: base.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF0F172A),
+        ),
+        titleSmall: base.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF0F172A),
+        ),
+        labelLarge: base.textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF0F172A),
+        ),
+        labelMedium: base.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+        labelSmall: base.textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF0F172A),
+          side: const BorderSide(color: Color(0xFF475569), width: 1.3),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    );
 
     final mobile = AppBreakpoints.isMobile(context);
     final abierta = _cajaAbierta;
@@ -878,12 +1108,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       style: TextStyle(
 
                         fontSize: 20,
-                        color: Color(0xFF0F172A))),
+                        color: Color(0xFF0F172A), fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
                     const Text(
                       'Abre el turno para comenzar. La estación inicia vacía.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 14)),
+                      style: TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 28),
                     SizedBox(
                       width: double.infinity,
@@ -893,7 +1123,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         icon: const Icon(Icons.lock_open_rounded),
                         label: Text(
                           _procesando ? 'Abriendo…' : 'Abrir Caja',
-                          style: const TextStyle(fontSize: 16)),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFF059669),
                           foregroundColor: Colors.white,
@@ -903,7 +1133,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     }
 
     // ABIERTA: POS 2 columnas vacío (diseño HTML, sin ticket)
-    return CallbackShortcuts(
+    
+    return Theme(
+      data: cajaTheme,
+      child: CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.f2): () {
           _focusBuscaProducto.requestFocus();
@@ -949,7 +1182,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                             Expanded(flex: 4, child: _buildVistaPreviaTicket()),
                           ]))),
               _buildPosFooter(),
-            ]))));
+            ])))),
+    );
   }
 
 
@@ -961,8 +1195,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         style: const TextStyle(
           fontSize: 11,
 
-          color: Color(0xFF64748B),
-          letterSpacing: 0.6));
+          color: Color(0xFF1E293B),
+          letterSpacing: 0.6, fontWeight: FontWeight.w700));
 
 
 
@@ -1049,7 +1283,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       const Icon(Icons.description_outlined, color: Color(0xFFF59E0B), size: 22),
                       const SizedBox(width: 8),
                       const Expanded(child: Text('Buscar Cotización', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
-                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF94A3B8))),
+                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF334155))),
                     ]),
                     const Divider(height: 20),
                     TextField(
@@ -1059,13 +1293,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       decoration: InputDecoration(
                         hintText: 'N° Cotización o Cliente...',
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFCBD5E1))),
+                        fillColor: const Color(0xFFF1F5F9),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B))),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12))),
                     const SizedBox(height: 12),
                     Expanded(
                       child: items.isEmpty
-                          ? const Center(child: Text('Sin cotizaciones pendientes', style: TextStyle(color: Color(0xFF94A3B8))))
+                          ? const Center(child: Text('Sin cotizaciones pendientes', style: TextStyle(color: Color(0xFF334155), fontWeight: FontWeight.w700)))
                           : ListView.separated(
                               itemCount: items.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -1090,7 +1324,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                           children: [
                                             Text('${v.numeroCotizacion} — ${v.nombreCliente ?? 'Cliente'}',
                                                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                                            const Text('Pendiente de cobro', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                                            const Text('Pendiente de cobro', style: TextStyle(fontSize: 11, color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                                           ])),
                                         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                                           Text(formatRd(v.montoTotal), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF2563EB), fontSize: 13)),
@@ -1157,7 +1391,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF8B5CF6), size: 22),
                       const SizedBox(width: 8),
                       const Expanded(child: Text('Buscar Cuenta por Cobrar (CxC)', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
-                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF94A3B8))),
+                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF334155))),
                     ]),
                     const Divider(height: 20),
                     TextField(
@@ -1167,13 +1401,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       decoration: InputDecoration(
                         hintText: 'RNC, Cédula o Nombre del cliente...',
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFCBD5E1))),
+                        fillColor: const Color(0xFFF1F5F9),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B))),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12))),
                     const SizedBox(height: 12),
                     Expanded(
                       child: filtered.isEmpty
-                          ? const Center(child: Text('Sin cuentas por cobrar', style: TextStyle(color: Color(0xFF94A3B8))))
+                          ? const Center(child: Text('Sin cuentas por cobrar', style: TextStyle(color: Color(0xFF334155), fontWeight: FontWeight.w700)))
                           : ListView.separated(
                               itemCount: filtered.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -1198,7 +1432,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(c.clienteNombre ?? 'Cliente', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                                            Text(c.numero ?? 'CXC-${c.id}', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                                            Text(c.numero ?? 'CXC-${c.id}', style: const TextStyle(fontSize: 11, color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                                           ])),
                                         Text(formatRd(c.saldoPendiente), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF7C3AED), fontSize: 13)),
                                       ]))));
@@ -1300,15 +1534,15 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       const Icon(Icons.account_balance, color: Color(0xFF059669), size: 22),
                       const SizedBox(width: 8),
                       const Expanded(child: Text('Arqueo & Cierre de Caja', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
-                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF94A3B8))),
+                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF334155))),
                     ]),
                     const Divider(height: 16),
                     Row(children: [
                       Expanded(child: Container(
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFE2E8F0))),
+                        decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFE2E8F0))),
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          const Text('Esperado en Caja', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF64748B))),
+                          const Text('Esperado en Caja', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF1E293B))),
                           const SizedBox(height: 4),
                           Text(formatRd(teorico), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
                         ]))),
@@ -1394,14 +1628,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: 14, color: sel ? accent : const Color(0xFFCBD5E1)),
+                  Icon(icon, size: 14, color: sel ? accent : const Color(0xFF1E293B)),
                   const SizedBox(width: 6),
                   Text(
                     label,
                     style: TextStyle(
                       color: sel ? accent : const Color(0xFFE2E8F0),
 
-                      fontSize: 11)),
+                      fontSize: 11, fontWeight: FontWeight.w700)),
                 ])))));
     }
 
@@ -1422,7 +1656,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               style: const TextStyle(
                 color: Colors.white,
 
-                fontSize: 12))),
+                fontSize: 12, fontWeight: FontWeight.w700))),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -1435,7 +1669,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       style: TextStyle(
                         color: Colors.white,
 
-                        fontSize: 13)),
+                        fontSize: 13, fontWeight: FontWeight.w700)),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -1449,15 +1683,15 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         style: TextStyle(
                           color: Color(0xFF6EE7B7),
 
-                          fontSize: 10))),
+                          fontSize: 10, fontWeight: FontWeight.w700))),
                   ]),
                 Text(
                   rnc.isNotEmpty
                       ? '$nombre • RNC $rnc • Terminal'
                       : '$nombre • Terminal',
                   style: const TextStyle(
-                    color: Color(0xFF94A3B8),
-                    fontSize: 11),
+                    color: Color(0xFF334155),
+                    fontSize: 11, fontWeight: FontWeight.w700),
                   overflow: TextOverflow.ellipsis),
               ])),
           modeChip('venta', 'VENTA NORMAL', Icons.shopping_cart_outlined,
@@ -1490,7 +1724,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       style: TextStyle(
                         color: Color(0xFFE2E8F0),
 
-                        fontSize: 11)),
+                        fontSize: 11, fontWeight: FontWeight.w700)),
                   ])))),
           const SizedBox(width: 8),
           Container(
@@ -1514,12 +1748,135 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   style: const TextStyle(
                     color: Color(0xFF6EE7B7),
 
-                    fontSize: 11)),
+                    fontSize: 11, fontWeight: FontWeight.w700)),
               ])),
         ]));
   }
 
 
+
+
+
+  /// Carga venta completa para que preview/totales traigan itbis y detalles.
+
+  /// Razón social limpia (sin " · ACTIVO").
+  String? get _razonSocialFiscal {
+    final n = (_rncNombreEncontrado ?? '').trim();
+    if (n.isEmpty) return null;
+    final limpio = n.split('·').first.trim();
+    return limpio.isEmpty ? n : limpio;
+  }
+
+  bool get _exigeRncFiscal =>
+      _tipoNcf == 'B01' || _tipoNcf == 'B14';
+
+  /// Nombre que debe salir en la factura/preview.
+  String _nombreClienteFactura(Venta? ticket) {
+    if (_exigeRncFiscal) {
+      final rz = _razonSocialFiscal;
+      if (rz != null && rz.isNotEmpty) return rz.toUpperCase();
+    }
+    return (ticket?.nombreCliente ?? 'CONSUMIDOR FINAL').toUpperCase();
+  }
+
+  /// ITBIS efectivo en modo normal (si la venta trae 0, deriva o calcula 18%).
+  /// Totales con ITBIS por la ruta oficial: itbisDeLineas (resolver_tasa_itbis).
+  /// ITBIS por ruta oficial: itbisDeLineas (resolver_tasa_itbis).
+  ({double sub, double itbis, double total}) _totalesTicketVivo(Venta ticket) {
+    final sub = ticket.montoSubtotal;
+    final dets = ticket.detalles;
+    final double itbis;
+    if (dets.isNotEmpty) {
+      final raw = itbisDeLineas(
+        subtotales: dets.map((d) => d.subtotalLinea ?? d.subtotal),
+        tasas: dets.map((d) => d.tasaImpuesto),
+        descuentoGeneral: 0,
+      );
+      itbis = double.parse(raw.toStringAsFixed(2));
+    } else {
+      // Sin detalles en memoria: valor persistido (no inventar)
+      itbis = ticket.itbis;
+    }
+    final totalCalc = double.parse((sub + itbis).toStringAsFixed(2));
+    final total = (ticket.montoTotal - totalCalc).abs() < 0.05
+        ? ticket.montoTotal
+        : totalCalc;
+    return (sub: sub, itbis: itbis, total: total);
+  }
+
+
+
+  Future<void> _onTipoNcfSeleccionado(String code) async {
+    setState(() => _tipoNcf = code);
+    if (code == 'B01' || code == 'B14') {
+      final rnc = _rncFiscalController.text.replaceAll(RegExp(r'\\D'), '');
+      if (rnc.length < 9) {
+        FiscoGestNotifications.show(const SnackBar(
+          content: Text(
+            'Comprobante fiscal: indique el RNC del cliente y consulte DGII',
+          ),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
+        ));
+        // Foco al campo RNC si existe
+        try {
+          // ignore: unnecessary_statements
+          FocusScope.of(context).requestFocus(FocusNode());
+        } catch (_) {}
+      } else if (_rncNombreEncontrado == null ||
+          _rncNombreEncontrado!.trim().isEmpty) {
+        await _buscarRncFiscalEnLinea();
+      }
+      setState(() {}); // refrescar preview con razón social
+    }
+  }
+
+
+  void _aplicarExtraCajaSiHay() {
+    if (_extraCajaAplicado || !mounted) return;
+    final extra = GoRouterState.of(context).extra;
+    if (extra is! Map) return;
+    _extraCajaAplicado = true;
+    final id = extra['ventaId'];
+    if (id == null) return;
+    // Cargar cotización completa en esta misma pantalla
+    () async {
+      try {
+        final full = await ref
+            .read(ventasRepositoryProvider)
+            .obtenerVentaPorId(id is int ? id : int.tryParse('$id') ?? 0);
+        if (!mounted || full == null) return;
+        await _cargarTicketCompleto(full);
+      } catch (e) {
+        if (!mounted) return;
+        FiscoGestNotifications.show(SnackBar(
+          content: Text('No se pudo cargar cotización: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }();
+  }
+
+  Future<void> _cargarTicketCompleto(Venta base) async {
+    Venta ticket = base;
+    if (base.id != null) {
+      try {
+        final full = await ref
+            .read(ventasRepositoryProvider)
+            .obtenerVentaPorId(base.id!);
+        if (full != null) ticket = full;
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    setState(() {
+      _ticketSeleccionado = ticket;
+      _cxcActiva = null;
+      _cxcProntoPago = null;
+      _modoUi = 'venta';
+      _recibidoCtrl.text = ticket.montoTotal.toStringAsFixed(2);
+    });
+  }
 
   Widget _buildVistaPreviaTicket() {
     final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
@@ -1527,163 +1884,357 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ? cfg!.nombreComercial.trim().toUpperCase()
         : 'NEGOCIO';
     final rnc = cfg?.rnc.trim() ?? '';
-    final total = _ticketSeleccionado?.montoTotal ?? 0.0;
-    final sub = _ticketSeleccionado?.subtotal ?? 0.0;
-    final itbis = _ticketSeleccionado?.itbis ?? 0.0;
-    final cliente =
-        _ticketSeleccionado?.nombreCliente ?? 'CONSUMIDOR FINAL';
+    final tel = cfg?.telefono.trim() ?? '';
+    final dir = cfg?.direccion.trim() ?? '';
+    final simp = (ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false);
+
+    final ticket = _ticketSeleccionado;
+    final cxc = _cxcActiva;
+
+    // Totales en vivo (Venta usa montoSubtotal; fallback a subtotal si existe)
+    double sub = 0;
+    double itbis = 0;
+    double total = 0;
+    String cliente = 'CONSUMIDOR FINAL';
+    List<dynamic> lineas = const [];
+
+    if (cxc != null) {
+      final q = _cuotaActualCxc(cxc);
+      final mon = double.tryParse(
+            _cxcMontoCtrl.text.trim().replaceAll(',', '.'),
+          ) ??
+          q.monto;
+      total = mon;
+      sub = mon;
+      itbis = 0;
+      cliente = (cxc.clienteNombre ?? 'CLIENTE').toUpperCase();
+    } else if (ticket != null) {
+      try {
+        sub = ticket.montoSubtotal;
+
+      } catch (_) {
+        sub = 0;
+      }
+      final tot = _totalesTicketVivo(ticket);
+      sub = tot.sub;
+      itbis = tot.itbis;
+      total = tot.total;
+      cliente = _nombreClienteFactura(ticket);
+      try {
+        lineas = List<dynamic>.from(
+          (ticket as dynamic).detalles as List? ?? const [],
+        );
+      } catch (_) {
+        lineas = const [];
+      }
+    }
+
     final tipo = _tipoNcf == 'B01'
         ? 'CRÉDITO FISCAL'
         : (_tipoNcf == 'B14' ? 'RÉGIMEN ESPECIAL' : 'FACTURA DE CONSUMO');
 
+    final fecha =
+        '${DateTime.now().day.toString().padLeft(2, '0')}/'
+        '${DateTime.now().month.toString().padLeft(2, '0')}/'
+        '${DateTime.now().year} '
+        '${DateTime.now().hour.toString().padLeft(2, '0')}:'
+        '${DateTime.now().minute.toString().padLeft(2, '0')}';
+
+    // Estilo ticket: negro fuerte, negrita, fondo blanco
+    const ink = Color(0xFF0F172A);
+    const muted = Color(0xFF334155);
+    const lineC = Color(0xFF334155);
+
+    TextStyle ts(double size, {bool bold = true, Color? color}) => TextStyle(
+          fontSize: size,
+          fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+          color: color ?? ink,
+          fontFamily: 'monospace',
+          height: 1.35,
+        );
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFE2E8F0),
+        color: const Color(0xFF0F172A),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFCBD5E1))),
+        border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              const Icon(Icons.visibility, size: 14, color: Color(0xFF2563EB)),
+              const Icon(Icons.receipt_long, size: 16, color: Color(0xFF5EEAD4)),
               const SizedBox(width: 6),
-              const Text(
-                'VISTA PREVIA',
-                style: TextStyle(
-                  fontSize: 10,
-
-                  color: Color(0xFF475569),
-                  letterSpacing: 0.5)),
+              Text(
+                'VISTA PREVIA · EN VIVO',
+                style: ts(11, color: Colors.white),
+              ),
               const Spacer(),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFF134E4A),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFCBD5E1))),
-                child: const Text(
-                  '80mm Thermal',
-                  style: TextStyle(
-                    fontSize: 9,
-
-                    color: Color(0xFF64748B)))),
-            ]),
-          const SizedBox(height: 8),
+                  border: Border.all(color: const Color(0xFF2DD4BF)),
+                ),
+                child: Text(
+                  '80mm',
+                  style: ts(10, color: const Color(0xFFCCFBF1)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFCBD5E1))),
+                border: Border.all(color: const Color(0xFF0F172A), width: 1.4),
+              ),
               child: SingleChildScrollView(
-                child: DefaultTextStyle(
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF1E293B),
-                    fontFamily: 'monospace',
-                    height: 1.35),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(nombre, textAlign: TextAlign.center, style: ts(14)),
+                    if (rnc.isNotEmpty)
+                      Text('RNC: $rnc',
+                          textAlign: TextAlign.center, style: ts(10, color: muted)),
+                    if (tel.isNotEmpty)
+                      Text('Tel: $tel',
+                          textAlign: TextAlign.center, style: ts(9, color: muted)),
+                    if (dir.isNotEmpty)
+                      Text(dir,
+                          textAlign: TextAlign.center, style: ts(9, color: muted)),
+                    const Divider(height: 18, thickness: 1.2, color: lineC),
+
+                    // ── Cuerpo según modo ──
+                    if (cxc != null) ...[
+                      Text('TIPO: COMPROBANTE DE ABONO CXC', style: ts(11)),
                       Text(
-                        nombre,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 13)),
-                      if (rnc.isNotEmpty)
+                        'CXC: ${cxc.numero ?? cxc.id}',
+                        style: ts(11),
+                      ),
+                      Text('CLIENTE: $cliente', style: ts(11)),
+                      Text('FECHA: $fecha', style: ts(10, color: muted)),
+                      Text('FORMA PAGO: $_formaPagoUi', style: ts(10)),
+                      const Divider(height: 16, thickness: 1, color: lineC),
+                      Builder(builder: (context) {
+                        final q = _cuotaActualCxc(cxc);
+                        final mon = double.tryParse(
+                              _cxcMontoCtrl.text
+                                  .trim()
+                                  .replaceAll(',', '.'),
+                            ) ??
+                            q.monto;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('CUOTA ${q.numero} DE ${q.total}',
+                                style: ts(12, color: const Color(0xFF6D28D9))),
+                            Text('ABONO: ${formatRd(mon)}', style: ts(12)),
+                            Text(
+                              'SALDO POST: ${formatRd((cxc.saldoPendiente - mon).clamp(0, double.infinity))}',
+                              style: ts(11),
+                            ),
+                          ],
+                        );
+                      }),
+                    ] else ...[
+                      Text(
+                        simp ? 'TIPO: COMPROBANTE' : 'NCF: $_tipoNcf********',
+                        style: ts(11),
+                      ),
+                      if (!simp) Text('TIPO: $tipo', style: ts(11)),
+                      Text('CLIENTE: $cliente', style: ts(11)),
+                      Text('FECHA: $fecha', style: ts(10, color: muted)),
+                      Text('FORMA PAGO: $_formaPagoUi', style: ts(10)),
+                      const Divider(height: 16, thickness: 1, color: lineC),
+
+                      // Ítems en vivo — columnas tipo DGII: Artículo | ITBIS | Total
+                      if (ticket == null)
                         Text(
-                          'RNC: $rnc',
+                          '— sin ítems —',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Color(0xFF64748B))),
-                      const Divider(height: 16),
-                      if (_cxcActiva != null) ...[
-                        Text('TIPO: COMPROBANTE DE ABONO CXC'),
+                          style: ts(11, color: muted),
+                        )
+                      else if (lineas.isEmpty) ...[
+                        Text('DOC: ${ticket.numeroCotizacion}', style: ts(11)),
                         Text(
-                          'CXC: ${_cxcActiva!.numero ?? _cxcActiva!.id}'),
-                        Text(
-                          'CLIENTE: ${(_cxcActiva!.clienteNombre ?? 'CLIENTE').toUpperCase()}'),
-                        Text(
-                          'FECHA: ${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}'),
-                        const Divider(height: 16),
-                        Builder(builder: (context) {
-                          final q = _cuotaActualCxc(_cxcActiva!);
-                          final mon = double.tryParse(
-                                _cxcMontoCtrl.text.trim().replaceAll(',', '.')) ??
-                              q.monto;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Cuota ${q.numero} de ${q.total}'),
-                              Text('Abono: ${formatRd(mon)}'),
-                              Text(
-                                  'Método: ${_formaPagoUi}'),
-                              Text(
-                                'Saldo post: ${formatRd((_cxcActiva!.saldoPendiente - mon).clamp(0, double.infinity))}'),
-                            ]);
-                        }),
-                        const Divider(height: 16),
+                          'Sin líneas en memoria',
+                          style: ts(10, color: muted),
+                        ),
                       ] else ...[
-                        Text('NCF: ${_tipoNcf}********'),
-                        Text('TIPO: $tipo'),
-                        Text('CLIENTE: ${cliente.toUpperCase()}'),
-                        Text(
-                          'FECHA: ${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}'),
-                        const Divider(height: 16),
-                        if (_ticketSeleccionado != null)
-                          Text('1x ${_ticketSeleccionado!.numeroCotizacion}')
-                        else
-                          const Text(
-                            '— sin ítems —',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Color(0xFF94A3B8))),
-                        const Divider(height: 16),
-                      ],
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Builder(builder: (context) {
-                          final bool simp = ref.watch(modoSimplificadoProvider);
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
                             children: [
-                              if (!simp) ...[
-                                Text('SUBTOTAL: ${formatRd(sub)}'),
-                                Text('ITBIS (18%): ${formatRd(itbis)}'),
-                                const SizedBox(height: 4),
+                              Expanded(
+                                flex: 5,
+                                child: Text('ARTÍCULO',
+                                    style: ts(9, color: muted)),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text('ITBIS',
+                                    textAlign: TextAlign.right,
+                                    style: ts(9, color: muted)),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text('TOTAL',
+                                    textAlign: TextAlign.right,
+                                    style: ts(9, color: muted)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ...lineas.map((raw) {
+                          final d = raw as DetalleVenta;
+                          final base = d.subtotalLinea ?? d.subtotal;
+                          final itb = double.parse(
+                            (base * tasaComoFraccion(d.tasaImpuesto))
+                                .toStringAsFixed(2),
+                          );
+                          final totL = double.parse(
+                            (base + itb).toStringAsFixed(2),
+                          );
+                          final nom = (d.nombreProducto ?? 'Ítem').trim();
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 5),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 5,
+                                  child: Text(
+                                    '${d.cantidad}x $nom',
+                                    style: ts(10),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    formatRd(itb),
+                                    textAlign: TextAlign.right,
+                                    style: ts(10),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    formatRd(totL),
+                                    textAlign: TextAlign.right,
+                                    style: ts(10),
+                                  ),
+                                ),
                               ],
-                              Text(
-                                'TOTAL: ${formatRd(total)}',
-                                style: const TextStyle(fontSize: 13)),
-                            ]);
-                        })),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: Container(
-                          width: 56,
-                          height: 56,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0F172A),
-                            borderRadius: BorderRadius.circular(6)),
-                          child: const Text(
-                            '[ QR DGII ]',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 8)))),
-                      const SizedBox(height: 6),
-                      const Text(
-                        '¡Gracias por su compra!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 9,
-                          color: Color(0xFF94A3B8))),
-                    ]))))),
-        ]));
+                            ),
+                          );
+                        }),
+                      ],
+
+                      Divider(height: 18, thickness: 1.2, color: lineC),
+
+                    // Totales en vivo (SIEMPRE visibles)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (!simp || itbis > 0.009) ...[
+                            Text('SUBTOTAL: ${formatRd(sub)}', style: ts(11)),
+                            Text(
+                              '${lineas.isNotEmpty ? etiquetaItbisLineas(lineas.map((e) => (e as DetalleVenta).tasaImpuesto)) : 'ITBIS'}: ${formatRd(itbis)}',
+                              style: ts(11),
+                            ),
+                            const SizedBox(height: 4),
+                          ],
+                          Text(
+                            'TOTAL: ${formatRd(total)}',
+                            style: ts(14),
+                          ),
+                          if (_formaPagoUi.toLowerCase().contains('efect')) ...[
+                            Builder(builder: (context) {
+                              final rec = double.tryParse(
+                                    _recibidoCtrl.text
+                                        .trim()
+                                        .replaceAll(',', '.'),
+                                  ) ??
+                                  0;
+                              final cambio = (rec - total);
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text('RECIBIDO: ${formatRd(rec)}',
+                                      style: ts(10, color: muted)),
+                                  Text(
+                                    cambio >= 0
+                                        ? 'CAMBIO: ${formatRd(cambio)}'
+                                        : 'FALTA: ${formatRd(-cambio)}',
+                                    style: ts(10,
+                                        color: cambio >= 0
+                                            ? const Color(0xFF047857)
+                                            : const Color(0xFFB91C1C)),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+                    Center(
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: ink,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'QR\nDGII',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '¡Gracias por su compra!',
+                      textAlign: TextAlign.center,
+                      style: ts(10, color: muted),
+                    ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
+
 
   Widget _buildColProducto() {
     return Container(
@@ -1702,7 +2253,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     style: TextStyle(
                         fontSize: 11,
 
-                        color: Color(0xFF64748B))),
+                        color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -1713,7 +2264,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       style: TextStyle(
                           fontSize: 10,
 
-                          color: Color(0xFF1D4ED8)))),
+                          color: Color(0xFF1D4ED8), fontWeight: FontWeight.w700))),
               ])),
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
@@ -1728,13 +2279,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   icon: const Icon(Icons.search),
                   onPressed: _buscarTicketCaja),
                 filled: true,
-                fillColor: const Color(0xFFF8FAFC),
+                fillColor: const Color(0xFFF1F5F9),
                 isDense: true,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10))))),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            color: const Color(0xFFF8FAFC),
+            color: const Color(0xFFF1F5F9),
             child: const Row(
               children: [
                 Expanded(
@@ -1742,12 +2293,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         style: TextStyle(
                             fontSize: 10,
 
-                            color: Color(0xFF94A3B8)))),
+                            color: Color(0xFF334155), fontWeight: FontWeight.w700))),
                 Text('SUBTOTAL',
                     style: TextStyle(
                         fontSize: 10,
 
-                        color: Color(0xFF94A3B8))),
+                        color: Color(0xFF334155), fontWeight: FontWeight.w700)),
               ])),
           Expanded(
             child: _buscandoTicket
@@ -1767,14 +2318,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                             title: Text(v.numeroCotizacion,
                                 style: const TextStyle(
 
-                                    color: Color(0xFF0F172A))),
+                                    color: Color(0xFF0F172A), fontWeight: FontWeight.w700)),
                             subtitle: Text(
                               v.nombreCliente ?? 'Consumidor Final',
-                              style: const TextStyle(color: Color(0xFF64748B))),
+                              style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                             trailing: Text(formatRd(v.montoTotal),
                                 style: const TextStyle(
 
-                                    color: Color(0xFF0F172A))),
+                                    color: Color(0xFF0F172A), fontWeight: FontWeight.w700)),
                             onTap: () => _seleccionarTicket(v));
                         })
                     : _cxcActiva != null
@@ -1809,7 +2360,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                               style: TextStyle(
                                                 fontSize: 10,
 
-                                                color: Color(0xFF7C3AED)))),
+                                                color: Color(0xFF7C3AED), fontWeight: FontWeight.w700))),
                                           const Spacer(),
                                           TextButton(
                                             onPressed: _limpiarTicket,
@@ -1818,12 +2369,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                       const SizedBox(height: 8),
                                       Text(
                                         c.clienteNombre ?? 'Cliente',
-                                        style: const TextStyle(fontSize: 18)),
+                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                                       Text(
                                         c.numero ?? 'CXC-${c.id}',
                                         style: const TextStyle(
-                                          color: Color(0xFF64748B),
-                                          fontSize: 13)),
+                                          color: Color(0xFF1E293B),
+                                          fontSize: 13, fontWeight: FontWeight.w700)),
                                       if (_cxcProntoPago != null) ...[
                                         const SizedBox(height: 8),
                                         Container(
@@ -1839,7 +2390,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                             style: const TextStyle(
                                               fontSize: 12,
 
-                                              color: Color(0xFF4338CA)))),
+                                              color: Color(0xFF4338CA), fontWeight: FontWeight.w700))),
                                       ],
                                       const SizedBox(height: 12),
                                       Container(
@@ -1860,21 +2411,21 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                               style: const TextStyle(
                                                 fontSize: 13,
 
-                                                color: Color(0xFF5B21B6))),
+                                                color: Color(0xFF5B21B6), fontWeight: FontWeight.w700)),
                                             const SizedBox(height: 4),
                                             Text(
                                               formatRd(q.monto),
                                               style: const TextStyle(
                                                 fontSize: 22,
 
-                                                color: Color(0xFF7C3AED))),
+                                                color: Color(0xFF7C3AED), fontWeight: FontWeight.w700)),
                                             Text(
                                               q.pendientes > 1
                                                   ? 'Monto de esta cuota · ${q.pendientes} pendientes'
                                                   : 'Monto de esta cuota',
                                               style: const TextStyle(
                                                 fontSize: 11,
-                                                color: Color(0xFF64748B))),
+                                                color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                                           ])),
                                       if (plan != null) ...[
                                         const SizedBox(height: 8),
@@ -1883,7 +2434,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                           style: const TextStyle(
                                             fontSize: 12,
 
-                                            color: Color(0xFF475569))),
+                                            color: Color(0xFF0F172A), fontWeight: FontWeight.w700)),
                                       ],
                                       _posTotRow(
                                         'Saldo total cuenta',
@@ -1895,7 +2446,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                           style: TextStyle(
                                             fontSize: 11,
 
-                                            color: Color(0xFF64748B))),
+                                            color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                                         const SizedBox(height: 4),
                                         ...pend.take(8).map((cq) {
                                           final sel =
@@ -1919,7 +2470,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                               decoration: BoxDecoration(
                                                 color: sel
                                                     ? const Color(0xFFEDE9FE)
-                                                    : const Color(0xFFF8FAFC),
+                                                    : const Color(0xFFF1F5F9),
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                                 border: Border.all(
@@ -1939,14 +2490,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                                           ? const Color(
                                                               0xFF6D28D9)
                                                           : const Color(
-                                                              0xFF475569))),
+                                                              0xFF0F172A))),
                                                   const SizedBox(width: 8),
                                                   Expanded(
                                                     child: Text(
                                                       '${cq.fechaVencimiento.day.toString().padLeft(2, '0')}/'
                                                       '${cq.fechaVencimiento.month.toString().padLeft(2, '0')}/'
                                                       '${cq.fechaVencimiento.year}',
-                                                      style: const TextStyle(fontSize: 11))),
+                                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700))),
                                                   Text(
                                                     formatRd(cq.montoTotal),
                                                     style: const TextStyle(
@@ -1962,7 +2513,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                         style: TextStyle(
                                           fontSize: 11,
 
-                                          color: Color(0xFF64748B))),
+                                          color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                                       const SizedBox(height: 6),
                                       TextField(
                                         controller: _cxcMontoCtrl,
@@ -1975,7 +2526,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                         decoration: InputDecoration(
                                           prefixText: 'RD\$ ',
                                           filled: true,
-                                          fillColor: const Color(0xFFF8FAFC),
+                                          fillColor: const Color(0xFFF1F5F9),
                                           border: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(10)),
@@ -1996,7 +2547,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                           style: TextStyle(
                                             fontSize: 11,
 
-                                            color: Color(0xFF2563EB))),
+                                            color: Color(0xFF2563EB), fontWeight: FontWeight.w700)),
                                         const Spacer(),
                                         TextButton(
                                           onPressed: _limpiarTicket,
@@ -2004,24 +2555,24 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                       ]),
                                     Text(
                                       _ticketSeleccionado!.numeroCotizacion,
-                                      style: const TextStyle(fontSize: 20)),
+                                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                                     Text(
                                       _ticketSeleccionado!.nombreCliente ??
                                           'Consumidor Final',
                                       style: const TextStyle(
-                                          color: Color(0xFF64748B))),
+                                          color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                                     const SizedBox(height: 12),
                                     Text(
                                       'Total: ${formatRd(_ticketSeleccionado!.montoTotal)}',
                                       style: const TextStyle(
                                         fontSize: 16,
 
-                                        color: Color(0xFF059669))),
+                                        color: Color(0xFF059669), fontWeight: FontWeight.w700)),
                                   ]))
                             : const Center(
                                 child: Text(
                                   'Escanear o buscar siguiente cobro…',
-                                  style: TextStyle(color: Color(0xFF94A3B8))))),
+                                  style: TextStyle(color: Color(0xFF334155), fontWeight: FontWeight.w700)))),
           Container(
             padding: const EdgeInsets.all(14),
             decoration: const BoxDecoration(
@@ -2045,14 +2596,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 ] else ...[
                   _posTotRow(
                     'Subtotal',
-                    formatRd(_ticketSeleccionado?.subtotal ?? 0)),
+                    formatRd(_ticketSeleccionado != null ? _totalesTicketVivo(_ticketSeleccionado!).sub : 0)),
                   _posTotRow(
                     'ITBIS',
-                    formatRd(_ticketSeleccionado?.itbis ?? 0)),
+                    formatRd(_ticketSeleccionado != null ? _totalesTicketVivo(_ticketSeleccionado!).itbis : 0)),
                   const Divider(height: 14),
                   _posTotRow(
                     'TOTAL',
-                    formatRd(_ticketSeleccionado?.montoTotal ?? 0),
+                    formatRd(_ticketSeleccionado != null ? _totalesTicketVivo(_ticketSeleccionado!).total : 0),
                     bold: true),
                 ],
               ])),
@@ -2068,7 +2619,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               style: TextStyle(
                 fontSize: bold ? 13 : 12,
                 fontWeight: bold ? FontWeight.w900 : FontWeight.w600,
-                color: const Color(0xFF475569))),
+                color: const Color(0xFF0F172A))),
           const Spacer(),
           Text(v,
               style: TextStyle(
@@ -2076,7 +2627,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
                 color: bold
                     ? const Color(0xFF1D4ED8)
-                    : const Color(0xFF0F172A))),
+                    : const Color(0xFF0F172A), fontWeight: FontWeight.w700)),
         ]));
   }
 
@@ -2090,10 +2641,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     Widget ncfBtn(String code, String title, String sub) {
       final sel = _tipoNcf == code;
       return Material(
-        color: sel ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
+        color: sel ? const Color(0xFFEFF6FF) : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap: () => setState(() => _tipoNcf = code),
+          onTap: () => _onTipoNcfSeleccionado(code),
           borderRadius: BorderRadius.circular(12),
           child: Container(
             width: double.infinity,
@@ -2103,7 +2654,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               border: Border.all(
                 color: sel
                     ? const Color(0xFF2563EB)
-                    : const Color(0xFFCBD5E1),
+                    : const Color(0xFF1E293B),
                 width: sel ? 2 : 1)),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -2118,7 +2669,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     fontSize: 11,
                     color: sel
                         ? const Color(0xFF1E3A8A)
-                        : const Color(0xFF475569))),
+                        : const Color(0xFF0F172A), fontWeight: FontWeight.w700)),
                 Text(
                   sub,
                   textAlign: TextAlign.center,
@@ -2128,15 +2679,15 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     fontSize: 9,
                     color: sel
                         ? const Color(0xFF2563EB)
-                        : const Color(0xFF94A3B8))),
+                        : const Color(0xFF334155), fontWeight: FontWeight.w700)),
               ]))));
     }
 
     Widget payBtn(String id, String label, IconData icon) {
       final sel = _formaPagoUi == id;
-      Color border = const Color(0xFFCBD5E1);
-      Color bg = const Color(0xFFF8FAFC);
-      Color fg = const Color(0xFF475569);
+      Color border = const Color(0xFF1E293B);
+      Color bg = const Color(0xFFF1F5F9);
+      Color fg = const Color(0xFF0F172A);
       if (sel) {
         if (id == 'Efectivo') {
           border = const Color(0xFF059669);
@@ -2177,7 +2728,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     style: TextStyle(
 
                       fontSize: 11,
-                      color: fg))),
+                      color: fg, fontWeight: FontWeight.w700))),
               ]))));
     }
 
@@ -2202,8 +2753,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               style: TextStyle(
                 fontSize: 11,
 
-                color: Color(0xFF64748B),
-                letterSpacing: 0.5)),
+                color: Color(0xFF1E293B),
+                letterSpacing: 0.5, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -2214,10 +2765,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     decoration: InputDecoration(
                       hintText: 'RNC o cédula',
                       filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
+                      fillColor: const Color(0xFFF1F5F9),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFCBD5E1))),
+                        borderSide: const BorderSide(color: Color(0xFF1E293B))),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 10),
                       isDense: true),
@@ -2247,7 +2798,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 style: const TextStyle(
                   fontSize: 12,
 
-                  color: Color(0xFF047857))),
+                  color: Color(0xFF047857), fontWeight: FontWeight.w700)),
             ],
             const SizedBox(height: 16),
             const Text(
@@ -2255,8 +2806,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               style: TextStyle(
                 fontSize: 11,
 
-                color: Color(0xFF64748B),
-                letterSpacing: 0.5)),
+                color: Color(0xFF1E293B),
+                letterSpacing: 0.5, fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
             LayoutBuilder(builder: (context, c) {
               final w = (c.maxWidth - 16) / 3;
@@ -2281,8 +2832,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               style: TextStyle(
                 fontSize: 11,
 
-                color: Color(0xFF64748B),
-                letterSpacing: 0.5)),
+                color: Color(0xFF1E293B),
+                letterSpacing: 0.5, fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
             LayoutBuilder(builder: (context, c) {
               final w = (c.maxWidth - 16) / 3;
@@ -2299,7 +2850,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: const Color(0xFFE2E8F0))),
               child: Column(
@@ -2315,7 +2866,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               style: TextStyle(
                                 fontSize: 11,
 
-                                color: Color(0xFF64748B))),
+                                color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                             const SizedBox(height: 6),
                             TextField(
                               controller: _recibidoCtrl,
@@ -2323,14 +2874,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               keyboardType:
                                   const TextInputType.numberWithOptions(
                                       decimal: true),
-                              style: const TextStyle(fontSize: 20),
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: Colors.white,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: const BorderSide(
-                                      color: Color(0xFFCBD5E1), width: 2)),
+                                      color: Color(0xFF1E293B), width: 2)),
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 12))),
                           ])),
@@ -2344,7 +2895,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               style: TextStyle(
                                 fontSize: 11,
 
-                                color: Color(0xFF64748B))),
+                                color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                             const SizedBox(height: 6),
                             Container(
                               width: double.infinity,
@@ -2372,7 +2923,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                     fontSize: 16,
                                     color: cambio >= 0
                                         ? const Color(0xFF047857)
-                                        : const Color(0xFFB91C1C))))),
+                                        : const Color(0xFFB91C1C), fontWeight: FontWeight.w700)))),
                           ])),
                     ]),
                   const SizedBox(height: 10),
@@ -2386,7 +2937,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         style: TextStyle(
                           fontSize: 11,
 
-                          color: Color(0xFF94A3B8))),
+                          color: Color(0xFF334155), fontWeight: FontWeight.w700)),
                       for (final label in ['Exacto', '500', '1000', '2000'])
                         OutlinedButton(
                           onPressed: () {
@@ -2407,14 +2958,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF334155),
                             backgroundColor: Colors.white,
-                            side: const BorderSide(color: Color(0xFFCBD5E1)),
+                            side: const BorderSide(color: Color(0xFF1E293B)),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 6),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                           child: Text(
                             label == 'Exacto' ? 'Exacto' : '+$label',
-                            style: const TextStyle(fontSize: 11))),
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700))),
                     ]),
                 ])),
             const SizedBox(height: 20),
@@ -2445,18 +2996,18 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         children: [
           Text.rich(
             TextSpan(
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+              style: const TextStyle(color: Color(0xFF334155), fontSize: 11, fontWeight: FontWeight.w700),
               children: [
                 const TextSpan(text: 'Cajón: '),
                 TextSpan(
                   text: formatRd(_saldo ?? 0),
                   style: const TextStyle(
-                    color: Color(0xFF34D399))),
+                    color: Color(0xFF34D399), fontWeight: FontWeight.w700)),
               ])),
           const Spacer(),
           const Text(
             'F2 Producto · F3 Cotiz · F4 Arqueo · F6 CxC · F12 Cobrar',
-            style: TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+            style: TextStyle(color: Color(0xFF1E293B), fontSize: 11, fontWeight: FontWeight.w700)),
         ]));
   }
 

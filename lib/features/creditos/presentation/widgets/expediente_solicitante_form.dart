@@ -543,7 +543,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                           child: Padding(
                             padding: const EdgeInsets.only(top: 6),
                             child: DropdownButtonFormField<String>(
-                              value: _tipoVivienda,
+                              initialValue: _tipoVivienda,
                               decoration: InputDecoration(
                                 isDense: true,
                                 labelText: 'Confirmar vivienda propia/alquilada',
@@ -621,7 +621,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                           child: Padding(
                             padding: const EdgeInsets.only(top: 6),
                             child: DropdownButtonFormField<String>(
-                              value: _frecuenciaPago,
+                              initialValue: _frecuenciaPago,
                               decoration: InputDecoration(
                                 isDense: true,
                                 labelText: 'Frecuencia de pago',

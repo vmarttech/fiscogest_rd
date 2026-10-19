@@ -73,14 +73,14 @@ final alertasActivasProvider =
     final caja = await ref.watch(dashCajaProvider.future);
     if (!caja.abierta) {
       alertas.add(
-        AlertaOperativa(
+        const AlertaOperativa(
           id: 'caja_cerrada',
           tipo: TipoAlertaOperativa.cajaCerrada,
           titulo: 'Caja cerrada',
           cuerpo: 'No hay turno abierto. Abra caja para cobrar en efectivo.',
           ruta: '/ventas/cobro',
           icon: Icons.point_of_sale_outlined,
-          color: const Color(0xFF64748B),
+          color: Color(0xFF64748B),
         ),
       );
     }

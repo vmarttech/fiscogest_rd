@@ -627,7 +627,7 @@ class AppShell extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       'Tu negocio en buenas manos',
                     ),
                     Text(

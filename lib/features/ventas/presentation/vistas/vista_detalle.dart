@@ -474,8 +474,9 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         .cambiarVista(VistaActual.inicio);
 
     if (!context.mounted) return;
-    context.push(
-      '/ventas/cobro/operacion',
+    // Abrir Caja unificada (no CobroVentaPage) y cargar la cotización.
+    context.go(
+      '/ventas/cobro',
       extra: <String, dynamic>{
         'ventaId': venta.id,
         'montoTotal': venta.montoTotal,
