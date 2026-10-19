@@ -13,6 +13,7 @@ abstract class ICajaRepository {
   Future<double?> obtenerSaldoActual();
 
   Future<CajaSesionResumen?> obtenerSesionAbierta();
+  Future<CajaSesionResumen?> obtenerUltimaSesionCerrada();
 
   Future<int> abrirSesion({required double fondoInicial, int usuarioId = 1});
 
@@ -41,14 +42,20 @@ class CajaSesionResumen {
     required this.fondoInicial,
     required this.usuarioId,
     required this.estado,
+    this.fechaCierre,
+    this.saldoTeorico,
+    this.montoContado,
+    this.diferencia,
   });
-
   final int id;
   final DateTime fechaApertura;
   final double fondoInicial;
   final int usuarioId;
   final String estado;
-
+  final DateTime? fechaCierre;
+  final double? saldoTeorico;
+  final double? montoContado;
+  final double? diferencia;
   bool get estaAbierta => estado == 'abierta';
 }
 

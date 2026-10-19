@@ -1,5 +1,8 @@
 // ignore_for_file: unused_element, unused_field, unused_import, unused_element_parameter
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/features/notificaciones/presentation/notificaciones_provider.dart';
+import 'package:fiscogest_rd/features/caja/presentation/pdf/informe_z_pdf.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page.dart';
@@ -253,6 +256,425 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   void _irAHistorialTurno() => context.push('/ventas/cobro/historial-turno');
 
+
+  Widget _chipNotif(IconData icon, Color bg, Color fg, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: fg.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: fg),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: fg,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _cardAbrirTurno() {
+    return Material(
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: Color(0xFFE2E8F0)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: const Color(0xFF06B6D4),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF06B6D4).withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.point_of_sale_rounded,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Caja unificada',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFA7F3D0)),
+              ),
+              child: const Text(
+                'Sin turno activo',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF047857),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Abre el turno para comenzar.\nLa estación inicia vacía.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.35,
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: _procesando ? null : _dialogoAbrirCaja,
+                icon: const Icon(Icons.lock_open_rounded, size: 18),
+                label: Text(
+                  _procesando ? 'Abriendo…' : 'Abrir turno',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF059669),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cardUltimoTurno() {
+    return FutureBuilder<CajaSesionResumen?>(
+      future: ref.read(cajaRepositoryProvider).obtenerUltimaSesionCerrada(),
+      builder: (context, snap) {
+        final s = snap.data;
+        String cierre = '—';
+        String cajero = '—';
+        String fecha = '—';
+        String dif = '—';
+        if (s != null) {
+          cajero = 'Usuario #${s.usuarioId}';
+          final f = s.fechaCierre ?? s.fechaApertura;
+          fecha =
+              '${f.day.toString().padLeft(2, '0')}/'
+              '${f.month.toString().padLeft(2, '0')}/'
+              '${f.year} '
+              '${f.hour.toString().padLeft(2, '0')}:'
+              '${f.minute.toString().padLeft(2, '0')}';
+          if (s.montoContado != null) {
+            cierre = formatRd(s.montoContado!);
+          }
+          if (s.diferencia != null) {
+            final d = s.diferencia!;
+            dif = d.abs() < 0.005
+                ? 'Exacto'
+                : (d > 0
+                    ? 'Sobrante ${formatRd(d)}'
+                    : 'Faltante ${formatRd(d.abs())}');
+          } else if (s.montoContado != null && s.saldoTeorico != null) {
+            final d = s.montoContado! - s.saldoTeorico!;
+            dif = d.abs() < 0.005
+                ? 'Exacto'
+                : (d > 0
+                    ? 'Sobrante ${formatRd(d)}'
+                    : 'Faltante ${formatRd(d.abs())}');
+          }
+        }
+        return Material(
+          color: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: Color(0xFFE2E8F0)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Resumen último Turno',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                if (snap.connectionState == ConnectionState.waiting)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 32),
+                    child: Center(
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  )
+                else ...[
+                  const SizedBox(height: 16),
+                  _filaResumen(
+                    'Cierre de Caja anterior',
+                    cierre,
+                    Icons.bar_chart_rounded,
+                    const Color(0xFFDBEAFE),
+                    const Color(0xFF2563EB),
+                  ),
+                  const SizedBox(height: 12),
+                  _filaResumen(
+                    'Cajero',
+                    cajero,
+                    Icons.person_outline,
+                    const Color(0xFFE0E7FF),
+                    const Color(0xFF4F46E5),
+                  ),
+                  const SizedBox(height: 12),
+                  _filaResumen(
+                    'Fecha',
+                    fecha,
+                    Icons.calendar_today_outlined,
+                    const Color(0xFFE2E8F0),
+                    const Color(0xFF475569),
+                  ),
+                  const SizedBox(height: 12),
+                  _filaResumen(
+                    'Diferencia',
+                    dif,
+                    Icons.show_chart,
+                    const Color(0xFFD1FAE5),
+                    const Color(0xFF059669),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _filaResumen(
+    String label,
+    String value,
+    IconData icon,
+    Color iconBg,
+    Color iconFg,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: iconBg,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 18, color: iconFg),
+        ),
+      ],
+    );
+  }
+
+  Widget _cardVentasDiarias() {
+    final ventasAsync = ref.watch(listaVentasProvider);
+    return Material(
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: Color(0xFFE2E8F0)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: ventasAsync.when(
+          loading: () => const SizedBox(
+            height: 160,
+            child: Center(
+              child: SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          ),
+          error: (e, _) => Text(
+            'Ventas: $e',
+            style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+          ),
+          data: (ventas) {
+            final now = DateTime.now();
+            final hoy0 = DateTime(now.year, now.month, now.day);
+            final montos = List<double>.filled(7, 0);
+            var montoHoy = 0.0;
+            var nHoy = 0;
+            for (final v in ventas) {
+              final f = v.fecha;
+              final d0 = DateTime(f.year, f.month, f.day);
+              final diff = hoy0.difference(d0).inDays;
+              if (diff < 0 || diff > 6) continue;
+              final numF = (v.numeroFactura ?? '').trim();
+              final st = v.estadoDocumento.name.toLowerCase();
+              if (numF.isEmpty && !st.contains('factur')) continue;
+              final idx = 6 - diff;
+              montos[idx] += v.montoTotal;
+              if (diff == 0) {
+                montoHoy += v.montoTotal;
+                nHoy++;
+              }
+            }
+            final maxM = montos.fold<double>(0, (a, b) => a > b ? a : b);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Resumen de Ventas Diarias',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                Text(
+                  '$nHoy factura(s) hoy',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 120,
+                  width: double.infinity,
+                  child: CustomPaint(
+                    painter: _MiniBarsPainter(
+                      valores: montos
+                          .map((m) => maxM <= 0
+                              ? 0.12
+                              : (m / maxM).clamp(0.08, 1.0))
+                          .toList(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Hoy',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                          Text(
+                            formatRd(montoHoy),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Últimos 7 días',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                          Text(
+                            formatRd(montos.fold(0.0, (a, b) => a + b)),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF059669),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _dialogoAbrirCaja() async {
     // Admin y Cajero pueden abrir. La sesión queda a nombre del usuario logueado.
     final uid = _usuarioActual?.id;
@@ -269,6 +691,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
           title: const Text('Abrir caja', style: AppTypography.h4),
           content: SizedBox(
@@ -400,11 +823,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 (mq.size.height - mq.viewInsets.bottom - mq.padding.vertical - 160)
                     .clamp(200.0, 480.0);
             return AlertDialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-              insetPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 24),
-              title: const Text(
+                            title: const Text(
                 'Arqueo y cierre de caja',
                 style: AppTypography.h4),
               content: SizedBox(
@@ -921,6 +1342,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final accion = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         title: Text(simple ? 'Comprobante' : 'Comprobante fiscal'),
         content: Text(
           'NCF: $ncf\n\nElija imprimir o enviar (WhatsApp, correo, etc.).',
@@ -1259,60 +1681,148 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     }
 
     if (!abierta) {
-      return Scaffold(
+      // Dashboard pre-turno (bento). Sin arqueo/cobro hasta abrir.
+      final wide = MediaQuery.sizeOf(context).width >= 900;
+      return AppScaffold(
+        title: 'Caja unificada',
+        subtitle: 'FiscoGest',
+        showAppBar: mobile,
+        useAppPage: false,
         backgroundColor: const Color(0xFFF1F5F9),
         body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0F172A),
-                        borderRadius: BorderRadius.circular(18)),
-                      child: const Icon(Icons.point_of_sale,
-                          color: Colors.white, size: 36)),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'CAJA UNIFICADA',
-                      style: TextStyle(
-
-                        fontSize: 20,
-                        color: Color(0xFF0F172A), fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Abre el turno para comenzar. La estación inicia vacía.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 28),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: FilledButton.icon(
-                        onPressed: _procesando ? null : _dialogoAbrirCaja,
-                        icon: const Icon(Icons.lock_open_rounded),
-                        label: Text(
-                          _procesando ? 'Abriendo…' : 'Abrir Caja',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF059669),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12))))),
-                  ]))))));
+          child: LayoutBuilder(
+            builder: (ctx, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(mobile ? 12 : 20),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - (mobile ? 24 : 40),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Material(
+                        color: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Notificaciones Rápidas',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF1E293B),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Builder(builder: (context) {
+                                final alertasAsync =
+                                    ref.watch(alertasOperativasProvider);
+                                return alertasAsync.when(
+                                  loading: () => const SizedBox(
+                                    height: 28,
+                                    width: 28,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  ),
+                                  error: (_, __) => const Text(
+                                    'Sin alertas',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                  data: (alertas) {
+                                    if (alertas.isEmpty) {
+                                      return const Text(
+                                        'Todo en orden · sin alertas pendientes',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF64748B),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      );
+                                    }
+                                    return Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: [
+                                        for (final a in alertas.take(6))
+                                          InkWell(
+                                            onTap: () {
+                                              if (a.ruta.isNotEmpty) {
+                                                context.go(a.ruta);
+                                              }
+                                            },
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: _chipNotif(
+                                              a.icon,
+                                              a.color.withValues(alpha: 0.12),
+                                              a.color,
+                                              a.titulo,
+                                            ),
+                                          ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (wide)
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(flex: 5, child: _cardAbrirTurno()),
+                              const SizedBox(width: 16),
+                              Expanded(flex: 3, child: _cardUltimoTurno()),
+                              const SizedBox(width: 16),
+                              Expanded(flex: 4, child: _cardVentasDiarias()),
+                            ],
+                          ),
+                        )
+                      else ...[
+                        _cardAbrirTurno(),
+                        const SizedBox(height: 12),
+                        _cardUltimoTurno(),
+                        const SizedBox(height: 12),
+                        _cardVentasDiarias(),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
     }
-
     // ABIERTA: POS 2 columnas vacío (diseño HTML, sin ticket)
     
-    return Theme(
-      data: cajaTheme,
-      child: CallbackShortcuts(
+    return AppScaffold(
+      title: 'Caja unificada',
+      subtitle: 'FiscoGest',
+      showAppBar: mobile,
+      useAppPage: false,
+      backgroundColor: const Color(0xFFF1F5F9),
+      body: Theme(
+        data: cajaTheme,
+        child: CallbackShortcuts(
         bindings: {
           const SingleActivator(LogicalKeyboardKey.f2): () {
             _focusBuscaProducto.requestFocus();
@@ -1361,28 +1871,35 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             }
             return KeyEventResult.ignored;
           },
-          child: Scaffold(
-          backgroundColor: const Color(0xFFF1F5F9),
-          body: Column(
+          child: ColoredBox(
+            color: const Color(0xFFF1F5F9),
+            child: Column(
             children: [
               _buildPosHeader(),
               Expanded(
                 child: mobile
-                    ? ListView(
-                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                        children: [
-                          SizedBox(
-                            height: 280,
-                            child: _buildColProducto(),
-                          ),
-                          const SizedBox(height: 12),
-                          _buildColCobro(),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 420,
-                            child: _buildVistaPreviaTicket(),
-                          ),
-                        ],
+                    ? LayoutBuilder(
+                        builder: (context, c) {
+                          final w = c.maxWidth.isFinite && c.maxWidth > 0
+                              ? c.maxWidth
+                              : MediaQuery.sizeOf(context).width - 20;
+                          return SingleChildScrollView(
+                            padding:
+                                const EdgeInsets.fromLTRB(10, 8, 10, 24),
+                            child: SizedBox(
+                              width: w,
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildColProducto(compact: true),
+                                  const SizedBox(height: 10),
+                                  _buildColCobro(compact: true),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       )
                     : Padding(
                         padding: const EdgeInsets.all(10),
@@ -1400,11 +1917,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               ),
               _buildPosFooter(),
             ],
-          ),
-        ),
-      ),
-    ),
-    );
+          ), // Column
+          ), // ColoredBox
+        ), // Focus
+      ), // CallbackShortcuts
+    ), // Theme
+    ); // AppScaffold
   }
 
 
@@ -1474,16 +1992,18 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       final lista = await repo.listarPendientesCobro();
       if (mounted) setState(() => _pendientes = lista);
     } catch (_) {}
+    if (!mounted) return;
     final qCtrl = TextEditingController();
     var items = List<Venta>.from(_pendientes);
-    if (!mounted) return;
-    final seleccionada = await showDialog<Venta>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(builder: (ctx, setLocal) {
+    final seleccionada = await AppDialog.show<Venta>(
+      context,
+      title: 'Buscar Cotización',
+      content: StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          final maxH = MediaQuery.sizeOf(dialogContext).height * 0.5;
           void filtrar(String q) {
             final qq = q.trim().toLowerCase();
-            setLocal(() {
+            setDialogState(() {
               items = _pendientes.where((v) {
                 final n = v.numeroCotizacion.toLowerCase();
                 final c = (v.nombreCliente ?? '').toLowerCase();
@@ -1491,107 +2011,105 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               }).toList();
             });
           }
-          return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 560, maxHeight: 520),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(children: [
-                      const Icon(Icons.description_outlined, color: Color(0xFFF59E0B), size: 22),
-                      const SizedBox(width: 8),
-                      const Expanded(child: Text('Buscar Cotización', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
-                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF334155))),
-                    ]),
-                    const Divider(height: 20),
-                    TextField(
-                      controller: qCtrl,
-                      onChanged: filtrar,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        hintText: 'N° Cotización o Cliente...',
-                        filled: true,
-                        fillColor: const Color(0xFFF1F5F9),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B))),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12))),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: items.isEmpty
-                          ? const Center(child: Text('Sin cotizaciones pendientes', style: TextStyle(color: Color(0xFF334155), fontWeight: FontWeight.w700)))
-                          : ListView.separated(
-                              itemCount: items.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 8),
-                              itemBuilder: (_, i) {
-                                final v = items[i];
-                                return Material(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(12),
-                                    onTap: () {
-                                      Navigator.of(ctx).pop(v);
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: const Color(0xFFE2E8F0))),
-                                      child: Row(children: [
-                                        Expanded(child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text('${v.numeroCotizacion} — ${v.nombreCliente ?? 'Cliente'}',
-                                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                                            const Text('Pendiente de cobro', style: TextStyle(fontSize: 11, color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
-                                          ])),
-                                        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                                          Text(formatRd(v.montoTotal), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF2563EB), fontSize: 13)),
-                                          const SizedBox(height: 4),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(12)),
-                                            child: const Text('Pendiente', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFF92400E)))),
-                                        ]),
-                                      ]))));
-                              })),
-                  ]))));
-        });
-      });
-    qCtrl.dispose();
-
+          return SizedBox(
+            width: MediaQuery.sizeOf(dialogContext).width > 420
+                ? 400.0
+                : MediaQuery.sizeOf(dialogContext).width * 0.85,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: qCtrl,
+                  onChanged: filtrar,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'N° Cotización o Cliente...',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: maxH,
+                  child: items.isEmpty
+                      ? const Center(
+                          child: Text('Sin cotizaciones pendientes'))
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: items.length,
+                          separatorBuilder: (_, __) =>
+                              const Divider(height: 1),
+                          itemBuilder: (_, i) {
+                            final v = items[i];
+                            return ListTile(
+                              dense: true,
+                              title: Text(
+                                '${v.numeroCotizacion} — ${v.nombreCliente ?? 'Cliente'}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13),
+                              ),
+                              trailing: Text(
+                                formatRd(v.montoTotal),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF2563EB)),
+                              ),
+                              onTap: () =>
+                                  Navigator.of(dialogContext).pop(v),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cerrar'),
+        ),
+      ],
+    );
     if (seleccionada == null || !mounted) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _seleccionarTicket(seleccionada);
       setState(() => _modoUi = 'cotizacion');
     });
-
   }
 
   Future<void> _dialogoBuscarCxc() async {
-    final qCtrl = TextEditingController();
     List<CuentaPorCobrar> items = [];
     try {
       final repo = ref.read(cuentaPorCobrarRepositoryProvider);
       final todas = await repo.listarCuentas();
-      items = todas.where((c) => c.id != null && !c.estaPagada && c.saldoPendiente > 0.009).toList();
+      items = todas
+          .where((c) =>
+              c.id != null && !c.estaPagada && c.saldoPendiente > 0.009)
+          .toList();
     } catch (e) {
       if (mounted) {
-        FiscoGestNotifications.show(SnackBar(content: Text('Error CxC: $e'), backgroundColor: AppColors.error));
+        FiscoGestNotifications.show(SnackBar(
+            content: Text('Error CxC: $e'),
+            backgroundColor: AppColors.error));
       }
     }
     if (!mounted) return;
-    final seleccionada = await showDialog<CuentaPorCobrar>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(builder: (ctx, setLocal) {
-          var filtered = List<CuentaPorCobrar>.from(items);
+    final qCtrl = TextEditingController();
+    var filtered = List<CuentaPorCobrar>.from(items);
+    final seleccionada = await AppDialog.show<CuentaPorCobrar>(
+      context,
+      title: 'Buscar Cuenta por Cobrar',
+      content: StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          final maxH = MediaQuery.sizeOf(dialogContext).height * 0.5;
           void filtrar(String q) {
             final qq = q.trim().toLowerCase();
-            setLocal(() {
+            setDialogState(() {
               filtered = items.where((c) {
                 final n = (c.numero ?? '').toLowerCase();
                 final cl = (c.clienteNombre ?? '').toLowerCase();
@@ -1599,70 +2117,69 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               }).toList();
             });
           }
-          return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 560, maxHeight: 520),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(children: [
-                      const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF8B5CF6), size: 22),
-                      const SizedBox(width: 8),
-                      const Expanded(child: Text('Buscar Cuenta por Cobrar (CxC)', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
-                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF334155))),
-                    ]),
-                    const Divider(height: 20),
-                    TextField(
-                      controller: qCtrl,
-                      onChanged: filtrar,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        hintText: 'RNC, Cédula o Nombre del cliente...',
-                        filled: true,
-                        fillColor: const Color(0xFFF1F5F9),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B))),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12))),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: filtered.isEmpty
-                          ? const Center(child: Text('Sin cuentas por cobrar', style: TextStyle(color: Color(0xFF334155), fontWeight: FontWeight.w700)))
-                          : ListView.separated(
-                              itemCount: filtered.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 8),
-                              itemBuilder: (_, i) {
-                                final c = filtered[i];
-                                return Material(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(12),
-                                    onTap: () {
-                                      final cuenta = c;
-                                      Navigator.of(ctx).pop(cuenta);
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: const Color(0xFFE2E8F0))),
-                                      child: Row(children: [
-                                        Expanded(child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(c.clienteNombre ?? 'Cliente', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                                            Text(c.numero ?? 'CXC-${c.id}', style: const TextStyle(fontSize: 11, color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
-                                          ])),
-                                        Text(formatRd(c.saldoPendiente), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF7C3AED), fontSize: 13)),
-                                      ]))));
-                              })),
-                  ]))));
-        });
-      });
-    qCtrl.dispose();
-
+          return SizedBox(
+            width: MediaQuery.sizeOf(dialogContext).width > 420
+                ? 400.0
+                : MediaQuery.sizeOf(dialogContext).width * 0.85,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: qCtrl,
+                  onChanged: filtrar,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'RNC, Cédula o Nombre...',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: maxH,
+                  child: filtered.isEmpty
+                      ? const Center(child: Text('Sin cuentas por cobrar'))
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, __) =>
+                              const Divider(height: 1),
+                          itemBuilder: (_, i) {
+                            final c = filtered[i];
+                            return ListTile(
+                              dense: true,
+                              title: Text(
+                                c.clienteNombre ?? 'Cliente',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13),
+                              ),
+                              subtitle: Text(c.numero ?? 'CXC-${c.id}'),
+                              trailing: Text(
+                                formatRd(c.saldoPendiente),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF7C3AED)),
+                              ),
+                              onTap: () =>
+                                  Navigator.of(dialogContext).pop(c),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cerrar'),
+        ),
+      ],
+    );
     if (seleccionada == null || !mounted) return;
     if (seleccionada.id == null) return;
     CuentaPorCobrar cuenta = seleccionada;
@@ -1715,9 +2232,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     });
   }
 
+
+
   Future<void> _dialogoArqueoCaja() async {
     if (_sesion == null) {
-      FiscoGestNotifications.show(const SnackBar(content: Text('No hay turno activo')));
+      FiscoGestNotifications.show(
+          const SnackBar(content: Text('No hay turno activo')));
       return;
     }
     final dens = <int, TextEditingController>{
@@ -1729,86 +2249,245 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     };
     double teorico = _saldo ?? 0;
     try {
-      final r = await ref.read(cajaRepositoryProvider).obtenerResumenSesion(_sesion!.id);
+      final r = await ref
+          .read(cajaRepositoryProvider)
+          .obtenerResumenSesion(_sesion!.id);
       teorico = r.efectivoEsperado;
     } catch (_) {}
     if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(builder: (ctx, setLocal) {
-          double fisico = 0;
+    await AppDialog.show<void>(
+      context,
+      title: 'Arqueo & Cierre de Caja',
+      content: StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          var fisico = 0.0;
           dens.forEach((den, c) {
             fisico += den * (int.tryParse(c.text.trim()) ?? 0);
           });
-          return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480, maxHeight: 640),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+          return SizedBox(
+            width: MediaQuery.sizeOf(dialogContext).width > 420
+                ? 400.0
+                : MediaQuery.sizeOf(dialogContext).width * 0.85,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
                   children: [
-                    Row(children: [
-                      const Icon(Icons.account_balance, color: Color(0xFF059669), size: 22),
-                      const SizedBox(width: 8),
-                      const Expanded(child: Text('Arqueo & Cierre de Caja', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
-                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close, color: Color(0xFF334155))),
-                    ]),
-                    const Divider(height: 16),
-                    Row(children: [
-                      Expanded(child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFE2E8F0))),
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          const Text('Esperado en Caja', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF1E293B))),
-                          const SizedBox(height: 4),
-                          Text(formatRd(teorico), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-                        ]))),
-                      const SizedBox(width: 10),
-                      Expanded(child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFA7F3D0))),
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          const Text('Conteo Físico', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF065F46))),
-                          const SizedBox(height: 4),
-                          Text(formatRd(fisico), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF047857))),
-                        ]))),
-                    ]),
-                    const SizedBox(height: 12),
-                    for (final den in dens.keys)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(children: [
-                          Expanded(child: Text('RD\$ $den')),
-                          SizedBox(
-                            width: 80,
-                            child: TextField(
-                              controller: dens[den],
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.right,
-                              onChanged: (_) => setLocal(() {}),
-                              decoration: const InputDecoration(isDense: true, border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8)))),
-                        ])),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 48,
-                      child: FilledButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          _dialogoCerrarCaja();
-                        },
-                        style: FilledButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
-                        child: const Text('CERRAR TURNO Y GENERAR INFORME Z', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12)))),
-                  ]))));
-        });
-      });
-    for (final c in dens.values) {
-      c.dispose();
-    }
+                    Expanded(
+                      child: Text('Esperado\n${formatRd(teorico)}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 13)),
+                    ),
+                    Expanded(
+                      child: Text('Contado\n${formatRd(fisico)}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: Color(0xFF047857))),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                for (final den in dens.keys)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Expanded(child: Text('RD\$ $den')),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: dens[den],
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.right,
+                            onChanged: (_) => setDialogState(() {}),
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F172A)),
+                  onPressed: () async {
+                    var fisicoNow = 0.0;
+                    dens.forEach((den, c) {
+                      fisicoNow +=
+                          den * (int.tryParse(c.text.trim()) ?? 0);
+                    });
+                    final dif = fisicoNow - teorico;
+                    String? obs;
+                    if (dif.abs() >= 0.005) {
+                      final obsCtrl = TextEditingController();
+                      final okObs = await showDialog<bool>(
+                        context: dialogContext,
+                        builder: (c2) => AlertDialog(
+                          title: const Text('Diferencia en cuadre'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Esperado: ${formatRd(teorico)}\n'
+                                'Contado: ${formatRd(fisicoNow)}\n'
+                                'Diferencia: ${formatRd(dif)}',
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: obsCtrl,
+                                maxLines: 2,
+                                decoration: const InputDecoration(
+                                  labelText: 'Explique faltante/sobrante',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.pop(c2, false),
+                                child: const Text('Cancelar')),
+                            FilledButton(
+                              onPressed: () {
+                                if (obsCtrl.text.trim().isEmpty) return;
+                                Navigator.pop(c2, true);
+                              },
+                              child: const Text('Continuar'),
+                            ),
+                          ],
+                        ),
+                      );
+                      obs = obsCtrl.text.trim();
+                      if (okObs != true || obs.isEmpty) return;
+                    } else {
+                      obs = 'Cuadre exacto';
+                    }
+                    if (!dialogContext.mounted) return;
+                    try {
+                      final ok = await ref
+                          .read(cajaRepositoryProvider)
+                          .cerrarSesion(
+                            sesionId: _sesion!.id,
+                            saldoTeorico: teorico,
+                            montoContado: fisicoNow,
+                            observacion: obs,
+                          );
+                      try {
+                        if (ok) {
+                          await ref
+                              .read(bitacoraOperacionesServiceProvider)
+                              .registrar(
+                                accion: 'caja_cerrada',
+                                entidad: 'sesion_caja',
+                                entidadId: _sesion!.id,
+                                usuarioId:
+                                    ref.read(sesionUsuarioIdProvider),
+                                resumen:
+                                    'Cierre arqueo dens. dif ${formatRd(dif)}',
+                                datos: {
+                                  'saldoTeorico': teorico,
+                                  'montoContado': fisicoNow,
+                                  'diferencia': dif,
+                                  'observacion': obs,
+                                },
+                              );
+                        }
+                      } catch (_) {}
+                      if (dialogContext.mounted) {
+                        Navigator.pop(dialogContext);
+                      }
+                      if (!mounted) return;
+                      ref.invalidate(dashCajaProvider);
+                      final String msg;
+                      if (!ok) {
+                        msg = 'No se pudo cerrar la sesión';
+                      } else if (dif.abs() < 0.005) {
+                        msg =
+                            'Caja cerrada. Cuadre exacto. Informe Z listo.';
+                      } else if (dif > 0) {
+                        msg = 'Caja cerrada. Sobrante: ${formatRd(dif)}';
+                      } else {
+                        msg =
+                            'Caja cerrada. Faltante: ${formatRd(dif.abs())}';
+                      }
+                      FiscoGestNotifications.show(SnackBar(
+                        content: Text(msg),
+                        backgroundColor: ok
+                            ? (dif.abs() < 0.005
+                                ? AppColors.success
+                                : AppColors.warning)
+                            : AppColors.error,
+                        behavior: SnackBarBehavior.floating,
+                      ));
+                      if (ok) {
+                        try {
+                          final repo = ref.read(cajaRepositoryProvider);
+                          final resumenZ = await repo
+                              .obtenerResumenSesion(_sesion!.id);
+                          final emp = ref
+                              .read(configuracionControllerProvider)
+                              .valueOrNull;
+                          if (!mounted) return;
+                          await InformeZPdf.imprimir(
+                            resumen: resumenZ,
+                            montoContado: fisicoNow,
+                            observacion: obs,
+                            cerradoEn: DateTime.now(),
+                            fechaApertura: _sesion?.fechaApertura,
+                            nombreComercio: emp?.nombreComercial,
+                            rnc: emp?.rnc,
+                            telefono: emp?.telefono,
+                            direccion: emp?.direccion,
+                            compartir: false,
+                          );
+                        } catch (ePdf) {
+                          if (mounted) {
+                            FiscoGestNotifications.show(SnackBar(
+                              content: Text('Informe Z: $ePdf'),
+                              backgroundColor: AppColors.warning,
+                              behavior: SnackBarBehavior.floating,
+                            ));
+                          }
+                        }
+                      }
+                      await _refrescar();
+                    } catch (e) {
+                      if (!mounted) return;
+                      FiscoGestNotifications.show(SnackBar(
+                        content:
+                            Text('$e'.replaceAll('Exception: ', '')),
+                        backgroundColor: AppColors.error,
+                        behavior: SnackBarBehavior.floating,
+                      ));
+                    }
+                  },
+                  child: const Text(
+                    'CERRAR TURNO Y GENERAR INFORME Z',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+      ],
+    );
   }
+
 
   Widget _buildPosHeader() {
     final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
@@ -1819,6 +2498,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final ini = nombre.length >= 2
         ? nombre.substring(0, 2).toUpperCase()
         : nombre.toUpperCase();
+    final mobileH = AppBreakpoints.isMobile(context);
 
     Widget modeChip(String id, String label, IconData icon, Color accent) {
       final sel = _modoUi == id;
@@ -1838,155 +2518,201 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             },
             borderRadius: BorderRadius.circular(8),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: sel
                       ? accent.withValues(alpha: 0.6)
-                      : const Color(0xFF334155))),
+                      : const Color(0xFF334155),
+                ),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: 14, color: sel ? accent : const Color(0xFF1E293B)),
+                  Icon(icon,
+                      size: 14, color: sel ? accent : const Color(0xFF94A3B8)),
                   const SizedBox(width: 6),
                   Text(
                     label,
                     style: TextStyle(
                       color: sel ? accent : const Color(0xFFE2E8F0),
-
-                      fontSize: 11, fontWeight: FontWeight.w700)),
-                ])))));
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      color: const Color(0xFF0F172A),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
+    Widget arqueoBtn() {
+      return Material(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: _dialogoArqueoCaja,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
-              borderRadius: BorderRadius.circular(10)),
-            alignment: Alignment.center,
-            child: Text(
-              ini,
-              style: const TextStyle(
-                color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFF334155)),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.account_balance, size: 14, color: Color(0xFF34D399)),
+                SizedBox(width: 6),
+                Text(
+                  'F4 Arqueo',
+                  style: TextStyle(
+                    color: Color(0xFFE2E8F0),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
-                fontSize: 12, fontWeight: FontWeight.w700))),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final chips = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        modeChip('venta', mobileH ? 'VENTA' : 'VENTA NORMAL',
+            Icons.shopping_cart_outlined, const Color(0xFF60A5FA)),
+        modeChip('cotizacion', mobileH ? 'F3 Cotiz' : 'Cotiz. F3',
+            Icons.description_outlined, const Color(0xFFFBBF24)),
+        modeChip('cxc', mobileH ? 'F6 CxC' : 'CxC F6',
+            Icons.account_balance_wallet_outlined, const Color(0xFFA78BFA)),
+        const SizedBox(width: 6),
+        arqueoBtn(),
+      ],
+    );
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: mobileH ? 8 : 14,
+        vertical: mobileH ? 8 : 10,
+      ),
+      color: const Color(0xFF0F172A),
+      child: mobileH
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
-                    const Text(
-                      'FiscoGest v4.0',
-                      style: TextStyle(
-                        color: Colors.white,
-
-                        fontSize: 13, fontWeight: FontWeight.w700)),
-                    const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF064E3B),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF34D399))),
-                      child: const Text(
-                        'CAJA UNIFICADA',
-                        style: TextStyle(
-                          color: Color(0xFF6EE7B7),
-
-                          fontSize: 10, fontWeight: FontWeight.w700))),
-                  ]),
-                Text(
-                  rnc.isNotEmpty
-                      ? '$nombre • RNC $rnc • Terminal'
-                      : '$nombre • Terminal',
-                  style: const TextStyle(
-                    color: Color(0xFF334155),
-                    fontSize: 11, fontWeight: FontWeight.w700),
-                  overflow: TextOverflow.ellipsis),
-              ])),
-          modeChip('venta', 'VENTA NORMAL', Icons.shopping_cart_outlined,
-              const Color(0xFF60A5FA)),
-          modeChip('cotizacion', 'Cotiz. F3', Icons.description_outlined,
-              const Color(0xFFFBBF24)),
-          modeChip('cxc', 'CxC F6', Icons.account_balance_wallet_outlined,
-              const Color(0xFFA78BFA)),
-          const SizedBox(width: 6),
-          Material(
-            color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(8),
-            child: InkWell(
-              onTap: _dialogoArqueoCaja,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF334155))),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.account_balance,
-                        size: 14, color: Color(0xFF34D399)),
-                    SizedBox(width: 6),
-                    Text(
-                      'Arqueo F4',
-                      style: TextStyle(
-                        color: Color(0xFFE2E8F0),
-
-                        fontSize: 11, fontWeight: FontWeight.w700)),
-                  ])))),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF064E3B),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF047857))),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+                        color: const Color(0xFF2563EB),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        ini,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Caja unificada',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            nombre,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF94A3B8),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: chips,
+                ),
+              ],
+            )
+          : Row(
               children: [
                 Container(
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF34D399),
-                    shape: BoxShape.circle)),
-                const SizedBox(width: 6),
-                Text(
-                  _cajaAbierta ? 'Turno Activo' : 'Caja cerrada',
-                  style: const TextStyle(
-                    color: Color(0xFF6EE7B7),
-
-                    fontSize: 11, fontWeight: FontWeight.w700)),
-              ])),
-        ]));
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    ini,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'FiscoGest · CAJA UNIFICADA',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        rnc.isNotEmpty
+                            ? '$nombre • RNC $rnc'
+                            : nombre,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                chips,
+              ],
+            ),
+    );
   }
 
-
-
-
-
-  /// Carga venta completa para que preview/totales traigan itbis y detalles.
-
-  /// Razón social limpia (sin " · ACTIVO").
-  String? get _razonSocialFiscal {
-    final n = (_rncNombreEncontrado ?? '').trim();
-    if (n.isEmpty) return null;
-    final limpio = n.split('·').first.trim();
-    return limpio.isEmpty ? n : limpio;
-  }
 
   bool get _modoSimplificado =>
       ref.watch(configuracionControllerProvider).valueOrNull
@@ -2106,6 +2832,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       _modoUi = 'venta';
       _recibidoCtrl.text = ticket.montoTotal.toStringAsFixed(2);
     });
+  }
+
+
+  String? get _razonSocialFiscal {
+    final n = (_rncNombreEncontrado ?? '').trim();
+    if (n.isEmpty) return null;
+    final limpio = n.split('·').first.trim();
+    return limpio.isEmpty ? n : limpio;
   }
 
   Widget _buildVistaPreviaTicket() {
@@ -2334,10 +3068,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         ...lineas.map((raw) {
                           final d = raw as DetalleVenta;
                           final base = d.subtotalLinea ?? d.subtotal;
-                          final itb = double.parse(
-                            (base * tasaComoFraccion(d.tasaImpuesto))
-                                .toStringAsFixed(2),
-                          );
+                          final itb = simp
+                              ? 0.0
+                              : double.parse(
+                                  (base * tasaComoFraccion(d.tasaImpuesto))
+                                      .toStringAsFixed(2),
+                                );
                           final totL = double.parse(
                             (base + itb).toStringAsFixed(2),
                           );
@@ -2377,7 +3113,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         }),
                       ],
 
-                      Divider(height: 18, thickness: 1.2, color: lineC),
+                      const Divider(height: 18, thickness: 1.2, color: lineC),
 
                     // Totales en vivo (SIEMPRE visibles)
                     Align(
@@ -2468,13 +3204,30 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   }
 
 
-  Widget _buildColProducto() {
+
+  /// En desktop (Row+Expanded) usa Expanded; en móvil (ListView padre) usa alto fijo.
+  /// Vertical (Column): en compact no Expanded.
+  /// Horizontal (Row): SIEMPRE Expanded (TextField necesita ancho acotado).
+  Widget _expandOrBox({
+    required bool compact,
+    required Widget child,
+    double height = 200,
+    bool inRow = false,
+  }) {
+    if (inRow) return Expanded(child: child);
+    if (compact) return child;
+    return Expanded(child: child);
+  }
+
+
+  Widget _buildColProducto({bool compact = false}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE2E8F0))),
       child: Column(
+        mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
@@ -2524,7 +3277,6 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     child: Text('ARTÍCULO',
                         style: TextStyle(
                             fontSize: 10,
-
                             color: Color(0xFF334155), fontWeight: FontWeight.w700))),
                 Text('SUBTOTAL',
                     style: TextStyle(
@@ -2532,11 +3284,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
                         color: Color(0xFF334155), fontWeight: FontWeight.w700)),
               ])),
-          Expanded(
+          _expandOrBox(
+            compact: compact,
+            height: 200,
             child: _buscandoTicket
                 ? const Center(child: CircularProgressIndicator())
                 : _resultadosBusqueda.isNotEmpty
                     ? ListView.separated(
+                        shrinkWrap: compact,
+                        physics: compact
+                            ? const NeverScrollableScrollPhysics()
+                            : null,
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         itemCount: _resultadosBusqueda.length,
                         separatorBuilder: (_, __) => const Divider(height: 1),
@@ -2724,7 +3482,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                                           : const Color(
                                                               0xFF0F172A))),
                                                   const SizedBox(width: 8),
-                                                  Expanded(
+                                                  _expandOrBox(
+                                                    compact: compact,
+                                                    height: 200,
                                                     child: Text(
                                                       '${cq.fechaVencimiento.day.toString().padLeft(2, '0')}/'
                                                       '${cq.fechaVencimiento.month.toString().padLeft(2, '0')}/'
@@ -2829,7 +3589,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   _posTotRow(
                     'Subtotal',
                     formatRd(_ticketSeleccionado != null ? _totalesTicketVivo(_ticketSeleccionado!).sub : 0)),
-                  _posTotRow(
+                  if (!_modoSimplificado) _posTotRow(
                     'ITBIS',
                     formatRd(_ticketSeleccionado != null ? _totalesTicketVivo(_ticketSeleccionado!).itbis : 0)),
                   const Divider(height: 14),
@@ -2863,7 +3623,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ]));
   }
 
-  Widget _buildColCobro() {
+  Widget _buildColCobro({bool compact = false}) {
     final total = _ticketSeleccionado?.montoTotal ?? 0.0;
     final recibido = double.tryParse(
           _recibidoCtrl.text.trim().replaceAll(',', '.')) ??
@@ -2964,8 +3724,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               ]))));
     }
 
+    final mobileCobro = AppBreakpoints.isMobile(context);
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(mobileCobro ? 12 : 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -2990,7 +3751,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(
+                _expandOrBox(
+                  compact: compact,
+                  inRow: true,
                   child: TextField(
                     controller: _rncFiscalController,
                     keyboardType: TextInputType.number,
@@ -3089,7 +3852,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 children: [
                   Row(
                     children: [
-                      Expanded(
+                      _expandOrBox(
+                        compact: compact,
+                        inRow: true,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -3118,7 +3883,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                     horizontal: 12, vertical: 12))),
                           ])),
                       const SizedBox(width: 12),
-                      Expanded(
+                      _expandOrBox(
+                        compact: compact,
+                        inRow: true,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -3237,9 +4004,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     color: Color(0xFF34D399), fontWeight: FontWeight.w700)),
               ])),
           const Spacer(),
-          const Text(
-            'F2 Producto · F3 Cotiz · F4 Arqueo · F6 CxC · F12 Cobrar',
-            style: TextStyle(color: Color(0xFF1E293B), fontSize: 11, fontWeight: FontWeight.w700)),
+          Text(
+            AppBreakpoints.isMobile(context)
+                ? 'F2 · F3 · F4 · F6 · F12'
+                : 'F2 Producto · F3 Cotiz · F4 Arqueo · F6 CxC · F12 Cobrar',
+            style: const TextStyle(color: Color(0xFF1E293B), fontSize: 11, fontWeight: FontWeight.w700)),
         ]));
   }
 
@@ -3318,3 +4087,45 @@ class _CajaOpTile extends StatelessWidget {
 // ─────────────────────────────────────────────
 // FILA DE MOVIMIENTO
 // ─────────────────────────────────────────────
+
+class _MiniBarsPainter extends CustomPainter {
+  const _MiniBarsPainter({
+    this.valores = const [0.35, 0.55, 0.4, 0.7, 0.9, 0.6, 0.45],
+  });
+  final List<double> valores;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bars = valores.isEmpty ? const [0.3] : valores;
+    final w = size.width / (bars.length * 1.6);
+    final paint = Paint()..color = const Color(0xFF3B82F6);
+    final line = Paint()
+      ..color = const Color(0xFF60A5FA)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+    final path = Path();
+    for (var i = 0; i < bars.length; i++) {
+      final h = bars[i].clamp(0.05, 1.0) * size.height * 0.85;
+      final x = i * (w * 1.6) + w * 0.3;
+      final y = size.height - h;
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(x, y, w, h),
+          const Radius.circular(3),
+        ),
+        paint,
+      );
+      final cx = x + w / 2;
+      if (i == 0) {
+        path.moveTo(cx, y);
+      } else {
+        path.lineTo(cx, y);
+      }
+    }
+    canvas.drawPath(path, line);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MiniBarsPainter oldDelegate) =>
+      oldDelegate.valores != valores;
+}

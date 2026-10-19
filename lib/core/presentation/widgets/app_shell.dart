@@ -476,7 +476,8 @@ class AppShell extends ConsumerWidget {
                       _buildNavItem(context, '/ventas/cotizaciones/nueva', 'Ventas',
                           Icons.point_of_sale, currentPath, isPermanent),
                     if (puede(Permiso.cajaCobrar))
-                      _buildNavItem(context, '/ventas/cobro', 'Caja',
+                      if (!modoSimplificado)
+                        _buildNavItem(context, '/ventas/cobro', 'Caja',
                           Icons.payments_outlined, currentPath, isPermanent),
                     if (modoSimplificado &&
                         permiteFiaoLicencia &&

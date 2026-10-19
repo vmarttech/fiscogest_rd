@@ -203,6 +203,9 @@ class CajaRepositoryImpl implements ICajaRepository {
       fondoInicial: s.fondoInicial,
       usuarioId: s.usuarioId,
       estado: s.estado,
+      fechaCierre: s.fechaCierre,
+      saldoTeorico: s.saldoTeorico,
+      montoContado: s.montoContado,
     );
   }
 
@@ -283,4 +286,21 @@ class CajaRepositoryImpl implements ICajaRepository {
       observacion: observacion,
     );
   }
+
+  @override
+  Future<CajaSesionResumen?> obtenerUltimaSesionCerrada() async {
+    final s = await cajaSesionesDao.obtenerUltimaSesionCerrada();
+    if (s == null) return null;
+    return CajaSesionResumen(
+      id: s.id,
+      fechaApertura: s.fechaApertura,
+      fondoInicial: s.fondoInicial,
+      usuarioId: s.usuarioId,
+      estado: s.estado,
+      fechaCierre: s.fechaCierre,
+      saldoTeorico: s.saldoTeorico,
+      montoContado: s.montoContado,
+    );
+  }
+
 }

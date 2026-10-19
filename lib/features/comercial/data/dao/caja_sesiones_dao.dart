@@ -61,4 +61,19 @@ class CajaSesionesDao extends DatabaseAccessor<AppDatabase>
       cajaSesionesTable,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
+
+  /// Última sesión cerrada (por fecha_cierre DESC).
+  Future<CajaSesionData?> obtenerUltimaSesionCerrada() {
+    return (select(cajaSesionesTable)
+          ..where((t) => t.estado.equals('cerrada'))
+          ..orderBy([
+            (t) => OrderingTerm(
+                  expression: t.fechaCierre,
+                  mode: OrderingMode.desc,
+                ),
+          ])
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
 }

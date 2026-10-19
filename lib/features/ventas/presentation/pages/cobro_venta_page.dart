@@ -439,6 +439,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     final cfg =
         ref.read(configuracionControllerProvider).valueOrNull ??
         ref.read(configuracionControllerProvider).asData?.value;
+    // Modo simplificado: cobrar desde ventas sin abrir turno de caja.
+    if (cfg?.modoSimplificado == true) return true;
     final exige = cfg?.cajaExigirSesion ?? false;
     if (!exige) return true;
 
