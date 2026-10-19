@@ -308,8 +308,9 @@ class _TarjetaCotizacion extends ConsumerWidget {
     );
     if (confirmar != true || !context.mounted) return;
 
-    context.push(
-      '/ventas/cobro/operacion',
+    // Caja unificada (no CobroVentaPage)
+    context.go(
+      '/ventas/cobro',
       extra: <String, dynamic>{
         'ventaId': cotizacion.id,
         'montoTotal': cotizacion.montoTotal,

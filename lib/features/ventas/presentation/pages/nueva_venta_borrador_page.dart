@@ -336,8 +336,9 @@ class _NuevaVentaBorradorPageState
       ref.invalidate(listaVentasProvider);
         _limpiarFormulario();
         if (ventaId != null && mounted) {
-          await context.push(
-            '/ventas/cobro/operacion',
+          // Caja unificada (no CobroVentaPage)
+          context.go(
+            '/ventas/cobro',
             extra: <String, dynamic>{
               'ventaId': ventaId,
               'montoTotal': montoTotal,

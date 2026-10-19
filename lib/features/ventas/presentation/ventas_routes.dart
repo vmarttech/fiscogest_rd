@@ -3,7 +3,6 @@ import 'package:fiscogest_rd/features/ventas/presentation/contenedor/ventas_cont
 import 'package:fiscogest_rd/features/ventas/presentation/pages/nueva_venta_borrador_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/pagar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/descuentos_page.dart';
@@ -48,10 +47,11 @@ final List<VentasRoute> ventasRoutes = [
     name: CajaInicioPage.routeName,
     builder: (_) => const CajaInicioPage(),
   ),
+  // Legacy deep-link → misma Caja unificada
   VentasRoute(
     path: '/ventas/cobro/operacion',
-    name: CobroVentaPage.routeName,
-    builder: (_) => const CobroVentaPage(),
+    name: 'cobro-venta-operacion-legacy',
+    builder: (_) => const CajaInicioPage(),
   ),
   VentasRoute(
     path: '/ventas/pagar',

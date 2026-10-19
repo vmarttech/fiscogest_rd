@@ -40,7 +40,6 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/simulador_credit
 import 'package:fiscogest_rd/features/ventas/presentation/pages/devoluciones_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_cxc_page.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/credito_inicio_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/detalle_solicitud_credito_page.dart';
@@ -358,10 +357,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: CajaInicioPage.routeName,
             builder: (_, __) => const AppShell(child: CajaInicioPage()),
             routes: [
+              // Legacy: misma Caja unificada
               GoRoute(
                 path: 'operacion',
-                name: CobroVentaPage.routeName,
-                builder: (_, __) => const AppShell(child: CobroVentaPage()),
+                name: 'cobro-venta-operacion-legacy',
+                builder: (_, __) => const AppShell(child: CajaInicioPage()),
               ),
               GoRoute(
                 path: 'historial-turno',
