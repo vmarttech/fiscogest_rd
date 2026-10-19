@@ -1,5 +1,7 @@
 // ignore_for_file: unused_element, unused_field, unused_import, unused_element_parameter
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
+import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/pages/caja_inicio_page.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
@@ -83,6 +85,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_atajosTecladoCaja);
     _buscaProductoCtrl.dispose();
     _rncFiscalController.dispose();
     _cxcMontoCtrl.dispose();
@@ -93,6 +96,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   @override
   void initState() {
+    HardwareKeyboard.instance.addHandler(_atajosTecladoCaja);
     super.initState();
     _refrescar();
   }
@@ -835,7 +839,6 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
 
 
-  /// Emite NCF B01/B02/B14 si aún no hay NCF fiscal (misma lógica CobroVenta).
   Future<void> _asegurarNcfFiscalCaja(int ventaIdDoc) async {
     final repo = ref.read(venta_providers.ventasRepositoryProvider);
     final doc = await repo.obtenerVentaPorId(ventaIdDoc);
@@ -844,6 +847,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         actual.startsWith('B02') ||
         actual.startsWith('B14');
     if (yaFiscal) return;
+
     if (_tipoNcf == 'B01' || _tipoNcf == 'B14') {
       final rnc = _rncFiscalController.text
           .trim()
@@ -852,12 +856,126 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         throw StateError('B01 o B14 requiere RNC (9) o cédula (11 dígitos)');
       }
     }
+
     final ncf =
         await ref.read(secuenciasNcfDaoProvider).siguienteNcf(_tipoNcf);
     await repo.emitirNcfFiscal(ventaIdDoc, ncf);
+
+    final simp = ref.read(configuracionControllerProvider).valueOrNull
+            ?.modoSimplificado ??
+        false;
+    if (simp) return;
+
+    try {
+      final ventaEcfe = await repo.obtenerVentaPorId(ventaIdDoc);
+      if (ventaEcfe == null) return;
+      final tipo = ncf.length >= 3 ? ncf.substring(0, 3) : ncf;
+      final resultadoEcfe = await ref.read(encolarEcfeDesdeVentaProvider)(
+        venta: ventaEcfe,
+        tipoNcf: tipo,
+        rncCliente: _rncFiscalController.text.replaceAll(RegExp(r'\D'), ''),
+        nombreCliente: _nombreClienteFactura(ventaEcfe),
+      );
+      final detalleEcfe = resultadoEcfe.erroresValidacion.join(' · ');
+      final omisionEcfe = (resultadoEcfe.omitidoPor ?? '').trim();
+      final silencioso = omisionEcfe.contains('deshabilitado') ||
+          omisionEcfe.contains('sin envío');
+      if (mounted &&
+          !silencioso &&
+          (detalleEcfe.isNotEmpty ||
+              (!resultadoEcfe.encolado && omisionEcfe.isNotEmpty))) {
+        FiscoGestNotifications.show(SnackBar(
+          content: Text(
+            'e-CF no quedó listo: ${detalleEcfe.isNotEmpty ? detalleEcfe : omisionEcfe}',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+      try {
+        ref.invalidate(ecfeColaProvider);
+      } catch (_) {}
+    } catch (errorEcfe) {
+      if (mounted) {
+        FiscoGestNotifications.show(SnackBar(
+          content: Text('e-CF no quedó listo: $errorEcfe'),
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+    }
   }
 
-  /// Cobra en esta pantalla: NCF + confirmar + inventario + ingreso caja.
+  Future<void> _opcionesComprobantePdfCaja(Venta ventaConDetalle) async {
+    final emp = ref.read(configuracionControllerProvider).valueOrNull;
+    final simple = emp?.modoSimplificado == true;
+    final ncf = (ventaConDetalle.numeroFactura ?? '').trim();
+    if (ncf.isEmpty && !simple) {
+      if (!mounted) return;
+      FiscoGestNotifications.show(const SnackBar(
+        content: Text('Sin NCF fiscal: no se puede generar el PDF'),
+        backgroundColor: AppColors.warning,
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+    if (!mounted) return;
+    final accion = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(simple ? 'Comprobante' : 'Comprobante fiscal'),
+        content: Text(
+          'NCF: $ncf\n\nElija imprimir o enviar (WhatsApp, correo, etc.).',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'imprimir'),
+            child: const Text('Imprimir'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, 'enviar'),
+            icon: const Icon(Icons.share_outlined, size: 18),
+            label: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+    if (accion == null || !mounted) return;
+    try {
+      final compartir = accion == 'enviar';
+      String? codigoSeg;
+      AmbienteDgii? ambiente;
+      try {
+        if (ventaConDetalle.id != null) {
+          codigoSeg = await ref
+              .read(ecfeRepositoryProvider)
+              .codigoSeguridadPorVenta(ventaConDetalle.id!);
+          ambiente =
+              (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
+        }
+      } catch (_) {}
+      await ComprobantePdf.imprimirFactura(
+        ventaConDetalle,
+        compartir: compartir,
+        empresa: emp,
+        rncCliente: _rncFiscalController.text.trim(),
+        direccionCliente: '',
+        telefonoCliente: '',
+        codigoSeguridad: codigoSeg,
+        ambienteDgii: ambiente,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      FiscoGestNotifications.show(SnackBar(
+        content: Text('PDF: $e'),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+  }
+
   Future<void> _procesarCobroTicketEnCaja() async {
     if (!mounted || _procesando) return;
     final ticket = _ticketSeleccionado;
@@ -884,24 +1002,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           _recibidoCtrl.text.trim().replaceAll(',', '.'),
         ) ??
         0.0;
-    final esEfectivo = formaPagoNombre.toLowerCase().contains('efectivo');
-    if (esEfectivo && recibido + 0.009 < tot.total) {
-      FiscoGestNotifications.show(SnackBar(
-        content: Text('Efectivo insuficiente. Total ${formatRd(tot.total)}'),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating,
-      ));
-      return;
-    }
 
     final repoCheck = ref.read(venta_providers.ventasRepositoryProvider);
     final doc = await repoCheck.obtenerVentaPorId(ventaId);
+
+    bool esCredito = false;
     if (doc != null) {
-      final esCr = doc.numeroCotizacion.startsWith('CR-') ||
+      esCredito = doc.numeroCotizacion.startsWith('CR-') ||
           doc.estadoDocumento == EstadoDocumento.enCredito ||
           doc.formaPago.toLowerCase().contains('credito') ||
           doc.formaPago.toLowerCase().contains('crédito');
-      if (esCr && doc.estadoDocumento == EstadoDocumento.enCredito) {
+      if (esCredito && doc.estadoDocumento == EstadoDocumento.enCredito) {
         FiscoGestNotifications.show(const SnackBar(
           content: Text(
             'Pendiente de aprobación en Crédito. No se puede facturar aún.',
@@ -911,7 +1022,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ));
         return;
       }
-      if (esCr &&
+      if (esCredito &&
           doc.estadoDocumento != EstadoDocumento.aprobado &&
           doc.estadoDocumento != EstadoDocumento.facturado) {
         FiscoGestNotifications.show(SnackBar(
@@ -925,15 +1036,51 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       }
     }
 
+    final esEfectivo = formaPagoNombre.toLowerCase().contains('efectivo');
+    if (!esCredito && esEfectivo && recibido + 0.009 < tot.total) {
+      FiscoGestNotifications.show(SnackBar(
+        content: Text('Efectivo insuficiente. Total ${formatRd(tot.total)}'),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+    if (esCredito && recibido <= 0) {
+      FiscoGestNotifications.show(const SnackBar(
+        content: Text('Indique el abono inicial (mayor a 0)'),
+        backgroundColor: AppColors.warning,
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+    if (esCredito && recibido > tot.total + 0.009) {
+      FiscoGestNotifications.show(SnackBar(
+        content: Text('El abono no puede superar ${formatRd(tot.total)}'),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+
     setState(() => _procesando = true);
     try {
       await _asegurarNcfFiscalCaja(ventaId);
 
       final repositorio = ref.read(venta_providers.ventasRepositoryProvider);
-      final Venta venta = await repositorio.confirmarVentaBorrador(
-        ventaId,
-        formaPago: formaPagoNombre,
-      );
+      final Venta venta;
+      if (esCredito) {
+        venta = await repositorio.registrarVentaConAbono(
+          ventaId,
+          recibido,
+          '',
+          formaPago: formaPagoNombre,
+        );
+      } else {
+        venta = await repositorio.confirmarVentaBorrador(
+          ventaId,
+          formaPago: formaPagoNombre,
+        );
+      }
 
       final ventaConDetalle =
           await repositorio.obtenerVentaPorId(venta.id ?? ventaId);
@@ -954,7 +1101,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ref.invalidate(kardexPorProductoProvider);
       } catch (_) {}
 
-      final montoCaja = tot.total;
+      final montoCaja = esCredito ? recibido : tot.total;
       if (montoCaja > 0) {
         final cajaRepo = ref.read(cajaRepositoryProvider);
         final nFactura = venta.numeroFactura ?? venta.numeroCotizacion;
@@ -982,6 +1129,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
       ));
+
+      await _opcionesComprobantePdfCaja(ventaConDetalle);
+
+      if (!mounted) return;
       _limpiarTicket();
       await _refrescar();
     } catch (e) {
@@ -1002,6 +1153,31 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     return v.isEmpty ? 'Efectivo' : v;
   }
 
+
+  bool _atajosTecladoCaja(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+    if (!mounted) return false;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.f4) {
+      _dialogoArqueoCaja();
+      return true;
+    }
+    if (key == LogicalKeyboardKey.f6) {
+      setState(() => _modoUi = 'cxc');
+      _dialogoBuscarCxc();
+      return true;
+    }
+    if (key == LogicalKeyboardKey.f3) {
+      setState(() => _modoUi = 'cotizacion');
+      _dialogoBuscarCotizacion();
+      return true;
+    }
+    if (key == LogicalKeyboardKey.f12) {
+      _irCobrarTicketSeleccionado();
+      return true;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1137,26 +1313,55 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     return Theme(
       data: cajaTheme,
       child: CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.f2): () {
-          _focusBuscaProducto.requestFocus();
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.f2): () {
+            _focusBuscaProducto.requestFocus();
+          },
+          const SingleActivator(LogicalKeyboardKey.f3): () {
+            setState(() => _modoUi = 'cotizacion');
+            _dialogoBuscarCotizacion();
+          },
+          const SingleActivator(LogicalKeyboardKey.f4): () {
+            _dialogoArqueoCaja();
+          },
+          const SingleActivator(LogicalKeyboardKey.f6): () {
+            setState(() => _modoUi = 'cxc');
+            _dialogoBuscarCxc();
+          },
+          const SingleActivator(LogicalKeyboardKey.f12):
+              _irCobrarTicketSeleccionado,
         },
-        const SingleActivator(LogicalKeyboardKey.f3): () {
-          setState(() => _modoUi = 'cotizacion');
-          _dialogoBuscarCotizacion();
-        },
-        const SingleActivator(LogicalKeyboardKey.f6): () {
-          setState(() => _modoUi = 'cxc');
-          _dialogoBuscarCxc();
-        },
-        const SingleActivator(LogicalKeyboardKey.f4): () {
-          _dialogoArqueoCaja();
-        },
-        const SingleActivator(LogicalKeyboardKey.f12): _irCobrarTicketSeleccionado,
-      },
-      child: Focus(
-        autofocus: true,
-        child: Scaffold(
+        child: Focus(
+          autofocus: true,
+          canRequestFocus: true,
+          onKeyEvent: (node, event) {
+            if (event is! KeyDownEvent) return KeyEventResult.ignored;
+            final key = event.logicalKey;
+            if (key == LogicalKeyboardKey.f2) {
+              _focusBuscaProducto.requestFocus();
+              return KeyEventResult.handled;
+            }
+            if (key == LogicalKeyboardKey.f3) {
+              setState(() => _modoUi = 'cotizacion');
+              _dialogoBuscarCotizacion();
+              return KeyEventResult.handled;
+            }
+            if (key == LogicalKeyboardKey.f4) {
+              _dialogoArqueoCaja();
+              return KeyEventResult.handled;
+            }
+            if (key == LogicalKeyboardKey.f6) {
+              setState(() => _modoUi = 'cxc');
+              _dialogoBuscarCxc();
+              return KeyEventResult.handled;
+            }
+            if (key == LogicalKeyboardKey.f12) {
+              _irCobrarTicketSeleccionado();
+              return KeyEventResult.handled;
+            }
+            return KeyEventResult.ignored;
+          },
+          child: Scaffold(
           backgroundColor: const Color(0xFFF1F5F9),
           body: Column(
             children: [
@@ -1164,12 +1369,21 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               Expanded(
                 child: mobile
                     ? ListView(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                         children: [
-                          SizedBox(height: 400, child: _buildColProducto()),
+                          SizedBox(
+                            height: 280,
+                            child: _buildColProducto(),
+                          ),
                           const SizedBox(height: 12),
                           _buildColCobro(),
-                        ])
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 420,
+                            child: _buildVistaPreviaTicket(),
+                          ),
+                        ],
+                      )
                     : Padding(
                         padding: const EdgeInsets.all(10),
                         child: Row(
@@ -1180,9 +1394,16 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                             Expanded(flex: 4, child: _buildColCobro()),
                             const SizedBox(width: 10),
                             Expanded(flex: 4, child: _buildVistaPreviaTicket()),
-                          ]))),
+                          ],
+                        ),
+                      ),
+              ),
               _buildPosFooter(),
-            ])))),
+            ],
+          ),
+        ),
+      ),
+    ),
     );
   }
 
@@ -1767,8 +1988,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     return limpio.isEmpty ? n : limpio;
   }
 
+  bool get _modoSimplificado =>
+      ref.watch(configuracionControllerProvider).valueOrNull
+          ?.modoSimplificado ??
+      false;
+
   bool get _exigeRncFiscal =>
-      _tipoNcf == 'B01' || _tipoNcf == 'B14';
+      !_modoSimplificado &&
+      (_tipoNcf == 'B01' || _tipoNcf == 'B14');
 
   /// Nombre que debe salir en la factura/preview.
   String _nombreClienteFactura(Venta? ticket) {
@@ -1784,6 +2011,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   /// ITBIS por ruta oficial: itbisDeLineas (resolver_tasa_itbis).
   ({double sub, double itbis, double total}) _totalesTicketVivo(Venta ticket) {
     final sub = ticket.montoSubtotal;
+    if (_modoSimplificado) {
+      final total = ticket.montoTotal > 0 ? ticket.montoTotal : sub;
+      return (sub: sub, itbis: 0, total: total);
+    }
     final dets = ticket.detalles;
     final double itbis;
     if (dets.isNotEmpty) {
@@ -1794,7 +2025,6 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       );
       itbis = double.parse(raw.toStringAsFixed(2));
     } else {
-      // Sin detalles en memoria: valor persistido (no inventar)
       itbis = ticket.itbis;
     }
     final totalCalc = double.parse((sub + itbis).toStringAsFixed(2));
@@ -1886,7 +2116,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final rnc = cfg?.rnc.trim() ?? '';
     final tel = cfg?.telefono.trim() ?? '';
     final dir = cfg?.direccion.trim() ?? '';
-    final simp = (ref.watch(configuracionControllerProvider).valueOrNull?.modoSimplificado ?? false);
+    final simp = _modoSimplificado;
 
     final ticket = _ticketSeleccionado;
     final cxc = _cxcActiva;
@@ -2085,12 +2315,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 child: Text('ARTÍCULO',
                                     style: ts(9, color: muted)),
                               ),
-                              Expanded(
-                                flex: 2,
-                                child: Text('ITBIS',
-                                    textAlign: TextAlign.right,
-                                    style: ts(9, color: muted)),
-                              ),
+                              if (!simp)
+                                Expanded(
+                                  flex: 2,
+                                  child: Text('ITBIS',
+                                      textAlign: TextAlign.right,
+                                      style: ts(9, color: muted)),
+                                ),
                               Expanded(
                                 flex: 2,
                                 child: Text('TOTAL',
@@ -2123,14 +2354,15 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                     style: ts(10),
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    formatRd(itb),
-                                    textAlign: TextAlign.right,
-                                    style: ts(10),
+                                if (!simp)
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      formatRd(itb),
+                                      textAlign: TextAlign.right,
+                                      style: ts(10),
+                                    ),
                                   ),
-                                ),
                                 Expanded(
                                   flex: 2,
                                   child: Text(
@@ -2153,7 +2385,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          if (!simp || itbis > 0.009) ...[
+                          if (!simp) ...[
                             Text('SUBTOTAL: ${formatRd(sub)}', style: ts(11)),
                             Text(
                               '${lineas.isNotEmpty ? etiquetaItbisLineas(lineas.map((e) => (e as DetalleVenta).tasaImpuesto)) : 'ITBIS'}: ${formatRd(itbis)}',
