@@ -10,8 +10,10 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_ve
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart' as venta_providers;
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pdf/comprobante_abono_cuota_pdf.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
@@ -80,6 +82,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   List<Venta> _resultadosBusqueda = [];
   bool _buscandoTicket = false;
+  /// Columna izq.: ticket | producto (inventario → factura directa).
+  String _modoBusquedaCol = 'ticket';
+  List<Producto> _resultadosProducto = [];
+  bool _buscandoProducto = false;
+  bool _ticketEsDirectoCaja = false;
+  List<DetalleVenta> _lineasDirectoCaja = [];
 
 
 
@@ -1054,6 +1062,270 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     }
   }
 
+
+  void _setModoBusquedaCol(String modo) {
+    if (_modoBusquedaCol == modo) return;
+    setState(() {
+      _modoBusquedaCol = modo;
+      _resultadosBusqueda = [];
+      _resultadosProducto = [];
+      _buscaProductoCtrl.clear();
+    });
+    if (modo == 'producto') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _focusBuscaProducto.requestFocus();
+      });
+    }
+  }
+
+  Future<void> _buscarProductoCaja({bool desdeEnter = false}) async {
+    final texto = _buscaProductoCtrl.text.trim();
+    if (texto.isEmpty) {
+      setState(() {
+        _resultadosProducto = [];
+        _buscandoProducto = false;
+      });
+      return;
+    }
+    setState(() => _buscandoProducto = true);
+    try {
+      final todos = ref.read(productoControllerProvider).maybeWhen(
+            data: (lista) => lista,
+            orElse: () => <Producto>[],
+          );
+      final q = texto.toLowerCase();
+      Producto? exacto;
+      for (final p in todos) {
+        if (!p.activo) continue;
+        final cb = (p.codigoBarras ?? '').trim().toLowerCase();
+        if (cb.isNotEmpty && cb == q) {
+          exacto = p;
+          break;
+        }
+        if (p.codigo.trim().toLowerCase() == q) {
+          exacto = p;
+          break;
+        }
+      }
+      if (exacto != null && desdeEnter) {
+        await _agregarProductoDirectoCaja(exacto, 1);
+        if (!mounted) return;
+        setState(() {
+          _resultadosProducto = [];
+          _buscandoProducto = false;
+          _buscaProductoCtrl.clear();
+        });
+        _focusBuscaProducto.requestFocus();
+        return;
+      }
+      final filtrados = todos
+          .where((p) {
+            if (!p.activo) return false;
+            final n = p.nombre.toLowerCase();
+            final c = p.codigo.toLowerCase();
+            final b = (p.codigoBarras ?? '').toLowerCase();
+            return n.contains(q) || c.contains(q) || b.contains(q);
+          })
+          .take(40)
+          .toList();
+      if (!mounted) return;
+      setState(() {
+        _resultadosProducto = filtrados;
+        _buscandoProducto = false;
+      });
+      if (desdeEnter && filtrados.length == 1) {
+        await _agregarProductoDirectoCaja(filtrados.first, 1);
+        if (!mounted) return;
+        setState(() {
+          _resultadosProducto = [];
+          _buscaProductoCtrl.clear();
+        });
+        _focusBuscaProducto.requestFocus();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _buscandoProducto = false);
+      FiscoGestNotifications.show(SnackBar(
+        content: Text('$e'),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+  }
+
+  double _tasaItbisProductoCaja(Producto producto) {
+    final cfg = ref.read(configuracionControllerProvider).valueOrNull;
+    if (cfg?.modoSimplificado == true) return 0;
+    try {
+      final impuestos =
+          ref.read(impuestoControllerProvider).valueOrNull ?? const [];
+      if (producto.impuestoId != null) {
+        for (final i in impuestos) {
+          if (i.id == producto.impuestoId) {
+            if (!i.activo || i.esExento) return 0;
+            final pct = i.porcentaje;
+            return pct <= 1 ? pct * 100 : pct;
+          }
+        }
+      }
+      final g = cfg?.impuestoPorcentaje ?? 18.0;
+      return g <= 1 ? g * 100 : g;
+    } catch (_) {}
+    return 18;
+  }
+
+  ({double sub, double itbis, double total}) _totalesDeDetallesCaja(
+    List<DetalleVenta> dets,
+  ) {
+    final simple = ref
+            .read(configuracionControllerProvider)
+            .valueOrNull
+            ?.modoSimplificado ==
+        true;
+    double sub = 0, itbis = 0;
+    for (final d in dets) {
+      final base = d.subtotalLinea ?? d.subtotal;
+      sub += base;
+      if (!simple && d.tasaImpuesto > 0) {
+        itbis += base * tasaComoFraccion(d.tasaImpuesto);
+      }
+    }
+    sub = double.parse(sub.toStringAsFixed(2));
+    itbis = double.parse(itbis.toStringAsFixed(2));
+    return (sub: sub, itbis: itbis, total: double.parse((sub + itbis).toStringAsFixed(2)));
+  }
+
+  Future<void> _agregarProductoDirectoCaja(
+    Producto producto,
+    int cantidad,
+  ) async {
+    if (cantidad < 1) cantidad = 1;
+    if (producto.id == null) {
+      FiscoGestNotifications.show(const SnackBar(
+        content: Text('Producto sin id'),
+        backgroundColor: AppColors.error,
+      ));
+      return;
+    }
+    final precio = producto.precioVenta;
+    final tasa = _tasaItbisProductoCaja(producto);
+    final subLinea = double.parse((precio * cantidad).toStringAsFixed(2));
+    final nuevoDet = DetalleVenta(
+      productoId: producto.id!,
+      cantidad: cantidad,
+      precioUnitario: precio,
+      subtotal: subLinea,
+      subtotalLinea: subLinea,
+      nombreProducto: producto.nombre,
+      tasaImpuesto: tasa,
+    );
+
+    // Fuente de verdad en memoria (preview + lista izquierda)
+    final dets = <DetalleVenta>[];
+    if (_ticketEsDirectoCaja && _lineasDirectoCaja.isNotEmpty) {
+      dets.addAll(_lineasDirectoCaja);
+    }
+    final idx = dets.indexWhere((d) => d.productoId == producto.id);
+    if (idx >= 0) {
+      final prev = dets[idx];
+      final cant = prev.cantidad + cantidad;
+      final sub = double.parse((prev.precioUnitario * cant).toStringAsFixed(2));
+      dets[idx] = prev.copyWith(
+        cantidad: cant,
+        subtotal: sub,
+        subtotalLinea: sub,
+        tasaImpuesto: tasa > 0 ? tasa : prev.tasaImpuesto,
+        nombreProducto: producto.nombre,
+      );
+    } else {
+      dets.add(nuevoDet);
+    }
+    final tot = _totalesDeDetallesCaja(dets);
+    final repo = ref.read(ventasRepositoryProvider);
+    final uid = _sesion?.usuarioId ?? 0;
+    final cfg = ref.read(configuracionControllerProvider).valueOrNull;
+
+    try {
+      final actual = _ticketSeleccionado;
+      if (actual == null || actual.id == null || !_ticketEsDirectoCaja) {
+        final numero = await repo.siguienteNumeroCotizacion(
+          esCredito: false,
+          prefijoContado: cfg?.prefijoContado ?? 'C',
+          prefijoCredito: cfg?.prefijoCredito ?? 'CR',
+        );
+        final borrador = Venta(
+          id: null,
+          numeroCotizacion: numero,
+          clienteId: 0,
+          nombreCliente: 'CONSUMIDOR FINAL',
+          fecha: DateTime.now(),
+          detalles: dets,
+          montoSubtotal: tot.sub,
+          descuentoGlobal: 0,
+          itbis: tot.itbis,
+          montoTotal: tot.total,
+          formaPago: 'Contado',
+          costoEnvio: 0,
+          abonoInicial: 0,
+          estadoDocumento: EstadoDocumento.cotizado,
+          usuarioId: uid,
+          fechaRegistro: DateTime.now(),
+          montoDescuento: 0,
+        );
+        final creada = await repo.registrarVentaBorrador(borrador);
+        final id = creada.id;
+        final full = id != null ? await repo.obtenerVentaPorId(id) : null;
+        final merged = (full ?? creada).copyWith(
+          detalles: dets,
+          montoSubtotal: tot.sub,
+          itbis: tot.itbis,
+          montoTotal: tot.total,
+        );
+        if (!mounted) return;
+        setState(() {
+          _lineasDirectoCaja = List<DetalleVenta>.from(dets);
+          _ticketSeleccionado = merged;
+          _ticketEsDirectoCaja = true;
+          _cxcActiva = null;
+          _modoUi = 'venta';
+          _recibidoCtrl.text = tot.total.toStringAsFixed(2);
+        });
+      } else {
+        final updated = actual.copyWith(
+          detalles: dets,
+          montoSubtotal: tot.sub,
+          itbis: tot.itbis,
+          montoTotal: tot.total,
+          descuentoGlobal: 0,
+          montoDescuento: 0,
+          estadoDocumento: EstadoDocumento.cotizado,
+          formaPago: 'Contado',
+        );
+        await repo.actualizarVentaBorrador(updated);
+        if (!mounted) return;
+        setState(() {
+          _lineasDirectoCaja = List<DetalleVenta>.from(dets);
+          _ticketSeleccionado = updated;
+          _ticketEsDirectoCaja = true;
+          _recibidoCtrl.text = tot.total.toStringAsFixed(2);
+        });
+      }
+      FiscoGestNotifications.show(SnackBar(
+        content: Text('+ ${producto.nombre}'),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(milliseconds: 900),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      FiscoGestNotifications.show(SnackBar(
+        content: Text('$e'.replaceAll('Exception: ', '')),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+  }
+
   Future<void> _buscarTicketCaja() async {
     final texto = _buscaProductoCtrl.text.trim();
     setState(() {
@@ -1098,7 +1370,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   void _seleccionarTicket(Venta v) {
     setState(() {
       _ticketSeleccionado = v;
+      _ticketEsDirectoCaja = false;
+      _lineasDirectoCaja = [];
       _resultadosBusqueda = [];
+      _resultadosProducto = [];
       _buscaProductoCtrl.clear();
     });
   }
@@ -1106,10 +1381,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   void _limpiarTicket() {
     setState(() {
       _ticketSeleccionado = null;
+      _ticketEsDirectoCaja = false;
+      _lineasDirectoCaja = [];
       _cxcActiva = null;
       _cxcProntoPago = null;
       _recibidoCtrl.text = '0';
       _cxcMontoCtrl.text = '';
+      _resultadosProducto = [];
     });
   }
 
@@ -2736,6 +3014,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   /// Totales con ITBIS por la ruta oficial: itbisDeLineas (resolver_tasa_itbis).
   /// ITBIS por ruta oficial: itbisDeLineas (resolver_tasa_itbis).
   ({double sub, double itbis, double total}) _totalesTicketVivo(Venta ticket) {
+    if (_ticketEsDirectoCaja && _lineasDirectoCaja.isNotEmpty) {
+      return _totalesDeDetallesCaja(_lineasDirectoCaja);
+    }
     final sub = ticket.montoSubtotal;
     if (_modoSimplificado) {
       final total = ticket.montoTotal > 0 ? ticket.montoTotal : sub;
@@ -2884,12 +3165,18 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       itbis = tot.itbis;
       total = tot.total;
       cliente = _nombreClienteFactura(ticket);
-      try {
-        lineas = List<dynamic>.from(
-          (ticket as dynamic).detalles as List? ?? const [],
-        );
-      } catch (_) {
-        lineas = const [];
+      if (_ticketEsDirectoCaja && _lineasDirectoCaja.isNotEmpty) {
+        lineas = List<dynamic>.from(_lineasDirectoCaja);
+        final tm = _totalesDeDetallesCaja(_lineasDirectoCaja);
+        sub = tm.sub;
+        itbis = tm.itbis;
+        total = tm.total;
+      } else {
+        try {
+          lineas = List<dynamic>.from(ticket.detalles);
+        } catch (_) {
+          lineas = const [];
+        }
       }
     }
 
@@ -3022,6 +3309,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       ),
                       if (!simp) Text('TIPO: $tipo', style: ts(11)),
                       Text('CLIENTE: $cliente', style: ts(11)),
+                      if (_rncFiscalController.text.replaceAll(RegExp(r'\D'), '').isNotEmpty)
+                        Text(
+                          'RNC/Ced: ${_rncFiscalController.text.replaceAll(RegExp(r'\D'), '')}',
+                          style: ts(10, color: muted),
+                        ),
                       Text('FECHA: $fecha', style: ts(10, color: muted)),
                       Text('FORMA PAGO: $_formaPagoUi', style: ts(10)),
                       const Divider(height: 16, thickness: 1, color: lineC),
@@ -3220,6 +3512,52 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   }
 
 
+
+  Widget _chipModoBusqueda({
+    required String id,
+    required String label,
+    required IconData icon,
+  }) {
+    final sel = _modoBusquedaCol == id;
+    return Material(
+      color: sel ? const Color(0xFFDBEAFE) : const Color(0xFFF1F5F9),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: () => _setModoBusquedaCol(id),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: sel ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: sel ? const Color(0xFF1D4ED8) : const Color(0xFF64748B),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color:
+                      sel ? const Color(0xFF1D4ED8) : const Color(0xFF475569),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildColProducto({bool compact = false}) {
     return Container(
       decoration: BoxDecoration(
@@ -3234,11 +3572,15 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
             child: Row(
               children: [
-                const Text('BUSCAR TICKET / COTIZACIÓN',
-                    style: TextStyle(
-                        fontSize: 11,
-
-                        color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
+                Text(
+                  _modoBusquedaCol == 'producto'
+                      ? 'BUSCAR PRODUCTO (INVENTARIO)'
+                      : 'BUSCAR TICKET / COTIZACIÓN',
+                  style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF1E293B),
+                      fontWeight: FontWeight.w700),
+                ),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -3252,22 +3594,80 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           color: Color(0xFF1D4ED8), fontWeight: FontWeight.w700))),
               ])),
           Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _chipModoBusqueda(
+                    id: 'ticket',
+                    label: 'Ticket',
+                    icon: Icons.receipt_long_outlined,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _chipModoBusqueda(
+                    id: 'producto',
+                    label: 'Producto',
+                    icon: Icons.inventory_2_outlined,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
             child: TextField(
               controller: _buscaProductoCtrl,
               focusNode: _focusBuscaProducto,
-              onSubmitted: (_) => _buscarTicketCaja(),
+              onChanged: (v) {
+                if (_modoBusquedaCol != 'producto') return;
+                // Búsqueda en vivo desde la 1ª letra (sin pulsar lupa).
+                if (v.trim().isEmpty) {
+                  setState(() {
+                    _resultadosProducto = [];
+                    _buscandoProducto = false;
+                  });
+                  return;
+                }
+                _buscarProductoCaja(desdeEnter: false);
+              },
+              onSubmitted: (_) {
+                if (_modoBusquedaCol == 'producto') {
+                  _buscarProductoCaja(desdeEnter: true);
+                } else {
+                  _buscarTicketCaja();
+                }
+              },
               decoration: InputDecoration(
-                hintText: 'Ej. V-000021 o nombre de cliente…',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                hintText: _modoBusquedaCol == 'producto'
+                    ? 'Nombre, codigo o barras (escaner)...'
+                    : 'Ej. V-000021 o nombre de cliente...',
+                prefixIcon: Icon(
+                  _modoBusquedaCol == 'producto'
+                      ? Icons.qr_code_scanner
+                      : Icons.search,
+                  size: 20,
+                ),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.search),
-                  onPressed: _buscarTicketCaja),
+                  onPressed: () {
+                    if (_modoBusquedaCol == 'producto') {
+                      _buscarProductoCaja(desdeEnter: true);
+                    } else {
+                      _buscarTicketCaja();
+                    }
+                  },
+                ),
                 filled: true,
                 fillColor: const Color(0xFFF1F5F9),
                 isDense: true,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10))))),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             color: const Color(0xFFF1F5F9),
@@ -3287,7 +3687,86 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           _expandOrBox(
             compact: compact,
             height: 200,
-            child: _buscandoTicket
+            child: _modoBusquedaCol == 'producto'
+                ? (_buscandoProducto
+                    ? const Center(child: CircularProgressIndicator())
+                    : _resultadosProducto.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text(
+                                _buscaProductoCtrl.text.trim().isEmpty
+                                    ? 'Escanee o busque un producto del inventario'
+                                    : 'Sin resultados',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFF64748B),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            shrinkWrap: compact,
+                            physics: compact
+                                ? const NeverScrollableScrollPhysics()
+                                : null,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8),
+                            itemCount: _resultadosProducto.length,
+                            separatorBuilder: (_, __) =>
+                                const Divider(height: 1),
+                            itemBuilder: (ctx, i) {
+                              final prod = _resultadosProducto[i];
+                              final stock = prod.stock;
+                              return Material(
+                                color: Colors.white,
+                                child: ListTile(
+                                  dense: true,
+                                  title: Text(
+                                    prod.nombre,
+                                    style: const TextStyle(
+                                      color: Color(0xFF0F172A),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    [
+                                      prod.codigo,
+                                      if ((prod.codigoBarras ?? '')
+                                          .isNotEmpty)
+                                        'CB: ${prod.codigoBarras}',
+                                      if (stock != null)
+                                        'Stock: ${stock % 1 == 0 ? stock.toInt() : stock.toStringAsFixed(2)}',
+                                    ].join(' · '),
+                                    style: const TextStyle(
+                                      color: Color(0xFF475569),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    formatRd(prod.precioVenta),
+                                    style: const TextStyle(
+                                      color: Color(0xFF0F172A),
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    await _agregarProductoDirectoCaja(
+                                        prod, 1);
+                                    if (!mounted) return;
+                                    setState(() {
+                                      _resultadosProducto = [];
+                                      _buscaProductoCtrl.clear();
+                                    });
+                                    _focusBuscaProducto.requestFocus();
+                                  },
+                                ),
+                              );
+                            },
+                          ))
+                : _buscandoTicket
                 ? const Center(child: CircularProgressIndicator())
                 : _resultadosBusqueda.isNotEmpty
                     ? ListView.separated(
@@ -3549,17 +4028,24 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                       _ticketSeleccionado!.numeroCotizacion,
                                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                                     Text(
-                                      _ticketSeleccionado!.nombreCliente ??
-                                          'Consumidor Final',
-                                      style: const TextStyle(
-                                          color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Total: ${formatRd(_ticketSeleccionado!.montoTotal)}',
+                                      'Total: ${formatRd(_totalesTicketVivo(_ticketSeleccionado!).total)}',
                                       style: const TextStyle(
                                         fontSize: 16,
-
-                                        color: Color(0xFF059669), fontWeight: FontWeight.w700)),
+                                        color: Color(0xFF059669),
+                                        fontWeight: FontWeight.w700)),
+                                    if (!_modoSimplificado)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2),
+                                        child: Text(
+                                          'ITBIS: ${formatRd(_totalesTicketVivo(_ticketSeleccionado!).itbis)}',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Color(0xFF475569),
+                                            fontWeight: FontWeight.w700),
+                                        ),
+                                      ),
+                                    const SizedBox(height: 8),
+                                    ..._lineasPanelTicket(),
                                   ]))
                             : const Center(
                                 child: Text(
@@ -3600,6 +4086,63 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 ],
               ])),
         ]));
+  }
+
+
+  List<Widget> _lineasPanelTicket() {
+    final ticket = _ticketSeleccionado;
+    if (ticket == null) return const <Widget>[];
+    final lines = _ticketEsDirectoCaja && _lineasDirectoCaja.isNotEmpty
+        ? _lineasDirectoCaja
+        : ticket.detalles;
+    final simple = _modoSimplificado;
+    return [
+      for (final d in lines)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${d.cantidad}x ${d.nombreProducto ?? 'Item'}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+              if (!simple)
+                Text(
+                  formatRd(
+                    (d.subtotalLinea ?? d.subtotal) *
+                        tasaComoFraccion(d.tasaImpuesto),
+                  ),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              const SizedBox(width: 8),
+              Text(
+                formatRd(
+                  (d.subtotalLinea ?? d.subtotal) +
+                      (simple
+                          ? 0.0
+                          : (d.subtotalLinea ?? d.subtotal) *
+                              tasaComoFraccion(d.tasaImpuesto)),
+                ),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+        ),
+    ];
   }
 
   Widget _posTotRow(String k, String v, {bool bold = false}) {
