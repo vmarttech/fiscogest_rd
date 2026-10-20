@@ -19898,6 +19898,43 @@ class $CuentasCobrarTableTable extends CuentasCobrarTable
         type: DriftSqlType.dateTime,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _tasaInteresMeta = const VerificationMeta(
+    'tasaInteres',
+  );
+  @override
+  late final GeneratedColumn<double> tasaInteres = GeneratedColumn<double>(
+    'tasa_interes',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _numeroCuotasMeta = const VerificationMeta(
+    'numeroCuotas',
+  );
+  @override
+  late final GeneratedColumn<int> numeroCuotas = GeneratedColumn<int>(
+    'numero_cuotas',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _montoInteresTotalMeta = const VerificationMeta(
+    'montoInteresTotal',
+  );
+  @override
+  late final GeneratedColumn<double> montoInteresTotal =
+      GeneratedColumn<double>(
+        'monto_interes_total',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
+      );
   @override
   late final GeneratedColumnWithTypeConverter<CobrarEstado, String> estado =
       GeneratedColumn<String>(
@@ -19917,6 +19954,9 @@ class $CuentasCobrarTableTable extends CuentasCobrarTable
     montoAbonado,
     saldoPendiente,
     fechaVencimiento,
+    tasaInteres,
+    numeroCuotas,
+    montoInteresTotal,
     estado,
   ];
   @override
@@ -19992,6 +20032,33 @@ class $CuentasCobrarTableTable extends CuentasCobrarTable
     } else if (isInserting) {
       context.missing(_fechaVencimientoMeta);
     }
+    if (data.containsKey('tasa_interes')) {
+      context.handle(
+        _tasaInteresMeta,
+        tasaInteres.isAcceptableOrUnknown(
+          data['tasa_interes']!,
+          _tasaInteresMeta,
+        ),
+      );
+    }
+    if (data.containsKey('numero_cuotas')) {
+      context.handle(
+        _numeroCuotasMeta,
+        numeroCuotas.isAcceptableOrUnknown(
+          data['numero_cuotas']!,
+          _numeroCuotasMeta,
+        ),
+      );
+    }
+    if (data.containsKey('monto_interes_total')) {
+      context.handle(
+        _montoInteresTotalMeta,
+        montoInteresTotal.isAcceptableOrUnknown(
+          data['monto_interes_total']!,
+          _montoInteresTotalMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -20029,6 +20096,18 @@ class $CuentasCobrarTableTable extends CuentasCobrarTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha_vencimiento'],
       )!,
+      tasaInteres: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}tasa_interes'],
+      )!,
+      numeroCuotas: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numero_cuotas'],
+      )!,
+      montoInteresTotal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_interes_total'],
+      )!,
       estado: $CuentasCobrarTableTable.$converterestado.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -20056,6 +20135,9 @@ class CuentaCobrarData extends DataClass
   final double montoAbonado;
   final double saldoPendiente;
   final DateTime fechaVencimiento;
+  final double tasaInteres;
+  final int numeroCuotas;
+  final double montoInteresTotal;
   final CobrarEstado estado;
   const CuentaCobrarData({
     required this.id,
@@ -20065,6 +20147,9 @@ class CuentaCobrarData extends DataClass
     required this.montoAbonado,
     required this.saldoPendiente,
     required this.fechaVencimiento,
+    required this.tasaInteres,
+    required this.numeroCuotas,
+    required this.montoInteresTotal,
     required this.estado,
   });
   @override
@@ -20077,6 +20162,9 @@ class CuentaCobrarData extends DataClass
     map['monto_abonado'] = Variable<double>(montoAbonado);
     map['saldo_pendiente'] = Variable<double>(saldoPendiente);
     map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento);
+    map['tasa_interes'] = Variable<double>(tasaInteres);
+    map['numero_cuotas'] = Variable<int>(numeroCuotas);
+    map['monto_interes_total'] = Variable<double>(montoInteresTotal);
     {
       map['estado'] = Variable<String>(
         $CuentasCobrarTableTable.$converterestado.toSql(estado),
@@ -20094,6 +20182,9 @@ class CuentaCobrarData extends DataClass
       montoAbonado: Value(montoAbonado),
       saldoPendiente: Value(saldoPendiente),
       fechaVencimiento: Value(fechaVencimiento),
+      tasaInteres: Value(tasaInteres),
+      numeroCuotas: Value(numeroCuotas),
+      montoInteresTotal: Value(montoInteresTotal),
       estado: Value(estado),
     );
   }
@@ -20111,6 +20202,9 @@ class CuentaCobrarData extends DataClass
       montoAbonado: serializer.fromJson<double>(json['montoAbonado']),
       saldoPendiente: serializer.fromJson<double>(json['saldoPendiente']),
       fechaVencimiento: serializer.fromJson<DateTime>(json['fechaVencimiento']),
+      tasaInteres: serializer.fromJson<double>(json['tasaInteres']),
+      numeroCuotas: serializer.fromJson<int>(json['numeroCuotas']),
+      montoInteresTotal: serializer.fromJson<double>(json['montoInteresTotal']),
       estado: serializer.fromJson<CobrarEstado>(json['estado']),
     );
   }
@@ -20125,6 +20219,9 @@ class CuentaCobrarData extends DataClass
       'montoAbonado': serializer.toJson<double>(montoAbonado),
       'saldoPendiente': serializer.toJson<double>(saldoPendiente),
       'fechaVencimiento': serializer.toJson<DateTime>(fechaVencimiento),
+      'tasaInteres': serializer.toJson<double>(tasaInteres),
+      'numeroCuotas': serializer.toJson<int>(numeroCuotas),
+      'montoInteresTotal': serializer.toJson<double>(montoInteresTotal),
       'estado': serializer.toJson<CobrarEstado>(estado),
     };
   }
@@ -20137,6 +20234,9 @@ class CuentaCobrarData extends DataClass
     double? montoAbonado,
     double? saldoPendiente,
     DateTime? fechaVencimiento,
+    double? tasaInteres,
+    int? numeroCuotas,
+    double? montoInteresTotal,
     CobrarEstado? estado,
   }) => CuentaCobrarData(
     id: id ?? this.id,
@@ -20146,6 +20246,9 @@ class CuentaCobrarData extends DataClass
     montoAbonado: montoAbonado ?? this.montoAbonado,
     saldoPendiente: saldoPendiente ?? this.saldoPendiente,
     fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
+    tasaInteres: tasaInteres ?? this.tasaInteres,
+    numeroCuotas: numeroCuotas ?? this.numeroCuotas,
+    montoInteresTotal: montoInteresTotal ?? this.montoInteresTotal,
     estado: estado ?? this.estado,
   );
   CuentaCobrarData copyWithCompanion(CuentasCobrarTableCompanion data) {
@@ -20165,6 +20268,15 @@ class CuentaCobrarData extends DataClass
       fechaVencimiento: data.fechaVencimiento.present
           ? data.fechaVencimiento.value
           : this.fechaVencimiento,
+      tasaInteres: data.tasaInteres.present
+          ? data.tasaInteres.value
+          : this.tasaInteres,
+      numeroCuotas: data.numeroCuotas.present
+          ? data.numeroCuotas.value
+          : this.numeroCuotas,
+      montoInteresTotal: data.montoInteresTotal.present
+          ? data.montoInteresTotal.value
+          : this.montoInteresTotal,
       estado: data.estado.present ? data.estado.value : this.estado,
     );
   }
@@ -20179,6 +20291,9 @@ class CuentaCobrarData extends DataClass
           ..write('montoAbonado: $montoAbonado, ')
           ..write('saldoPendiente: $saldoPendiente, ')
           ..write('fechaVencimiento: $fechaVencimiento, ')
+          ..write('tasaInteres: $tasaInteres, ')
+          ..write('numeroCuotas: $numeroCuotas, ')
+          ..write('montoInteresTotal: $montoInteresTotal, ')
           ..write('estado: $estado')
           ..write(')'))
         .toString();
@@ -20193,6 +20308,9 @@ class CuentaCobrarData extends DataClass
     montoAbonado,
     saldoPendiente,
     fechaVencimiento,
+    tasaInteres,
+    numeroCuotas,
+    montoInteresTotal,
     estado,
   );
   @override
@@ -20206,6 +20324,9 @@ class CuentaCobrarData extends DataClass
           other.montoAbonado == this.montoAbonado &&
           other.saldoPendiente == this.saldoPendiente &&
           other.fechaVencimiento == this.fechaVencimiento &&
+          other.tasaInteres == this.tasaInteres &&
+          other.numeroCuotas == this.numeroCuotas &&
+          other.montoInteresTotal == this.montoInteresTotal &&
           other.estado == this.estado);
 }
 
@@ -20217,6 +20338,9 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
   final Value<double> montoAbonado;
   final Value<double> saldoPendiente;
   final Value<DateTime> fechaVencimiento;
+  final Value<double> tasaInteres;
+  final Value<int> numeroCuotas;
+  final Value<double> montoInteresTotal;
   final Value<CobrarEstado> estado;
   const CuentasCobrarTableCompanion({
     this.id = const Value.absent(),
@@ -20226,6 +20350,9 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
     this.montoAbonado = const Value.absent(),
     this.saldoPendiente = const Value.absent(),
     this.fechaVencimiento = const Value.absent(),
+    this.tasaInteres = const Value.absent(),
+    this.numeroCuotas = const Value.absent(),
+    this.montoInteresTotal = const Value.absent(),
     this.estado = const Value.absent(),
   });
   CuentasCobrarTableCompanion.insert({
@@ -20236,6 +20363,9 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
     this.montoAbonado = const Value.absent(),
     required double saldoPendiente,
     required DateTime fechaVencimiento,
+    this.tasaInteres = const Value.absent(),
+    this.numeroCuotas = const Value.absent(),
+    this.montoInteresTotal = const Value.absent(),
     this.estado = const Value.absent(),
   }) : clienteId = Value(clienteId),
        ventaId = Value(ventaId),
@@ -20250,6 +20380,9 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
     Expression<double>? montoAbonado,
     Expression<double>? saldoPendiente,
     Expression<DateTime>? fechaVencimiento,
+    Expression<double>? tasaInteres,
+    Expression<int>? numeroCuotas,
+    Expression<double>? montoInteresTotal,
     Expression<String>? estado,
   }) {
     return RawValuesInsertable({
@@ -20260,6 +20393,9 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
       if (montoAbonado != null) 'monto_abonado': montoAbonado,
       if (saldoPendiente != null) 'saldo_pendiente': saldoPendiente,
       if (fechaVencimiento != null) 'fecha_vencimiento': fechaVencimiento,
+      if (tasaInteres != null) 'tasa_interes': tasaInteres,
+      if (numeroCuotas != null) 'numero_cuotas': numeroCuotas,
+      if (montoInteresTotal != null) 'monto_interes_total': montoInteresTotal,
       if (estado != null) 'estado': estado,
     });
   }
@@ -20272,6 +20408,9 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
     Value<double>? montoAbonado,
     Value<double>? saldoPendiente,
     Value<DateTime>? fechaVencimiento,
+    Value<double>? tasaInteres,
+    Value<int>? numeroCuotas,
+    Value<double>? montoInteresTotal,
     Value<CobrarEstado>? estado,
   }) {
     return CuentasCobrarTableCompanion(
@@ -20282,6 +20421,9 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
       montoAbonado: montoAbonado ?? this.montoAbonado,
       saldoPendiente: saldoPendiente ?? this.saldoPendiente,
       fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
+      tasaInteres: tasaInteres ?? this.tasaInteres,
+      numeroCuotas: numeroCuotas ?? this.numeroCuotas,
+      montoInteresTotal: montoInteresTotal ?? this.montoInteresTotal,
       estado: estado ?? this.estado,
     );
   }
@@ -20310,6 +20452,15 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
     if (fechaVencimiento.present) {
       map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento.value);
     }
+    if (tasaInteres.present) {
+      map['tasa_interes'] = Variable<double>(tasaInteres.value);
+    }
+    if (numeroCuotas.present) {
+      map['numero_cuotas'] = Variable<int>(numeroCuotas.value);
+    }
+    if (montoInteresTotal.present) {
+      map['monto_interes_total'] = Variable<double>(montoInteresTotal.value);
+    }
     if (estado.present) {
       map['estado'] = Variable<String>(
         $CuentasCobrarTableTable.$converterestado.toSql(estado.value),
@@ -20328,6 +20479,9 @@ class CuentasCobrarTableCompanion extends UpdateCompanion<CuentaCobrarData> {
           ..write('montoAbonado: $montoAbonado, ')
           ..write('saldoPendiente: $saldoPendiente, ')
           ..write('fechaVencimiento: $fechaVencimiento, ')
+          ..write('tasaInteres: $tasaInteres, ')
+          ..write('numeroCuotas: $numeroCuotas, ')
+          ..write('montoInteresTotal: $montoInteresTotal, ')
           ..write('estado: $estado')
           ..write(')'))
         .toString();
@@ -24081,6 +24235,30 @@ class $CuotasCuentaTableTable extends CuotasCuentaTable
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _montoCapitalMeta = const VerificationMeta(
+    'montoCapital',
+  );
+  @override
+  late final GeneratedColumn<double> montoCapital = GeneratedColumn<double>(
+    'monto_capital',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _montoInteresMeta = const VerificationMeta(
+    'montoInteres',
+  );
+  @override
+  late final GeneratedColumn<double> montoInteres = GeneratedColumn<double>(
+    'monto_interes',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _montoPagadoMeta = const VerificationMeta(
     'montoPagado',
   );
@@ -24132,6 +24310,8 @@ class $CuotasCuentaTableTable extends CuotasCuentaTable
     cuentaCobrarId,
     numero,
     monto,
+    montoCapital,
+    montoInteres,
     montoPagado,
     fechaVencimiento,
     estado,
@@ -24178,6 +24358,24 @@ class $CuotasCuentaTableTable extends CuotasCuentaTable
       );
     } else if (isInserting) {
       context.missing(_montoMeta);
+    }
+    if (data.containsKey('monto_capital')) {
+      context.handle(
+        _montoCapitalMeta,
+        montoCapital.isAcceptableOrUnknown(
+          data['monto_capital']!,
+          _montoCapitalMeta,
+        ),
+      );
+    }
+    if (data.containsKey('monto_interes')) {
+      context.handle(
+        _montoInteresMeta,
+        montoInteres.isAcceptableOrUnknown(
+          data['monto_interes']!,
+          _montoInteresMeta,
+        ),
+      );
     }
     if (data.containsKey('monto_pagado')) {
       context.handle(
@@ -24236,6 +24434,14 @@ class $CuotasCuentaTableTable extends CuotasCuentaTable
         DriftSqlType.double,
         data['${effectivePrefix}monto'],
       )!,
+      montoCapital: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_capital'],
+      )!,
+      montoInteres: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monto_interes'],
+      )!,
       montoPagado: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}monto_pagado'],
@@ -24266,6 +24472,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
   final int cuentaCobrarId;
   final int numero;
   final double monto;
+  final double montoCapital;
+  final double montoInteres;
   final double montoPagado;
   final DateTime fechaVencimiento;
 
@@ -24277,6 +24485,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
     required this.cuentaCobrarId,
     required this.numero,
     required this.monto,
+    required this.montoCapital,
+    required this.montoInteres,
     required this.montoPagado,
     required this.fechaVencimiento,
     required this.estado,
@@ -24289,6 +24499,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
     map['cuenta_cobrar_id'] = Variable<int>(cuentaCobrarId);
     map['numero'] = Variable<int>(numero);
     map['monto'] = Variable<double>(monto);
+    map['monto_capital'] = Variable<double>(montoCapital);
+    map['monto_interes'] = Variable<double>(montoInteres);
     map['monto_pagado'] = Variable<double>(montoPagado);
     map['fecha_vencimiento'] = Variable<DateTime>(fechaVencimiento);
     map['estado'] = Variable<String>(estado);
@@ -24304,6 +24516,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
       cuentaCobrarId: Value(cuentaCobrarId),
       numero: Value(numero),
       monto: Value(monto),
+      montoCapital: Value(montoCapital),
+      montoInteres: Value(montoInteres),
       montoPagado: Value(montoPagado),
       fechaVencimiento: Value(fechaVencimiento),
       estado: Value(estado),
@@ -24323,6 +24537,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
       cuentaCobrarId: serializer.fromJson<int>(json['cuentaCobrarId']),
       numero: serializer.fromJson<int>(json['numero']),
       monto: serializer.fromJson<double>(json['monto']),
+      montoCapital: serializer.fromJson<double>(json['montoCapital']),
+      montoInteres: serializer.fromJson<double>(json['montoInteres']),
       montoPagado: serializer.fromJson<double>(json['montoPagado']),
       fechaVencimiento: serializer.fromJson<DateTime>(json['fechaVencimiento']),
       estado: serializer.fromJson<String>(json['estado']),
@@ -24337,6 +24553,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
       'cuentaCobrarId': serializer.toJson<int>(cuentaCobrarId),
       'numero': serializer.toJson<int>(numero),
       'monto': serializer.toJson<double>(monto),
+      'montoCapital': serializer.toJson<double>(montoCapital),
+      'montoInteres': serializer.toJson<double>(montoInteres),
       'montoPagado': serializer.toJson<double>(montoPagado),
       'fechaVencimiento': serializer.toJson<DateTime>(fechaVencimiento),
       'estado': serializer.toJson<String>(estado),
@@ -24349,6 +24567,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
     int? cuentaCobrarId,
     int? numero,
     double? monto,
+    double? montoCapital,
+    double? montoInteres,
     double? montoPagado,
     DateTime? fechaVencimiento,
     String? estado,
@@ -24358,6 +24578,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
     cuentaCobrarId: cuentaCobrarId ?? this.cuentaCobrarId,
     numero: numero ?? this.numero,
     monto: monto ?? this.monto,
+    montoCapital: montoCapital ?? this.montoCapital,
+    montoInteres: montoInteres ?? this.montoInteres,
     montoPagado: montoPagado ?? this.montoPagado,
     fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
     estado: estado ?? this.estado,
@@ -24371,6 +24593,12 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
           : this.cuentaCobrarId,
       numero: data.numero.present ? data.numero.value : this.numero,
       monto: data.monto.present ? data.monto.value : this.monto,
+      montoCapital: data.montoCapital.present
+          ? data.montoCapital.value
+          : this.montoCapital,
+      montoInteres: data.montoInteres.present
+          ? data.montoInteres.value
+          : this.montoInteres,
       montoPagado: data.montoPagado.present
           ? data.montoPagado.value
           : this.montoPagado,
@@ -24389,6 +24617,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
           ..write('cuentaCobrarId: $cuentaCobrarId, ')
           ..write('numero: $numero, ')
           ..write('monto: $monto, ')
+          ..write('montoCapital: $montoCapital, ')
+          ..write('montoInteres: $montoInteres, ')
           ..write('montoPagado: $montoPagado, ')
           ..write('fechaVencimiento: $fechaVencimiento, ')
           ..write('estado: $estado, ')
@@ -24403,6 +24633,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
     cuentaCobrarId,
     numero,
     monto,
+    montoCapital,
+    montoInteres,
     montoPagado,
     fechaVencimiento,
     estado,
@@ -24416,6 +24648,8 @@ class CuotaCuentaData extends DataClass implements Insertable<CuotaCuentaData> {
           other.cuentaCobrarId == this.cuentaCobrarId &&
           other.numero == this.numero &&
           other.monto == this.monto &&
+          other.montoCapital == this.montoCapital &&
+          other.montoInteres == this.montoInteres &&
           other.montoPagado == this.montoPagado &&
           other.fechaVencimiento == this.fechaVencimiento &&
           other.estado == this.estado &&
@@ -24427,6 +24661,8 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
   final Value<int> cuentaCobrarId;
   final Value<int> numero;
   final Value<double> monto;
+  final Value<double> montoCapital;
+  final Value<double> montoInteres;
   final Value<double> montoPagado;
   final Value<DateTime> fechaVencimiento;
   final Value<String> estado;
@@ -24436,6 +24672,8 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
     this.cuentaCobrarId = const Value.absent(),
     this.numero = const Value.absent(),
     this.monto = const Value.absent(),
+    this.montoCapital = const Value.absent(),
+    this.montoInteres = const Value.absent(),
     this.montoPagado = const Value.absent(),
     this.fechaVencimiento = const Value.absent(),
     this.estado = const Value.absent(),
@@ -24446,6 +24684,8 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
     required int cuentaCobrarId,
     required int numero,
     required double monto,
+    this.montoCapital = const Value.absent(),
+    this.montoInteres = const Value.absent(),
     this.montoPagado = const Value.absent(),
     required DateTime fechaVencimiento,
     this.estado = const Value.absent(),
@@ -24459,6 +24699,8 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
     Expression<int>? cuentaCobrarId,
     Expression<int>? numero,
     Expression<double>? monto,
+    Expression<double>? montoCapital,
+    Expression<double>? montoInteres,
     Expression<double>? montoPagado,
     Expression<DateTime>? fechaVencimiento,
     Expression<String>? estado,
@@ -24469,6 +24711,8 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
       if (cuentaCobrarId != null) 'cuenta_cobrar_id': cuentaCobrarId,
       if (numero != null) 'numero': numero,
       if (monto != null) 'monto': monto,
+      if (montoCapital != null) 'monto_capital': montoCapital,
+      if (montoInteres != null) 'monto_interes': montoInteres,
       if (montoPagado != null) 'monto_pagado': montoPagado,
       if (fechaVencimiento != null) 'fecha_vencimiento': fechaVencimiento,
       if (estado != null) 'estado': estado,
@@ -24481,6 +24725,8 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
     Value<int>? cuentaCobrarId,
     Value<int>? numero,
     Value<double>? monto,
+    Value<double>? montoCapital,
+    Value<double>? montoInteres,
     Value<double>? montoPagado,
     Value<DateTime>? fechaVencimiento,
     Value<String>? estado,
@@ -24491,6 +24737,8 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
       cuentaCobrarId: cuentaCobrarId ?? this.cuentaCobrarId,
       numero: numero ?? this.numero,
       monto: monto ?? this.monto,
+      montoCapital: montoCapital ?? this.montoCapital,
+      montoInteres: montoInteres ?? this.montoInteres,
       montoPagado: montoPagado ?? this.montoPagado,
       fechaVencimiento: fechaVencimiento ?? this.fechaVencimiento,
       estado: estado ?? this.estado,
@@ -24512,6 +24760,12 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
     }
     if (monto.present) {
       map['monto'] = Variable<double>(monto.value);
+    }
+    if (montoCapital.present) {
+      map['monto_capital'] = Variable<double>(montoCapital.value);
+    }
+    if (montoInteres.present) {
+      map['monto_interes'] = Variable<double>(montoInteres.value);
     }
     if (montoPagado.present) {
       map['monto_pagado'] = Variable<double>(montoPagado.value);
@@ -24535,6 +24789,8 @@ class CuotasCuentaTableCompanion extends UpdateCompanion<CuotaCuentaData> {
           ..write('cuentaCobrarId: $cuentaCobrarId, ')
           ..write('numero: $numero, ')
           ..write('monto: $monto, ')
+          ..write('montoCapital: $montoCapital, ')
+          ..write('montoInteres: $montoInteres, ')
           ..write('montoPagado: $montoPagado, ')
           ..write('fechaVencimiento: $fechaVencimiento, ')
           ..write('estado: $estado, ')
@@ -51380,6 +51636,9 @@ typedef $$CuentasCobrarTableTableCreateCompanionBuilder =
       Value<double> montoAbonado,
       required double saldoPendiente,
       required DateTime fechaVencimiento,
+      Value<double> tasaInteres,
+      Value<int> numeroCuotas,
+      Value<double> montoInteresTotal,
       Value<CobrarEstado> estado,
     });
 typedef $$CuentasCobrarTableTableUpdateCompanionBuilder =
@@ -51391,6 +51650,9 @@ typedef $$CuentasCobrarTableTableUpdateCompanionBuilder =
       Value<double> montoAbonado,
       Value<double> saldoPendiente,
       Value<DateTime> fechaVencimiento,
+      Value<double> tasaInteres,
+      Value<int> numeroCuotas,
+      Value<double> montoInteresTotal,
       Value<CobrarEstado> estado,
     });
 
@@ -51553,6 +51815,21 @@ class $$CuentasCobrarTableTableFilterComposer
 
   ColumnFilters<DateTime> get fechaVencimiento => $composableBuilder(
     column: $table.fechaVencimiento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get tasaInteres => $composableBuilder(
+    column: $table.tasaInteres,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numeroCuotas => $composableBuilder(
+    column: $table.numeroCuotas,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montoInteresTotal => $composableBuilder(
+    column: $table.montoInteresTotal,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -51719,6 +51996,21 @@ class $$CuentasCobrarTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get tasaInteres => $composableBuilder(
+    column: $table.tasaInteres,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get numeroCuotas => $composableBuilder(
+    column: $table.numeroCuotas,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montoInteresTotal => $composableBuilder(
+    column: $table.montoInteresTotal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get estado => $composableBuilder(
     column: $table.estado,
     builder: (column) => ColumnOrderings(column),
@@ -51800,6 +52092,21 @@ class $$CuentasCobrarTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get fechaVencimiento => $composableBuilder(
     column: $table.fechaVencimiento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get tasaInteres => $composableBuilder(
+    column: $table.tasaInteres,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get numeroCuotas => $composableBuilder(
+    column: $table.numeroCuotas,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get montoInteresTotal => $composableBuilder(
+    column: $table.montoInteresTotal,
     builder: (column) => column,
   );
 
@@ -51977,6 +52284,9 @@ class $$CuentasCobrarTableTableTableManager
                 Value<double> montoAbonado = const Value.absent(),
                 Value<double> saldoPendiente = const Value.absent(),
                 Value<DateTime> fechaVencimiento = const Value.absent(),
+                Value<double> tasaInteres = const Value.absent(),
+                Value<int> numeroCuotas = const Value.absent(),
+                Value<double> montoInteresTotal = const Value.absent(),
                 Value<CobrarEstado> estado = const Value.absent(),
               }) => CuentasCobrarTableCompanion(
                 id: id,
@@ -51986,6 +52296,9 @@ class $$CuentasCobrarTableTableTableManager
                 montoAbonado: montoAbonado,
                 saldoPendiente: saldoPendiente,
                 fechaVencimiento: fechaVencimiento,
+                tasaInteres: tasaInteres,
+                numeroCuotas: numeroCuotas,
+                montoInteresTotal: montoInteresTotal,
                 estado: estado,
               ),
           createCompanionCallback:
@@ -51997,6 +52310,9 @@ class $$CuentasCobrarTableTableTableManager
                 Value<double> montoAbonado = const Value.absent(),
                 required double saldoPendiente,
                 required DateTime fechaVencimiento,
+                Value<double> tasaInteres = const Value.absent(),
+                Value<int> numeroCuotas = const Value.absent(),
+                Value<double> montoInteresTotal = const Value.absent(),
                 Value<CobrarEstado> estado = const Value.absent(),
               }) => CuentasCobrarTableCompanion.insert(
                 id: id,
@@ -52006,6 +52322,9 @@ class $$CuentasCobrarTableTableTableManager
                 montoAbonado: montoAbonado,
                 saldoPendiente: saldoPendiente,
                 fechaVencimiento: fechaVencimiento,
+                tasaInteres: tasaInteres,
+                numeroCuotas: numeroCuotas,
+                montoInteresTotal: montoInteresTotal,
                 estado: estado,
               ),
           withReferenceMapper: (p0) => p0
@@ -54603,6 +54922,8 @@ typedef $$CuotasCuentaTableTableCreateCompanionBuilder =
       required int cuentaCobrarId,
       required int numero,
       required double monto,
+      Value<double> montoCapital,
+      Value<double> montoInteres,
       Value<double> montoPagado,
       required DateTime fechaVencimiento,
       Value<String> estado,
@@ -54614,6 +54935,8 @@ typedef $$CuotasCuentaTableTableUpdateCompanionBuilder =
       Value<int> cuentaCobrarId,
       Value<int> numero,
       Value<double> monto,
+      Value<double> montoCapital,
+      Value<double> montoInteres,
       Value<double> montoPagado,
       Value<DateTime> fechaVencimiento,
       Value<String> estado,
@@ -54677,6 +55000,16 @@ class $$CuotasCuentaTableTableFilterComposer
 
   ColumnFilters<double> get monto => $composableBuilder(
     column: $table.monto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montoCapital => $composableBuilder(
+    column: $table.montoCapital,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get montoInteres => $composableBuilder(
+    column: $table.montoInteres,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -54748,6 +55081,16 @@ class $$CuotasCuentaTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get montoCapital => $composableBuilder(
+    column: $table.montoCapital,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get montoInteres => $composableBuilder(
+    column: $table.montoInteres,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get montoPagado => $composableBuilder(
     column: $table.montoPagado,
     builder: (column) => ColumnOrderings(column),
@@ -54809,6 +55152,16 @@ class $$CuotasCuentaTableTableAnnotationComposer
 
   GeneratedColumn<double> get monto =>
       $composableBuilder(column: $table.monto, builder: (column) => column);
+
+  GeneratedColumn<double> get montoCapital => $composableBuilder(
+    column: $table.montoCapital,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get montoInteres => $composableBuilder(
+    column: $table.montoInteres,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get montoPagado => $composableBuilder(
     column: $table.montoPagado,
@@ -54888,6 +55241,8 @@ class $$CuotasCuentaTableTableTableManager
                 Value<int> cuentaCobrarId = const Value.absent(),
                 Value<int> numero = const Value.absent(),
                 Value<double> monto = const Value.absent(),
+                Value<double> montoCapital = const Value.absent(),
+                Value<double> montoInteres = const Value.absent(),
                 Value<double> montoPagado = const Value.absent(),
                 Value<DateTime> fechaVencimiento = const Value.absent(),
                 Value<String> estado = const Value.absent(),
@@ -54897,6 +55252,8 @@ class $$CuotasCuentaTableTableTableManager
                 cuentaCobrarId: cuentaCobrarId,
                 numero: numero,
                 monto: monto,
+                montoCapital: montoCapital,
+                montoInteres: montoInteres,
                 montoPagado: montoPagado,
                 fechaVencimiento: fechaVencimiento,
                 estado: estado,
@@ -54908,6 +55265,8 @@ class $$CuotasCuentaTableTableTableManager
                 required int cuentaCobrarId,
                 required int numero,
                 required double monto,
+                Value<double> montoCapital = const Value.absent(),
+                Value<double> montoInteres = const Value.absent(),
                 Value<double> montoPagado = const Value.absent(),
                 required DateTime fechaVencimiento,
                 Value<String> estado = const Value.absent(),
@@ -54917,6 +55276,8 @@ class $$CuotasCuentaTableTableTableManager
                 cuentaCobrarId: cuentaCobrarId,
                 numero: numero,
                 monto: monto,
+                montoCapital: montoCapital,
+                montoInteres: montoInteres,
                 montoPagado: montoPagado,
                 fechaVencimiento: fechaVencimiento,
                 estado: estado,

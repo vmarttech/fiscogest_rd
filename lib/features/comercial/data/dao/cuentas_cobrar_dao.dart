@@ -23,6 +23,9 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     required double montoOriginal,
     double montoAbonado = 0.0,
     DateTime? fechaVencimiento,
+    double tasaInteres = 0.0,
+    int numeroCuotas = 1,
+    double montoInteresTotal = 0.0,
   }) async {
     final vencimiento = fechaVencimiento ?? _hoy.add(const Duration(days: 30));
     final saldoPendiente = montoOriginal - montoAbonado;
@@ -34,6 +37,9 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
         montoAbonado: Value(montoAbonado),
         saldoPendiente: saldoPendiente,
         fechaVencimiento: vencimiento,
+        tasaInteres: Value(tasaInteres),
+        numeroCuotas: Value(numeroCuotas),
+        montoInteresTotal: Value(montoInteresTotal),
         estado: const Value(CobrarEstado.pendiente),
       ),
     );
@@ -310,8 +316,14 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
   /// Inserta el plan ya calculado (sistema francés). No reparte monto/n.
   Future<void> insertarCuotasPlan({
     required int cuentaCobrarId,
-    required List<({int numero, DateTime fechaVencimiento, double monto})>
-    cuotas,
+    required List<
+        ({
+          int numero,
+          DateTime fechaVencimiento,
+          double monto,
+          double montoCapital,
+          double montoInteres,
+        })> cuotas,
   }) async {
     await (delete(
       cuotasCuentaTable,
@@ -323,6 +335,8 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
           numero: c.numero,
           fechaVencimiento: c.fechaVencimiento,
           monto: c.monto,
+          montoCapital: Value(c.montoCapital),
+          montoInteres: Value(c.montoInteres),
           montoPagado: const Value(0.0),
           estado: const Value('pendiente'),
         ),

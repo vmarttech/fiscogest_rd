@@ -129,7 +129,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 66;
+  int get schemaVersion => 67;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -138,6 +138,28 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+
+      if (from < 67) {
+        try {
+          await m.addColumn(cuentasCobrarTable, cuentasCobrarTable.tasaInteres);
+        } catch (_) {}
+        try {
+          await m.addColumn(cuentasCobrarTable, cuentasCobrarTable.numeroCuotas);
+        } catch (_) {}
+        try {
+          await m.addColumn(
+            cuentasCobrarTable,
+            cuentasCobrarTable.montoInteresTotal,
+          );
+        } catch (_) {}
+        try {
+          await m.addColumn(cuotasCuentaTable, cuotasCuentaTable.montoCapital);
+        } catch (_) {}
+        try {
+          await m.addColumn(cuotasCuentaTable, cuotasCuentaTable.montoInteres);
+        } catch (_) {}
+      }
+
 
       if (from < 66) {
         try {

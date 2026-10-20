@@ -37,9 +37,18 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
     final todos = ref.read(productoControllerProvider);
     setState(() {
       _resultados = todos.maybeWhen(
-        data: (lista) => lista
-            .where((p) => p.activo && p.nombre.toLowerCase().contains(limpio))
-            .toList(),
+        data: (lista) {
+          if (limpio.isEmpty) return <Producto>[];
+          return lista.where((p) {
+            if (!p.activo) return false;
+            final nombre = p.nombre.toLowerCase();
+            final codigo = p.codigo.toLowerCase();
+            final barras = (p.codigoBarras ?? '').toLowerCase();
+            return nombre.contains(limpio) ||
+                codigo.contains(limpio) ||
+                (barras.isNotEmpty && barras.contains(limpio));
+          }).toList();
+        },
         orElse: () => <Producto>[],
       );
     });
@@ -178,7 +187,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
         TextField(
           controller: _buscador,
           decoration: const InputDecoration(
-            hintText: 'Buscar producto por nombre...',
+            hintText: 'Buscar por nombre, código o barras...',
             prefixIcon: Icon(Icons.search),
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -206,9 +215,11 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                 style: AppTypography.bodySmall,
               );
             }
-            return ListView.builder(
+            return ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 280),
+              child: ListView.builder(
               shrinkWrap: true,
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               itemCount: lista.length,
               itemBuilder: (context, i) {
                 final prod = lista[i];
@@ -217,6 +228,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                   child: ListTile(
                     title: Text(prod.nombre),
                     subtitle: Text(
+                      '${prod.codigo.trim().isNotEmpty ? '[${prod.codigo}] · ' : ''}'
                       'Precio: ${formatRd(prod.precioVenta)}'
                       '${prod.stock != null ? ' • Stock: ${prod.stock}' : ''}',
                       style: AppTypography.bodySmall,
@@ -228,6 +240,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                   ),
                 );
               },
+              ),
             );
           },
         ),

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
-import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_dao.dart';
-import 'package:fiscogest_rd/core/database/database_provider.dart';
-import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,13 +14,14 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_credito_vista.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart'
+    show solicitudesCreditoProvider;
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/panel_productos.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_delivery.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_contado_fiao.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_anotar_fiao.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
-import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_usecase_provider.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' show cajaRepositoryProvider;
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
@@ -31,15 +29,6 @@ import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 
 
-/// Usuarios activos para el dropdown Vendedor del POS.
-final posUsuariosVentaProvider =
-    FutureProvider.autoDispose<List<UsuarioData>>((ref) async {
-  final db = ref.watch(databaseProvider);
-  final todos = await UsuariosDao(db).obtenerTodos();
-  return todos
-      .where((u) => u.estado.toLowerCase() != 'inactivo')
-      .toList();
-});
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -59,60 +48,144 @@ class _NuevaVentaBorradorPageState
   RegistrarVentaState? _estadoFormularioCredito;
   bool _guardando = false;
   final FocusNode _posRootFocus = FocusNode(debugLabel: 'pos-desktop-root');
+  DateTime? _ultimoAtajoPos;
+  LogicalKeyboardKey? _ultimaTeclaAtajo;
 
   /// Atajos globales del POS (desktop). Funciona aunque el foco esté en un TextField.
+  bool _atajoPosAbierto = false;
+
   bool _posOnKey(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
+    // Flutter a veces marca mal repeat; filtramos por bandera + tiempo
     if (!mounted) return false;
     if (MediaQuery.sizeOf(context).width < 1024) return false;
+
     final key = event.logicalKey;
+    final esAtajo = key == LogicalKeyboardKey.f3 ||
+        key == LogicalKeyboardKey.f4 ||
+        key == LogicalKeyboardKey.f5 ||
+        key == LogicalKeyboardKey.f7 ||
+        key == LogicalKeyboardKey.f8 ||
+        key == LogicalKeyboardKey.f9 ||
+        key == LogicalKeyboardKey.f10 ||
+        key == LogicalKeyboardKey.f11;
+    if (!esAtajo) return false;
+
+    if (_atajoPosAbierto) return true;
+
+    final ahora = DateTime.now();
+    if (_ultimoAtajoPos != null &&
+        _ultimaTeclaAtajo == key &&
+        ahora.difference(_ultimoAtajoPos!) < const Duration(milliseconds: 900)) {
+      return true;
+    }
+    _ultimoAtajoPos = ahora;
+    _ultimaTeclaAtajo = key;
+    _atajoPosAbierto = true;
+
     final st = ref.read(ventaBorradorProvider);
     final puede = st.detalles.isNotEmpty && st.montoTotal > 0 && !_guardando;
-    if (key == LogicalKeyboardKey.f3) {
-      _abrirDescuentoGeneralCotizacion(context, ref);
-      return true;
-    }
-    if (key == LogicalKeyboardKey.f4) {
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => const ConsultaStockLecturaSheet(),
-      );
-      return true;
-    }
-    if (key == LogicalKeyboardKey.f5 || key == LogicalKeyboardKey.f10) {
-      if (puede) {
-        setState(() => _esCredito = false);
-        _guardarCotizacion(esCredito: false);
+
+    try {
+      if (key == LogicalKeyboardKey.f3) {
+        _abrirDescuentoGeneralCotizacion(context, ref).whenComplete(() {
+          _atajoPosAbierto = false;
+        });
+        return true;
       }
-      return true;
-    }
-    if (key == LogicalKeyboardKey.f9) {
-      if (puede) {
-        setState(() => _esCredito = true);
-        _guardarCotizacion(esCredito: true);
+      if (key == LogicalKeyboardKey.f4) {
+        showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => const ConsultaStockLecturaSheet(),
+        ).whenComplete(() {
+          _atajoPosAbierto = false;
+        });
+        return true;
       }
-      return true;
-    }
-    if (key == LogicalKeyboardKey.f11) {
-      if (puede) {
-        final simplificado = ref.read(modoColmadoProvider);
-        if (simplificado) {
-          _onGenerarVentaSimplificada();
-        } else {
-          _guardarCotizacion(esCredito: _esCredito);
+      if (key == LogicalKeyboardKey.f5 || key == LogicalKeyboardKey.f10) {
+        if (puede) {
+          setState(() => _esCredito = false);
+          _guardarCotizacion(esCredito: false);
         }
+        _atajoPosAbierto = false;
+        return true;
       }
-      return true;
+      if (key == LogicalKeyboardKey.f7) {
+        context.push('/ventas/cotizaciones/historial');
+        _atajoPosAbierto = false;
+        return true;
+      }
+      if (key == LogicalKeyboardKey.f8) {
+        context.push('/ventas/historial');
+        _atajoPosAbierto = false;
+        return true;
+      }
+      if (key == LogicalKeyboardKey.f9) {
+        if (puede) {
+          setState(() => _esCredito = true);
+          _guardarCotizacion(esCredito: true);
+        }
+        _atajoPosAbierto = false;
+        return true;
+      }
+      if (key == LogicalKeyboardKey.f11) {
+        if (puede) {
+          final simplificado = ref.read(modoColmadoProvider);
+          if (simplificado) {
+            _onGenerarVentaSimplificada();
+          } else {
+            _guardarCotizacion(esCredito: _esCredito);
+          }
+        }
+        _atajoPosAbierto = false;
+        return true;
+      }
+    } catch (_) {
+      _atajoPosAbierto = false;
+      rethrow;
     }
+    _atajoPosAbierto = false;
     return false;
   }
 
 
+
+  /// Etiqueta del vendedor según sesión (sin palabras repetidas).
+  String _etiquetaVendedorSesion(UsuarioSesion? s) {
+    if (s == null) return '—';
+    var nombre = s.nombre.trim();
+    if (nombre.isEmpty) nombre = s.username.trim();
+    final parts = <String>[];
+    for (final w in nombre.split(RegExp(r'\s+'))) {
+      if (w.isEmpty) continue;
+      if (parts.isEmpty || parts.last.toLowerCase() != w.toLowerCase()) {
+        parts.add(w);
+      }
+    }
+    nombre = parts.join(' ');
+    if (nombre.length > 28) {
+      nombre = '${nombre.substring(0, 26)}…';
+    }
+    final rol = s.rolNorm;
+    final low = nombre.toLowerCase();
+    if (low.contains('admin') || low.contains(rol.toLowerCase())) {
+      return nombre;
+    }
+    return '$nombre · $rol';
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final sesion = ref.read(sesionProvider);
+      if (sesion != null) {
+        ref.read(ventaBorradorProvider.notifier).establecerUsuarioId(sesion.id);
+      }
+    });
     HardwareKeyboard.instance.addHandler(_posOnKey);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _posRootFocus.requestFocus();
@@ -523,6 +596,7 @@ class _NuevaVentaBorradorPageState
       );
       ref.invalidate(listaCotizacionesProvider);
       ref.invalidate(listaVentasProvider);
+      ref.invalidate(solicitudesCreditoProvider);
       _limpiarFormulario();
     } catch (e) {
       if (!mounted) return;
@@ -619,6 +693,7 @@ class _NuevaVentaBorradorPageState
       );
       ref.invalidate(listaCotizacionesProvider);
       ref.invalidate(listaVentasProvider);
+      ref.invalidate(solicitudesCreditoProvider);
       _limpiarFormulario();
     } catch (e) {
       if (!mounted) return;
@@ -644,15 +719,23 @@ class _NuevaVentaBorradorPageState
     final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
       title: 'NUEVA COTIZACIÓN',
-      showAppBar: !desktop,
+      showAppBar: !desktop || (_modoFormularioCredito && _estadoFormularioCredito != null),
       // En desktop la entrada es directa: atrás → Dashboard
-      leading: desktop
-          ? null
-          : IconButton(
+      leading: (_modoFormularioCredito && _estadoFormularioCredito != null)
+          ? IconButton(
               icon: const Icon(Icons.arrow_back),
-              tooltip: 'Atrás',
-              onPressed: () => safeBack(context, fallback: '/inicio'),
-            ),
+              tooltip: 'Volver al POS',
+              onPressed: _cerrarFormularioCredito,
+            )
+          : (desktop
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  tooltip: 'Atrás',
+                  onPressed: () => safeBack(context, fallback: '/inicio'),
+                )),
+      // En crédito desktop también mostrar AppBar para poder volver
+      // (showAppBar se ajusta abajo si hace falta)
       body: SafeArea(
         bottom: true,
         maintainBottomViewPadding: true,
@@ -702,53 +785,12 @@ class _NuevaVentaBorradorPageState
     );
     if (!desktop) return cuerpo;
 
-    void stock() {
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => const ConsultaStockLecturaSheet(),
-      );
-    }
 
-    void finalizar() {
-      if (!puedeGenerar || _guardando) return;
-      final simplificado = ref.read(modoColmadoProvider);
-      if (simplificado) {
-        _onGenerarVentaSimplificada();
-      } else {
-        _guardarCotizacion(esCredito: _esCredito);
-      }
-    }
-
-    void cotizar() {
-      if (!puedeGenerar || _guardando) return;
-      setState(() => _esCredito = false);
-      _guardarCotizacion(esCredito: false);
-    }
-
-    void credito() {
-      if (!puedeGenerar || _guardando) return;
-      setState(() => _esCredito = true);
-      _guardarCotizacion(esCredito: true);
-    }
-
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.f3): () {
-          _abrirDescuentoGeneralCotizacion(context, ref);
-        },
-        const SingleActivator(LogicalKeyboardKey.f4): stock,
-        const SingleActivator(LogicalKeyboardKey.f5): cotizar,
-        const SingleActivator(LogicalKeyboardKey.f9): credito,
-        const SingleActivator(LogicalKeyboardKey.f10): cotizar,
-        const SingleActivator(LogicalKeyboardKey.f11): finalizar,
-      },
-      child: Focus(
-        focusNode: _posRootFocus,
-        autofocus: true,
-        child: cuerpo,
-      ),
+    // Atajos solo vía HardwareKeyboard (_posOnKey) para no abrir 2 diálogos.
+    return Focus(
+      focusNode: _posRootFocus,
+      autofocus: true,
+      child: cuerpo,
     );
   }
 
@@ -839,6 +881,8 @@ class _NuevaVentaBorradorPageState
                       Text('F3  Descuento general'),
                       Text('F4  Stock'),
                       Text('F5 / F10  Cotización'),
+                      Text('F7  Historial cotizaciones'),
+                      Text('F8  Historial ventas'),
                       Text('F9  Crédito'),
                       Text('F11 Finalizar'),
                     ],
@@ -928,24 +972,26 @@ class _NuevaVentaBorradorPageState
       required IconData icon,
       required String label,
       required String value,
-      required VoidCallback onTap,
+      VoidCallback? onTap,
+      Color accent = const Color(0xFF0F172A),
     }) {
+      final canTap = onTap != null;
       return Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(8),
+                    color: accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(icon, size: 16, color: const Color(0xFF64748B)),
+                  child: Icon(icon, size: 18, color: accent),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -954,26 +1000,29 @@ class _NuevaVentaBorradorPageState
                     children: [
                       Text(
                         label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Color(0xFF94A3B8),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.3,
+                          color: accent.withValues(alpha: 0.75),
                         ),
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         value,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF334155),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: accent,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, size: 18, color: Color(0xFFCBD5E1)),
+                if (canTap)
+                  Icon(Icons.chevron_right, size: 20, color: accent.withValues(alpha: 0.45)),
               ],
             ),
           ),
@@ -1033,48 +1082,50 @@ class _NuevaVentaBorradorPageState
       cartBody = Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.shopping_cart_outlined,
-                size: 80,
-                color: const Color(0xFF38BDF8).withValues(alpha: 0.95),
-                shadows: const [
-                  Shadow(
-                    color: Color(0x590EA5E9),
-                    blurRadius: 16,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Text.rich(
-                TextSpan(
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF334155),
-                  ),
-                  children: [
-                    TextSpan(text: 'Carrito vacío — '),
-                    TextSpan(
-                      text: 'busca un producto',
-                      style: TextStyle(color: Color(0xFF0EA5E9)),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.shopping_cart_outlined,
+                  size: 64,
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.95),
+                  shadows: const [
+                    Shadow(
+                      color: Color(0x590EA5E9),
+                      blurRadius: 16,
                     ),
                   ],
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Agrega productos para comenzar una nueva operación.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
-              ),
-              const SizedBox(height: 28),
-              // Buscador centrado (mismo motor que PanelProductos)
-              PanelProductos(alAgregar: _agregarProductoACotizacion),
-            ],
+                const SizedBox(height: 12),
+                const Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF334155),
+                    ),
+                    children: [
+                      TextSpan(text: 'Carrito vacío — '),
+                      TextSpan(
+                        text: 'busca un producto',
+                        style: TextStyle(color: Color(0xFF0EA5E9)),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Agrega productos para comenzar una nueva operación.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                ),
+                const SizedBox(height: 16),
+                // Buscador centrado (mismo motor que PanelProductos)
+                PanelProductos(alAgregar: _agregarProductoACotizacion),
+              ],
+            ),
           ),
         ),
       );
@@ -1284,19 +1335,14 @@ class _NuevaVentaBorradorPageState
                           value: nombreCliente,
                           onTap: _seleccionarCliente,
                         ),
+                        // Vendedor = solo quien tiene la sesión abierta
                         configRow(
                           icon: Icons.badge_outlined,
                           label: 'Vendedor',
-                          value: 'Admin',
-                          onTap: () {},
+                          value: _etiquetaVendedorSesion(ref.watch(sesionProvider)),
+                          onTap: null,
+                          accent: const Color(0xFF2563EB),
                         ),
-                        // Vendedor real: el dropdown sigue disponible vía tap vacío
-                        // (evitamos romper el mock; el valor se sincroniza aparte)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: _buildPosVendedorDropdown(estado),
-                        ),
-                        const SizedBox(height: 4),
                         configRow(
                           icon: Icons.location_on_outlined,
                           label: 'Dirección',
@@ -1310,6 +1356,34 @@ class _NuevaVentaBorradorPageState
                           onTap: () {
                             setState(() => _esCredito = !_esCredito);
                           },
+                        ),
+                        const SizedBox(height: 8),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+                          child: Text(
+                            'CONSULTAS',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ),
+                        configRow(
+                          icon: Icons.request_quote_outlined,
+                          label: 'Historial cotizaciones',
+                          value: 'F7 · Ver listado',
+                          accent: const Color(0xFF0F766E),
+                          onTap: () =>
+                              context.push('/ventas/cotizaciones/historial'),
+                        ),
+                        configRow(
+                          icon: Icons.receipt_long_outlined,
+                          label: 'Historial ventas',
+                          value: 'F8 · Ver listado',
+                          accent: const Color(0xFF1D4ED8),
+                          onTap: () => context.push('/ventas/historial'),
                         ),
                       ],
                     ),
@@ -1350,8 +1424,8 @@ class _NuevaVentaBorradorPageState
                           'Cierre de operación',
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF334155),
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
                           ),
                         ),
                       ],
@@ -1616,101 +1690,6 @@ class _NuevaVentaBorradorPageState
 
   /// Contado / Crédito + Vence — pensado para columna izquierda del POS (ancho completo, sin truncar).
 
-  Widget _buildPosVendedorDropdown(VentaBorradorState estado) {
-    final asyncUsers = ref.watch(posUsuariosVentaProvider);
-    final sesion = ref.watch(sesionProvider);
-    final currentId = estado.usuarioId;
-
-    return asyncUsers.when(
-      loading: () => Container(
-        height: 44,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: const Text('Cargando…', style: TextStyle(color: Color(0xFF94A3B8))),
-      ),
-      error: (_, __) => Container(
-        height: 44,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Text(
-          sesion?.nombre ?? 'Usuario actual',
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-      ),
-      data: (users) {
-        // Solo usuarios con rol Vendedor (los crea el admin en Usuarios)
-        final lista = users
-            .where((u) {
-              final r = u.rol.toLowerCase().trim();
-              return r == 'vendedor' || r.contains('vend');
-            })
-            .toList();
-
-        final ids = lista.map((u) => u.id).toSet();
-        // Solo un id que exista en la lista de vendedores
-        final int? value = ids.contains(currentId)
-            ? currentId
-            : (lista.isNotEmpty ? lista.first.id : null);
-        // Si el borrador tenía un admin, alinear al primer vendedor
-        if (value != null && value != currentId) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(ventaBorradorProvider.notifier).establecerUsuarioId(value);
-          });
-        }
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<int>(
-              isExpanded: true,
-              value: value,
-              hint: const Text(
-                'Seleccionar…',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-              ),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF64748B)),
-              style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF0F172A),
-              ),
-              items: lista
-                  .map(
-                    (u) => DropdownMenuItem<int>(
-                      value: u.id,
-                      child: Text(
-                        '${u.nombre}${u.apellido != null && u.apellido!.isNotEmpty ? ' ${u.apellido}' : ''} · ${u.rol}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (id) {
-                if (id == null) return;
-                ref.read(ventaBorradorProvider.notifier).establecerUsuarioId(id);
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildSeccionTipoYVencimiento(bool esPantallaPequena) {
     Widget opcionPago({required bool credito}) {

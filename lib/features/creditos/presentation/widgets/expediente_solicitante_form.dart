@@ -52,63 +52,91 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
 
   bool _guardando = false;
 
+  bool _controllersListos = false;
+
   @override
   void initState() {
     super.initState();
-    _cargar(widget.inicial);
+    _initControllers(widget.inicial);
   }
 
   @override
   void didUpdateWidget(covariant ExpedienteSolicitanteForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.inicial != widget.inicial) {
-      _cargar(widget.inicial);
+      _rellenarDesde(widget.inicial);
     }
   }
 
-  void _cargar(SolicitudCreditoExpediente e) {
-    _nombre = TextEditingController(text: e.nombreCompleto);
-    _cedula = TextEditingController(text: e.cedula);
-    _estadoCivil = TextEditingController(text: e.estadoCivil);
-    _nacionalidad = TextEditingController(text: 'Dominicana');
-    _telefono = TextEditingController(text: e.telefono);
-    _celular = TextEditingController(text: e.celular);
-    _email = TextEditingController(text: e.email);
-    _direccion = TextEditingController(text: e.direccion);
-    _sector = TextEditingController(text: e.sector);
-    _ciudad = TextEditingController(text: e.ciudad);
-    _tiempoRes = TextEditingController(text: e.tiempoResidencia);
+  /// Crea controllers una sola vez (late final no se reasigna).
+  void _initControllers(SolicitudCreditoExpediente e) {
+    _nombre = TextEditingController();
+    _cedula = TextEditingController();
+    _estadoCivil = TextEditingController();
+    _nacionalidad = TextEditingController();
+    _telefono = TextEditingController();
+    _celular = TextEditingController();
+    _email = TextEditingController();
+    _direccion = TextEditingController();
+    _sector = TextEditingController();
+    _ciudad = TextEditingController();
+    _tiempoRes = TextEditingController();
     _montoAlquiler = TextEditingController();
-    _empresa = TextEditingController(text: e.empresa);
-    _cargo = TextEditingController(text: e.cargo);
-    _ingreso = TextEditingController(
-      text: e.ingresoMensual > 0 ? e.ingresoMensual.toStringAsFixed(2) : '',
-    );
-    _tiempoLab = TextEditingController(text: e.tiempoLaborando);
+    _empresa = TextEditingController();
+    _cargo = TextEditingController();
+    _ingreso = TextEditingController();
+    _tiempoLab = TextEditingController();
     _otrosIngresos = TextEditingController();
-    _notas = TextEditingController(text: e.notasAnalista);
-    _dependientes = TextEditingController(text: '${e.dependientes}');
-    _tipoVivienda = e.tipoVivienda.isNotEmpty ? e.tipoVivienda : 'Alquilada';
+    _notas = TextEditingController();
+    _dependientes = TextEditingController();
+    _refNombre = [TextEditingController(), TextEditingController()];
+    _refRelacion = [TextEditingController(), TextEditingController()];
+    _refTelefono = [TextEditingController(), TextEditingController()];
+    _refDireccion = [TextEditingController(), TextEditingController()];
+    _controllersListos = true;
+    _rellenarDesde(e);
+  }
 
+  /// Solo actualiza textos (seguro si el padre reenvía [inicial]).
+  void _rellenarDesde(SolicitudCreditoExpediente e) {
+    if (!_controllersListos) return;
+    _nombre.text = e.nombreCompleto;
+    _cedula.text = e.cedula;
+    _estadoCivil.text = e.estadoCivil;
+    _nacionalidad.text = 'Dominicana';
+    _telefono.text = e.telefono;
+    _celular.text = e.celular;
+    _email.text = e.email;
+    _direccion.text = e.direccion;
+    _sector.text = e.sector;
+    _ciudad.text = e.ciudad;
+    _tiempoRes.text = e.tiempoResidencia;
+    _empresa.text = e.empresa;
+    _cargo.text = e.cargo;
+    _ingreso.text =
+        e.ingresoMensual > 0 ? e.ingresoMensual.toStringAsFixed(2) : '';
+    _tiempoLab.text = e.tiempoLaborando;
+    _notas.text = e.notasAnalista;
+    _dependientes.text = '${e.dependientes}';
+    _tipoVivienda = e.tipoVivienda.isNotEmpty ? e.tipoVivienda : 'Alquilada';
     final refs = e.referencias.isEmpty
         ? const [
             ReferenciaSolicitante(orden: 1),
             ReferenciaSolicitante(orden: 2),
           ]
         : e.referencias;
-    _refNombre =
-        refs.map((r) => TextEditingController(text: r.nombre)).toList();
-    _refRelacion =
-        refs.map((r) => TextEditingController(text: r.relacion)).toList();
-    _refTelefono =
-        refs.map((r) => TextEditingController(text: r.telefono)).toList();
-    _refDireccion =
-        refs.map((r) => TextEditingController(text: r.direccion)).toList();
-    while (_refNombre.length < 2) {
-      _refNombre.add(TextEditingController());
-      _refRelacion.add(TextEditingController());
-      _refTelefono.add(TextEditingController());
-      _refDireccion.add(TextEditingController());
+    for (var i = 0; i < _refNombre.length; i++) {
+      if (i < refs.length) {
+        _refNombre[i].text = refs[i].nombre;
+        _refRelacion[i].text = refs[i].relacion;
+        _refTelefono[i].text = refs[i].telefono;
+        _refDireccion[i].text = refs[i].direccion;
+      } else {
+        _refNombre[i].clear();
+        _refRelacion[i].clear();
+        _refTelefono[i].clear();
+        _refDireccion[i].clear();
+      }
     }
   }
 

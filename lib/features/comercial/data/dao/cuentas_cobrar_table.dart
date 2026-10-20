@@ -30,6 +30,12 @@ class CuentasCobrarTable extends Table {
   RealColumn get saldoPendiente => real().named('saldo_pendiente')();
   DateTimeColumn get fechaVencimiento =>
       dateTime().named('fecha_vencimiento')();
+  RealColumn get tasaInteres =>
+      real().named('tasa_interes').withDefault(const Constant(0.0))();
+  IntColumn get numeroCuotas =>
+      integer().named('numero_cuotas').withDefault(const Constant(1))();
+  RealColumn get montoInteresTotal =>
+      real().named('monto_interes_total').withDefault(const Constant(0.0))();
   TextColumn get estado => text()
       .named('estado')
       .withDefault(const Constant('pendiente'))

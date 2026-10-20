@@ -12,11 +12,20 @@ final solicitudesCreditoProvider = FutureProvider.autoDispose<List<Venta>>((
 ) async {
   final repo = ref.watch(ventasRepositoryProvider);
   try {
-    final todas = await repo.listarVentas();
-    return todas
-        .where((v) => v.estadoDocumento == EstadoDocumento.enCredito)
-        .toList()
+    // Cotizaciones a crédito viven en listarCotizaciones; por si alguna
+    // quedó en listarVentas, unimos ambas y deduplicamos por id.
+    final cotiz = await repo.listarCotizaciones();
+    final ventas = await repo.listarVentas();
+    final byId = <int?, Venta>{};
+    for (final v in [...cotiz, ...ventas]) {
+      if (v.estadoDocumento != EstadoDocumento.enCredito) continue;
+      if (v.id != null) {
+        byId[v.id] = v;
+      }
+    }
+    final list = byId.values.toList()
       ..sort((a, b) => b.fecha.compareTo(a.fecha));
+    return list;
   } catch (_) {
     return [];
   }

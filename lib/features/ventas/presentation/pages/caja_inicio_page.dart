@@ -1,6 +1,5 @@
 // ignore_for_file: unused_element, unused_field, unused_import, unused_element_parameter
 import 'package:flutter/material.dart';
-import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/features/notificaciones/presentation/notificaciones_provider.dart';
 import 'package:fiscogest_rd/features/caja/presentation/pdf/informe_z_pdf.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
@@ -15,6 +14,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_provid
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pdf/comprobante_abono_cuota_pdf.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/pdf/comprobante_abono_inicial_pdf.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
@@ -67,6 +67,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   final _buscaProductoCtrl = TextEditingController();
   final _recibidoCtrl = TextEditingController(text: '0');
   final _focusBuscaProducto = FocusNode();
+  bool _atajoCajaAbierto = false;
+  DateTime? _ultimoAtajoCaja;
+
   String _modoUi = 'venta';
   String _tipoNcf = 'B02';
   String _formaPagoUi = 'Efectivo';
@@ -1367,15 +1370,40 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     }
   }
 
+
+  bool _esVentaCredito(Venta v) {
+    final fp = v.formaPago.toLowerCase();
+    if (fp.contains('credito') || fp.contains('crédito')) return true;
+    final n = v.numeroCotizacion.toUpperCase();
+    if (n.startsWith('CR')) return true;
+    if (v.estadoDocumento == EstadoDocumento.enCredito ||
+        v.estadoDocumento == EstadoDocumento.aprobado) {
+      return true;
+    }
+    return false;
+  }
+
+  /// Caja vieja: en crédito solo se cobra el abono inicial.
+  double _montoACobrarEnCaja(Venta v) {
+    if (!_esVentaCredito(v)) return v.montoTotal;
+    final abono = v.abonoInicial;
+    if (abono > 0.009) {
+      return abono > v.montoTotal ? v.montoTotal : abono;
+    }
+    return v.montoTotal;
+  }
+
   void _seleccionarTicket(Venta v) {
     setState(() {
-      _ticketSeleccionado = v;
       _ticketEsDirectoCaja = false;
       _lineasDirectoCaja = [];
       _resultadosBusqueda = [];
       _resultadosProducto = [];
       _buscaProductoCtrl.clear();
+      _cxcActiva = null;
+      _cxcProntoPago = null;
     });
+    _cargarTicketCompleto(v);
   }
 
   void _limpiarTicket() {
@@ -1805,33 +1833,63 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       if (montoCaja > 0) {
         final cajaRepo = ref.read(cajaRepositoryProvider);
         final nFactura = venta.numeroFactura ?? venta.numeroCotizacion;
+        // Cuadre: en crédito el ingreso de caja es SOLO el abono inicial.
+        final desc = esCredito
+            ? 'Abono inicial crédito $nFactura '
+                '(cotiz. ${venta.numeroCotizacion}) · total doc. ${formatRd(tot.total)}'
+            : 'Cobro factura $nFactura (cotización ${venta.numeroCotizacion})';
         await cajaRepo.registrarMovimiento(
-          referencia: nFactura,
+          referencia: esCredito ? 'ABI-$nFactura' : nFactura,
           monto: montoCaja,
           tipo: 'ingreso',
-          descripcion:
-              'Cobro factura $nFactura (cotización ${venta.numeroCotizacion})',
+          descripcion: desc,
           formaPago: formaPagoNombre,
         );
       }
-
       try {
         ref.invalidate(listaVentasBorradorProvider);
         ref.invalidate(listaCotizacionesProvider);
         ref.invalidate(listaVentasProvider);
       } catch (_) {}
-
       if (!mounted) return;
       FiscoGestNotifications.show(SnackBar(
         content: Text(
-          'Facturado ${venta.numeroFactura ?? venta.numeroCotizacion} · ${formatRd(montoCaja)}',
+          esCredito
+              ? 'Facturado ${venta.numeroFactura ?? venta.numeroCotizacion} · '
+                  'Abono ${formatRd(montoCaja)} (caja)'
+              : 'Facturado ${venta.numeroFactura ?? venta.numeroCotizacion} · ${formatRd(montoCaja)}',
         ),
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
       ));
-
+      // 1) Factura normal (productos / NCF) — igual que hoy
       await _opcionesComprobantePdfCaja(ventaConDetalle);
-
+      // 2) Crédito: ticket 80mm abono inicial (cuadre de caja)
+      if (esCredito && montoCaja > 0) {
+        try {
+          final empresa =
+              ref.read(configuracionControllerProvider).valueOrNull;
+          final cambioAbono = recibido - montoCaja;
+          await ComprobanteAbonoInicialPdf.imprimir(
+            venta: ventaConDetalle,
+            montoAbono: montoCaja,
+            metodoPago: formaPagoNombre,
+            fecha: DateTime.now(),
+            empresa: empresa,
+            cajero: _nombreUsuarioCaja,
+            recibido: recibido,
+            cambio: cambioAbono >= 0 ? cambioAbono : null,
+          );
+        } catch (e) {
+          if (mounted) {
+            FiscoGestNotifications.show(SnackBar(
+              content: Text('Factura OK. Ticket abono inicial: $e'),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+            ));
+          }
+        }
+      }
       if (!mounted) return;
       _limpiarTicket();
       await _refrescar();
@@ -1858,25 +1916,40 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     if (event is! KeyDownEvent) return false;
     if (!mounted) return false;
     final key = event.logicalKey;
-    if (key == LogicalKeyboardKey.f4) {
-      _dialogoArqueoCaja();
+    final esAtajo = key == LogicalKeyboardKey.f2 ||
+        key == LogicalKeyboardKey.f3 ||
+        key == LogicalKeyboardKey.f4 ||
+        key == LogicalKeyboardKey.f6 ||
+        key == LogicalKeyboardKey.f12;
+    if (!esAtajo) return false;
+    if (_atajoCajaAbierto) return true;
+    final now = DateTime.now();
+    if (_ultimoAtajoCaja != null &&
+        now.difference(_ultimoAtajoCaja!) < const Duration(milliseconds: 900)) {
       return true;
     }
-    if (key == LogicalKeyboardKey.f6) {
-      setState(() => _modoUi = 'cxc');
-      _dialogoBuscarCxc();
-      return true;
+    _atajoCajaAbierto = true;
+    _ultimoAtajoCaja = now;
+    try {
+      if (key == LogicalKeyboardKey.f2) {
+        _focusBuscaProducto.requestFocus();
+      } else if (key == LogicalKeyboardKey.f4) {
+        _dialogoArqueoCaja();
+      } else if (key == LogicalKeyboardKey.f6) {
+        setState(() => _modoUi = 'cxc');
+        _dialogoBuscarCxc();
+      } else if (key == LogicalKeyboardKey.f3) {
+        setState(() => _modoUi = 'cotizacion');
+        _dialogoBuscarCotizacion();
+      } else if (key == LogicalKeyboardKey.f12) {
+        _irCobrarTicketSeleccionado();
+      }
+    } finally {
+      Future<void>.delayed(const Duration(milliseconds: 700), () {
+        if (mounted) _atajoCajaAbierto = false;
+      });
     }
-    if (key == LogicalKeyboardKey.f3) {
-      setState(() => _modoUi = 'cotizacion');
-      _dialogoBuscarCotizacion();
-      return true;
-    }
-    if (key == LogicalKeyboardKey.f12) {
-      _irCobrarTicketSeleccionado();
-      return true;
-    }
-    return false;
+    return true;
   }
 
   @override
@@ -1885,6 +1958,15 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _aplicarExtraCajaSiHay());
     final base = Theme.of(context);
     final cajaTheme = base.copyWith(
+      listTileTheme: const ListTileThemeData(
+        textColor: Color(0xFF0F172A),
+        iconColor: Color(0xFF0F172A),
+        selectedTileColor: Color(0xFFEFF6FF),
+        selectedColor: Color(0xFF1D4ED8),
+      ),
+      splashColor: const Color(0x332563EB),
+      highlightColor: const Color(0x1A2563EB),
+      hoverColor: const Color(0x142563EB),
       textTheme: base.textTheme.copyWith(
         bodyLarge: base.textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w700,
@@ -2100,53 +2182,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       backgroundColor: const Color(0xFFF1F5F9),
       body: Theme(
         data: cajaTheme,
-        child: CallbackShortcuts(
-        bindings: {
-          const SingleActivator(LogicalKeyboardKey.f2): () {
-            _focusBuscaProducto.requestFocus();
-          },
-          const SingleActivator(LogicalKeyboardKey.f3): () {
-            setState(() => _modoUi = 'cotizacion');
-            _dialogoBuscarCotizacion();
-          },
-          const SingleActivator(LogicalKeyboardKey.f4): () {
-            _dialogoArqueoCaja();
-          },
-          const SingleActivator(LogicalKeyboardKey.f6): () {
-            setState(() => _modoUi = 'cxc');
-            _dialogoBuscarCxc();
-          },
-          const SingleActivator(LogicalKeyboardKey.f12):
-              _irCobrarTicketSeleccionado,
-        },
+        // Atajos F2–F12: solo HardwareKeyboard (_atajosTecladoCaja).
         child: Focus(
           autofocus: true,
           canRequestFocus: true,
           onKeyEvent: (node, event) {
-            if (event is! KeyDownEvent) return KeyEventResult.ignored;
-            final key = event.logicalKey;
-            if (key == LogicalKeyboardKey.f2) {
-              _focusBuscaProducto.requestFocus();
-              return KeyEventResult.handled;
-            }
-            if (key == LogicalKeyboardKey.f3) {
-              setState(() => _modoUi = 'cotizacion');
-              _dialogoBuscarCotizacion();
-              return KeyEventResult.handled;
-            }
-            if (key == LogicalKeyboardKey.f4) {
-              _dialogoArqueoCaja();
-              return KeyEventResult.handled;
-            }
-            if (key == LogicalKeyboardKey.f6) {
-              setState(() => _modoUi = 'cxc');
-              _dialogoBuscarCxc();
-              return KeyEventResult.handled;
-            }
-            if (key == LogicalKeyboardKey.f12) {
-              _irCobrarTicketSeleccionado();
-              return KeyEventResult.handled;
-            }
             return KeyEventResult.ignored;
           },
           child: ColoredBox(
@@ -2195,11 +2235,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               ),
               _buildPosFooter(),
             ],
-          ), // Column
+            ), // Column
           ), // ColoredBox
         ), // Focus
-      ), // CallbackShortcuts
-    ), // Theme
+      ), // Theme
     ); // AppScaffold
   }
 
@@ -2320,22 +2359,27 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               const Divider(height: 1),
                           itemBuilder: (_, i) {
                             final v = items[i];
-                            return ListTile(
-                              dense: true,
-                              title: Text(
-                                '${v.numeroCotizacion} — ${v.nombreCliente ?? 'Cliente'}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13),
+                            return Material(
+                              color: Colors.white,
+                              child: ListTile(
+                                dense: true,
+                                hoverColor: const Color(0x142563EB),
+                                splashColor: const Color(0x332563EB),
+                                title: Text(
+                                  '${v.numeroCotizacion} — ${v.nombreCliente ?? 'Cliente'}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13),
+                                ),
+                                trailing: Text(
+                                  formatRd(v.montoTotal),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF2563EB)),
+                                ),
+                                onTap: () =>
+                                    Navigator.of(dialogContext).pop(v),
                               ),
-                              trailing: Text(
-                                formatRd(v.montoTotal),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF2563EB)),
-                              ),
-                              onTap: () =>
-                                  Navigator.of(dialogContext).pop(v),
                             );
                           },
                         ),
@@ -2425,23 +2469,28 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               const Divider(height: 1),
                           itemBuilder: (_, i) {
                             final c = filtered[i];
-                            return ListTile(
-                              dense: true,
-                              title: Text(
-                                c.clienteNombre ?? 'Cliente',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13),
+                            return Material(
+                              color: Colors.white,
+                              child: ListTile(
+                                dense: true,
+                                hoverColor: const Color(0x142563EB),
+                                splashColor: const Color(0x332563EB),
+                                title: Text(
+                                  c.clienteNombre ?? 'Cliente',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13),
+                                ),
+                                subtitle: Text(c.numero ?? 'CXC-${c.id}'),
+                                trailing: Text(
+                                  formatRd(c.saldoPendiente),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF7C3AED)),
+                                ),
+                                onTap: () =>
+                                    Navigator.of(dialogContext).pop(c),
                               ),
-                              subtitle: Text(c.numero ?? 'CXC-${c.id}'),
-                              trailing: Text(
-                                formatRd(c.saldoPendiente),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF7C3AED)),
-                              ),
-                              onTap: () =>
-                                  Navigator.of(dialogContext).pop(c),
                             );
                           },
                         ),
@@ -3106,12 +3155,16 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       } catch (_) {}
     }
     if (!mounted) return;
+    final aCobrar = _montoACobrarEnCaja(ticket);
     setState(() {
       _ticketSeleccionado = ticket;
+      _ticketEsDirectoCaja = false;
+      _lineasDirectoCaja = [];
       _cxcActiva = null;
       _cxcProntoPago = null;
       _modoUi = 'venta';
-      _recibidoCtrl.text = ticket.montoTotal.toStringAsFixed(2);
+      // Crédito → abono inicial; contado → total (misma lógica caja vieja)
+      _recibidoCtrl.text = aCobrar.toStringAsFixed(2);
     });
   }
 
@@ -3723,6 +3776,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 color: Colors.white,
                                 child: ListTile(
                                   dense: true,
+                                  hoverColor: const Color(0x142563EB),
+                                  splashColor: const Color(0x332563EB),
                                   title: Text(
                                     prod.nombre,
                                     style: const TextStyle(
@@ -3781,7 +3836,6 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           final v = _resultadosBusqueda[i];
                           return ListTile(
                             dense: true,
-                            tileColor: Colors.white,
                             textColor: const Color(0xFF0F172A),
                             iconColor: const Color(0xFF0F172A),
                             title: Text(v.numeroCotizacion,
@@ -4167,7 +4221,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   }
 
   Widget _buildColCobro({bool compact = false}) {
-    final total = _ticketSeleccionado?.montoTotal ?? 0.0;
+    final ticket = _ticketSeleccionado;
+    final totalDoc = ticket?.montoTotal ?? 0.0;
+    // Crédito: solo abono inicial (caja vieja). Contado: total.
+    final total = ticket != null ? _montoACobrarEnCaja(ticket) : 0.0;
+    final esCreditoUi = ticket != null && _esVentaCredito(ticket);
     final recibido = double.tryParse(
           _recibidoCtrl.text.trim().replaceAll(',', '.')) ??
         0.0;
@@ -4401,11 +4459,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'EFECTIVO RECIBIDO (RD\$)',
-                              style: TextStyle(
+                            Text(
+                              esCreditoUi
+                                  ? 'ABONO INICIAL (doc. ${formatRd(totalDoc)})'
+                                  : 'EFECTIVO RECIBIDO (RD\$)',
+                              style: const TextStyle(
                                 fontSize: 11,
-
                                 color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
                             const SizedBox(height: 6),
                             TextField(

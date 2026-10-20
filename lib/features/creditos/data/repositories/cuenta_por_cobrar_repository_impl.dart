@@ -46,7 +46,10 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       clienteId: row.clienteId,
       ventaId: row.ventaId,
       totalOriginal: row.montoOriginal,
-      abonoInicial: 0.0,
+      abonoInicial: row.montoAbonado,
+      tasaInteres: row.tasaInteres,
+      montoInteres: row.montoInteresTotal,
+      numeroCuotas: row.numeroCuotas,
       fechaCreacion: row.fechaVencimiento,
       fechaVencimiento: row.fechaVencimiento,
       estado: _desdeCobrarEstado(row.estado, row.fechaVencimiento),
@@ -117,6 +120,8 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
               numero: c.numeroCuota,
               fechaVencimiento: c.fechaVencimiento,
               monto: c.montoTotal,
+              montoCapital: c.montoCapital,
+              montoInteres: c.montoInteres,
             ),
         ],
       );
@@ -137,14 +142,15 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     if (row == null) return null;
     final abonos = await listarAbonos(cuentaId);
     final cuotasRows = await _dao.listarCuotas(cuentaId);
+    final tasa = row.tasaInteres;
     final cuotas = [
       for (final q in cuotasRows)
         Cuota(
           id: q.id,
           numeroCuota: q.numero,
           fechaVencimiento: q.fechaVencimiento,
-          montoCapital: q.monto,
-          montoInteres: 0,
+          montoCapital: q.montoCapital > 0.0001 ? q.montoCapital : (q.monto - q.montoInteres),
+          montoInteres: q.montoInteres,
           montoTotal: q.monto,
           saldoDespues: (q.monto - q.montoPagado).clamp(0.0, double.infinity),
           pagada: q.estado == 'pagada',
@@ -154,7 +160,7 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     PlanPago? plan;
     if (cuotas.isNotEmpty) {
       plan = PlanPago(
-        tasaInteresMensual: 0,
+        tasaInteresMensual: tasa,
         numeroCuotas: cuotas.length,
         montoPorCuota: cuotas.first.montoTotal,
         fechaPrimerVencimiento: cuotas.first.fechaVencimiento,
@@ -163,7 +169,9 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     }
     return _mapear(row, abonos: abonos).copyWith(
       planPago: plan,
-      numeroCuotas: cuotas.isEmpty ? 1 : cuotas.length,
+      numeroCuotas: cuotas.isEmpty ? row.numeroCuotas : cuotas.length,
+      tasaInteres: tasa,
+      montoInteres: row.montoInteresTotal,
     );
   }
 

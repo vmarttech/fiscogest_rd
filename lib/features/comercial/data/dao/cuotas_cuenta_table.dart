@@ -10,6 +10,10 @@ class CuotasCuentaTable extends Table {
       .references(CuentasCobrarTable, #id, onDelete: KeyAction.cascade)();
   IntColumn get numero => integer().named('numero')();
   RealColumn get monto => real().named('monto')();
+  RealColumn get montoCapital =>
+      real().named('monto_capital').withDefault(const Constant(0.0))();
+  RealColumn get montoInteres =>
+      real().named('monto_interes').withDefault(const Constant(0.0))();
   RealColumn get montoPagado =>
       real().named('monto_pagado').withDefault(const Constant(0.0))();
   DateTimeColumn get fechaVencimiento =>

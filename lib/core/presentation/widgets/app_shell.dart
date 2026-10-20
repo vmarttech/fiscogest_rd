@@ -587,6 +587,10 @@ class AppShell extends ConsumerWidget {
                     ListTile(
                       dense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                      // Splash visible sobre sidebar navy (evita assert Flutter)
+                      hoverColor: const Color(0x33FFFFFF),
+                      splashColor: const Color(0x44FFFFFF),
+                      focusColor: const Color(0x22FFFFFF),
                       leading: const Icon(Icons.logout,
                           color: AppColors.grey400, size: 20),
                       title: Text(
@@ -684,6 +688,9 @@ class AppShell extends ConsumerWidget {
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: AppRadius.allM,
+          hoverColor: const Color(0x33FFFFFF),
+          splashColor: const Color(0x44FFFFFF),
+          highlightColor: const Color(0x22FFFFFF),
           onTap: () {
             if (!isPermanent &&
                 (Scaffold.maybeOf(context)?.isDrawerOpen ?? false)) {
