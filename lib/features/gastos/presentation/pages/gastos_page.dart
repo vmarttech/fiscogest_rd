@@ -348,6 +348,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               final h = media.size.height -
                   media.viewInsets.bottom -
                   media.padding.top;
+              final bottomSafe = media.padding.bottom;
               return Padding(
                 padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
                 child: SizedBox(
@@ -357,27 +358,35 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                       header(ctx),
                       const Divider(height: 1),
                       Expanded(child: formBody(setLocal)),
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.pop(ctx),
-                                child: const Text('Cancelar'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: AppButton(
-                                  text: 'Guardar',
-                                  onPressed: () => guardar(ctx),
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            12,
+                            8,
+                            12,
+                            12 + (bottomSafe > 0 ? 0 : 8),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('Cancelar'),
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 48,
+                                  child: AppButton(
+                                    text: 'Guardar',
+                                    onPressed: () => guardar(ctx),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

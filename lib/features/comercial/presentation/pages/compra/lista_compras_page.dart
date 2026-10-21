@@ -739,6 +739,7 @@ class ListaComprasPage extends ConsumerWidget {
                         ],
                       ),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // .compra-row-top
@@ -1129,25 +1130,6 @@ class ListaComprasPage extends ConsumerWidget {
                 return ListView(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
                   children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () =>
-                              context.go('/compras'),
-                          icon: const Icon(Icons.arrow_back),
-                        ),
-                        const Expanded(
-                          child: Text(
-                            'Lista de Compras',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
                     kpi(
                       title: 'Resumen del Mes ($mesLabel)',
                       value: formatRd(totalMes),
@@ -1176,7 +1158,7 @@ class ListaComprasPage extends ConsumerWidget {
                       )
                     else
                       for (final c in compras) ...[
-                        SizedBox(height: 160, child: compraCard(c)),
+                        compraCard(c),
                         const SizedBox(height: 10),
                       ],
                   ],

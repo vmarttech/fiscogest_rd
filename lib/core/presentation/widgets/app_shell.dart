@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
@@ -84,6 +85,7 @@ class AppShell extends ConsumerWidget {
               currentPath: currentPath,
               context: context,
               nombreEmpresa: nombreEmpresa,
+              logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true) ? cfg!.logoUrl.trim() : '',
               modoSimplificado: modoSimplificado,
               esAdmin: esAdmin,
               esVendedor: esVendedor,
@@ -142,6 +144,7 @@ class AppShell extends ConsumerWidget {
           currentPath: currentPath,
           context: context,
           nombreEmpresa: nombreEmpresa,
+          logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true) ? cfg!.logoUrl.trim() : '',
           modoSimplificado: modoSimplificado,
           esAdmin: esAdmin,
           esVendedor: esVendedor,
@@ -355,6 +358,7 @@ class AppShell extends ConsumerWidget {
     required String currentPath,
     required BuildContext context,
     required String nombreEmpresa,
+    required String logoUrl,
     required bool modoSimplificado,
     required bool esAdmin,
     required bool esVendedor,
@@ -390,27 +394,15 @@ class AppShell extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
                 child: Row(
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1268F3),
-                        borderRadius: BorderRadius.circular(11),
-                      ),
-                      child: const Icon(
-                        Icons.grid_view_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
+                    _buildBusinessLogo(logoUrl, nombreEmpresa),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'FiscoGest',
-                            style: TextStyle(
+                            nombreEmpresa,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
@@ -419,8 +411,8 @@ class AppShell extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
-                          SizedBox(height: 2),
-                          Text(
+                          const SizedBox(height: 2),
+                          const Text(
                             'Gestión Fiscal y Créditos',
                             style: TextStyle(
                               color: Color(0xFF9DB5DA),
@@ -683,7 +675,7 @@ class AppShell extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 1.5),
       child: Material(
         color: esSeleccionado
-            ? const Color(0xFF1268F3)
+            ? const Color(0xFF1A3A6B) // azul marino (no brillante)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
@@ -760,6 +752,52 @@ class AppShell extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBusinessLogo(String logoUrl, String nombreEmpresa) {
+    final tieneLogo = logoUrl.isNotEmpty && File(logoUrl).existsSync();
+    final iniciales = nombreEmpresa
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .take(2)
+        .map((p) => p[0].toUpperCase())
+        .join();
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F2A52),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(color: const Color(0xFF1E3A6B)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: tieneLogo
+          ? Image.file(
+              File(logoUrl),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Center(
+                child: Text(
+                  iniciales.isEmpty ? 'FG' : iniciales,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            )
+          : Center(
+              child: Text(
+                iniciales.isEmpty ? 'FG' : iniciales,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+              ),
+            ),
     );
   }
 }
