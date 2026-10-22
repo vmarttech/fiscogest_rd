@@ -23,6 +23,7 @@ abstract class IVentasRepository {
 
   Future<Venta?> obtenerVentaPorId(int ventaId);
   Future<Venta?> buscarPorNumeroCotizacion(String numero);
+  Future<Venta?> buscarPorNumeroFactura(String ncf);
   Future<List<Venta>> buscarPorNombreCliente(String texto);
   Future<List<Venta>> listarPendientesCobro({DateTime? desde, DateTime? hasta});
 

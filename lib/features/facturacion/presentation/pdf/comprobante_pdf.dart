@@ -166,7 +166,7 @@ class ComprobantePdf {
       ambienteDgii: ambienteDgii,
     );
     final bytes = await doc.save();
-    final name = (ncf.isEmpty ? 'Comprobante' : 'Factura_$ncf') + '.pdf';
+    final name = '${ncf.isEmpty ? 'Comprobante' : 'Factura_$ncf'}.pdf';
     final esMovil = Platform.isAndroid || Platform.isIOS;
     if (esMovil) {
       await _abrirPdfMovil(bytes, name);

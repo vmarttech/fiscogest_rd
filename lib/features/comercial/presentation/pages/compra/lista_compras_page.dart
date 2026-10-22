@@ -214,7 +214,7 @@ class ListaComprasPage extends ConsumerWidget {
       );
       EstadoCompra? estadoSel = actual.estado;
       bool? creditoSel = actual.soloCredito;
-      String? tipoSel = actual.tipoComprobante;
+      final String? tipoSel = actual.tipoComprobante;
       DateTime? desde = actual.fechaDesde;
       DateTime? hasta = actual.fechaHasta;
 
@@ -1281,14 +1281,14 @@ class ListaComprasPage extends ConsumerWidget {
                                 LayoutBuilder(
                                   builder: (context, c) {
                                     // 2 pares por fila en desktop: [compra|notas] [compra|notas]
-                                    final cols = 2; // HTML: grid-template-columns: repeat(2, 1fr)
+                                    const cols = 2; // HTML: grid-template-columns: repeat(2, 1fr)
                                     return GridView.builder(
                                       shrinkWrap: true,
                                       physics:
                                           const NeverScrollableScrollPhysics(),
                                       itemCount: compras.length,
                                       gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: cols,
                                         mainAxisExtent: 220,
                                         crossAxisSpacing: 12,

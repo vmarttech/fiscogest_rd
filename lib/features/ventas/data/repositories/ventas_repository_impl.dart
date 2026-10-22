@@ -228,6 +228,17 @@ class VentasRepositoryImpl implements IVentasRepository {
     return _mapearDesdeVentasTableData(registro, esCotizacion: true);
   }
 
+
+  @override
+  Future<Venta?> buscarPorNumeroFactura(String ncf) async {
+    final registro = await _ventasDao.buscarPorNumeroFactura(ncf);
+    if (registro == null) return null;
+    final dets = await _mapearDetalles(
+      await _ventasDao.listarDetalles(registro.id),
+    );
+    return _mapearDesdeVentasTableData(registro, detalles: dets);
+  }
+
   @override
   Future<List<Venta>> buscarPorNombreCliente(String texto) async {
     final resultados = await _ventasDao.buscarPorNombreCliente(texto);

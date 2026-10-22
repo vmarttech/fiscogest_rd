@@ -104,9 +104,56 @@ class VentasDao {
   ) async {
     final limpio = numero.trim().toUpperCase();
     if (limpio.isEmpty) return null;
-    return await (_db.select(
-      _db.ventasTable,
-    )..where((final t) => t.numeroCotizacion.equals(limpio))).getSingleOrNull();
+    final rows = await (_db.select(_db.ventasTable)
+          ..where((final t) => t.numeroCotizacion.equals(limpio))
+          ..orderBy([
+            (final t) => OrderingTerm(
+                  expression: t.id,
+                  mode: OrderingMode.desc,
+                ),
+          ])
+          ..limit(1))
+        .get();
+    return rows.isEmpty ? null : rows.first;
+  }
+
+
+  Future<VentasTableData?> buscarPorNumeroFactura(
+    final String ncf,
+  ) async {
+    final limpio = ncf.trim();
+    if (limpio.isEmpty) return null;
+    // Puede haber más de una fila histórica con el mismo NCF:
+    // tomamos la más reciente sin usar getSingle (lanza Too many elements).
+    final rows = await (_db.select(_db.ventasTable)
+          ..where((final t) => t.numeroFactura.equals(limpio))
+          ..orderBy([
+            (final t) => OrderingTerm(
+                  expression: t.id,
+                  mode: OrderingMode.desc,
+                ),
+          ])
+          ..limit(1))
+        .get();
+    if (rows.isEmpty) {
+      // Reintento case-insensitive por si el NCF se guardó en otro casing
+      final upper = limpio.toUpperCase();
+      if (upper != limpio) {
+        final rows2 = await (_db.select(_db.ventasTable)
+              ..where((final t) => t.numeroFactura.equals(upper))
+              ..orderBy([
+                (final t) => OrderingTerm(
+                      expression: t.id,
+                      mode: OrderingMode.desc,
+                    ),
+              ])
+              ..limit(1))
+            .get();
+        return rows2.isEmpty ? null : rows2.first;
+      }
+      return null;
+    }
+    return rows.first;
   }
 
   Future<List<VentaConCliente>> buscarPorNombreCliente(
