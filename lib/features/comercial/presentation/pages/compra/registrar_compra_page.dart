@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -182,133 +183,81 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     );
   }
 
-  Future<void> _seleccionarProducto(int indexLinea) async {
+  bool _selectorProductoAbierto = false;
+
+  /// Al escribir en el buscador: asegura línea y abre selector ya filtrado.
+  /// Solo un diálogo a la vez (evita apilar al teclear).
+  void _buscarProductoEnVivo(String query) {
+    if (query.trim().isEmpty) return;
+    if (_selectorProductoAbierto) return;
+    void abrir(int idx) {
+      _selectorProductoAbierto = true;
+      _seleccionarProducto(idx, queryInicial: query).whenComplete(() {
+        _selectorProductoAbierto = false;
+      });
+    }
+
+    if (_lineas.isEmpty) {
+      _agregarLinea();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _lineas.isEmpty) return;
+        abrir(0);
+      });
+      return;
+    }
+    int idx = _lineas.length - 1;
+    for (var i = 0; i < _lineas.length; i++) {
+      if (_lineas[i].productoId == null &&
+          _controladores[i].nombreProducto.text.trim().isEmpty) {
+        idx = i;
+        break;
+      }
+    }
+    abrir(idx);
+  }
+
+  Future<void> _seleccionarProducto(int indexLinea, {String? queryInicial}) async {
     final estado = ref.read(productoControllerProvider);
     final listaProductos = estado.valueOrNull;
     if (!mounted) return;
-    if (listaProductos?.isEmpty ?? true) {
+    if (listaProductos == null || listaProductos.isEmpty) {
       FiscoGestNotifications.show(
         const SnackBar(content: Text('⚠️ No hay productos registrados')),
       );
       return;
     }
-    final buscador = TextEditingController();
-    await showDialog<void>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final media = MediaQuery.of(context);
-          final ancho = (media.size.width - 88).clamp(0.0, 480.0).toDouble();
-          final altoDisponible =
-              media.size.height - media.viewInsets.bottom - 96;
-          final alto = (altoDisponible * 0.7).clamp(100.0, 440.0).toDouble();
-          final consulta = buscador.text.trim().toLowerCase();
-          final productosFiltrados = listaProductos!.where((producto) {
-            if (consulta.isEmpty) return true;
-            return producto.nombre.toLowerCase().contains(consulta) ||
-                producto.codigo.toLowerCase().contains(consulta);
-          }).toList();
+    if (indexLinea < 0 || indexLinea >= _controladores.length) return;
 
-          return AlertDialog(
-            insetPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 20,
-            ),
-            title: Text(
-              'Seleccionar producto',
-              style: AppTypography.bodyMedium.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-            content: SizedBox(
-              width: ancho,
-              height: alto,
-              child: Column(
-                children: [
-                  TextField(
-                    controller: buscador,
-                    autofocus: true,
-                    textInputAction: TextInputAction.search,
-                    decoration: const InputDecoration(
-                      hintText: 'Buscar por nombre o SKU',
-                      prefixIcon: Icon(Icons.search),
-                      isDense: true,
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (_) => setDialogState(() {}),
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: productosFiltrados.isEmpty
-                        ? const Center(
-                            child: Text('No se encontraron productos'),
-                          )
-                        : ListView.builder(
-                            keyboardDismissBehavior:
-                                ScrollViewKeyboardDismissBehavior.onDrag,
-                            itemCount: productosFiltrados.length,
-                            itemBuilder: (context, index) {
-                              final prod = productosFiltrados[index];
-                              return ListTile(
-                                dense: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                title: Text(
-                                  prod.nombre,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.bodyMedium,
-                                ),
-                                subtitle: Text(
-                                  'SKU: ${prod.codigo}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                onTap: () {
-                                  if (!mounted) return;
-                                  setState(() {
-                                    final ctrl = _controladores[indexLinea];
-                                    ctrl.productoId.text =
-                                        prod.id?.toString() ?? '';
-                                    ctrl.nombreProducto.text = prod.nombre;
-                                    final tasa = _tasaParaProducto(prod);
-                                    final actualizada = ctrl.haciaLinea(
-                                      tasaItbis: tasa,
-                                    );
-                                    actualizada.productoId = prod.id;
-                                    actualizada.tasaImpuestoLinea = tasa;
-                                    _lineas[indexLinea] = actualizada;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Cancelar',
-                  style: AppTypography.button.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+    // Quitar foco del buscador externo (evita conflicto de FocusNode).
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    final elegido = await showDialog<Producto>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => _SelectorProductoCompraDialog(
+        productos: listaProductos,
+        queryInicial: queryInicial,
       ),
     );
-    buscador.dispose();
+
+    if (!mounted || elegido == null) return;
+    if (indexLinea < 0 || indexLinea >= _controladores.length) return;
+
+    final prod = elegido;
+    setState(() {
+      final ctrl = _controladores[indexLinea];
+      ctrl.productoId.text = prod.id?.toString() ?? '';
+      ctrl.nombreProducto.text = prod.nombre;
+      if (ctrl.costoUnitario.text.trim().isEmpty && prod.precioCompra > 0) {
+        ctrl.costoUnitario.text = prod.precioCompra.toStringAsFixed(2);
+      }
+      final tasa = _tasaParaProducto(prod);
+      final actualizada = ctrl.haciaLinea(tasaItbis: tasa);
+      actualizada.productoId = prod.id;
+      actualizada.nombreProducto = prod.nombre;
+      actualizada.tasaImpuestoLinea = tasa;
+      _lineas[indexLinea] = actualizada;
+    });
   }
 
   Future<void> _guardarCompra() async {
@@ -488,91 +437,396 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       );
     }
 
-    return AppScaffold(
-      backgroundColor: AppColors.pageBackground,
-      title: 'REGISTRAR COMPRA',
-      body: SafeArea(
-        bottom: true,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            esPequena ? 16 : AppSpacing.l,
-            esPequena ? 16 : AppSpacing.m,
-            esPequena ? 16 : AppSpacing.l,
-            32,
-          ),
-          child: AppLayout.centerConstrained(
-            maxWidth: maxW,
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SectionHeader(
-                    title: 'Datos de la compra',
-                    subtitle: modoSimplificado
-                        ? 'Proveedor, recibo y forma de pago'
-                        : 'Proveedor, comprobante y forma de pago',
-                  ),
-                  CabeceraCompraWidget(
-                    fechaController: _fechaController,
-                    proveedorIdController: _proveedorIdController,
-                    proveedorNombreController: _proveedorNombreController,
-                    onSeleccionarProveedor: _seleccionarProveedor,
-                    comprobanteController: _comprobanteController,
-                    ncfController: _ncfController,
-                    tipoComprobante: _tipoComprobante,
-                    onTipoComprobanteChanged: (v) =>
-                        setState(() => _tipoComprobante = v),
-                    formaPago: _formaPago,
-                    onFormaPagoChanged: (v) => setState(() => _formaPago = v),
-                    condicionPagoController: _condicionPagoController,
-                    diasCreditoController: _diasCreditoController,
-                    fechaVencimientoController: _fechaVencimientoController,
-                    observacionesController: _observacionesController,
-                    esPequena: esPequena,
-                    filaResponsiva: filaResponsiva,
-                    modoSimplificado: modoSimplificado,
-                  ),
-                  AppLayout.vL,
-                  const SectionHeader(
-                    title: 'Productos',
-                    subtitle: 'Líneas de la compra',
-                  ),
-                  SeccionLineasWidget(
-                    lineas: _lineas,
-                    controladores: _controladores,
-                    onAgregarLinea: _agregarLinea,
-                    onEliminarLinea: _eliminarLinea,
-                    onSeleccionarProducto: _seleccionarProducto,
-                    onValorCambiado:
-                        _actualizarLineaEnTiempoReal, // ✅ CONECTADO
-                    esPequena: esPequena,
-                    filaResponsiva: filaResponsiva,
-                    modoSimplificado: modoSimplificado,
-                  ),
-                  AppLayout.vL,
-                  const SectionHeader(
-                    title: 'Resumen',
-                    subtitle: 'Totales de la compra',
-                  ),
-                  TotalesCompraWidget(
-                    subtotalSinImpuestos: _subtotalSinImpuestos,
-                    descuentoGlobal: _descuentoGlobal,
-                    montoImpuesto: _montoImpuesto,
-                    totalCompra: _totalCompra,
-                    mostrarImpuesto: !modoSimplificado,
-                  ),
-                  AppLayout.vL,
-                  BotonesAccionWidget(
-                    onGuardarBorrador: _guardarComoBorrador,
-                    onRegistrarCompra: _registrarCompraDirecta,
-                  ),
-                ],
+    final cabecera = CabeceraCompraWidget(
+      fechaController: _fechaController,
+      proveedorIdController: _proveedorIdController,
+      proveedorNombreController: _proveedorNombreController,
+      onSeleccionarProveedor: _seleccionarProveedor,
+      comprobanteController: _comprobanteController,
+      ncfController: _ncfController,
+      tipoComprobante: _tipoComprobante,
+      onTipoComprobanteChanged: (v) => setState(() => _tipoComprobante = v),
+      formaPago: _formaPago,
+      onFormaPagoChanged: (v) => setState(() => _formaPago = v),
+      condicionPagoController: _condicionPagoController,
+      diasCreditoController: _diasCreditoController,
+      fechaVencimientoController: _fechaVencimientoController,
+      observacionesController: _observacionesController,
+      esPequena: esPequena,
+      filaResponsiva: filaResponsiva,
+      modoSimplificado: modoSimplificado,
+    );
+    final lineas = SeccionLineasWidget(
+      lineas: _lineas,
+      controladores: _controladores,
+      onAgregarLinea: _agregarLinea,
+      onEliminarLinea: _eliminarLinea,
+      onSeleccionarProducto: _seleccionarProducto,
+      onValorCambiado: _actualizarLineaEnTiempoReal,
+      esPequena: esPequena,
+      filaResponsiva: filaResponsiva,
+      modoSimplificado: modoSimplificado,
+      onBuscarProducto: _buscarProductoEnVivo,
+    );
+    final totales = TotalesCompraWidget(
+      subtotalSinImpuestos: _subtotalSinImpuestos,
+      descuentoGlobal: _descuentoGlobal,
+      montoImpuesto: _montoImpuesto,
+      totalCompra: _totalCompra,
+      mostrarImpuesto: !modoSimplificado,
+      observacionesController: desktop ? _observacionesController : null,
+    );
+    final botones = BotonesAccionWidget(
+      onGuardarBorrador: _guardarComoBorrador,
+      onRegistrarCompra: _registrarCompraDirecta,
+    );
+
+    // ── MÓVIL / TABLET: layout actual (sin cambios) ──
+    if (!desktop) {
+      return AppScaffold(
+        backgroundColor: AppColors.pageBackground,
+        title: 'REGISTRAR COMPRA',
+        body: SafeArea(
+          bottom: true,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              esPequena ? 16 : AppSpacing.l,
+              esPequena ? 16 : AppSpacing.m,
+              esPequena ? 16 : AppSpacing.l,
+              32,
+            ),
+            child: AppLayout.centerConstrained(
+              maxWidth: maxW,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SectionHeader(
+                      title: 'Datos de la compra',
+                      subtitle: modoSimplificado
+                          ? 'Proveedor, recibo y forma de pago'
+                          : 'Proveedor, comprobante y forma de pago',
+                    ),
+                    cabecera,
+                    AppLayout.vL,
+                    const SectionHeader(
+                      title: 'Productos',
+                      subtitle: 'Líneas de la compra',
+                    ),
+                    lineas,
+                    AppLayout.vL,
+                    const SectionHeader(
+                      title: 'Resumen',
+                      subtitle: 'Totales de la compra',
+                    ),
+                    totales,
+                    AppLayout.vL,
+                    botones,
+                  ],
+                ),
               ),
             ),
+          ),
+        ),
+      );
+    }
+
+    // ── ESCRITORIO: mock exacto ──
+    // DATOS + DETALLES a ancho completo
+    // luego PRODUCTOS (2fr) | RESUMEN (1fr)
+    return AppScaffold(
+      backgroundColor: const Color(0xFFF0F4F8),
+      showAppBar: false,
+      useAppPage: false,
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                child: Row(
+                  children: [
+                    Material(
+                      color: Colors.white,
+                      shape: const CircleBorder(
+                        side: BorderSide(color: Color(0xFFCBD5E0)),
+                      ),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/compras');
+                          }
+                        },
+                        child: const SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: Icon(
+                            Icons.arrow_back,
+                            size: 18,
+                            color: Color(0xFF666666),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Text(
+                        'REGISTRAR COMPRA',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF127369),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: _registrarCompraDirecta,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF127369),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Registrar Compra',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton(
+                      onPressed: _guardarComoBorrador,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF127369),
+                        side: const BorderSide(color: Color(0xFF127369)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Guardar Borrador',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      cabecera,
+                      const SizedBox(height: 20),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 2, child: lineas),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                totales,
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 44,
+                                  child: FilledButton(
+                                    onPressed: _registrarCompraDirecta,
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: const Color(0xFF127369),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Registrar Compra',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 44,
+                                  child: OutlinedButton(
+                                    onPressed: _guardarComoBorrador,
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: const Color(0xFF127369),
+                                      side: const BorderSide(
+                                        color: Color(0xFF127369),
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Guardar Borrador',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
+
+
+/// Diálogo de selección: el [TextEditingController] vive y muere con este State
+/// (evita `_dependents.isEmpty` al hacer dispose fuera de ciclo de vida del TextField).
+class _SelectorProductoCompraDialog extends StatefulWidget {
+  const _SelectorProductoCompraDialog({
+    required this.productos,
+    this.queryInicial,
+  });
+
+  final List<Producto> productos;
+  final String? queryInicial;
+
+  @override
+  State<_SelectorProductoCompraDialog> createState() =>
+      _SelectorProductoCompraDialogState();
+}
+
+class _SelectorProductoCompraDialogState
+    extends State<_SelectorProductoCompraDialog> {
+  late final TextEditingController _buscador;
+
+  @override
+  void initState() {
+    super.initState();
+    _buscador = TextEditingController(text: widget.queryInicial ?? '');
+  }
+
+  @override
+  void dispose() {
+    _buscador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final ancho = (media.size.width - 88).clamp(0.0, 480.0).toDouble();
+    final altoDisponible =
+        media.size.height - media.viewInsets.bottom - 96;
+    final alto = (altoDisponible * 0.7).clamp(100.0, 440.0).toDouble();
+    final consulta = _buscador.text.trim().toLowerCase();
+    final filtrados = widget.productos.where((producto) {
+      if (consulta.isEmpty) return true;
+      return producto.nombre.toLowerCase().contains(consulta) ||
+          producto.codigo.toLowerCase().contains(consulta) ||
+          (producto.codigoBarras ?? '').toLowerCase().contains(consulta);
+    }).toList();
+
+    return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      title: Text(
+        'Seleccionar producto',
+        style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      content: SizedBox(
+        width: ancho,
+        height: alto,
+        child: Column(
+          children: [
+            TextField(
+              controller: _buscador,
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              decoration: const InputDecoration(
+                hintText: 'Buscar por nombre, SKU o barras',
+                prefixIcon: Icon(Icons.search),
+                isDense: true,
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: filtrados.isEmpty
+                  ? const Center(child: Text('No se encontraron productos'))
+                  : ListView.builder(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      itemCount: filtrados.length,
+                      itemBuilder: (ctx, index) {
+                        final prod = filtrados[index];
+                        return ListTile(
+                          dense: true,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 4),
+                          title: Text(
+                            prod.nombre,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodyMedium,
+                          ),
+                          subtitle: Text(
+                            [
+                              'SKU: ${prod.codigo}',
+                              if ((prod.codigoBarras ?? '').trim().isNotEmpty)
+                                'CB: ${prod.codigoBarras}',
+                            ].join(' · '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          onTap: () => Navigator.of(context).pop(prod),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancelar',
+            style: AppTypography.button.copyWith(color: AppColors.primary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+

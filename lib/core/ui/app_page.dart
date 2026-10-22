@@ -19,7 +19,7 @@ class AppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mobile = AppBreakpoints.isMobile(context);
+    final mobile = AppBreakpoints.isCompact(context);
     final w = maxWidth ?? AppSizes.maxContentWidth;
 
     // Margen exterior SIEMPRE en PC → se ve el fondo a los lados

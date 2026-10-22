@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter/services.dart';
@@ -665,6 +666,18 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                               hint: 'Código único del producto',
                               controller: _skuCtrl,
                               prefixIcon: Icons.qr_code,
+                              suffixIcon: Icons.qr_code_scanner,
+                              onSuffixTap: () async {
+                                final codigo = await BarcodeScannerPage.abrir(
+                                  context,
+                                  titulo: 'Escanear código',
+                                  subtitulo:
+                                      'Centre el código de barras del producto',
+                                );
+                                if (!mounted || codigo == null) return;
+                                _skuAutomatico = false;
+                                _skuCtrl.text = codigo.trim();
+                              },
                             ),
                             child2: cats.when(
                               data: (lista) {

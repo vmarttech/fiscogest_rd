@@ -23,12 +23,14 @@ class ItemCarrito extends ConsumerWidget {
   final int indice;
   final VoidCallback alEliminar;
 
-  void _abrirEditarCantidad(BuildContext context, WidgetRef ref) {
+  Future<void> _abrirEditarCantidad(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final controlador = TextEditingController(
       text: detalle.cantidad.toString(),
     );
-
-    showDialog<dynamic>(
+    final nueva = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -63,21 +65,25 @@ class ItemCarrito extends ConsumerWidget {
               ),
             ),
             onPressed: () {
-              final nuevaCantidad =
-                  double.tryParse(controlador.text) ??
-                  detalle.cantidad.toDouble();
-              if (nuevaCantidad > 0) {
-                ref
-                    .read(registrarVentaProvider.notifier)
-                    .cambiarCantidad(indice, nuevaCantidad.toInt());
-              }
-              Navigator.pop(ctx);
+              final v = double.tryParse(
+                    controlador.text.replaceAll(',', '.'),
+                  ) ??
+                  0;
+              Navigator.pop(ctx, v > 0 ? v : null);
             },
             child: const Text('Aceptar'),
           ),
         ],
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controlador.dispose();
+    });
+    if (nueva != null && nueva > 0) {
+      ref
+          .read(registrarVentaProvider.notifier)
+          .cambiarCantidad(indice, nueva.toInt());
+    }
   }
 
   void _abrirDescuentoLinea(BuildContext context, WidgetRef ref) {

@@ -2,6 +2,9 @@
 
     <!-- ✅ PERMISO OBLIGATORIO PARA CONEXIÓN A INTERNET (DGII) -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <!-- ✅ Permiso opcional pero recomendado para verificar estado de red -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:drift/drift.dart' hide Column;
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -102,7 +103,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   int _vistaActual = 0;
   String _filtroProductos = '';
   String _filtroKardex = '';
-  String _filtroEstado = 'todos';
+  String _filtroEstado = 'todos'; // todos|en_stock|bajo|agotado|inactivo
+  String _ordenProductos = 'nombre_asc';
+  bool _soloActivos = true;
   /// Solo desktop: producto seleccionado en el listado.
   Producto? _productoSeleccionado;
   /// 'normal' | 'compacta'
@@ -207,7 +210,18 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 AppTextField(
-                  hint: 'Buscar por código, nombre...',
+                  hint: 'Código, nombre o barras...',
+                  prefixIcon: Icons.search_rounded,
+                  suffixIcon: Icons.qr_code_scanner,
+                  onSuffixTap: () async {
+                    final codigo = await BarcodeScannerPage.abrir(
+                      context,
+                      titulo: 'Escanear producto',
+                      subtitulo: 'Centre el código de barras',
+                    );
+                    if (!mounted || codigo == null) return;
+                    setState(() => _filtroProductos = codigo.trim());
+                  },
                   onChanged: (v) => setState(() => _filtroProductos = v),
                 ),
                 const SizedBox(height: 10),
@@ -245,6 +259,8 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 10),
+                _buildBarraOrdenYFiltros(),
                 const SizedBox(height: 14),
                 ref.watch(productoControllerProvider).when(
                       loading: () => const Padding(
@@ -399,21 +415,114 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     );
   }
 
+
+  Widget _buildBarraOrdenYFiltros() {
+    const ordenes = <MapEntry<String, String>>[
+      MapEntry('nombre_asc', 'Nombre A→Z'),
+      MapEntry('nombre_desc', 'Nombre Z→A'),
+      MapEntry('sku_asc', 'SKU A→Z'),
+      MapEntry('sku_desc', 'SKU Z→A'),
+      MapEntry('precio_asc', 'Precio ↑'),
+      MapEntry('precio_desc', 'Precio ↓'),
+      MapEntry('stock_desc', 'Stock mayor'),
+      MapEntry('stock_asc', 'Stock menor'),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              _FilterChip(
+                label: _soloActivos ? 'Solo activos' : 'Con inactivos',
+                selected: _soloActivos,
+                onTap: () => setState(() => _soloActivos = !_soloActivos),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: 'Inactivos',
+                selected: _filtroEstado == 'inactivo',
+                color: AppColors.textSecondary,
+                onTap: () => setState(() {
+                  _filtroEstado = 'inactivo';
+                  _soloActivos = false;
+                }),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: _ordenProductos,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'Ordenar por',
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            border: OutlineInputBorder(),
+          ),
+          items: [
+            for (final e in ordenes)
+              DropdownMenuItem(
+                value: e.key,
+                child: Text(e.value, style: const TextStyle(fontSize: 13)),
+              ),
+          ],
+          onChanged: (v) {
+            if (v != null) setState(() => _ordenProductos = v);
+          },
+        ),
+      ],
+    );
+  }
+
   List<Producto> _filtrarProductos(List<Producto> productos) {
-    return productos.where((p) {
-      final matchTexto = p.codigo.toLowerCase().contains(
-            _filtroProductos.toLowerCase(),
-          ) ||
-          p.nombre.toLowerCase().contains(_filtroProductos.toLowerCase());
+    final q = _filtroProductos.trim().toLowerCase();
+    final list = productos.where((p) {
+      if (_soloActivos && !p.activo) return false;
+      final matchTexto = q.isEmpty ||
+          p.nombre.toLowerCase().contains(q) ||
+          p.codigo.toLowerCase().contains(q) ||
+          (p.codigoBarras ?? '').toLowerCase().contains(q);
       if (!matchTexto) return false;
       final stock = p.stock ?? 0;
+      final min = p.stockMinimo ?? 10;
       return switch (_filtroEstado) {
-        'en_stock' => stock > (p.stockMinimo ?? 10),
-        'bajo' => stock > 0 && stock <= (p.stockMinimo ?? 10),
+        'en_stock' => stock > min,
+        'bajo' => stock > 0 && stock <= min,
         'agotado' => stock <= 0,
+        'inactivo' => !p.activo,
         _ => true,
       };
     }).toList();
+
+    int cmpStr(String a, String b) =>
+        a.toLowerCase().compareTo(b.toLowerCase());
+
+    list.sort((a, b) {
+      switch (_ordenProductos) {
+        case 'nombre_desc':
+          return cmpStr(b.nombre, a.nombre);
+        case 'sku_asc':
+          return cmpStr(a.codigo, b.codigo);
+        case 'sku_desc':
+          return cmpStr(b.codigo, a.codigo);
+        case 'precio_asc':
+          return a.precioVenta.compareTo(b.precioVenta);
+        case 'precio_desc':
+          return b.precioVenta.compareTo(a.precioVenta);
+        case 'stock_asc':
+          return (a.stock ?? 0).compareTo(b.stock ?? 0);
+        case 'stock_desc':
+          return (b.stock ?? 0).compareTo(a.stock ?? 0);
+        case 'nombre_asc':
+        default:
+          return cmpStr(a.nombre, b.nombre);
+      }
+    });
+    return list;
   }
 
   (String, Color) _getStatus(double stock, double stockMinimo) {
@@ -628,6 +737,13 @@ class _PanelConfigInventario extends StatelessWidget {
                 selected: filtroEstado == 'agotado',
                 color: AppColors.error,
                 onTap: () => onFiltro(filtroEstado == 'agotado' ? 'todos' : 'agotado'),
+              ),
+              const SizedBox(height: 8),
+              _FilterChip(
+                label: 'Inactivos',
+                selected: filtroEstado == 'inactivo',
+                color: AppColors.textSecondary,
+                onTap: () => onFiltro(filtroEstado == 'inactivo' ? 'todos' : 'inactivo'),
               ),
             ],
           ),
@@ -863,7 +979,17 @@ class _PanelListadoProductos extends StatelessWidget {
             child: AppTextField(
               height: 42,
               prefixIcon: Icons.search_rounded,
-              hint: 'Buscar producto por código, nombre o categoría...',
+              suffixIcon: Icons.qr_code_scanner,
+              hint: 'Código, nombre, categoría o barras...',
+              onSuffixTap: () async {
+                final codigo = await BarcodeScannerPage.abrir(
+                  context,
+                  titulo: 'Escanear producto',
+                  subtitulo: 'Centre el código de barras',
+                );
+                if (!context.mounted || codigo == null) return;
+                onBuscar(codigo.trim());
+              },
               onChanged: onBuscar,
             ),
           ),

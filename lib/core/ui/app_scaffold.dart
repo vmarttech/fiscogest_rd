@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_page.dart';
@@ -112,7 +113,7 @@ class AppScaffold extends StatelessWidget {
     Widget? resolvedLeading = leading;
     if (resolvedLeading == null && showBackButton) {
       // Con menú fijo (AppShell) nunca mostrar hamburguesa en desktop/tablet
-      final isDesktop = MediaQuery.of(context).size.width >= 900;
+      final isDesktop = AppBreakpoints.useWideChrome(context);
 
       if (principal && underShell && !isDesktop) {
         // Solo mostrar hamburguesa en móvil/tablet

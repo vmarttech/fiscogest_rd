@@ -27,6 +27,7 @@ dependencies:
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
   image_picker: ^1.2.3
+  mobile_scanner: ^6.0.2
   file_picker: ^10.3.7
   xml: ^6.5.0
   asn1lib: ^1.5.0

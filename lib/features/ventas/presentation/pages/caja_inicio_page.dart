@@ -1,4 +1,5 @@
 // ignore_for_file: unused_element, unused_field, unused_import, unused_element_parameter
+import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/features/notificaciones/presentation/notificaciones_provider.dart';
 import 'package:fiscogest_rd/features/caja/presentation/pdf/informe_z_pdf.dart';
@@ -1081,6 +1082,22 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     }
   }
 
+  /// Cámara: lee código de barras y busca/agrega el producto (móvil / tablet).
+  Future<void> _escanearCodigoBarrasCaja() async {
+    // Asegurar modo producto
+    if (_modoBusquedaCol != 'producto') {
+      _setModoBusquedaCol('producto');
+    }
+    final codigo = await BarcodeScannerPage.abrir(
+      context,
+      titulo: 'Escanear producto',
+      subtitulo: 'Centre el código de barras en el recuadro',
+    );
+    if (!mounted || codigo == null || codigo.trim().isEmpty) return;
+    _buscaProductoCtrl.text = codigo.trim();
+    await _buscarProductoCaja(desdeEnter: true);
+  }
+
   Future<void> _buscarProductoCaja({bool desdeEnter = false}) async {
     final texto = _buscaProductoCtrl.text.trim();
     if (texto.isEmpty) {
@@ -1092,7 +1109,16 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     }
     setState(() => _buscandoProducto = true);
     try {
-      final todos = ref.read(productoControllerProvider).maybeWhen(
+      // Asegurar catálogo cargado (si aún loading → esperar / recargar)
+      var estado = ref.read(productoControllerProvider);
+      if (estado is AsyncLoading ||
+          (estado is AsyncData && (estado.value?.isEmpty ?? true))) {
+        try {
+          await ref.read(productoControllerProvider.notifier).cargarProductos();
+        } catch (_) {}
+        estado = ref.read(productoControllerProvider);
+      }
+      final todos = estado.maybeWhen(
             data: (lista) => lista,
             orElse: () => <Producto>[],
           );
@@ -2195,43 +2221,46 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             children: [
               _buildPosHeader(),
               Expanded(
-                child: mobile
-                    ? LayoutBuilder(
-                        builder: (context, c) {
-                          final w = c.maxWidth.isFinite && c.maxWidth > 0
-                              ? c.maxWidth
-                              : MediaQuery.sizeOf(context).width - 20;
-                          return SingleChildScrollView(
-                            padding:
-                                const EdgeInsets.fromLTRB(10, 8, 10, 24),
-                            child: SizedBox(
-                              width: w,
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
-                                children: [
-                                  _buildColProducto(compact: true),
-                                  const SizedBox(height: 10),
-                                  _buildColCobro(compact: true),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(flex: 4, child: _buildColProducto()),
-                            const SizedBox(width: 10),
-                            Expanded(flex: 4, child: _buildColCobro()),
-                            const SizedBox(width: 10),
-                            Expanded(flex: 4, child: _buildVistaPreviaTicket()),
-                          ],
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    final screenW = MediaQuery.sizeOf(context).width;
+                    // Móvil / tablet estrecha: sin columna ticket (vista previa)
+                    final hideTicket = mobile || screenW < 1100;
+                    if (hideTicket) {
+                      final w = c.maxWidth.isFinite && c.maxWidth > 0
+                          ? c.maxWidth
+                          : screenW - 20;
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 24),
+                        child: SizedBox(
+                          width: w,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _buildColProducto(compact: true),
+                              const SizedBox(height: 10),
+                              _buildColCobro(compact: true),
+                            ],
+                          ),
                         ),
+                      );
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(flex: 4, child: _buildColProducto()),
+                          const SizedBox(width: 10),
+                          Expanded(flex: 4, child: _buildColCobro()),
+                          const SizedBox(width: 10),
+                          Expanded(
+                              flex: 4, child: _buildVistaPreviaTicket()),
+                        ],
                       ),
+                    );
+                  },
+                ),
               ),
               _buildPosFooter(),
             ],
@@ -3702,15 +3731,28 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       : Icons.search,
                   size: 20,
                 ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    if (_modoBusquedaCol == 'producto') {
-                      _buscarProductoCaja(desdeEnter: true);
-                    } else {
-                      _buscarTicketCaja();
-                    }
-                  },
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_modoBusquedaCol == 'producto')
+                      IconButton(
+                        tooltip: 'Escanear código de barras',
+                        icon: const Icon(Icons.qr_code_scanner),
+                        color: const Color(0xFF2563EB),
+                        onPressed: _escanearCodigoBarrasCaja,
+                      ),
+                    IconButton(
+                      tooltip: 'Buscar',
+                      icon: const Icon(Icons.search),
+                      onPressed: () {
+                        if (_modoBusquedaCol == 'producto') {
+                          _buscarProductoCaja(desdeEnter: true);
+                        } else {
+                          _buscarTicketCaja();
+                        }
+                      },
+                    ),
+                  ],
                 ),
                 filled: true,
                 fillColor: const Color(0xFFF1F5F9),
@@ -3743,23 +3785,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             child: _modoBusquedaCol == 'producto'
                 ? (_buscandoProducto
                     ? const Center(child: CircularProgressIndicator())
-                    : _resultadosProducto.isEmpty
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Text(
-                                _buscaProductoCtrl.text.trim().isEmpty
-                                    ? 'Escanee o busque un producto del inventario'
-                                    : 'Sin resultados',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(0xFF64748B),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          )
-                        : ListView.separated(
+                    : _resultadosProducto.isNotEmpty
+                        ? ListView.separated(
                             shrinkWrap: compact,
                             physics: compact
                                 ? const NeverScrollableScrollPhysics()
@@ -3820,7 +3847,45 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 ),
                               );
                             },
-                          ))
+                          )
+                        // Sin resultados de búsqueda: mostrar carrito / guía
+                        : (_ticketSeleccionado != null
+                            ? Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: ListView(
+                                  shrinkWrap: compact,
+                                  physics: compact
+                                      ? const NeverScrollableScrollPhysics()
+                                      : null,
+                                  children: [
+                                    const Text(
+                                      'Productos en factura',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF2563EB),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    ..._lineasPanelTicket(),
+                                  ],
+                                ),
+                              )
+                            : Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(
+                                    _buscaProductoCtrl.text.trim().isEmpty
+                                        ? 'Escanee o busque un producto del inventario'
+                                        : 'Sin resultados',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Color(0xFF64748B),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              )))
                 : _buscandoTicket
                 ? const Center(child: CircularProgressIndicator())
                 : _resultadosBusqueda.isNotEmpty
@@ -4143,6 +4208,81 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   }
 
 
+
+  void _cambiarCantidadLineaCaja(int index, int delta) {
+    if (!_ticketEsDirectoCaja || index < 0 || index >= _lineasDirectoCaja.length) {
+      return;
+    }
+    final d = _lineasDirectoCaja[index];
+    final nueva = d.cantidad + delta;
+    if (nueva < 1) {
+      _eliminarLineaCaja(index);
+      return;
+    }
+    final precio = d.precioUnitario;
+    final descPct = d.descuentoPorcentaje;
+    final bruto = precio * nueva;
+    final montoDesc = bruto * (descPct / 100);
+    final sub = double.parse((bruto - montoDesc).toStringAsFixed(2));
+    setState(() {
+      _lineasDirectoCaja[index] = d.copyWith(
+        cantidad: nueva,
+        subtotal: sub,
+        subtotalLinea: sub,
+        montoDescuento: double.parse(montoDesc.toStringAsFixed(2)),
+      );
+      _sincronizarTicketDirectoDesdeLineas();
+    });
+  }
+
+  void _eliminarLineaCaja(int index) {
+    if (!_ticketEsDirectoCaja || index < 0 || index >= _lineasDirectoCaja.length) {
+      return;
+    }
+    setState(() {
+      _lineasDirectoCaja = List<DetalleVenta>.from(_lineasDirectoCaja)
+        ..removeAt(index);
+      if (_lineasDirectoCaja.isEmpty) {
+        _ticketSeleccionado = null;
+        _ticketEsDirectoCaja = false;
+      } else {
+        _sincronizarTicketDirectoDesdeLineas();
+      }
+    });
+  }
+
+  void _aplicarDescuentoLineaCaja(int index, double pct) {
+    if (!_ticketEsDirectoCaja || index < 0 || index >= _lineasDirectoCaja.length) {
+      return;
+    }
+    final d = _lineasDirectoCaja[index];
+    final p = pct.clamp(0.0, 100.0);
+    final bruto = d.precioUnitario * d.cantidad;
+    final montoDesc = bruto * (p / 100);
+    final sub = double.parse((bruto - montoDesc).toStringAsFixed(2));
+    setState(() {
+      _lineasDirectoCaja[index] = d.copyWith(
+        descuentoPorcentaje: p,
+        montoDescuento: double.parse(montoDesc.toStringAsFixed(2)),
+        subtotal: sub,
+        subtotalLinea: sub,
+      );
+      _sincronizarTicketDirectoDesdeLineas();
+    });
+  }
+
+  void _sincronizarTicketDirectoDesdeLineas() {
+    if (_ticketSeleccionado == null || !_ticketEsDirectoCaja) return;
+    final tot = _totalesDeDetallesCaja(_lineasDirectoCaja);
+    final actual = _ticketSeleccionado!;
+    _ticketSeleccionado = actual.copyWith(
+      detalles: List<DetalleVenta>.from(_lineasDirectoCaja),
+      montoSubtotal: tot.sub,
+      itbis: tot.itbis,
+      montoTotal: tot.total,
+    );
+  }
+
   List<Widget> _lineasPanelTicket() {
     final ticket = _ticketSeleccionado;
     if (ticket == null) return const <Widget>[];
@@ -4150,53 +4290,164 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ? _lineasDirectoCaja
         : ticket.detalles;
     final simple = _modoSimplificado;
+    final editable = _ticketEsDirectoCaja;
     return [
-      for (final d in lines)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '${d.cantidad}x ${d.nombreProducto ?? 'Item'}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
-                  ),
+      for (var i = 0; i < lines.length; i++)
+        Builder(builder: (context) {
+          final d = lines[i];
+          final base = d.subtotalLinea ?? d.subtotal;
+          final itbis = simple
+              ? 0.0
+              : base * tasaComoFraccion(d.tasaImpuesto);
+          final totalLin = base + itbis;
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        d.nombreProducto ?? 'Item',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                    if (editable)
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32, minHeight: 32),
+                        icon: const Icon(Icons.delete_outline,
+                            size: 18, color: Color(0xFFDC2626)),
+                        onPressed: () => _eliminarLineaCaja(i),
+                      ),
+                  ],
                 ),
-              ),
-              if (!simple)
+                const SizedBox(height: 4),
                 Text(
-                  formatRd(
-                    (d.subtotalLinea ?? d.subtotal) *
-                        tasaComoFraccion(d.tasaImpuesto),
-                  ),
+                  '${formatRd(d.precioUnitario)} c/u'
+                  '${d.descuentoPorcentaje > 0 ? ' · Desc. ${d.descuentoPorcentaje.toStringAsFixed(0)}%' : ''}',
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF64748B),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              const SizedBox(width: 8),
-              Text(
-                formatRd(
-                  (d.subtotalLinea ?? d.subtotal) +
-                      (simple
-                          ? 0.0
-                          : (d.subtotalLinea ?? d.subtotal) *
-                              tasaComoFraccion(d.tasaImpuesto)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    if (editable) ...[
+                      _qtyBtn(Icons.remove, () => _cambiarCantidadLineaCaja(i, -1)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          '${d.cantidad}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ),
+                      _qtyBtn(Icons.add, () => _cambiarCantidadLineaCaja(i, 1)),
+                      const SizedBox(width: 8),
+                      // Descuento %
+                      SizedBox(
+                        width: 72,
+                        child: TextFormField(
+                          key: ValueKey('desc-$i-${d.descuentoPorcentaje}'),
+                          initialValue: d.descuentoPorcentaje > 0
+                              ? d.descuentoPorcentaje.toStringAsFixed(0)
+                              : '',
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w700),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            labelText: 'Desc %',
+                            labelStyle: const TextStyle(fontSize: 10),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 8),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onFieldSubmitted: (v) {
+                            final pct = double.tryParse(
+                                    v.trim().replaceAll(',', '.')) ??
+                                0;
+                            _aplicarDescuentoLineaCaja(i, pct);
+                          },
+                          onChanged: (v) {
+                            // solo aplica al perder foco / submit
+                          },
+                        ),
+                      ),
+                      const Spacer(),
+                    ] else
+                      Expanded(
+                        child: Text(
+                          '${d.cantidad}x',
+                          style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (!simple)
+                          Text(
+                            'ITBIS ${formatRd(itbis)}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF64748B),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        Text(
+                          formatRd(totalLin),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A),
-                ),
-              ),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        }),
     ];
+  }
+
+  Widget _qtyBtn(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: const Color(0xFFE2E8F0),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: Icon(icon, size: 18, color: const Color(0xFF0F172A)),
+        ),
+      ),
+    );
   }
 
   Widget _posTotRow(String k, String v, {bool bold = false}) {

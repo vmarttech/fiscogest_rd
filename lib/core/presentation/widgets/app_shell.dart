@@ -68,7 +68,8 @@ class AppShell extends ConsumerWidget {
     final permiteAlmacenesLicencia = gatesLic.permiteAlmacenes;
 
     final currentPath = GoRouterState.of(context).uri.path;
-    final isDesktop = AppBreakpoints.isDesktop(context);
+    // Tablet horizontal y ≥900: mismo chrome que escritorio (evita desbordes del layout móvil).
+    final isDesktop = AppBreakpoints.useWideChrome(context);
 
     // ─────────────────────────────────────────────
     // ESCRITORIO → Menú fijo + Header

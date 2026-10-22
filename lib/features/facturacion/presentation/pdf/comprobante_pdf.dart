@@ -6,6 +6,8 @@ import 'package:pdf/pdf.dart';
 import 'package:fiscogest_rd/core/print/print_formats.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
@@ -113,6 +115,24 @@ class ComprobantePdf {
 
   /// [modo]: null = solo layout; true = compartir; false = imprimir.
   /// Si [mostrarOpciones] es true, el llamador debe pasar un callback UI.
+
+  /// Android/iOS: escribir a archivo y compartir (evita PDF en blanco).
+  static Future<void> _abrirPdfMovil(Uint8List bytes, String filename) async {
+    try {
+      final dir = await getTemporaryDirectory();
+      final safe = filename.replaceAll(RegExp(r'[^\w.\-]'), '_');
+      final file = File('${dir.path}/$safe');
+      await file.writeAsBytes(bytes, flush: true);
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'application/pdf', name: safe)],
+        subject: safe,
+      );
+    } catch (_) {
+      // Fallback
+      await Printing.sharePdf(bytes: bytes, filename: filename);
+    }
+  }
+
   static Future<void> imprimirFactura(
     Venta v, {
     ConfiguracionEntity? empresa,
@@ -146,12 +166,16 @@ class ComprobantePdf {
       ambienteDgii: ambienteDgii,
     );
     final bytes = await doc.save();
-    if (compartir) {
-      await Printing.sharePdf(bytes: bytes, filename: 'Factura_$ncf.pdf');
+    final name = (ncf.isEmpty ? 'Comprobante' : 'Factura_$ncf') + '.pdf';
+    final esMovil = Platform.isAndroid || Platform.isIOS;
+    if (esMovil) {
+      await _abrirPdfMovil(bytes, name);
+    } else if (compartir) {
+      await Printing.sharePdf(bytes: bytes, filename: name);
     } else {
       await Printing.layoutPdf(
         onLayout: (format) async => bytes,
-        name: 'Factura_$ncf.pdf',
+        name: name,
         format: _formatoTicketPara(v, empresa),
       );
     }
@@ -181,10 +205,18 @@ class ComprobantePdf {
   }
 
   static Future<void> compartirBytes(Uint8List bytes, String filename) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      await _abrirPdfMovil(bytes, filename);
+      return;
+    }
     await Printing.sharePdf(bytes: bytes, filename: filename);
   }
 
   static Future<void> imprimirBytes(Uint8List bytes, String filename) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      await _abrirPdfMovil(bytes, filename);
+      return;
+    }
     await Printing.layoutPdf(
       onLayout: (_) async => bytes,
       name: filename,
