@@ -537,8 +537,14 @@ class _KardexPageState extends ConsumerState<KardexPage> {
     final categoriasAsync = ref.watch(categoriaControllerProvider);
     final usuariosFuture = _cargarNombresUsuario();
 
+    final isMobile = AppBreakpoints.isMobile(context);
+
     return AppScaffold(
-      showAppBar: false,
+      // En móvil: barra superior igual que el resto de pantallas.
+      // En desktop: sin AppBar (título va en el contenido del mock).
+      showAppBar: isMobile,
+      title: isMobile ? 'Kárdex' : null,
+      showBackButton: isMobile,
       useAppPage: false,
       backgroundColor: _bgMain,
       body: movimientosAsync.when(
@@ -711,15 +717,6 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       ),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       children: [
-        const Text(
-          'Kárdex',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: _textPrimary,
-          ),
-        ),
-        const SizedBox(height: 4),
         Text(
           '$totalFiltrados movimientos',
           style: const TextStyle(
@@ -728,7 +725,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
