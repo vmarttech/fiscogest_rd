@@ -546,21 +546,35 @@ class _GastosPageState extends ConsumerState<GastosPage> {
 
     return AppScaffold(
       title: 'GASTOS',
-      subtitle: 'Egresos operativos del negocio',
+      subtitle: desktop ? 'Egresos operativos del negocio' : null,
       showAppBar: !desktop,
       actions: const [],
-
       floatingActionButton: mobile
           ? FloatingActionButton.extended(
               onPressed: () => _abrirForm(),
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF00796B),
               foregroundColor: Colors.white,
-              icon: const Icon(Icons.add),
-              label: const Text('Registrar'),
+              elevation: 4,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text(
+                'Registrar',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
             )
           : null,
-      body: ColoredBox(
-        color: const Color(0xFFF3F4F6),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFE0F2F1),
+              Color(0xFFF8FAFC),
+              Color(0xFFF1F5F9),
+            ],
+            stops: [0.0, 0.2, 1.0],
+          ),
+        ),
         child: SafeArea(
           child: async.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -571,6 +585,16 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                   filtrados.fold<double>(0, (s, g) => s + g.monto);
               final resumen = _resumenMes(lista);
               final top = _categoriaTop(filtrados, totalFiltrado);
+
+              if (mobile) {
+                return _buildMobileBody(
+                  lista: lista,
+                  filtrados: filtrados,
+                  totalFiltrado: totalFiltrado,
+                  resumen: resumen,
+                  top: top,
+                );
+              }
 
               return Align(
                 alignment: Alignment.topCenter,
@@ -1095,6 +1119,411 @@ class _GastosPageState extends ConsumerState<GastosPage> {
       ),
     );
   }
+
+  Widget _buildMobileBody({
+    required List<Gasto> lista,
+    required List<Gasto> filtrados,
+    required double totalFiltrado,
+    required ({double mesActual, double mesAnterior, double pct}) resumen,
+    required ({String nombre, double monto, double pct}) top,
+  }) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _mobileKpi(
+                label: 'Este mes',
+                value: formatRd(resumen.mesActual),
+                icon: Icons.calendar_month_rounded,
+                accent: const Color(0xFF2563EB),
+                bg: const Color(0xFFDBEAFE),
+                footer: resumen.mesAnterior == 0 && resumen.mesActual == 0
+                    ? null
+                    : '${resumen.pct >= 0 ? '+' : ''}${resumen.pct.toStringAsFixed(0)}% vs ant.',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _mobileKpi(
+                label: 'Movimientos',
+                value: '${filtrados.length}',
+                icon: Icons.swap_horiz_rounded,
+                accent: const Color(0xFF64748B),
+                bg: const Color(0xFFF1F5F9),
+                footer: 'de ${lista.length} totales',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _mobileKpi(
+          label: 'Categoría top',
+          value: top.nombre,
+          icon: _iconCat(top.nombre == '—' ? 'General' : top.nombre),
+          accent: _colorCat(top.nombre == '—' ? 'General' : top.nombre),
+          bg: _colorCat(top.nombre == '—' ? 'General' : top.nombre)
+              .withValues(alpha: 0.12),
+          footer: top.nombre == '—'
+              ? null
+              : '${formatRd(top.monto)} · ${top.pct.toStringAsFixed(0)}%',
+          wide: true,
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          onChanged: (v) => setState(() => _filtro = v.toLowerCase()),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          decoration: InputDecoration(
+            hintText: 'Buscar gasto…',
+            hintStyle: const TextStyle(
+              color: Color(0xFF94A3B8),
+              fontWeight: FontWeight.w500,
+            ),
+            prefixIcon: const Icon(Icons.search_rounded,
+                color: Color(0xFF94A3B8), size: 20),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  const BorderSide(color: Color(0xFF00796B), width: 1.4),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _FilterChipBtn(
+                label: 'Este mes',
+                selected: _periodo == _PeriodoFiltro.esteMes,
+                onTap: () =>
+                    setState(() => _periodo = _PeriodoFiltro.esteMes),
+              ),
+              const SizedBox(width: 6),
+              _FilterChipBtn(
+                label: '7 días',
+                selected: _periodo == _PeriodoFiltro.ultimos7,
+                onTap: () =>
+                    setState(() => _periodo = _PeriodoFiltro.ultimos7),
+              ),
+              const SizedBox(width: 6),
+              _FilterChipBtn(
+                label: 'Todos',
+                selected: _periodo == _PeriodoFiltro.todos,
+                onTap: () => setState(() => _periodo = _PeriodoFiltro.todos),
+              ),
+              const SizedBox(width: 6),
+              PopupMenuButton<String?>(
+                onSelected: (v) => setState(() => _categoriaFiltro = v),
+                itemBuilder: (_) => [
+                  const PopupMenuItem(
+                    value: null,
+                    child: Text('Todas las categorías'),
+                  ),
+                  for (final c in _cats)
+                    PopupMenuItem(value: c, child: Text(c)),
+                ],
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _categoriaFiltro != null
+                        ? const Color(0xFF0F172A)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _categoriaFiltro != null
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFE2E8F0),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _categoriaFiltro ?? 'Categoría',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: _categoriaFiltro != null
+                              ? Colors.white
+                              : const Color(0xFF475569),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 16,
+                        color: _categoriaFiltro != null
+                            ? Colors.white
+                            : const Color(0xFF64748B),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            const Text(
+              'Movimientos',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const Spacer(),
+            Text(
+              formatRd(totalFiltrado),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF00796B),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (filtrados.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: const Column(
+              children: [
+                Icon(Icons.money_off_csred_outlined,
+                    size: 36, color: Color(0xFFCBD5E1)),
+                SizedBox(height: 8),
+                Text(
+                  'Sin gastos con estos filtros',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          for (final g in filtrados) ...[
+            _mobileGastoCard(g),
+            const SizedBox(height: 8),
+          ],
+      ],
+    );
+  }
+
+  Widget _mobileKpi({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color accent,
+    required Color bg,
+    String? footer,
+    bool wide = false,
+  }) {
+    return Container(
+      width: wide ? double.infinity : null,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: accent),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: accent.withValues(alpha: 0.9),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+                if (footer != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    footer,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF94A3B8),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _mobileGastoCard(Gasto g) {
+    final catColor = _colorCat(g.categoria);
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: () => _abrirForm(edit: g),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: catColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(_iconCat(g.categoria), color: catColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      g.descripcion,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13.5,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: catColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            g.categoria,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: catColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _fmt.format(g.fecha),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      g.formaPago,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    formatRd(g.monto),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13.5,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Eliminar',
+                    onPressed: () => _eliminar(g),
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    color: const Color(0xFFEF4444),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 }
 
 const _th = TextStyle(
@@ -1130,14 +1559,23 @@ class _KpiCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-        boxShadow: [
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.white, Color(0xFFF0FDFA)],
+        ),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Color(0x1A0F172A),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Color(0x0D00796B),
+            blurRadius: 20,
+            offset: Offset(0, 8),
           ),
         ],
       ),

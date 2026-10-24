@@ -66,6 +66,10 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   bool _docNcf = true;
   bool _docCliente = true;
   bool _docItbisDesglose = true;
+  final _transfTituloCtrl = TextEditingController();
+  final _transfSubtituloCtrl = TextEditingController();
+  final _transfTransportistaCtrl = TextEditingController();
+  final _transfObsCtrl = TextEditingController();
   final _pieController = TextEditingController(
     text: 'Gracias por su preferencia',
   );
@@ -77,6 +81,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   bool _cajaPermitirCheque = false;
   bool _cajaExigirSesion = false;
   bool _modoSimplificado = true;
+  bool _transfImprimirManifiesto = true;
+  bool _transfMostrarFirmas = true;
 
   @override
   void dispose() {
@@ -89,6 +95,10 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     _pieController.dispose();
     _prefijoContadoController.dispose();
     _prefijoCreditoController.dispose();
+    _transfTituloCtrl.dispose();
+    _transfSubtituloCtrl.dispose();
+    _transfTransportistaCtrl.dispose();
+    _transfObsCtrl.dispose();
     super.dispose();
   }
 
@@ -119,6 +129,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     _cajaPermitirCheque = cfg.cajaPermitirCheque;
     _cajaExigirSesion = cfg.cajaExigirSesion;
     _modoSimplificado = cfg.modoSimplificado;
+    _transfImprimirManifiesto = cfg.transfImprimirManifiesto;
+    _transfMostrarFirmas = cfg.transfMostrarFirmas;
+    _transfTituloCtrl.text = cfg.transfTituloManifiesto;
+    _transfSubtituloCtrl.text = cfg.transfSubtituloManifiesto;
+    _transfTransportistaCtrl.text = cfg.transfTransportistaDefault;
+    _transfObsCtrl.text = cfg.transfObservacionesDefault;
     _datosCargados = true;
   }
 
@@ -220,6 +236,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       cajaPermitirCheque: _cajaPermitirCheque,
       cajaExigirSesion: _cajaExigirSesion,
       modoSimplificado: _modoSimplificado,
+      transfImprimirManifiesto: _transfImprimirManifiesto,
+      transfTituloManifiesto: _transfTituloCtrl.text.trim(),
+      transfSubtituloManifiesto: _transfSubtituloCtrl.text.trim(),
+      transfTransportistaDefault: _transfTransportistaCtrl.text.trim(),
+      transfObservacionesDefault: _transfObsCtrl.text.trim(),
+      transfMostrarFirmas: _transfMostrarFirmas,
     );
     try {
       await ref.read(configuracionControllerProvider.notifier).guardar(entity);
@@ -954,6 +976,95 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             return Column(children: [form, AppLayout.vL, preview]);
           },
         ),
+        const SizedBox(height: 20),
+        const Divider(),
+        const SizedBox(height: 12),
+        const Text(
+          'Manifiesto de transferencia (packing list)',
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Edita el contenido del PDF que se genera al transferir entre almacenes.',
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 8),
+        SwitchListTile.adaptive(
+          contentPadding: EdgeInsets.zero,
+          title: const Text(
+            'Imprimir manifiesto al transferir',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+          ),
+          subtitle: const Text(
+            'Si está activo, al completar una transferencia se abre el PDF.',
+            style: TextStyle(fontSize: 12),
+          ),
+          value: _transfImprimirManifiesto,
+          activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+          onChanged: (v) => setState(() => _transfImprimirManifiesto = v),
+        ),
+        if (_transfImprimirManifiesto) ...[
+          const SizedBox(height: 8),
+          TextField(
+            controller: _transfTituloCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Título del documento',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _transfSubtituloCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Subtítulo',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _transfTransportistaCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Transportista / Operador (por defecto)',
+              hintText: 'Ej. TransLogística S.A.',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _transfObsCtrl,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              labelText: 'Observaciones / instrucciones de carga',
+              border: OutlineInputBorder(),
+              alignLabelWithHint: true,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(
+              'Mostrar bloque de firmas',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+            subtitle: const Text(
+              'Despachado / Transportista / Recibido',
+              style: TextStyle(fontSize: 11),
+            ),
+            value: _transfMostrarFirmas,
+            activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+            onChanged: (v) => setState(() => _transfMostrarFirmas = v),
+          ),
+          Text(
+            'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.',
+            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+          ),
+        ],
       ],
     );
   }

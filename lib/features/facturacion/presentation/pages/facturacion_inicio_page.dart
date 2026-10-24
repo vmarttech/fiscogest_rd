@@ -88,8 +88,81 @@ class FacturacionInicioPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 18),
                   ] else ...[
-                    _BannerFacturacion(mobile: mobile, simple: simple),
-                    const SizedBox(height: 18),
+                    // Sin hero: CTAs bajo la barra de título
+                    if (!simple) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () =>
+                              context.push('/sales/emitir-factura'),
+                          icon: const Icon(Icons.receipt_long_rounded, size: 20),
+                          label: const Text(
+                            'Emitir factura',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF0D9488),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => context.push('/sales/emitir-nc'),
+                          icon: const Icon(Icons.note_alt_outlined, size: 20),
+                          label: const Text(
+                            'Emitir nota de crédito',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF4F46E5),
+                            side: const BorderSide(color: Color(0xFFC7D2FE)),
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () => context.push('/sales/historial'),
+                          icon: const Icon(Icons.history_rounded, size: 20),
+                          label: const Text(
+                            'Ver historial',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF0D9488),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
                   ],
 
                   // KPIs (en modo simple se ocultan los fiscales de NC/NCF alert)
@@ -298,52 +371,29 @@ class FacturacionInicioPage extends ConsumerWidget {
                       ],
                     )
                   else ...[
-                    if (!simple) ...[
-                      _OpCard(
-                        icon: Icons.receipt_long_outlined,
-                        title: 'Emitir factura',
-                        subtitle:
-                            'Crea una factura con NCF de consumo o crédito fiscal',
-                        color: AppColors.primary,
-                        onTap: () => context.push('/sales/emitir-factura'),
-                      ),
-                      const SizedBox(height: 10),
-                      _OpCard(
-                        icon: Icons.note_alt_outlined,
-                        title: 'Emitir NC',
-                        subtitle: 'Emite una nota de crédito sobre una factura',
-                        color: const Color(0xFF6366F1),
-                        onTap: () => context.push('/sales/emitir-nc'),
-                      ),
-                      const SizedBox(height: 4),
-                      TextButton(
-                        onPressed: () => context.push('/sales/historial'),
-                        child: Text(
-                          'Historial →',
-                          style: AppTypography.labelMedium.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w600,
+                    // Accesos secundarios (CTAs principales ya están arriba)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _quickLink(
+                            icon: Icons.history_rounded,
+                            label: 'Historial',
+                            onTap: () => context.push('/sales/historial'),
                           ),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () => context.push('/sales/secuencias-ncf'),
-                        child: Text(
-                          'Secuencias NCF →',
-                          style: AppTypography.labelMedium.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w600,
+                        if (!simple) ...[
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _quickLink(
+                              icon: Icons.qr_code_2_rounded,
+                              label: 'Secuencias',
+                              onTap: () =>
+                                  context.push('/sales/secuencias-ncf'),
+                            ),
                           ),
-                        ),
-                      ),
-                    ] else
-                      _OpCard(
-                        icon: Icons.history_outlined,
-                        title: 'Historial',
-                        subtitle: 'Consulta facturas y NC emitidas',
-                        color: AppColors.primary,
-                        onTap: () => context.push('/sales/historial'),
-                      ),
+                        ],
+                      ],
+                    ),
                   ],
 
                   if (desktop)
@@ -457,80 +507,43 @@ class FacturacionInicioPage extends ConsumerWidget {
   }
 }
 
-class _BannerFacturacion extends StatelessWidget {
-  const _BannerFacturacion({required this.mobile, required this.simple});
-  final bool mobile;
-  final bool simple;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: mobile ? 18 : 24,
-        vertical: mobile ? 16 : 20,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
+Widget _quickLink({
+  required IconData icon,
+  required String label,
+  required VoidCallback onTap,
+}) {
+  return Material(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(14),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.22),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF0D9488)),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: mobile ? 44 : 52,
-            height: mobile ? 44 : 52,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              Icons.receipt_long_rounded,
-              color: AppColors.primary,
-              size: mobile ? 24 : 28,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  simple ? 'Ventas / Comprobantes' : 'Facturación y NC',
-                  style: (mobile ? AppTypography.h4 : AppTypography.h3)
-                      .copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  simple
-                      ? 'Consulta comprobantes e historial de emisión.'
-                      : 'Emisión de facturas, notas de crédito, NCF e historial de comprobantes.',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+    ),
+  );
 }
-
 class _KpiPill extends StatelessWidget {
   const _KpiPill({
     required this.icon,

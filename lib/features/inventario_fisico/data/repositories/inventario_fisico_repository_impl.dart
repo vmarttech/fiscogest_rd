@@ -217,10 +217,10 @@ class InventarioFisicoRepositoryImpl
                   tipoAjuste: tipo,
                   cantidad: d.diferencia.abs(),
                   motivo: 'Conteo físico #$conteoId',
-                  observaciones: const Value(
-                    '\${d.nombreProducto}: '
-                    '\${d.stockSistema.toStringAsFixed(2)} → '
-                    '\${d.stockFisico.toStringAsFixed(2)}',
+                                    observaciones: Value(
+                    '${d.nombreProducto}: '
+                    '${d.stockSistema.toStringAsFixed(2)} → '
+                    '${d.stockFisico.toStringAsFixed(2)}',
                   ),
                   usuarioId: usuarioId,
                   fechaCreacion: ahora,

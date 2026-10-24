@@ -104,6 +104,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   String _filtroProductos = '';
   String _filtroKardex = '';
   String _filtroEstado = 'todos'; // todos|en_stock|bajo|agotado|inactivo
+  bool _filtroRutaAplicado = false;
   String _ordenProductos = 'nombre_asc';
   bool _soloActivos = true;
   /// Solo desktop: producto seleccionado en el listado.
@@ -170,6 +171,15 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_filtroRutaAplicado) {
+      _filtroRutaAplicado = true;
+      final q = GoRouterState.of(context).uri.queryParameters['filtro'];
+      if (q != null &&
+          const {'bajo', 'agotado', 'en_stock', 'inactivo', 'todos'}.contains(q)) {
+        _filtroEstado = q;
+      }
+    }
+
     final isMobile = AppBreakpoints.isMobile(context);
     return AppScaffold(
       // PC: sin barra de título (el layout de 3 columnas la sustituye).

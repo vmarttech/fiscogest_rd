@@ -138,33 +138,41 @@ class AppShell extends ConsumerWidget {
     // ─────────────────────────────────────────────
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
-      drawer: SizedBox(
-        width: 280,
-        child: _buildMenu(
-          width: 280,
-          currentPath: currentPath,
-          context: context,
-          nombreEmpresa: nombreEmpresa,
-          logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true) ? cfg!.logoUrl.trim() : '',
-          modoSimplificado: modoSimplificado,
-          esAdmin: esAdmin,
-          esVendedor: esVendedor,
-          esCajero: esCajero,
-          operadorLabel: operadorLabel,
-          rolUsuario: sesion?.rol ?? '',
-          usernameSesion: sesion?.username ?? '',
-          onLogout: () {
-            ref.read(sesionProvider.notifier).state = null;
-            SesionNube.clear();
-            context.go('/login');
-          },
-          permiteFiscalLicencia: permiteFiscalLicencia,
-          permiteFiaoLicencia: permiteFiaoLicencia,
-          permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
-          permiteAlmacenesLicencia: permiteAlmacenesLicencia,
-          pedidosPendientes: pedidosPendientes,
-          isPermanent: false,
-        ),
+      drawer: Builder(
+        builder: (drawerCtx) {
+          final screenW = MediaQuery.sizeOf(drawerCtx).width;
+          final drawerW = (screenW * 0.85).clamp(220.0, 280.0);
+          return SizedBox(
+            width: drawerW,
+            child: _buildMenu(
+              width: drawerW,
+              currentPath: currentPath,
+              context: context,
+              nombreEmpresa: nombreEmpresa,
+              logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true)
+                  ? cfg!.logoUrl.trim()
+                  : '',
+              modoSimplificado: modoSimplificado,
+              esAdmin: esAdmin,
+              esVendedor: esVendedor,
+              esCajero: esCajero,
+              operadorLabel: operadorLabel,
+              rolUsuario: sesion?.rol ?? '',
+              usernameSesion: sesion?.username ?? '',
+              onLogout: () {
+                ref.read(sesionProvider.notifier).state = null;
+                SesionNube.clear();
+                context.go('/login');
+              },
+              permiteFiscalLicencia: permiteFiscalLicencia,
+              permiteFiaoLicencia: permiteFiaoLicencia,
+              permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
+              permiteAlmacenesLicencia: permiteAlmacenesLicencia,
+              pedidosPendientes: pedidosPendientes,
+              isPermanent: false,
+            ),
+          );
+        },
       ),
       body: Builder(
         builder: (scaffoldContext) {
@@ -381,10 +389,31 @@ class AppShell extends ConsumerWidget {
 
     bool puede(String permiso) => rolTienePermiso(rolUsuario, permiso);
 
+    // Móvil: degradado teal profundo (barra app → oscuro).
+    // Desktop (isPermanent): fondo sidebar actual.
+    final menuBg = isPermanent
+        ? null
+        : const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF00796B), // verde AppBar
+                Color(0xFF00695C),
+                Color(0xFF004D40),
+                Color(0xFF003D36),
+                Color(0xFF0A1F1C), // pie profundo
+              ],
+              stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+            ),
+          );
     return Material(
-      color: AppColors.sidebarBackground,
-      child: SizedBox(
+      color: isPermanent
+          ? AppColors.sidebarBackground
+          : Colors.transparent,
+      child: Container(
         width: width,
+        decoration: menuBg,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -430,7 +459,12 @@ class AppShell extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Divider(color: AppColors.divider, height: 1),
+              Divider(
+                color: isPermanent
+                    ? AppColors.divider
+                    : Colors.white.withValues(alpha: 0.18),
+                height: 1,
+              ),
 
               // ─── ÍTEMS DEL MENÚ ───
               Expanded(
@@ -468,7 +502,7 @@ class AppShell extends ConsumerWidget {
                     if (puede(Permiso.ventasCotizar))
                       _buildNavItem(context, '/ventas/cotizaciones/nueva', 'Ventas',
                           Icons.point_of_sale, currentPath, isPermanent),
-                    if (puede(Permiso.cajaCobrar))
+                    if (puede(Permiso.cajaCobrar) && !AppBreakpoints.isMobile(context))
                       if (!modoSimplificado)
                         _buildNavItem(context, '/ventas/cobro', 'Caja',
                           Icons.payments_outlined, currentPath, isPermanent),
@@ -576,7 +610,12 @@ class AppShell extends ConsumerWidget {
                           Icons.settings_outlined, currentPath, isPermanent),
 
                     const SizedBox(height: 8),
-                    const Divider(color: AppColors.divider, height: 24),
+                    Divider(
+                      color: isPermanent
+                          ? AppColors.divider
+                          : Colors.white.withValues(alpha: 0.15),
+                      height: 24,
+                    ),
                     ListTile(
                       dense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
@@ -600,44 +639,7 @@ class AppShell extends ConsumerWidget {
                 ),
               ),
 
-              // ─── PIE (mock) ───
-              const Divider(color: Color(0xFF1A2F52), height: 1),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Tu negocio en',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF9DB5DA),
-                        height: 1.3,
-                      ),
-                    ),
-                    const Text(
-                      'buenas manos',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Tu negocio en buenas manos',
-                    ),
-                    Text(
-                      'FiscoGest v3.0 Pro Enterprise',
-                      style: AppTypography.labelSmall.copyWith(
-                        color: const Color(0xFF6B82A8),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+
             ],
           ),
         ),

@@ -53,4 +53,23 @@ class ConfiguracionTable extends Table {
 
   BoolColumn get modoSimplificado =>
       boolean().withDefault(const Constant(true))();
+  /// Generar manifiesto / packing list al completar una transferencia.
+  BoolColumn get transfImprimirManifiesto =>
+      boolean().withDefault(const Constant(true))();
+  TextColumn get transfTituloManifiesto => text().withDefault(
+        const Constant('MANIFIESTO DE TRANSFERENCIA INTER-ALMACÉN'),
+      )();
+  TextColumn get transfSubtituloManifiesto => text().withDefault(
+        const Constant('PACKING LIST / BATCH LIST (LISTA DE LOTES)'),
+      )();
+  TextColumn get transfTransportistaDefault =>
+      text().withDefault(const Constant(''))();
+  TextColumn get transfObservacionesDefault => text().withDefault(
+        const Constant(
+          'Verificar cantidades y estado del producto al momento de la recepción en el Almacén Destino. Reportar cualquier discrepancia de inmediato.',
+        ),
+      )();
+  BoolColumn get transfMostrarFirmas =>
+      boolean().withDefault(const Constant(true))();
 }
+

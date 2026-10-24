@@ -73,7 +73,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
   }
 
   // ═══════════════════════════════════════════
-  // MÓVIL
+  // MÓVIL — diseño premium
   // ═══════════════════════════════════════════
   Widget _buildMobile(
     AsyncValue<DashboardComprasKpis> kpisAsync,
@@ -81,91 +81,427 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
     int alertas,
   ) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
       children: [
-        _cardCentroCompras(),
-        const SizedBox(height: 12),
-        kpisAsync.when(
-          data: (k) => Column(
-            children: [
-              _metricBar('Este mes', formatRd(k.comprasEsteMes),
-                  const Color(0xFF0D9488)),
-              const SizedBox(height: 8),
-              _metricBar('A crédito', formatRd(k.aCreditoEsteMes),
-                  const Color(0xFF2563EB)),
-              const SizedBox(height: 8),
-              _metricBar(
-                  'Por pagar', formatRd(k.porPagar), const Color(0xFFF59E0B)),
-              const SizedBox(height: 8),
-              _metricBar(
-                  'Vencido', formatRd(k.vencido), const Color(0xFFEF4444)),
-            ],
+        // CTA principal bajo el AppBar
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF0D9488),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            onPressed: () => context.push('/compras/registrar'),
+            icon: const Icon(Icons.add_rounded, size: 20),
+            label: const Text(
+              'Registrar compra',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            ),
           ),
-          loading: () => const Center(
-              child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: CircularProgressIndicator())),
-          error: (e, _) => Text('$e'),
         ),
         const SizedBox(height: 16),
-        _OpCard(
-          icon: Icons.add_shopping_cart_rounded,
-          title: 'Registrar compra',
-          subtitle: 'Nueva orden de compra o gasto menor',
-          color: const Color(0xFF3B82F6),
-          onTap: () => context.push('/compras/registrar'),
+
+        // ── KPIs 2×2 ──
+        kpisAsync.when(
+          data: (k) => GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.45,
+            children: [
+              _kpiTile(
+                'Este mes',
+                formatRd(k.comprasEsteMes),
+                Icons.calendar_month_rounded,
+                const Color(0xFF0D9488),
+                const Color(0xFFCCFBF1),
+              ),
+              _kpiTile(
+                'A crédito',
+                formatRd(k.aCreditoEsteMes),
+                Icons.credit_card_rounded,
+                const Color(0xFF2563EB),
+                const Color(0xFFDBEAFE),
+              ),
+              _kpiTile(
+                'Por pagar',
+                formatRd(k.porPagar),
+                Icons.pending_actions_rounded,
+                const Color(0xFFD97706),
+                const Color(0xFFFEF3C7),
+              ),
+              _kpiTile(
+                'Vencido',
+                formatRd(k.vencido),
+                Icons.warning_amber_rounded,
+                const Color(0xFFDC2626),
+                const Color(0xFFFEE2E2),
+              ),
+            ],
+          ),
+          loading: () => const Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+          error: (e, _) => Text('$e'),
         ),
-        const SizedBox(height: 8),
-        _OpCard(
-          icon: Icons.list_alt_rounded,
-          title: 'Lista de compras',
-          subtitle: 'Historial, facturas y seguimiento',
-          color: const Color(0xFF64748B),
-          onTap: () => context.push('/compras/lista'),
-        ),
-        TextButton(
-          onPressed: () => context.goNamed(ListaCuentasPagarPage.routeName),
-          child: Text(
-            alertas > 0
-                ? 'Cuentas por pagar · $alertas →'
-                : 'Cuentas por pagar →',
+        const SizedBox(height: 18),
+
+        // ── Accesos ──
+        const Text(
+          'Operaciones',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
           ),
         ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _quickAction(
+                icon: Icons.receipt_long_rounded,
+                label: 'Lista',
+                sub: 'Historial',
+                color: const Color(0xFF334155),
+                bg: const Color(0xFFF1F5F9),
+                onTap: () => context.push('/compras/lista'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _quickAction(
+                icon: Icons.account_balance_wallet_rounded,
+                label: 'Por pagar',
+                sub: alertas > 0 ? '$alertas alerta${alertas > 1 ? 's' : ''}' : 'Cuentas',
+                color: alertas > 0
+                    ? const Color(0xFFDC2626)
+                    : const Color(0xFF0D9488),
+                bg: alertas > 0
+                    ? const Color(0xFFFEF2F2)
+                    : const Color(0xFFCCFBF1),
+                onTap: () => context.goNamed(ListaCuentasPagarPage.routeName),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+
+        // ── Actividad ──
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Actividad reciente',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => context.push('/compras/lista'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF0D9488),
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(0, 32),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                'Ver todo',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
-        Text('Actividad reciente',
-            style: AppTypography.labelLarge
-                .copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: 8),
+        // Filtros chips compactos
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final e in [
+                ('Todos', 'todos'),
+                ('Pagadas', 'pagada'),
+                ('Crédito', 'credito'),
+                ('Pendientes', 'pendiente'),
+                ('Vencidas', 'vencida'),
+              ]) ...[
+                _chipFiltro(e.$1, e.$2),
+                const SizedBox(width: 6),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
         actividadAsync.when(
           data: (items) {
             final filtrados = _filtrar(items);
             if (filtrados.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(24),
-                child: Text('Sin compras', textAlign: TextAlign.center),
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 36),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Column(
+                  children: [
+                    Icon(Icons.inbox_outlined,
+                        size: 36, color: Color(0xFFCBD5E1)),
+                    SizedBox(height: 8),
+                    Text(
+                      'Sin compras en este filtro',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
             return Column(
               children: [
-                for (final item in filtrados)
-                  ListTile(
-                    title: Text(item.proveedorNombre,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 13)),
-                    subtitle: Text(
-                        '${_fecha(item.fecha)} · ${_estadoLabel(item.estado)}'),
-                    trailing: Text(formatRd(item.total),
-                        style: const TextStyle(fontWeight: FontWeight.w800)),
-                    onTap: () => context
-                        .push('/compras/detalle/${item.compraId}'),
-                  ),
+                for (final item in filtrados.take(12)) ...[
+                  _actividadCard(item),
+                  const SizedBox(height: 8),
+                ],
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
           error: (e, _) => Text('$e'),
         ),
       ],
+    );
+  }
+
+  Widget _kpiTile(
+    String label,
+    String value,
+    IconData icon,
+    Color accent,
+    Color bg,
+  ) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(icon, size: 16, color: accent),
+          ),
+          const Spacer(),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: accent.withValues(alpha: 0.85),
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _quickAction({
+    required IconData icon,
+    required String label,
+    required String sub,
+    required Color color,
+    required Color bg,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    Text(
+                      sub,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: color.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _actividadCard(ActividadRecienteItem item) {
+    final badge = _estadoBadge(item.estado);
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: () => context.push('/compras/detalle/${item.compraId}'),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDFA),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: const Icon(
+                  Icons.storefront_rounded,
+                  color: Color(0xFF0D9488),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.proveedorNombre,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13.5,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Text(
+                          _fecha(item.fecha),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF94A3B8),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: badge.$2,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            badge.$1,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: badge.$3,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                formatRd(item.total),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -1214,66 +1550,4 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
             const Color(0xFF64748B)
           ),
       };
-}
-
-class _OpCard extends StatelessWidget {
-  const _OpCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w800, fontSize: 14)),
-                    Text(subtitle,
-                        style: const TextStyle(
-                            fontSize: 11, color: Color(0xFF94A3B8))),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: Color(0xFF94A3B8)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

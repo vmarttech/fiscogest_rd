@@ -129,7 +129,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 67;
+  int get schemaVersion => 69;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -138,6 +138,42 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 69) {
+        try {
+          await m.database.customStatement(
+            "ALTER TABLE configuracion_table ADD COLUMN transf_titulo_manifiesto TEXT NOT NULL DEFAULT 'MANIFIESTO DE TRANSFERENCIA INTER-ALMACÉN'",
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            "ALTER TABLE configuracion_table ADD COLUMN transf_subtitulo_manifiesto TEXT NOT NULL DEFAULT 'PACKING LIST / BATCH LIST (LISTA DE LOTES)'",
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            "ALTER TABLE configuracion_table ADD COLUMN transf_transportista_default TEXT NOT NULL DEFAULT ''",
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            "ALTER TABLE configuracion_table ADD COLUMN transf_observaciones_default TEXT NOT NULL DEFAULT 'Verificar cantidades y estado del producto al momento de la recepción en el Almacén Destino. Reportar cualquier discrepancia de inmediato.'",
+          );
+        } catch (_) {}
+        try {
+          await m.database.customStatement(
+            'ALTER TABLE configuracion_table ADD COLUMN transf_mostrar_firmas INTEGER NOT NULL DEFAULT 1',
+          );
+        } catch (_) {}
+      }
+
+      if (from < 68) {
+        try {
+          await m.database.customStatement(
+            'ALTER TABLE configuracion_table ADD COLUMN transf_imprimir_manifiesto INTEGER NOT NULL DEFAULT 1',
+          );
+        } catch (_) {}
+      }
+
 
       if (from < 67) {
         try {

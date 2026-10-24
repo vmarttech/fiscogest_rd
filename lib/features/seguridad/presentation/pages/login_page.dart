@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/sync/supabase/emitir_token.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -271,7 +272,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       } else {
         final sesion = ref.read(sesionProvider);
         if (sesion != null && normalizarRol(sesion.rol) == 'Cajero') {
-          context.go('/ventas/cobro');
+          context.go(
+            AppBreakpoints.isMobile(context)
+                ? '/ventas/cotizaciones/nueva'
+                : '/ventas/cobro',
+          );
         } else {
           context.go(sesion?.rutaInicio ?? '/');
         }
@@ -335,7 +340,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       } else {
         final sesion = ref.read(sesionProvider);
         if (sesion != null && normalizarRol(sesion.rol) == 'Cajero') {
-          context.go('/ventas/cobro');
+          context.go(
+            AppBreakpoints.isMobile(context)
+                ? '/ventas/cotizaciones/nueva'
+                : '/ventas/cobro',
+          );
         } else {
           context.go(sesion?.rutaInicio ?? '/');
         }

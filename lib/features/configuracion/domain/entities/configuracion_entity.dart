@@ -31,6 +31,15 @@ class ConfiguracionEntity {
     this.cajaPermitirCheque = false,
     this.cajaExigirSesion = false,
     this.modoSimplificado = true,
+    this.transfImprimirManifiesto = true,
+    this.transfTituloManifiesto =
+        'MANIFIESTO DE TRANSFERENCIA INTER-ALMACÉN',
+    this.transfSubtituloManifiesto =
+        'PACKING LIST / BATCH LIST (LISTA DE LOTES)',
+    this.transfTransportistaDefault = '',
+    this.transfObservacionesDefault =
+        'Verificar cantidades y estado del producto al momento de la recepción en el Almacén Destino. Reportar cualquier discrepancia de inmediato.',
+    this.transfMostrarFirmas = true,
   });
 
   final String id;
@@ -65,6 +74,12 @@ class ConfiguracionEntity {
   final bool cajaPermitirCheque;
   final bool cajaExigirSesion;
   final bool modoSimplificado;
+  final bool transfImprimirManifiesto;
+  final String transfTituloManifiesto;
+  final String transfSubtituloManifiesto;
+  final String transfTransportistaDefault;
+  final String transfObservacionesDefault;
+  final bool transfMostrarFirmas;
 
   ConfiguracionEntity copyWith({
     String? id,
@@ -98,6 +113,12 @@ class ConfiguracionEntity {
     bool? cajaPermitirCheque,
     bool? cajaExigirSesion,
     bool? modoSimplificado,
+    bool? transfImprimirManifiesto,
+    String? transfTituloManifiesto,
+    String? transfSubtituloManifiesto,
+    String? transfTransportistaDefault,
+    String? transfObservacionesDefault,
+    bool? transfMostrarFirmas,
   }) {
     return ConfiguracionEntity(
       id: id ?? this.id,
@@ -133,6 +154,17 @@ class ConfiguracionEntity {
       cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
       cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
       modoSimplificado: modoSimplificado ?? this.modoSimplificado,
+      transfImprimirManifiesto:
+          transfImprimirManifiesto ?? this.transfImprimirManifiesto,
+      transfTituloManifiesto:
+          transfTituloManifiesto ?? this.transfTituloManifiesto,
+      transfSubtituloManifiesto:
+          transfSubtituloManifiesto ?? this.transfSubtituloManifiesto,
+      transfTransportistaDefault:
+          transfTransportistaDefault ?? this.transfTransportistaDefault,
+      transfObservacionesDefault:
+          transfObservacionesDefault ?? this.transfObservacionesDefault,
+      transfMostrarFirmas: transfMostrarFirmas ?? this.transfMostrarFirmas,
     );
   }
 }

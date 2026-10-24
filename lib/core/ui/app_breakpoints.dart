@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 /// Anchos de referencia FiscoGest.
 ///
-/// - **Móvil** (&lt; 768): UI en columna, menú drawer.
-/// - **Tablet** (768–1023): en vertical ≈ móvil ampliado; en **horizontal**
-///   usa chrome ancho (sidebar) como escritorio.
-/// - **Escritorio** (≥ 1024): sidebar fijo + layouts multi-columna.
+/// - **Teléfono**: [shortestSide] < 600 (portrait y landscape).
+/// - **Tablet** (lado corto ≥ 600, ancho &lt; 1024).
+/// - **Escritorio** (ancho ≥ 1024 / chrome ancho).
+///
+/// Un celular en horizontal no debe activar sidebar ni layout PC.
 abstract class AppBreakpoints {
   static const double mobile = 360;
   static const double mobileLarge = 480;
@@ -14,8 +15,11 @@ abstract class AppBreakpoints {
   static const double desktop = 1024;
   static const double desktopLarge = 1440;
 
-  /// Sidebar fijo y cabeceras de escritorio (tablet landscape típica ≥ 900).
+  /// Sidebar fijo y cabeceras de escritorio.
   static const double wideChrome = 900;
+
+  /// Lado corto típico de teléfono (Material).
+  static const double phoneShortest = 600;
 
   static Size sizeOf(BuildContext context) => MediaQuery.sizeOf(context);
 
@@ -25,29 +29,34 @@ abstract class AppBreakpoints {
   static bool isPortrait(BuildContext context) =>
       MediaQuery.orientationOf(context) == Orientation.portrait;
 
-  /// Ancho &lt; 768 (teléfono / ventana estrecha).
+  /// Teléfono real: vertical u horizontal (no usar solo width).
   static bool isMobile(BuildContext context) =>
-      sizeOf(context).width < tablet;
+      sizeOf(context).shortestSide < phoneShortest;
 
-  /// 768 ≤ ancho &lt; 1024.
+  /// Tablet por ancho (ventana intermedia), excluyendo teléfonos.
   static bool isTablet(BuildContext context) {
-    final w = sizeOf(context).width;
-    return w >= tablet && w < desktop;
+    final s = sizeOf(context);
+    if (s.shortestSide < phoneShortest) return false;
+    return s.width >= tablet && s.width < desktop;
   }
 
-  /// Ancho ≥ 1024.
-  static bool isDesktop(BuildContext context) =>
-      sizeOf(context).width >= desktop;
+  /// Escritorio / ventana ancha.
+  static bool isDesktop(BuildContext context) {
+    final s = sizeOf(context);
+    if (s.shortestSide < phoneShortest) return false;
+    return s.width >= desktop;
+  }
 
-  /// Una columna / drawer: solo móvil real (no tablet horizontal).
+  /// Una columna / drawer: teléfonos.
   static bool isCompact(BuildContext context) => isMobile(context);
 
   /// Sidebar permanente + header tipo escritorio.
-  /// Incluye tablet en horizontal aunque el ancho sea 768–899.
+  /// Nunca en teléfono (aunque esté en landscape con ancho > 900).
   static bool useWideChrome(BuildContext context) {
-    final w = sizeOf(context).width;
-    if (w >= wideChrome) return true;
-    if (w >= tablet && isLandscape(context)) return true;
+    final s = sizeOf(context);
+    if (s.shortestSide < phoneShortest) return false;
+    if (s.width >= wideChrome) return true;
+    if (s.width >= tablet && isLandscape(context)) return true;
     return false;
   }
 
@@ -57,7 +66,7 @@ abstract class AppBreakpoints {
   /// Padding horizontal exterior del contenido.
   static double contentHorizontalPadding(BuildContext context) {
     final w = sizeOf(context).width;
-    if (w < tablet) return 12;
+    if (isMobile(context)) return 12;
     if (w < desktop) return 16;
     return 24;
   }

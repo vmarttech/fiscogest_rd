@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/pages/almacenes_page.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/store/store_channel.dart';
@@ -354,6 +355,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           GoRoute(
             path: 'cobro',
+            // redirect móvil caja: no hub unificado; solo flujo cotización
+            redirect: (context, state) {
+              // Móvil: no hub de caja unificada; solo flujo cotización
+              double w = 800;
+              try {
+                w = MediaQuery.sizeOf(context).width;
+              } catch (_) {
+                final views = WidgetsBinding.instance.platformDispatcher.views;
+                if (views.isNotEmpty) {
+                  final v = views.first;
+                  w = v.physicalSize.width / v.devicePixelRatio;
+                }
+              }
+              if (w < 600) return '/ventas/cotizaciones/nueva';
+              return null;
+            },
             name: CajaInicioPage.routeName,
             builder: (_, __) => const AppShell(child: CajaInicioPage()),
             routes: [
@@ -598,6 +615,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/inventario-fisico/listar',
         name: ListarConteosPage.routeName,
         builder: (_, __) => const AppShell(child: ListarConteosPage()),
+      ),
+      GoRoute(
+        path: '/inventario-fisico/nuevo',
+        redirect: (_, __) => '/inventario-fisico',
       ),
       GoRoute(
         path: '/inventario-fisico/capturar/:conteoId',

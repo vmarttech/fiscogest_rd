@@ -40,6 +40,13 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
     cajaPermitirCheque: false,
     cajaExigirSesion: false,
     modoSimplificado: true,
+    transfImprimirManifiesto: true,
+    transfTituloManifiesto: 'MANIFIESTO DE TRANSFERENCIA INTER-ALMACÉN',
+    transfSubtituloManifiesto: 'PACKING LIST / BATCH LIST (LISTA DE LOTES)',
+    transfTransportistaDefault: '',
+    transfObservacionesDefault:
+        'Verificar cantidades y estado del producto al momento de la recepción en el Almacén Destino. Reportar cualquier discrepancia de inmediato.',
+    transfMostrarFirmas: true,
   );
 
   @override
@@ -78,6 +85,12 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
       cajaPermitirCheque: model.cajaPermitirCheque,
       cajaExigirSesion: model.cajaExigirSesion,
       modoSimplificado: model.modoSimplificado,
+      transfImprimirManifiesto: model.transfImprimirManifiesto,
+      transfTituloManifiesto: model.transfTituloManifiesto,
+      transfSubtituloManifiesto: model.transfSubtituloManifiesto,
+      transfTransportistaDefault: model.transfTransportistaDefault,
+      transfObservacionesDefault: model.transfObservacionesDefault,
+      transfMostrarFirmas: model.transfMostrarFirmas,
     );
   }
 
@@ -117,6 +130,12 @@ class ConfiguracionRepositoryImpl implements IConfiguracionRepository {
         cajaPermitirCheque: Value(c.cajaPermitirCheque),
         cajaExigirSesion: Value(c.cajaExigirSesion),
         modoSimplificado: Value(c.modoSimplificado),
+        transfImprimirManifiesto: Value(c.transfImprimirManifiesto),
+        transfTituloManifiesto: Value(c.transfTituloManifiesto),
+        transfSubtituloManifiesto: Value(c.transfSubtituloManifiesto),
+        transfTransportistaDefault: Value(c.transfTransportistaDefault),
+        transfObservacionesDefault: Value(c.transfObservacionesDefault),
+        transfMostrarFirmas: Value(c.transfMostrarFirmas),
       ),
     );
   }

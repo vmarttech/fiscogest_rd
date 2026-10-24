@@ -4554,6 +4554,89 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _transfImprimirManifiestoMeta =
+      const VerificationMeta('transfImprimirManifiesto');
+  @override
+  late final GeneratedColumn<bool> transfImprimirManifiesto =
+      GeneratedColumn<bool>(
+        'transf_imprimir_manifiesto',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("transf_imprimir_manifiesto" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
+  static const VerificationMeta _transfTituloManifiestoMeta =
+      const VerificationMeta('transfTituloManifiesto');
+  @override
+  late final GeneratedColumn<String> transfTituloManifiesto =
+      GeneratedColumn<String>(
+        'transf_titulo_manifiesto',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(
+          'MANIFIESTO DE TRANSFERENCIA INTER-ALMACÉN',
+        ),
+      );
+  static const VerificationMeta _transfSubtituloManifiestoMeta =
+      const VerificationMeta('transfSubtituloManifiesto');
+  @override
+  late final GeneratedColumn<String> transfSubtituloManifiesto =
+      GeneratedColumn<String>(
+        'transf_subtitulo_manifiesto',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(
+          'PACKING LIST / BATCH LIST (LISTA DE LOTES)',
+        ),
+      );
+  static const VerificationMeta _transfTransportistaDefaultMeta =
+      const VerificationMeta('transfTransportistaDefault');
+  @override
+  late final GeneratedColumn<String> transfTransportistaDefault =
+      GeneratedColumn<String>(
+        'transf_transportista_default',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _transfObservacionesDefaultMeta =
+      const VerificationMeta('transfObservacionesDefault');
+  @override
+  late final GeneratedColumn<String>
+  transfObservacionesDefault = GeneratedColumn<String>(
+    'transf_observaciones_default',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(
+      'Verificar cantidades y estado del producto al momento de la recepción en el Almacén Destino. Reportar cualquier discrepancia de inmediato.',
+    ),
+  );
+  static const VerificationMeta _transfMostrarFirmasMeta =
+      const VerificationMeta('transfMostrarFirmas');
+  @override
+  late final GeneratedColumn<bool> transfMostrarFirmas = GeneratedColumn<bool>(
+    'transf_mostrar_firmas',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("transf_mostrar_firmas" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4587,6 +4670,12 @@ class $ConfiguracionTableTable extends ConfiguracionTable
     cajaPermitirCheque,
     cajaExigirSesion,
     modoSimplificado,
+    transfImprimirManifiesto,
+    transfTituloManifiesto,
+    transfSubtituloManifiesto,
+    transfTransportistaDefault,
+    transfObservacionesDefault,
+    transfMostrarFirmas,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4852,6 +4941,60 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         ),
       );
     }
+    if (data.containsKey('transf_imprimir_manifiesto')) {
+      context.handle(
+        _transfImprimirManifiestoMeta,
+        transfImprimirManifiesto.isAcceptableOrUnknown(
+          data['transf_imprimir_manifiesto']!,
+          _transfImprimirManifiestoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transf_titulo_manifiesto')) {
+      context.handle(
+        _transfTituloManifiestoMeta,
+        transfTituloManifiesto.isAcceptableOrUnknown(
+          data['transf_titulo_manifiesto']!,
+          _transfTituloManifiestoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transf_subtitulo_manifiesto')) {
+      context.handle(
+        _transfSubtituloManifiestoMeta,
+        transfSubtituloManifiesto.isAcceptableOrUnknown(
+          data['transf_subtitulo_manifiesto']!,
+          _transfSubtituloManifiestoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transf_transportista_default')) {
+      context.handle(
+        _transfTransportistaDefaultMeta,
+        transfTransportistaDefault.isAcceptableOrUnknown(
+          data['transf_transportista_default']!,
+          _transfTransportistaDefaultMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transf_observaciones_default')) {
+      context.handle(
+        _transfObservacionesDefaultMeta,
+        transfObservacionesDefault.isAcceptableOrUnknown(
+          data['transf_observaciones_default']!,
+          _transfObservacionesDefaultMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transf_mostrar_firmas')) {
+      context.handle(
+        _transfMostrarFirmasMeta,
+        transfMostrarFirmas.isAcceptableOrUnknown(
+          data['transf_mostrar_firmas']!,
+          _transfMostrarFirmasMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4985,6 +5128,30 @@ class $ConfiguracionTableTable extends ConfiguracionTable
         DriftSqlType.bool,
         data['${effectivePrefix}modo_simplificado'],
       )!,
+      transfImprimirManifiesto: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}transf_imprimir_manifiesto'],
+      )!,
+      transfTituloManifiesto: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transf_titulo_manifiesto'],
+      )!,
+      transfSubtituloManifiesto: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transf_subtitulo_manifiesto'],
+      )!,
+      transfTransportistaDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transf_transportista_default'],
+      )!,
+      transfObservacionesDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transf_observaciones_default'],
+      )!,
+      transfMostrarFirmas: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}transf_mostrar_firmas'],
+      )!,
     );
   }
 
@@ -5027,6 +5194,14 @@ class ConfiguracionTableData extends DataClass
   final bool cajaPermitirCheque;
   final bool cajaExigirSesion;
   final bool modoSimplificado;
+
+  /// Generar manifiesto / packing list al completar una transferencia.
+  final bool transfImprimirManifiesto;
+  final String transfTituloManifiesto;
+  final String transfSubtituloManifiesto;
+  final String transfTransportistaDefault;
+  final String transfObservacionesDefault;
+  final bool transfMostrarFirmas;
   const ConfiguracionTableData({
     required this.id,
     required this.nombreNegocio,
@@ -5059,6 +5234,12 @@ class ConfiguracionTableData extends DataClass
     required this.cajaPermitirCheque,
     required this.cajaExigirSesion,
     required this.modoSimplificado,
+    required this.transfImprimirManifiesto,
+    required this.transfTituloManifiesto,
+    required this.transfSubtituloManifiesto,
+    required this.transfTransportistaDefault,
+    required this.transfObservacionesDefault,
+    required this.transfMostrarFirmas,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5096,6 +5277,20 @@ class ConfiguracionTableData extends DataClass
     map['caja_permitir_cheque'] = Variable<bool>(cajaPermitirCheque);
     map['caja_exigir_sesion'] = Variable<bool>(cajaExigirSesion);
     map['modo_simplificado'] = Variable<bool>(modoSimplificado);
+    map['transf_imprimir_manifiesto'] = Variable<bool>(
+      transfImprimirManifiesto,
+    );
+    map['transf_titulo_manifiesto'] = Variable<String>(transfTituloManifiesto);
+    map['transf_subtitulo_manifiesto'] = Variable<String>(
+      transfSubtituloManifiesto,
+    );
+    map['transf_transportista_default'] = Variable<String>(
+      transfTransportistaDefault,
+    );
+    map['transf_observaciones_default'] = Variable<String>(
+      transfObservacionesDefault,
+    );
+    map['transf_mostrar_firmas'] = Variable<bool>(transfMostrarFirmas);
     return map;
   }
 
@@ -5132,6 +5327,12 @@ class ConfiguracionTableData extends DataClass
       cajaPermitirCheque: Value(cajaPermitirCheque),
       cajaExigirSesion: Value(cajaExigirSesion),
       modoSimplificado: Value(modoSimplificado),
+      transfImprimirManifiesto: Value(transfImprimirManifiesto),
+      transfTituloManifiesto: Value(transfTituloManifiesto),
+      transfSubtituloManifiesto: Value(transfSubtituloManifiesto),
+      transfTransportistaDefault: Value(transfTransportistaDefault),
+      transfObservacionesDefault: Value(transfObservacionesDefault),
+      transfMostrarFirmas: Value(transfMostrarFirmas),
     );
   }
 
@@ -5184,6 +5385,24 @@ class ConfiguracionTableData extends DataClass
       cajaPermitirCheque: serializer.fromJson<bool>(json['cajaPermitirCheque']),
       cajaExigirSesion: serializer.fromJson<bool>(json['cajaExigirSesion']),
       modoSimplificado: serializer.fromJson<bool>(json['modoSimplificado']),
+      transfImprimirManifiesto: serializer.fromJson<bool>(
+        json['transfImprimirManifiesto'],
+      ),
+      transfTituloManifiesto: serializer.fromJson<String>(
+        json['transfTituloManifiesto'],
+      ),
+      transfSubtituloManifiesto: serializer.fromJson<String>(
+        json['transfSubtituloManifiesto'],
+      ),
+      transfTransportistaDefault: serializer.fromJson<String>(
+        json['transfTransportistaDefault'],
+      ),
+      transfObservacionesDefault: serializer.fromJson<String>(
+        json['transfObservacionesDefault'],
+      ),
+      transfMostrarFirmas: serializer.fromJson<bool>(
+        json['transfMostrarFirmas'],
+      ),
     );
   }
   @override
@@ -5225,6 +5444,22 @@ class ConfiguracionTableData extends DataClass
       'cajaPermitirCheque': serializer.toJson<bool>(cajaPermitirCheque),
       'cajaExigirSesion': serializer.toJson<bool>(cajaExigirSesion),
       'modoSimplificado': serializer.toJson<bool>(modoSimplificado),
+      'transfImprimirManifiesto': serializer.toJson<bool>(
+        transfImprimirManifiesto,
+      ),
+      'transfTituloManifiesto': serializer.toJson<String>(
+        transfTituloManifiesto,
+      ),
+      'transfSubtituloManifiesto': serializer.toJson<String>(
+        transfSubtituloManifiesto,
+      ),
+      'transfTransportistaDefault': serializer.toJson<String>(
+        transfTransportistaDefault,
+      ),
+      'transfObservacionesDefault': serializer.toJson<String>(
+        transfObservacionesDefault,
+      ),
+      'transfMostrarFirmas': serializer.toJson<bool>(transfMostrarFirmas),
     };
   }
 
@@ -5260,6 +5495,12 @@ class ConfiguracionTableData extends DataClass
     bool? cajaPermitirCheque,
     bool? cajaExigirSesion,
     bool? modoSimplificado,
+    bool? transfImprimirManifiesto,
+    String? transfTituloManifiesto,
+    String? transfSubtituloManifiesto,
+    String? transfTransportistaDefault,
+    String? transfObservacionesDefault,
+    bool? transfMostrarFirmas,
   }) => ConfiguracionTableData(
     id: id ?? this.id,
     nombreNegocio: nombreNegocio ?? this.nombreNegocio,
@@ -5294,6 +5535,17 @@ class ConfiguracionTableData extends DataClass
     cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
     cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
     modoSimplificado: modoSimplificado ?? this.modoSimplificado,
+    transfImprimirManifiesto:
+        transfImprimirManifiesto ?? this.transfImprimirManifiesto,
+    transfTituloManifiesto:
+        transfTituloManifiesto ?? this.transfTituloManifiesto,
+    transfSubtituloManifiesto:
+        transfSubtituloManifiesto ?? this.transfSubtituloManifiesto,
+    transfTransportistaDefault:
+        transfTransportistaDefault ?? this.transfTransportistaDefault,
+    transfObservacionesDefault:
+        transfObservacionesDefault ?? this.transfObservacionesDefault,
+    transfMostrarFirmas: transfMostrarFirmas ?? this.transfMostrarFirmas,
   );
   ConfiguracionTableData copyWithCompanion(ConfiguracionTableCompanion data) {
     return ConfiguracionTableData(
@@ -5374,6 +5626,24 @@ class ConfiguracionTableData extends DataClass
       modoSimplificado: data.modoSimplificado.present
           ? data.modoSimplificado.value
           : this.modoSimplificado,
+      transfImprimirManifiesto: data.transfImprimirManifiesto.present
+          ? data.transfImprimirManifiesto.value
+          : this.transfImprimirManifiesto,
+      transfTituloManifiesto: data.transfTituloManifiesto.present
+          ? data.transfTituloManifiesto.value
+          : this.transfTituloManifiesto,
+      transfSubtituloManifiesto: data.transfSubtituloManifiesto.present
+          ? data.transfSubtituloManifiesto.value
+          : this.transfSubtituloManifiesto,
+      transfTransportistaDefault: data.transfTransportistaDefault.present
+          ? data.transfTransportistaDefault.value
+          : this.transfTransportistaDefault,
+      transfObservacionesDefault: data.transfObservacionesDefault.present
+          ? data.transfObservacionesDefault.value
+          : this.transfObservacionesDefault,
+      transfMostrarFirmas: data.transfMostrarFirmas.present
+          ? data.transfMostrarFirmas.value
+          : this.transfMostrarFirmas,
     );
   }
 
@@ -5410,7 +5680,13 @@ class ConfiguracionTableData extends DataClass
           ..write('cajaPermitirTransferencia: $cajaPermitirTransferencia, ')
           ..write('cajaPermitirCheque: $cajaPermitirCheque, ')
           ..write('cajaExigirSesion: $cajaExigirSesion, ')
-          ..write('modoSimplificado: $modoSimplificado')
+          ..write('modoSimplificado: $modoSimplificado, ')
+          ..write('transfImprimirManifiesto: $transfImprimirManifiesto, ')
+          ..write('transfTituloManifiesto: $transfTituloManifiesto, ')
+          ..write('transfSubtituloManifiesto: $transfSubtituloManifiesto, ')
+          ..write('transfTransportistaDefault: $transfTransportistaDefault, ')
+          ..write('transfObservacionesDefault: $transfObservacionesDefault, ')
+          ..write('transfMostrarFirmas: $transfMostrarFirmas')
           ..write(')'))
         .toString();
   }
@@ -5448,6 +5724,12 @@ class ConfiguracionTableData extends DataClass
     cajaPermitirCheque,
     cajaExigirSesion,
     modoSimplificado,
+    transfImprimirManifiesto,
+    transfTituloManifiesto,
+    transfSubtituloManifiesto,
+    transfTransportistaDefault,
+    transfObservacionesDefault,
+    transfMostrarFirmas,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -5483,7 +5765,13 @@ class ConfiguracionTableData extends DataClass
           other.cajaPermitirTransferencia == this.cajaPermitirTransferencia &&
           other.cajaPermitirCheque == this.cajaPermitirCheque &&
           other.cajaExigirSesion == this.cajaExigirSesion &&
-          other.modoSimplificado == this.modoSimplificado);
+          other.modoSimplificado == this.modoSimplificado &&
+          other.transfImprimirManifiesto == this.transfImprimirManifiesto &&
+          other.transfTituloManifiesto == this.transfTituloManifiesto &&
+          other.transfSubtituloManifiesto == this.transfSubtituloManifiesto &&
+          other.transfTransportistaDefault == this.transfTransportistaDefault &&
+          other.transfObservacionesDefault == this.transfObservacionesDefault &&
+          other.transfMostrarFirmas == this.transfMostrarFirmas);
 }
 
 class ConfiguracionTableCompanion
@@ -5519,6 +5807,12 @@ class ConfiguracionTableCompanion
   final Value<bool> cajaPermitirCheque;
   final Value<bool> cajaExigirSesion;
   final Value<bool> modoSimplificado;
+  final Value<bool> transfImprimirManifiesto;
+  final Value<String> transfTituloManifiesto;
+  final Value<String> transfSubtituloManifiesto;
+  final Value<String> transfTransportistaDefault;
+  final Value<String> transfObservacionesDefault;
+  final Value<bool> transfMostrarFirmas;
   const ConfiguracionTableCompanion({
     this.id = const Value.absent(),
     this.nombreNegocio = const Value.absent(),
@@ -5551,6 +5845,12 @@ class ConfiguracionTableCompanion
     this.cajaPermitirCheque = const Value.absent(),
     this.cajaExigirSesion = const Value.absent(),
     this.modoSimplificado = const Value.absent(),
+    this.transfImprimirManifiesto = const Value.absent(),
+    this.transfTituloManifiesto = const Value.absent(),
+    this.transfSubtituloManifiesto = const Value.absent(),
+    this.transfTransportistaDefault = const Value.absent(),
+    this.transfObservacionesDefault = const Value.absent(),
+    this.transfMostrarFirmas = const Value.absent(),
   });
   ConfiguracionTableCompanion.insert({
     this.id = const Value.absent(),
@@ -5584,6 +5884,12 @@ class ConfiguracionTableCompanion
     this.cajaPermitirCheque = const Value.absent(),
     this.cajaExigirSesion = const Value.absent(),
     this.modoSimplificado = const Value.absent(),
+    this.transfImprimirManifiesto = const Value.absent(),
+    this.transfTituloManifiesto = const Value.absent(),
+    this.transfSubtituloManifiesto = const Value.absent(),
+    this.transfTransportistaDefault = const Value.absent(),
+    this.transfObservacionesDefault = const Value.absent(),
+    this.transfMostrarFirmas = const Value.absent(),
   });
   static Insertable<ConfiguracionTableData> custom({
     Expression<int>? id,
@@ -5617,6 +5923,12 @@ class ConfiguracionTableCompanion
     Expression<bool>? cajaPermitirCheque,
     Expression<bool>? cajaExigirSesion,
     Expression<bool>? modoSimplificado,
+    Expression<bool>? transfImprimirManifiesto,
+    Expression<String>? transfTituloManifiesto,
+    Expression<String>? transfSubtituloManifiesto,
+    Expression<String>? transfTransportistaDefault,
+    Expression<String>? transfObservacionesDefault,
+    Expression<bool>? transfMostrarFirmas,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -5657,6 +5969,18 @@ class ConfiguracionTableCompanion
         'caja_permitir_cheque': cajaPermitirCheque,
       if (cajaExigirSesion != null) 'caja_exigir_sesion': cajaExigirSesion,
       if (modoSimplificado != null) 'modo_simplificado': modoSimplificado,
+      if (transfImprimirManifiesto != null)
+        'transf_imprimir_manifiesto': transfImprimirManifiesto,
+      if (transfTituloManifiesto != null)
+        'transf_titulo_manifiesto': transfTituloManifiesto,
+      if (transfSubtituloManifiesto != null)
+        'transf_subtitulo_manifiesto': transfSubtituloManifiesto,
+      if (transfTransportistaDefault != null)
+        'transf_transportista_default': transfTransportistaDefault,
+      if (transfObservacionesDefault != null)
+        'transf_observaciones_default': transfObservacionesDefault,
+      if (transfMostrarFirmas != null)
+        'transf_mostrar_firmas': transfMostrarFirmas,
     });
   }
 
@@ -5692,6 +6016,12 @@ class ConfiguracionTableCompanion
     Value<bool>? cajaPermitirCheque,
     Value<bool>? cajaExigirSesion,
     Value<bool>? modoSimplificado,
+    Value<bool>? transfImprimirManifiesto,
+    Value<String>? transfTituloManifiesto,
+    Value<String>? transfSubtituloManifiesto,
+    Value<String>? transfTransportistaDefault,
+    Value<String>? transfObservacionesDefault,
+    Value<bool>? transfMostrarFirmas,
   }) {
     return ConfiguracionTableCompanion(
       id: id ?? this.id,
@@ -5727,6 +6057,17 @@ class ConfiguracionTableCompanion
       cajaPermitirCheque: cajaPermitirCheque ?? this.cajaPermitirCheque,
       cajaExigirSesion: cajaExigirSesion ?? this.cajaExigirSesion,
       modoSimplificado: modoSimplificado ?? this.modoSimplificado,
+      transfImprimirManifiesto:
+          transfImprimirManifiesto ?? this.transfImprimirManifiesto,
+      transfTituloManifiesto:
+          transfTituloManifiesto ?? this.transfTituloManifiesto,
+      transfSubtituloManifiesto:
+          transfSubtituloManifiesto ?? this.transfSubtituloManifiesto,
+      transfTransportistaDefault:
+          transfTransportistaDefault ?? this.transfTransportistaDefault,
+      transfObservacionesDefault:
+          transfObservacionesDefault ?? this.transfObservacionesDefault,
+      transfMostrarFirmas: transfMostrarFirmas ?? this.transfMostrarFirmas,
     );
   }
 
@@ -5832,6 +6173,34 @@ class ConfiguracionTableCompanion
     if (modoSimplificado.present) {
       map['modo_simplificado'] = Variable<bool>(modoSimplificado.value);
     }
+    if (transfImprimirManifiesto.present) {
+      map['transf_imprimir_manifiesto'] = Variable<bool>(
+        transfImprimirManifiesto.value,
+      );
+    }
+    if (transfTituloManifiesto.present) {
+      map['transf_titulo_manifiesto'] = Variable<String>(
+        transfTituloManifiesto.value,
+      );
+    }
+    if (transfSubtituloManifiesto.present) {
+      map['transf_subtitulo_manifiesto'] = Variable<String>(
+        transfSubtituloManifiesto.value,
+      );
+    }
+    if (transfTransportistaDefault.present) {
+      map['transf_transportista_default'] = Variable<String>(
+        transfTransportistaDefault.value,
+      );
+    }
+    if (transfObservacionesDefault.present) {
+      map['transf_observaciones_default'] = Variable<String>(
+        transfObservacionesDefault.value,
+      );
+    }
+    if (transfMostrarFirmas.present) {
+      map['transf_mostrar_firmas'] = Variable<bool>(transfMostrarFirmas.value);
+    }
     return map;
   }
 
@@ -5868,7 +6237,13 @@ class ConfiguracionTableCompanion
           ..write('cajaPermitirTransferencia: $cajaPermitirTransferencia, ')
           ..write('cajaPermitirCheque: $cajaPermitirCheque, ')
           ..write('cajaExigirSesion: $cajaExigirSesion, ')
-          ..write('modoSimplificado: $modoSimplificado')
+          ..write('modoSimplificado: $modoSimplificado, ')
+          ..write('transfImprimirManifiesto: $transfImprimirManifiesto, ')
+          ..write('transfTituloManifiesto: $transfTituloManifiesto, ')
+          ..write('transfSubtituloManifiesto: $transfSubtituloManifiesto, ')
+          ..write('transfTransportistaDefault: $transfTransportistaDefault, ')
+          ..write('transfObservacionesDefault: $transfObservacionesDefault, ')
+          ..write('transfMostrarFirmas: $transfMostrarFirmas')
           ..write(')'))
         .toString();
   }
@@ -40846,6 +41221,12 @@ typedef $$ConfiguracionTableTableCreateCompanionBuilder =
       Value<bool> cajaPermitirCheque,
       Value<bool> cajaExigirSesion,
       Value<bool> modoSimplificado,
+      Value<bool> transfImprimirManifiesto,
+      Value<String> transfTituloManifiesto,
+      Value<String> transfSubtituloManifiesto,
+      Value<String> transfTransportistaDefault,
+      Value<String> transfObservacionesDefault,
+      Value<bool> transfMostrarFirmas,
     });
 typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
     ConfiguracionTableCompanion Function({
@@ -40880,6 +41261,12 @@ typedef $$ConfiguracionTableTableUpdateCompanionBuilder =
       Value<bool> cajaPermitirCheque,
       Value<bool> cajaExigirSesion,
       Value<bool> modoSimplificado,
+      Value<bool> transfImprimirManifiesto,
+      Value<String> transfTituloManifiesto,
+      Value<String> transfSubtituloManifiesto,
+      Value<String> transfTransportistaDefault,
+      Value<String> transfObservacionesDefault,
+      Value<bool> transfMostrarFirmas,
     });
 
 class $$ConfiguracionTableTableFilterComposer
@@ -41043,6 +41430,36 @@ class $$ConfiguracionTableTableFilterComposer
 
   ColumnFilters<bool> get modoSimplificado => $composableBuilder(
     column: $table.modoSimplificado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get transfImprimirManifiesto => $composableBuilder(
+    column: $table.transfImprimirManifiesto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transfTituloManifiesto => $composableBuilder(
+    column: $table.transfTituloManifiesto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transfSubtituloManifiesto => $composableBuilder(
+    column: $table.transfSubtituloManifiesto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transfTransportistaDefault => $composableBuilder(
+    column: $table.transfTransportistaDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transfObservacionesDefault => $composableBuilder(
+    column: $table.transfObservacionesDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get transfMostrarFirmas => $composableBuilder(
+    column: $table.transfMostrarFirmas,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -41210,6 +41627,36 @@ class $$ConfiguracionTableTableOrderingComposer
     column: $table.modoSimplificado,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get transfImprimirManifiesto => $composableBuilder(
+    column: $table.transfImprimirManifiesto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transfTituloManifiesto => $composableBuilder(
+    column: $table.transfTituloManifiesto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transfSubtituloManifiesto => $composableBuilder(
+    column: $table.transfSubtituloManifiesto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transfTransportistaDefault => $composableBuilder(
+    column: $table.transfTransportistaDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transfObservacionesDefault => $composableBuilder(
+    column: $table.transfObservacionesDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get transfMostrarFirmas => $composableBuilder(
+    column: $table.transfMostrarFirmas,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ConfiguracionTableTableAnnotationComposer
@@ -41359,6 +41806,36 @@ class $$ConfiguracionTableTableAnnotationComposer
     column: $table.modoSimplificado,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get transfImprimirManifiesto => $composableBuilder(
+    column: $table.transfImprimirManifiesto,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transfTituloManifiesto => $composableBuilder(
+    column: $table.transfTituloManifiesto,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transfSubtituloManifiesto => $composableBuilder(
+    column: $table.transfSubtituloManifiesto,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transfTransportistaDefault => $composableBuilder(
+    column: $table.transfTransportistaDefault,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transfObservacionesDefault => $composableBuilder(
+    column: $table.transfObservacionesDefault,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get transfMostrarFirmas => $composableBuilder(
+    column: $table.transfMostrarFirmas,
+    builder: (column) => column,
+  );
 }
 
 class $$ConfiguracionTableTableTableManager
@@ -41432,6 +41909,12 @@ class $$ConfiguracionTableTableTableManager
                 Value<bool> cajaPermitirCheque = const Value.absent(),
                 Value<bool> cajaExigirSesion = const Value.absent(),
                 Value<bool> modoSimplificado = const Value.absent(),
+                Value<bool> transfImprimirManifiesto = const Value.absent(),
+                Value<String> transfTituloManifiesto = const Value.absent(),
+                Value<String> transfSubtituloManifiesto = const Value.absent(),
+                Value<String> transfTransportistaDefault = const Value.absent(),
+                Value<String> transfObservacionesDefault = const Value.absent(),
+                Value<bool> transfMostrarFirmas = const Value.absent(),
               }) => ConfiguracionTableCompanion(
                 id: id,
                 nombreNegocio: nombreNegocio,
@@ -41464,6 +41947,12 @@ class $$ConfiguracionTableTableTableManager
                 cajaPermitirCheque: cajaPermitirCheque,
                 cajaExigirSesion: cajaExigirSesion,
                 modoSimplificado: modoSimplificado,
+                transfImprimirManifiesto: transfImprimirManifiesto,
+                transfTituloManifiesto: transfTituloManifiesto,
+                transfSubtituloManifiesto: transfSubtituloManifiesto,
+                transfTransportistaDefault: transfTransportistaDefault,
+                transfObservacionesDefault: transfObservacionesDefault,
+                transfMostrarFirmas: transfMostrarFirmas,
               ),
           createCompanionCallback:
               ({
@@ -41498,6 +41987,12 @@ class $$ConfiguracionTableTableTableManager
                 Value<bool> cajaPermitirCheque = const Value.absent(),
                 Value<bool> cajaExigirSesion = const Value.absent(),
                 Value<bool> modoSimplificado = const Value.absent(),
+                Value<bool> transfImprimirManifiesto = const Value.absent(),
+                Value<String> transfTituloManifiesto = const Value.absent(),
+                Value<String> transfSubtituloManifiesto = const Value.absent(),
+                Value<String> transfTransportistaDefault = const Value.absent(),
+                Value<String> transfObservacionesDefault = const Value.absent(),
+                Value<bool> transfMostrarFirmas = const Value.absent(),
               }) => ConfiguracionTableCompanion.insert(
                 id: id,
                 nombreNegocio: nombreNegocio,
@@ -41530,6 +42025,12 @@ class $$ConfiguracionTableTableTableManager
                 cajaPermitirCheque: cajaPermitirCheque,
                 cajaExigirSesion: cajaExigirSesion,
                 modoSimplificado: modoSimplificado,
+                transfImprimirManifiesto: transfImprimirManifiesto,
+                transfTituloManifiesto: transfTituloManifiesto,
+                transfSubtituloManifiesto: transfSubtituloManifiesto,
+                transfTransportistaDefault: transfTransportistaDefault,
+                transfObservacionesDefault: transfObservacionesDefault,
+                transfMostrarFirmas: transfMostrarFirmas,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

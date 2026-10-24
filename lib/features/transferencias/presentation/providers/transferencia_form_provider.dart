@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/transferencias/data/services/transferencia_service.dart';
 import 'package:fiscogest_rd/features/transferencias/domain/entities/transferencia.dart';
 
@@ -18,7 +19,7 @@ class TransferenciaFormState {
     this.error,
   });
 
-  final String? almacenOrigen; // id as string (compat UI)
+  final String? almacenOrigen;
   final String? almacenDestino;
   final int? productoId;
   final String? cantidad;
@@ -83,24 +84,37 @@ class TransferenciaFormNotifier extends Notifier<TransferenciaFormState> {
     state = state.copiar(nota: valor);
   }
 
-  Future<bool> enviar() async {
-    if (!state.esValido) return false;
+  /// true + última transferencia creada (para PDF).
+  Future<Transferencia?> enviar() async {
+    if (!state.esValido) return null;
     state = state.copiar(enviando: true, clearError: true);
     try {
       final svc = ref.read(transferenciaServiceProvider);
-      await svc.registrar(
+      final productos =
+          ref.read(productoControllerProvider).valueOrNull ?? [];
+      final prod = productos.cast<dynamic>().where((p) => p.id == state.productoId).toList();
+      String? cod;
+      String? nom;
+      if (prod.isNotEmpty) {
+        cod = prod.first.codigo as String?;
+        nom = prod.first.nombre as String?;
+      }
+
+      final creada = await svc.registrar(
         origenId: int.parse(state.almacenOrigen!),
         destinoId: int.parse(state.almacenDestino!),
         productoId: state.productoId!,
         cantidad: double.parse(state.cantidad!.replaceAll(',', '.')),
         nota: (state.nota ?? '').trim().isEmpty ? null : state.nota!.trim(),
+        productoCodigo: cod,
+        productoNombre: nom,
       );
       state = const TransferenciaFormState();
       ref.invalidate(transferenciasHistorialProvider);
-      return true;
+      return creada;
     } catch (e) {
       state = state.copiar(enviando: false, error: e.toString());
-      return false;
+      return null;
     }
   }
 }

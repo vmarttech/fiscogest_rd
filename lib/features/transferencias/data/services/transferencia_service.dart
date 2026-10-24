@@ -25,12 +25,15 @@ class TransferenciaService {
 
   Future<List<Transferencia>> historial() => _transf.ultimas();
 
-  Future<void> registrar({
+  /// Registra la transferencia y devuelve el registro con id asignado.
+  Future<Transferencia> registrar({
     required int origenId,
     required int destinoId,
     required int productoId,
     required double cantidad,
     String? nota,
+    String? productoCodigo,
+    String? productoNombre,
   }) async {
     if (origenId == destinoId) {
       throw Exception('Origen y destino deben ser distintos.');
@@ -47,6 +50,8 @@ class TransferenciaService {
     if (destino == null || !destino.activo) {
       throw Exception('El almacén destino no existe o está inactivo.');
     }
+
+    late Transferencia creada;
     await _db.transaction(() async {
       final hay = await _stock.cantidad(productoId, origenId);
       if (hay + 1e-9 < cantidad) {
@@ -57,16 +62,33 @@ class TransferenciaService {
       await _stock.setCantidad(productoId, origenId, hay - cantidad);
       final destCant = await _stock.cantidad(productoId, destinoId);
       await _stock.setCantidad(productoId, destinoId, destCant + cantidad);
-      await _transf.insertar(
+
+      final ahora = DateTime.now();
+      final id = await _transf.insertar(
         Transferencia(
           almacenOrigenId: origenId,
           almacenDestinoId: destinoId,
           productoId: productoId,
           cantidad: cantidad,
           nota: nota,
-          fecha: DateTime.now(),
+          fecha: ahora,
         ),
       );
+      creada = Transferencia(
+        id: id,
+        almacenOrigenId: origenId,
+        almacenDestinoId: destinoId,
+        productoId: productoId,
+        cantidad: cantidad,
+        nota: nota,
+        fecha: ahora,
+        estado: 'Completa',
+        origenNombre: origen.nombre,
+        destinoNombre: destino.nombre,
+        productoCodigo: productoCodigo,
+        productoNombre: productoNombre,
+      );
     });
+    return creada;
   }
 }

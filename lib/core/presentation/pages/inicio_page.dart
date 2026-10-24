@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/features/home/presentation/pages/home_mobile_page.dart';
 
 
 /// Caja del dashboard: sesión abierta + efectivo esperado del turno.
@@ -63,6 +64,11 @@ class InicioPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mobile = AppBreakpoints.isMobile(context);
     final desktop = AppBreakpoints.isDesktop(context);
+
+    // Home móvil ÚNICO (mock). Igual en simplificado y normal.
+    if (mobile) {
+      return const HomeMobilePage();
+    }
 
     // Datos reales para KPI enterprise
 
@@ -1070,7 +1076,7 @@ class _Acceso extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mobile = MediaQuery.of(context).size.width < 600;
+    final mobile = AppBreakpoints.isMobile(context);
 
     // Móvil: lista horizontal compacta (sin cambiar UX táctil)
     if (mobile) {

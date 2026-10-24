@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
@@ -58,7 +59,7 @@ class _NuevaVentaBorradorPageState
     if (event is! KeyDownEvent) return false;
     // Flutter a veces marca mal repeat; filtramos por bandera + tiempo
     if (!mounted) return false;
-    if (MediaQuery.sizeOf(context).width < 1024) return false;
+    if (!AppBreakpoints.isDesktop(context)) return false;
 
     final key = event.logicalKey;
     final esAtajo = key == LogicalKeyboardKey.f3 ||
@@ -713,8 +714,9 @@ class _NuevaVentaBorradorPageState
   Widget build(BuildContext context) {
     final estado = ref.watch(ventaBorradorProvider);
     final puedeGenerar = estado.detalles.isNotEmpty && estado.montoTotal > 0;
-    final esPantallaPequena = MediaQuery.of(context).size.width < 600;
-    final esPantallaAncha = MediaQuery.of(context).size.width >= 720;
+    final esPantallaPequena = AppBreakpoints.isMobile(context);
+    final esPantallaAncha = !AppBreakpoints.isMobile(context) &&
+        MediaQuery.sizeOf(context).width >= 720;
 
     final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
