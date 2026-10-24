@@ -39,8 +39,8 @@ class ManifiestoTransferenciaPdf {
       fontWeight: pw.FontWeight.bold,
       color: PdfColors.blueGrey800,
     );
-    final cellStyle = const pw.TextStyle(fontSize: 8);
-    final titleBlue = PdfColor.fromInt(0xFF1E3A5F);
+    const cellStyle = pw.TextStyle(fontSize: 8);
+    const titleBlue = PdfColor.fromInt(0xFF1E3A5F);
 
     doc.addPage(
       pw.MultiPage(

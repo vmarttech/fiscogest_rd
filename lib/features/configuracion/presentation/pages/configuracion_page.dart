@@ -984,7 +984,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
         ),
         const SizedBox(height: 4),
-        Text(
+        const Text(
           'Edita el contenido del PDF que se genera al transferir entre almacenes.',
           style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
@@ -1060,7 +1060,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
             onChanged: (v) => setState(() => _transfMostrarFirmas = v),
           ),
-          Text(
+          const Text(
             'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.',
             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),

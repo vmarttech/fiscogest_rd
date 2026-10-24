@@ -867,16 +867,15 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   }
 
   List<FormaPago> _formasDisponibles({required bool esCredito}) {
-    final cfg = ref.read(configuracionControllerProvider).valueOrNull;
-    final list = <FormaPago>[FormaPago.efectivo];
-    if (cfg?.cajaPermitirTarjeta ?? true) list.add(FormaPago.tarjeta);
-    if (cfg?.cajaPermitirTransferencia ?? true) {
-      list.add(FormaPago.transferencia);
-    }
+    // Siempre visibles al cobrar (móvil y PC).
+    final list = <FormaPago>[
+      FormaPago.efectivo,
+      FormaPago.tarjeta,
+      FormaPago.transferencia,
+    ];
     if (esCredito) list.add(FormaPago.credito);
     return list;
   }
-
 
   Future<void> _refrescarCajon() async {
     try {

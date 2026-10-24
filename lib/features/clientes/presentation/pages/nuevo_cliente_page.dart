@@ -142,13 +142,13 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
       labelText: label,
       hintText: hint,
       isDense: true,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
       ),
     );
@@ -163,11 +163,11 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
       child: ElevatedButton.icon(
         onPressed: _guardar,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: const Color(0xFF115E59),
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
         icon: const Icon(Icons.save_rounded, size: 20),
@@ -180,6 +180,9 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
 
     return AppScaffold(
       title: _esEdicion ? 'EDITAR CLIENTE' : 'NUEVO CLIENTE',
+      backgroundColor: const Color(0xFFF3F7F9),
+      showAppBar: false,
+// PC: sin barra extra; móvil: atrás seguro
       body: SafeArea(
         child: Column(
           children: [
@@ -199,6 +202,54 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          Row(
+                            children: [
+                              Material(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                child: InkWell(
+                                  onTap: () {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go('/clientes');
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: const Color(0xFFE2E8F0),
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_back_rounded,
+                                      size: 20,
+                                      color: Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _esEdicion
+                                      ? 'Editar cliente'
+                                      : 'Nuevo cliente',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
                           Text(
                             _esEdicion
                                 ? 'Modificar datos del cliente'

@@ -671,6 +671,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+
+      GoRoute(
+        path: '/clientes/detalle',
+        name: 'cliente-detalle',
+        builder: (context, state) {
+          final c = state.extra;
+          if (c is! ClienteCompleto) {
+            return const AppShell(child: ClientesGestionPage());
+          }
+          return AppShell(child: ClienteDetallePage.fromCliente(c));
+        },
+      ),
       GoRoute(path: '/customers', redirect: (_, __) => '/clientes'),
       GoRoute(path: '/clients', redirect: (_, __) => '/clientes'),
       GoRoute(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';

@@ -23,6 +23,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/aju
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart'
     as ajuste_prov;
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo.dart';
 
 class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
@@ -215,11 +216,16 @@ void main() async {
   );
 }
 
-class FiscoGestApp extends ConsumerWidget {
+class FiscoGestApp extends ConsumerStatefulWidget {
   const FiscoGestApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FiscoGestApp> createState() => _FiscoGestAppState();
+}
+
+class _FiscoGestAppState extends ConsumerState<FiscoGestApp> {
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'FiscoGest',
       debugShowCheckedModeBanner: false,
@@ -232,15 +238,45 @@ class FiscoGestApp extends ConsumerWidget {
       ],
       supportedLocales: const [Locale('es', 'DO'), Locale('en', 'US')],
       locale: const Locale('es', 'DO'),
-
       builder: (context, child) {
-        return Stack(
-          children: [
-            if (child != null) child,
-            const FiscoGestNotificationOverlay(),
-          ],
+        // context AQUÍ sí tiene Navigator → diálogos de update OK
+        return _UpdateGate(
+          child: Stack(
+            children: [
+              if (child != null) child,
+              const FiscoGestNotificationOverlay(),
+            ],
+          ),
         );
       },
     );
   }
+}
+
+/// Revisa update.json una sola vez, con un context bajo MaterialApp.
+class _UpdateGate extends StatefulWidget {
+  const _UpdateGate({required this.child});
+  final Widget child;
+
+  @override
+  State<_UpdateGate> createState() => _UpdateGateState();
+}
+
+class _UpdateGateState extends State<_UpdateGate> {
+  bool _checked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(seconds: 2), () async {
+        if (!mounted || _checked) return;
+        _checked = true;
+        await UpdateChecker.checkAndPrompt(context);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

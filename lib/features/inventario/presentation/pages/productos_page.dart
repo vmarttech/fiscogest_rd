@@ -234,42 +234,51 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                   },
                   onChanged: (v) => setState(() => _filtroProductos = v),
                 ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 40,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
+                const SizedBox(height: 12),
+                // Fila 1: estado de stock (scroll horizontal, sin amontonar)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     children: [
                       _FilterChip(
                         label: 'Todos',
                         selected: _filtroEstado == 'todos',
-                        onTap: () => setState(() => _filtroEstado = 'todos'),
+                        onTap: () => setState(() {
+                          _filtroEstado = 'todos';
+                        }),
                       ),
                       const SizedBox(width: 8),
                       _FilterChip(
-                        label: 'En Stock',
+                        label: 'En stock',
                         selected: _filtroEstado == 'en_stock',
                         color: AppColors.success,
-                        onTap: () => setState(() => _filtroEstado = 'en_stock'),
+                        onTap: () => setState(() {
+                          _filtroEstado = 'en_stock';
+                        }),
                       ),
                       const SizedBox(width: 8),
                       _FilterChip(
                         label: 'Bajo',
                         selected: _filtroEstado == 'bajo',
                         color: AppColors.warning,
-                        onTap: () => setState(() => _filtroEstado = 'bajo'),
+                        onTap: () => setState(() {
+                          _filtroEstado = 'bajo';
+                        }),
                       ),
                       const SizedBox(width: 8),
                       _FilterChip(
                         label: 'Agotado',
                         selected: _filtroEstado == 'agotado',
                         color: AppColors.error,
-                        onTap: () => setState(() => _filtroEstado = 'agotado'),
+                        onTap: () => setState(() {
+                          _filtroEstado = 'agotado';
+                        }),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 10),
+                // Fila 2: activos + orden
                 _buildBarraOrdenYFiltros(),
                 const SizedBox(height: 14),
                 ref.watch(productoControllerProvider).when(
@@ -446,9 +455,12 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
             scrollDirection: Axis.horizontal,
             children: [
               _FilterChip(
-                label: _soloActivos ? 'Solo activos' : 'Con inactivos',
-                selected: _soloActivos,
-                onTap: () => setState(() => _soloActivos = !_soloActivos),
+                label: 'Solo activos',
+                selected: _soloActivos && _filtroEstado != 'inactivo',
+                onTap: () => setState(() {
+                  _soloActivos = true;
+                  if (_filtroEstado == 'inactivo') _filtroEstado = 'todos';
+                }),
               ),
               const SizedBox(width: 8),
               _FilterChip(
@@ -458,6 +470,15 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 onTap: () => setState(() {
                   _filtroEstado = 'inactivo';
                   _soloActivos = false;
+                }),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: 'Todos (act+inact)',
+                selected: !_soloActivos && _filtroEstado != 'inactivo',
+                onTap: () => setState(() {
+                  _soloActivos = false;
+                  if (_filtroEstado == 'inactivo') _filtroEstado = 'todos';
                 }),
               ),
             ],
@@ -488,23 +509,57 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     );
   }
 
+
+  /// Umbral "bajo": stockMinimo del producto; si es null/<=0 usa 5.
+  double _umbralBajo(Producto p) {
+    final m = p.stockMinimo;
+    if (m == null || m <= 0) return 5;
+    return m;
+  }
+
+  double _stockDe(Producto p) => p.stock ?? 0;
+
+  /// Misma regla que el badge de la tarjeta.
+  String _estadoStock(Producto p) {
+    final s = _stockDe(p);
+    if (s <= 0) return 'agotado';
+    if (s <= _umbralBajo(p)) return 'bajo';
+    return 'en_stock';
+  }
+
   List<Producto> _filtrarProductos(List<Producto> productos) {
     final q = _filtroProductos.trim().toLowerCase();
     final list = productos.where((p) {
-      if (_soloActivos && !p.activo) return false;
-      final matchTexto = q.isEmpty ||
-          p.nombre.toLowerCase().contains(q) ||
-          p.codigo.toLowerCase().contains(q) ||
-          (p.codigoBarras ?? '').toLowerCase().contains(q);
-      if (!matchTexto) return false;
-      final stock = p.stock ?? 0;
-      final min = p.stockMinimo ?? 10;
+      // Activo / inactivo
+      if (_filtroEstado == 'inactivo') {
+        if (p.activo) return false;
+      } else if (_soloActivos && !p.activo) {
+        return false;
+      }
+
+      // Texto: nombre, código, barras
+      if (q.isNotEmpty) {
+        final nombre = p.nombre.toLowerCase();
+        final codigo = p.codigo.toLowerCase();
+        final barras = (p.codigoBarras ?? '').toLowerCase();
+        final tokens = q.split(RegExp(r'\s+')).where((e) => e.isNotEmpty);
+        final ok = tokens.every(
+          (tok) =>
+              nombre.contains(tok) ||
+              codigo.contains(tok) ||
+              barras.contains(tok),
+        );
+        if (!ok) return false;
+      }
+
+      // Stock (misma regla que el badge)
+      final est = _estadoStock(p);
       return switch (_filtroEstado) {
-        'en_stock' => stock > min,
-        'bajo' => stock > 0 && stock <= min,
-        'agotado' => stock <= 0,
-        'inactivo' => !p.activo,
-        _ => true,
+        'en_stock' => est == 'en_stock',
+        'bajo' => est == 'bajo',
+        'agotado' => est == 'agotado',
+        'inactivo' => true, // ya filtrado arriba
+        _ => true, // todos
       };
     }).toList();
 
@@ -536,8 +591,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   }
 
   (String, Color) _getStatus(double stock, double stockMinimo) {
+    final min = stockMinimo <= 0 ? 5.0 : stockMinimo;
     if (stock <= 0) return ('Agotado', AppColors.error);
-    if (stock <= stockMinimo) return ('Bajo', AppColors.warning);
+    if (stock <= min) return ('Bajo', AppColors.warning);
     return ('En Stock', AppColors.success);
   }
 
@@ -1466,12 +1522,15 @@ class _ProductoCardMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stock = producto.stock ?? 0;
+        final stock = producto.stock ?? 0;
+    final minBajo = (producto.stockMinimo == null || producto.stockMinimo! <= 0)
+        ? 5.0
+        : producto.stockMinimo!;
     final (statusText, statusColor) = stock <= 0
         ? ('Agotado', AppColors.error)
-        : stock <= 10
-        ? ('Bajo', AppColors.warning)
-        : ('En Stock', AppColors.success);
+        : stock <= minBajo
+            ? ('Bajo', AppColors.warning)
+            : ('En Stock', AppColors.success);
 
     return Container(
       padding: const EdgeInsets.all(14),

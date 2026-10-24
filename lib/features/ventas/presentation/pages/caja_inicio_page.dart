@@ -4683,15 +4683,30 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 letterSpacing: 0.5, fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
             LayoutBuilder(builder: (context, c) {
-              final w = (c.maxWidth - 16) / 3;
-              return Row(
+              final maxW = c.maxWidth.isFinite && c.maxWidth > 0
+                  ? c.maxWidth
+                  : MediaQuery.sizeOf(context).width;
+              final w = ((maxW - 16) / 3).clamp(88.0, 200.0);
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  SizedBox(width: w, child: payBtn('Efectivo', 'Efectivo', Icons.payments_outlined)),
-                  const SizedBox(width: 8),
-                  SizedBox(width: w, child: payBtn('Tarjeta', 'Tarjeta', Icons.credit_card)),
-                  const SizedBox(width: 8),
-                  SizedBox(width: w, child: payBtn('Transfer.', 'Transfer.', Icons.swap_horiz)),
-                ]);
+                  SizedBox(
+                    width: w,
+                    child: payBtn(
+                      'Efectivo', 'Efectivo', Icons.payments_outlined),
+                  ),
+                  SizedBox(
+                    width: w,
+                    child: payBtn('Tarjeta', 'Tarjeta', Icons.credit_card),
+                  ),
+                  SizedBox(
+                    width: w,
+                    child: payBtn(
+                      'Transferencia', 'Transfer.', Icons.swap_horiz),
+                  ),
+                ],
+              );
             }),
             const SizedBox(height: 20),
             Container(
@@ -4713,7 +4728,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                             Text(
                               esCreditoUi
                                   ? 'ABONO INICIAL (doc. ${formatRd(totalDoc)})'
-                                  : 'EFECTIVO RECIBIDO (RD\$)',
+                                  : (_formaPagoUi.toLowerCase().contains('efect')
+                                      ? 'EFECTIVO RECIBIDO (RD\$)'
+                                      : 'MONTO A COBRAR (RD\$) · $_formaPagoUi'),
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: Color(0xFF1E293B), fontWeight: FontWeight.w700)),
