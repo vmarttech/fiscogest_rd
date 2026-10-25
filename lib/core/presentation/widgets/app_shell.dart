@@ -489,7 +489,6 @@ class AppShell extends ConsumerWidget {
                         isPermanent,
                       ),
                     if (!modoColmadoFlag &&
-                        permiteFiscalLicencia &&
                         puede(Permiso.facturacionGestionar))
                       _buildNavItem(
                         context,
@@ -507,12 +506,10 @@ class AppShell extends ConsumerWidget {
                         _buildNavItem(context, '/ventas/cobro', 'Caja',
                           Icons.payments_outlined, currentPath, isPermanent),
                     if (modoSimplificado &&
-                        permiteFiaoLicencia &&
                         puede(Permiso.fiaoUsar))
                       _buildNavItem(context, '/ventas/fios', 'Fiao',
                           Icons.edit_note_rounded, currentPath, isPermanent),
                     if (!modoSimplificado &&
-                        permiteCreditoFormalLicencia &&
                         puede(Permiso.creditosGestionar))
                       _buildNavItem(context, '/creditos', 'Crédito',
                           Icons.credit_score_outlined, currentPath, isPermanent),
@@ -540,8 +537,7 @@ class AppShell extends ConsumerWidget {
                           isPermanent),
                       _buildNavItem(context, '/lista-ajustes', 'Ajustes',
                           Icons.tune_outlined, currentPath, isPermanent),
-                      if (permiteAlmacenesLicencia)
-                        _buildNavItem(
+                      _buildNavItem(
                             context,
                             '/transferencias/registrar',
                             'Transferencias',
@@ -567,8 +563,7 @@ class AppShell extends ConsumerWidget {
                     if (puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/unidades', 'Unidades',
                           Icons.straighten_outlined, currentPath, isPermanent),
-                    if (puede(Permiso.catalogoGestionar) &&
-                        permiteAlmacenesLicencia)
+                    if (puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/almacenes', 'Almacenes',
                           Icons.warehouse_outlined, currentPath, isPermanent),
                     if (puede(Permiso.catalogoGestionar))
@@ -582,9 +577,7 @@ class AppShell extends ConsumerWidget {
                         esAdmin)
                       _buildNavItem(context, '/reports', 'Reportes',
                           Icons.assessment_outlined, currentPath, isPermanent),
-                    if (!modoColmadoFlag &&
-                        esAdmin &&
-                        permiteFiscalLicencia) ...[
+                    if (!modoColmadoFlag && esAdmin) ...[
                       _buildNavItem(context, '/ecfe', 'e-CF · DGII',
                           Icons.cloud_sync_outlined, currentPath, isPermanent),
                       _buildNavItem(context, '/impuestos', 'Impuestos',
@@ -605,6 +598,22 @@ class AppShell extends ConsumerWidget {
                         isPermanent,
                         badgeCount: pedidosPendientes,
                       ),
+                    _buildNavItem(
+                      context,
+                      '/licencia/comprar',
+                      'Planes y pago',
+                      Icons.workspace_premium_outlined,
+                      currentPath,
+                      isPermanent,
+                    ),
+                    _buildNavItem(
+                      context,
+                      '/licencia',
+                      'Mi licencia',
+                      Icons.verified_outlined,
+                      currentPath,
+                      isPermanent,
+                    ),
                     if (puede(Permiso.configAdmin))
                       _buildNavItem(context, '/configuracion', 'Configuración',
                           Icons.settings_outlined, currentPath, isPermanent),

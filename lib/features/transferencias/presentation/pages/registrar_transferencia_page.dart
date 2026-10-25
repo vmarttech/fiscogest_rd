@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -306,7 +307,12 @@ class _RegistrarTransferenciaPageState
   @override
   Widget build(BuildContext context) {
     if (!ref.watch(almacenesHabilitadosProvider)) {
-      return const PlanRequeridoAlmacenes(titulo: 'Transferencias');
+      final plan = ref.watch(licenciaActualProvider).valueOrNull?.plan ?? 'gratis';
+      return PlanRequeridoAlmacenes(
+        titulo: 'Transferencias',
+        planActual: plan,
+        funcion: 'transferencias',
+      );
     }
 
     final isMobile = AppBreakpoints.isMobile(context);

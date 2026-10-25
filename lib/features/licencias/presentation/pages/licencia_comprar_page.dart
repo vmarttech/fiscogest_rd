@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
-import 'package:fiscogest_rd/features/licencias/domain/medios_cobro.dart';
 import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
 import 'package:fiscogest_rd/features/licencias/domain/paypal_config.dart';
 import 'package:fiscogest_rd/features/licencias/data/paypal_service.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/paypal_checkout_page.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 
+/// Compra móvil: solo PayPal en USD, activación automática.
 class LicenciaComprarPage extends ConsumerStatefulWidget {
   const LicenciaComprarPage({super.key});
 
@@ -19,37 +16,28 @@ class LicenciaComprarPage extends ConsumerStatefulWidget {
   static const path = '/licencia/comprar';
 
   @override
-  ConsumerState<LicenciaComprarPage> createState() => _LicenciaComprarPageState();
+  ConsumerState<LicenciaComprarPage> createState() =>
+      _LicenciaComprarPageState();
 }
 
 class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
   String _plan = 'basico';
-  String _vigencia = 'mensual';
-  String? _referencia;
-  double? _monto;
   bool _cargando = false;
-  String? _medioId = 'toke';
 
-  double? get _precio => precioPlanVigencia(_plan, _vigencia);
+  static const _planes = ['basico', 'simplificado', 'pro'];
 
-  Future<void> _generarPedido() async {
+  double get _precioUsd => precioMensualUsd(_plan) ?? 0;
+
+  Future<void> _pagarPayPal() async {
     final montoUsd = precioMensualUsd(_plan);
     if (montoUsd == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Este plan no tiene precio de suscripción móvil.'),
-        ),
-      );
+      _snack('Este plan no tiene precio de suscripción.');
       return;
     }
     if (!PaypalConfig.configurado) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'PayPal no configurado. Ejecuta con '
-            '--dart-define=PAYPAL_CLIENT_ID=... --dart-define=PAYPAL_SECRET=...',
-          ),
-        ),
+      _snack(
+        'El pago en línea no está disponible en esta instalación. '
+        'Reinstala la app desde la última versión publicada o contacta soporte.',
       );
       return;
     }
@@ -62,11 +50,12 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
         vigenciaTipo: 'mensual',
         medioPreferido: 'paypal',
       );
+
       final paypal = PaypalService();
       final order = await paypal.createOrder(
         amountUsd: montoUsd,
         reference: refCode,
-        description: 'FiscoGest $_plan mensual',
+        description: 'FiscoGest ${nombrePlanUi(_plan)} mensual',
       );
 
       if (!mounted) return;
@@ -81,375 +70,161 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
 
       if (!mounted) return;
       if (result == null || result.cancelled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pago cancelado.')),
-        );
+        _snack('Pago cancelado.');
         return;
       }
       if (!result.success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result.error ?? 'No se completó el pago.')),
-        );
+        _snack(result.error ?? 'No se completó el pago.');
         return;
       }
 
-      // Pago OK → emitir licencia (sin transferencia manual)
       await svc.marcarPagadoYEmitirLicencia(refCode);
       ref.invalidate(licenciaActualProvider);
+
       if (!mounted) return;
-      setState(() {
-        _referencia = refCode;
-        _monto = montoUsd;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Pago recibido! Tu licencia está activa.'),
-        ),
-      );
-      // Volver a estado de licencia
-      if (mounted) await Navigator.of(context).maybePop();
+      _snack('¡Pago recibido! Tu plan ${nombrePlanUi(_plan)} ya está activo.');
+      await Navigator.of(context).maybePop();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
+      if (mounted) _snack('Error: $e');
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
   }
 
-
-  Future<void> _yaPague() async {
-    if (_referencia == null) return;
-    await ref.read(licenciaServiceProvider).marcarPagoReportado(_referencia!);
-    if (!mounted) return;
-    FiscoGestNotifications.show(
-      const SnackBar(
-        content: Text(
-          'Pago reportado. Cuando confirmemos el depósito, tu licencia quedará activa.',
-        ),
-      ),
-    );
+  void _snack(String m) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
   }
 
-  void _copiar(String texto) {
-    Clipboard.setData(ClipboardData(text: texto));
-    FiscoGestNotifications.show(const SnackBar(content: Text('Copiado')));
-  }
-
-  @override
   @override
   Widget build(BuildContext context) {
-    final esMovil = MediaQuery.sizeOf(context).width < 700;
+    final w = MediaQuery.sizeOf(context).width;
+    final pad = w < 700 ? 16.0 : 24.0;
 
     return AppScaffold(
-      title: 'Comprar licencia',
+      title: 'Planes y pago',
       body: ListView(
-        padding: EdgeInsets.fromLTRB(esMovil ? 16 : 24, 16, esMovil ? 16 : 24, 32),
+        padding: EdgeInsets.fromLTRB(pad, 12, pad, 32),
         children: [
-          _BannerPago(esMovil: esMovil),
+          _Hero(),
           const SizedBox(height: 20),
-
-          const _SectionLabel('Plan'),
-          const SizedBox(height: 8),
-          Text(
-            'Sin fiscal (ambulantes)',
-            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _PlanChip(
-                label: 'Simplificado · desde RD\$300',
-                selected: _plan == 'simplificado',
-                onTap: () => setState(() {
-                  _plan = 'simplificado';
-                  if (!vigenciasDisponiblesParaPlan('simplificado')
-                      .contains(_vigencia)) {
-                    _vigencia = 'mensual';
-                  }
-                  _referencia = null;
-                }),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Modo normal — US\$15.99/mes',
-            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final p in ['basico'])  // profesional/empresa → contacto FiscoGest
-                _PlanChip(
-                  label: p[0].toUpperCase() + p.substring(1),
-                  selected: _plan == p,
-                  onTap: () => setState(() {
-                    _plan = p;
-                    if (!vigenciasDisponiblesParaPlan(p).contains(_vigencia)) {
-                      _vigencia = 'mensual';
-                    }
-                    _referencia = null;
-                  }),
-                ),
-            ],
-          ),
-          if (descripcionPlanCorta(_plan).isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              descripcionPlanCorta(_plan),
-              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+          for (final p in _planes) ...[
+            _PlanCard(
+              plan: p,
+              selected: _plan == p,
+              onTap: () => setState(() => _plan = p),
             ),
+            const SizedBox(height: 12),
           ],
-
-          const SizedBox(height: 20),
-          const _SectionLabel('Periodo'),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final v in vigenciasDisponiblesParaPlan(_plan))
-                _PlanChip(
-                  label: v,
-                  selected: _vigencia == v,
-                  onTap: () => setState(() {
-                    _vigencia = v;
-                    _referencia = null;
-                  }),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 22),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Monto: RD\$ ${(_precio ?? 0).toStringAsFixed(0)}',
+                  'Total',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'US\$ ${_precioUsd.toStringAsFixed(2)} / mes',
                   style: const TextStyle(
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  esPlanSimplificado(_plan)
-                      ? 'Sin impuestos · 1 dispositivo · fiao hasta 50 cuentas'
-                      : 'Máx. cajas: ${kMaxCajasPorPlan[_plan] ?? 1}'
-                          ' · Instalaciones: ${maxInstalacionesPermitidas(_plan)}'
-                          ' (incluye 1 celular gratis)'
-                          '${planIncluyeEcf(_plan) ? ' · e-CF' : ''}',
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                  'Cobro en USD · activación automática al confirmar PayPal',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 18),
-          if (_referencia == null)
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: FilledButton(
-                onPressed: _cargando ? null : _generarPedido,
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F766E),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton.icon(
+              onPressed: _cargando ? null : _pagarPayPal,
+              icon: _cargando
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.payment),
+              label: Text(
+                _cargando ? 'Procesando…' : 'Pagar con PayPal',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
-                child: Text(_cargando ? 'Procesando…' : 'Pagar con PayPal'),
               ),
-            )
-          else ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF0F766E), Color(0xFF14B8A6)],
-                ),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Tu referencia',
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _referencia!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => _copiar(_referencia!),
-                        icon: const Icon(Icons.copy, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    'Monto exacto: RD\$ ${(_monto ?? 0).toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Incluye esta referencia en el concepto. Vence en 7 días si no se confirma.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-            const _SectionLabel('Medios de pago'),
-            const SizedBox(height: 10),
-            ...kMediosCobroMartTech.map((m) {
-              final sel = _medioId == m.id;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () => setState(() => _medioId = m.id),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: sel
-                              ? const Color(0xFF0F766E)
-                              : Colors.black.withValues(alpha: 0.06),
-                          width: sel ? 1.6 : 1,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  m.nombre,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    color: sel
-                                        ? const Color(0xFF0F766E)
-                                        : const Color(0xFF0F172A),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${m.etiquetaDato}: ${m.dato}\n'
-                                  'Titular: ${m.titular}\n'
-                                  '${m.instruccionCorta}',
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: AppColors.textSecondary,
-                                    height: 1.35,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.copy_outlined),
-                            onPressed: () => _copiar(m.dato),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: FilledButton.icon(
-                onPressed: _yaPague,
-                icon: const Icon(Icons.check_circle_outline),
-                label: const Text('Confirmar suscripción'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F766E),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF0F766E),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
               ),
             ),
-          ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Tras el pago, la licencia se activa sola. No hace falta enviar comprobantes.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              height: 1.35,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _BannerPago extends StatelessWidget {
-  const _BannerPago({required this.esMovil});
-  final bool esMovil;
-
+class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(esMovil ? 18 : 22),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         gradient: const LinearGradient(
           colors: [Color(0xFF0F766E), Color(0xFF14B8A6)],
         ),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(Icons.payments_outlined, color: Colors.white, size: 28),
-          ),
-          const SizedBox(width: 14),
-          const Expanded(
+          Icon(Icons.workspace_premium, color: Colors.white, size: 32),
+          SizedBox(width: 14),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Pago de licencia',
+                  'Elige tu plan',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -458,8 +233,12 @@ class _BannerPago extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Toke o transferencia. Genera FG-XXXXX e inclúyelo en el concepto.',
-                  style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.3),
+                  'Solo PayPal en USD. Tu plan queda activo al instante.',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.3,
+                  ),
                 ),
               ],
             ),
@@ -470,47 +249,135 @@ class _BannerPago extends StatelessWidget {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(text, style: AppTypography.labelLarge);
-  }
-}
-
-class _PlanChip extends StatelessWidget {
-  const _PlanChip({
-    required this.label,
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({
+    required this.plan,
     required this.selected,
     required this.onTap,
   });
-  final String label;
+
+  final String plan;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(
-        label,
-        style: TextStyle(
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          color: selected ? const Color(0xFF0F766E) : const Color(0xFF334155),
+    final precio = precioMensualUsd(plan) ?? 0;
+    final beneficios = beneficiosPlanUi(plan);
+    final destacado = plan == 'pro';
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected
+                  ? const Color(0xFF0F766E)
+                  : const Color(0xFFE2E8F0),
+              width: selected ? 2 : 1,
+            ),
+            color: selected
+                ? const Color(0xFF0F766E).withValues(alpha: 0.04)
+                : Colors.white,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Text(
+                          nombrePlanUi(plan),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: selected
+                                ? const Color(0xFF0F766E)
+                                : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        if (destacado) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F766E),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'Recomendado',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    selected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    color: selected
+                        ? const Color(0xFF0F766E)
+                        : const Color(0xFF94A3B8),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'US\$ ${precio.toStringAsFixed(2)} / mes',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 10),
+              for (final b in beneficios)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.check_circle,
+                        size: 16,
+                        color: Color(0xFF0F766E),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          b,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            height: 1.3,
+                            color: Color(0xFF334155),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      selectedColor: const Color(0xFF0F766E).withValues(alpha: 0.12),
-      checkmarkColor: const Color(0xFF0F766E),
-      side: BorderSide(
-        color: selected
-            ? const Color(0xFF0F766E)
-            : Colors.black.withValues(alpha: 0.08),
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      backgroundColor: Colors.white,
     );
   }
 }

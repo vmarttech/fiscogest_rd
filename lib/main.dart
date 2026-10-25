@@ -262,19 +262,46 @@ class _UpdateGate extends StatefulWidget {
   State<_UpdateGate> createState() => _UpdateGateState();
 }
 
-class _UpdateGateState extends State<_UpdateGate> {
-  bool _checked = false;
+class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
+  bool _busy = false;
+  DateTime? _lastCheck;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future<void>.delayed(const Duration(seconds: 2), () async {
-        if (!mounted || _checked) return;
-        _checked = true;
-        await UpdateChecker.checkAndPrompt(context);
-      });
+      Future<void>.delayed(const Duration(seconds: 2), _runCheck);
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _runCheck();
+    }
+  }
+
+  Future<void> _runCheck() async {
+    if (!mounted || _busy) return;
+    final now = DateTime.now();
+    if (_lastCheck != null &&
+        now.difference(_lastCheck!) < const Duration(seconds: 30)) {
+      return;
+    }
+    _busy = true;
+    _lastCheck = now;
+    try {
+      await UpdateChecker.checkAndPrompt(context);
+    } finally {
+      _busy = false;
+    }
   }
 
   @override

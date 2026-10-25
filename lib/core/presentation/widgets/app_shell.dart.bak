@@ -1,13 +1,17 @@
+import 'dart:io';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/notificaciones/presentation/campana_notificaciones.dart';
+import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/pedidos_pendientes_provider.dart';
 import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
@@ -18,6 +22,9 @@ class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
+
+  // Ancho del menú fijo en escritorio (Opción 1)
+  static const double _sidebarWidth = 200.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,14 +39,22 @@ class AppShell extends ConsumerWidget {
     final rolNorm = (sesion?.rol ?? '').toLowerCase().trim();
     final esVendedor = rolNorm.contains('vendedor');
     final esCajero = rolNorm.contains('cajero');
+    // Label limpio y corto para el menú
     final operadorLabel = sesion == null
         ? 'Sin sesión'
-        : '${sesion.nombre.isNotEmpty ? sesion.nombre : sesion.username}'
-              ' · ${sesion.rol}';
+        : (sesion.nombre.isNotEmpty 
+            ? sesion.nombre.split(' ').first 
+            : sesion.username);
     final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
     final nombreEmpresa = (cfg?.nombreComercial.trim().isNotEmpty == true)
         ? cfg!.nombreComercial.trim()
         : 'Mi negocio';
+    final rncEmpresa = (cfg?.rnc.trim().isNotEmpty == true)
+        ? cfg!.rnc.trim()
+        : '';
+    final direccionEmpresa = (cfg?.direccion.trim().isNotEmpty == true)
+        ? cfg!.direccion.trim()
+        : '';
 
     final gatesLic = ref
         .watch(licenciaActualProvider)
@@ -52,36 +67,112 @@ class AppShell extends ConsumerWidget {
     final permiteCreditoFormalLicencia = gatesLic.permiteCreditoFormal;
     final permiteAlmacenesLicencia = gatesLic.permiteAlmacenes;
 
-    const navWidth = 280.0;
     final currentPath = GoRouterState.of(context).uri.path;
+    // Tablet horizontal y ≥900: mismo chrome que escritorio (evita desbordes del layout móvil).
+    final isDesktop = AppBreakpoints.useWideChrome(context);
 
+    // ─────────────────────────────────────────────
+    // ESCRITORIO → Menú fijo + Header
+    // ─────────────────────────────────────────────
+    if (isDesktop) {
+      // Mock: sidebar altura completa + header claro solo sobre el contenido
+      return Scaffold(
+        backgroundColor: AppColors.pageBackground,
+        body: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildMenu(
+              width: _sidebarWidth,
+              currentPath: currentPath,
+              context: context,
+              nombreEmpresa: nombreEmpresa,
+              logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true) ? cfg!.logoUrl.trim() : '',
+              modoSimplificado: modoSimplificado,
+              esAdmin: esAdmin,
+              esVendedor: esVendedor,
+              esCajero: esCajero,
+              operadorLabel: operadorLabel,
+              rolUsuario: sesion?.rol ?? '',
+              usernameSesion: sesion?.username ?? '',
+              onLogout: () {
+                ref.read(sesionProvider.notifier).state = null;
+                SesionNube.clear();
+                context.go('/login');
+              },
+              permiteFiscalLicencia: permiteFiscalLicencia,
+              permiteFiaoLicencia: permiteFiaoLicencia,
+              permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
+              permiteAlmacenesLicencia: permiteAlmacenesLicencia,
+              pedidosPendientes: pedidosPendientes,
+              isPermanent: true,
+              hideBrandHeader: false,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildDesktopHeader(
+                    context: context,
+                    ref: ref,
+                    nombreEmpresa: nombreEmpresa,
+                    rncEmpresa: rncEmpresa,
+                    direccionEmpresa: direccionEmpresa,
+                    operadorLabel: operadorLabel,
+                    onLogout: () {
+                      ref.read(sesionProvider.notifier).state = null;
+                      SesionNube.clear();
+                      context.go('/login');
+                    },
+                  ),
+                  Expanded(child: child),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // ─────────────────────────────────────────────
+    // MÓVIL / TABLET → Drawer (comportamiento actual)
+    // ─────────────────────────────────────────────
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
-      drawer: SizedBox(
-        width: navWidth,
-        child: _buildMenu(
-          navWidth,
-          currentPath,
-          context,
-          nombreEmpresa,
-          modoSimplificado,
-          esAdmin,
-          esVendedor,
-          esCajero,
-          operadorLabel,
-          sesion?.rol ?? '',
-          sesion?.username ?? '',
-          () {
-            ref.read(sesionProvider.notifier).state = null;
-            SesionNube.clear();
-            context.go('/login');
-          },
-          permiteFiscalLicencia,
-          permiteFiaoLicencia,
-          permiteCreditoFormalLicencia,
-          permiteAlmacenesLicencia,
-          pedidosPendientes,
-        ),
+      drawer: Builder(
+        builder: (drawerCtx) {
+          final screenW = MediaQuery.sizeOf(drawerCtx).width;
+          final drawerW = (screenW * 0.85).clamp(220.0, 280.0);
+          return SizedBox(
+            width: drawerW,
+            child: _buildMenu(
+              width: drawerW,
+              currentPath: currentPath,
+              context: context,
+              nombreEmpresa: nombreEmpresa,
+              logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true)
+                  ? cfg!.logoUrl.trim()
+                  : '',
+              modoSimplificado: modoSimplificado,
+              esAdmin: esAdmin,
+              esVendedor: esVendedor,
+              esCajero: esCajero,
+              operadorLabel: operadorLabel,
+              rolUsuario: sesion?.rol ?? '',
+              usernameSesion: sesion?.username ?? '',
+              onLogout: () {
+                ref.read(sesionProvider.notifier).state = null;
+                SesionNube.clear();
+                context.go('/login');
+              },
+              permiteFiscalLicencia: permiteFiscalLicencia,
+              permiteFiaoLicencia: permiteFiaoLicencia,
+              permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
+              permiteAlmacenesLicencia: permiteAlmacenesLicencia,
+              pedidosPendientes: pedidosPendientes,
+              isPermanent: false,
+            ),
+          );
+        },
       ),
       body: Builder(
         builder: (scaffoldContext) {
@@ -102,81 +193,265 @@ class AppShell extends ConsumerWidget {
     );
   }
 
-  Widget _buildMenu(
-    double width,
-    String currentPath,
-    BuildContext context,
-    String nombreEmpresa,
-    bool modoSimplificado,
-    bool esAdmin,
-    bool esVendedor,
-    bool esCajero,
-    String operadorLabel,
-    String rolUsuario,
-    String usernameSesion,
-    VoidCallback onLogout,
-    bool permiteFiscalLicencia,
-    bool permiteFiaoLicencia,
-    bool permiteCreditoFormalLicencia,
-    bool permiteAlmacenesLicencia,
-    int pedidosPendientes,
-  ) {
-    // Menú completo SOLO Admin.
-    // Cara "colmado" (Fiao, etc.) SOLO si config.simplificado Y es Admin.
-    // Vendedor/Cajero siempre ven menú formal de su rol.
-    // modoColmado: param modoSimplificado && fiao
+  // ─────────────────────────────────────────────
+  // HEADER SUPERIOR (solo escritorio)
+  // ─────────────────────────────────────────────
+  Widget _buildDesktopHeader({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String nombreEmpresa,
+    required String rncEmpresa,
+    required String direccionEmpresa,
+    required String operadorLabel,
+    required VoidCallback onLogout,
+  }) {
+    final rnc = rncEmpresa;
+    final fecha = DateFormat("EEEE, d 'de' MMMM yyyy", 'es').format(DateTime.now());
+    final fechaCap = fecha.isEmpty ? fecha : '${fecha[0].toUpperCase()}${fecha.substring(1)}';
+
+    return Container(
+      height: 64,
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A), // mismo que sidebar navy-900
+        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          // Company chip (HTML enterprise)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFF334155)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.business_outlined, size: 15, color: Color(0xFF60A5FA)),
+                const SizedBox(width: 8),
+                Text(
+                  nombreEmpresa,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+                if (rnc.isNotEmpty) ...[
+                  const Text('  •  ', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                  Text(
+                    'RNC: $rnc',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'monospace',
+                      color: Color(0xFF94A3B8),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Search
+          Expanded(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: SizedBox(
+                height: 40,
+                child: TextField(
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar clientes, facturas, e-CF, créditos...',
+                    hintStyle: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                    prefixIcon: const Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
+                    filled: true,
+                    fillColor: const Color(0xFF1E293B),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const Spacer(),
+          // Date
+          Row(
+            children: [
+              const Icon(Icons.calendar_today_outlined, size: 15, color: Color(0xFF94A3B8)),
+              const SizedBox(width: 6),
+              Text(
+                fechaCap,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFCBD5E1),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          // Sistema Operativo badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: const Color(0xFFA7F3D0)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF10B981),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Text(
+                  'Sistema Operativo',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF047857),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Campana de alertas operativas
+          const CampanaNotificaciones(),
+          const SizedBox(width: 4),
+          // Exportar Resumen
+          FilledButton.icon(
+            onPressed: () => context.push('/reports'),
+            icon: const Icon(Icons.download_outlined, size: 16),
+            label: const Text(
+              'Exportar Resumen',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildMenu({
+    required double width,
+    required String currentPath,
+    required BuildContext context,
+    required String nombreEmpresa,
+    required String logoUrl,
+    required bool modoSimplificado,
+    required bool esAdmin,
+    required bool esVendedor,
+    required bool esCajero,
+    required String operadorLabel,
+    required String rolUsuario,
+    required String usernameSesion,
+    required VoidCallback onLogout,
+    bool hideBrandHeader = false,
+    required bool permiteFiscalLicencia,
+    required bool permiteFiaoLicencia,
+    required bool permiteCreditoFormalLicencia,
+    required bool permiteAlmacenesLicencia,
+    required int pedidosPendientes,
+    required bool isPermanent,
+  }) {
     final bool modoColmadoFlag =
         modoSimplificado && rolTienePermiso(rolUsuario, Permiso.fiaoUsar);
 
     bool puede(String permiso) => rolTienePermiso(rolUsuario, permiso);
 
+    // Móvil: degradado teal profundo (barra app → oscuro).
+    // Desktop (isPermanent): fondo sidebar actual.
+    final menuBg = isPermanent
+        ? null
+        : const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF00796B), // verde AppBar
+                Color(0xFF00695C),
+                Color(0xFF004D40),
+                Color(0xFF003D36),
+                Color(0xFF0A1F1C), // pie profundo
+              ],
+              stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+            ),
+          );
     return Material(
-      color: AppColors.sidebarBackground,
-      child: SizedBox(
+      color: isPermanent
+          ? AppColors.sidebarBackground
+          : Colors.transparent,
+      child: Container(
         width: width,
+        decoration: menuBg,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ─── HEADER (Logo + App) ───
+              // ─── HEADER DEL MENÚ (oculto en desktop: va en barra superior) ───
+              if (!hideBrandHeader)
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
                 child: Row(
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.inventory_2_rounded,
-                        color: AppColors.primaryLight,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    _buildBusinessLogo(logoUrl, nombreEmpresa),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             nombreEmpresa,
-                            style: AppTypography.h4.copyWith(
-                              color: AppColors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              height: 1.15,
                             ),
                             overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          Text(
-                            operadorLabel,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.grey400,
-                              fontSize: 11,
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Gestión Fiscal y Créditos',
+                            style: TextStyle(
+                              color: Color(0xFF9DB5DA),
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w500,
+                              height: 1.2,
                             ),
                             overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ],
                       ),
@@ -184,30 +459,25 @@ class AppShell extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Divider(color: AppColors.divider, height: 1),
-              // ─── MENÚ CON SCROLL ───
+              Divider(
+                color: isPermanent
+                    ? AppColors.divider
+                    : Colors.white.withValues(alpha: 0.18),
+                height: 1,
+              ),
+
+              // ─── ÍTEMS DEL MENÚ ───
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
+                  padding: const EdgeInsets.fromLTRB(10, 14, 10, 20),
                   children: [
                     _buildSectionTitle('OPERACIONES'),
-                    // Invitado: puede registrarse o iniciar sesión (app ya usable)
                     if (usernameSesion.isEmpty ||
                         usernameSesion.toLowerCase() == 'invitado') ...[
-                      _buildNavItem(
-                        context,
-                        '/setup-cuenta',
-                        'Registro',
-                        Icons.person_add_outlined,
-                        currentPath,
-                      ),
-                      _buildNavItem(
-                        context,
-                        '/login',
-                        'Iniciar sesión',
-                        Icons.login_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/setup-cuenta', 'Registro',
+                          Icons.person_add_outlined, currentPath, isPermanent),
+                      _buildNavItem(context, '/login', 'Iniciar sesión',
+                          Icons.login_outlined, currentPath, isPermanent),
                     ],
                     if (puede(Permiso.dashboardVer))
                       _buildNavItem(
@@ -216,6 +486,7 @@ class AppShell extends ConsumerWidget {
                         modoColmadoFlag ? 'Inicio' : 'Dashboard',
                         Icons.home_outlined,
                         currentPath,
+                        isPermanent,
                       ),
                     if (!modoColmadoFlag &&
                         permiteFiscalLicencia &&
@@ -226,208 +497,104 @@ class AppShell extends ConsumerWidget {
                         'Facturación y NC',
                         Icons.point_of_sale_outlined,
                         currentPath,
+                        isPermanent,
                       ),
                     if (puede(Permiso.ventasCotizar))
-                      _buildNavItem(
-                        context,
-                        '/ventas',
-                        'Ventas',
-                        Icons.point_of_sale,
-                        currentPath,
-                      ),
-                    if (puede(Permiso.cajaCobrar))
-                      _buildNavItem(
-                        context,
-                        '/ventas/cobro',
-                        'Caja',
-                        Icons.payments_outlined,
-                        currentPath,
-                      ),
-                    // Fiao: solo cara colmado (modoSimplificado) Y plan con fiao
-                    // (gratis / simplificado). En modo normal no aparece aunque el plan lo permita.
+                      _buildNavItem(context, '/ventas/cotizaciones/nueva', 'Ventas',
+                          Icons.point_of_sale, currentPath, isPermanent),
+                    if (puede(Permiso.cajaCobrar) && !AppBreakpoints.isMobile(context))
+                      if (!modoSimplificado)
+                        _buildNavItem(context, '/ventas/cobro', 'Caja',
+                          Icons.payments_outlined, currentPath, isPermanent),
                     if (modoSimplificado &&
                         permiteFiaoLicencia &&
                         puede(Permiso.fiaoUsar))
-                      _buildNavItem(
-                        context,
-                        '/ventas/fios',
-                        'Fiao',
-                        Icons.edit_note_rounded,
-                        currentPath,
-                      ),
-                    // Crédito formal: NUNCA en modoSimplificado ni en plan gratis/simplificado.
-                    // Solo modo normal + plan con permiteCreditoFormal.
+                      _buildNavItem(context, '/ventas/fios', 'Fiao',
+                          Icons.edit_note_rounded, currentPath, isPermanent),
                     if (!modoSimplificado &&
                         permiteCreditoFormalLicencia &&
                         puede(Permiso.creditosGestionar))
-                      _buildNavItem(
-                        context,
-                        '/creditos',
-                        'Crédito',
-                        Icons.credit_score_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/creditos', 'Crédito',
+                          Icons.credit_score_outlined, currentPath, isPermanent),
                     if (puede(Permiso.comprasGestionar))
-                      _buildNavItem(
-                        context,
-                        '/compras',
-                        'Compras',
-                        Icons.shopping_cart_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/compras', 'Compras',
+                          Icons.shopping_cart_outlined, currentPath, isPermanent),
                     if (puede(Permiso.reportesVer) || esAdmin)
-                      _buildNavItem(
-                        context,
-                        '/gastos',
-                        'Gastos',
-                        Icons.money_off_csred_outlined,
-                        currentPath,
-                      ),
-                    const SizedBox(height: 18),
+                      _buildNavItem(context, '/gastos', 'Gastos',
+                          Icons.money_off_csred_outlined, currentPath, isPermanent),
+
+                    const SizedBox(height: 16),
                     _buildSectionTitle('INVENTARIO'),
                     if (puede(Permiso.inventarioVer))
-                      _buildNavItem(
-                        context,
-                        '/inventario',
-                        'Productos',
-                        Icons.inventory_2_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/inventario', 'Productos',
+                          Icons.inventory_2_outlined, currentPath, isPermanent),
                     if (!modoColmadoFlag && puede(Permiso.kardexVer)) ...[
+                      _buildNavItem(context, '/kardex', 'Kárdex',
+                          Icons.receipt_long_outlined, currentPath, isPermanent),
                       _buildNavItem(
-                        context,
-                        '/kardex',
-                        'Kárdex',
-                        Icons.receipt_long_outlined,
-                        currentPath,
-                      ),
-                      _buildNavItem(
-                        context,
-                        '/inventario-fisico',
-                        'Inventario Físico',
-                        Icons.fact_check_outlined,
-                        currentPath,
-                      ),
-                      _buildNavItem(
-                        context,
-                        '/lista-ajustes',
-                        'Ajustes',
-                        Icons.tune_outlined,
-                        currentPath,
-                      ),
+                          context,
+                          '/inventario-fisico',
+                          'Inventario Físico',
+                          Icons.fact_check_outlined,
+                          currentPath,
+                          isPermanent),
+                      _buildNavItem(context, '/lista-ajustes', 'Ajustes',
+                          Icons.tune_outlined, currentPath, isPermanent),
                       if (permiteAlmacenesLicencia)
                         _buildNavItem(
-                          context,
-                          '/transferencias/registrar',
-                          'Transferencias',
-                          Icons.swap_horiz_outlined,
-                          currentPath,
-                        ),
+                            context,
+                            '/transferencias/registrar',
+                            'Transferencias',
+                            Icons.swap_horiz_outlined,
+                            currentPath,
+                            isPermanent),
                     ],
-                    const SizedBox(height: 18),
+
+                    const SizedBox(height: 16),
                     _buildSectionTitle('CATÁLOGOS'),
                     if (puede(Permiso.clientesVer))
-                      _buildNavItem(
-                        context,
-                        '/clientes',
-                        'Clientes',
-                        Icons.people_outline,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/clientes', 'Clientes',
+                          Icons.people_outline, currentPath, isPermanent),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(
-                        context,
-                        '/proveedores',
-                        'Proveedores',
-                        Icons.business_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/proveedores', 'Proveedores',
+                          Icons.business_outlined, currentPath, isPermanent),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(
-                        context,
-                        '/categorias',
-                        'Categorías',
-                        Icons.category_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/categorias', 'Categorías',
+                          Icons.category_outlined, currentPath, isPermanent),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(
-                        context,
-                        '/marcas',
-                        'Marcas',
-                        Icons.branding_watermark_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/marcas', 'Marcas',
+                          Icons.branding_watermark_outlined, currentPath, isPermanent),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(
-                        context,
-                        '/unidades',
-                        'Unidades',
-                        Icons.straighten_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/unidades', 'Unidades',
+                          Icons.straighten_outlined, currentPath, isPermanent),
                     if (puede(Permiso.catalogoGestionar) &&
                         permiteAlmacenesLicencia)
-                      _buildNavItem(
-                        context,
-                        '/almacenes',
-                        'Almacenes',
-                        Icons.warehouse_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/almacenes', 'Almacenes',
+                          Icons.warehouse_outlined, currentPath, isPermanent),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(
-                        context,
-                        '/presentaciones',
-                        'Presentaciones',
-                        Icons.view_module_outlined,
-                        currentPath,
-                      ),
-                    const SizedBox(height: 18),
+                      _buildNavItem(context, '/presentaciones', 'Presentaciones',
+                          Icons.view_module_outlined, currentPath, isPermanent),
+
+                    const SizedBox(height: 16),
                     _buildSectionTitle('SISTEMA'),
                     if (puede(Permiso.reportesVer) ||
                         modoSimplificado ||
                         esAdmin)
-                      _buildNavItem(
-                        context,
-                        '/reports',
-                        'Reportes',
-                        Icons.assessment_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/reports', 'Reportes',
+                          Icons.assessment_outlined, currentPath, isPermanent),
                     if (!modoColmadoFlag &&
                         esAdmin &&
                         permiteFiscalLicencia) ...[
-                      _buildNavItem(
-                        context,
-                        '/ecfe',
-                        'e-CF · DGII',
-                        Icons.cloud_sync_outlined,
-                        currentPath,
-                      ),
-                      _buildNavItem(
-                        context,
-                        '/impuestos',
-                        'Impuestos',
-                        Icons.calculate_outlined,
-                        currentPath,
-                      ),
-                      _buildNavItem(
-                        context,
-                        '/import-export',
-                        'Importar / Exportar',
-                        Icons.import_export,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/ecfe', 'e-CF · DGII',
+                          Icons.cloud_sync_outlined, currentPath, isPermanent),
+                      _buildNavItem(context, '/impuestos', 'Impuestos',
+                          Icons.calculate_outlined, currentPath, isPermanent),
+                      _buildNavItem(context, '/import-export', 'Importar / Exportar',
+                          Icons.import_export, currentPath, isPermanent),
                     ],
                     if (puede(Permiso.usuariosGestionar))
-                      _buildNavItem(
-                        context,
-                        '/usuarios',
-                        'Usuarios',
-                        Icons.manage_accounts_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/usuarios', 'Usuarios',
+                          Icons.manage_accounts_outlined, currentPath, isPermanent),
                     if (esDuenoPlataforma(usernameSesion))
                       _buildNavItem(
                         context,
@@ -435,33 +602,35 @@ class AppShell extends ConsumerWidget {
                         'Pedidos licencia',
                         Icons.receipt_long_outlined,
                         currentPath,
+                        isPermanent,
                         badgeCount: pedidosPendientes,
                       ),
                     if (puede(Permiso.configAdmin))
-                      _buildNavItem(
-                        context,
-                        '/configuracion',
-                        'Configuración',
-                        Icons.settings_outlined,
-                        currentPath,
-                      ),
+                      _buildNavItem(context, '/configuracion', 'Configuración',
+                          Icons.settings_outlined, currentPath, isPermanent),
+
                     const SizedBox(height: 8),
-                    const Divider(color: AppColors.divider, height: 24),
+                    Divider(
+                      color: isPermanent
+                          ? AppColors.divider
+                          : Colors.white.withValues(alpha: 0.15),
+                      height: 24,
+                    ),
                     ListTile(
                       dense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
-                      leading: const Icon(
-                        Icons.logout,
-                        color: AppColors.grey400,
-                        size: 22,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                      // Splash visible sobre sidebar navy (evita assert Flutter)
+                      hoverColor: const Color(0x33FFFFFF),
+                      splashColor: const Color(0x44FFFFFF),
+                      focusColor: const Color(0x22FFFFFF),
+                      leading: const Icon(Icons.logout,
+                          color: AppColors.grey400, size: 20),
                       title: Text(
                         'Cerrar sesión',
                         style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.grey300,
-                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
                         ),
                       ),
                       onTap: onLogout,
@@ -469,18 +638,8 @@ class AppShell extends ConsumerWidget {
                   ],
                 ),
               ),
-              // ─── PIE ───
-              const Divider(color: AppColors.divider, height: 1),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                child: Text(
-                  'v3.0 Pro',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.grey500,
-                    fontSize: 11,
-                  ),
-                ),
-              ),
+
+
             ],
           ),
         ),
@@ -490,13 +649,13 @@ class AppShell extends ConsumerWidget {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      padding: const EdgeInsets.fromLTRB(10, 4, 10, 7),
       child: Text(
         title,
         style: AppTypography.labelSmall.copyWith(
-          color: AppColors.grey400,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.9,
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8,
           fontSize: 10,
         ),
       ),
@@ -508,22 +667,28 @@ class AppShell extends ConsumerWidget {
     String routePath,
     String title,
     IconData icon,
-    String currentPath, {
+    String currentPath,
+    bool isPermanent, {
     int badgeCount = 0,
   }) {
     final esSeleccionado =
         currentPath == routePath || currentPath.startsWith('$routePath/');
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 1.5),
       child: Material(
         color: esSeleccionado
-            ? AppColors.primary.withValues(alpha: 0.18)
+            ? const Color(0xFF1A3A6B) // azul marino (no brillante)
             : Colors.transparent,
-        borderRadius: AppRadius.allM,
+        borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: AppRadius.allM,
+          hoverColor: const Color(0x33FFFFFF),
+          splashColor: const Color(0x44FFFFFF),
+          highlightColor: const Color(0x22FFFFFF),
           onTap: () {
-            if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+            if (!isPermanent &&
+                (Scaffold.maybeOf(context)?.isDrawerOpen ?? false)) {
               Navigator.of(context).pop();
             }
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -531,36 +696,33 @@ class AppShell extends ConsumerWidget {
             });
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Row(
               children: [
                 Icon(
                   icon,
                   color: esSeleccionado
-                      ? AppColors.primaryLight
-                      : AppColors.grey400,
-                  size: 20,
+                      ? Colors.white
+                      : const Color(0xFF9DB5DA),
+                  size: 19,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     title,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: AppTypography.labelMedium.copyWith(
-                      color: esSeleccionado
-                          ? AppColors.white
-                          : AppColors.grey400,
-                      fontWeight: esSeleccionado
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                      fontSize: 13.5,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
                     ),
                   ),
                 ),
                 if (badgeCount > 0) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: const Color(0xFFB91C1C),
                       borderRadius: BorderRadius.circular(10),
@@ -569,17 +731,17 @@ class AppShell extends ConsumerWidget {
                       badgeCount > 99 ? '99+' : '$badgeCount',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 4),
                 ],
                 if (esSeleccionado)
                   Container(
-                    width: 4,
-                    height: 18,
+                    width: 3.5,
+                    height: 16,
                     decoration: BoxDecoration(
                       color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(2),
@@ -590,6 +752,52 @@ class AppShell extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBusinessLogo(String logoUrl, String nombreEmpresa) {
+    final tieneLogo = logoUrl.isNotEmpty && File(logoUrl).existsSync();
+    final iniciales = nombreEmpresa
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .take(2)
+        .map((p) => p[0].toUpperCase())
+        .join();
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F2A52),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(color: const Color(0xFF1E3A6B)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: tieneLogo
+          ? Image.file(
+              File(logoUrl),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Center(
+                child: Text(
+                  iniciales.isEmpty ? 'FG' : iniciales,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            )
+          : Center(
+              child: Text(
+                iniciales.isEmpty ? 'FG' : iniciales,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+              ),
+            ),
     );
   }
 }

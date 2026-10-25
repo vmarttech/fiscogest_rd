@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/almacenes/domain/entities/almacen.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/widgets/plan_requerido.dart';
 
 class AlmacenesPage extends ConsumerStatefulWidget {
@@ -36,7 +37,12 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
   @override
   Widget build(BuildContext context) {
     if (!ref.watch(almacenesHabilitadosProvider)) {
-      return const PlanRequeridoAlmacenes(titulo: 'Almacenes');
+      final plan = ref.watch(licenciaActualProvider).valueOrNull?.plan ?? 'gratis';
+      return PlanRequeridoAlmacenes(
+        titulo: 'Almacenes',
+        planActual: plan,
+        funcion: 'almacenes',
+      );
     }
     final mobile = AppBreakpoints.isMobile(context);
     final async = ref.watch(almacenesControllerProvider);
@@ -53,18 +59,24 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
             )
           : null,
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: mobile ? 560 : 1100),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                mobile ? 16 : 25,
-                mobile ? 12 : 25,
-                mobile ? 16 : 25,
-                24,
-              ),
-              child: async.when(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: mobile ? 560 : 1100,
+                  minHeight: constraints.maxHeight,
+                  maxHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    mobile ? 16 : 25,
+                    mobile ? 12 : 25,
+                    mobile ? 16 : 25,
+                    24,
+                  ),
+                  child: async.when(
                 loading: () => const Center(
                   child: CircularProgressIndicator(color: _accent),
                 ),
@@ -275,6 +287,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                 ),
                               )
                             : ListView.separated(
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 itemCount: visible.length,
                                 separatorBuilder: (_, __) =>
                                     const SizedBox(height: 12),
@@ -286,14 +299,17 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                   );
                 },
               ),
-            ),
-          ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _searchField() {
+  Widget _searchField()
+ {
     return TextField(
       onChanged: (v) => setState(() => _filtro = v.trim()),
       style: const TextStyle(fontSize: 14, color: _ink),

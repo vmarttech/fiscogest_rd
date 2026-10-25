@@ -44,16 +44,20 @@ class UpdateChecker {
     try {
       final info = await PackageInfo.fromPlatform();
       final currentCode = int.tryParse(info.buildNumber) ?? 0;
-
+      final uri = Uri.parse(kUpdateJsonUrl).replace(
+        queryParameters: {
+          't': DateTime.now().millisecondsSinceEpoch.toString(),
+        },
+      );
       final res = await http
-          .get(Uri.parse(kUpdateJsonUrl))
-          .timeout(const Duration(seconds: 8));
-
+          .get(uri, headers: const {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+          })
+          .timeout(const Duration(seconds: 12));
       if (res.statusCode != 200) return null;
-
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       final remote = UpdateInfo.fromJson(data);
-
       if (remote.versionCode > currentCode && remote.apkUrl.isNotEmpty) {
         return remote;
       }

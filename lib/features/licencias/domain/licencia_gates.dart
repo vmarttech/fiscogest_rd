@@ -6,7 +6,7 @@ class LicenciaGates {
 
   final LicenciaInfo? lic;
 
-  String get plan => lic?.plan ?? 'demo';
+  String get plan => (lic?.plan ?? 'demo').toLowerCase();
 
   LimitesPlan get limites => limitesDe(plan);
 
@@ -14,24 +14,50 @@ class LicenciaGates {
 
   bool get puedeEscribir => lic?.puedeEscribir ?? false;
 
+  bool get esDemo => plan == 'demo';
+
+  bool get esDesarrollador => lic?.esDesarrollador == true;
+
   bool get permiteFiscal {
-    if (lic?.esDesarrollador == true) return true;
-    return limites.permiteFiscal || plan == 'demo';
+    if (esDesarrollador || esDemo) return true;
+    return limites.permiteFiscal;
   }
 
   bool get permiteFiao {
-    if (lic?.esDesarrollador == true) return true;
+    if (esDesarrollador || esDemo) return true;
     return limites.permiteFiao;
   }
 
   bool get permiteCreditoFormal {
-    if (lic?.esDesarrollador == true) return true;
+    if (esDesarrollador || esDemo) return true;
     return limites.permiteCreditoFormal;
+  }
+
+  bool get permiteReportes {
+    if (esDesarrollador || esDemo) return true;
+    return limites.permiteReportes;
+  }
+
+  bool get permiteAlmacenes {
+    if (esDesarrollador || esDemo) return true;
+    return limites.permiteAlmacenes;
+  }
+
+  bool get permiteUsuariosExtra {
+    if (esDesarrollador || esDemo) return true;
+    return limites.permiteUsuariosExtra;
+  }
+
+  bool get permiteEcf {
+    if (esDesarrollador || esDemo) return true;
+    return limites.permiteEcf;
   }
 
   bool get esSimplificado => esPlanSimplificado(plan);
 
   bool get esGratis => esPlanGratis(plan);
+
+  bool get esPro => esPlanPro(plan);
 
   int? get maxCuentasFiao => limites.maxCuentasFiaoAbiertas;
 
@@ -43,29 +69,36 @@ class LicenciaGates {
 
   String get textoDispositivos {
     if (lic == null) return '';
-    if (lic!.esDesarrollador) {
+    if (esDesarrollador) {
       return 'Licencia de plataforma · desarrollador autorizado.';
     }
+    if (esDemo) {
+      return 'Prueba 30 días · acceso completo · 1 equipo.';
+    }
     if (esGratis) {
-      return 'Plan gratis · 1 dispositivo · límites activos · fiao hasta ${maxCuentasFiao ?? 25} cuentas.';
+      return 'Gratis · 15 ventas/mes · 1 equipo · sin reportes.';
+    }
+    if (plan == 'basico') {
+      return 'Básico · 50 facturas/mes · reportes · 1 equipo.';
     }
     if (esSimplificado) {
-      return 'Simplificado · 1 dispositivo · sin impuestos · fiao hasta ${maxCuentasFiao ?? 50}.';
+      return 'Simplificado · 150 facturas/mes · 1 equipo.';
+    }
+    if (esPro) {
+      return 'Pro · todo incluido · usuarios por departamento.';
     }
     final max = lic!.maxDispositivos;
-    if (permiteFiao) {
-      return 'Hasta $max instalaciones · fiao disponible · 1 celular gratis en planes de pago.';
-    }
-    return 'Hasta $max instalaciones · crédito formal (sin fiao) · 1 celular gratis.';
+    return 'Hasta $max instalaciones.';
   }
 
   String mensajeTope(String recurso) =>
-      'Límite del plan ($plan) en $recurso. '
-      'Actualice en Configuración → Sistema → Licencia y pagos.';
+      'Límite del plan ${nombrePlanUi(plan)} en $recurso. '
+      'Actualiza tu plan en Licencia y pagos.';
 
-  /// Catálogo de almacenes + transferencias: Profesional y Empresa.
-  bool get permiteAlmacenes {
-    final p = (lic?.plan ?? '').toLowerCase().trim();
-    return p == 'profesional' || p == 'empresa' || p == 'desarrollador';
+  /// Mensaje al tocar una función no incluida en el plan actual.
+  String mensajeUpgrade(String funcion) {
+    final min = planMinimoPara(funcion);
+    return 'Tu plan ${nombrePlanUi(plan)} no incluye esta función. '
+        'Actualiza a ${nombrePlanUi(min)} para usarla.';
   }
 }

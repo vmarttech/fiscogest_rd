@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fiscogest_rd/core/store/store_channel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
@@ -1369,11 +1370,20 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             onTap: () => context.push('/legal/terminos'),
           ),
           const SizedBox(height: 8),
-          const ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.info_outline),
-            title: Text('Version'),
-            subtitle: Text('FiscoGest RD v3.0 Pro'),
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snap) {
+              final info = snap.data;
+              final label = info == null
+                  ? 'Cargando…'
+                  : 'FiscoGest RD ${info.version} (${info.buildNumber})';
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.info_outline),
+                title: const Text('Version'),
+                subtitle: Text(label),
+              );
+            },
           ),
           const ListTile(
             contentPadding: EdgeInsets.zero,

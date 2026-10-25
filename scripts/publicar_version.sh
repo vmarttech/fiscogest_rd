@@ -40,7 +40,11 @@ sed -i "s/^version: .*/version: ${NEW_VERSION}/" pubspec.yaml
 # 2) APK — MISMA ruta que usas tú (STORE=direct)
 echo ""
 echo "  Compilando APK (STORE=direct)..."
-flutter build apk --release --dart-define=STORE=direct
+flutter build apk --release \
+  --dart-define=STORE=direct \
+  --dart-define=PAYPAL_CLIENT_ID="${PAYPAL_CLIENT_ID:?Define PAYPAL_CLIENT_ID antes de publicar}" \
+  --dart-define=PAYPAL_SECRET="${PAYPAL_SECRET:?Define PAYPAL_SECRET antes de publicar}" \
+  --dart-define=PAYPAL_SANDBOX="${PAYPAL_SANDBOX:-true}"
 
 APK="build/app/outputs/flutter-apk/app-release.apk"
 [[ -f "$APK" ]] || { echo "  ERROR: no se generó el APK"; exit 1; }
