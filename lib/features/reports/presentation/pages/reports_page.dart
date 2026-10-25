@@ -72,33 +72,9 @@ class ReportsPage extends StatelessWidget {
       ),
     ];
 
-    final dgii = <_ItemReporte>[
-      const _ItemReporte(
-        codigo: '606',
-        titulo: 'Compras DGII',
-        subtitulo: 'Base para declaración 606',
-        icon: Icons.receipt_long_outlined,
-        color: AppColors.primary,
-        tipo: '606',
-      ),
-      const _ItemReporte(
-        codigo: '607',
-        titulo: 'Ventas DGII',
-        subtitulo: 'Base para declaración 607',
-        icon: Icons.receipt_outlined,
-        color: AppColors.success,
-        tipo: '607',
-      ),
-    ];
-
     return AppScaffold(
       title: 'REPORTES',
-      subtitle: 'Operativos y declaraciones DGII',
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        tooltip: 'Atrás',
-        onPressed: () => safeBack(context, fallback: '/reports'),
-      ),
+      showAppBar: false,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -114,6 +90,24 @@ class ReportsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        tooltip: 'Atrás',
+                        onPressed: () => safeBack(context, fallback: '/reports'),
+                        icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
+                      ),
+                      const Text(
+                        'Reportes operativos',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   _LinkTile(
                     icon: Icons.monitor_heart_outlined,
                     title: 'Dashboard económico',
@@ -139,23 +133,7 @@ class ReportsPage extends StatelessWidget {
                     onTap: (t) => _abrir(context, t),
                   ),
                   SizedBox(height: mobile ? 22 : 28),
-                  Text(
-                    'Declaraciones DGII',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Vista previa de datos para 606 (compras) y 607 (ventas).',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  SizedBox(height: mobile ? 12 : 16),
-                  _GridReportes(
-                    items: dgii,
-                    mobile: mobile,
-                    onTap: (t) => _abrir(context, t),
-                  ),
+
                 ],
               ),
             ),
@@ -228,15 +206,15 @@ class _ReporteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFCBD5E1)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
@@ -336,7 +314,7 @@ class _LinkTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: const Color(0xFFCBD5E1)),
           ),
           child: Row(
             children: [

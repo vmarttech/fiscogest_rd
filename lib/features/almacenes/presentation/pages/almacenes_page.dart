@@ -102,8 +102,8 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                         (a.direccion ?? '').toLowerCase().contains(q);
                   }).toList();
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  return ListView(
+                    padding: EdgeInsets.zero,
                     children: [
                       // Header: título + CTA
                       if (mobile) ...[
@@ -277,24 +277,25 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                               ),
                       ),
 
-                      // Lista
-                      Expanded(
-                        child: visible.isEmpty
-                            ? const Center(
-                                child: Text(
-                                  'Sin almacenes para este filtro.',
-                                  style: TextStyle(color: _muted),
-                                ),
-                              )
-                            : ListView.separated(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: visible.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 12),
-                                itemBuilder: (_, i) =>
-                                    _almacenCard(visible[i]),
-                              ),
-                      ),
+                      // Lista (mismo scroll que métricas)
+                      if (visible.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32),
+                          child: Center(
+                            child: Text(
+                              'Sin almacenes para este filtro.',
+                              style: TextStyle(color: _muted),
+                            ),
+                          ),
+                        )
+                      else
+                        ...[
+                          for (var i = 0; i < visible.length; i++) ...[
+                            if (i > 0) const SizedBox(height: 12),
+                            _almacenCard(visible[i]),
+                          ],
+                          const SizedBox(height: 24),
+                        ],
                     ],
                   );
                 },

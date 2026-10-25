@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -39,6 +40,66 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Header + CTA
+
+            // Declaraciones DGII (606 / 607) — viven en Impuestos, no en métricas
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                mobile ? 16 : 24,
+                16,
+                mobile ? 16 : 24,
+                0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Declaraciones DGII',
+                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Base para declaración 606 (compras) y 607 (ventas).',
+                    style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 12),
+                  LayoutBuilder(
+                    builder: (context, c) {
+                      final wide = c.maxWidth > 520;
+                      final cards = [
+                        _DgiiCard(
+                          codigo: '606',
+                          titulo: 'Compras DGII',
+                          subtitulo: 'Base para declaración 606',
+                          onTap: () => context.push('/reports/detalle/606'),
+                        ),
+                        _DgiiCard(
+                          codigo: '607',
+                          titulo: 'Ventas DGII',
+                          subtitulo: 'Base para declaración 607',
+                          onTap: () => context.push('/reports/detalle/607'),
+                        ),
+                      ];
+                      if (wide) {
+                        return Row(
+                          children: [
+                            Expanded(child: cards[0]),
+                            const SizedBox(width: 12),
+                            Expanded(child: cards[1]),
+                          ],
+                        );
+                      }
+                      return Column(
+                        children: [
+                          cards[0],
+                          const SizedBox(height: 10),
+                          cards[1],
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
             Padding(
               padding: EdgeInsets.fromLTRB(
                 mobile ? 16 : 24,
@@ -701,6 +762,103 @@ class _ImpuestoCard extends StatelessWidget {
                   Icons.delete_outline,
                   size: 20,
                   color: AppColors.error,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DgiiCard extends StatelessWidget {
+  const _DgiiCard({
+    required this.codigo,
+    required this.titulo,
+    required this.subtitulo,
+    required this.onTap,
+  });
+  final String codigo;
+  final String titulo;
+  final String subtitulo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      elevation: 0,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCCFBF1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.receipt_long_outlined, color: Color(0xFF0F766E)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            titulo,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCCFBF1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            codigo,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12,
+                              color: Color(0xFF0F766E),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitulo,
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Abrir →',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: Color(0xFF0F766E),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

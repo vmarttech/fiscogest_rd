@@ -5,6 +5,28 @@ import 'package:intl/intl.dart';
 
 /// Agregados de ventas cobradas (facturado + enCredito).
 class ReportesRepository {
+  String _fmtFechaRepo(dynamic raw) {
+    if (raw == null) return '';
+    if (raw is DateTime) {
+      return '${raw.day.toString().padLeft(2, '0')}/${raw.month.toString().padLeft(2, '0')}/${raw.year}';
+    }
+    if (raw is num) {
+      var n = raw.toInt();
+      if (n > 1000000000 && n < 100000000000) n *= 1000;
+      if (n > 100000000000) {
+        final d = DateTime.fromMillisecondsSinceEpoch(n);
+        return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+      }
+    }
+    final s = raw.toString();
+    try {
+      final d = DateTime.parse(s);
+      return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+    } catch (_) {
+      return s;
+    }
+  }
+
   ReportesRepository(this._db);
   final AppDatabase _db;
 
@@ -229,15 +251,26 @@ class ReportesRepository {
     final rows = await _db
         .customSelect(
           '''
-      SELECT COALESCE(p.nombre, 'Producto') AS nombre,
+      SELECT COALESCE(
+               NULLIF(TRIM(p.nombre), ''),
+               'Producto #' || CAST(d.producto_id AS TEXT)
+             ) AS nombre,
              COALESCE(SUM(d.cantidad), 0.0) AS cant,
-             COALESCE(SUM(d.subtotal), 0.0) AS monto
+             COALESCE(SUM(
+               CASE
+                 WHEN d.subtotal IS NOT NULL AND d.subtotal > 0 THEN d.subtotal
+                 ELSE d.cantidad * d.precio_unitario
+               END
+             ), 0.0) AS monto
       FROM ventas_detalle_table d
       INNER JOIN ventas_table v ON v.id = d.venta_id
       LEFT JOIN productos_table p ON p.id = d.producto_id
       WHERE v.fecha >= ? AND v.fecha < ?
         AND v.estado_documento IN $_estadosVenta
+        AND d.producto_id IS NOT NULL
+        AND d.producto_id > 0
       GROUP BY d.producto_id
+      HAVING monto > 0
       ORDER BY monto DESC
       LIMIT ?
       ''',
@@ -289,18 +322,25 @@ class ReportesRepository {
 
     double total = 0, itbis = 0;
     final registros = <Map<String, dynamic>>[];
+    final seenIds = <int>{};
+    final seenDoc = <String>{};
     for (final r in rows) {
+      final id = (r.data['id'] as num?)?.toInt();
+      if (id != null && !seenIds.add(id)) continue;
       final m = (r.data['monto_total'] as num?)?.toDouble() ?? 0.0;
       final i = (r.data['itbis'] as num?)?.toDouble() ?? 0.0;
+      final ncf = (r.data['numero_factura']?.toString() ?? '').trim();
+      final cot = (r.data['numero_cotizacion']?.toString() ?? '').trim();
+      final doc = ncf.isNotEmpty ? ncf : cot;
+      final key = '$doc|$m|${r.data['fecha']}';
+      if (doc.isNotEmpty && !seenDoc.add(key)) continue;
       total += m;
       itbis += i;
-      final ncf = r.data['numero_factura']?.toString() ?? '';
-      final cot = r.data['numero_cotizacion']?.toString() ?? '';
       registros.add({
         'id': r.data['id'],
-        'fecha': r.data['fecha']?.toString() ?? '',
+        'fecha': _fmtFechaRepo(r.data['fecha']),
         'cliente': r.data['nombre_cliente']?.toString() ?? 'Consumidor Final',
-        'documento': ncf.isNotEmpty ? ncf : cot,
+        'documento': doc,
         'total': m,
         'itbis': i,
         'formaPago': r.data['forma_pago']?.toString() ?? '',
@@ -341,14 +381,17 @@ class ReportesRepository {
 
     double total = 0, itbis = 0;
     final registros = <Map<String, dynamic>>[];
+    final seenIds = <int>{};
     for (final r in rows) {
+      final id = (r.data['id'] as num?)?.toInt();
+      if (id != null && !seenIds.add(id)) continue;
       final m = (r.data['total_compra'] as num?)?.toDouble() ?? 0.0;
       final i = (r.data['monto_impuesto'] as num?)?.toDouble() ?? 0.0;
       total += m;
       itbis += i;
       registros.add({
         'id': r.data['id'],
-        'fecha': r.data['fecha_emision']?.toString() ?? '',
+        'fecha': _fmtFechaRepo(r.data['fecha_emision']),
         'proveedor': r.data['nombre_proveedor']?.toString() ?? '',
         'documento': r.data['numero_comprobante']?.toString() ?? '',
         'ncf': r.data['ncf']?.toString() ?? '',
@@ -374,7 +417,7 @@ class ReportesRepository {
   ) async {
     final actual = await _agregado(desde, hasta);
     final gastos = await _sumGastos(desde, hasta);
-    final top = await _topProductos(desde, hasta, 20);
+    final top = await _topProductos(desde, hasta, 100);
     final gananciaBruta = actual.$3;
     final gananciaNeta = gananciaBruta - gastos;
     final listaGastos = await _listarGastosResumen(desde, hasta);
@@ -385,20 +428,26 @@ class ReportesRepository {
       'gastos': gastos,
       'gananciaNeta': gananciaNeta,
       'costo': actual.$1 - gananciaBruta,
-      'cantidad': actual.$2,
+      'numFacturas': actual.$2,
+      
       'margenPct': actual.$1 <= 0 ? 0.0 : (gananciaBruta / actual.$1) * 100,
       'margenNetoPct': actual.$1 <= 0 ? 0.0 : (gananciaNeta / actual.$1) * 100,
-      'registros': [
-        ...top.map(
-          (p) => {
-            'nombre': p.nombre,
-            'cantidad': p.cantidad,
-            'monto': p.monto,
-            'tipo': 'producto',
-          },
-        ),
-        ...listaGastos,
-      ],
+      'registros': () {
+        final regs = <Map<String, dynamic>>[
+          ...top.map(
+            (p) => {
+              'nombre': p.nombre,
+              'cantidad': p.cantidad,
+              'monto': p.monto,
+              'tipo': 'producto',
+            },
+          ),
+          ...listaGastos,
+        ];
+        return regs;
+      }(),
+      'cantidad': top.length + listaGastos.length,
+      'numFacturas': actual.$2,
       'columnas': ['Concepto', 'Cant./Cat.', 'Monto'],
     };
   }
@@ -445,7 +494,7 @@ class ReportesRepository {
     DateTime desde,
     DateTime hasta,
   ) async {
-    final top = await _topProductos(desde, hasta, 50);
+    final top = await _topProductos(desde, hasta, 200);
     double total = 0;
     for (final p in top) {
       total += p.monto;
@@ -562,11 +611,25 @@ class ReportesRepository {
     DateTime hasta,
   ) async {
     final base = await reporteVentas(desde, hasta);
+    final regs = (base['registros'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    // 607 DGII: solo documentos con NCF / factura (no cotizaciones vacías)
+    final filtrados = regs.where((r) {
+      final doc = (r['documento']?.toString() ?? '').trim();
+      return doc.isNotEmpty;
+    }).toList();
+    double total = 0, itbis = 0;
+    for (final r in filtrados) {
+      total += (r['total'] as num?)?.toDouble() ?? 0;
+      itbis += (r['itbis'] as num?)?.toDouble() ?? 0;
+    }
     return {
-      ...base,
       'titulo': '607 · Ventas DGII',
       'codigoDgii': '607',
-      'columnas': ['Fecha', 'Cliente', 'Documento', 'Total', 'ITBIS'],
+      'total': total,
+      'itbis': itbis,
+      'cantidad': filtrados.length,
+      'registros': filtrados,
+      'columnas': ['Fecha', 'Cliente', 'NCF', 'Total', 'ITBIS'],
     };
   }
 
@@ -575,10 +638,30 @@ class ReportesRepository {
     DateTime hasta,
   ) async {
     final base = await reporteCompras(desde, hasta);
+    final regs = (base['registros'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    // 606 DGII: preferir NCF; si no hay NCF, comprobante
+    final filtrados = <Map<String, dynamic>>[];
+    double total = 0, itbis = 0;
+    for (final r in regs) {
+      final ncf = (r['ncf']?.toString() ?? '').trim();
+      final doc = (r['documento']?.toString() ?? '').trim();
+      final idDoc = ncf.isNotEmpty ? ncf : doc;
+      if (idDoc.isEmpty) continue;
+      total += (r['total'] as num?)?.toDouble() ?? 0;
+      itbis += (r['itbis'] as num?)?.toDouble() ?? 0;
+      filtrados.add({
+        ...r,
+        'documento': idDoc,
+        'ncf': idDoc,
+      });
+    }
     return {
-      ...base,
       'titulo': '606 · Compras DGII',
       'codigoDgii': '606',
+      'total': total,
+      'itbis': itbis,
+      'cantidad': filtrados.length,
+      'registros': filtrados,
       'columnas': ['Fecha', 'Proveedor', 'NCF', 'Total', 'ITBIS'],
     };
   }

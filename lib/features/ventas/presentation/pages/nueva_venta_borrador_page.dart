@@ -22,13 +22,12 @@ import 'package:fiscogest_rd/features/ventas/presentation/widgets/selector_deliv
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_contado_fiao.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/sheet_anotar_fiao.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
-import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart' show cajaRepositoryProvider;
+import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart'
+    show cajaRepositoryProvider;
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
-
-
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -61,7 +60,8 @@ class _NuevaVentaBorradorPageState
     if (!AppBreakpoints.isDesktop(context)) return false;
 
     final key = event.logicalKey;
-    final esAtajo = key == LogicalKeyboardKey.f3 ||
+    final esAtajo =
+        key == LogicalKeyboardKey.f3 ||
         key == LogicalKeyboardKey.f4 ||
         key == LogicalKeyboardKey.f5 ||
         key == LogicalKeyboardKey.f7 ||
@@ -76,7 +76,8 @@ class _NuevaVentaBorradorPageState
     final ahora = DateTime.now();
     if (_ultimoAtajoPos != null &&
         _ultimaTeclaAtajo == key &&
-        ahora.difference(_ultimoAtajoPos!) < const Duration(milliseconds: 900)) {
+        ahora.difference(_ultimoAtajoPos!) <
+            const Duration(milliseconds: 900)) {
       return true;
     }
     _ultimoAtajoPos = ahora;
@@ -149,8 +150,6 @@ class _NuevaVentaBorradorPageState
     _atajoPosAbierto = false;
     return false;
   }
-
-
 
   /// Etiqueta del vendedor según sesión (sin palabras repetidas).
   String _etiquetaVendedorSesion(UsuarioSesion? s) {
@@ -347,7 +346,13 @@ class _NuevaVentaBorradorPageState
 
     switch (resultado) {
       case ResultadoCobro.contado:
-        await _guardarCotizacion(esCredito: false, abrirCobro: true);
+        final formaPago = await SheetContadoFiao.showMetodoPago(context);
+        if (!mounted || formaPago == null) return;
+        await _guardarCotizacion(
+          esCredito: false,
+          abrirCobro: true,
+          formaPago: formaPago,
+        );
         break;
       case ResultadoCobro.fiao:
         final ok = await SheetAnotarFiao.show(
@@ -373,6 +378,7 @@ class _NuevaVentaBorradorPageState
   Future<void> _guardarCotizacion({
     required bool esCredito,
     bool abrirCobro = false,
+    String formaPago = 'efectivo',
   }) async {
     setState(() => _guardando = true);
     try {
@@ -464,17 +470,19 @@ class _NuevaVentaBorradorPageState
         final ventaId = estadoFinal.id;
         final montoTotal = estadoFinal.montoTotal;
         if (ventaId == null) {
-          FiscoGestNotifications.show(const SnackBar(
-            content: Text('No se pudo obtener el id de la venta'),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ));
+          FiscoGestNotifications.show(
+            const SnackBar(
+              content: Text('No se pudo obtener el id de la venta'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
           return;
         }
         final repositorio = ref.read(ventasRepositoryProvider);
         final venta = await repositorio.confirmarVentaBorrador(
           ventaId,
-          formaPago: 'Efectivo',
+          formaPago: formaPago,
         );
         final ventaConDetalle = await repositorio.obtenerVentaPorId(
           venta.id ?? ventaId,
@@ -501,7 +509,7 @@ class _NuevaVentaBorradorPageState
             monto: montoTotal,
             tipo: 'ingreso',
             descripcion: 'Cobro venta $nFactura (modo simple)',
-            formaPago: 'Efectivo',
+            formaPago: formaPago,
           );
         }
         ref.invalidate(listaCotizacionesProvider);
@@ -509,11 +517,13 @@ class _NuevaVentaBorradorPageState
         if (!mounted) return;
         _limpiarFormulario();
         final nFactura = venta.numeroFactura ?? venta.numeroCotizacion;
-        FiscoGestNotifications.show(SnackBar(
-          content: Text('Venta $nFactura cobrada · ${formatRd(montoTotal)}'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-        ));
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text('Venta $nFactura cobrada · ${formatRd(montoTotal)}'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         final desea = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -568,11 +578,13 @@ class _NuevaVentaBorradorPageState
               );
             } catch (e) {
               if (mounted) {
-                FiscoGestNotifications.show(SnackBar(
-                  content: Text('PDF: $e'),
-                  backgroundColor: AppColors.error,
-                  behavior: SnackBarBehavior.floating,
-                ));
+                FiscoGestNotifications.show(
+                  SnackBar(
+                    content: Text('PDF: $e'),
+                    backgroundColor: AppColors.error,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
               }
             }
           }
@@ -714,13 +726,16 @@ class _NuevaVentaBorradorPageState
     final estado = ref.watch(ventaBorradorProvider);
     final puedeGenerar = estado.detalles.isNotEmpty && estado.montoTotal > 0;
     final esPantallaPequena = AppBreakpoints.isMobile(context);
-    final esPantallaAncha = !AppBreakpoints.isMobile(context) &&
+    final esPantallaAncha =
+        !AppBreakpoints.isMobile(context) &&
         MediaQuery.sizeOf(context).width >= 720;
 
     final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
       title: 'NUEVA COTIZACIÓN',
-      showAppBar: !desktop || (_modoFormularioCredito && _estadoFormularioCredito != null),
+      showAppBar:
+          !desktop ||
+          (_modoFormularioCredito && _estadoFormularioCredito != null),
       // En desktop la entrada es directa: atrás → Dashboard
       leading: (_modoFormularioCredito && _estadoFormularioCredito != null)
           ? IconButton(
@@ -729,12 +744,12 @@ class _NuevaVentaBorradorPageState
               onPressed: _cerrarFormularioCredito,
             )
           : (desktop
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  tooltip: 'Atrás',
-                  onPressed: () => safeBack(context, fallback: '/inicio'),
-                )),
+                ? null
+                : IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    tooltip: 'Atrás',
+                    onPressed: () => safeBack(context, fallback: '/inicio'),
+                  )),
       // En crédito desktop también mostrar AppBar para poder volver
       // (showAppBar se ajusta abajo si hace falta)
       body: SafeArea(
@@ -786,13 +801,8 @@ class _NuevaVentaBorradorPageState
     );
     if (!desktop) return cuerpo;
 
-
     // Atajos solo vía HardwareKeyboard (_posOnKey) para no abrir 2 diálogos.
-    return Focus(
-      focusNode: _posRootFocus,
-      autofocus: true,
-      child: cuerpo,
-    );
+    return Focus(focusNode: _posRootFocus, autofocus: true, child: cuerpo);
   }
 
   Widget _buildDockAccionesRapidas(
@@ -812,17 +822,23 @@ class _NuevaVentaBorradorPageState
               children: [
                 Icon(icon, size: 16, color: const Color(0xFF64748B)),
                 const SizedBox(width: 6),
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF475569))),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF475569),
+                  ),
+                ),
                 const SizedBox(width: 6),
-                Text(key,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF94A3B8))),
+                Text(
+                  key,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1023,7 +1039,11 @@ class _NuevaVentaBorradorPageState
                   ),
                 ),
                 if (canTap)
-                  Icon(Icons.chevron_right, size: 20, color: accent.withValues(alpha: 0.45)),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: accent.withValues(alpha: 0.45),
+                  ),
               ],
             ),
           ),
@@ -1092,10 +1112,7 @@ class _NuevaVentaBorradorPageState
                   size: 64,
                   color: const Color(0xFF38BDF8).withValues(alpha: 0.95),
                   shadows: const [
-                    Shadow(
-                      color: Color(0x590EA5E9),
-                      blurRadius: 16,
-                    ),
+                    Shadow(color: Color(0x590EA5E9), blurRadius: 16),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -1168,19 +1185,18 @@ class _NuevaVentaBorradorPageState
                 final item = estado.detalles[i];
                 final nombre =
                     (item['productoNombre'] as String?)?.trim().isNotEmpty ==
-                            true
-                        ? (item['productoNombre'] as String).trim()
-                        : 'Producto';
-                final cant =
-                    (item['cantidad'] as num?)?.toDouble() ?? 0.0;
+                        true
+                    ? (item['productoNombre'] as String).trim()
+                    : 'Producto';
+                final cant = (item['cantidad'] as num?)?.toDouble() ?? 0.0;
                 final precio =
                     (item['precioUnitario'] as num?)?.toDouble() ?? 0.0;
-                final sub = (item['subtotal'] as num?)?.toDouble() ??
-                    (cant * precio);
-                final tasa =
-                    (item['tasaImpuesto'] as num?)?.toDouble() ?? 0.0;
-                final itbisLinea =
-                    simp ? 0.0 : sub * (tasa > 1 ? tasa / 100.0 : tasa);
+                final sub =
+                    (item['subtotal'] as num?)?.toDouble() ?? (cant * precio);
+                final tasa = (item['tasaImpuesto'] as num?)?.toDouble() ?? 0.0;
+                final itbisLinea = simp
+                    ? 0.0
+                    : sub * (tasa > 1 ? tasa / 100.0 : tasa);
                 final productoId = item['productoId'] is int
                     ? item['productoId'] as int
                     : int.tryParse('${item['productoId'] ?? ''}');
@@ -1208,7 +1224,10 @@ class _NuevaVentaBorradorPageState
                     simp
                         ? '$cantLabel × ${formatRd(precio)}${tieneDesc ? ' · desc.' : ''}'
                         : '$cantLabel × ${formatRd(precio)} · ITBIS ${formatRd(itbisLinea)}${tieneDesc ? ' · desc.' : ''}',
-                    style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF64748B),
+                    ),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1216,13 +1235,17 @@ class _NuevaVentaBorradorPageState
                       if (productoId != null) ...[
                         IconButton(
                           tooltip: 'Menos',
-                          icon: const Icon(Icons.remove, size: 16,
-                              color: Color(0xFF64748B)),
+                          icon: const Icon(
+                            Icons.remove,
+                            size: 16,
+                            color: Color(0xFF64748B),
+                          ),
                           onPressed: () {
                             final n = cant <= 1
                                 ? (cant > 0.001 ? cant - 0.5 : 0.0)
                                 : cant - 1;
-                            ref.read(ventaBorradorProvider.notifier)
+                            ref
+                                .read(ventaBorradorProvider.notifier)
                                 .cambiarCantidad(
                                   productoId,
                                   n < 0.001 ? 0.0 : n,
@@ -1231,10 +1254,14 @@ class _NuevaVentaBorradorPageState
                         ),
                         IconButton(
                           tooltip: 'Más',
-                          icon: const Icon(Icons.add, size: 16,
-                              color: Color(0xFF0EA5E9)),
+                          icon: const Icon(
+                            Icons.add,
+                            size: 16,
+                            color: Color(0xFF0EA5E9),
+                          ),
                           onPressed: () {
-                            ref.read(ventaBorradorProvider.notifier)
+                            ref
+                                .read(ventaBorradorProvider.notifier)
                                 .cambiarCantidad(productoId, cant + 1);
                           },
                         ),
@@ -1266,8 +1293,11 @@ class _NuevaVentaBorradorPageState
                       if (productoId != null)
                         IconButton(
                           tooltip: 'Quitar',
-                          icon: const Icon(Icons.delete_outline,
-                              size: 18, color: Color(0xFFDC2626)),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: Color(0xFFDC2626),
+                          ),
                           onPressed: () {
                             ref
                                 .read(ventaBorradorProvider.notifier)
@@ -1340,7 +1370,9 @@ class _NuevaVentaBorradorPageState
                         configRow(
                           icon: Icons.badge_outlined,
                           label: 'Vendedor',
-                          value: _etiquetaVendedorSesion(ref.watch(sesionProvider)),
+                          value: _etiquetaVendedorSesion(
+                            ref.watch(sesionProvider),
+                          ),
                           onTap: null,
                           accent: const Color(0xFF2563EB),
                         ),
@@ -1418,8 +1450,11 @@ class _NuevaVentaBorradorPageState
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.shopping_cart_outlined,
-                            size: 16, color: Color(0xFF94A3B8)),
+                        Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 16,
+                          color: Color(0xFF94A3B8),
+                        ),
                         SizedBox(width: 8),
                         Text(
                           'Cierre de operación',
@@ -1448,10 +1483,7 @@ class _NuevaVentaBorradorPageState
                           ),
                           if (!simp) ...[
                             const SizedBox(height: 12),
-                            _htmlTotRow(
-                              'ITBIS (18%)',
-                              formatRd(showItbis),
-                            ),
+                            _htmlTotRow('ITBIS (18%)', formatRd(showItbis)),
                           ],
                           const SizedBox(height: 12),
                           const Divider(height: 1, color: Color(0xFFF1F5F9)),
@@ -1505,8 +1537,9 @@ class _NuevaVentaBorradorPageState
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF0EA5E9),
                                 foregroundColor: Colors.white,
-                                disabledBackgroundColor:
-                                    const Color(0xFF94A3B8),
+                                disabledBackgroundColor: const Color(
+                                  0xFF94A3B8,
+                                ),
                                 elevation: 0,
                                 shadowColor: const Color(0x4D0EA5E9),
                                 shape: RoundedRectangleBorder(
@@ -1572,10 +1605,7 @@ class _NuevaVentaBorradorPageState
   Widget _htmlTotRow(String k, String v) {
     return Row(
       children: [
-        Text(
-          k,
-          style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-        ),
+        Text(k, style: const TextStyle(fontSize: 13, color: Color(0xFF64748B))),
         const Spacer(),
         Text(
           v,
@@ -1688,9 +1718,7 @@ class _NuevaVentaBorradorPageState
     );
   }
 
-
   /// Contado / Crédito + Vence — pensado para columna izquierda del POS (ancho completo, sin truncar).
-
 
   Widget _buildSeccionTipoYVencimiento(bool esPantallaPequena) {
     Widget opcionPago({required bool credito}) {
@@ -2520,8 +2548,8 @@ class _NuevaVentaBorradorPageState
     final onTap = !puedeGenerar || _guardando
         ? null
         : simplificado
-            ? _onGenerarVentaSimplificada
-            : () => _guardarCotizacion(esCredito: _esCredito);
+        ? _onGenerarVentaSimplificada
+        : () => _guardarCotizacion(esCredito: _esCredito);
     final label = simplificado
         ? 'GENERAR VENTA'
         : (_esCredito ? 'Crear cotización (CR)' : 'Crear cotización (C)');
@@ -2595,7 +2623,6 @@ class _NuevaVentaBorradorPageState
       ),
     );
   }
-
 
   Future<void> _abrirDescuentoLineaCotizacion(
     BuildContext context,

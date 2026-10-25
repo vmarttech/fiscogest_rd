@@ -31,6 +31,68 @@ class SheetContadoFiao extends StatelessWidget {
     );
   }
 
+  static Future<String?> showMetodoPago(BuildContext context) {
+    return showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Método de pago',
+                style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 14),
+              _OpcionCobro(
+                icon: Icons.payments_rounded,
+                titulo: 'EFECTIVO',
+                subtitulo: 'Pago en efectivo',
+                color: AppColors.primary,
+                onTap: () => Navigator.pop(sheetContext, 'efectivo'),
+              ),
+              const SizedBox(height: 8),
+              _OpcionCobro(
+                icon: Icons.credit_card_rounded,
+                titulo: 'TARJETA',
+                subtitulo: 'Pago con tarjeta',
+                color: AppColors.success,
+                onTap: () => Navigator.pop(sheetContext, 'tarjeta'),
+              ),
+              const SizedBox(height: 8),
+              _OpcionCobro(
+                icon: Icons.account_balance_rounded,
+                titulo: 'TRANSFERENCIA',
+                subtitulo: 'Pago por transferencia bancaria',
+                color: AppColors.warning,
+                onTap: () => Navigator.pop(sheetContext, 'transferencia'),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => Navigator.pop(sheetContext),
+                child: Text(
+                  'Cancelar',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cliente = (nombreCliente ?? '').trim();

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
-import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:share_plus/share_plus.dart';
@@ -36,9 +35,17 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
   bool _cargando = false;
   String? _error;
   Map<String, dynamic>? _data;
+  String _busqueda = '';
+  final _busquedaCtrl = TextEditingController();
 
   final _fmtFecha = DateFormat('dd/MM/yyyy');
   final _fmtFechaHora = DateFormat('dd/MM/yyyy HH:mm');
+
+  @override
+  void dispose() {
+    _busquedaCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -69,6 +76,17 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
       initialDate: _desde,
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 1)),
+      builder: (ctx, child) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 520),
+          child: Material(
+            elevation: 12,
+            borderRadius: BorderRadius.circular(12),
+            clipBehavior: Clip.antiAlias,
+            child: child,
+          ),
+        ),
+      ),
     );
     if (d != null) {
       setState(() => _desde = DateTime(d.year, d.month, d.day));
@@ -82,6 +100,17 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
       initialDate: base.isBefore(_desde) ? _desde : base,
       firstDate: _desde,
       lastDate: DateTime.now().add(const Duration(days: 1)),
+      builder: (ctx, child) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 520),
+          child: Material(
+            elevation: 12,
+            borderRadius: BorderRadius.circular(12),
+            clipBehavior: Clip.antiAlias,
+            child: child,
+          ),
+        ),
+      ),
     );
     if (d != null) {
       setState(
@@ -111,6 +140,18 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
         _data = null;
       });
     }
+  }
+
+
+  List<Map<String, dynamic>> get _regsFiltrados {
+    final regs = (_data?['registros'] as List?)?.cast<Map<String, dynamic>>() ??
+        <Map<String, dynamic>>[];
+    final q = _busqueda.trim().toLowerCase();
+    if (q.isEmpty) return regs;
+    return regs.where((row) {
+      final vals = _valoresFila(row);
+      return vals.any((c) => c.toLowerCase().contains(q));
+    }).toList();
   }
 
   String _fmtCell(dynamic v) {
@@ -184,13 +225,33 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
 
   List<List<String>> _filasExport() {
     final cols = (_data?['columnas'] as List?)?.cast<String>() ?? <String>[];
-    final regs = (_data?['registros'] as List?)?.cast<Map<String, dynamic>>() ??
-        <Map<String, dynamic>>[];
+    final regs = _regsFiltrados;
     final out = <List<String>>[cols];
     for (final r in regs) {
       out.add(_valoresFila(r));
     }
     return out;
+  }
+
+  Future<void> _guardarArchivo(String name, List<int> bytes, String mime) async {
+    final dir = await getDownloadsDirectory() ?? await getTemporaryDirectory();
+    final file = File('${dir.path}/$name');
+    await file.writeAsBytes(bytes, flush: true);
+    if (!mounted) return;
+    FiscoGestNotifications.show(
+      SnackBar(content: Text('Guardado: ${file.path}')),
+    );
+    if (Platform.isLinux) {
+      try { await Process.run('xdg-open', [file.path]); } catch (_) {}
+    } else if (Platform.isWindows) {
+      try { await Process.run('cmd', ['/c', 'start', '', file.path]); } catch (_) {}
+    } else if (Platform.isMacOS) {
+      try { await Process.run('open', [file.path]); } catch (_) {}
+    } else {
+      try {
+        await Share.shareXFiles([XFile(file.path, mimeType: mime, name: name)]);
+      } catch (_) {}
+    }
   }
 
   Future<void> _exportarCsv() async {
@@ -204,22 +265,13 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
           return '"$s"';
         }).join(','));
       }
-      final dir = await getTemporaryDirectory();
       final name =
           'reporte_${widget.tipo}_${DateTime.now().millisecondsSinceEpoch}.csv';
-      final file = File('${dir.path}/$name');
-      await file.writeAsString(buf.toString(), flush: true);
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'text/csv', name: name)],
-        text: _titulo,
-      );
+      await _guardarArchivo(name, buf.toString().codeUnits, 'text/csv');
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(
-        SnackBar(
-          content: Text('Error CSV: $e'),
-          backgroundColor: AppColors.error,
-        ),
+        SnackBar(content: Text('Error CSV: $e')),
       );
     }
   }
@@ -270,7 +322,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
       final bytes = await doc.save();
       final name =
           'reporte_${widget.tipo}_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      await Printing.sharePdf(bytes: bytes, filename: name);
+      await _guardarArchivo(name, bytes, 'application/pdf');
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(
@@ -286,206 +338,342 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
   Widget build(BuildContext context) {
     final mobile = AppBreakpoints.isMobile(context);
     final cols = (_data?['columnas'] as List?)?.cast<String>() ?? <String>[];
-    final regs = (_data?['registros'] as List?)?.cast<Map<String, dynamic>>() ?? <Map<String, dynamic>>[];
+    final regs = _regsFiltrados;
 
     return AppScaffold(
       title: _titulo.toUpperCase(),
-      subtitle: '${_fmtFecha.format(_desde)} — ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
-      actions: [
-        IconButton(
-          tooltip: 'Exportar CSV',
-          onPressed: _data == null || _cargando ? null : _exportarCsv,
-          icon: const Icon(Icons.table_view_outlined),
-        ),
-        IconButton(
-          tooltip: 'Exportar PDF',
-          onPressed: _data == null || _cargando ? null : _exportarPdf,
-          icon: const Icon(Icons.picture_as_pdf_outlined),
-        ),
-      ],
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        tooltip: 'Atrás',
-        onPressed: () => safeBack(context, fallback: '/reports/hub'),
-      ),
+      showAppBar: false,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: mobile ? 720 : 1100),
             child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(mobile ? 16 : 24, 12, mobile ? 16 : 24, 0),
-              child: Column(
-                children: [
-                  AppActionBar(
-                    alignment: WrapAlignment.start,
-                    actions: [
-                      OutlinedButton.icon(
-                        onPressed: _cargando ? null : _pickDesde,
-                        icon: const Icon(Icons.calendar_today, size: 16),
-                        label: Text('Desde ${_fmtFecha.format(_desde)}'),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Solo ← + título (SIN barra teal)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(mobile ? 8 : 16, 8, mobile ? 16 : 24, 8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        tooltip: 'Atrás',
+                        onPressed: () =>
+                            safeBack(context, fallback: '/reports/hub'),
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Color(0xFF0F172A),
+                        ),
                       ),
-                      OutlinedButton.icon(
-                        onPressed: _cargando ? null : _pickHasta,
-                        icon: const Icon(Icons.event, size: 16),
-                        label: Text(
-                          'Hasta ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _titulo.toUpperCase(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 18,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            Text(
+                              '${_fmtFecha.format(_desde)} — ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: SizedBox(
-                      width: mobile ? double.infinity : 220,
-                      child: ElevatedButton.icon(
-                        onPressed: _cargando ? null : _generar,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    mobile ? 16 : 24,
+                    0,
+                    mobile ? 16 : 24,
+                    0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppActionBar(
+                        alignment: WrapAlignment.start,
+                        actions: [
+                          OutlinedButton.icon(
+                            onPressed: _cargando ? null : _pickDesde,
+                            icon: const Icon(Icons.calendar_today, size: 16),
+                            label: Text(
+                              'Desde ${_fmtFecha.format(_desde)}',
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: _cargando ? null : _pickHasta,
+                            icon: const Icon(Icons.event, size: 16),
+                            label: Text(
+                              'Hasta ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          width: mobile ? double.infinity : 220,
+                          child: ElevatedButton.icon(
+                            onPressed: _cargando ? null : _generar,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF00796B),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            icon: _cargando
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(Icons.play_arrow_rounded),
+                            label: Text(
+                              _cargando ? 'Generando…' : 'Generar reporte',
+                              style: const TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                          ),
                         ),
-                        icon: _cargando
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(Icons.play_arrow_rounded),
-                        label: Text(
-                          _cargando ? 'Generando…' : 'Generar reporte',
+                      ),
+                      if (_data != null) ...[
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 8,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: _cargando ? null : _exportarCsv,
+                              icon: const Icon(Icons.table_view_outlined, size: 18),
+                              label: const Text(
+                                'CSV',
+                                style: TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: _cargando ? null : _exportarPdf,
+                              icon: const Icon(
+                                Icons.picture_as_pdf_outlined,
+                                size: 18,
+                              ),
+                              label: const Text(
+                                'PDF',
+                                style: TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _busquedaCtrl,
+                          onChanged: (v) => setState(() => _busqueda = v),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          decoration: InputDecoration(
+                            hintText: 'Buscar en resultados…',
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: _busqueda.isEmpty
+                                ? null
+                                : IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _busquedaCtrl.clear();
+                                      setState(() => _busqueda = '');
+                                    },
+                                  ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            isDense: true,
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      _error!,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.error,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  _error!,
-                  style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
-                ),
-              ),
-            if (_data != null) ...[
-              Padding(
-                padding: EdgeInsets.fromLTRB(mobile ? 16 : 24, 16, mobile ? 16 : 24, 8),
-                child: _ResumenCards(data: _data!, tipo: widget.tipo),
-              ),
-            ],
-            Expanded(
-              child: _cargando && _data == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : regs.isEmpty
-                      ? Center(
-                          child: Text(
-                            'Sin movimientos en el período',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        )
-                      : mobile
-                          ? ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                              itemCount: regs.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 8),
-                              itemBuilder: (_, i) {
-                                final row = Map<String, dynamic>.from(regs[i]);
-                                final vals = _valoresFila(row);
-                                return Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.border),
+                if (_data != null)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      mobile ? 16 : 24,
+                      16,
+                      mobile ? 16 : 24,
+                      8,
+                    ),
+                    child: _ResumenCards(data: _data!, tipo: widget.tipo),
+                  ),
+                Expanded(
+                  child: _cargando && _data == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : regs.isEmpty
+                          ? Center(
+                              child: Text(
+                                'Sin movimientos en el período',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            )
+                          : mobile
+                              ? ListView.separated(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                                  itemCount: regs.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 8),
+                                  itemBuilder: (_, i) {
+                                    final row =
+                                        Map<String, dynamic>.from(regs[i]);
+                                    final vals = _valoresFila(row);
+                                    return Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: const Color(0xFFCBD5E1),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          for (var c = 0;
+                                              c < cols.length && c < vals.length;
+                                              c++)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: 4,
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      cols[c],
+                                                      style: AppTypography
+                                                          .labelSmall
+                                                          .copyWith(
+                                                        color: AppColors
+                                                            .textSecondary,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: Text(
+                                                      vals[c],
+                                                      style: AppTypography
+                                                          .bodySmall
+                                                          .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    24,
+                                    8,
+                                    24,
+                                    24,
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      for (var c = 0; c < cols.length && c < vals.length; c++)
-                                        Padding(
-                                          padding: const EdgeInsets.only(bottom: 4),
-                                          child: Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 100,
-                                                child: Text(
-                                                  cols[c],
-                                                  style: AppTypography.labelSmall.copyWith(
-                                                    color: AppColors.textSecondary,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: const Color(0xFFCBD5E1),
+                                      ),
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: SingleChildScrollView(
+                                        scrollDirection: Axis.vertical,
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: DataTable(
+                                            headingRowColor:
+                                                WidgetStatePropertyAll(
+                                              const Color(0xFF00796B)
+                                                  .withValues(alpha: 0.08),
+                                            ),
+                                            columns: [
+                                              for (final c in cols)
+                                                DataColumn(
+                                                  label: Text(
+                                                    c,
+                                                    style: AppTypography
+                                                        .labelSmall
+                                                        .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  vals[c],
-                                                  style: AppTypography.bodySmall.copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
+                                            ],
+                                            rows: [
+                                              for (final r in regs)
+                                                DataRow(
+                                                  cells: [
+                                                    for (final v
+                                                        in _valoresFila(
+                                                      Map<String, dynamic>.from(
+                                                        r,
+                                                      ),
+                                                    ))
+                                                      DataCell(
+                                                        Text(
+                                                          v,
+                                                          style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
                                                 ),
-                                              ),
                                             ],
                                           ),
                                         ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppColors.border),
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: SingleChildScrollView(
-                                    child: DataTable(
-                                      headingRowColor: WidgetStatePropertyAll(
-                                        AppColors.primary.withValues(alpha: 0.06),
                                       ),
-                                      columns: [
-                                        for (final c in cols)
-                                          DataColumn(
-                                            label: Text(
-                                              c,
-                                              style: AppTypography.labelSmall.copyWith(
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                      rows: [
-                                        for (final r in regs)
-                                          DataRow(
-                                            cells: [
-                                              for (final v in _valoresFila(
-                                                Map<String, dynamic>.from(r),
-                                              ))
-                                                DataCell(Text(v)),
-                                            ],
-                                          ),
-                                      ],
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-            ),
-          ],
+              ],
             ),
           ),
         ),
@@ -493,6 +681,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     );
   }
 }
+
 
 class _ResumenCards extends StatelessWidget {
   const _ResumenCards({required this.data, required this.tipo});
@@ -571,3 +760,5 @@ class _ResumenCards extends StatelessWidget {
     );
   }
 }
+
+
