@@ -7,6 +7,9 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/licencias/domain/medios_cobro.dart';
 import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
+import 'package:fiscogest_rd/features/licencias/domain/paypal_config.dart';
+import 'package:fiscogest_rd/features/licencias/data/paypal_service.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/pages/paypal_checkout_page.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 
 class LicenciaComprarPage extends ConsumerStatefulWidget {
@@ -30,27 +33,92 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
   double? get _precio => precioPlanVigencia(_plan, _vigencia);
 
   Future<void> _generarPedido() async {
-    final monto = _precio;
-    if (monto == null) return;
+    final montoUsd = precioMensualUsd(_plan);
+    if (montoUsd == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Este plan no tiene precio de suscripción móvil.'),
+        ),
+      );
+      return;
+    }
+    if (!PaypalConfig.configurado) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'PayPal no configurado. Ejecuta con '
+            '--dart-define=PAYPAL_CLIENT_ID=... --dart-define=PAYPAL_SECRET=...',
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => _cargando = true);
     try {
-      final refCode = await ref.read(licenciaServiceProvider).crearPedido(
-            plan: _plan,
-            vigenciaTipo: _vigencia,
-            medioPreferido: _medioId,
-          );
+      final svc = ref.read(licenciaServiceProvider);
+      final refCode = await svc.crearPedido(
+        plan: _plan,
+        vigenciaTipo: 'mensual',
+        medioPreferido: 'paypal',
+      );
+      final paypal = PaypalService();
+      final order = await paypal.createOrder(
+        amountUsd: montoUsd,
+        reference: refCode,
+        description: 'FiscoGest $_plan mensual',
+      );
+
+      if (!mounted) return;
+      final result = await Navigator.of(context).push<PaypalCheckoutResult>(
+        MaterialPageRoute(
+          builder: (_) => PaypalCheckoutPage(
+            approveUrl: order.approveUrl,
+            orderId: order.orderId,
+          ),
+        ),
+      );
+
+      if (!mounted) return;
+      if (result == null || result.cancelled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pago cancelado.')),
+        );
+        return;
+      }
+      if (!result.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.error ?? 'No se completó el pago.')),
+        );
+        return;
+      }
+
+      // Pago OK → emitir licencia (sin transferencia manual)
+      await svc.marcarPagadoYEmitirLicencia(refCode);
+      ref.invalidate(licenciaActualProvider);
+      if (!mounted) return;
       setState(() {
         _referencia = refCode;
-        _monto = monto;
+        _monto = montoUsd;
       });
-    } catch (e) {
-      FiscoGestNotifications.show(
-        SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Pago recibido! Tu licencia está activa.'),
+        ),
       );
+      // Volver a estado de licencia
+      if (mounted) await Navigator.of(context).maybePop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
   }
+
 
   Future<void> _yaPague() async {
     if (_referencia == null) return;
@@ -110,7 +178,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
           ),
           const SizedBox(height: 14),
           Text(
-            'Modo normal (negocio / PC)',
+            'Modo normal — US\$15.99/mes',
             style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),
@@ -118,7 +186,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final p in ['basico', 'profesional', 'empresa'])
+              for (final p in ['basico'])  // profesional/empresa → contacto FiscoGest
                 _PlanChip(
                   label: p[0].toUpperCase() + p.substring(1),
                   selected: _plan == p,
@@ -206,7 +274,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: Text(_cargando ? 'Generando…' : 'Generar referencia de pago'),
+                child: Text(_cargando ? 'Procesando…' : 'Pagar con PayPal'),
               ),
             )
           else ...[
@@ -334,7 +402,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
               child: FilledButton.icon(
                 onPressed: _yaPague,
                 icon: const Icon(Icons.check_circle_outline),
-                label: const Text('Ya realicé el pago'),
+                label: const Text('Confirmar suscripción'),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF0F766E),
                   shape: RoundedRectangleBorder(

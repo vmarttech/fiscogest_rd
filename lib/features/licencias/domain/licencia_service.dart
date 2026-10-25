@@ -179,7 +179,9 @@ class LicenciaService {
     String? rnc,
     String? medioPreferido,
   }) async {
-    final monto = precioPlanVigencia(plan, vigenciaTipo);
+    // Móvil automático: USD; si no, tarifa DOP legacy.
+    final monto = precioMensualUsd(plan) ??
+        precioPlanVigencia(plan, vigenciaTipo);
     if (monto == null) {
       throw ArgumentError('Plan/vigencia no tarifados: $plan / $vigenciaTipo');
     }

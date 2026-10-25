@@ -34,24 +34,15 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
     return AppScaffold(
       title: 'Marcas',
       subtitle: 'Administración de marcas comerciales',
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        tooltip: 'Atrás',
-        onPressed: () => safeBack(context, fallback: '/inventario'),
-        style: IconButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: Colors.white.withValues(alpha: 0.1),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      ),
-      actions: [
-        AppButton(
-          text: isMobile ? 'Nuevo' : 'Nueva marca',
-          icon: Icons.sell_outlined,
-          onPressed: () => _mostrarModalRegistro(context),
-        ),
-      ],
+      backgroundColor: const Color(0xFFEEF2F3),
+      showAppBar: isMobile,
+      leading: isMobile
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              tooltip: 'Atrás',
+              onPressed: () => safeBack(context, fallback: '/inventario'),
+            )
+          : null,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -69,34 +60,190 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.12),
+                  if (!isMobile)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Marcas',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Administración de marcas comerciales',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFF1E293B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 280,
+                            height: 44,
+                            child: TextField(
+                              onChanged: (v) => setState(
+                                () => _filtroBusqueda = v.toLowerCase(),
+                              ),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF0F172A),
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Buscar marca...',
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF1E293B),
+                                  fontSize: 13,
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.search_rounded,
+                                  size: 20,
+                                  color: Color(0xFF1E293B),
+                                ),
+                                isDense: true,
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF114E54),
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          FilledButton.icon(
+                            onPressed: () => _mostrarModalRegistro(context),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF114E54),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 14,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            icon: const Icon(Icons.sell_outlined, size: 20),
+                            label: const Text(
+                              'Nueva marca',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                    )
+                  else ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: FilledButton.icon(
+                          onPressed: () => _mostrarModalRegistro(context),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF114E54),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
+                          ),
+                          icon: const Icon(Icons.sell_outlined, size: 20),
+                          label: const Text(
+                            'Nueva marca',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                    child: AppTextField(
-                      hint: 'Buscar por nombre o descripción...',
-                      prefixIcon: Icons.search,
-                      onChanged: (v) =>
-                          setState(() => _filtroBusqueda = v.toLowerCase()),
+                    TextField(
+                      onChanged: (v) => setState(
+                        () => _filtroBusqueda = v.toLowerCase(),
+                      ),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0F172A),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Buscar marca...',
+                        hintStyle: const TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 13,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: Color(0xFF1E293B),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF114E54),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: isMobile ? 14 : 18),
+                    const SizedBox(height: 14),
+                  ],
+                  if (!isMobile) const SizedBox(height: 16),
                   Expanded(
                     child: marcasAsync.when(
                       loading: () => const Center(
-                        child: CircularProgressIndicator(color: AppColors.primary),
+                        child: CircularProgressIndicator(color: Color(0xFF114E54)),
                       ),
                       error: (e, _) => Center(
                         child: Text(
@@ -160,7 +307,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                         : 'Prueba con otro nombre o descripción.',
                                     textAlign: TextAlign.center,
                                     style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: const Color(0xFF1E293B),
                                       height: 1.35,
                                     ),
                                   ),
@@ -228,7 +375,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                       child: Text(
                                         'MARCA',
                                         style: AppTypography.labelSmall.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: const Color(0xFF1E293B),
                                           fontWeight: FontWeight.w700,
                                           letterSpacing: 0.4,
                                         ),
@@ -240,7 +387,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                                         'ACCIONES',
                                         textAlign: TextAlign.center,
                                         style: AppTypography.labelSmall.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: const Color(0xFF1E293B),
                                           fontWeight: FontWeight.w700,
                                           letterSpacing: 0.4,
                                         ),
@@ -656,7 +803,7 @@ class _MarcaCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+        border: Border.all(color: const Color(0xFFE5F2F3)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -671,7 +818,7 @@ class _MarcaCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: const Color(0xFFE5F2F3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -697,7 +844,7 @@ class _MarcaCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                    color: const Color(0xFF1E293B),
                   ),
                 ),
               ],

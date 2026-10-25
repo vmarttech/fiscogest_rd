@@ -181,8 +181,8 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
     return AppScaffold(
       title: _esEdicion ? 'EDITAR CLIENTE' : 'NUEVO CLIENTE',
       backgroundColor: const Color(0xFFF3F7F9),
-      showAppBar: false,
-// PC: sin barra extra; móvil: atrás seguro
+      // Móvil: barra del módulo. Desktop: el shell ya cubre navegación.
+      showAppBar: mobile,
       body: SafeArea(
         child: Column(
           children: [

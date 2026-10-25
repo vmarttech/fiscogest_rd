@@ -1459,7 +1459,8 @@ class ClienteDetallePage extends StatelessWidget {
     return AppScaffold(
       title: 'DETALLE CLIENTE',
       backgroundColor: _bgCanvas,
-      showAppBar: false,
+      // Móvil: barra del módulo (como el resto). Desktop: false (ya hay shell).
+      showAppBar: mobile,
       body: ListView(
         padding: EdgeInsets.fromLTRB(
           mobile ? 16 : 24,
@@ -1468,42 +1469,48 @@ class ClienteDetallePage extends StatelessWidget {
           32,
         ),
         children: [
-          Row(
-            children: [
-              Material(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                child: InkWell(
-                  onTap: goBack,
+          // En PC se mantiene fila con atrás + título (sin AppBar del scaffold)
+          if (!mobile) ...[
+            Row(
+              children: [
+                Material(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFCBD5E1), width: 1.5),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_rounded,
-                      size: 20,
-                      color: Color(0xFF020617),
+                  child: InkWell(
+                    onTap: goBack,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFCBD5E1),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_rounded,
+                        size: 20,
+                        color: Color(0xFF020617),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Detalle del cliente',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF020617),
+                const SizedBox(width: 12),
+                const Text(
+                  'Detalle del cliente',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF020617),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
           if (mobile) ...[
             profileCard,
             const SizedBox(height: 12),

@@ -163,7 +163,7 @@ class _LicenciaAdminPedidosPageState
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            '${rows.length} pedido(s) · marca Pagado al confirmar el depósito',
+                            '${rows.length} pedido(s) · PayPal auto emite licencia; revisión manual solo si hace falta',
                             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                           ),
                         ),
@@ -206,7 +206,7 @@ class _LicenciaAdminPedidosPageState
                           const SizedBox(height: 4),
                           Text(
                             '${p.plan} · ${p.vigenciaTipo}\n'
-                            'RD\$ ${p.monto.toStringAsFixed(0)} · ${p.estado}'
+                            '${_adminMontoLabel(p)} · ${p.estado}' '${p.medioPagoPreferido == null ? '' : ' · ${p.medioPagoPreferido}'}'
                             '${p.medioPagoPreferido != null ? ' · ${p.medioPagoPreferido}' : ''}',
                             style: AppTypography.bodySmall.copyWith(
                               color: AppColors.textSecondary,
@@ -267,4 +267,14 @@ class _LicenciaAdminPedidosPageState
       ),
     );
   }
+}
+
+String _adminMontoLabel(PedidosLicenciaTableData p) {
+  final medio = p.medioPagoPreferido?.toLowerCase() ?? '';
+  final mon = p.moneda.toUpperCase();
+  final m = p.monto;
+  if (medio == 'paypal' || mon == 'USD') {
+    return 'US\$ ${m.toStringAsFixed(2)}';
+  }
+  return 'RD\$ ${m.toStringAsFixed(0)}';
 }

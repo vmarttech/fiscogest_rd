@@ -628,8 +628,8 @@ class AppShell extends ConsumerWidget {
                       title: Text(
                         'Cerrar sesión',
                         style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.grey300,
-                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
                       ),
@@ -653,8 +653,8 @@ class AppShell extends ConsumerWidget {
       child: Text(
         title,
         style: AppTypography.labelSmall.copyWith(
-          color: AppColors.grey400,
-          fontWeight: FontWeight.w600,
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.8,
           fontSize: 10,
         ),
@@ -713,11 +713,8 @@ class AppShell extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: AppTypography.labelMedium.copyWith(
-                      color: esSeleccionado
-                          ? AppColors.white
-                          : const Color(0xFFA8BAD8),
-                      fontWeight:
-                          esSeleccionado ? FontWeight.w600 : FontWeight.normal,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
                       fontSize: 13,
                     ),
                   ),

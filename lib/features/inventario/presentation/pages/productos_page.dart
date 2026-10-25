@@ -446,64 +446,190 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       MapEntry('stock_desc', 'Stock mayor'),
       MapEntry('stock_asc', 'Stock menor'),
     ];
+    final ordenLabel = ordenes
+        .firstWhere(
+          (e) => e.key == _ordenProductos,
+          orElse: () => const MapEntry('nombre_asc', 'Nombre A→Z'),
+        )
+        .value;
+
+    // Segmento compacto Activos | Todos | Inactivos (una sola píldora)
+    Widget seg({
+      required String label,
+      required bool selected,
+      required VoidCallback onTap,
+    }) {
+      return Expanded(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: selected
+                    ? AppColors.primary.withValues(alpha: 0.12)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
+        // Píldora segmentada (no 3 chips sueltos)
+        Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
             children: [
-              _FilterChip(
-                label: 'Solo activos',
+              seg(
+                label: 'Activos',
                 selected: _soloActivos && _filtroEstado != 'inactivo',
                 onTap: () => setState(() {
                   _soloActivos = true;
                   if (_filtroEstado == 'inactivo') _filtroEstado = 'todos';
                 }),
               ),
-              const SizedBox(width: 8),
-              _FilterChip(
-                label: 'Inactivos',
-                selected: _filtroEstado == 'inactivo',
-                color: AppColors.textSecondary,
-                onTap: () => setState(() {
-                  _filtroEstado = 'inactivo';
-                  _soloActivos = false;
-                }),
-              ),
-              const SizedBox(width: 8),
-              _FilterChip(
-                label: 'Todos (act+inact)',
+              seg(
+                label: 'Todos',
                 selected: !_soloActivos && _filtroEstado != 'inactivo',
                 onTap: () => setState(() {
                   _soloActivos = false;
                   if (_filtroEstado == 'inactivo') _filtroEstado = 'todos';
                 }),
               ),
+              seg(
+                label: 'Inactivos',
+                selected: _filtroEstado == 'inactivo',
+                onTap: () => setState(() {
+                  _filtroEstado = 'inactivo';
+                  _soloActivos = false;
+                }),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          initialValue: _ordenProductos,
-          isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Ordenar por',
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            border: OutlineInputBorder(),
-          ),
-          items: [
-            for (final e in ordenes)
-              DropdownMenuItem(
-                value: e.key,
-                child: Text(e.value, style: const TextStyle(fontSize: 13)),
+        const SizedBox(height: 10),
+        // Orden: fila compacta premium (no dropdown alto)
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () async {
+              final chosen = await showModalBottomSheet<String>(
+                context: context,
+                backgroundColor: Colors.white,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                builder: (ctx) {
+                  return SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 8),
+                        Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCBD5E1),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(20, 14, 20, 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Ordenar por',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        for (final e in ordenes)
+                          ListTile(
+                            dense: true,
+                            title: Text(
+                              e.value,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: e.key == _ordenProductos
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: e.key == _ordenProductos
+                                    ? AppColors.primary
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                            trailing: e.key == _ordenProductos
+                                ? const Icon(Icons.check_rounded,
+                                    color: AppColors.primary, size: 20)
+                                : null,
+                            onTap: () => Navigator.pop(ctx, e.key),
+                          ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  );
+                },
+              );
+              if (chosen != null) {
+                setState(() => _ordenProductos = chosen);
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
-          ],
-          onChanged: (v) {
-            if (v != null) setState(() => _ordenProductos = v);
-          },
+              child: Row(
+                children: [
+                  const Icon(Icons.sort_rounded,
+                      size: 18, color: AppColors.textSecondary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      ordenLabel,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                  ),
+                  const Icon(Icons.keyboard_arrow_down_rounded,
+                      size: 20, color: AppColors.textSecondary),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );

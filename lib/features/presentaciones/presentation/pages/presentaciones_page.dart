@@ -38,26 +38,14 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
 
     return AppScaffold(
       title: 'Presentaciones',
-      subtitle: 'Administración de presentaciones de productos',
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        tooltip: 'Atrás',
-        onPressed: () => safeBack(context, fallback: '/inventario'),
-      ),
-      actions: [
-        if (!isMobile)
-          AppButton(
-            text: 'Nueva presentación',
-            icon: Icons.add,
-            onPressed: () => _mostrarModalRegistro(context),
-          ),
-      ],
-      floatingActionButton: isMobile
-          ? FloatingActionButton(
-              onPressed: () => _mostrarModalRegistro(context),
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.add),
+      subtitle: 'Presentaciones y factores de conversión',
+      backgroundColor: const Color(0xFFEEF2F3),
+      showAppBar: isMobile,
+      leading: isMobile
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              tooltip: 'Atrás',
+              onPressed: () => safeBack(context, fallback: '/inventario'),
             )
           : null,
       body: SafeArea(
@@ -70,39 +58,199 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                 isMobile ? 16 : 24,
                 isMobile ? 12 : 20,
                 isMobile ? 16 : 24,
-                isMobile ? 88 : 24,
+                24,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.12),
+                  if (!isMobile)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Presentaciones',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Presentaciones y factores de conversión',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFF1E293B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 280,
+                            height: 44,
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (v) => setState(
+                                () => _filtroBusqueda = v.toLowerCase(),
+                              ),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF0F172A),
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Buscar presentación...',
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF1E293B),
+                                  fontSize: 13,
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.search_rounded,
+                                  size: 20,
+                                  color: Color(0xFF1E293B),
+                                ),
+                                isDense: true,
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF114E54),
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          FilledButton.icon(
+                            onPressed: () =>
+                                _mostrarModalRegistro(context),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF114E54),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 14,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            icon: const Icon(Icons.layers_outlined, size: 20),
+                            label: const Text(
+                              'Nueva presentación',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                    )
+                  else ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: FilledButton.icon(
+                          onPressed: () =>
+                              _mostrarModalRegistro(context),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF114E54),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
+                          ),
+                          icon: const Icon(Icons.layers_outlined, size: 20),
+                          label: const Text(
+                            'Nueva presentación',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                    child: AppTextField(
-                      hint: 'Buscar...',
-                      prefixIcon: Icons.search,
-                      onChanged: (v) =>
-                          setState(() => _filtroBusqueda = v.toLowerCase()),
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (v) => setState(
+                        () => _filtroBusqueda = v.toLowerCase(),
+                      ),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0F172A),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Buscar presentación...',
+                        hintStyle: const TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 13,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: Color(0xFF1E293B),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF114E54),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: isMobile ? 14 : 18),
+                    const SizedBox(height: 14),
+                  ],
+                  if (!isMobile) const SizedBox(height: 16),
                   Expanded(
                     child: asyncList.when(
                       loading: () => const Center(
-                        child: CircularProgressIndicator(color: AppColors.primary),
+                        child: CircularProgressIndicator(color: Color(0xFF114E54)),
                       ),
                       error: (e, _) => Center(
                         child: Text(
@@ -153,7 +301,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                         : 'Prueba con otro término de búsqueda.',
                                     textAlign: TextAlign.center,
                                     style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: const Color(0xFF1E293B),
                                       height: 1.35,
                                     ),
                                   ),
@@ -230,7 +378,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                       child: Text(
                                         'NOMBRE',
                                         style: AppTypography.labelSmall.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: const Color(0xFF1E293B),
                                           fontWeight: FontWeight.w700,
                                           letterSpacing: 0.4,
                                         ),
@@ -242,7 +390,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                         'ACCIONES',
                                         textAlign: TextAlign.center,
                                         style: AppTypography.labelSmall.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: const Color(0xFF1E293B),
                                           fontWeight: FontWeight.w700,
                                           letterSpacing: 0.4,
                                         ),
@@ -310,7 +458,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                                     style: AppTypography.bodySmall
                                                         .copyWith(
                                                       color:
-                                                          AppColors.textSecondary,
+                                                          const Color(0xFF1E293B),
                                                     ),
                                                   ),
                                                 ],
@@ -612,7 +760,7 @@ class _PresentacionCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                    color: const Color(0xFF1E293B),
                   ),
                 ),
               ],

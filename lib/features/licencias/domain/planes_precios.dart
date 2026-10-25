@@ -1,4 +1,6 @@
-/// Precios en DOP y reglas de producto por plan.
+/// Precios y reglas por plan.
+/// Móvil pago automático USD: simplificado 8.99 · basico 15.99.
+/// Profesional/empresa: contacto FiscoGest (no self-serve móvil).
 ///
 /// - demo: prueba 15 días, sin Fiao
 /// - gratis: post-demo, límites duros + fiao ≤ 25
@@ -17,6 +19,13 @@ const int kDiasGracia = 3;
 /// Días de validez de un pedido FG- sin confirmar pago.
 const int kDiasExpiracionPedido = 7;
 
+/// Precios USD — suscripción automática (PayPal). Solo móvil de pago.
+const kPreciosLicenciaUsd = <String, Map<String, double>>{
+  'simplificado': {'mensual': 8.99},
+  'basico': {'mensual': 15.99},
+};
+
+/// DOP legacy (admin / referencia). El cobro móvil usa USD.
 const kPreciosLicenciaDop = <String, Map<String, double>>{
   'simplificado': {'mensual': 300, 'anual': 2990},
   'basico': {'mensual': 1500, 'trimestral': 4050, 'anual': 14400},
@@ -180,6 +189,20 @@ double? precioPlanVigencia(String plan, String vigencia) {
   return kPreciosLicenciaDop[plan]?[vigencia];
 }
 
+double? precioPlanVigenciaUsd(String plan, String vigencia) {
+  return kPreciosLicenciaUsd[plan]?[vigencia];
+}
+
+/// Monto USD mensual (simplificado 8.99 · basico 15.99).
+double? precioMensualUsd(String plan) =>
+    precioPlanVigenciaUsd(plan, 'mensual');
+
+/// Planes de pago automático en móvil.
+const kPlanesPagoMovil = <String>['simplificado', 'basico'];
+
+bool esPlanPagoMovil(String plan) => kPlanesPagoMovil.contains(plan);
+
+
 List<String> vigenciasDisponiblesParaPlan(String plan) {
   final m = kPreciosLicenciaDop[plan];
   if (m == null) return const [];
@@ -191,13 +214,13 @@ String descripcionPlanCorta(String plan) {
     case 'gratis':
       return 'Post-prueba · límites · fiao hasta 25 cuentas.';
     case 'simplificado':
-      return 'Sin impuestos · fiao hasta 50 · 1 dispositivo · RD\$300/mes o 2.990/año.';
+      return 'Sin impuestos · fiao hasta 50 · 1 dispositivo · US\$8.99/mes. Cancela cuando quieras.';
     case 'basico':
-      return 'Modo normal · sin Fiao · 1 PC + 1 celular gratis.';
+      return 'Modo normal · sin Fiao · 1 PC + 1 celular · US\$15.99/mes. Cancela cuando quieras.';
     case 'profesional':
-      return 'Crédito formal · e-CF · sin fiao · hasta 3 equipos + móvil.';
+      return 'Versión PC avanzada · crédito formal · e-CF. Contacte a FiscoGest.';
     case 'empresa':
-      return 'Crédito formal · e-CF · sin fiao · equipos según acuerdo.';
+      return 'Multi-equipo y acuerdo comercial. Contacte a FiscoGest.';
     default:
       return '';
   }

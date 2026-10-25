@@ -31,19 +31,26 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
   @override
   @override
   Widget build(BuildContext context) {
+    // Ficha técnica FiscoGest — Proveedores (sin desviaciones)
     final isMobile = MediaQuery.sizeOf(context).width < 600;
     final proveedoresAsync = ref.watch(proveedorControllerProvider);
+
+    const cBg = Color(0xFFEEF2F3);
+    const cWhite = Color(0xFFFFFFFF);
+    const cMuted = Color(0xFF1E293B);
+    const cInk = Color(0xFF0F172A);
+    const cTealDark = Color(0xFF114E54);
+    const cMint = Color(0xFF114E54);
+    const cAvatarBg = Color(0xFFE5F2F3);
+    const cBorder = Color(0xFFE2E8F0);
+    const cHeaderBg = Color(0xFFFAFAFA);
 
     return AppScaffold(
       title: 'Proveedores',
       subtitle: 'Directorio de proveedores y contactos',
-      actions: [
-        AppButton(
-          text: isMobile ? 'Nuevo' : 'Nuevo proveedor',
-          icon: Icons.person_add_alt_1_rounded,
-          onPressed: () => _mostrarModalRegistro(context),
-        ),
-      ],
+      backgroundColor: cBg,
+      // PC: sin barra del módulo. Móvil: sí.
+      showAppBar: isMobile,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -59,56 +66,198 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                      width: isMobile ? double.infinity : 520,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.grey900.withValues(alpha: 0.04),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
+                  // Cabecera: título | buscador compacto der | Nuevo
+                  if (!isMobile)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Proveedores',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    color: cInk,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Gestiona tus proveedores y contactos comerciales',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w400,
+                                    color: cMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Buscador reducido a la derecha
+                          SizedBox(
+                            width: 280,
+                            height: 44,
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (value) => setState(
+                                () =>
+                                    _filtroBusqueda = value.toLowerCase(),
+                              ),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: cInk,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Buscar proveedor...',
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF1E293B),
+                                  fontSize: 13,
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.search_rounded,
+                                  size: 20,
+                                  color: cMuted,
+                                ),
+                                isDense: true,
+                                filled: true,
+                                fillColor: cWhite,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide:
+                                      const BorderSide(color: cBorder),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide:
+                                      const BorderSide(color: cBorder),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: cMint,
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          FilledButton.icon(
+                            onPressed: () =>
+                                _mostrarModalRegistro(context),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: cMint,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 14,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            icon: const Icon(Icons.add_rounded, size: 20),
+                            label: const Text(
+                              'Nuevo Proveedor',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      child: AppTextField(
+                    )
+                  else ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: SizedBox(
+                        width: double.infinity,
                         height: 48,
-                        controller: _searchController,
-                        hint: 'Buscar por nombre, RNC, contacto o correo...',
-                        prefixIcon: Icons.search_rounded,
-                        onChanged: (value) => setState(
-                          () => _filtroBusqueda = value.toLowerCase(),
+                        child: FilledButton.icon(
+                          onPressed: () => _mostrarModalRegistro(context),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: cMint,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
+                          ),
+                          icon: const Icon(Icons.add_rounded, size: 20),
+                          label: const Text(
+                            'Nuevo Proveedor',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: isMobile ? 14 : 18),
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) => setState(
+                        () => _filtroBusqueda = value.toLowerCase(),
+                      ),
+                      style: const TextStyle(fontSize: 14, color: cInk),
+                      decoration: InputDecoration(
+                        hintText: 'Buscar por nombre, RNC o correo...',
+                        hintStyle: const TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 13,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: cMuted,
+                        ),
+                        filled: true,
+                        fillColor: cWhite,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: cBorder),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: cBorder),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              const BorderSide(color: cMint, width: 1.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  if (!isMobile) const SizedBox(height: 16),
                   Expanded(
                     child: proveedoresAsync.when(
                       loading: () => const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
+                        child: CircularProgressIndicator(color: cMint),
                       ),
                       error: (e, _) => Center(
                         child: Text(
                           'Error: $e',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.error,
-                          ),
+                          style: const TextStyle(color: AppColors.error),
                         ),
                       ),
                       data: (proveedores) {
                         final filtrados = proveedores.where((p) {
                           final nombre = p.nombreEmpresa.toLowerCase();
                           final rnc = (p.rnc ?? '').toLowerCase();
-                          final contacto = (p.nombreContacto ?? '')
-                              .toLowerCase();
+                          final contacto =
+                              (p.nombreContacto ?? '').toLowerCase();
                           final correo = (p.email ?? '').toLowerCase();
                           return nombre.contains(_filtroBusqueda) ||
                               rnc.contains(_filtroBusqueda) ||
@@ -127,15 +276,13 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                     width: 64,
                                     height: 64,
                                     decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(
-                                        alpha: 0.10,
-                                      ),
+                                      color: cAvatarBg,
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: const Icon(
                                       Icons.store_mall_directory_outlined,
                                       size: 32,
-                                      color: AppColors.primary,
+                                      color: cTealDark,
                                     ),
                                   ),
                                   const SizedBox(height: 16),
@@ -143,8 +290,10 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                     _filtroBusqueda.isEmpty
                                         ? 'Sin proveedores aún'
                                         : 'Sin resultados',
-                                    style: AppTypography.h4.copyWith(
-                                      fontWeight: FontWeight.w800,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: cInk,
                                     ),
                                   ),
                                   const SizedBox(height: 6),
@@ -153,8 +302,9 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                         ? 'Registra el primer proveedor\npara compras y cuentas por pagar.'
                                         : 'Prueba con otro término de búsqueda.',
                                     textAlign: TextAlign.center,
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: cMuted,
                                       height: 1.35,
                                     ),
                                   ),
@@ -168,7 +318,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                           return ListView.separated(
                             itemCount: filtrados.length,
                             separatorBuilder: (_, __) =>
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 12),
                             itemBuilder: (_, i) {
                               final proveedor = filtrados[i];
                               return _ProveedorCardMobile(
@@ -181,24 +331,27 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                   context,
                                   proveedor,
                                 ),
+                                onSettings: () =>
+                                    _abrirConfiguracionProveedor(
+                                  context,
+                                  proveedor,
+                                ),
                               );
                             },
                           );
                         }
 
-                        // Desktop: filas en panel
+                        // DESKTOP: tabla ficha técnica
                         return Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cWhite,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.10),
-                            ),
-                            boxShadow: [
+                            border: Border.all(color: cBorder),
+                            boxShadow: const [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.04),
+                                color: Color(0x0F000000),
                                 blurRadius: 12,
-                                offset: const Offset(0, 4),
+                                offset: Offset(0, 4),
                               ),
                             ],
                           ),
@@ -207,34 +360,65 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                                  horizontal: 20,
+                                  vertical: 14,
                                 ),
                                 decoration: const BoxDecoration(
-                                  color: AppColors.white,
+                                  color: cHeaderBg,
                                   border: Border(
-                                    bottom: BorderSide(color: AppColors.border),
+                                    bottom: BorderSide(color: cBorder),
                                   ),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   children: [
-                                    const SizedBox(width: 52),
-                                    _headerCell(
-                                      'PROVEEDOR',
-                                      flex: 2,
-                                      color: AppColors.primary,
+                                    SizedBox(width: 48),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        'PROVEEDOR',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: cMuted,
+                                          letterSpacing: 0.6,
+                                        ),
+                                      ),
                                     ),
-                                    _headerCell(
-                                      'CONTACTO',
+                                    Expanded(
                                       flex: 2,
-                                      color: AppColors.info,
+                                      child: Text(
+                                        'CONTACTO',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: cMuted,
+                                          letterSpacing: 0.6,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        'CORREO / TEL',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: cMuted,
+                                          letterSpacing: 0.6,
+                                        ),
+                                      ),
                                     ),
                                     SizedBox(
-                                      width: 100,
-                                      child: _headerBadge(
+                                      width: 120,
+                                      child: Text(
                                         'ACCIONES',
-                                        AppColors.grey600,
                                         textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: cMuted,
+                                          letterSpacing: 0.6,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -245,80 +429,86 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                   itemCount: filtrados.length,
                                   separatorBuilder: (_, __) => const Divider(
                                     height: 1,
-                                    color: AppColors.border,
+                                    color: cBorder,
                                   ),
                                   itemBuilder: (_, i) {
                                     final proveedor = filtrados[i];
-                                    final direccionCompleta = [
-                                      if (proveedor.direccion?.isNotEmpty ??
-                                          false)
-                                        proveedor.direccion,
-                                      if (proveedor.ciudad?.isNotEmpty ?? false)
-                                        proveedor.ciudad,
-                                      if (proveedor.provincia?.isNotEmpty ??
-                                          false)
-                                        proveedor.provincia,
-                                    ].join(', ');
                                     return Material(
-                                      color: i.isEven
-                                          ? Colors.white
-                                          : AppColors.grey50.withValues(
-                                              alpha: 0.55,
-                                            ),
+                                      color: cWhite,
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 10,
+                                          horizontal: 20,
+                                          vertical: 14,
                                         ),
                                         child: Row(
                                           children: [
+                                            // Avatar
                                             Container(
-                                              width: 40,
-                                              height: 40,
+                                              width: 36,
+                                              height: 36,
                                               decoration: BoxDecoration(
-                                                color: AppColors.primary
-                                                    .withValues(alpha: 0.12),
+                                                color: cAvatarBg,
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
                                               child: const Icon(
-                                                Icons
-                                                    .store_mall_directory_outlined,
-                                                color: AppColors.primary,
-                                                size: 20,
+                                                Icons.business_rounded,
+                                                color: cTealDark,
+                                                size: 18,
                                               ),
                                             ),
                                             const SizedBox(width: 12),
+                                            // Proveedor
                                             Expanded(
-                                              flex: 2,
+                                              flex: 3,
                                               child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
                                                     proveedor.nombreEmpresa,
-                                                    style: AppTypography
-                                                        .bodyLarge
-                                                        .copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                        ),
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: cInk,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                   const SizedBox(height: 2),
                                                   Text(
-                                                    'RNC: ${proveedor.rnc ?? '—'} · ${proveedor.nombreContacto ?? '—'}',
-                                                    style: AppTypography
-                                                        .bodySmall
-                                                        .copyWith(
-                                                          color:
-                                                              AppColors.grey700,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
+                                                    'RNC ${proveedor.rnc ?? '—'}',
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: cMuted,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
                                             ),
+                                            // Contacto
+                                            Expanded(
+                                              flex: 2,
+                                              child: Text(
+                                                proveedor.nombreContacto
+                                                            ?.isNotEmpty ==
+                                                        true
+                                                    ? proveedor.nombreContacto!
+                                                    : '—',
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: cInk,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            // Correo / Tel
                                             Expanded(
                                               flex: 2,
                                               child: Column(
@@ -326,57 +516,82 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    '${proveedor.telefono ?? '—'} · ${proveedor.email ?? '—'}',
-                                                    style: AppTypography
-                                                        .bodySmall
-                                                        .copyWith(
-                                                          color: AppColors
-                                                              .textPrimary,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  Text(
-                                                    direccionCompleta.isNotEmpty
-                                                        ? direccionCompleta
-                                                        : 'Sin dirección',
+                                                    proveedor.email
+                                                                ?.isNotEmpty ==
+                                                            true
+                                                        ? proveedor.email!
+                                                        : '—',
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: cInk,
+                                                    ),
                                                     maxLines: 1,
                                                     overflow:
                                                         TextOverflow.ellipsis,
-                                                    style: AppTypography
-                                                        .bodySmall
-                                                        .copyWith(
-                                                          color:
-                                                              AppColors.grey700,
-                                                        ),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    proveedor.telefono
+                                                                ?.isNotEmpty ==
+                                                            true
+                                                        ? proveedor.telefono!
+                                                        : (proveedor.celular
+                                                                    ?.isNotEmpty ==
+                                                                true
+                                                            ? proveedor
+                                                                .celular!
+                                                            : '—'),
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: cMuted,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.edit_outlined,
-                                                color: AppColors.primary,
-                                                size: 20,
-                                              ),
-                                              onPressed: () =>
-                                                  _mostrarModalRegistro(
-                                                    context,
-                                                    proveedorToEdit: proveedor,
+                                            // Acciones: editar · eliminar · configurar
+                                            SizedBox(
+                                              width: 120,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  _ProvActionIcon(
+                                                    Icons.edit_outlined,
+                                                    cMuted,
+                                                    () =>
+                                                        _mostrarModalRegistro(
+                                                      context,
+                                                      proveedorToEdit:
+                                                          proveedor,
+                                                    ),
                                                   ),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.delete_outline,
-                                                color: AppColors.error,
-                                                size: 20,
-                                              ),
-                                              onPressed: () =>
-                                                  _confirmarEliminarProveedor(
-                                                    context,
-                                                    proveedor,
+                                                  const SizedBox(width: 4),
+                                                  _ProvActionIcon(
+                                                    Icons.delete_outline,
+                                                    AppColors.error,
+                                                    () =>
+                                                        _confirmarEliminarProveedor(
+                                                      context,
+                                                      proveedor,
+                                                    ),
                                                   ),
+                                                  const SizedBox(width: 4),
+                                                  _ProvActionIcon(
+                                                    Icons.settings_outlined,
+                                                    cMuted,
+                                                    () =>
+                                                        _abrirConfiguracionProveedor(
+                                                      context,
+                                                      proveedor,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -395,35 +610,6 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _headerCell(String label, {required int flex, required Color color}) {
-    return Expanded(flex: flex, child: _headerBadge(label, color));
-  }
-
-  Widget _headerBadge(
-    String label,
-    Color color, {
-    TextAlign textAlign = TextAlign.left,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.11),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.24)),
-      ),
-      child: Text(
-        label,
-        textAlign: textAlign,
-        style: AppTypography.labelSmall.copyWith(
-          color: color,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.4,
-          fontSize: 11,
         ),
       ),
     );
@@ -452,6 +638,181 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
           },
         ),
       ],
+    );
+  }
+
+
+  void _abrirConfiguracionProveedor(
+    BuildContext context,
+    Proveedor proveedor,
+  ) {
+    final limiteCtrl = TextEditingController(
+      text: proveedor.limiteCredito > 0
+          ? proveedor.limiteCredito.toStringAsFixed(2)
+          : '',
+    );
+    final diasCtrl = TextEditingController(
+      text: proveedor.diasCredito > 0 ? '${proveedor.diasCredito}' : '',
+    );
+    final condicionesCtrl = TextEditingController(
+      text: proveedor.condicionesNota ?? '',
+    );
+    var estado = proveedor.estado;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 16,
+            bottom: MediaQuery.viewInsetsOf(ctx).bottom + 20,
+          ),
+          child: StatefulBuilder(
+            builder: (ctx, setModal) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFCBD5E1),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Configurar · ${proveedor.nombreEmpresa}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Límite de crédito, días y condiciones',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: limiteCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'Límite de crédito (RD\$)',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: diasCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Días de crédito',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: condicionesCtrl,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: 'Condiciones / notas',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue:
+                          estado == 'Inactivo' ? 'Inactivo' : 'Activo',
+                      decoration: InputDecoration(
+                        labelText: 'Estado',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'Activo',
+                          child: Text('Activo'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Inactivo',
+                          child: Text('Inactivo'),
+                        ),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) setModal(() => estado = v);
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    FilledButton(
+                      onPressed: () {
+                        final actualizado = proveedor.copyWith(
+                          limiteCredito:
+                              double.tryParse(limiteCtrl.text.trim()) ?? 0,
+                          diasCredito:
+                              int.tryParse(diasCtrl.text.trim()) ?? 0,
+                          condicionesNota: condicionesCtrl.text.trim().isEmpty
+                              ? null
+                              : condicionesCtrl.text.trim(),
+                          estado: estado,
+                          fechaActualizacion: DateTime.now(),
+                        );
+                        ref
+                            .read(proveedorControllerProvider.notifier)
+                            .actualizar(actualizado);
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Configuración de ${proveedor.nombreEmpresa} guardada',
+                            ),
+                          ),
+                        );
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF114E54),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Guardar configuración',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -701,7 +1062,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                   Text(
                                     'Información comercial y de contacto',
                                     style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: const Color(0xFF1E293B),
                                     ),
                                   ),
                                 ],
@@ -805,7 +1166,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             Text(
                               'Información comercial y de contacto',
                               style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
+                                color: const Color(0xFF1E293B),
                               ),
                             ),
                           ],
@@ -853,34 +1214,63 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
   }
 }
 
+
+class _ProvActionIcon extends StatelessWidget {
+  const _ProvActionIcon(this.icon, this.color, this.onTap);
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          child: Icon(icon, size: 18, color: color),
+        ),
+      ),
+    );
+  }
+}
+
 class _ProveedorCardMobile extends StatelessWidget {
   const _ProveedorCardMobile({
     required this.proveedor,
     required this.onEdit,
     required this.onDelete,
+    required this.onSettings,
   });
 
   final Proveedor proveedor;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onSettings;
 
   @override
   Widget build(BuildContext context) {
-    final sub =
-        'RNC: ${proveedor.rnc ?? '—'} · ${proveedor.nombreContacto ?? 'Sin contacto'}';
-    final tel = proveedor.telefono ?? proveedor.celular ?? '—';
+    const cWhite = Color(0xFFFFFFFF);
+    const cMuted = Color(0xFF1E293B);
+    const cInk = Color(0xFF0F172A);
+    const cTealDark = Color(0xFF114E54);
+    const cAvatarBg = Color(0xFFE5F2F3);
+    const cBorder = Color(0xFFE2E8F0);
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cWhite,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
-        boxShadow: [
+        border: Border.all(color: cBorder),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Color(0x0F000000),
+            blurRadius: 10,
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -893,12 +1283,12 @@ class _ProveedorCardMobile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  color: cAvatarBg,
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
-                  Icons.store_mall_directory_outlined,
-                  color: AppColors.primary,
+                  Icons.business_rounded,
+                  color: cTealDark,
                   size: 22,
                 ),
               ),
@@ -909,19 +1299,21 @@ class _ProveedorCardMobile extends StatelessWidget {
                   children: [
                     Text(
                       proveedor.nombreEmpresa,
-                      style: AppTypography.bodyLarge.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w800,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: cInk,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      sub,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.grey700,
-                        fontWeight: FontWeight.w500,
+                      'RNC ${proveedor.rnc ?? '—'}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: cMuted,
                       ),
                     ),
                   ],
@@ -929,38 +1321,114 @@ class _ProveedorCardMobile extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            'Tel: $tel${proveedor.email != null ? ' · ${proveedor.email}' : ''}',
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: cBorder),
+          const SizedBox(height: 12),
+          _mRow(Icons.person_outline, 'Contacto',
+              proveedor.nombreContacto?.isNotEmpty == true
+                  ? proveedor.nombreContacto!
+                  : '—'),
           const SizedBox(height: 8),
+          _mRow(Icons.email_outlined, 'Correo',
+              proveedor.email?.isNotEmpty == true ? proveedor.email! : '—'),
+          const SizedBox(height: 8),
+          _mRow(
+            Icons.phone_outlined,
+            'Teléfono',
+            proveedor.telefono?.isNotEmpty == true
+                ? proveedor.telefono!
+                : (proveedor.celular?.isNotEmpty == true
+                    ? proveedor.celular!
+                    : '—'),
+          ),
+          const SizedBox(height: 14),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.edit_outlined,
-                  color: AppColors.primary,
-                  size: 20,
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  label: const Text('Editar'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: cTealDark,
+                    side: const BorderSide(color: cBorder),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
-                onPressed: onEdit,
               ),
-              IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: AppColors.error,
-                  size: 20,
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 44,
+                height: 40,
+                child: OutlinedButton(
+                  onPressed: onSettings,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: cMuted,
+                    side: const BorderSide(color: cBorder),
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Icon(Icons.settings_outlined, size: 18),
                 ),
-                onPressed: onDelete,
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 44,
+                height: 40,
+                child: OutlinedButton(
+                  onPressed: onDelete,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: cBorder),
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Icon(Icons.delete_outline, size: 18),
+                ),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _mRow(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: const Color(0xFF1E293B)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1E293B),
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

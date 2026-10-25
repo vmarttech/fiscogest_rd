@@ -305,7 +305,8 @@ class LicenciaEstadoPage extends ConsumerWidget {
                 storeOcultaCompraTransferencia
                     ? 'En esta version de tienda: active con codigo o use el plan gratuito/demo. '
                       'La compra in-app de la tienda se habilitara cuando este disponible.'
-                    : 'Pago de la licencia: Toke o transferencia bancaria con referencia FG-. '
+                    : 'Planes móviles: Simplificado US\$8.99/mes y Básico US\$15.99/mes con PayPal. '
+                      'Profesional/Empresa: contacte a FiscoGest. '
                       'No confundir con los cobros del comercio a sus clientes en caja.',
                 style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
