@@ -24,11 +24,18 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
   String _plan = 'basico';
   bool _cargando = false;
 
-  static const _planes = ['basico', 'simplificado', 'pro'];
+  static const _planes = ['gratis', 'basico', 'simplificado', 'pro'];
 
   double get _precioUsd => precioMensualUsd(_plan) ?? 0;
 
   Future<void> _pagarPayPal() async {
+    if (_plan == 'gratis') {
+      _snack(
+        'El plan Gratis no requiere pago. '
+        'Se aplica al terminar la prueba o desde Mi licencia.',
+      );
+      return;
+    }
     final montoUsd = precioMensualUsd(_plan);
     if (montoUsd == null) {
       _snack('Este plan no tiene precio de suscripción.');
@@ -173,7 +180,11 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                     )
                   : const Icon(Icons.payment),
               label: Text(
-                _cargando ? 'Procesando…' : 'Pagar con PayPal',
+                _cargando
+                  ? 'Procesando…'
+                  : (_plan == 'gratis'
+                      ? 'Plan Gratis (sin pago)'
+                      : 'Pagar con PayPal'),
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,

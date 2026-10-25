@@ -95,8 +95,15 @@ class LicenciaService {
     final info = _fromRow(row);
     final nuevoEstado = _calcularEstado(info);
 
-    // Demo vencida (tras gracia) → plan gratis automático
-    if (row.plan == 'demo' && nuevoEstado == 'vencida') {
+    // Demo o plan de pago vencido (tras gracia) → gratis automático
+    // (cancelar solo evita renovar; al llegar fechaFin también cae aquí)
+    final planLow = row.plan.toLowerCase();
+    final esPagoVencido = planLow == 'basico' ||
+        planLow == 'simplificado' ||
+        planLow == 'pro' ||
+        planLow == 'profesional' ||
+        planLow == 'empresa';
+    if ((planLow == 'demo' || esPagoVencido) && nuevoEstado == 'vencida') {
       final ahora = DateTime.now();
       await (_db.update(_db.licenciasTable)..where((t) => t.id.equals(row.id)))
           .write(
@@ -307,6 +314,39 @@ class LicenciaService {
 
     final row = await (_db.select(_db.licenciasTable)
           ..where((t) => t.id.equals(id)))
+        .getSingle();
+    return _mapYActualizarEstado(row);
+  }
+
+
+  /// Cancela la renovación: el plan de pago sigue hasta fechaFin.
+  /// Al vencer (tras gracia), [ _mapYActualizarEstado ] debe pasar a gratis.
+  /// No acorta el periodo ya pagado.
+  Future<LicenciaInfo> cancelarPlanPagado() async {
+    final actual = await obtenerActual();
+    if (actual == null) {
+      throw StateError('No hay licencia activa');
+    }
+    if (actual.esDesarrollador) {
+      throw StateError('La licencia de desarrollador no se cancela aquí');
+    }
+    final plan = actual.plan.toLowerCase();
+    if (plan == 'gratis' || plan == 'demo') {
+      throw StateError('No hay plan de pago que cancelar');
+    }
+    // Marca en notas/estado: no renovar. Mantiene fechaFin y plan actual.
+    final ahora = DateTime.now().toIso8601String();
+    await (_db.update(_db.licenciasTable)
+          ..where((t) => t.id.equals(actual.id)))
+        .write(
+      LicenciasTableCompanion(
+        // vigenciaTipo especial para saber que no debe renovarse
+        vigenciaTipo: const Value('mensual_cancelada'),
+        actualizadoEn: Value(ahora),
+      ),
+    );
+    final row = await (_db.select(_db.licenciasTable)
+          ..where((t) => t.id.equals(actual.id)))
         .getSingle();
     return _mapYActualizarEstado(row);
   }

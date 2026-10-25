@@ -293,7 +293,73 @@ class LicenciaEstadoPage extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: 8),
-              if (esDuenoPlataforma(ref.watch(sesionProvider)?.username))
+              // Cancelar renovación: sigue hasta fechaFin, luego gratis
+              if (!esDev &&
+                  lic.plan != 'gratis' &&
+                  lic.plan != 'demo') ...[
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Cancelar plan'),
+                          content: const Text(
+                            'Seguirás con tu plan actual hasta el último día '
+                            'ya pagado. Después pasarás al plan Gratis. '
+                            '¿Confirmas cancelar la renovación?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('No'),
+                            ),
+                            FilledButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: const Text('Sí, cancelar'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (ok != true || !context.mounted) return;
+                      try {
+                        await ref
+                            .read(licenciaServiceProvider)
+                            .cancelarPlanPagado();
+                        ref.invalidate(licenciaActualProvider);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Renovación cancelada. Tu plan sigue hasta la fecha de fin.',
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.cancel_outlined),
+                    label: const Text('Cancelar renovación del plan'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFB91C1C),
+                      side: const BorderSide(color: Color(0xFFB91C1C)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+                            if (esDuenoPlataforma(ref.watch(sesionProvider)?.username))
                 Center(
                   child: TextButton(
                     onPressed: () => context.push('/licencia/admin'),

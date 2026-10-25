@@ -72,8 +72,10 @@ class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
     setState(() => _busy = true);
     try {
       final capture = await _paypal.captureOrder(widget.orderId);
-      final status = '${capture['status'] ?? ''}';
-      if (status == 'COMPLETED' || status == 'APPROVED') {
+      // Solo COMPLETED = dinero capturado. APPROVED NO basta (no hay cobro).
+      final status = '${capture['status'] ?? ''}'.toUpperCase();
+      final capturesOk = _capturesCompleted(capture);
+      if (status == 'COMPLETED' && capturesOk) {
         if (mounted) {
           Navigator.of(context).pop(
             PaypalCheckoutResult(
@@ -89,7 +91,9 @@ class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
             PaypalCheckoutResult(
               success: false,
               orderId: widget.orderId,
-              error: 'Estado PayPal: $status',
+              error:
+                  'Pago no confirmado (estado: $status). '
+                  'No se activó ninguna licencia. Completa el pago en PayPal.',
             ),
           );
         }
@@ -105,6 +109,21 @@ class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
         );
       }
     }
+  }
+
+  bool _capturesCompleted(Map<String, dynamic> capture) {
+    try {
+      final units = capture['purchase_units'] as List<dynamic>? ?? [];
+      for (final u in units) {
+        final payments = (u as Map)['payments'] as Map? ?? {};
+        final caps = payments['captures'] as List<dynamic>? ?? [];
+        for (final c in caps) {
+          final st = '${(c as Map)['status'] ?? ''}'.toUpperCase();
+          if (st == 'COMPLETED') return true;
+        }
+      }
+    } catch (_) {}
+    return '${capture['status'] ?? ''}'.toUpperCase() == 'COMPLETED';
   }
 
   @override
