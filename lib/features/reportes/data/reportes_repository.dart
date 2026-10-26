@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 
 /// Agregados de ventas cobradas (facturado + enCredito).
 class ReportesRepository {
+
+  ReportesRepository(this._db);
   String _fmtFechaRepo(dynamic raw) {
     if (raw == null) return '';
     if (raw is DateTime) {
@@ -26,8 +28,6 @@ class ReportesRepository {
       return s;
     }
   }
-
-  ReportesRepository(this._db);
   final AppDatabase _db;
 
   static const _estadosVenta = "('facturado','enCredito')";

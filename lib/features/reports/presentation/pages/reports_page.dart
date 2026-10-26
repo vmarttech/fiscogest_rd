@@ -73,8 +73,9 @@ class ReportsPage extends StatelessWidget {
     ];
 
     return AppScaffold(
-      title: 'REPORTES',
-      showAppBar: false,
+      title: 'Reportes operativos',
+      showAppBar: mobile,
+      showBackButton: true,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -90,31 +91,26 @@ class ReportsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        tooltip: 'Atrás',
-                        onPressed: () => safeBack(context, fallback: '/reports'),
-                        icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
-                      ),
-                      const Text(
-                        'Reportes operativos',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          color: Color(0xFF0F172A),
+                  if (!mobile) ...[
+                    Row(
+                      children: [
+                        IconButton(
+                          tooltip: 'Atrás',
+                          onPressed: () => safeBack(context, fallback: '/reports'),
+                          icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _LinkTile(
-                    icon: Icons.monitor_heart_outlined,
-                    title: 'Dashboard económico',
-                    subtitle: 'KPIs de ventas, ganancia y tendencias',
-                    onTap: () => safeBack(context, fallback: '/reports'),
-                  ),
-                  SizedBox(height: mobile ? 18 : 22),
+                        const Text(
+                          'Reportes operativos',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   Text(
                     'Reportes operativos',
                     style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
@@ -290,67 +286,3 @@ class _ReporteCard extends StatelessWidget {
   }
 }
 
-class _LinkTile extends StatelessWidget {
-  const _LinkTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFCBD5E1)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: AppColors.primary, size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    Text(
-                      subtitle,
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.textSecondary.withValues(alpha: 0.7),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

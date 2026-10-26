@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
-import 'package:fiscogest_rd/core/ui/app_action_bar.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
@@ -334,346 +333,366 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final mobile = AppBreakpoints.isMobile(context);
     final cols = (_data?['columnas'] as List?)?.cast<String>() ?? <String>[];
     final regs = _regsFiltrados;
+    final rango =
+        '${_fmtFecha.format(_desde)} — ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}';
 
     return AppScaffold(
-      title: _titulo.toUpperCase(),
-      showAppBar: false,
+      title: _titulo,
+      showAppBar: mobile,
+      showBackButton: true,
+      actions: [
+        IconButton(
+          tooltip: 'CSV',
+          onPressed: _data == null || _cargando ? null : _exportarCsv,
+          icon: const Icon(Icons.table_view_outlined),
+        ),
+        IconButton(
+          tooltip: 'PDF',
+          onPressed: _data == null || _cargando ? null : _exportarPdf,
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+        ),
+      ],
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: mobile ? 720 : 1100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Solo ← + título (SIN barra teal)
-                Padding(
-                  padding: EdgeInsets.fromLTRB(mobile ? 8 : 16, 8, mobile ? 16 : 24, 8),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        tooltip: 'Atrás',
-                        onPressed: () =>
-                            safeBack(context, fallback: '/reports/hub'),
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _titulo.toUpperCase(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
-                                color: Color(0xFF0F172A),
-                              ),
-                            ),
-                            Text(
-                              '${_fmtFecha.format(_desde)} — ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                                color: Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+            constraints: BoxConstraints(maxWidth: mobile ? 560 : 1000),
+            // Un solo scroll (como dashboard económico) — evita pantalla fija
+            child: RefreshIndicator(
+              onRefresh: _generar,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  mobile ? 16 : 24,
+                  mobile ? 8 : 12,
+                  mobile ? 16 : 24,
+                  32,
                 ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    mobile ? 16 : 24,
-                    0,
-                    mobile ? 16 : 24,
-                    0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      AppActionBar(
-                        alignment: WrapAlignment.start,
-                        actions: [
-                          OutlinedButton.icon(
-                            onPressed: _cargando ? null : _pickDesde,
-                            icon: const Icon(Icons.calendar_today, size: 16),
-                            label: Text(
-                              'Desde ${_fmtFecha.format(_desde)}',
-                              style: const TextStyle(fontWeight: FontWeight.w700),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Escritorio: ← + título (móvil usa AppBar)
+                    if (!mobile) ...[
+                      Row(
+                        children: [
+                          IconButton(
+                            tooltip: 'Atrás',
+                            onPressed: () =>
+                                safeBack(context, fallback: '/reports/hub'),
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: Color(0xFF0F172A),
                             ),
                           ),
-                          OutlinedButton.icon(
-                            onPressed: _cargando ? null : _pickHasta,
-                            icon: const Icon(Icons.event, size: 16),
-                            label: Text(
-                              'Hasta ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
-                              style: const TextStyle(fontWeight: FontWeight.w700),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _titulo.toUpperCase(),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 18,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                Text(
+                                  rango,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                    ] else ...[
+                      Text(
+                        rango,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
                       const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: SizedBox(
-                          width: mobile ? double.infinity : 220,
-                          child: ElevatedButton.icon(
-                            onPressed: _cargando ? null : _generar,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00796B),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            icon: _cargando
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.play_arrow_rounded),
-                            label: Text(
-                              _cargando ? 'Generando…' : 'Generar reporte',
-                              style: const TextStyle(fontWeight: FontWeight.w800),
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (_data != null) ...[
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 8,
-                          children: [
-                            OutlinedButton.icon(
-                              onPressed: _cargando ? null : _exportarCsv,
-                              icon: const Icon(Icons.table_view_outlined, size: 18),
-                              label: const Text(
-                                'CSV',
-                                style: TextStyle(fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: _cargando ? null : _exportarPdf,
-                              icon: const Icon(
-                                Icons.picture_as_pdf_outlined,
-                                size: 18,
-                              ),
-                              label: const Text(
-                                'PDF',
-                                style: TextStyle(fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _busquedaCtrl,
-                          onChanged: (v) => setState(() => _busqueda = v),
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                          decoration: InputDecoration(
-                            hintText: 'Buscar en resultados…',
-                            prefixIcon: const Icon(Icons.search),
-                            suffixIcon: _busqueda.isEmpty
-                                ? null
-                                : IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () {
-                                      _busquedaCtrl.clear();
-                                      setState(() => _busqueda = '');
-                                    },
-                                  ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            isDense: true,
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                        ),
-                      ],
                     ],
-                  ),
-                ),
-                if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      _error!,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.error,
+
+                    // Barra de control (mockup): 1 fila desktop / apilada móvil
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                      ),
+                      child: LayoutBuilder(
+                        builder: (context, bc) {
+                          final narrow = bc.maxWidth < 640;
+                          final dates = <Widget>[
+                            OutlinedButton.icon(
+                              onPressed: _cargando ? null : _pickDesde,
+                              icon: const Icon(Icons.calendar_today, size: 16),
+                              label: Text(
+                                'Desde ${_fmtFecha.format(_desde)}',
+                                style: const TextStyle(fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: _cargando ? null : _pickHasta,
+                              icon: const Icon(Icons.event, size: 16),
+                              label: Text(
+                                'Hasta ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
+                                style: const TextStyle(fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                            FilledButton.icon(
+                              onPressed: _cargando ? null : _generar,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF00796B),
+                                foregroundColor: Colors.white,
+                              ),
+                              icon: _cargando
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.play_arrow_rounded),
+                              label: Text(
+                                _cargando ? 'Generando…' : 'Generar',
+                                style: const TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                          ];
+                          final search = _data == null
+                              ? null
+                              : TextField(
+                                  controller: _busquedaCtrl,
+                                  onChanged: (v) => setState(() => _busqueda = v),
+                                  style: const TextStyle(fontWeight: FontWeight.w700),
+                                  decoration: InputDecoration(
+                                    hintText: 'Buscar en resultados…',
+                                    prefixIcon: const Icon(Icons.search),
+                                    suffixIcon: _busqueda.isEmpty
+                                        ? null
+                                        : IconButton(
+                                            icon: const Icon(Icons.clear),
+                                            onPressed: () {
+                                              _busquedaCtrl.clear();
+                                              setState(() => _busqueda = '');
+                                            },
+                                          ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    isDense: true,
+                                    filled: true,
+                                    fillColor: const Color(0xFFF8FAFC),
+                                  ),
+                                );
+
+                          if (narrow) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Wrap(spacing: 8, runSpacing: 8, children: dates),
+                                if (search != null) ...[
+                                  const SizedBox(height: 10),
+                                  search,
+                                ],
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: [
+                              ...[
+                                for (var i = 0; i < dates.length; i++) ...[
+                                  if (i > 0) const SizedBox(width: 8),
+                                  dates[i],
+                                ],
+                              ],
+                              if (search != null) ...[
+                                const SizedBox(width: 12),
+                                Expanded(child: search),
+                              ],
+                            ],
+                          );
+                        },
                       ),
                     ),
-                  ),
-                if (_data != null)
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      mobile ? 16 : 24,
-                      16,
-                      mobile ? 16 : 24,
-                      8,
-                    ),
-                    child: _ResumenCards(data: _data!, tipo: widget.tipo),
-                  ),
-                Expanded(
-                  child: _cargando && _data == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : regs.isEmpty
-                          ? Center(
-                              child: Text(
-                                'Sin movimientos en el período',
-                                style: AppTypography.bodyMedium.copyWith(
-                                  color: AppColors.textSecondary,
+
+                    if (_error != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        _error!,
+                        style: AppTypography.bodyMedium
+                            .copyWith(color: AppColors.error),
+                      ),
+                    ],
+
+                    if (_data != null) ...[
+                      const SizedBox(height: 16),
+                      _ResumenCards(data: _data!, tipo: widget.tipo),
+                      const SizedBox(height: 12),
+                    ],
+
+                    if (_cargando && _data == null)
+                      const Padding(
+                        padding: EdgeInsets.all(48),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_data != null && regs.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Center(
+                          child: Text(
+                            'Sin movimientos en el período',
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (_data != null && mobile)
+                      ...[
+                        for (var i = 0; i < regs.length; i++) ...[
+                          if (i > 0) const SizedBox(height: 8),
+                          Builder(
+                            builder: (_) {
+                              final row =
+                                  Map<String, dynamic>.from(regs[i]);
+                              final vals = _valoresFila(row);
+                              return Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFFCBD5E1),
+                                  ),
                                 ),
-                              ),
-                            )
-                          : mobile
-                              ? ListView.separated(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                                  itemCount: regs.length,
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: 8),
-                                  itemBuilder: (_, i) {
-                                    final row =
-                                        Map<String, dynamic>.from(regs[i]);
-                                    final vals = _valoresFila(row);
-                                    return Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: const Color(0xFFCBD5E1),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    for (var c = 0;
+                                        c < cols.length && c < vals.length;
+                                        c++)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 4),
+                                        child: Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 100,
+                                              child: Text(
+                                                cols[c],
+                                                style: AppTypography
+                                                    .labelSmall
+                                                    .copyWith(
+                                                  color: AppColors
+                                                      .textSecondary,
+                                                  fontWeight:
+                                                      FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                vals[c],
+                                                style: AppTypography
+                                                    .bodySmall
+                                                    .copyWith(
+                                                  fontWeight:
+                                                      FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          for (var c = 0;
-                                              c < cols.length && c < vals.length;
-                                              c++)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                bottom: 4,
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  SizedBox(
-                                                    width: 100,
-                                                    child: Text(
-                                                      cols[c],
-                                                      style: AppTypography
-                                                          .labelSmall
-                                                          .copyWith(
-                                                        color: AppColors
-                                                            .textSecondary,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    child: Text(
-                                                      vals[c],
-                                                      style: AppTypography
-                                                          .bodySmall
-                                                          .copyWith(
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    24,
-                                    8,
-                                    24,
-                                    24,
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: const Color(0xFFCBD5E1),
-                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ]
+                    else if (_data != null)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border:
+                              Border.all(color: const Color(0xFFCBD5E1)),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: LayoutBuilder(
+                          builder: (context, tc) {
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(minWidth: tc.maxWidth),
+                                child: DataTable(
+                            columnSpacing: 28,
+                            horizontalMargin: 16,
+                            headingRowColor: WidgetStatePropertyAll(
+                              const Color(0xFF00796B)
+                                  .withValues(alpha: 0.08),
+                            ),
+                            columns: [
+                              for (final c in cols)
+                                DataColumn(
+                                  label: Text(
+                                    c,
+                                    style: AppTypography.labelSmall
+                                        .copyWith(
+                                      fontWeight: FontWeight.w800,
                                     ),
-                                    clipBehavior: Clip.antiAlias,
-                                    child: SingleChildScrollView(
-                                        scrollDirection: Axis.vertical,
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          child: DataTable(
-                                            headingRowColor:
-                                                WidgetStatePropertyAll(
-                                              const Color(0xFF00796B)
-                                                  .withValues(alpha: 0.08),
-                                            ),
-                                            columns: [
-                                              for (final c in cols)
-                                                DataColumn(
-                                                  label: Text(
-                                                    c,
-                                                    style: AppTypography
-                                                        .labelSmall
-                                                        .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                            rows: [
-                                              for (final r in regs)
-                                                DataRow(
-                                                  cells: [
-                                                    for (final v
-                                                        in _valoresFila(
-                                                      Map<String, dynamic>.from(
-                                                        r,
-                                                      ),
-                                                    ))
-                                                      DataCell(
-                                                        Text(
-                                                          v,
-                                                          style: const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
-                                            ],
+                                  ),
+                                ),
+                            ],
+                            rows: [
+                              for (final r in regs)
+                                DataRow(
+                                  cells: [
+                                    for (final v in _valoresFila(
+                                      Map<String, dynamic>.from(r),
+                                    ))
+                                      DataCell(
+                                        Text(
+                                          v,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
+                                  ],
                                 ),
-              ],
+                            ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -681,7 +700,6 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     );
   }
 }
-
 
 class _ResumenCards extends StatelessWidget {
   const _ResumenCards({required this.data, required this.tipo});
@@ -696,7 +714,6 @@ class _ResumenCards extends StatelessWidget {
     final gastos = (data['gastos'] as num?)?.toDouble();
     final gananciaNeta = (data['gananciaNeta'] as num?)?.toDouble();
     final itbis = (data['itbis'] as num?)?.toDouble();
-
     final items = <(String, String, Color)>[
       ('Registros', '$cant', AppColors.primary),
       ('Total', formatRd(total), AppColors.success),
@@ -709,56 +726,55 @@ class _ResumenCards extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, c) {
-        final mobile = c.maxWidth < 600;
-        Container card(int i) => Container(
-              width: mobile ? (c.maxWidth - 10) / 2 : null,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: items[i].$3.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: items[i].$3.withValues(alpha: 0.2)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    items[i].$1,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    items[i].$2,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: items[i].$3,
-                    ),
-                  ),
-                ],
-              ),
-            );
+        const gap = 10.0;
+        final narrow = c.maxWidth < 600;
+        final cols = narrow
+            ? 2
+            : (items.length <= 4 ? items.length : 3);
+        final w = (c.maxWidth - gap * (cols - 1)) / cols;
 
-        if (mobile) {
-          return Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [for (var i = 0; i < items.length; i++) card(i)],
-          );
-        }
-        return Row(
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
           children: [
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) const SizedBox(width: 10),
-              Expanded(child: card(i)),
-            ],
+            for (final it in items)
+              SizedBox(
+                width: w,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                  decoration: BoxDecoration(
+                    color: it.$3.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: it.$3.withValues(alpha: 0.22)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        it.$1,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        it.$2,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: it.$3,
+                          fontSize: narrow ? 16 : 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         );
       },
     );
   }
 }
-
-

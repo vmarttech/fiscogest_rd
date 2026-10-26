@@ -309,14 +309,14 @@ String nombrePlanUi(String plan) {
 String descripcionPlanCorta(String plan) {
   switch (plan.toLowerCase()) {
     case 'gratis':
-      return '15 ventas/mes · sin reportes · 1 equipo · sin almacenes.';
+      return 'Prueba el flujo, sin compromiso.';
     case 'basico':
-      return '50 facturas/mes · reportes · 1 equipo · sin almacenes ni transferencias.';
+      return 'Opera y mira reportes en 1 equipo.';
     case 'simplificado':
-      return '150 facturas/mes · todo lo de Básico · 1 equipo.';
+      return 'Básico + hasta 150 facturas/mes.';
     case 'pro':
     case 'profesional':
-      return 'Todo incluido · ITBIS · facturación electrónica · almacenes · usuarios por departamento.';
+      return 'Fiscal DGII (RNC, NCF, e-CF) + almacenes + equipos.';
     default:
       return '';
   }
@@ -327,38 +327,35 @@ List<String> beneficiosPlanUi(String plan) {
   switch (plan.toLowerCase()) {
     case 'gratis':
       return const [
-        'US\$0 — sin cobro',
-        'Hasta 15 ventas al mes',
+        'Ventas y caja',
+        'Catálogo limitado (productos / clientes)',
+        'Fiao básico',
         '1 equipo',
-        'Sin reportes',
-        'Sin almacenes ni transferencias',
+        'Sin reportes ni módulo fiscal',
       ];
     case 'basico':
       return const [
-        'US\$5.99 / mes',
         'Hasta 50 facturas al mes',
-        'Reportes incluidos',
-        '1 equipo',
-        'Sin almacenes ni transferencias',
-        'Para más usuarios → Pro',
+        'Ventas, compras, inventario y caja',
+        'Productos y clientes sin tope práctico',
+        'Reportes para decidir con datos',
+        'Fiao · 1 equipo',
       ];
     case 'simplificado':
       return const [
-        'US\$10.99 / mes',
-        'Hasta 150 facturas al mes',
         'Todo lo de Básico',
-        'Reportes incluidos',
-        '1 equipo',
-        'Para más usuarios → Pro',
+        'Hasta 150 facturas al mes',
+        'Más holgura de fiao',
+        'Mismos reportes e inventario',
+        '1 equipo · sin almacenes ni e-CF',
       ];
     case 'pro':
       return const [
-        'US\$19.99 / mes',
-        'Facturas con ITBIS',
-        'Facturación electrónica (e-CF)',
-        'Almacenes y transferencias',
-        'Usuarios por departamento',
-        'Sin tope práctico de ventas',
+        'Ventas sin tope práctico + ITBIS',
+        'RNC de la empresa y secuencias NCF',
+        'Facturación electrónica e-CF (DGII)',
+        'Almacenes, transferencias y multiequipo',
+        'Crédito formal y usuarios por equipo',
       ];
     default:
       return const [];

@@ -40,8 +40,25 @@ class DashboardEconomicoPage extends ConsumerWidget {
 
     return AppScaffold(
       title: 'REPORTES',
-      showAppBar: false,
+      // Móvil: AppBar como el resto de módulos. Escritorio: cabecera teal propia.
+      showAppBar: mobile,
       showBackButton: false,
+      leading: mobile
+          ? IconButton(
+              icon: const Icon(Icons.menu),
+              tooltip: 'Menú',
+              onPressed: () => ShellDrawerScope.open(context),
+            )
+          : null,
+      actions: mobile
+          ? [
+              IconButton(
+                tooltip: 'Reportes operativos',
+                icon: const Icon(Icons.folder_open_outlined),
+                onPressed: () => context.push('/reports/hub'),
+              ),
+            ]
+          : null,
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(dashboardSnapshotProvider);
@@ -96,11 +113,14 @@ class DashboardEconomicoPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _ReportesHeader(
-                        onMenu: () => ShellDrawerScope.open(context),
-                        onHub: () => context.push('/reports/hub'),
-                      ),
-                      const SizedBox(height: 16),
+                      // Escritorio: franja teal. Móvil: ya hay AppBar.
+                      if (!mobile) ...[
+                        _ReportesHeader(
+                          onMenu: () => ShellDrawerScope.open(context),
+                          onHub: () => context.push('/reports/hub'),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       _PeriodoChips(
                         selected: periodo,
                         onChanged: (p) =>
