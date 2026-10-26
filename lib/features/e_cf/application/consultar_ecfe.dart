@@ -98,12 +98,20 @@ class ConsultarEcfe {
       final res = await gw.consultar(trackId);
 
       if (!res.ok) {
+        final errorAnterior = doc.ultimoError ?? '';
+        final conservaIncertidumbre = errorAnterior.contains(
+          '[ENVIO_DGII_INCIERTO]',
+        );
+        final errorConsulta = res.mensaje ?? 'Consulta fallida';
+
         await repo.actualizarEstado(
           id: documentoId,
-          estado: EstadoEcfInterno.enProceso,
+          estado: doc.estado,
           codigoRespuesta: res.codigo,
           mensajeDgii: res.mensaje,
-          ultimoError: res.mensaje,
+          ultimoError: conservaIncertidumbre
+              ? '[ENVIO_DGII_INCIERTO] $errorConsulta'
+              : res.mensaje,
         );
         await repo.registrarEvento(
           documentoId: documentoId,
@@ -113,19 +121,30 @@ class ConsultarEcfe {
         );
         return ConsultarEcfeResultado(
           ok: false,
-          estado: EstadoEcfInterno.enProceso,
+          estado: doc.estado,
           mensaje: res.mensaje,
           errores: [res.mensaje ?? 'Consulta fallida'],
         );
       }
 
       final interno = mapearEstadoDgii(res.estadoDgii, res.codigo);
+      final errorAnterior = doc.ultimoError ?? '';
+      final esEstadoTerminalConfirmado =
+          interno == EstadoEcfInterno.aceptado ||
+          interno == EstadoEcfInterno.aceptadoObservacion ||
+          interno == EstadoEcfInterno.rechazado;
+      final conservaIncertidumbre =
+          errorAnterior.contains('[ENVIO_DGII_INCIERTO]') &&
+          !esEstadoTerminalConfirmado;
+
       await repo.actualizarEstado(
         id: documentoId,
         estado: interno,
         codigoRespuesta: res.codigo,
         mensajeDgii: res.mensaje ?? res.estadoDgii,
-        ultimoError: interno == EstadoEcfInterno.rechazado
+        ultimoError: conservaIncertidumbre
+            ? errorAnterior
+            : interno == EstadoEcfInterno.rechazado
             ? (res.mensaje ?? res.estadoDgii)
             : null,
       );

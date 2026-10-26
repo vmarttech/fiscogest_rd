@@ -21,13 +21,19 @@ class DgiiTokenCache {
         return null;
       }
     } else {
-      // sin expira: asumir 50 min desde cache (guardamos en map con wrapper no; simple: sin expira no cachear largo)
-      // Si no hay expira, no confiar en caché larga → null para forzar refresh la 2ª vez tras 50 min no trackeamos
+      // Sin expiración conocida, no reutilizar el token almacenado.
+      _byAmbiente.remove(_key(ambiente));
+      return null;
     }
     return t;
   }
 
   void put(AmbienteDgii ambiente, DgiiToken token) {
+    // Solo cachear tokens cuya expiración se conoce.
+    if (token.expira == null) {
+      _byAmbiente.remove(_key(ambiente));
+      return;
+    }
     _byAmbiente[_key(ambiente)] = token;
   }
 

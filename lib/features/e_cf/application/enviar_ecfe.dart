@@ -30,6 +30,9 @@ class EnviarEcfe {
     required int documentoId,
     bool forzarReenvio = false,
   }) async {
+    const marcaEnvioIncierto = '[ENVIO_DGII_INCIERTO]';
+    var resultadoRecepcionIncierto = false;
+
     try {
       final cfg = await repo.obtenerConfig();
       if (!cfg.listoParaPipeline) {
@@ -54,6 +57,20 @@ class EnviarEcfe {
       }
 
       final trackExistente = (doc.trackId ?? '').trim();
+
+      // La incertidumbre siempre bloquea el envío, incluso si se solicita
+      // forzarReenvio o el documento ya tiene un TrackId guardado.
+      if ((doc.ultimoError ?? '').contains(marcaEnvioIncierto)) {
+        return const EnviarEcfeResultado(
+          ok: false,
+          errores: [
+            'Recepción DGII incierta. No se reenvió para evitar duplicados. '
+                'Consulta el estado con DGII y verifica el resultado antes '
+                'de cualquier acción excepcional.',
+          ],
+        );
+      }
+
       if (trackExistente.isNotEmpty && !forzarReenvio) {
         await repo.registrarEvento(
           documentoId: documentoId,
@@ -124,6 +141,12 @@ class EnviarEcfe {
         nombre,
         rfce: xml.contains('<RFCE'),
       );
+      // Una respuesta satisfactoria todavía no es segura hasta persistirla
+      // localmente. Si el guardado falla, se bloqueará el reenvío.
+      resultadoRecepcionIncierto =
+          res.resultadoIncierto ||
+          res.ok ||
+          (res.trackId != null && res.trackId!.trim().isNotEmpty);
 
       final esRfce = xml.contains('<RFCE');
       if (esRfce && res.ok) {
@@ -135,10 +158,14 @@ class EnviarEcfe {
         return EnviarEcfeResultado(ok: true, trackId: res.trackId);
       }
       if (!res.ok || (!esRfce && (res.trackId ?? '').isEmpty)) {
+        final errorGuardado = res.resultadoIncierto
+            ? '$marcaEnvioIncierto ${res.mensaje ?? 'Resultado de recepción desconocido'}'
+            : res.mensaje;
+
         await repo.actualizarEstado(
           id: documentoId,
           estado: EstadoEcfInterno.errorTecnico,
-          ultimoError: res.mensaje,
+          ultimoError: errorGuardado,
           codigoRespuesta: res.codigo,
           mensajeDgii: res.mensaje,
         );
@@ -174,7 +201,9 @@ class EnviarEcfe {
         await repo.actualizarEstado(
           id: documentoId,
           estado: EstadoEcfInterno.errorTecnico,
-          ultimoError: '$e',
+          ultimoError: resultadoRecepcionIncierto
+              ? '$marcaEnvioIncierto $e'
+              : '$e',
         );
         await repo.registrarEvento(
           documentoId: documentoId,

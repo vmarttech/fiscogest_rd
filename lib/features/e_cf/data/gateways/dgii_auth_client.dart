@@ -21,6 +21,8 @@ class DgiiAuthClient {
     http.Client? httpClient,
   }) : _http = httpClient ?? http.Client();
 
+  static const Duration _requestTimeout = Duration(seconds: 45);
+
   final AmbienteDgii ambiente;
   final String rutaCertificado;
   final String claveCertificado;
@@ -35,14 +37,14 @@ class DgiiAuthClient {
       if (cached != null) return cached;
     }
 
-    final rSeed = await _http.get(
-      Uri.parse(DgiiEndpoints.apiSemilla(ambiente)),
-      headers: {'Accept': 'application/xml, text/xml, */*'},
-    );
+    final rSeed = await _http
+        .get(
+          Uri.parse(DgiiEndpoints.apiSemilla(ambiente)),
+          headers: {'Accept': 'application/xml, text/xml, */*'},
+        )
+        .timeout(_requestTimeout);
     if (rSeed.statusCode < 200 || rSeed.statusCode >= 300) {
-      throw StateError(
-        'Semilla DGII HTTP ${rSeed.statusCode}: ${_clip(rSeed.body)}',
-      );
+      throw StateError('Semilla DGII respondió HTTP ${rSeed.statusCode}');
     }
     final semillaXml = rSeed.body.trim();
     if (semillaXml.isEmpty) throw StateError('Semilla DGII vacía');
@@ -64,20 +66,28 @@ class DgiiAuthClient {
       );
       req.headers['Accept'] = 'application/json';
       req.files.add(
-        await http.MultipartFile.fromPath('xml', f.path, filename: 'semilla.xml'),
+        await http.MultipartFile.fromPath(
+          'xml',
+          f.path,
+          filename: 'semilla.xml',
+        ),
       );
 
-      final streamed = await _http.send(req);
-      final body = await streamed.stream.bytesToString();
+      final streamed = await _http.send(req).timeout(_requestTimeout);
+      final body = await streamed.stream.bytesToString().timeout(
+        _requestTimeout,
+      );
       if (streamed.statusCode < 200 || streamed.statusCode >= 300) {
         throw StateError(
-          'ValidarSemilla HTTP ${streamed.statusCode}: ${_clip(body)}',
+          'ValidarSemilla respondió HTTP ${streamed.statusCode}',
         );
       }
 
       final map = jsonDecode(body) as Map<String, dynamic>;
       final token = (map['token'] ?? map['Token'] ?? '').toString();
-      if (token.isEmpty) throw StateError('Respuesta sin token: $body');
+      if (token.trim().isEmpty) {
+        throw StateError('Respuesta de autenticación sin token válido');
+      }
       DateTime? expira;
       final expRaw = map['expira'] ?? map['Expira'];
       if (expRaw != null) expira = DateTime.tryParse(expRaw.toString());
@@ -90,6 +100,4 @@ class DgiiAuthClient {
       } catch (_) {}
     }
   }
-
-  static String _clip(String s) => s.length > 300 ? s.substring(0, 300) : s;
 }

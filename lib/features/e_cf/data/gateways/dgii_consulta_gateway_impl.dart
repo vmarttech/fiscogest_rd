@@ -40,19 +40,21 @@ class DgiiConsultaGatewayImpl implements DgiiConsultaGateway {
       );
       final tok = await auth.obtenerToken();
 
-      final r = await _http.get(
-        Uri.parse(DgiiEndpoints.apiEstadoTrackId(ambiente, trackId)),
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${tok.token}',
-        },
-      );
+      final r = await _http
+          .get(
+            Uri.parse(DgiiEndpoints.apiEstadoTrackId(ambiente, trackId)),
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ${tok.token}',
+            },
+          )
+          .timeout(const Duration(seconds: 45));
 
       if (r.statusCode < 200 || r.statusCode >= 300) {
         return DgiiConsultaResultado(
           ok: false,
           codigo: '${r.statusCode}',
-          mensaje: r.body.length > 400 ? r.body.substring(0, 400) : r.body,
+          mensaje: 'Consulta DGII respondió HTTP ${r.statusCode}',
           payloadRaw: r.body,
         );
       }

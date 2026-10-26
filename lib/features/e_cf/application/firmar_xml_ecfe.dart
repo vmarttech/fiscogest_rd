@@ -30,6 +30,17 @@ class FirmarXmlEcfe {
           errores: ['Documento no encontrado'],
         );
       }
+
+      if ((doc.ultimoError ?? '').contains('[ENVIO_DGII_INCIERTO]')) {
+        return const FirmarXmlResultado(
+          ok: false,
+          errores: [
+            'La recepción en DGII es incierta. No se volverá a firmar '
+                'automáticamente. Verifica primero el estado con DGII.',
+          ],
+        );
+      }
+
       if (doc.estado != EstadoEcfInterno.xmlListo &&
           doc.estado != EstadoEcfInterno.firmado &&
           doc.estado != EstadoEcfInterno.errorTecnico) {

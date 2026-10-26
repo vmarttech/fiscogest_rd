@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_config.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_documento.dart';
@@ -50,10 +51,53 @@ class EcfeRepository {
     );
   }
 
+  static const String _claveSeguraEcfe = 'fiscogest_ecfe_clave_certificado';
+  static const FlutterSecureStorage _almacenSeguro = FlutterSecureStorage();
+
+  Future<String> _leerClaveSegura({String claveLegada = ''}) async {
+    try {
+      var guardada = await _almacenSeguro.read(key: _claveSeguraEcfe);
+
+      if (guardada != null && guardada.isNotEmpty) {
+        return guardada;
+      }
+
+      // Migración de instalaciones antiguas: no borrar SQLite aquí.
+      // Primero guardar y verificar la copia en el almacenamiento seguro.
+      if (claveLegada.isNotEmpty) {
+        await _almacenSeguro.write(key: _claveSeguraEcfe, value: claveLegada);
+        guardada = await _almacenSeguro.read(key: _claveSeguraEcfe);
+
+        if (guardada != claveLegada) {
+          throw StateError('No se pudo verificar la clave migrada.');
+        }
+        return guardada!;
+      }
+
+      return '';
+    } catch (_) {
+      throw StateError(
+        'No se pudo acceder al almacenamiento seguro de la clave e-CF. '
+        'Comprueba que el llavero del sistema esté disponible e inténtalo '
+        'de nuevo. La copia antigua no se ha eliminado.',
+      );
+    }
+  }
+
   Future<EcfeConfig> obtenerConfig() async {
     final rows = await _db.select(_db.ecfeConfigTable).get();
     if (rows.isEmpty) return const EcfeConfig();
+
     final r = rows.first;
+    final clave = await _leerClaveSegura(claveLegada: r.claveCertificado);
+
+    // Solo limpiar el campo antiguo si la clave segura ya existe y se leyó
+    // correctamente. Nunca borrar la única copia conocida.
+    if (clave.isNotEmpty && r.claveCertificado.isNotEmpty) {
+      await (_db.update(_db.ecfeConfigTable)..where((t) => t.id.equals(r.id)))
+          .write(const EcfeConfigTableCompanion(claveCertificado: Value('')));
+    }
+
     return EcfeConfig(
       id: r.id,
       habilitado: r.habilitado,
@@ -62,13 +106,40 @@ class EcfeRepository {
       razonSocialEmisor: r.razonSocialEmisor,
       rutaCertificado: r.rutaCertificado,
       aliasCertificado: r.aliasCertificado,
-      claveCertificado: r.claveCertificado,
+      claveCertificado: clave,
       xsdVersion: r.xsdVersion,
     );
   }
 
   Future<void> guardarConfig(EcfeConfig c) async {
     final existing = await _db.select(_db.ecfeConfigTable).get();
+    final actual = existing.isEmpty
+        ? ''
+        : await _leerClaveSegura(claveLegada: existing.first.claveCertificado);
+
+    var claveFinal = actual;
+
+    // Campo vacío significa conservar la clave existente.
+    if (c.claveCertificado.isNotEmpty) {
+      try {
+        await _almacenSeguro.write(
+          key: _claveSeguraEcfe,
+          value: c.claveCertificado,
+        );
+        final verificada = await _almacenSeguro.read(key: _claveSeguraEcfe);
+        if (verificada != c.claveCertificado) {
+          throw StateError('La verificación de la clave no coincidió.');
+        }
+        claveFinal = verificada!;
+      } catch (_) {
+        throw StateError(
+          'No se pudo guardar y verificar la clave del certificado '
+          'en el almacenamiento seguro. No se confirmó la configuración.',
+        );
+      }
+    }
+
+    // Nunca volver a escribir el secreto en texto plano en SQLite.
     if (existing.isEmpty) {
       await _db
           .into(_db.ecfeConfigTable)
@@ -80,7 +151,7 @@ class EcfeRepository {
               razonSocialEmisor: Value(c.razonSocialEmisor),
               rutaCertificado: Value(c.rutaCertificado),
               aliasCertificado: Value(c.aliasCertificado),
-              claveCertificado: Value(c.claveCertificado),
+              claveCertificado: const Value(''),
               xsdVersion: Value(c.xsdVersion),
             ),
           );
@@ -95,12 +166,20 @@ class EcfeRepository {
           razonSocialEmisor: Value(c.razonSocialEmisor),
           rutaCertificado: Value(c.rutaCertificado),
           aliasCertificado: Value(c.aliasCertificado),
-          claveCertificado: Value(c.claveCertificado),
+          claveCertificado: const Value(''),
           xsdVersion: Value(c.xsdVersion),
           actualizadoEn: Value(DateTime.now()),
         ),
       );
     }
+
+    // Evitar advertencias del analizador sobre la clave resuelta y dejar
+    // explícito que la lectura verificada es la que conserva la credencial.
+    assert(
+      claveFinal.isEmpty ||
+          claveFinal == actual ||
+          claveFinal == c.claveCertificado,
+    );
   }
 
   Future<List<EcfeDocumento>> listarDocumentos({

@@ -32,7 +32,9 @@ class ConsultarEstadoEcfe {
     if (e.contains('rechaz')) {
       return EstadoEcfInterno.rechazado;
     }
-    if (e.contains('proceso') || e.contains('pendiente') || e.contains('recibido')) {
+    if (e.contains('proceso') ||
+        e.contains('pendiente') ||
+        e.contains('recibido')) {
       return EstadoEcfInterno.enProceso;
     }
     return EstadoEcfInterno.enProceso;
@@ -82,13 +84,26 @@ class ConsultarEstadoEcfe {
       }
 
       final interno = mapearEstadoDgii(res.estadoDgii);
+      final errorAnterior = doc.ultimoError ?? '';
+      final esEstadoTerminalConfirmado =
+          interno == EstadoEcfInterno.aceptado ||
+          interno == EstadoEcfInterno.aceptadoObservacion ||
+          interno == EstadoEcfInterno.rechazado;
+      final conservaIncertidumbre =
+          errorAnterior.contains('[ENVIO_DGII_INCIERTO]') &&
+          !esEstadoTerminalConfirmado;
+
       await repo.actualizarEstado(
         id: documentoId,
         estado: interno,
         trackId: track,
         codigoRespuesta: res.codigo,
         mensajeDgii: res.mensaje ?? res.estadoDgii,
-        ultimoError: null,
+        ultimoError: conservaIncertidumbre
+            ? errorAnterior
+            : interno == EstadoEcfInterno.rechazado
+            ? (res.mensaje ?? res.estadoDgii)
+            : null,
       );
       await repo.registrarEvento(
         documentoId: documentoId,

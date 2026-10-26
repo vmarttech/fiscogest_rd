@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:io';
@@ -18,6 +19,44 @@ import 'package:fiscogest_rd/features/e_cf/data/xml/pkcs12_movil.dart';
 ///
 /// Alinear al 100% con el PDF "Firmado de e-CF" de la DGII (C14N exacto)
 /// durante certificación; este implementador cubre el flujo productivo base.
+class _EcfeProcessRunner {
+  static const Duration timeout = Duration(seconds: 30);
+  static const Duration cleanupTimeout = Duration(seconds: 2);
+
+  static Future<ProcessResult> run(
+    String executable,
+    List<String> arguments,
+  ) async {
+    final process = await Process.start(
+      executable,
+      arguments,
+      runInShell: false,
+    );
+
+    final stdoutFuture = process.stdout.transform(utf8.decoder).join();
+    final stderrFuture = process.stderr.transform(utf8.decoder).join();
+
+    try {
+      final exitCode = await process.exitCode.timeout(timeout);
+      final stdout = await stdoutFuture.timeout(timeout);
+      final stderr = await stderrFuture.timeout(timeout);
+      return ProcessResult(process.pid, exitCode, stdout, stderr);
+    } on TimeoutException {
+      process.kill();
+      try {
+        await process.exitCode.timeout(cleanupTimeout);
+      } catch (_) {}
+      try {
+        await stdoutFuture.timeout(cleanupTimeout);
+      } catch (_) {}
+      try {
+        await stderrFuture.timeout(cleanupTimeout);
+      } catch (_) {}
+      rethrow;
+    }
+  }
+}
+
 class EcfeSignerImpl implements EcfeSigner {
   EcfeSignerImpl({
     required this.rutaCertificado,
@@ -43,7 +82,9 @@ class EcfeSignerImpl implements EcfeSigner {
 
     final openssl = await _whichOpenssl();
     if (openssl == null) {
-      if (Platform.isAndroid || Platform.isIOS) return _firmarEnMovil(xmlSinFirma);
+      if (Platform.isAndroid || Platform.isIOS) {
+        return _firmarEnMovil(xmlSinFirma);
+      }
       throw StateError(
         'OpenSSL no esta en el PATH. Instalalo para firmar e-CF en esta computadora.',
       );
@@ -51,13 +92,27 @@ class EcfeSignerImpl implements EcfeSigner {
 
     final tmp = await Directory.systemTemp.createTemp('ecfe_sign_');
     try {
+      // En sistemas POSIX, solo el propietario debe acceder a la clave temporal.
+      // Si no se puede proteger el directorio, no continuar con material secreto.
+      if (!Platform.isWindows) {
+        final permisos = await _EcfeProcessRunner.run('chmod', [
+          '700',
+          tmp.path,
+        ]);
+        if (permisos.exitCode != 0) {
+          throw StateError(
+            'No se pudieron proteger los archivos temporales de la firma.',
+          );
+        }
+      }
+
       final keyPem = File('${tmp.path}/key.pem');
       final certPem = File('${tmp.path}/cert.pem');
       final p12PassFile = File('${tmp.path}/p12.pass');
       await p12PassFile.writeAsString(claveCertificado, flush: true);
 
       // Extraer clave privada
-      final rKey = await Process.run(openssl, [
+      final rKey = await _EcfeProcessRunner.run(openssl, [
         'pkcs12',
         '-in',
         certPath,
@@ -70,12 +125,12 @@ class EcfeSignerImpl implements EcfeSigner {
       ]);
       if (rKey.exitCode != 0) {
         throw StateError(
-          'No se pudo leer la clave del .p12 (¿password incorrecta?): ${rKey.stderr}',
+          'No se pudo leer la clave privada del certificado .p12. Verifica la contraseña y el archivo.',
         );
       }
 
       // Extraer certificado X509
-      final rCert = await Process.run(openssl, [
+      final rCert = await _EcfeProcessRunner.run(openssl, [
         'pkcs12',
         '-in',
         certPath,
@@ -88,7 +143,7 @@ class EcfeSignerImpl implements EcfeSigner {
       ]);
       if (rCert.exitCode != 0) {
         throw StateError(
-          'No se pudo leer el certificado del .p12: ${rCert.stderr}',
+          'No se pudo leer el certificado público del archivo .p12. Verifica el archivo.',
         );
       }
 
@@ -125,7 +180,7 @@ class EcfeSignerImpl implements EcfeSigner {
       final sigOut = File('${tmp.path}/sig.bin');
 
       // RSA-SHA256 sobre SignedInfo
-      final rSign = await Process.run(openssl, [
+      final rSign = await _EcfeProcessRunner.run(openssl, [
         'dgst',
         '-sha256',
         '-sign',
@@ -135,7 +190,9 @@ class EcfeSignerImpl implements EcfeSigner {
         siFile.path,
       ]);
       if (rSign.exitCode != 0) {
-        throw StateError('Error al firmar SignedInfo: ${rSign.stderr}');
+        throw StateError(
+          'OpenSSL no pudo firmar SignedInfo. Verifica el certificado y los datos.',
+        );
       }
       final signatureValue = base64.encode(await sigOut.readAsBytes());
 
@@ -147,6 +204,11 @@ class EcfeSignerImpl implements EcfeSigner {
           '</Signature>';
 
       return '<?xml version="1.0" encoding="UTF-8"?>${_insertSignature(xmlParaFirma, signatureXml)}';
+    } on TimeoutException {
+      throw StateError(
+        'La operación de firma excedió el límite de 30 segundos. '
+        'Verifica OpenSSL y vuelve a intentarlo.',
+      );
     } finally {
       try {
         await tmp.delete(recursive: true);
@@ -154,26 +216,27 @@ class EcfeSignerImpl implements EcfeSigner {
     }
   }
 
-
   Future<String> _firmarEnMovil(String xmlSinFirma) async {
     final xmlLimpio = _conFechaHoraFirma(
       _stripSignature(xmlSinFirma.trim()),
       DateTime.now(),
     );
     final xmlParaFirma = _canon(xmlLimpio);
-    final digestValue = base64.encode(sha256.convert(utf8.encode(xmlParaFirma)).bytes);
+    final digestValue = base64.encode(
+      sha256.convert(utf8.encode(xmlParaFirma)).bytes,
+    );
     final signedInfo =
-          '<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">'
-          '<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>'
-          '<SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>'
-          '<Reference URI="">'
-          '<Transforms>'
-          '<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>'
-          '</Transforms>'
-          '<DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>'
-          '<DigestValue>$digestValue</DigestValue>'
-          '</Reference>'
-          '</SignedInfo>';
+        '<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">'
+        '<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>'
+        '<SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>'
+        '<Reference URI="">'
+        '<Transforms>'
+        '<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>'
+        '</Transforms>'
+        '<DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>'
+        '<DigestValue>$digestValue</DigestValue>'
+        '</Reference>'
+        '</SignedInfo>';
     final firmado = await Pkcs12Movil.firmar(
       ruta: rutaCertificado,
       clave: claveCertificado,
@@ -192,17 +255,25 @@ class EcfeSignerImpl implements EcfeSigner {
   }
 
   static Future<String?> _whichOpenssl() async {
-    final r = await Process.run('which', ['openssl']);
-    if (r.exitCode == 0) {
-      final p = (r.stdout as String).trim();
-      if (p.isNotEmpty) return p;
-    }
-    // Windows
-    final r2 = await Process.run('where', ['openssl']);
-    if (r2.exitCode == 0) {
-      final lines = (r2.stdout as String).trim().split('\n');
-      if (lines.isNotEmpty && lines.first.trim().isNotEmpty) {
-        return lines.first.trim();
+    for (final command in <List<String>>[
+      ['which', 'openssl'],
+      ['where', 'openssl'],
+    ]) {
+      try {
+        final result = await _EcfeProcessRunner.run(
+          command.first,
+          command.skip(1).toList(),
+        );
+        if (result.exitCode == 0) {
+          final String output = result.stdout.toString().trim();
+          if (output.isNotEmpty) {
+            return output.split('\n').first.trim();
+          }
+        }
+      } on TimeoutException {
+        // La detección no debe quedar bloqueada indefinidamente.
+      } on ProcessException {
+        // El comando puede no existir en este sistema operativo.
       }
     }
     return null;

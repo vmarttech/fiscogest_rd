@@ -173,6 +173,13 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         throw StateError('Documento no encontrado');
       }
 
+      if ((doc.ultimoError ?? '').contains('[ENVIO_DGII_INCIERTO]')) {
+        throw StateError(
+          'Recepción DGII incierta. No se procesará ni firmará de nuevo '
+          'automáticamente. Verifica el estado con DGII antes de continuar.',
+        );
+      }
+
       // 1) Generar XML si aún no está listo o firmado
       if (doc.estado == EstadoEcfInterno.borrador ||
           doc.estado == EstadoEcfInterno.validacionFallida) {
@@ -256,8 +263,25 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   Future<void> _firmarXml() async {
     setState(() => _generando = true);
     try {
+      final repo = ref.read(ecfeRepositoryProvider);
+      final doc = await repo.obtenerPorId(widget.documentoId);
+      if ((doc?.ultimoError ?? '').contains('[ENVIO_DGII_INCIERTO]')) {
+        if (mounted) {
+          FiscoGestNotifications.show(
+            const SnackBar(
+              content: Text(
+                'Recepción DGII incierta. Verifica el estado antes de firmar '
+                'o reenviar este documento.',
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+        return;
+      }
+
       final result = await FirmarXmlEcfe(
-        repo: ref.read(ecfeRepositoryProvider),
+        repo: repo,
       ).call(documentoId: widget.documentoId);
       ref.invalidate(ecfeDocumentoProvider(widget.documentoId));
       ref.invalidate(ecfeEventosProvider(widget.documentoId));

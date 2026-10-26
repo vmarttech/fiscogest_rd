@@ -8,10 +8,7 @@ import 'package:xml/xml.dart';
 /// 2) Si [rutaXsd] apunta a un .xsd (o directorio con un .xsd raíz),
 ///    valida con `xmllint --schema` (libxml2).
 class EcfeXsdValidatorImpl implements EcfeXsdValidator {
-  EcfeXsdValidatorImpl({
-    this.rutaXsd,
-    this.exigirXsd = false,
-  });
+  EcfeXsdValidatorImpl({this.rutaXsd, this.exigirXsd = false});
 
   /// Ruta a archivo .xsd o carpeta que lo contiene.
   final String? rutaXsd;
@@ -79,9 +76,7 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
         final encf =
             idDoc.findElements('eNCF').firstOrNull?.innerText.trim() ?? '';
         if (encf.isNotEmpty && !_encfRe.hasMatch(encf)) {
-          errores.add(
-            'eNCF inválido (esperado E + tipo + 10 dígitos): $encf',
-          );
+          errores.add('eNCF inválido (esperado E + tipo + 10 dígitos): $encf');
         }
         final tipo =
             idDoc.findElements('TipoeCF').firstOrNull?.innerText.trim() ?? '';
@@ -89,16 +84,15 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
           errores.add('eNCF $encf no coincide con TipoeCF $tipo');
         }
         _req(idDoc, 'FechaVencimientoSecuencia', errores);
-        final fvs = idDoc
+        final fvs =
+            idDoc
                 .findElements('FechaVencimientoSecuencia')
                 .firstOrNull
                 ?.innerText
                 .trim() ??
             '';
         if (fvs.isNotEmpty && !_fechaRe.hasMatch(fvs)) {
-          errores.add(
-            'FechaVencimientoSecuencia debe ser dd-MM-yyyy: $fvs',
-          );
+          errores.add('FechaVencimientoSecuencia debe ser dd-MM-yyyy: $fvs');
         }
       }
 
@@ -111,13 +105,13 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
         _req(emisor, 'FechaEmision', errores);
         final fe =
             emisor.findElements('FechaEmision').firstOrNull?.innerText.trim() ??
-                '';
+            '';
         if (fe.isNotEmpty && !_fechaRe.hasMatch(fe)) {
           errores.add('FechaEmision debe ser dd-MM-yyyy: $fe');
         }
         final rnc =
             emisor.findElements('RNCEmisor').firstOrNull?.innerText.trim() ??
-                '';
+            '';
         final rncDigits = rnc.replaceAll(RegExp(r'\D'), '');
         if (rncDigits.isNotEmpty &&
             rncDigits.length != 9 &&
@@ -235,11 +229,12 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
     ).create();
     try {
       await tmp.writeAsString(xml);
-      final result = await Process.run(
-        xmllint,
-        ['--noout', '--schema', xsd.path, tmp.path],
-        runInShell: false,
-      );
+      final result = await Process.run(xmllint, [
+        '--noout',
+        '--schema',
+        xsd.path,
+        tmp.path,
+      ], runInShell: false);
       if (result.exitCode != 0) {
         final err = '${result.stderr}\n${result.stdout}'.trim();
         if (err.isEmpty) {

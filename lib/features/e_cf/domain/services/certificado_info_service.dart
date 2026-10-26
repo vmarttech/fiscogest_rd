@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -29,15 +30,64 @@ class CertificadoInfo {
   String get mensaje {
     if (error != null) return error!;
     final d = diasRestantes;
-    if (d == null) return 'No se pudo determinar el vencimiento del certificado';
+    if (d == null) {
+      return 'No se pudo determinar el vencimiento del certificado';
+    }
     if (d < 0) return 'Certificado digital VENCIDO hace ${-d} día(s)';
-    if (d == 0) return 'Certificado digital vence HOY';
+    if (d == 0) {
+      return 'Certificado digital vence HOY';
+    }
     if (d <= 30) return 'Certificado digital vence en $d día(s)';
     return 'Certificado vigente ($d días restantes)';
   }
 }
 
+class _OpenSslResult {
+  const _OpenSslResult({
+    required this.exitCode,
+    required this.stdout,
+    required this.stderr,
+  });
+
+  final int exitCode;
+  final String stdout;
+  final String stderr;
+}
+
 class CertificadoInfoService {
+  static const Duration _timeout = Duration(seconds: 20);
+
+  static Future<_OpenSslResult> _ejecutarOpenSsl(
+    List<String> argumentos, {
+    String? entrada,
+  }) async {
+    final proceso = await Process.start('openssl', argumentos);
+    final stdoutFuture = proceso.stdout.transform(utf8.decoder).join();
+    final stderrFuture = proceso.stderr.transform(utf8.decoder).join();
+    final exitFuture = proceso.exitCode;
+
+    if (entrada != null) {
+      proceso.stdin.write(entrada);
+    }
+    await proceso.stdin.close();
+
+    late final int codigo;
+    try {
+      codigo = await exitFuture.timeout(_timeout);
+    } on TimeoutException {
+      proceso.kill();
+      try {
+        await exitFuture.timeout(const Duration(seconds: 2));
+      } catch (_) {}
+      throw TimeoutException('OpenSSL excedió el límite de tiempo');
+    }
+
+    final salida = await stdoutFuture.timeout(_timeout);
+    final error = await stderrFuture.timeout(_timeout);
+
+    return _OpenSslResult(exitCode: codigo, stdout: salida, stderr: error);
+  }
+
   static Future<CertificadoInfo> inspeccionar({
     required String ruta,
     required String clave,
@@ -46,62 +96,98 @@ class CertificadoInfoService {
     if (path.isEmpty) {
       return const CertificadoInfo(error: 'Sin ruta de certificado');
     }
+    if (clave.isEmpty) {
+      return const CertificadoInfo(error: 'Clave del certificado vacía');
+    }
     if (!await File(path).exists()) {
       return CertificadoInfo(error: 'No existe el archivo: $path');
     }
+
+    Directory? temporal;
     try {
-      final r = await Process.run(
-        'openssl',
-        [
-          'pkcs12',
-          '-in',
-          path,
-          '-nokeys',
-          '-clcerts',
-          '-passin',
-          'pass:$clave',
-        ],
-      );
+      temporal = await Directory.systemTemp.createTemp('dgii_cert_info_');
+      final archivoClave = File('${temporal.path}/p12.pass');
+      await archivoClave.writeAsString(clave, flush: true);
+
+      final r = await _ejecutarOpenSsl([
+        'pkcs12',
+        '-in',
+        path,
+        '-nokeys',
+        '-clcerts',
+        '-passin',
+        'file:${archivoClave.path}',
+      ]);
+
       if (r.exitCode != 0) {
-        final err = '${r.stderr}'.trim();
+        final err = r.stderr.trim();
         return CertificadoInfo(
           error: err.isEmpty
               ? 'OpenSSL no pudo leer el .p12 (¿clave incorrecta?)'
               : (err.length > 180 ? '${err.substring(0, 180)}…' : err),
         );
       }
-      final pem = '${r.stdout}';
-      final r3 = await Process.start('openssl', ['x509', '-noout', '-enddate']);
-      r3.stdin.write(pem);
-      await r3.stdin.close();
-      final out = await r3.stdout.transform(utf8.decoder).join();
-      final err2 = await r3.stderr.transform(utf8.decoder).join();
-      final code = await r3.exitCode;
-      if (code != 0) {
+
+      final r3 = await _ejecutarOpenSsl([
+        'x509',
+        '-noout',
+        '-enddate',
+      ], entrada: r.stdout);
+
+      if (r3.exitCode != 0) {
+        final err = r3.stderr.trim();
         return CertificadoInfo(
-          error: err2.trim().isEmpty
+          error: err.isEmpty
               ? 'No se pudo leer fecha del certificado'
-              : err2.trim(),
+              : (err.length > 180 ? '${err.substring(0, 180)}…' : err),
         );
       }
-      final m = RegExp(r'notAfter=(.+)').firstMatch(out.trim());
+
+      final m = RegExp(r'notAfter=(.+)').firstMatch(r3.stdout.trim());
       if (m == null) {
-        return CertificadoInfo(error: 'Fecha no reconocida: ${out.trim()}');
+        return const CertificadoInfo(
+          error: 'No se reconoció la fecha de vencimiento del certificado',
+        );
       }
+
       final parsed = _parseOpenSslDate(m.group(1)!.trim());
       if (parsed == null) {
-        return CertificadoInfo(error: 'Fecha no parseable: ${m.group(1)}');
+        return const CertificadoInfo(
+          error: 'No se pudo interpretar la fecha de vencimiento',
+        );
       }
+
       return CertificadoInfo(notAfter: parsed);
-    } catch (e) {
+    } on TimeoutException catch (e) {
       return CertificadoInfo(error: '$e');
+    } catch (_) {
+      // No incluir argumentos de proceso ni contraseña en el error mostrado.
+      return const CertificadoInfo(
+        error: 'No se pudo inspeccionar el certificado con OpenSSL',
+      );
+    } finally {
+      if (temporal != null) {
+        try {
+          await temporal.delete(recursive: true);
+        } catch (_) {}
+      }
     }
   }
 
   static DateTime? _parseOpenSslDate(String s) {
     const months = {
-      'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-      'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+      'Jan': 1,
+      'Feb': 2,
+      'Mar': 3,
+      'Apr': 4,
+      'May': 5,
+      'Jun': 6,
+      'Jul': 7,
+      'Aug': 8,
+      'Sep': 9,
+      'Oct': 10,
+      'Nov': 11,
+      'Dec': 12,
     };
     final parts = s.replaceAll(RegExp(r'\s+'), ' ').split(' ');
     if (parts.length < 4) return null;

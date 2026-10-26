@@ -4,11 +4,15 @@ class DgiiRecepcionResultado {
     this.trackId,
     this.codigo,
     this.mensaje,
+    this.resultadoIncierto = false,
   });
   final bool ok;
   final String? trackId;
   final String? codigo;
   final String? mensaje;
+
+  /// true cuando no se puede confirmar si DGII recibió el documento.
+  final bool resultadoIncierto;
 }
 
 /// Envío a recepción DGII. Solo se implementa en fases de red.

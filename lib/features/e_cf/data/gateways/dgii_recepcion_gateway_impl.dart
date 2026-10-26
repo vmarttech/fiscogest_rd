@@ -15,6 +15,7 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
     required this.claveCertificado,
     required this.rncEmisor,
     http.Client? httpClient,
+    this.requestTimeout = const Duration(seconds: 45),
   }) : _http = httpClient ?? http.Client();
 
   final AmbienteDgii ambiente;
@@ -22,6 +23,9 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
   final String claveCertificado;
   final String rncEmisor;
   final http.Client _http;
+
+  /// Tiempo máximo permitido para cada fase de comunicación con DGII.
+  final Duration requestTimeout;
 
   @override
   Future<DgiiRecepcionResultado> enviar(String xmlFirmado) =>
@@ -52,6 +56,8 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
       return const DgiiRecepcionResultado(ok: false, mensaje: 'XML vacío');
     }
 
+    var solicitudRecepcionIniciada = false;
+
     try {
       final auth = DgiiAuthClient(
         ambiente: ambiente,
@@ -59,7 +65,7 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
         claveCertificado: claveCertificado,
         httpClient: _http,
       );
-      final tok = await auth.obtenerToken();
+      final tok = await auth.obtenerToken().timeout(requestTimeout);
 
       final fileName = (nombreArchivo ?? _nombreDesdeXml(xmlFirmado)).trim();
       final tmp = await Directory.systemTemp.createTemp('dgii_rec_');
@@ -81,8 +87,11 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
           await http.MultipartFile.fromPath('xml', f.path, filename: fileName),
         );
 
-        final streamed = await _http.send(req);
-        final body = await streamed.stream.bytesToString();
+        solicitudRecepcionIniciada = true;
+        final streamed = await _http.send(req).timeout(requestTimeout);
+        final body = await streamed.stream.bytesToString().timeout(
+          requestTimeout,
+        );
         if (rfce) return _resultadoRfce(streamed.statusCode, body);
 
         if (streamed.statusCode < 200 || streamed.statusCode >= 300) {
@@ -90,6 +99,7 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
             ok: false,
             codigo: '${streamed.statusCode}',
             mensaje: body.length > 500 ? body.substring(0, 500) : body,
+            resultadoIncierto: streamed.statusCode >= 500,
           );
         }
 
@@ -116,6 +126,7 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
             ok: false,
             codigo: codigo,
             mensaje: mensaje ?? 'Sin TrackId: $body',
+            resultadoIncierto: true,
           );
         }
 
@@ -131,7 +142,11 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
         } catch (_) {}
       }
     } catch (e) {
-      return DgiiRecepcionResultado(ok: false, mensaje: '$e');
+      return DgiiRecepcionResultado(
+        ok: false,
+        mensaje: '$e',
+        resultadoIncierto: solicitudRecepcionIniciada,
+      );
     }
   }
 
@@ -150,12 +165,17 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
         ok: false,
         codigo: '$status',
         mensaje: body.length > 500 ? body.substring(0, 500) : body,
+        resultadoIncierto: status >= 500,
       );
     }
     try {
       final decoded = jsonDecode(body);
       if (decoded is! Map) {
-        return DgiiRecepcionResultado(ok: false, mensaje: body);
+        return DgiiRecepcionResultado(
+          ok: false,
+          mensaje: body.length > 500 ? body.substring(0, 500) : body,
+          resultadoIncierto: true,
+        );
       }
       final estado = (decoded['estado'] ?? '').toString();
       final codigo = (decoded['codigo'] ?? '').toString();
@@ -166,17 +186,19 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
         mensaje = (primero['valor'] ?? primero['mensaje'] ?? estado).toString();
       }
       final bajo = estado.toLowerCase();
-      final ok = bajo.contains('aceptado') && !bajo.contains('rechazado');
+      final aceptado = bajo.contains('aceptado') && !bajo.contains('rechazado');
+      final rechazado = bajo.contains('rechazado');
       return DgiiRecepcionResultado(
-        ok: ok,
+        ok: aceptado,
         codigo: codigo,
         mensaje: mensaje.isEmpty ? estado : mensaje,
+        resultadoIncierto: !aceptado && !rechazado,
       );
     } catch (_) {
-      final bajo = body.toLowerCase();
       return DgiiRecepcionResultado(
-        ok: bajo.contains('aceptado') && !bajo.contains('rechazado'),
+        ok: false,
         mensaje: body.length > 500 ? body.substring(0, 500) : body,
+        resultadoIncierto: true,
       );
     }
   }
