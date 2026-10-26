@@ -298,7 +298,19 @@ class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
     _busy = true;
     _lastCheck = now;
     try {
-      await UpdateChecker.checkAndPrompt(context);
+      final navigatorContext = appNavigatorKey.currentContext;
+      if (navigatorContext == null) {
+        debugPrint(
+          '[UpdateChecker] Navigator no disponible; '
+          'se intentará comprobar de nuevo más adelante.',
+        );
+        _lastCheck = null;
+        return;
+      }
+      await UpdateChecker.checkAndPrompt(navigatorContext);
+    } catch (e, st) {
+      debugPrint('[UpdateChecker] Error al comprobar o mostrar aviso: $e');
+      debugPrint('$st');
     } finally {
       _busy = false;
     }

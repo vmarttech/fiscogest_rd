@@ -21,6 +21,7 @@ import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 
@@ -159,6 +160,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return;
     }
     await EmitirToken.trasLogin(username: username, password: password);
+    // 1) Bajar licencia + datos ANTES de subir (evitar pisar nube con demo local)
+    if (!requiereSetup) {
+      try {
+        await SyncPull(db).pullTodoElNegocio();
+        if (esDuenoPlataforma(usernameSesion)) {
+          try {
+            await LicenciaService(db).activarDesarrolladorVitalicio();
+          } catch (e) {
+            debugPrint('Login: vitalicio post-nube $e');
+          }
+        }
+        if (mounted) ref.invalidate(licenciaActualProvider);
+      } catch (e, st) {
+        debugPrint('Pull post-login: $e');
+        debugPrint('$st');
+      }
+    }
     try {
       await SyncEngine(db).pushAll();
     } catch (e, st) {
@@ -168,9 +186,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!requiereSetup) {
       try {
         await ProductoSync(db).pushTodos();
-        await SyncPull(db).pullTodoElNegocio();
       } catch (e, st) {
-        debugPrint('Pull post-login: $e');
+        debugPrint('Push productos post-login: $e');
         debugPrint('$st');
       }
     }
@@ -189,28 +206,56 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final user = _userCtrl.text.trim();
       final pass = _passCtrl.text;
       var res = await AuthService(db).login(user, pass);
-      // Equipo nuevo: no hay usuarios locales → bajar de Supabase y reintentar
+      // Equipo nuevo / BD vacía: recuperar cuenta desde la nube (cualquier usuario)
       if (res == null) {
         if (await SupabaseConfig.hayRed()) {
           try {
-            debugPrint('Login: local falló → token + pull');
+            debugPrint('Login: local falló → recuperar desde nube');
             await EmitirToken.trasLogin(username: user, password: pass);
             final nid = await NegocioLocal.getId();
             if (nid != null && nid.isNotEmpty) {
-              await ProductoSync(db).pushTodos();
-        await SyncPull(db).pullTodoElNegocio();
+              // Primero bajar usuarios y datos; no push con BD vacía
+              await SyncPull(db).pullTodoElNegocio();
+              if (esDuenoPlataforma(user)) {
+                try {
+                  await LicenciaService(db).activarDesarrolladorVitalicio();
+                } catch (e) {
+                  debugPrint('Login: vitalicio post-pull $e');
+                }
+              }
+              ref.invalidate(licenciaActualProvider);
               res = await AuthService(db).login(user, pass);
+              if (res == null) {
+                debugPrint(
+                  'Login: pull OK pero login local falló (hash/usuario)',
+                );
+              }
+            } else {
+              debugPrint('Login: nube no devolvió negocio_id (credenciales o sin fila)');
             }
           } catch (e, st) {
-            debugPrint('Login: pull antes de reintento: $e');
+            debugPrint('Login: recuperar nube: $e');
             debugPrint('$st');
           }
         } else {
           debugPrint('Login: sin red y sin usuario local');
+          if (mounted) {
+            setState(() {
+              _error =
+                  'Sin datos en este equipo y sin internet. '
+                  'Conéctate para recuperar tu cuenta.';
+              _cargando = false;
+            });
+            return;
+          }
         }
       }
       if (res == null) {
-        setState(() => _error = 'Usuario o contraseña incorrectos');
+        setState(
+          () => _error =
+              'Usuario o contraseña incorrectos, '
+              'o la cuenta aún no está respaldada en la nube.',
+        );
         return;
       }
 
@@ -251,6 +296,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         await LoginPrefs.enableBiometric(username: user, password: pass);
       }
 
+      // Dueño plataforma: licencia YA, no esperar el unawaited de nube
+      if (esDuenoPlataforma(res.username)) {
+        try {
+          await LicenciaService(db).activarDesarrolladorVitalicio();
+          debugPrint('Login: desarrollador vitalicio listo (${res.username})');
+        } catch (e, st) {
+          debugPrint('Login: vitalicio $e\n$st');
+        }
+      }
       ref.read(sesionProvider.notifier).state = UsuarioSesion(
         id: res.usuarioId,
         username: res.username,

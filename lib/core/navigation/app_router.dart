@@ -92,8 +92,11 @@ import 'package:fiscogest_rd/features/facturacion/presentation/pages/historial_f
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_nc_page.dart';
 import 'package:fiscogest_rd/core/presentation/pages/inicio_page.dart';
 
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
+    navigatorKey: appNavigatorKey,
     initialLocation: '/splash',
     redirect: (context, state) async {
       final path = state.uri.path;
@@ -144,7 +147,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
       // Tiendas: no checkout de licencia por transferencia dentro de la app
       if (storeOcultaCompraTransferencia &&
-          (path == '/licencia/comprar' || path.startsWith('/licencia/comprar/'))) {
+          (path == '/licencia/comprar' ||
+              path.startsWith('/licencia/comprar/'))) {
         return '/licencia/activar';
       }
       // Plan simplificado: sin módulos fiscales
@@ -187,7 +191,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           sesion.requiereSetupInicial &&
           path != '/setup-cuenta') {
         // ignore: avoid_print
-        print('ROUTER: requiereSetupInicial → /setup-cuenta (user=${sesion.username})');
+        print(
+          'ROUTER: requiereSetupInicial → /setup-cuenta (user=${sesion.username})',
+        );
         return '/setup-cuenta';
       }
       if (!rutaPermitida(path, sesion)) {
@@ -196,7 +202,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-
       GoRoute(
         path: '/licencia',
         name: LicenciaEstadoPage.routeName,
@@ -218,7 +223,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const AppShell(child: LicenciaAdminPedidosPage()),
       ),
 
-
       GoRoute(
         path: '/splash',
         name: FiscoSplashPage.routeName,
@@ -238,8 +242,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/legal/terminos',
         name: LegalPage.routeTerminos,
-        builder: (_, __) =>
-            const LegalPage(documento: LegalDocumento.terminos),
+        builder: (_, __) => const LegalPage(documento: LegalDocumento.terminos),
       ),
       GoRoute(
         path: '/setup-cuenta',
@@ -344,14 +347,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const AppShell(child: CobrarPage()),
           ),
 
-            GoRoute(
-              path: 'cobro/cxc/:id',
-              name: CobroCxcPage.routeName,
-              builder: (context, state) {
-                final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
-                return AppShell(child: CobroCxcPage(cuentaId: id));
-              },
-            ),
+          GoRoute(
+            path: 'cobro/cxc/:id',
+            name: CobroCxcPage.routeName,
+            builder: (context, state) {
+              final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+              return AppShell(child: CobroCxcPage(cuentaId: id));
+            },
+          ),
 
           GoRoute(
             path: 'cobro',
@@ -737,12 +740,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: MarcasPage.routeName,
         builder: (_, __) => const AppShell(child: MarcasPage()),
       ),
-            GoRoute(
+      GoRoute(
         path: '/almacenes',
         name: AlmacenesPage.routeName,
         builder: (_, __) => const AppShell(child: AlmacenesPage()),
       ),
-GoRoute(
+      GoRoute(
         path: '/unidades',
         name: UnidadesPage.routeName,
         builder: (_, __) => const AppShell(child: UnidadesPage()),

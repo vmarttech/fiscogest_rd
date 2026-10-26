@@ -1,4 +1,5 @@
 import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/cliente_sync.dart';
@@ -37,6 +38,7 @@ class SyncEngine {
       }
     }
 
+    await step('licencia', () => LicenciaSync(_db).pushAlNegocio());
     await step('dispositivos', () => DispositivoSync(_db).pushEsteEquipo());
     await step('usuarios', () => UsuarioSync(_db).pushTodos());
     await step('pedidos', () => PedidoSync(_db).pushTodos());

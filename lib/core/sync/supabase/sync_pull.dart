@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
 
 /// Baja datos de Supabase → Drift para el negocio actual.
 class SyncPull {
@@ -25,7 +26,12 @@ class SyncPull {
       return;
     }
     debugPrint('SyncPull: negocio=$negocioId');
-
+    // Licencia del contrato ANTES de datos (equipo recuperado ≠ demo)
+    try {
+      await LicenciaSync(_db).pullDesdeNegocio();
+    } catch (e) {
+      debugPrint('SyncPull: licencia $e');
+    }
     await _pullUsuarios(negocioId);
     await _pullProductos(negocioId);
     await _pullClientes(negocioId);
@@ -331,12 +337,49 @@ class SyncPull {
       table: 'ventas',
       filters: {'negocio_id': 'eq.$negocioId'},
     );
+    // id remoto id_local → id local asignado en este pull (para detalle)
+    final idMap = <int, int>{};
+
     for (final r in ventas) {
-      final idLocal = r['id_local'];
-      if (idLocal is! int) continue;
-      final existing = await (_db.select(_db.ventasTable)
-            ..where((t) => t.id.equals(idLocal)))
-          .getSingleOrNull();
+      final idLocalRemote = r['id_local'];
+      final numFactura = (r['numero_factura'] as String?)?.trim() ?? '';
+      final numCotiz = (r['numero_cotizacion'] as String?)?.trim() ?? '';
+
+      dynamic existing;
+      if (idLocalRemote is int) {
+        existing = await (_db.select(_db.ventasTable)
+              ..where((t) => t.id.equals(idLocalRemote)))
+            .getSingleOrNull();
+      }
+      // Equipo nuevo: el autoincrement no coincide → buscar por documento
+      if (existing == null && numFactura.isNotEmpty) {
+        existing = await (_db.select(_db.ventasTable)
+              ..where((t) => t.numeroFactura.equals(numFactura)))
+            .getSingleOrNull();
+      }
+      if (existing == null && numCotiz.isNotEmpty) {
+        final candidatos = await (_db.select(_db.ventasTable)
+              ..where((t) => t.numeroCotizacion.equals(numCotiz)))
+            .get();
+        if (candidatos.length == 1) {
+          existing = candidatos.first;
+        } else if (candidatos.isNotEmpty) {
+          final monto = _toDouble(r['monto_total']);
+          final fecha = DateTime.tryParse('${r['fecha'] ?? ''}');
+          for (final c in candidatos) {
+            final sameMonto = (c.montoTotal - monto).abs() < 0.01;
+            final sameFecha = fecha == null ||
+                (c.fecha.year == fecha.year &&
+                    c.fecha.month == fecha.month &&
+                    c.fecha.day == fecha.day);
+            if (sameMonto && sameFecha) {
+              existing = c;
+              break;
+            }
+          }
+          existing ??= candidatos.first;
+        }
+      }
 
       final fecha = DateTime.tryParse('${r['fecha'] ?? ''}') ?? DateTime.now();
       final fechaReg =
@@ -348,15 +391,14 @@ class SyncPull {
           ? DateTime.tryParse('${r['fecha_comprobante_entrega']}')
           : null;
 
+      int localId;
       if (existing == null) {
-        // Insertar con id forzado no siempre es posible con autoIncrement;
-        // usamos insert normal y mapeamos por id_local en updates posteriores.
-        await _db.into(_db.ventasTable).insert(
+        localId = await _db.into(_db.ventasTable).insert(
               VentasTableCompanion.insert(
                 clienteId: (r['cliente_id_local'] as int?) ?? 0,
                 fecha: fecha,
                 formaPago: (r['forma_pago'] as String?) ?? 'efectivo',
-                numeroCotizacion: (r['numero_cotizacion'] as String?) ?? '',
+                numeroCotizacion: numCotiz,
                 estadoDocumento: (r['estado_documento'] as String?) ?? 'venta',
                 usuarioId: (r['usuario_id_local'] as int?) ?? 0,
                 fechaRegistro: fechaReg,
@@ -375,7 +417,7 @@ class SyncPull {
                 tasaInteres: Value(_toDouble(r['tasa_interes'])),
                 montoInteres: Value(_toDouble(r['monto_interes'])),
                 vencimiento: Value(venc),
-                numeroFactura: Value(r['numero_factura'] as String?),
+                numeroFactura: Value(numFactura.isEmpty ? null : numFactura),
                 descuentoId: Value(r['descuento_id'] as int?),
                 descuentoNombre: Value(r['descuento_nombre'] as String?),
                 montoDescuento: Value(_toDouble(r['monto_descuento'])),
@@ -385,18 +427,27 @@ class SyncPull {
               ),
             );
       } else {
+        localId = existing.id as int;
         await (_db.update(_db.ventasTable)
-              ..where((t) => t.id.equals(existing.id)))
+              ..where((t) => t.id.equals(localId)))
             .write(
           VentasTableCompanion(
             nombreCliente: Value(r['nombre_cliente'] as String?),
             montoTotal: Value(_toDouble(r['monto_total'])),
-            formaPago: Value((r['forma_pago'] as String?) ?? existing.formaPago),
+            formaPago:
+                Value((r['forma_pago'] as String?) ?? existing.formaPago as String),
             estadoDocumento: Value(
-              (r['estado_documento'] as String?) ?? existing.estadoDocumento,
+              (r['estado_documento'] as String?) ??
+                  existing.estadoDocumento as String,
             ),
+            numeroFactura: numFactura.isEmpty
+                ? const Value.absent()
+                : Value(numFactura),
           ),
         );
+      }
+      if (idLocalRemote is int) {
+        idMap[idLocalRemote] = localId;
       }
     }
     debugPrint('SyncPull: ventas ${ventas.length}');

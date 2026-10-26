@@ -196,6 +196,20 @@ class VentasDao {
   /// Acepta cualquier prefijo (V, C, COT, FG, …). Formato: `{prefijo}-{dígitos}`.
   /// Máximo correlativo de la serie del [prefijo] (configuración global).
   /// Cualquier prefijo: V, C, COT, FG, … Formato: `{prefijo}-{dígitos}`.
+
+  Future<bool> existeNumeroCotizacion(String numero) async {
+    final limpio = numero.trim().toUpperCase();
+    if (limpio.isEmpty) return false;
+
+    final filas = await (_db.select(_db.ventasTable)
+          ..where((final t) => t.numeroCotizacion.isNotNull()))
+        .get();
+
+    return filas.any(
+      (final fila) => fila.numeroCotizacion.trim().toUpperCase() == limpio,
+    );
+  }
+
   Future<int> obtenerUltimoCorrelativoCotizacion({
     required String prefijo,
   }) async {

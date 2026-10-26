@@ -4,6 +4,9 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_estado.dart';
 import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 
 class LicenciaService {
   LicenciaService(this._db);
@@ -15,7 +18,26 @@ class LicenciaService {
   Future<LicenciaInfo> ensureLicenciaInicial() async {
     final rows = await _db.select(_db.licenciasTable).get();
     if (rows.isNotEmpty) {
-      return _mapYActualizarEstado(rows.first);
+      rows.sort((a, b) => b.id.compareTo(a.id));
+      final dev = rows.where((r) => r.plan == 'desarrollador' || r.vitalicia);
+      final row = dev.isNotEmpty ? dev.first : rows.first;
+      return _mapYActualizarEstado(row);
+    }
+    // Equipo vacío pero negocio ya vinculado (reinstalación): restaurar desde nube
+    if (SupabaseConfig.isConfigured) {
+      final nid = await NegocioLocal.getId();
+      if (nid != null && nid.isNotEmpty) {
+        try {
+          final ok = await LicenciaSync(_db).pullDesdeNegocio();
+          if (ok) {
+            final after = await obtenerActual();
+            if (after != null) return after;
+          }
+        } catch (e) {
+          // ignore: avoid_print
+          print('ensureLicenciaInicial pull: $e');
+        }
+      }
     }
 
     final ahora = DateTime.now();

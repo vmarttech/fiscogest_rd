@@ -96,6 +96,26 @@ class SupabaseRestClient {
   }
 
   /// GET filtrado; obliga negocio_id en tablas de negocio.
+
+  /// PATCH parcial (p. ej. actualizar plan en public.negocios).
+  Future<void> patch({
+    required String table,
+    required Map<String, String> filters,
+    required Map<String, dynamic> body,
+  }) async {
+    if (!SupabaseConfig.isConfigured || body.isEmpty) return;
+    final q = Map<String, String>.from(filters);
+    final uri = _uri(table, q);
+    final h = await _headers(upsert: false, usarJwt: true);
+    h['Prefer'] = 'return=minimal';
+    final res = await _http
+        .patch(uri, headers: h, body: jsonEncode(body))
+        .timeout(_timeout);
+    if (res.statusCode >= 300) {
+      throw Exception('PATCH $table ${res.statusCode} ${res.body}');
+    }
+  }
+
   Future<List<Map<String, dynamic>>> select({
     required String table,
     Map<String, String>? filters,

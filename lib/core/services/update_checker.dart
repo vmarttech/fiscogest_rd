@@ -44,26 +44,45 @@ class UpdateChecker {
     try {
       final info = await PackageInfo.fromPlatform();
       final currentCode = int.tryParse(info.buildNumber) ?? 0;
+      // ignore: avoid_print
+      print('[UpdateChecker] local version=${info.version} build=${info.buildNumber} code=$currentCode');
       final uri = Uri.parse(kUpdateJsonUrl).replace(
         queryParameters: {
           't': DateTime.now().millisecondsSinceEpoch.toString(),
         },
       );
+      // ignore: avoid_print
+      print('[UpdateChecker] GET $uri');
       final res = await http
           .get(uri, headers: const {
             'Cache-Control': 'no-cache',
             'Pragma': 'no-cache',
           })
           .timeout(const Duration(seconds: 12));
-      if (res.statusCode != 200) return null;
+      // ignore: avoid_print
+      print('[UpdateChecker] status=${res.statusCode} bodyLen=${res.body.length}');
+      if (res.statusCode != 200) {
+        // ignore: avoid_print
+        print('[UpdateChecker] abort: bad status');
+        return null;
+      }
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       final remote = UpdateInfo.fromJson(data);
+      // ignore: avoid_print
+      print('[UpdateChecker] remote name=${remote.versionName} code=${remote.versionCode}');
       if (remote.versionCode > currentCode && remote.apkUrl.isNotEmpty) {
+        // ignore: avoid_print
+        print('[UpdateChecker] UPDATE AVAILABLE');
         return remote;
       }
+      // ignore: avoid_print
+      print('[UpdateChecker] no update (remote<=local or empty apkUrl)');
       return null;
-    } catch (_) {
-      // Sin internet o error: no molestar al usuario
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('[UpdateChecker] ERROR: $e');
+      // ignore: avoid_print
+      print(st);
       return null;
     }
   }

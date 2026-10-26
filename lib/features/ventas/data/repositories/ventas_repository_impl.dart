@@ -278,6 +278,45 @@ class VentasRepositoryImpl implements IVentasRepository {
     return '$pref-$digitos';
   }
 
+
+  Future<String> _numeroCotizacionLibre({
+    required String preferido,
+    required bool esCredito,
+  }) async {
+    final solicitado = preferido.trim();
+
+    // Si el número recibido está libre, conservarlo exactamente.
+    if (solicitado.isNotEmpty &&
+        !await _ventasDao.existeNumeroCotizacion(solicitado)) {
+      return solicitado;
+    }
+
+    // Usar el prefijo del número solicitado para respetar la configuración.
+    String prefijo;
+    if (solicitado.contains('-')) {
+      prefijo = solicitado.substring(0, solicitado.lastIndexOf('-')).trim();
+    } else {
+      prefijo = esCredito ? 'CR' : 'C';
+    }
+    if (prefijo.isEmpty) prefijo = esCredito ? 'CR' : 'C';
+
+    var correlativo = await _ventasDao.obtenerUltimoCorrelativoCotizacion(
+      prefijo: prefijo,
+    );
+
+    // Buscar el siguiente número disponible.
+    for (var intento = 0; intento < 1000; intento++) {
+      correlativo++;
+      final candidato =
+          '$prefijo-${correlativo.toString().padLeft(6, '0')}';
+      if (!await _ventasDao.existeNumeroCotizacion(candidato)) {
+        return candidato;
+      }
+    }
+
+    throw StateError('No se encontró un número de cotización disponible.');
+  }
+
   @override
   Future<String> siguienteNumeroFactura() async {
     final ultimo = await _ventasDao.obtenerUltimoCorrelativoFactura();
@@ -302,9 +341,14 @@ class VentasRepositoryImpl implements IVentasRepository {
   @override
   Future<Venta> registrarVenta(Venta venta) async {
     await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
-    final id = await _ventasDao.insertarVenta(
+    
+    final numero = await _numeroCotizacionLibre(
+      preferido: venta.numeroCotizacion,
+      esCredito: venta.numeroCotizacion.trim().toUpperCase().startsWith('CR'),
+    );
+final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
-        numeroCotizacion: Value(venta.numeroCotizacion),
+        numeroCotizacion: Value(numero),
         numeroFactura: Value(venta.numeroFactura),
         clienteId: Value(venta.clienteId),
         fecha: Value(venta.fecha),
@@ -336,9 +380,14 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta> registrarVentaBorrador(Venta cotizacion) async {
-    final id = await _ventasDao.insertarVenta(
+    
+    final numero = await _numeroCotizacionLibre(
+      preferido: cotizacion.numeroCotizacion,
+      esCredito: cotizacion.numeroCotizacion.trim().toUpperCase().startsWith('CR'),
+    );
+final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
-        numeroCotizacion: Value(cotizacion.numeroCotizacion),
+        numeroCotizacion: Value(numero),
         numeroFactura: Value(cotizacion.numeroFactura),
         clienteId: Value(cotizacion.clienteId),
         nombreCliente: Value(cotizacion.nombreCliente),
