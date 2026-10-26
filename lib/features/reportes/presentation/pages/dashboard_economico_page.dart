@@ -113,19 +113,46 @@ class DashboardEconomicoPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Escritorio: franja teal. Móvil: ya hay AppBar.
-                      if (!mobile) ...[
-                        _ReportesHeader(
-                          onMenu: () => ShellDrawerScope.open(context),
-                          onHub: () => context.push('/reports/hub'),
+                      // Móvil: AppBar del scaffold. PC: sin franja teal;
+                      // acceso a hub en la esquina de la barra de período.
+                      if (mobile)
+                        _PeriodoChips(
+                          selected: periodo,
+                          onChanged: (p) =>
+                              ref.read(periodoDashProvider.notifier).state = p,
+                        )
+                      else
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: _PeriodoChips(
+                                selected: periodo,
+                                onChanged: (p) => ref
+                                    .read(periodoDashProvider.notifier)
+                                    .state = p,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Material(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              elevation: 0,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () => context.push('/reports/hub'),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Icon(
+                                    Icons.folder_open_outlined,
+                                    size: 22,
+                                    color: Color(0xFF00796B),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                      ],
-                      _PeriodoChips(
-                        selected: periodo,
-                        onChanged: (p) =>
-                            ref.read(periodoDashProvider.notifier).state = p,
-                      ),
                       const SizedBox(height: 16),
                       _KpiGrid(
                         kpi: kpi,
@@ -185,57 +212,6 @@ const _kBlueBar = Color(0xFF2563EB);
 const _kNavy = Color(0xFF0D1E34);
 
 // ─── Barra de control: tabs + fechas + comparar (una sola franja) ───
-
-class _ReportesHeader extends StatelessWidget {
-  const _ReportesHeader({
-    required this.onMenu,
-    required this.onHub,
-  });
-  final VoidCallback onMenu;
-  final VoidCallback onHub;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF00796B),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00796B).withValues(alpha: 0.4),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onMenu,
-            icon: const Icon(Icons.menu, color: Colors.white),
-            tooltip: 'Menú',
-          ),
-          const Text(
-            'REPORTES',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: 0.6,
-            ),
-          ),
-          const Spacer(),
-          IconButton(
-            onPressed: onHub,
-            icon: const Icon(Icons.folder_open_outlined, color: Colors.white),
-            tooltip: 'Reportes operativos',
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _PeriodoChips extends ConsumerWidget {
   const _PeriodoChips({required this.selected, required this.onChanged});
