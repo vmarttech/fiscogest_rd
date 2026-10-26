@@ -298,7 +298,7 @@ class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
     _busy = true;
     _lastCheck = now;
     try {
-      final navigatorContext = appNavigatorKey.currentContext;
+      final navigatorContext = appNavigatorKey.currentState?.overlay?.context;
       if (navigatorContext == null) {
         debugPrint(
           '[UpdateChecker] Navigator no disponible; '
