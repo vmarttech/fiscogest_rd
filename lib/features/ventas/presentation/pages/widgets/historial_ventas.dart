@@ -115,7 +115,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
 
     if (widget.standalone) {
       final q = venta.id != null ? '?id=${venta.id}' : '';
-      context.push('/ventas/historial/detalle$q', extra: venta);
+      await context.push('/ventas/historial/detalle$q', extra: venta);
       return;
     }
 

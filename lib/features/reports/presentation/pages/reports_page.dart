@@ -96,8 +96,12 @@ class ReportsPage extends StatelessWidget {
                       children: [
                         IconButton(
                           tooltip: 'Atrás',
-                          onPressed: () => safeBack(context, fallback: '/reports'),
-                          icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
+                          onPressed: () =>
+                              safeBack(context, fallback: '/reports'),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Color(0xFF0F172A),
+                          ),
                         ),
                         const Text(
                           'Reportes operativos',
@@ -113,7 +117,9 @@ class ReportsPage extends StatelessWidget {
                   ],
                   Text(
                     'Reportes operativos',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -129,7 +135,6 @@ class ReportsPage extends StatelessWidget {
                     onTap: (t) => _abrir(context, t),
                   ),
                   SizedBox(height: mobile ? 22 : 28),
-
                 ],
               ),
             ),
@@ -235,7 +240,10 @@ class _ReporteCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: item.color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
@@ -254,7 +262,9 @@ class _ReporteCard extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 item.titulo,
-                style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w800),
+                style: AppTypography.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -275,7 +285,11 @@ class _ReporteCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(Icons.arrow_forward_rounded, size: 16, color: item.color),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: item.color,
+                  ),
                 ],
               ),
             ],
@@ -285,4 +299,3 @@ class _ReporteCard extends StatelessWidget {
     );
   }
 }
-

@@ -1,6 +1,7 @@
 import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_recepcion_gateway_impl.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/services/ecfe_preflight.dart';
 
 class EnviarEcfeResultado {
   const EnviarEcfeResultado({
@@ -46,6 +47,10 @@ class EnviarEcfe {
           ok: false,
           errores: ['Certificado .p12 y clave requeridos'],
         );
+      }
+      final pre = await EcfePreflight.evaluar(cfg);
+      if (pre.bloqueante) {
+        return EnviarEcfeResultado(ok: false, errores: pre.errores);
       }
 
       final doc = await repo.obtenerPorId(documentoId);

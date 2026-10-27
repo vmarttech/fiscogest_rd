@@ -807,6 +807,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final teorico = resumenCierre.efectivoEsperado;
     final controller = TextEditingController(text: teorico.toStringAsFixed(2));
     final obsController = TextEditingController();
+    if (!mounted) return;
     final ancho = MediaQuery.of(context).size.width;
     final result = await showDialog<({double contado, String? obs})>(
       context: context,

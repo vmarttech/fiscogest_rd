@@ -149,7 +149,7 @@ class CampanaNotificaciones extends ConsumerWidget {
     if (selected is AlertaOperativa) {
       // Al abrir la ruta, marcar como leída
       await marcarAlertaLeida(ref, selected.id);
-      if (context.mounted) context.push(selected.ruta);
+      if (context.mounted) await context.push(selected.ruta);
     }
   }
 }

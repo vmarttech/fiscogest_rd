@@ -490,18 +490,24 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
+                                // ignore: deprecated_member_use
                                 Radio<String>(
                                   value: 'M',
+                                  // ignore: deprecated_member_use
                                   groupValue: _sexo,
+                                  // ignore: deprecated_member_use
                                   onChanged: widget.editable
                                       ? (v) => setState(() => _sexo = v!)
                                       : null,
                                   visualDensity: VisualDensity.compact,
                                 ),
                                 const Text('M', style: TextStyle(fontSize: 12)),
+                                // ignore: deprecated_member_use
                                 Radio<String>(
                                   value: 'F',
+                                  // ignore: deprecated_member_use
                                   groupValue: _sexo,
+                                  // ignore: deprecated_member_use
                                   onChanged: widget.editable
                                       ? (v) => setState(() => _sexo = v!)
                                       : null,

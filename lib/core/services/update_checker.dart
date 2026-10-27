@@ -153,7 +153,7 @@ class UpdateChecker {
     if (!context.mounted) return;
 
     // Diálogo de progreso
-    showDialog<void>(
+    await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) => const AlertDialog(

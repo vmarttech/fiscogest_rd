@@ -5,20 +5,20 @@ import 'package:flutter/material.dart';
 class FiscoGestNotifications {
   FiscoGestNotifications._();
 
-  static final ValueNotifier<List<_FiscoGestNotificationEntry>> notifications =
-      ValueNotifier<List<_FiscoGestNotificationEntry>>(
-        <_FiscoGestNotificationEntry>[],
+  static final ValueNotifier<List<FiscoGestNotificationEntry>> notifications =
+      ValueNotifier<List<FiscoGestNotificationEntry>>(
+        <FiscoGestNotificationEntry>[],
       );
 
   static int _nextId = 0;
 
   static void show(SnackBar snackBar) {
-    final entry = _FiscoGestNotificationEntry(
+    final entry = FiscoGestNotificationEntry(
       id: _nextId++,
       snackBar: snackBar,
     );
 
-    final current = List<_FiscoGestNotificationEntry>.from(notifications.value);
+    final current = List<FiscoGestNotificationEntry>.from(notifications.value);
     current.add(entry);
     notifications.value = current;
 
@@ -32,18 +32,18 @@ class FiscoGestNotifications {
   }
 
   static void dismiss(int id) {
-    final current = List<_FiscoGestNotificationEntry>.from(notifications.value);
+    final current = List<FiscoGestNotificationEntry>.from(notifications.value);
     current.removeWhere((entry) => entry.id == id);
     notifications.value = current;
   }
 
   static void clear() {
-    notifications.value = <_FiscoGestNotificationEntry>[];
+    notifications.value = <FiscoGestNotificationEntry>[];
   }
 }
 
-class _FiscoGestNotificationEntry {
-  const _FiscoGestNotificationEntry({required this.id, required this.snackBar});
+class FiscoGestNotificationEntry {
+  const FiscoGestNotificationEntry({required this.id, required this.snackBar});
 
   final int id;
   final SnackBar snackBar;
@@ -54,7 +54,7 @@ class FiscoGestNotificationOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<_FiscoGestNotificationEntry>>(
+    return ValueListenableBuilder<List<FiscoGestNotificationEntry>>(
       valueListenable: FiscoGestNotifications.notifications,
       builder: (context, entries, _) {
         if (entries.isEmpty) {
@@ -97,7 +97,7 @@ class FiscoGestNotificationOverlay extends StatelessWidget {
 class _CompactNotification extends StatefulWidget {
   const _CompactNotification({super.key, required this.entry});
 
-  final _FiscoGestNotificationEntry entry;
+  final FiscoGestNotificationEntry entry;
 
   @override
   State<_CompactNotification> createState() => _CompactNotificationState();

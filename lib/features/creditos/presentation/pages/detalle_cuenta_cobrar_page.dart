@@ -147,20 +147,21 @@ class _DetalleCuentaCobrarPageState
       }
       if (!mounted) return;
       ProntoPagoAcuerdoData? acuerdoDb;
-        try {
-          if (cuenta.id != null) {
-            acuerdoDb = await ProntoPagoAcuerdosDao(ref.read(databaseProvider))
-                .activoPorCuenta(cuenta.id!);
-          }
-        } catch (_) {
-          acuerdoDb = null;
+      try {
+        if (cuenta.id != null) {
+          acuerdoDb = await ProntoPagoAcuerdosDao(
+            ref.read(databaseProvider),
+          ).activoPorCuenta(cuenta.id!);
         }
-        if (!mounted) return;
-        setState(() {
-          _cuenta = cuenta;
-          _acuerdoActivo = acuerdoDb;
-          _cargando = false;
-        });
+      } catch (_) {
+        acuerdoDb = null;
+      }
+      if (!mounted) return;
+      setState(() {
+        _cuenta = cuenta;
+        _acuerdoActivo = acuerdoDb;
+        _cargando = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -217,7 +218,9 @@ class _DetalleCuentaCobrarPageState
         setState(() => _acuerdoActivo = activo);
       }
       try {
-        await ref.read(bitacoraOperacionesServiceProvider).registrar(
+        await ref
+            .read(bitacoraOperacionesServiceProvider)
+            .registrar(
               accion: 'pronto_pago_acordado',
               entidad: 'cuenta_por_cobrar',
               entidadId: c.id,
@@ -251,8 +254,6 @@ class _DetalleCuentaCobrarPageState
       if (mounted) setState(() => _pagando = false);
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -446,7 +447,10 @@ class _DetalleCuentaCobrarPageState
               ),
               child: const Text('Crédito', style: TextStyle(fontSize: 12)),
             ),
-            const Text('  ›  ', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+            const Text(
+              '  ›  ',
+              style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+            ),
             TextButton(
               onPressed: () => context.go('/creditos/cuentas'),
               style: TextButton.styleFrom(
@@ -455,9 +459,15 @@ class _DetalleCuentaCobrarPageState
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 foregroundColor: const Color(0xFF64748B),
               ),
-              child: const Text('Cuentas por Cobrar', style: TextStyle(fontSize: 12)),
+              child: const Text(
+                'Cuentas por Cobrar',
+                style: TextStyle(fontSize: 12),
+              ),
             ),
-            const Text('  ›  ', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+            const Text(
+              '  ›  ',
+              style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+            ),
             const Text(
               'Detalle de cuenta',
               style: TextStyle(
@@ -539,7 +549,9 @@ class _DetalleCuentaCobrarPageState
               onPressed: () {
                 FiscoGestNotifications.show(
                   const SnackBar(
-                    content: Text('Recordatorio: conectar WhatsApp en una próxima iteración'),
+                    content: Text(
+                      'Recordatorio: conectar WhatsApp en una próxima iteración',
+                    ),
                   ),
                 );
               },
@@ -576,11 +588,16 @@ class _DetalleCuentaCobrarPageState
               ),
             ),
             FilledButton.icon(
-              onPressed: c.estaPagada || _pagando ? null : _dialogoRegistrarPago,
+              onPressed: c.estaPagada || _pagando
+                  ? null
+                  : _dialogoRegistrarPago,
               icon: const Icon(Icons.payments_outlined, size: 16),
               label: Text(
                 _pagando ? 'Procesando…' : 'Pronto pago / liquidar',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF059669),
@@ -630,7 +647,8 @@ class _DetalleCuentaCobrarPageState
                 kpi(
                   label: 'Total Abonado',
                   value: formatRd(c.totalAbonado),
-                  hint: '${c.abonos.length} pago${c.abonos.length == 1 ? '' : 's'} registrado${c.abonos.length == 1 ? '' : 's'}',
+                  hint:
+                      '${c.abonos.length} pago${c.abonos.length == 1 ? '' : 's'} registrado${c.abonos.length == 1 ? '' : 's'}',
                   bg: const Color(0xFFECFDF5),
                   border: const Color(0xFFA7F3D0),
                   valueColor: const Color(0xFF047857),
@@ -706,7 +724,10 @@ class _DetalleCuentaCobrarPageState
                   'Liquidación acordada: ${formatRd(acuerdoActivo.montoLiquidacion)} '
                   '(desc. ${acuerdoActivo.descuentoInteresPct.toStringAsFixed(0)}% sobre intereses). '
                   'Si el cliente no liquida en Caja, las cuotas siguen vigentes.',
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF334155),
+                  ),
                 ),
               ],
             ),
@@ -723,8 +744,11 @@ class _DetalleCuentaCobrarPageState
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
             child: Row(
               children: [
-                const Icon(Icons.calendar_month_outlined,
-                    size: 18, color: Color(0xFF2563EB)),
+                const Icon(
+                  Icons.calendar_month_outlined,
+                  size: 18,
+                  color: Color(0xFF2563EB),
+                ),
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
@@ -747,8 +771,10 @@ class _DetalleCuentaCobrarPageState
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.print_outlined, size: 16),
-                  label: const Text('Imprimir Tabla',
-                      style: TextStyle(fontSize: 12)),
+                  label: const Text(
+                    'Imprimir Tabla',
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -767,8 +793,10 @@ class _DetalleCuentaCobrarPageState
             if (!mobile)
               Container(
                 color: const Color(0xFFF8FAFC),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: const Row(
                   children: [
                     Expanded(flex: 2, child: Text('CUOTA #', style: _th)),
@@ -777,18 +805,25 @@ class _DetalleCuentaCobrarPageState
                     Expanded(flex: 2, child: Text('INTERÉS', style: _th)),
                     Expanded(flex: 2, child: Text('TOTAL', style: _th)),
                     Expanded(flex: 2, child: Text('ESTADO', style: _th)),
-                    SizedBox(width: 72, child: Text('ACCIÓN', style: _th, textAlign: TextAlign.right)),
+                    SizedBox(
+                      width: 72,
+                      child: Text(
+                        'ACCIÓN',
+                        style: _th,
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
                   ],
                 ),
               ),
             for (final q in cuotas)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFF1F5F9)),
-                  ),
+                  border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
                 ),
                 child: mobile
                     ? Column(
@@ -831,9 +866,12 @@ class _DetalleCuentaCobrarPageState
                                   onPressed: _pagando
                                       ? null
                                       : _dialogoRegistrarPago,
-                                  child: const Text('Cobrar',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w700)),
+                                  child: const Text(
+                                    'Cobrar',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
                             ],
                           ),
@@ -846,7 +884,9 @@ class _DetalleCuentaCobrarPageState
                             child: Text(
                               'Cuota ${q.numeroCuota}',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w800, fontSize: 12),
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           Expanded(
@@ -854,7 +894,9 @@ class _DetalleCuentaCobrarPageState
                             child: Text(
                               _fmtFecha.format(q.fechaVencimiento),
                               style: const TextStyle(
-                                  fontFamily: 'monospace', fontSize: 12),
+                                fontFamily: 'monospace',
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           Expanded(
@@ -862,7 +904,9 @@ class _DetalleCuentaCobrarPageState
                             child: Text(
                               formatRd(q.montoCapital),
                               style: const TextStyle(
-                                  fontFamily: 'monospace', fontSize: 12),
+                                fontFamily: 'monospace',
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           Expanded(
@@ -870,9 +914,10 @@ class _DetalleCuentaCobrarPageState
                             child: Text(
                               formatRd(q.montoInteres),
                               style: const TextStyle(
-                                  fontFamily: 'monospace',
-                                  fontSize: 12,
-                                  color: Color(0xFF94A3B8)),
+                                fontFamily: 'monospace',
+                                fontSize: 12,
+                                color: Color(0xFF94A3B8),
+                              ),
                             ),
                           ),
                           Expanded(
@@ -880,9 +925,10 @@ class _DetalleCuentaCobrarPageState
                             child: Text(
                               formatRd(q.montoTotal),
                               style: const TextStyle(
-                                  fontFamily: 'monospace',
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12),
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           Expanded(flex: 2, child: _chipEstadoCuota(q.pagada)),
@@ -897,12 +943,15 @@ class _DetalleCuentaCobrarPageState
                                           ? null
                                           : _dialogoRegistrarPago,
                                       style: TextButton.styleFrom(
-                                        foregroundColor:
-                                            const Color(0xFF047857),
-                                        backgroundColor:
-                                            const Color(0xFFECFDF5),
+                                        foregroundColor: const Color(
+                                          0xFF047857,
+                                        ),
+                                        backgroundColor: const Color(
+                                          0xFFECFDF5,
+                                        ),
                                         padding: const EdgeInsets.symmetric(
-                                            horizontal: 8),
+                                          horizontal: 8,
+                                        ),
                                         minimumSize: Size.zero,
                                         tapTargetSize:
                                             MaterialTapTargetSize.shrinkWrap,
@@ -928,7 +977,9 @@ class _DetalleCuentaCobrarPageState
                   Text(
                     'Mostrando ${cuotas.length} cuota${cuotas.length == 1 ? '' : 's'}',
                     style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF64748B)),
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                    ),
                   ),
                   const Spacer(),
                   Text(
@@ -957,8 +1008,7 @@ class _DetalleCuentaCobrarPageState
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             child: Row(
               children: [
-                const Icon(Icons.history,
-                    size: 18, color: Color(0xFF059669)),
+                const Icon(Icons.history, size: 18, color: Color(0xFF059669)),
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
@@ -971,8 +1021,10 @@ class _DetalleCuentaCobrarPageState
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(20),
@@ -1003,8 +1055,10 @@ class _DetalleCuentaCobrarPageState
             if (!mobile)
               Container(
                 color: const Color(0xFFF8FAFC),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: const Row(
                   children: [
                     Expanded(flex: 2, child: Text('FECHA', style: _th)),
@@ -1017,12 +1071,12 @@ class _DetalleCuentaCobrarPageState
               ),
             for (final a in c.abonos)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFF1F5F9)),
-                  ),
+                  border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
                 ),
                 child: mobile
                     ? Row(
@@ -1034,14 +1088,16 @@ class _DetalleCuentaCobrarPageState
                                 Text(
                                   _fmtFecha.format(a.fecha),
                                   style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                  ),
                                 ),
                                 Text(
                                   a.metodoPago,
                                   style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF64748B)),
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                  ),
                                 ),
                               ],
                             ),
@@ -1063,9 +1119,10 @@ class _DetalleCuentaCobrarPageState
                             child: Text(
                               _fmtFecha.format(a.fecha),
                               style: const TextStyle(
-                                  fontFamily: 'monospace',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12),
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           Expanded(
@@ -1092,7 +1149,9 @@ class _DetalleCuentaCobrarPageState
                             child: Text(
                               a.nota?.isNotEmpty == true ? a.nota! : '—',
                               style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF64748B)),
+                                fontSize: 12,
+                                color: Color(0xFF64748B),
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -1100,7 +1159,9 @@ class _DetalleCuentaCobrarPageState
                             flex: 1,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFD1FAE5),
                                 borderRadius: BorderRadius.circular(4),
@@ -1188,8 +1249,10 @@ class _DetalleCuentaCobrarPageState
               Row(
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(4),
@@ -1313,10 +1376,8 @@ class _DetalleCuentaCobrarPageState
         ),
       ),
     );
-  }}
-
-
-
+  }
+}
 
 class _ProntoPagoResultado {
   const _ProntoPagoResultado({required this.calculo, this.nota = ''});
@@ -1345,23 +1406,20 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
 
   ProntoPagoCalculo get _calc {
     final pct = double.tryParse(_pctCtrl.text.trim().replaceAll(',', '.')) ?? 0;
-    return ProntoPagoService.calcular(
-      widget.cuenta,
-      descuentoInteresPct: pct,
-    );
+    return ProntoPagoService.calcular(widget.cuenta, descuentoInteresPct: pct);
   }
 
   void _confirmar() {
     final calc = _calc;
     if (!calc.elegible) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(calc.error ?? 'No elegible')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(calc.error ?? 'No elegible')));
       return;
     }
-    Navigator.of(context).pop(
-      _ProntoPagoResultado(calculo: calc, nota: _notaCtrl.text.trim()),
-    );
+    Navigator.of(
+      context,
+    ).pop(_ProntoPagoResultado(calculo: calc, nota: _notaCtrl.text.trim()));
   }
 
   Widget _row(String k, String v, {bool bold = false, Color? color}) {
@@ -1458,7 +1516,9 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
               const SizedBox(height: 14),
               TextField(
                 controller: _pctCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: const InputDecoration(
                   labelText: '% descuento sobre intereses',
                   hintText: '0 – 100',
@@ -1480,7 +1540,10 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
                 const SizedBox(height: 8),
                 Text(
                   calc.error!,
-                  style: const TextStyle(color: Color(0xFFBE123C), fontSize: 12),
+                  style: const TextStyle(
+                    color: Color(0xFFBE123C),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ],
@@ -1494,11 +1557,12 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
         ),
         FilledButton(
           onPressed: calc.elegible ? _confirmar : null,
-          style: FilledButton.styleFrom(backgroundColor: const Color(0xFF047857)),
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF047857),
+          ),
           child: const Text('Aprobar acuerdo'),
         ),
       ],
     );
   }
 }
-

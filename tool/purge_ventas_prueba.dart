@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:fiscogest_rd/core/database/app_database.dart';
 
 /// Purga ventas de prueba y datos ligados.

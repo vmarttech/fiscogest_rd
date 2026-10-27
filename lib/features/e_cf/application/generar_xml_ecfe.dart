@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/e_cf/domain/value_objects/ecfe_payload.dar
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/services/ecfe_preflight.dart';
 
 class GenerarXmlResultado {
   const GenerarXmlResultado({
@@ -51,6 +52,11 @@ class GenerarXmlEcfe {
   }) async {
     var codigoModificacionNota = '3';
     try {
+      final cfgPre = await repo.obtenerConfig();
+      final preGen = await EcfePreflight.evaluar(cfgPre);
+      if (preGen.bloqueante) {
+        return GenerarXmlResultado(ok: false, errores: preGen.errores);
+      }
       final doc = await repo.obtenerPorId(documentoId);
       if (doc == null) {
         return const GenerarXmlResultado(
@@ -304,9 +310,15 @@ class GenerarXmlEcfe {
       );
 
       var xml = builder.construirDesdePayload(payload);
+      // En certificación/producción el XSD oficial es obligatorio.
+      // En pre-certificación se respeta el flag del caller (desarrollo).
+      final cfgAmb = await repo.obtenerConfig();
+      final exigirXsdEfectivo = exigirXsd ||
+          cfgAmb.ambiente.name == 'certificacion' ||
+          cfgAmb.ambiente.name == 'produccion';
       final val = await EcfeXsdValidatorImpl(
         rutaXsd: rutaXsd,
-        exigirXsd: exigirXsd,
+        exigirXsd: exigirXsdEfectivo,
       ).validar(xml);
 
       if (!val.ok) {

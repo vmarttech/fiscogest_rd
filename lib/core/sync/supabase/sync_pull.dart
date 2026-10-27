@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_dynamic_calls
 import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';

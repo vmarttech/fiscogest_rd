@@ -189,7 +189,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         _pendientes = mapa.values.toList();
         _cargandoLista = false;
       });
-      _refrescarCajon();
+      await _refrescarCajon();
     } catch (e) {
       if (!mounted) return;
       setState(() {

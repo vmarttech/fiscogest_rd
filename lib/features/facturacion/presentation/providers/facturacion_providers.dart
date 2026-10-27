@@ -105,7 +105,6 @@ final notasCreditoListProvider = FutureProvider.autoDispose((ref) async {
   return ref.watch(notasCreditoDaoProvider).listar();
 });
 
-
 class FacturacionKpis {
   const FacturacionKpis({
     required this.facturasHoy,
@@ -120,8 +119,9 @@ class FacturacionKpis {
 }
 
 /// KPIs del hub Facturación: hoy + stock NCF.
-final facturacionKpisProvider =
-    FutureProvider.autoDispose<FacturacionKpis>((ref) async {
+final facturacionKpisProvider = FutureProvider.autoDispose<FacturacionKpis>((
+  ref,
+) async {
   final repo = ref.watch(ventasRepositoryProvider);
   final notasDao = ref.watch(notasCreditoDaoProvider);
   final seqDao = ref.watch(secuenciasNcfDaoProvider);
@@ -136,7 +136,8 @@ final facturacionKpisProvider =
   final ventas = await repo.listarVentas();
   final facturasHoy = ventas.where((v) {
     final ncf = (v.numeroFactura ?? '').trim();
-    final tieneNcf = ncf.startsWith('B01') ||
+    final tieneNcf =
+        ncf.startsWith('B01') ||
         ncf.startsWith('B02') ||
         ncf.startsWith('B14') ||
         ncf.startsWith('E');
@@ -175,4 +176,3 @@ final facturacionKpisProvider =
     alertasNcf: alertas,
   );
 });
-

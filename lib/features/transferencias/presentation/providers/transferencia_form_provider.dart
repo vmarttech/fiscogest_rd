@@ -92,12 +92,12 @@ class TransferenciaFormNotifier extends Notifier<TransferenciaFormState> {
       final svc = ref.read(transferenciaServiceProvider);
       final productos =
           ref.read(productoControllerProvider).valueOrNull ?? [];
-      final prod = productos.cast<dynamic>().where((p) => p.id == state.productoId).toList();
+      final prod = productos.where((p) => p.id == state.productoId).toList();
       String? cod;
       String? nom;
       if (prod.isNotEmpty) {
-        cod = prod.first.codigo as String?;
-        nom = prod.first.nombre as String?;
+        cod = prod.first.codigo;
+        nom = prod.first.nombre;
       }
 
       final creada = await svc.registrar(

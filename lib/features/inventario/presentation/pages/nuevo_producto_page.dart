@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_dynamic_calls
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
 import 'package:flutter/scheduler.dart';
@@ -688,8 +689,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                 final items = _itemsConSeleccion(
                                   opciones: opciones,
                                   idOf: (c) => c.id as int?,
-                                  nombreOf: (c) =>
-                                      (c as dynamic).nombre as String,
+                                  nombreOf: (c) => c.nombre as String,
                                   seleccionado: _catSel,
                                 );
                                 return _campoConCreacionRapida(
@@ -738,8 +738,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                 final items = _itemsConSeleccion(
                                   opciones: opciones,
                                   idOf: (m) => m.id as int?,
-                                  nombreOf: (m) =>
-                                      (m as dynamic).nombre as String,
+                                  nombreOf: (m) => m.nombre as String,
                                   seleccionado: _marcaSel,
                                 );
                                 return _campoConCreacionRapida(
@@ -783,8 +782,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                 final items = _itemsConSeleccion(
                                   opciones: opciones,
                                   idOf: (u) => u.id as int?,
-                                  nombreOf: (u) =>
-                                      (u as dynamic).nombre as String,
+                                  nombreOf: (u) => u.nombre as String,
                                   seleccionado: _unidadSel,
                                 );
                                 return _campoConCreacionRapida(

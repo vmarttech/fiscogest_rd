@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 /// Agregados de ventas cobradas (facturado + enCredito).
 class ReportesRepository {
-
   ReportesRepository(this._db);
   String _fmtFechaRepo(dynamic raw) {
     if (raw == null) return '';
@@ -28,6 +27,7 @@ class ReportesRepository {
       return s;
     }
   }
+
   final AppDatabase _db;
 
   static const _estadosVenta = "('facturado','enCredito')";
@@ -429,7 +429,7 @@ class ReportesRepository {
       'gananciaNeta': gananciaNeta,
       'costo': actual.$1 - gananciaBruta,
       'numFacturas': actual.$2,
-      
+
       'margenPct': actual.$1 <= 0 ? 0.0 : (gananciaBruta / actual.$1) * 100,
       'margenNetoPct': actual.$1 <= 0 ? 0.0 : (gananciaNeta / actual.$1) * 100,
       'registros': () {
@@ -447,7 +447,6 @@ class ReportesRepository {
         return regs;
       }(),
       'cantidad': top.length + listaGastos.length,
-      'numFacturas': actual.$2,
       'columnas': ['Concepto', 'Cant./Cat.', 'Monto'],
     };
   }
@@ -611,7 +610,8 @@ class ReportesRepository {
     DateTime hasta,
   ) async {
     final base = await reporteVentas(desde, hasta);
-    final regs = (base['registros'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final regs =
+        (base['registros'] as List?)?.cast<Map<String, dynamic>>() ?? [];
     // 607 DGII: solo documentos con NCF / factura (no cotizaciones vacías)
     final filtrados = regs.where((r) {
       final doc = (r['documento']?.toString() ?? '').trim();
@@ -638,7 +638,8 @@ class ReportesRepository {
     DateTime hasta,
   ) async {
     final base = await reporteCompras(desde, hasta);
-    final regs = (base['registros'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final regs =
+        (base['registros'] as List?)?.cast<Map<String, dynamic>>() ?? [];
     // 606 DGII: preferir NCF; si no hay NCF, comprobante
     final filtrados = <Map<String, dynamic>>[];
     double total = 0, itbis = 0;
@@ -649,11 +650,7 @@ class ReportesRepository {
       if (idDoc.isEmpty) continue;
       total += (r['total'] as num?)?.toDouble() ?? 0;
       itbis += (r['itbis'] as num?)?.toDouble() ?? 0;
-      filtrados.add({
-        ...r,
-        'documento': idDoc,
-        'ncf': idDoc,
-      });
+      filtrados.add({...r, 'documento': idDoc, 'ncf': idDoc});
     }
     return {
       'titulo': '606 · Compras DGII',

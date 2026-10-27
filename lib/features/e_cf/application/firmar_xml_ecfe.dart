@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/features/e_cf/data/xml/ecfe_signer_impl.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/ports/ecfe_signer.dart';
 import 'package:fiscogest_rd/features/e_cf/data/xml/rfce_xml.dart';
+import 'package:fiscogest_rd/features/e_cf/domain/services/ecfe_preflight.dart';
 
 class FirmarXmlResultado {
   const FirmarXmlResultado({
@@ -61,6 +62,10 @@ class FirmarXmlEcfe {
       }
 
       final cfg = await repo.obtenerConfig();
+      final pre = await EcfePreflight.evaluar(cfg);
+      if (pre.bloqueante) {
+        return FirmarXmlResultado(ok: false, errores: pre.errores);
+      }
       final EcfeSigner signer = (cfg.rutaCertificado.trim().isEmpty)
           ? NoOpEcfeSigner()
           : EcfeSignerImpl(

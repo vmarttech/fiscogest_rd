@@ -17,30 +17,31 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/home/presentation/pages/home_mobile_page.dart';
 
-
 /// Caja del dashboard: sesión abierta + efectivo esperado del turno.
 final dashboardCajaProvider =
-    FutureProvider.autoDispose<({bool abierta, double efectivo, String label})>((ref) async {
-  final repo = ref.watch(cajaRepositoryProvider);
-  final sesion = await repo.obtenerSesionAbierta();
-  if (sesion == null || !sesion.estaAbierta) {
-    return (abierta: false, efectivo: 0.0, label: 'Caja cerrada');
-  }
-  try {
-    final resumen = await repo.obtenerResumenSesion(sesion.id);
-    return (
-      abierta: true,
-      efectivo: resumen.efectivoEsperado,
-      label: 'Sesión #${sesion.id} · abierta',
+    FutureProvider.autoDispose<({bool abierta, double efectivo, String label})>(
+      (ref) async {
+        final repo = ref.watch(cajaRepositoryProvider);
+        final sesion = await repo.obtenerSesionAbierta();
+        if (sesion == null || !sesion.estaAbierta) {
+          return (abierta: false, efectivo: 0.0, label: 'Caja cerrada');
+        }
+        try {
+          final resumen = await repo.obtenerResumenSesion(sesion.id);
+          return (
+            abierta: true,
+            efectivo: resumen.efectivoEsperado,
+            label: 'Sesión #${sesion.id} · abierta',
+          );
+        } catch (_) {
+          return (
+            abierta: true,
+            efectivo: sesion.fondoInicial,
+            label: 'Sesión #${sesion.id} · abierta',
+          );
+        }
+      },
     );
-  } catch (_) {
-    return (
-      abierta: true,
-      efectivo: sesion.fondoInicial,
-      label: 'Sesión #${sesion.id} · abierta',
-    );
-  }
-});
 
 /// Hub de inicio — layout denso y atmósfera premium en desktop.
 class InicioPage extends ConsumerWidget {
@@ -72,7 +73,6 @@ class InicioPage extends ConsumerWidget {
 
     // Datos reales para KPI enterprise
 
-
     // Actividad reciente = últimas ventas
 
     final modoCfg = ref.watch(modoSimplificadoProvider);
@@ -80,7 +80,9 @@ class InicioPage extends ConsumerWidget {
     final esAdmin = sesion?.esAdmin ?? false;
     // Dashboard colmado solo Admin + config simplificada
     final simplificado = modoCfg && esAdmin;
-    final gatesLic = ref.watch(licenciaActualProvider).maybeWhen(
+    final gatesLic = ref
+        .watch(licenciaActualProvider)
+        .maybeWhen(
           data: (lic) => LicenciaGates(lic),
           orElse: () => const LicenciaGates(null),
         );
@@ -158,28 +160,27 @@ class InicioPage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (!desktop)
-
-                    Builder(
-                      builder: (_) {
-                        final cfg = ref
-                            .watch(configuracionControllerProvider)
-                            .valueOrNull;
-                        final n1 = cfg?.nombreComercial.trim() ?? '';
-                        final n2 = cfg?.razonSocial.trim() ?? '';
-                        final nombre = n1.isNotEmpty
-                            ? n1
-                            : (n2.isNotEmpty ? n2 : 'Mi negocio');
-                        return _HeroBanner(
-                          saludo: _saludo(),
-                          fecha: fecha,
-                          nombreNegocio: nombre,
-                          onNuevaVenta: () =>
-                              _go(context, '/ventas/cotizaciones/nueva'),
-                          onCaja: () => _go(context, '/ventas/cobro'),
-                          compact: mobile,
-                        );
-                      },
-                    ),
+                      Builder(
+                        builder: (_) {
+                          final cfg = ref
+                              .watch(configuracionControllerProvider)
+                              .valueOrNull;
+                          final n1 = cfg?.nombreComercial.trim() ?? '';
+                          final n2 = cfg?.razonSocial.trim() ?? '';
+                          final nombre = n1.isNotEmpty
+                              ? n1
+                              : (n2.isNotEmpty ? n2 : 'Mi negocio');
+                          return _HeroBanner(
+                            saludo: _saludo(),
+                            fecha: fecha,
+                            nombreNegocio: nombre,
+                            onNuevaVenta: () =>
+                                _go(context, '/ventas/cotizaciones/nueva'),
+                            onCaja: () => _go(context, '/ventas/cobro'),
+                            compact: mobile,
+                          );
+                        },
+                      ),
                     const SizedBox(height: 20),
                     // KPIs
                     if (simplificado)
@@ -289,8 +290,11 @@ class InicioPage extends ConsumerWidget {
       ),
     );
   }
+
   void _mostrarMasAccionesNormal(BuildContext context, WidgetRef ref) {
-    final gates = ref.watch(licenciaActualProvider).maybeWhen(
+    final gates = ref
+        .watch(licenciaActualProvider)
+        .maybeWhen(
           data: (lic) => LicenciaGates(lic),
           orElse: () => const LicenciaGates(null),
         );
@@ -858,7 +862,6 @@ class _HeroBanner extends StatelessWidget {
                   height: 1.35,
                 ),
               ),
-
             ],
           ),
         ],
@@ -1659,7 +1662,6 @@ class _FondoPuntosPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
-
 // ignore: unused_element
 class _ActionBigCard extends StatelessWidget {
   const _ActionBigCard({
@@ -1746,16 +1748,6 @@ class _ActionBigCard extends StatelessWidget {
   }
 }
 
-
 // ═══════════════════════════════════════════════════════════════
 // WIDGETS ENTERPRISE (Opción 1)
 // ═══════════════════════════════════════════════════════════════
-
-
-
-
-
-
-
-
-

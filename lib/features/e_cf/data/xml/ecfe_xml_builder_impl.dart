@@ -233,7 +233,7 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
         }
       },
     );
-    return builder.buildDocument().toXmlString(pretty: true);
+    return builder.buildDocument().toXmlString(pretty: false);
   }
 
   String _unidadDgii(String raw) {
@@ -351,6 +351,6 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
         );
       },
     );
-    return builder.buildDocument().toXmlString(pretty: true);
+    return builder.buildDocument().toXmlString(pretty: false);
   }
 }

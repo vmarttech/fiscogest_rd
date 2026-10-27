@@ -15,19 +15,10 @@ const _ink = Color(0xFF020617);
 const _tealDark = Color(0xFF115E59);
 
 const List<BoxShadow> _cardShadow = [
-  BoxShadow(
-    color: Color(0x1F0F172A),
-    blurRadius: 16,
-    offset: Offset(0, 6),
-  ),
-  BoxShadow(
-    color: Color(0x1414B8A6),
-    blurRadius: 24,
-    offset: Offset(0, 10),
-  ),
+  BoxShadow(color: Color(0x1F0F172A), blurRadius: 16, offset: Offset(0, 6)),
+  BoxShadow(color: Color(0x1414B8A6), blurRadius: 24, offset: Offset(0, 10)),
 ];
 const double _cardBorderW = 1.5; // +1% visual de grosor
-
 
 class ClientesGestionPage extends ConsumerStatefulWidget {
   const ClientesGestionPage({super.key});
@@ -61,8 +52,11 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
   }
 
   String _iniciales(String nombre) {
-    final parts =
-        nombre.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    final parts = nombre
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((e) => e.isNotEmpty)
+        .toList();
     if (parts.isEmpty) return '?';
     if (parts.length == 1) {
       final s = parts.first;
@@ -104,8 +98,10 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                 child: CircularProgressIndicator(color: _tealDark),
               ),
               error: (e, _) => Center(
-                child: Text('Error: $e',
-                    style: const TextStyle(color: AppColors.error)),
+                child: Text(
+                  'Error: $e',
+                  style: const TextStyle(color: AppColors.error),
+                ),
               ),
               data: (clientes) {
                 final filtrados = _filtrar(clientes);
@@ -116,9 +112,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                     if (mounted) setState(() => _seleccionado = null);
                   });
                 }
-                if (!mobile &&
-                    filtrados.isNotEmpty &&
-                    _seleccionado == null) {
+                if (!mobile && filtrados.isNotEmpty && _seleccionado == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (mounted && _seleccionado == null) {
                       setState(() => _seleccionado = filtrados.first);
@@ -144,10 +138,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
       slivers: [
         SliverToBoxAdapter(child: _buildHeader(true, filtrados)),
         if (filtrados.isEmpty)
-          const SliverFillRemaining(
-            hasScrollBody: false,
-            child: _EmptyState(),
-          )
+          const SliverFillRemaining(hasScrollBody: false, child: _EmptyState())
         else
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
@@ -244,10 +235,9 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                                   iniciales: _iniciales(c.nombre),
                                   mobile: false,
                                   selected: _seleccionado?.id == c.id,
-                                  onOpen: () => setState(
-                                      () => _seleccionado = c),
-                                  onEdit: () =>
-                                      _irAEditarCliente(context, c),
+                                  onOpen: () =>
+                                      setState(() => _seleccionado = c),
+                                  onEdit: () => _irAEditarCliente(context, c),
                                   onDelete: () =>
                                       _confirmarEliminar(context, c),
                                 );
@@ -263,10 +253,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                   decoration: const BoxDecoration(
                     color: Color(0xFFFFFFFF),
                     border: Border(
-                      left: BorderSide(
-                        color: Color(0xFFE2E8F0),
-                        width: 1,
-                      ),
+                      left: BorderSide(color: Color(0xFFE2E8F0), width: 1),
                     ),
                   ),
                   child: _seleccionado == null
@@ -274,17 +261,14 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                       : _PanelDerechoDesktop(
                           cliente: _seleccionado!,
                           theme: _themeFor(_seleccionado!),
-                          iniciales:
-                              _iniciales(_seleccionado!.nombre),
+                          iniciales: _iniciales(_seleccionado!.nombre),
                           onDetalleCompleto: () => _abrirDetalle(
                             context,
                             _seleccionado!,
                             _themeFor(_seleccionado!),
                           ),
-                          onEdit: () => _irAEditarCliente(
-                            context,
-                            _seleccionado!,
-                          ),
+                          onEdit: () =>
+                              _irAEditarCliente(context, _seleccionado!),
                         ),
                 ),
               ],
@@ -297,8 +281,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
 
   Widget _buildIndicadores(List<ClienteCompleto> clientes) {
     final activos = clientes.where((c) => c.activo).length;
-    final pendientes =
-        clientes.where((c) => c.saldoPendiente > 0.009).length;
+    final pendientes = clientes.where((c) => c.saldoPendiente > 0.009).length;
     final vencidos = clientes.where((c) {
       if (c.saldoPendiente <= 0) return false;
       if (c.limiteCuotaMensual > 0) {
@@ -342,12 +325,24 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        item(Icons.bar_chart_rounded, 'Activos', activos,
-            const Color(0xFF10B981)),
-        item(Icons.description_outlined, 'Pendientes', pendientes,
-            const Color(0xFFF59E0B)),
-        item(Icons.schedule_rounded, 'Vencidos', vencidos,
-            const Color(0xFFEF4444)),
+        item(
+          Icons.bar_chart_rounded,
+          'Activos',
+          activos,
+          const Color(0xFF10B981),
+        ),
+        item(
+          Icons.description_outlined,
+          'Pendientes',
+          pendientes,
+          const Color(0xFFF59E0B),
+        ),
+        item(
+          Icons.schedule_rounded,
+          'Vencidos',
+          vencidos,
+          const Color(0xFFEF4444),
+        ),
       ],
     );
   }
@@ -469,13 +464,18 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
             style: AppTypography.bodyMedium,
             decoration: InputDecoration(
               hintText: 'Buscar por nombre, RNC, teléfono o correo…',
-              hintStyle: const TextStyle(color: Color(0xFF334155), fontSize: 13),
+              hintStyle: const TextStyle(
+                color: Color(0xFF334155),
+                fontSize: 13,
+              ),
               prefixIcon: const Icon(Icons.search_rounded, size: 22),
               isDense: true,
               filled: true,
               fillColor: Colors.white,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -486,7 +486,10 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF14B8A6), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF14B8A6),
+                  width: 1.5,
+                ),
               ),
             ),
           ),
@@ -495,11 +498,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
     );
   }
 
-  void _abrirDetalle(
-    BuildContext context,
-    ClienteCompleto c,
-    Color theme,
-  ) {
+  void _abrirDetalle(BuildContext context, ClienteCompleto c, Color theme) {
     // Dentro de AppShell: menú lateral + barra superior se mantienen.
     context.pushNamed('cliente-detalle', extra: c);
   }
@@ -517,8 +516,10 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Eliminar cliente',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+        title: const Text(
+          'Eliminar cliente',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
         content: Text('¿Eliminar a “${cliente.nombre}”?'),
         actions: [
           TextButton(
@@ -665,8 +666,9 @@ class _ClienteCardPremium extends StatelessWidget {
                                         ),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFFF0FDF4),
-                                          borderRadius:
-                                              BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                           border: Border.all(
                                             color: const Color(0xFFBBF7D0),
                                           ),
@@ -674,9 +676,11 @@ class _ClienteCardPremium extends StatelessWidget {
                                         child: const Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.star_rounded,
-                                                size: 12,
-                                                color: Color(0xFF16A34A)),
+                                            Icon(
+                                              Icons.star_rounded,
+                                              size: 12,
+                                              color: Color(0xFF16A34A),
+                                            ),
                                             SizedBox(width: 3),
                                             Text(
                                               'Preferencial',
@@ -783,12 +787,21 @@ class _ClienteCardPremium extends StatelessWidget {
                               ),
                             ),
                           ],
-                          _HIcon(Icons.info_outline_rounded,
-                              const Color(0xFF334155), onOpen),
-                          _HIcon(Icons.edit_outlined,
-                              const Color(0xFF334155), onEdit),
-                          _HIcon(Icons.delete_outline_rounded,
-                              const Color(0xFFEF4444), onDelete),
+                          _HIcon(
+                            Icons.info_outline_rounded,
+                            const Color(0xFF334155),
+                            onOpen,
+                          ),
+                          _HIcon(
+                            Icons.edit_outlined,
+                            const Color(0xFF334155),
+                            onEdit,
+                          ),
+                          _HIcon(
+                            Icons.delete_outline_rounded,
+                            const Color(0xFFEF4444),
+                            onDelete,
+                          ),
                         ],
                       ),
                     ),
@@ -820,15 +833,12 @@ class _HIcon extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(4),
-          child: Center(
-            child: Icon(icon, size: 16, color: color),
-          ),
+          child: Center(child: Icon(icon, size: 16, color: color)),
         ),
       ),
     );
   }
 }
-
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
@@ -841,8 +851,11 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.people_outline_rounded,
-                size: 56, color: Color(0xFFCBD5E1)),
+            Icon(
+              Icons.people_outline_rounded,
+              size: 56,
+              color: Color(0xFFCBD5E1),
+            ),
             SizedBox(height: 14),
             Text(
               'Sin clientes',
@@ -876,8 +889,11 @@ class _PanelVacio extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.person_search_rounded,
-                size: 48, color: Color(0xFFCBD5E1)),
+            Icon(
+              Icons.person_search_rounded,
+              size: 48,
+              color: Color(0xFFCBD5E1),
+            ),
             SizedBox(height: 12),
             Text(
               'Selecciona un cliente',
@@ -994,11 +1010,7 @@ class _PanelDerechoDesktop extends StatelessWidget {
             height: 120,
             child: CustomPaint(
               painter: _MultiDonutPainter(
-                segments: [
-                  a / total,
-                  b / total,
-                  c / total,
-                ],
+                segments: [a / total, b / total, c / total],
                 colors: const [
                   Color(0xFF14B8A6),
                   Color(0xFF3B82F6),
@@ -1064,13 +1076,13 @@ class _PanelDerechoDesktop extends StatelessWidget {
           height: 42,
           child: OutlinedButton(
             onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Reporte del cliente: próximamente'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          },
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Reporte del cliente: próximamente'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF020617),
               side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1104,8 +1116,10 @@ class _MetricRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(label,
-              style: const TextStyle(fontSize: 11, color: _muted)),
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: _muted),
+          ),
         ),
         Text(
           value,
@@ -1154,12 +1168,14 @@ class _ActivityDot extends StatelessWidget {
                   color: _ink,
                 ),
               ),
-              Text(subtitle,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: _muted,
-                  )),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: _muted,
+                ),
+              ),
             ],
           ),
         ),
@@ -1196,7 +1212,9 @@ class ClienteDetallePage extends StatelessWidget {
         .toList();
     String ini = '?';
     if (parts.length == 1) {
-      ini = parts.first.substring(0, parts.first.length.clamp(0, 2)).toUpperCase();
+      ini = parts.first
+          .substring(0, parts.first.length.clamp(0, 2))
+          .toUpperCase();
     } else if (parts.length >= 2) {
       ini = (parts[0][0] + parts[1][0]).toUpperCase();
     }
@@ -1209,7 +1227,7 @@ class ClienteDetallePage extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-    @override
+  @override
   Widget build(BuildContext context) {
     final bgAvatar = Color.lerp(theme, Colors.white, 0.78)!;
     final saldo = cliente.saldoPendiente;
@@ -1447,8 +1465,7 @@ class ClienteDetallePage extends StatelessWidget {
           ],
           const SizedBox(height: 10),
           _ActivityDot(
-            color:
-                cliente.activo ? const Color(0xFF16A34A) : AppColors.error,
+            color: cliente.activo ? const Color(0xFF16A34A) : AppColors.error,
             title: cliente.activo ? 'Cliente activo' : 'Cliente inactivo',
             subtitle: 'Estado',
           ),
@@ -1560,7 +1577,6 @@ class ClienteDetallePage extends StatelessWidget {
   }
 }
 
-
 class _GlassCard extends StatelessWidget {
   const _GlassCard({required this.child});
   final Widget child;
@@ -1611,8 +1627,7 @@ class _QuickRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: const TextStyle(fontSize: 11, color: _muted)),
+              Text(label, style: const TextStyle(fontSize: 11, color: _muted)),
               Text(
                 value,
                 style: const TextStyle(
@@ -1703,4 +1718,3 @@ class _MultiDonutPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _MultiDonutPainter oldDelegate) => true;
 }
-

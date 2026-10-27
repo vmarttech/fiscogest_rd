@@ -216,7 +216,10 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     abrir(idx);
   }
 
-  Future<void> _seleccionarProducto(int indexLinea, {String? queryInicial}) async {
+  Future<void> _seleccionarProducto(
+    int indexLinea, {
+    String? queryInicial,
+  }) async {
     final estado = ref.read(productoControllerProvider);
     final listaProductos = estado.valueOrNull;
     if (!mounted) return;
@@ -705,7 +708,6 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   }
 }
 
-
 /// Diálogo de selección: el [TextEditingController] vive y muere con este State
 /// (evita `_dependents.isEmpty` al hacer dispose fuera de ciclo de vida del TextField).
 class _SelectorProductoCompraDialog extends StatefulWidget {
@@ -742,8 +744,7 @@ class _SelectorProductoCompraDialogState
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final ancho = (media.size.width - 88).clamp(0.0, 480.0).toDouble();
-    final altoDisponible =
-        media.size.height - media.viewInsets.bottom - 96;
+    final altoDisponible = media.size.height - media.viewInsets.bottom - 96;
     final alto = (altoDisponible * 0.7).clamp(100.0, 440.0).toDouble();
     final consulta = _buscador.text.trim().toLowerCase();
     final filtrados = widget.productos.where((producto) {
@@ -789,8 +790,9 @@ class _SelectorProductoCompraDialogState
                         final prod = filtrados[index];
                         return ListTile(
                           dense: true,
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 4),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                          ),
                           title: Text(
                             prod.nombre,
                             maxLines: 2,
@@ -829,4 +831,3 @@ class _SelectorProductoCompraDialogState
     );
   }
 }
-

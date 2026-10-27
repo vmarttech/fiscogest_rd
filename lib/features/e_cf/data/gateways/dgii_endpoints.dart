@@ -25,19 +25,19 @@ class DgiiEndpoints {
   static String apiRecepcion(AmbienteDgii a) =>
       '${recepcion(a)}/api/facturaselectronicas';
 
-  /// Resumen de factura de consumo, menor de RD$250,000.
+  /// Resumen Factura de Consumo (RFCE) < RD\$250,000.
+  /// URLs oficiales DGII (host fc.dgii.gov.do, servicio recepcionfc).
   static String apiRecepcionFc(AmbienteDgii a) {
-    final url = apiRecepcion(a);
-    final conHost = url.contains('ecf.dgii.gov.do')
-        ? url.replaceFirst('ecf.dgii.gov.do', 'fc.dgii.gov.do')
-        : url;
-    final cola = conHost.contains('/Recepcion/')
-        ? '/RecepcionFC/api/recepcion/ecf'
-        : '/recepcionfc/api/recepcion/ecf';
-    return conHost.replaceFirst(
-      RegExp(r'/recepcion/api/.*', caseSensitive: false),
-      cola,
-    );
+    switch (a) {
+      case AmbienteDgii.precertificacion:
+        return 'https://fc.dgii.gov.do/testecf/recepcionfc/api/recepcion/ecf';
+      case AmbienteDgii.certificacion:
+        return 'https://fc.dgii.gov.do/certecf/recepcionfc/api/recepcion/ecf';
+      case AmbienteDgii.produccion:
+        return 'https://fc.dgii.gov.do/ecf/recepcionfc/api/recepcion/ecf';
+      case AmbienteDgii.deshabilitado:
+        return '';
+    }
   }
 
   static String apiEstadoTrackId(AmbienteDgii a, String trackId) =>
