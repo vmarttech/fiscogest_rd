@@ -24,6 +24,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/
     as ajuste_prov;
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/services/update_checker.dart';
+import 'package:fiscogest_rd/core/services/usb_barcode_scanner_service.dart';
 
 class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   _InventarioRepositoryAdapter(this._db);
@@ -222,6 +223,14 @@ class FiscoGestApp extends ConsumerStatefulWidget {
 }
 
 class _FiscoGestAppState extends ConsumerState<FiscoGestApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Scanner USB (keyboard wedge): activo en toda la app comercial.
+    // En móvil no molesta; en PC reconoce cualquier lector HID al conectar.
+    UsbBarcodeScannerService.instance.start();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(

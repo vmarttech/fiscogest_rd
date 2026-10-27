@@ -635,48 +635,71 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // panel-head
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Identidad',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF17212B),
+            // panel-head (compacto en móvil para no romper con el título)
+            Builder(
+              builder: (context) {
+                final isMobile = AppBreakpoints.isMobile(context);
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Identidad',
+                        style: TextStyle(
+                          fontSize: isMobile ? 17 : 20,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF17212B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ),
-                FilledButton.icon(
-                  onPressed: _validarEmpresa() && !_guardando
-                      ? () async {
-                          await _guardarEmpresa();
-                          if (!mounted) return;
-                          setState(() {
-                            _historialEntradas.insert(
-                              0,
-                              '${TimeOfDay.now().format(context)} - Configuración actualizada',
-                            );
-                          });
-                        }
-                      : null,
-                  icon: const Icon(Icons.save_rounded, size: 18),
-                  label: Text(
-                    _guardando ? 'Guardando...' : 'Guardar Cambios',
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF21877C),
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFFCBD5E1),
-                    padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11),
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      onPressed: _validarEmpresa() && !_guardando
+                          ? () async {
+                              await _guardarEmpresa();
+                              if (!mounted) return;
+                              setState(() {
+                                _historialEntradas.insert(
+                                  0,
+                                  '${TimeOfDay.now().format(context)} - Configuración actualizada',
+                                );
+                              });
+                            }
+                          : null,
+                      icon: Icon(Icons.save_rounded, size: isMobile ? 16 : 18),
+                      label: Text(
+                        _guardando
+                            ? 'Guardando...'
+                            : (isMobile ? 'Guardar' : 'Guardar Cambios'),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: isMobile ? 13 : 14,
+                        ),
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF21877C),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: const Color(0xFFCBD5E1),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 12 : 17,
+                          vertical: isMobile ? 8 : 12,
+                        ),
+                        visualDensity: isMobile
+                            ? VisualDensity.compact
+                            : VisualDensity.standard,
+                        minimumSize: isMobile ? const Size(0, 36) : null,
+                        tapTargetSize: isMobile
+                            ? MaterialTapTargetSize.shrinkWrap
+                            : MaterialTapTargetSize.padded,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(isMobile ? 9 : 11),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 27),
             // form-layout: logo | fields
@@ -943,72 +966,97 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
 
 
   /// Panel blanco unificado (mismo estilo que Identidad).
+  /// En móvil: título más chico + botón Guardar compacto para no romper el layout.
   Widget _panelSeccion({
     required String titulo,
     required Widget body,
     VoidCallback? onGuardar,
   }) {
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 200),
-      padding: const EdgeInsets.fromLTRB(19, 19, 19, 28),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(19),
-        border: Border.all(color: const Color(0xFFD8DFE4)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.015),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+    return Builder(
+      builder: (context) {
+        final isMobile = AppBreakpoints.isMobile(context);
+        return Container(
+          width: double.infinity,
+          constraints: BoxConstraints(minHeight: isMobile ? 120 : 200),
+          padding: EdgeInsets.fromLTRB(
+            isMobile ? 14 : 19,
+            isMobile ? 14 : 19,
+            isMobile ? 14 : 19,
+            isMobile ? 20 : 28,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  titulo,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF17212B),
-                  ),
-                ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(isMobile ? 14 : 19),
+            border: Border.all(color: const Color(0xFFD8DFE4)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.015),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
-              if (onGuardar != null)
-                FilledButton.icon(
-                  onPressed: _guardando ? null : onGuardar,
-                  icon: const Icon(Icons.save_rounded, size: 18),
-                  label: Text(
-                    _guardando ? 'Guardando...' : 'Guardar Cambios',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF21877C),
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFFCBD5E1),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 17,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11),
-                    ),
-                  ),
-                ),
             ],
           ),
-          const SizedBox(height: 20),
-          body,
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      titulo,
+                      style: TextStyle(
+                        fontSize: isMobile ? 16 : 20,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF17212B),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (onGuardar != null) ...[
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      onPressed: _guardando ? null : onGuardar,
+                      icon: Icon(Icons.save_rounded, size: isMobile ? 16 : 18),
+                      label: Text(
+                        _guardando
+                            ? 'Guardando...'
+                            : (isMobile ? 'Guardar' : 'Guardar Cambios'),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: isMobile ? 13 : 14,
+                        ),
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF21877C),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: const Color(0xFFCBD5E1),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 12 : 17,
+                          vertical: isMobile ? 8 : 12,
+                        ),
+                        visualDensity: isMobile
+                            ? VisualDensity.compact
+                            : VisualDensity.standard,
+                        minimumSize: isMobile ? const Size(0, 36) : null,
+                        tapTargetSize: isMobile
+                            ? MaterialTapTargetSize.shrinkWrap
+                            : MaterialTapTargetSize.padded,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 9 : 11),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              SizedBox(height: isMobile ? 14 : 20),
+              body,
+            ],
+          ),
+        );
+      },
     );
   }
 

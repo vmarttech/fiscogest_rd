@@ -56,11 +56,11 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
     });
     try {
       final svc = ref.read(licenciaServiceProvider);
-      final refCode = await svc.crearPedido(
-        plan: plan,
-        vigenciaTipo: 'mensual',
-        medioPreferido: 'paypal',
-      );
+
+      // Generamos la referencia SOLO en memoria.
+      // El pedido NO se crea todavía (evita tokens basura).
+      final refCode = await svc.generarReferenciaUnica();
+
       final paypal = PaypalService();
       final order = await paypal.createOrder(
         amountUsd: montoUsd,
@@ -85,7 +85,15 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
         _snack(result.error ?? 'No se completó el pago.');
         return;
       }
-      await svc.marcarPagadoYEmitirLicencia(refCode);
+
+      // Solo aquí, después de confirmación de PayPal, se crea el pedido y se emite la licencia
+      await svc.crearPedidoTrasPagoExitoso(
+        referencia: refCode,
+        plan: plan,
+        vigenciaTipo: 'mensual',
+        medioPreferido: 'paypal',
+      );
+
       ref.invalidate(licenciaActualProvider);
       if (!mounted) return;
       _snack('¡Pago recibido! Tu plan ${nombrePlanUi(plan)} ya está activo.');

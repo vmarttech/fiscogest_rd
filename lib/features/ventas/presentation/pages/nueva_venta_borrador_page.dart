@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fiscogest_rd/core/services/usb_barcode_scanner_service.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/widgets/consulta_stock_lectura_sheet.dart';
 
@@ -41,6 +43,7 @@ class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
 class _NuevaVentaBorradorPageState
     extends ConsumerState<NuevaVentaBorradorPage> {
   final TextEditingController _buscadorController = TextEditingController();
+  StreamSubscription<String>? _usbScanSub;
   DateTime? _fechaVencimientoSeleccionada;
   bool _esCredito = false;
   bool _modoFormularioCredito = false;
@@ -192,14 +195,78 @@ class _NuevaVentaBorradorPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(ventaBorradorProvider.notifier).establecerConsumidorFinal();
     });
+  
+    // Scanner USB: añade producto aunque el buscador no tenga foco
+    _usbScanSub = UsbBarcodeScannerService.instance.onScan.listen((codigo) {
+      if (!mounted) return;
+      _buscadorController.text = codigo;
+      // PanelProductos reacciona al texto; además intentamos match directo
+      _aplicarCodigoUsbCotizacion(codigo);
+    });
   }
 
   @override
   void dispose() {
+    _usbScanSub?.cancel();
     _buscadorController.dispose();
     HardwareKeyboard.instance.removeHandler(_posOnKey);
     _posRootFocus.dispose();
     super.dispose();
+  }
+
+  
+  /// Scanner USB → busca por código de barras / código y agrega a la cotización.
+  /// Permanece activo: solo hay que pasar productos por el lector.
+  Future<void> _aplicarCodigoUsbCotizacion(String codigo) async {
+    final q = codigo.trim().toLowerCase();
+    if (q.isEmpty || !mounted) return;
+    try {
+      var estado = ref.read(productoControllerProvider);
+      if (estado is AsyncLoading ||
+          (estado is AsyncData && (estado.value?.isEmpty ?? true))) {
+        try {
+          await ref.read(productoControllerProvider.notifier).cargarProductos();
+        } catch (_) {}
+        estado = ref.read(productoControllerProvider);
+      }
+      final todos = estado.maybeWhen(
+        data: (lista) => lista,
+        orElse: () => [],
+      );
+      dynamic exacto;
+      for (final p in todos) {
+        try {
+          if (p.activo == false) continue;
+          final cb = ('${p.codigoBarras ?? ''}').trim().toLowerCase();
+          final c = ('${p.codigo ?? ''}').trim().toLowerCase();
+          if ((cb.isNotEmpty && cb == q) || c == q) {
+            exacto = p;
+            break;
+          }
+        } catch (_) {}
+      }
+      if (exacto == null) {
+        // Búsqueda parcial si no hay match exacto
+        for (final p in todos) {
+          try {
+            if (p.activo == false) continue;
+            final cb = ('${p.codigoBarras ?? ''}').toLowerCase();
+            final c = ('${p.codigo ?? ''}').toLowerCase();
+            final n = ('${p.nombre ?? ''}').toLowerCase();
+            if (cb == q || c == q || cb.contains(q) || c.contains(q)) {
+              exacto = p;
+              break;
+            }
+          } catch (_) {}
+        }
+      }
+      if (exacto != null) {
+        await _agregarProductoACotizacion(exacto as Producto, 1);
+        if (mounted) _buscadorController.clear();
+      }
+    } catch (e) {
+      // silencioso: no interrumpir el flujo de caja/cotización
+    }
   }
 
   Future<void> _agregarProductoACotizacion(

@@ -201,6 +201,41 @@ class LicenciaService {
     return 'FG-${DateTime.now().millisecondsSinceEpoch % 100000}';
   }
 
+
+  /// Crea el pedido ya como licencia_emitida y emite la licencia.
+  /// Solo debe llamarse DESPUÉS de que PayPal confirme el capture (COMPLETED).
+  Future<LicenciaInfo> crearPedidoTrasPagoExitoso({
+    required String referencia,
+    required String plan,
+    required String vigenciaTipo,
+    String? medioPreferido,
+  }) async {
+    final monto = precioMensualUsd(plan) ??
+        precioPlanVigencia(plan, vigenciaTipo);
+    if (monto == null) {
+      throw ArgumentError('Plan/vigencia no tarifados: $plan / $vigenciaTipo');
+    }
+
+    final ahora = DateTime.now();
+
+    await _db.into(_db.pedidosLicenciaTable).insert(
+          PedidosLicenciaTableCompanion.insert(
+            referencia: referencia,
+            plan: plan,
+            vigenciaTipo: vigenciaTipo,
+            monto: monto,
+            estado: 'licencia_emitida',
+            fechaCreacion: ahora.toIso8601String(),
+            fechaExpiracionPedido: ahora
+                .add(const Duration(days: kDiasExpiracionPedido))
+                .toIso8601String(),
+            medioPagoPreferido: Value(medioPreferido),
+          ),
+        );
+
+    return marcarPagadoYEmitirLicencia(referencia);
+  }
+
   Future<String> crearPedido({
     required String plan,
     required String vigenciaTipo,

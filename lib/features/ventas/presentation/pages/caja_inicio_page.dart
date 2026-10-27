@@ -1,5 +1,7 @@
+import 'dart:async';
 // ignore_for_file: unused_element, unused_field, unused_import, unused_element_parameter
 import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
+import 'package:fiscogest_rd/core/services/usb_barcode_scanner_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/features/notificaciones/presentation/notificaciones_provider.dart';
 import 'package:fiscogest_rd/features/caja/presentation/pdf/informe_z_pdf.dart';
@@ -68,6 +70,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   final _buscaProductoCtrl = TextEditingController();
   final _recibidoCtrl = TextEditingController(text: '0');
   final _focusBuscaProducto = FocusNode();
+  StreamSubscription<String>? _usbScanSub;
   bool _atajoCajaAbierto = false;
   DateTime? _ultimoAtajoCaja;
 
@@ -100,6 +103,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
   @override
   void dispose() {
+    _usbScanSub?.cancel();
     HardwareKeyboard.instance.removeHandler(_atajosTecladoCaja);
     _buscaProductoCtrl.dispose();
     _rncFiscalController.dispose();
@@ -114,6 +118,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     HardwareKeyboard.instance.addHandler(_atajosTecladoCaja);
     super.initState();
     _refrescar();
+    // Scanner USB global: si el buscador no tiene foco, inyecta el código.
+    _usbScanSub = UsbBarcodeScannerService.instance.onScan.listen((codigo) {
+      if (!mounted) return;
+      // Evitar doble procesamiento si el TextField ya recibió el tecleo.
+      if (_focusBuscaProducto.hasFocus) return;
+      if (_modoBusquedaCol != 'producto') {
+        _setModoBusquedaCol('producto');
+      }
+      _buscaProductoCtrl.text = codigo;
+      _buscarProductoCaja(desdeEnter: true);
+    });
   }
 
   Future<void> _refrescar() async {
