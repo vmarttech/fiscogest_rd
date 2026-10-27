@@ -375,35 +375,52 @@ class _PeriodoChips extends ConsumerWidget {
               ],
             ),
           ),
-          Material(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(6),
-            child: InkWell(
-              onTap: () => _pickRango(context, ref),
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFCBD5E1)),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = MediaQuery.sizeOf(context).width < 600;
+              final fechaLabel = '${_fmt(rango.$1)} — ${_fmt(rango.$2)}';
+              return Material(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                child: InkWell(
+                  onTap: () => _pickRango(context, ref),
                   borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF0F172A)),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${_fmt(rango.$1)} — ${_fmt(rango.$2)}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
-                      ),
+                  child: Container(
+                    width: narrow ? double.infinity : null,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFCBD5E1)),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ],
+                    child: Row(
+                      mainAxisSize: narrow ? MainAxisSize.max : MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          size: 14,
+                          color: Color(0xFF0F172A),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            fechaLabel,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
           const Text(
             'Comparar con',
@@ -917,33 +934,65 @@ class _ChartCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          if (mobile)
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ventas vs. Margen - Tendencia de 30 Días',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: _kInk,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
                   children: [
-                    Text(
-                      'Ventas vs. Margen - Tendencia de 30 Días',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _kInk),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Análisis dinámico comparativo',
-                      style: TextStyle(fontSize: 12, color: _kMuted),
-                    ),
+                    _LegendDot(color: _kTealBright, label: 'Ventas'),
+                    SizedBox(width: 14),
+                    _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
                   ],
                 ),
-              ),
-              Row(
-                children: [
-                  _LegendDot(color: _kTealBright, label: 'Ventas'),
-                  SizedBox(width: 14),
-                  _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
-                ],
-              ),
-            ],
-          ),
+                SizedBox(height: 8),
+                Text(
+                  'Análisis dinámico comparativo',
+                  style: TextStyle(fontSize: 12, color: _kMuted),
+                ),
+              ],
+            )
+          else
+            const Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ventas vs. Margen - Tendencia de 30 Días',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: _kInk,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Análisis dinámico comparativo',
+                        style: TextStyle(fontSize: 12, color: _kMuted),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    _LegendDot(color: _kTealBright, label: 'Ventas'),
+                    SizedBox(width: 14),
+                    _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
+                  ],
+                ),
+              ],
+            ),
           const SizedBox(height: 20),
           if (mobile) ...[
             chart,

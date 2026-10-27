@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
 
 typedef AgregarProductoCallback =
     Future<void> Function(Producto producto, double cantidad);
@@ -172,6 +173,37 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
     }
   }
 
+  Future<void> _escanearCodigoBarras() async {
+    final codigo = await BarcodeScannerPage.abrir(
+      context,
+      titulo: 'Escanear producto',
+    );
+    if (!mounted || codigo == null) return;
+    final limpio = codigo.trim();
+    if (limpio.isEmpty) return;
+    _buscador.text = limpio;
+    _buscador.selection = TextSelection.collapsed(offset: limpio.length);
+    _buscar(limpio);
+    final todos = ref.read(productoControllerProvider);
+    final match = todos.maybeWhen(
+      data: (lista) {
+        final q = limpio.toLowerCase();
+        for (final prod in lista) {
+          if (!prod.activo) continue;
+          if (prod.codigo.toLowerCase() == q) return prod;
+          final b = (prod.codigoBarras ?? '').toLowerCase();
+          if (b.isNotEmpty && b == q) return prod;
+        }
+        if (_resultados.length == 1) return _resultados.first;
+        return null;
+      },
+      orElse: () => null,
+    );
+    if (match != null && mounted) {
+      await _pedirCantidadYAgregar(match);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final productosAsync = ref.watch(productoControllerProvider);
@@ -180,13 +212,33 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
       children: [
         TextField(
           controller: _buscador,
-          decoration: const InputDecoration(
-            hintText: 'Buscar por nombre, código o barras...',
-            prefixIcon: Icon(Icons.search),
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          decoration: InputDecoration(
+            hintText: 'Nombre, código o barras',
+            hintStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF94A3B8),
+            ),
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: IconButton(
+              tooltip: 'Escanear código de barras',
+              icon: const Icon(Icons.qr_code_scanner),
+              onPressed: _escanearCodigoBarras,
+            ),
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ),
           ),
           onChanged: _buscar,
+          onSubmitted: (v) {
+            _buscar(v);
+            // Si hay un único match por código/barras, agregar directo
+            if (_resultados.length == 1) {
+              _pedirCantidadYAgregar(_resultados.first);
+            }
+          },
         ),
         const SizedBox(height: AppSpacing.s),
         productosAsync.when(
@@ -199,7 +251,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
             final lista = _resultados;
             if (_buscador.text.trim().isEmpty) {
               return const Text(
-                'Escriba para buscar productos del inventario',
+                'Escriba o escanee el código de barras del producto',
                 style: AppTypography.bodySmall,
               );
             }

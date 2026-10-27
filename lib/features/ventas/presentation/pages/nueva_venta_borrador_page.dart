@@ -948,11 +948,11 @@ class _NuevaVentaBorradorPageState
           SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildSeccionCliente(estado, esPantallaPequena),
           SizedBox(height: esPantallaPequena ? 12 : 16),
-          _buildSeccionDelivery(estado, esPantallaPequena),
-          SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildSeccionProductos(esPantallaPequena),
           SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildListaItemsCarrito(estado, esPantallaPequena),
+          SizedBox(height: esPantallaPequena ? 12 : 16),
+          _buildSeccionDelivery(estado, esPantallaPequena),
           SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildSeccionResumen(estado, esPantallaPequena),
           const SizedBox(height: 8),
@@ -2081,9 +2081,12 @@ class _NuevaVentaBorradorPageState
         const SizedBox(height: 2),
         Text(
           'Busque por nombre, código o código de barras',
+          maxLines: 2,
+          softWrap: true,
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: esPantallaPequena ? 11.5 : 12.5,
+            height: 1.25,
             color: const Color(0xFF64748B),
           ),
         ),
@@ -2567,54 +2570,34 @@ class _NuevaVentaBorradorPageState
           child: Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'TOTAL',
-                      style: AppTypography.labelSmall.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: onTap,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: bg,
+                      foregroundColor: AppColors.white,
+                      disabledBackgroundColor: AppColors.grey300,
+                      disabledForegroundColor: AppColors.grey500,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    Text(
-                      formatRd(estado.montoTotal),
-                      style: AppTypography.h4.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: onTap,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: bg,
-                    foregroundColor: AppColors.white,
-                    disabledBackgroundColor: AppColors.grey300,
-                    disabledForegroundColor: AppColors.grey500,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: _guardando
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                    child: _guardando
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            label,
+                            style: const TextStyle(fontWeight: FontWeight.w800),
                           ),
-                        )
-                      : Text(
-                          label,
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
+                  ),
                 ),
               ),
             ],
