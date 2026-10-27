@@ -527,7 +527,6 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     const EcfeSoloLecturaBanner(),
-                    const EcfePracticaBanner(),
                     _card(
                       children: [
                         _row(

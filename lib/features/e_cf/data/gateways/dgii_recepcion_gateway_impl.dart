@@ -6,7 +6,6 @@ import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_auth_client.dart';
 import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_endpoints.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/ports/dgii_recepcion_gateway.dart';
-import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo_local.dart';
 
 class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
   DgiiRecepcionGatewayImpl({
@@ -36,16 +35,6 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
     String? nombreArchivo, {
     bool rfce = false,
   }) async {
-    if (DgiiEndpoints.modoPractica) {
-      final local = DgiiEspejoLocal.recibir(xmlFirmado, resumen: rfce);
-      return DgiiRecepcionResultado(
-        ok: local.ok,
-        codigo: local.codigo,
-        mensaje: local.mensaje,
-        trackId: local.trackId,
-      );
-    }
-
     if (!ambiente.permiteEnvio) {
       return const DgiiRecepcionResultado(
         ok: false,
@@ -160,44 +149,72 @@ class DgiiRecepcionGatewayImpl implements DgiiRecepcionGateway {
   }
 
   DgiiRecepcionResultado _resultadoRfce(int status, String body) {
+    final cuerpo = body.length > 500 ? body.substring(0, 500) : body;
+
     if (status < 200 || status >= 300) {
       return DgiiRecepcionResultado(
         ok: false,
         codigo: '$status',
-        mensaje: body.length > 500 ? body.substring(0, 500) : body,
+        mensaje: cuerpo,
         resultadoIncierto: status >= 500,
       );
     }
+
     try {
       final decoded = jsonDecode(body);
       if (decoded is! Map) {
         return DgiiRecepcionResultado(
           ok: false,
-          mensaje: body.length > 500 ? body.substring(0, 500) : body,
+          mensaje: cuerpo,
           resultadoIncierto: true,
         );
       }
-      final estado = (decoded['estado'] ?? '').toString();
+
+      final estadoOriginal = (decoded['estado'] ?? '').toString().trim();
       final codigo = (decoded['codigo'] ?? '').toString();
-      var mensaje = estado;
+
+      var mensaje = estadoOriginal;
       final mensajes = decoded['mensajes'];
       if (mensajes is List && mensajes.isNotEmpty && mensajes.first is Map) {
         final primero = mensajes.first as Map;
-        mensaje = (primero['valor'] ?? primero['mensaje'] ?? estado).toString();
+        mensaje = (primero['valor'] ?? primero['mensaje'] ?? estadoOriginal)
+            .toString();
       }
-      final bajo = estado.toLowerCase();
-      final aceptado = bajo.contains('aceptado') && !bajo.contains('rechazado');
-      final rechazado = bajo.contains('rechazado');
+
+      final normalizado = estadoOriginal
+          .toLowerCase()
+          .replaceAll(RegExp(r'[_-]+'), ' ')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+
+      final String? estadoCanonico;
+      if (normalizado == 'aceptado') {
+        estadoCanonico = 'aceptado';
+      } else if (normalizado == 'aceptado condicional' ||
+          normalizado == 'aceptado condicionalmente') {
+        estadoCanonico = 'aceptado condicional';
+      } else if (normalizado == 'rechazado') {
+        estadoCanonico = 'rechazado';
+      } else {
+        estadoCanonico = null;
+      }
+
+      final aceptado =
+          estadoCanonico == 'aceptado' ||
+          estadoCanonico == 'aceptado condicional';
+      final rechazado = estadoCanonico == 'rechazado';
+
       return DgiiRecepcionResultado(
         ok: aceptado,
         codigo: codigo,
-        mensaje: mensaje.isEmpty ? estado : mensaje,
+        mensaje: mensaje.isEmpty ? estadoOriginal : mensaje,
+        estadoDgii: estadoCanonico,
         resultadoIncierto: !aceptado && !rechazado,
       );
     } catch (_) {
       return DgiiRecepcionResultado(
         ok: false,
-        mensaje: body.length > 500 ? body.substring(0, 500) : body,
+        mensaje: cuerpo,
         resultadoIncierto: true,
       );
     }

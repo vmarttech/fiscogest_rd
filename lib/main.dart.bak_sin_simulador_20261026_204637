@@ -1,0 +1,321 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:drift/drift.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:fiscogest_rd/core/navigation/app_router.dart';
+import 'package:fiscogest_rd/core/providers/core_providers.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
+import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sync_scheduler.dart';
+import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
+import 'package:fiscogest_rd/core/interfaces/inventario_repository_interface.dart';
+import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/inventario_fisico/data/repositories/inventario_fisico_repository_impl.dart';
+import 'package:fiscogest_rd/features/ajustes_inventario/data/repositories/ajuste_inventario_repository_impl.dart';
+import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/ajuste_inventario_repository.dart';
+import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart'
+    as ajuste_prov;
+import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/services/update_checker.dart';
+import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo.dart';
+
+class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
+  _InventarioRepositoryAdapter(this._db);
+  final AppDatabase _db;
+
+  @override
+  Future<void> actualizarStock(int productoId, double nuevoStock) async {
+    await (_db.update(_db.productosTable)
+          ..where((fila) => fila.id.equals(productoId)))
+        .write(ProductosTableCompanion(stock: Value(nuevoStock)));
+  }
+
+  @override
+  Future<void> actualizarProducto(Producto producto) async {
+    if (producto.id == null) return;
+    await (_db.update(
+      _db.productosTable,
+    )..where((t) => t.id.equals(producto.id!))).write(
+      ProductosTableCompanion(
+        codigo: Value(producto.codigo),
+        nombre: Value(producto.nombre),
+        precioCompra: Value(producto.precioCompra),
+        precioVenta: Value(producto.precioVenta),
+        stock: Value(producto.stock),
+        stockMinimo: Value(producto.stockMinimo),
+        categoriaId: Value(producto.categoriaId),
+        marcaId: Value(producto.marcaId),
+        unidadMedidaId: Value(producto.unidadMedidaId),
+        activo: Value(producto.activo ? 1 : 0),
+      ),
+    );
+  }
+
+  @override
+  Future<void> crearProducto(Producto producto) async {
+    await _db
+        .into(_db.productosTable)
+        .insert(
+          ProductosTableCompanion(
+            codigo: Value(producto.codigo),
+            nombre: Value(producto.nombre),
+            precioCompra: Value(producto.precioCompra),
+            precioVenta: Value(producto.precioVenta),
+            stock: Value(producto.stock),
+            stockMinimo: Value(producto.stockMinimo),
+            categoriaId: Value(producto.categoriaId),
+            marcaId: Value(producto.marcaId),
+            unidadMedidaId: Value(producto.unidadMedidaId),
+            activo: Value(producto.activo ? 1 : 0),
+          ),
+        );
+  }
+
+  @override
+  Future<void> eliminarProducto(int id) async {
+    await (_db.delete(_db.productosTable)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
+  Future<Producto?> obtenerProductoPorCodigo(String codigo) async {
+    final row = await (_db.select(
+      _db.productosTable,
+    )..where((t) => t.codigo.equals(codigo))).getSingleOrNull();
+    if (row == null) return null;
+    return Producto(
+      id: row.id,
+      codigo: row.codigo,
+      nombre: row.nombre,
+      precioCompra: row.precioCompra ?? 0.0,
+      precioVenta: row.precioVenta ?? 0.0,
+      stock: row.stock,
+      stockMinimo: row.stockMinimo,
+      categoriaId: row.categoriaId,
+      marcaId: row.marcaId,
+      unidadMedidaId: row.unidadMedidaId,
+      activo: row.activo == 1,
+    );
+  }
+
+  @override
+  Future<Producto?> obtenerProductoPorId(int id) async {
+    final row = await (_db.select(
+      _db.productosTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (row == null) return null;
+    return Producto(
+      id: row.id,
+      codigo: row.codigo,
+      nombre: row.nombre,
+      precioCompra: row.precioCompra ?? 0.0,
+      precioVenta: row.precioVenta ?? 0.0,
+      stock: row.stock,
+      stockMinimo: row.stockMinimo,
+      categoriaId: row.categoriaId,
+      marcaId: row.marcaId,
+      unidadMedidaId: row.unidadMedidaId,
+      activo: row.activo == 1,
+    );
+  }
+
+  @override
+  Future<List<Producto>> listarProductos() async {
+    final results = await _db.select(_db.productosTable).get();
+    return results
+        .map(
+          (row) => Producto(
+            id: row.id,
+            codigo: row.codigo,
+            nombre: row.nombre,
+            precioCompra: row.precioCompra ?? 0.0,
+            precioVenta: row.precioVenta ?? 0.0,
+            stock: row.stock,
+            stockMinimo: row.stockMinimo,
+            categoriaId: row.categoriaId,
+            marcaId: row.marcaId,
+            unidadMedidaId: row.unidadMedidaId,
+            activo: row.activo == 1,
+          ),
+        )
+        .toList();
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DgiiEspejo.cargar();
+  await initializeDateFormatting('es_DO', null);
+  final db = AppDatabase();
+  await RepositoryInjection.initialize(db);
+
+  // Licencia offline: demo 15 días si no hay fila; limpia pedidos >7 días.
+  try {
+    final licenciaSvc = LicenciaService(db);
+    await licenciaSvc.ensureLicenciaInicial();
+    await DispositivoService(db).ensureDispositivoRegistrado();
+    debugPrint(
+      'Supabase configurado: ${SupabaseConfig.isConfigured} '
+      'urlLen=${SupabaseConfig.url.length} keyLen=${SupabaseConfig.anonKey.length}',
+    );
+    if (SupabaseConfig.isConfigured) {
+      try {
+        unawaited(() async {
+          await RenovarToken.asegurar();
+          debugPrint('main: push al entrar o cada 5 min');
+        }());
+      } catch (e, st) {
+        debugPrint('Sync nube: $e');
+        debugPrint('$st');
+      }
+      // Reintentos periódicos (fase 1)
+      SyncScheduler(db).start();
+    } else {
+      debugPrint(
+        'DispositivoSync: OMITIDO — falta --dart-define SUPABASE_URL y SUPABASE_ANON_KEY',
+      );
+    }
+    await licenciaSvc.expirarPedidosVencidos();
+    // UNA vez en tu PC (MartTech vitalicio), descomenta, corre y vuelve a comentar:
+    // await licenciaSvc.activarDesarrolladorVitalicio();
+  } catch (e, st) {
+    debugPrint('Licencia ensure: $e');
+    debugPrint('$st');
+  }
+  final InventarioRepositoryInterface inventarioRepo =
+      _InventarioRepositoryAdapter(db);
+  final InventarioFisicoRepositoryInterface inventarioFisicoRepo =
+      InventarioFisicoRepositoryImpl(db);
+  final AjusteInventarioRepository ajusteInventarioRepo =
+      AjusteInventarioRepositoryImpl(db);
+  final ventasRepo = RepositoryInjection.instance.ventasRepository;
+  final container = ProviderContainer(
+    overrides: [
+      databaseProvider.overrideWithValue(db),
+      inventarioRepositoryProvider.overrideWithValue(inventarioRepo),
+      inventarioFisicoRepositoryProvider.overrideWithValue(
+        inventarioFisicoRepo,
+      ),
+      ajuste_prov.ajusteInventarioRepositoryProvider.overrideWithValue(
+        ajusteInventarioRepo,
+      ),
+      ventasRepositoryProvider.overrideWithValue(ventasRepo),
+    ],
+  );
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const FiscoGestApp(),
+    ),
+  );
+}
+
+class FiscoGestApp extends ConsumerStatefulWidget {
+  const FiscoGestApp({super.key});
+
+  @override
+  ConsumerState<FiscoGestApp> createState() => _FiscoGestAppState();
+}
+
+class _FiscoGestAppState extends ConsumerState<FiscoGestApp> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'FiscoGest',
+      debugShowCheckedModeBanner: false,
+      routerConfig: ref.watch(appRouterProvider),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blueGrey),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('es', 'DO'), Locale('en', 'US')],
+      locale: const Locale('es', 'DO'),
+      builder: (context, child) {
+        // context AQUÍ sí tiene Navigator → diálogos de update OK
+        return _UpdateGate(
+          child: Stack(
+            children: [
+              if (child != null) child,
+              const FiscoGestNotificationOverlay(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Revisa update.json una sola vez, con un context bajo MaterialApp.
+class _UpdateGate extends StatefulWidget {
+  const _UpdateGate({required this.child});
+  final Widget child;
+
+  @override
+  State<_UpdateGate> createState() => _UpdateGateState();
+}
+
+class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
+  bool _busy = false;
+  DateTime? _lastCheck;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(seconds: 2), _runCheck);
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _runCheck();
+    }
+  }
+
+  Future<void> _runCheck() async {
+    if (!mounted || _busy) return;
+    final now = DateTime.now();
+    if (_lastCheck != null &&
+        now.difference(_lastCheck!) < const Duration(seconds: 30)) {
+      return;
+    }
+    _busy = true;
+    _lastCheck = now;
+    try {
+      final navigatorContext = appNavigatorKey.currentState?.overlay?.context;
+      if (navigatorContext == null) {
+        debugPrint(
+          '[UpdateChecker] Navigator no disponible; '
+          'se intentará comprobar de nuevo más adelante.',
+        );
+        _lastCheck = null;
+        return;
+      }
+      await UpdateChecker.checkAndPrompt(navigatorContext);
+    } catch (e, st) {
+      debugPrint('[UpdateChecker] Error al comprobar o mostrar aviso: $e');
+      debugPrint('$st');
+    } finally {
+      _busy = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}

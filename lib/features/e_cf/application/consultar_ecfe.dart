@@ -1,8 +1,6 @@
 import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_consulta_gateway_impl.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
-import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_endpoints.dart';
-import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo_local.dart';
 
 class ConsultarEcfeResultado {
   const ConsultarEcfeResultado({
@@ -25,40 +23,6 @@ class ConsultarEcfe {
   final EcfeRepository repo;
 
   Future<ConsultarEcfeResultado> call({required int documentoId}) async {
-    if (DgiiEndpoints.modoPractica) {
-      final doc = await repo.obtenerPorId(documentoId);
-      if (doc == null) {
-        return const ConsultarEcfeResultado(
-          ok: false,
-          errores: ['Documento no encontrado'],
-        );
-      }
-      final crudo = DgiiEspejoLocal.consultar((doc.trackId ?? '').trim());
-      final aceptado = crudo == 'Aceptado';
-      final proceso = crudo == 'En Proceso';
-      await repo.actualizarEstado(
-        id: doc.id!,
-        estado: aceptado
-            ? EstadoEcfInterno.aceptado
-            : proceso
-            ? EstadoEcfInterno.enProceso
-            : EstadoEcfInterno.errorTecnico,
-        ultimoError: aceptado || proceso ? null : crudo,
-        codigoRespuesta: aceptado ? '1' : '0',
-      );
-      return ConsultarEcfeResultado(
-        ok: aceptado || proceso,
-        estado: aceptado
-            ? EstadoEcfInterno.aceptado
-            : proceso
-            ? EstadoEcfInterno.enProceso
-            : EstadoEcfInterno.errorTecnico,
-        estadoDgii: crudo,
-        mensaje: 'Practica: $crudo. No se consulto a la DGII.',
-        errores: const <String>[],
-      );
-    }
-
     try {
       final cfg = await repo.obtenerConfig();
       if (!cfg.listoParaPipeline) {
@@ -128,6 +92,31 @@ class ConsultarEcfe {
       }
 
       final interno = mapearEstadoDgii(res.estadoDgii, res.codigo);
+
+      // Una respuesta HTTP correcta no garantiza un estado fiscal concluyente.
+      // Si DGII devuelve un estado desconocido, no alterar el estado guardado.
+      if (interno == null) {
+        final detalle =
+            (res.estadoDgii == null || res.estadoDgii!.trim().isEmpty)
+            ? 'DGII no devolvió un estado fiscal reconocible'
+            : 'Estado DGII no reconocido: ${res.estadoDgii}';
+
+        await repo.registrarEvento(
+          documentoId: documentoId,
+          paso: 'consultar_estado',
+          ok: false,
+          detalle: detalle,
+        );
+
+        return ConsultarEcfeResultado(
+          ok: false,
+          estado: doc.estado,
+          estadoDgii: res.estadoDgii,
+          mensaje: res.mensaje,
+          errores: [detalle],
+        );
+      }
+
       final errorAnterior = doc.ultimoError ?? '';
       final esEstadoTerminalConfirmado =
           interno == EstadoEcfInterno.aceptado ||
@@ -196,30 +185,49 @@ class ConsultarEcfe {
     return null;
   }
 
-  /// Mapeo tolerante a variantes de texto de la DGII.
-  static EstadoEcfInterno mapearEstadoDgii(String? estadoDgii, String? codigo) {
-    final e = (estadoDgii ?? '').trim().toLowerCase();
-    final c = (codigo ?? '').trim();
+  /// Solo traduce estados fiscales reconocidos por su texto.
+  /// null significa que la respuesta no permite concluir el estado.
+  static EstadoEcfInterno? mapearEstadoDgii(
+    String? estadoDgii,
+    String? codigo,
+  ) {
+    final e = (estadoDgii ?? '')
+        .trim()
+        .toLowerCase()
+        .replaceAll('_', ' ')
+        .replaceAll('-', ' ');
+
+    if (e.isEmpty) return null;
+
+    if (e.contains('rechaz')) {
+      return EstadoEcfInterno.rechazado;
+    }
 
     if (e.contains('aceptado cond') ||
         e.contains('aceptado con obs') ||
-        e.contains('observacion') ||
-        e.contains('observación') ||
-        c == '2') {
+        e.contains('aceptado con observ') ||
+        e.contains('aceptado con objec') ||
+        e.contains('aceptado con incidencia') ||
+        e.contains('aceptado con observación') ||
+        e.contains('aceptado con observacion')) {
       return EstadoEcfInterno.aceptadoObservacion;
     }
-    if (e.contains('aceptado') || e == 'aceptado' || c == '1') {
+
+    if (e == 'aceptado' ||
+        e == 'aceptada' ||
+        e == 'aprobado' ||
+        e == 'aprobada') {
       return EstadoEcfInterno.aceptado;
     }
-    if (e.contains('rechaz') || c == '3' || c == '4') {
-      return EstadoEcfInterno.rechazado;
-    }
-    if (e.contains('proceso') ||
+
+    if (e.contains('en proceso') ||
+        e == 'proceso' ||
         e.contains('recibido') ||
-        e.contains('enviado') ||
-        e.isEmpty) {
+        e == 'enviado') {
       return EstadoEcfInterno.enProceso;
     }
-    return EstadoEcfInterno.enProceso;
+
+    // No inferir aceptación o rechazo a partir de códigos no verificados.
+    return null;
   }
 }

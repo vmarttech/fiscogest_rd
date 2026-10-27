@@ -32,7 +32,7 @@ class EcfeSpecPage extends ConsumerWidget {
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: mobile ? 720 : 800),
+            constraints: BoxConstraints(maxWidth: mobile ? 720 : 1200),
             child: async.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('$e')),
@@ -45,15 +45,49 @@ class EcfeSpecPage extends ConsumerWidget {
                   itemCount: list.length + 1,
                   itemBuilder: (ctx, i) {
                     if (i == 0) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          'Al salir una circular nueva: crea o activa una versión, '
-                          'completa el checklist en TesteCF/CerteCF y solo entonces '
-                          'marca producción.',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 18),
+                        padding: EdgeInsets.all(mobile ? 14 : 20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF8F7),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFB9E4DE)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.fact_check_outlined,
+                              color: Color(0xFF008F83),
+                              size: 25,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Versiones y certificación e-CF',
+                                    style: AppTypography.bodyLarge.copyWith(
+                                      color: const Color(0xFF075B55),
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    'Administra las versiones de especificación, '
+                                    'revisa las circulares DGII y completa las '
+                                    'pruebas de cada ambiente. El checklist es '
+                                    'un control interno; no certifica por sí solo '
+                                    'al emisor ante la DGII.',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: const Color(0xFF376965),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     }
@@ -108,6 +142,14 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
         done: done,
       );
       widget.onChanged();
+    } catch (e) {
+      if (!mounted) return;
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text('No se pudo actualizar el checklist: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -208,8 +250,14 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFE1E7EF)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

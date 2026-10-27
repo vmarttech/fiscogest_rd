@@ -465,43 +465,70 @@ class EcfeRepository {
     required bool cert,
     required bool produccion,
   }) async {
-    final all = await _db.select(_db.ecfeSpecVersionTable).get();
-    for (final r in all) {
-      final isTarget = r.id == id;
-      var ap = r.activaPrecert;
-      var ac = r.activaCert;
-      var apo = r.activaProduccion;
-      if (precert) {
-        ap = isTarget;
-      }
-      if (cert) {
-        ac = isTarget;
-      }
-      if (produccion) {
-        apo = isTarget;
-      }
-      await (_db.update(
-        _db.ecfeSpecVersionTable,
-      )..where((t) => t.id.equals(r.id))).write(
-        EcfeSpecVersionTableCompanion(
-          activaPrecert: Value(ap),
-          activaCert: Value(ac),
-          activaProduccion: Value(apo),
-          activadoEn: isTarget ? Value(DateTime.now()) : const Value.absent(),
-        ),
+    final ambientesSeleccionados = [
+      precert,
+      cert,
+      produccion,
+    ].where((seleccionado) => seleccionado).length;
+
+    if (ambientesSeleccionados != 1) {
+      throw ArgumentError(
+        'Debes seleccionar exactamente un ambiente para activar la especificación.',
       );
     }
+
+    await _db.transaction(() async {
+      final all = await _db.select(_db.ecfeSpecVersionTable).get();
+      final existe = all.any((version) => version.id == id);
+
+      if (!existe) {
+        throw StateError(
+          'La versión de especificación solicitada ya no existe.',
+        );
+      }
+
+      final ahora = DateTime.now();
+
+      for (final r in all) {
+        final isTarget = r.id == id;
+        var ap = r.activaPrecert;
+        var ac = r.activaCert;
+        var apo = r.activaProduccion;
+
+        if (precert) ap = isTarget;
+        if (cert) ac = isTarget;
+        if (produccion) apo = isTarget;
+
+        await (_db.update(
+          _db.ecfeSpecVersionTable,
+        )..where((t) => t.id.equals(r.id))).write(
+          EcfeSpecVersionTableCompanion(
+            activaPrecert: Value(ap),
+            activaCert: Value(ac),
+            activaProduccion: Value(apo),
+            activadoEn: isTarget ? Value(ahora) : const Value.absent(),
+          ),
+        );
+      }
+    });
   }
 
+  /// Lee el checklist guardado sin perder los estados existentes.
+  /// Si el contenido está vacío o es inválido, usa la plantilla base.
   List<EcfeChecklistItem> parseChecklist(String json) {
     try {
-      final list = jsonDecode(json) as List<dynamic>;
-      return list
-          .map(
-            (e) =>
-                EcfeChecklistItem.fromJson(Map<String, dynamic>.from(e as Map)),
-          )
-          .toList();
+      final decoded = jsonDecode(json);
+      if (decoded is! List) {
+        return EcfeChecklistCatalog.plantillaBase();
+      }
+
+      final items = <EcfeChecklistItem>[];
+      for (final raw in decoded) {
+        if (raw is! Map || raw['id'] == null) continue;
+        items.add(EcfeChecklistItem.fromJson(Map<String, dynamic>.from(raw)));
+      }
+
+      return items.isEmpty ? EcfeChecklistCatalog.plantillaBase() : items;
     } catch (_) {
       return EcfeChecklistCatalog.plantillaBase();
     }

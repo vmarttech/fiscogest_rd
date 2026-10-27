@@ -18,8 +18,6 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_config.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
-import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_endpoints.dart';
-import 'package:fiscogest_rd/features/e_cf/data/dgii_espejo.dart';
 
 /// Hub del módulo e-CF. No interviene en ventas ni caja.
 class EcfeHubPage extends ConsumerStatefulWidget {
@@ -53,6 +51,7 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
   Widget build(BuildContext context) {
     final mobile = AppBreakpoints.isMobile(context);
     return AppScaffold(
+      showAppBar: !AppBreakpoints.isDesktop(context),
       actions: [
         if (mobile)
           Padding(
@@ -103,11 +102,57 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: mobile ? 720 : 960),
+            constraints: BoxConstraints(maxWidth: mobile ? 720 : 1200),
             child: Column(
               children: [
+                if (AppBreakpoints.isDesktop(context))
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'e-CF · DGII',
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF0D1E34),
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Facturación electrónica y configuración',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        FilledButton.icon(
+                          onPressed: () => context.push('/ecfe/spec'),
+                          icon: const Icon(Icons.rule_folder_rounded, size: 19),
+                          label: const Text('Especificación'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 const EcfeSoloLecturaBanner(),
-                const EcfePracticaBanner(),
                 Expanded(
                   child: TabBarView(
                     controller: _tabs,
@@ -753,7 +798,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
     _rnc.text = c.rncEmisor;
     _razon.text = c.razonSocialEmisor;
     _rutaCert.text = c.rutaCertificado;
-    _claveCert.text = c.claveCertificado;
+    _claveCert.clear(); // La clave guardada nunca se precarga en la interfaz.
     _rutaXsd.text = c.xsdVersion;
     _loaded = true;
   }
@@ -768,12 +813,34 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
       claveCertificado: _claveCert.text,
       xsdVersion: _rutaXsd.text.trim(),
     );
-    await ref.read(ecfeRepositoryProvider).guardarConfig(c);
-    ref.invalidate(ecfeConfigProvider);
-    ref.invalidate(ecfeHabilitadoProvider);
+    late final List<(String, bool, String)> checks;
+    try {
+      final repository = ref.read(ecfeRepositoryProvider);
+      await repository.guardarConfig(c);
 
-    // Checklist operativo (cert, XSD, secuencias, OpenSSL)
-    final checks = await _evaluarChecklistConfig(c);
+      // Leer lo persistido: si el campo quedó vacío, la clave anterior
+      // se conserva y el checklist debe usar la configuración recuperada.
+      final guardada = await repository.obtenerConfig();
+
+      ref.invalidate(ecfeConfigProvider);
+      ref.invalidate(ecfeHabilitadoProvider);
+      _claveCert.clear();
+
+      checks = await _evaluarChecklistConfig(guardada);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No se pudo guardar la configuración e-CF. '
+            'Comprueba el almacenamiento seguro del sistema e inténtalo '
+            'de nuevo. No se confirmó el guardado.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     if (!mounted) return;
     await showDialog<void>(
       context: context,
@@ -950,132 +1017,361 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(ecfeConfigProvider);
+    final mobile = AppBreakpoints.isMobile(context);
+
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
+      error: (e, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'No se pudo cargar la configuración e-CF.\n'
+            'Comprueba el almacenamiento seguro del sistema y vuelve a intentar.',
+            textAlign: TextAlign.center,
+            style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+          ),
+        ),
+      ),
       data: (cfg) {
         _hydrate(cfg);
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            SwitchListTile(
-              title: const Text('Habilitar módulo e-CF'),
-              subtitle: const Text(
-                'Desactivado por defecto. No encola ni envía nada.',
-              ),
-              value: _habilitado,
-              onChanged: (v) => setState(() => _habilitado = v),
-            ),
-            const SizedBox(height: 8),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Modo practica'),
-              subtitle: const Text(
-                'Revisa el comprobante en este equipo. Apagado, se envia a la DGII.',
-              ),
-              value: DgiiEndpoints.modoPractica,
-              onChanged: (valor) async {
-                await DgiiEspejo.guardarModo(valor);
-                if (mounted) setState(() {});
-              },
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<AmbienteDgii>(
-              initialValue: _ambiente,
-              decoration: const InputDecoration(
-                labelText: 'Ambiente DGII',
-                border: OutlineInputBorder(),
-              ),
-              items: [
-                for (final a in AmbienteDgii.values)
-                  DropdownMenuItem(value: a, child: Text(a.etiqueta)),
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 900;
+            final gap = wide ? 18.0 : 12.0;
+            final cardWidth = wide
+                ? (constraints.maxWidth - gap) / 2
+                : constraints.maxWidth;
+
+            final cardDecoration = BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE1E7EF)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0A10243A),
+                  blurRadius: 16,
+                  offset: Offset(0, 4),
+                ),
               ],
-              onChanged: (v) {
-                if (v != null) setState(() => _ambiente = v);
-              },
-            ),
-            const SizedBox(height: 12),
-            AppTextField(label: 'RNC emisor', controller: _rnc),
-            const SizedBox(height: 12),
-            AppTextField(label: 'Razón social emisor', controller: _razon),
-            const SizedBox(height: 12),
-            AppTextField(
-              label: 'Ruta certificado (.p12 / .pfx)',
-              controller: _rutaCert,
-            ),
-            const SizedBox(height: 12),
-            AppTextField(
-              label: 'Clave del certificado',
-              controller: _claveCert,
-              obscureText: true,
-            ),
-            const SizedBox(height: 8),
-            Consumer(
-              builder: (context, ref, _) {
-                final cert = ref.watch(certificadoInfoProvider);
-                return cert.when(
-                  loading: () => const LinearProgressIndicator(),
-                  error: (e, _) => Text('$e', style: AppTypography.bodySmall),
-                  data: (info) {
-                    if (info == null) {
-                      return Text(
-                        'Indica ruta y clave del .p12 para verificar vencimiento.',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      );
-                    }
-                    final color = info.vencido
-                        ? AppColors.error
-                        : (info.requiereAviso
-                              ? const Color(0xFFE65100)
-                              : AppColors.success);
-                    return Text(
-                      info.mensaje,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w600,
+            );
+
+            Widget sectionTitle(IconData icon, String title, Color iconColor) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 18),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: iconColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(11),
                       ),
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'El certificado lo emite un PSC acreditado por INDOTEL. '
-              'La firma usa OpenSSL en este equipo (XMLDSig RSA-SHA256).',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 20),
-            AppTextField(
-              label: 'Ruta XSD oficial DGII (.xsd o carpeta)',
-              controller: _rutaXsd,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Descarga el paquete de esquemas e-CF de la DGII y apunta al .xsd raíz. '
-              'Validación XSD: xmllint/libxml2 en el PATH (Linux: apt install libxml2-utils · Windows: instale xmllint y agréguelo al PATH). '
-              'Sin XSD solo aplica validación estructural interna.',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 20),
-            AppButton(text: 'Guardar configuración', onPressed: _guardar),
-            const SizedBox(height: 16),
-            Text(
-              'Configure certificado .p12, clave, XSD oficial y secuencias e-NCF. '
-              'Con ambiente de precertificación/certificación/producción y OpenSSL '
-              'en el equipo emisor, puede firmar y enviar a la DGII desde la Cola.',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const _SecuenciasEncfSection(),
-          ],
+                      child: Icon(icon, color: iconColor, size: 21),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: AppTypography.bodyLarge.copyWith(
+                          color: const Color(0xFF10243A),
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            Widget credentialCard() {
+              return Container(
+                width: cardWidth,
+                padding: EdgeInsets.all(mobile ? 16 : 22),
+                decoration: cardDecoration,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    sectionTitle(
+                      Icons.verified_user_outlined,
+                      'Credenciales y firma digital',
+                      const Color(0xFF008F83),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeThumbColor: const Color(0xFF008F83),
+                      title: const Text(
+                        'Habilitar módulo e-CF',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: const Text(
+                        'Controla la habilitación del módulo fiscal electrónico.',
+                      ),
+                      value: _habilitado,
+                      onChanged: (v) => setState(() => _habilitado = v),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<AmbienteDgii>(
+                      initialValue: _ambiente,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Ambiente DGII',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: [
+                        for (final a in AmbienteDgii.values)
+                          DropdownMenuItem(value: a, child: Text(a.etiqueta)),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) setState(() => _ambiente = v);
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    AppTextField(label: 'RNC emisor', controller: _rnc),
+                    const SizedBox(height: 12),
+                    AppTextField(
+                      label: 'Razón social emisor',
+                      controller: _razon,
+                    ),
+                    const SizedBox(height: 12),
+                    AppTextField(
+                      label: 'Ruta certificado (.p12 / .pfx)',
+                      controller: _rutaCert,
+                    ),
+                    const SizedBox(height: 12),
+                    AppTextField(
+                      label: 'Clave del certificado',
+                      controller: _claveCert,
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'La clave guardada no se muestra. Deja este campo vacío '
+                      'para conservarla; escribe otra solo para cambiarla.',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final cert = ref.watch(certificadoInfoProvider);
+                        return cert.when(
+                          loading: () => const LinearProgressIndicator(),
+                          error: (_, __) => Text(
+                            'No se pudo verificar el certificado.',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.warning,
+                            ),
+                          ),
+                          data: (info) {
+                            if (info == null) {
+                              return Text(
+                                'La verificación estará disponible cuando '
+                                'se indiquen la ruta y la clave.',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              );
+                            }
+                            final color = info.vencido
+                                ? AppColors.error
+                                : (info.requiereAviso
+                                      ? const Color(0xFFE65100)
+                                      : AppColors.success);
+                            return Text(
+                              info.mensaje,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: color,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'La firma se ejecuta en este equipo mediante OpenSSL. '
+                      'Utiliza el certificado correspondiente al emisor.',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    AppTextField(
+                      label: 'Ruta XSD oficial DGII (.xsd o carpeta)',
+                      controller: _rutaXsd,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'En certificación y producción configura los esquemas '
+                      'oficiales requeridos para validar el XML.',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 48,
+                      child: AppButton(
+                        text: 'Guardar configuración',
+                        onPressed: _guardar,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            Widget sequencesCard() {
+              return Container(
+                width: cardWidth,
+                padding: EdgeInsets.all(mobile ? 12 : 18),
+                decoration: cardDecoration,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+                      child: sectionTitle(
+                        Icons.format_list_numbered_rounded,
+                        'Secuencias autorizadas e-NCF',
+                        const Color(0xFF2765C7),
+                      ),
+                    ),
+                    const _SecuenciasEncfSection(),
+                  ],
+                ),
+              );
+            }
+
+            return ListView(
+              padding: EdgeInsets.all(mobile ? 12 : 22),
+              children: [
+                Container(
+                  padding: EdgeInsets.all(mobile ? 14 : 18),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF8F7),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFB9E4DE)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.shield_outlined,
+                        color: Color(0xFF008F83),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Configuración fiscal del emisor',
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: const Color(0xFF075B55),
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Verifica las credenciales, el ambiente, el '
+                              'certificado y las secuencias antes de operar. '
+                              'Los datos mostrados corresponden a tu configuración.',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: const Color(0xFF376965),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (wide)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: credentialCard()),
+                      SizedBox(width: gap),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            sequencesCard(),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: cardDecoration,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  sectionTitle(
+                                    Icons.fact_check_outlined,
+                                    'Verificación de configuración',
+                                    const Color(0xFF27834A),
+                                  ),
+                                  Text(
+                                    'Al guardar se comprueban los datos del '
+                                    'emisor, OpenSSL, el certificado, el XSD '
+                                    'y las secuencias e-NCF. Revisa los '
+                                    'resultados y corrige los puntos pendientes. '
+                                    'Guardar no equivale a estar certificado '
+                                    'por la DGII.',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      credentialCard(),
+                      SizedBox(height: gap),
+                      sequencesCard(),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: cardDecoration,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            sectionTitle(
+                              Icons.fact_check_outlined,
+                              'Verificación de configuración',
+                              const Color(0xFF27834A),
+                            ),
+                            Text(
+                              'Al guardar se comprueban los datos del emisor, '
+                              'OpenSSL, el certificado, el XSD y las secuencias '
+                              'e-NCF. Revisa los resultados y corrige los puntos '
+                              'pendientes. Guardar no equivale a estar '
+                              'certificado por la DGII.',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            );
+          },
         );
       },
     );

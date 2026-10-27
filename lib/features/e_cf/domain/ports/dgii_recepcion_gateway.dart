@@ -4,12 +4,14 @@ class DgiiRecepcionResultado {
     this.trackId,
     this.codigo,
     this.mensaje,
+    this.estadoDgii,
     this.resultadoIncierto = false,
   });
   final bool ok;
   final String? trackId;
   final String? codigo;
   final String? mensaje;
+  final String? estadoDgii;
 
   /// true cuando no se puede confirmar si DGII recibió el documento.
   final bool resultadoIncierto;

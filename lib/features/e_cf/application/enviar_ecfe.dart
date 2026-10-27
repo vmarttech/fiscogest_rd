@@ -150,10 +150,16 @@ class EnviarEcfe {
 
       final esRfce = xml.contains('<RFCE');
       if (esRfce && res.ok) {
+        final estadoFinal = res.estadoDgii == 'aceptado condicional'
+            ? EstadoEcfInterno.aceptadoObservacion
+            : EstadoEcfInterno.aceptado;
+
         await repo.actualizarEstado(
           id: documentoId,
-          estado: EstadoEcfInterno.aceptado,
+          estado: estadoFinal,
+          ultimoError: null,
           codigoRespuesta: res.codigo,
+          mensajeDgii: res.mensaje,
         );
         return EnviarEcfeResultado(ok: true, trackId: res.trackId);
       }
@@ -161,10 +167,13 @@ class EnviarEcfe {
         final errorGuardado = res.resultadoIncierto
             ? '$marcaEnvioIncierto ${res.mensaje ?? 'Resultado de recepción desconocido'}'
             : res.mensaje;
+        final estadoFallido = esRfce && res.estadoDgii == 'rechazado'
+            ? EstadoEcfInterno.rechazado
+            : EstadoEcfInterno.errorTecnico;
 
         await repo.actualizarEstado(
           id: documentoId,
-          estado: EstadoEcfInterno.errorTecnico,
+          estado: estadoFallido,
           ultimoError: errorGuardado,
           codigoRespuesta: res.codigo,
           mensajeDgii: res.mensaje,
