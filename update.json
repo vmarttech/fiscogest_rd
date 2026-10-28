@@ -1,7 +1,7 @@
 {
   "versionName": "3.1.1",
-  "versionCode": 12,
+  "versionCode": 13,
   "apkUrl": "https://github.com/vmarttech/fiscogest_rd/releases/download/v3.1.1/app-release.apk",
-  "changelog": "Actualización 3.1.1 (build 12).",
+  "changelog": "Actualización 3.1.1 (build 13).",
   "forceUpdate": false
 }
