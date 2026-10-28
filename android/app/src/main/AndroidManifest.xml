@@ -50,8 +50,16 @@
 
     <!-- Consultas: Requerido para compatibilidad con Android 11+ -->
     <!-- Más info: https://developer.android.com/training/package-visibility -->
+    <!-- Android 11+: permite a url_launcher resolver apps que abren https/http -->
     <queries>
-        
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
     </queries>
 
 </manifest>

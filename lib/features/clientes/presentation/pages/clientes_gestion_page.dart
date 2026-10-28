@@ -359,16 +359,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (mobile) ...[
-            const Text(
-              'CLIENTES',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF334155),
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 6),
+            // En móvil el AppBar ya muestra "CLIENTES"; no repetir el label.
             const Text(
               'Cartera de clientes',
               style: TextStyle(

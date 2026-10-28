@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -149,45 +150,59 @@ class UpdateChecker {
         return;
       }
     }
-
     if (!context.mounted) return;
 
-    // Diálogo de progreso
-    await showDialog<void>(
+    // NO usar await showDialog: bloquearía la descarga hasta cerrar el diálogo.
+    unawaited(showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const AlertDialog(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 16),
-            Expanded(child: Text('Descargando actualización...')),
-          ],
+      builder: (_) => const PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Expanded(child: Text('Descargando actualización...')),
+            ],
+          ),
         ),
       ),
-    );
+    ));
+
+    var dialogOpen = true;
+    void closeProgress() {
+      if (dialogOpen && context.mounted) {
+        final nav = Navigator.of(context, rootNavigator: true);
+        if (nav.canPop()) nav.pop();
+        dialogOpen = false;
+      }
+    }
 
     try {
-      final res = await http.get(Uri.parse(update.apkUrl));
+      final res = await http
+          .get(Uri.parse(update.apkUrl))
+          .timeout(const Duration(minutes: 3));
       if (res.statusCode != 200) {
         throw Exception('Error al descargar (${res.statusCode})');
       }
-
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/fiscogest_update.apk');
       await file.writeAsBytes(res.bodyBytes);
 
-      if (context.mounted) Navigator.of(context).pop(); // cierra progreso
+      closeProgress();
 
       final result = await OpenFilex.open(file.path);
       if (result.type != ResultType.done && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo abrir el instalador: ${result.message}')),
+          SnackBar(
+            content: Text('No se pudo abrir el instalador: ${result.message}'),
+          ),
         );
       }
     } catch (e) {
+      closeProgress();
       if (context.mounted) {
-        Navigator.of(context).pop(); // cierra progreso si sigue abierto
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al actualizar: $e')),
         );

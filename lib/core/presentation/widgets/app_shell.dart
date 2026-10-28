@@ -683,11 +683,28 @@ class AppShell extends ConsumerWidget {
                       isPermanent: isPermanent,
                       onTap: () async {
                         final uri = Uri.parse('https://fiscogest-web.web.app');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(
+                        try {
+                          final ok = await launchUrl(
                             uri,
                             mode: LaunchMode.externalApplication,
                           );
+                          if (!ok && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No se pudo abrir el sitio. Revisa la conexión o el navegador.',
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('No se pudo abrir el enlace: $e'),
+                              ),
+                            );
+                          }
                         }
                       },
                     ),
