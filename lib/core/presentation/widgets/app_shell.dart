@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
@@ -617,6 +618,79 @@ class AppShell extends ConsumerWidget {
                     if (puede(Permiso.configAdmin))
                       _buildNavItem(context, '/configuracion', 'Configuración',
                           Icons.settings_outlined, currentPath, isPermanent),
+                    _buildNavAction(
+                      context,
+                      title: 'Contactar',
+                      icon: Icons.mail_outline,
+                      isPermanent: isPermanent,
+                      onTap: () async {
+                        final uri = Uri(
+                          scheme: 'mailto',
+                          path: 'fiscogestrd@gmail.com',
+                          queryParameters: {
+                            'subject': 'Contacto FiscoGest',
+                          },
+                        );
+                        try {
+                          final ok = await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                          if (!ok && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No hay una app de correo configurada. '
+                                  'Escríbenos a fiscogestrd@gmail.com',
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (_) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No se pudo abrir el correo. '
+                                  'Escríbenos a fiscogestrd@gmail.com',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                    _buildNavItem(
+                      context,
+                      '/legal/terminos',
+                      'Términos y\ncondiciones',
+                      Icons.description_outlined,
+                      currentPath,
+                      isPermanent,
+                    ),
+                    _buildNavItem(
+                      context,
+                      '/legal/privacidad',
+                      'Privacidad',
+                      Icons.privacy_tip_outlined,
+                      currentPath,
+                      isPermanent,
+                    ),
+                    _buildNavAction(
+                      context,
+                      title: 'Acerca de la App',
+                      icon: Icons.info_outline,
+                      isPermanent: isPermanent,
+                      onTap: () async {
+                        final uri = Uri.parse('https://fiscogest-web.web.app');
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
+                    ),
 
                     const SizedBox(height: 8),
                     Divider(
@@ -671,6 +745,60 @@ class AppShell extends ConsumerWidget {
     );
   }
 
+
+  /// Acción externa (correo / web) con el mismo look del menú lateral.
+  Widget _buildNavAction(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required bool isPermanent,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1.5),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: AppRadius.allM,
+          hoverColor: const Color(0x33FFFFFF),
+          splashColor: const Color(0x44FFFFFF),
+          highlightColor: const Color(0x22FFFFFF),
+          onTap: () {
+            if (!isPermanent &&
+                (Scaffold.maybeOf(context)?.isDrawerOpen ?? false)) {
+              Navigator.of(context).pop();
+            }
+            onTap();
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: Row(
+              children: [
+                Icon(icon, color: const Color(0xFF9DB5DA), size: 19),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    title,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.5,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildNavItem(
     BuildContext context,
     String routePath,
@@ -719,12 +847,14 @@ class AppShell extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     title,
+                    softWrap: true,
                     overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+                    maxLines: 2,
                     style: AppTypography.labelMedium.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 13,
+                      fontSize: 12.5,
+                      height: 1.2,
                     ),
                   ),
                 ),
