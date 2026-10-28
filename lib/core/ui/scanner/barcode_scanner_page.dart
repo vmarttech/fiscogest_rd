@@ -1,13 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 /// Pantalla de cámara para leer código de barras / QR.
-/// Devuelve el texto leído con [Navigator.pop(context, codigo)].
 ///
-/// Ajuste global: solicita permiso, gestiona ciclo de vida y evita el NPE
-/// típico de mobile_scanner 6.x en Android.
+/// Punto único de entrada del producto: [BarcodeScannerPage.abrir].
+/// Ciclo de vida endurecido para mobile_scanner 6.x en Android
+/// (evita NPE getClass() on null al iniciar demasiado pronto).
 class BarcodeScannerPage extends StatefulWidget {
   const BarcodeScannerPage({
     super.key,
@@ -44,23 +46,27 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   MobileScannerController? _controller;
   bool _yaLeido = false;
   bool _listo = false;
+  bool _arrancando = false;
   String? _error;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _prepararCamara();
+    // Tras el primer frame: Activity/surface más estables en Android.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_prepararCamara());
+    });
   }
 
   Future<void> _prepararCamara() async {
+    if (_arrancando) return;
+    _arrancando = true;
     try {
-      // 1. Pedir permiso de cámara de forma explícita
       var status = await Permission.camera.status;
       if (!status.isGranted) {
         status = await Permission.camera.request();
       }
-
       if (!status.isGranted) {
         if (!mounted) return;
         setState(() {
@@ -69,50 +75,95 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                   'Ábrelo en Ajustes del teléfono.'
               : 'Se necesita permiso de cámara para escanear.\n'
                   'Actívalo en Ajustes.';
+          _listo = false;
         });
         return;
       }
 
-      // 2. Crear el controller solo cuando ya hay permiso
-      final controller = MobileScannerController(
-        detectionSpeed: DetectionSpeed.normal,
-        facing: CameraFacing.back,
-        torchEnabled: false,
-        autoStart: true,
-      );
-
-      if (!mounted) {
-        controller.dispose();
-        return;
-      }
-
-      setState(() {
-        _controller = controller;
-        _listo = true;
-        _error = null;
-      });
+      await _recrearControllerYArrancar();
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _error = 'No se pudo inicializar la cámara.\n$e';
+        _listo = false;
       });
+    } finally {
+      _arrancando = false;
+    }
+  }
+
+  Future<void> _recrearControllerYArrancar() async {
+    // Destruir instancia previa (reintento / resume problemático).
+    final prev = _controller;
+    _controller = null;
+    if (prev != null) {
+      try {
+        await prev.stop();
+      } catch (_) {}
+      try {
+        await prev.dispose();
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
+
+    final controller = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal,
+      facing: CameraFacing.back,
+      torchEnabled: false,
+      // Crítico: no autoStart; arrancamos cuando el widget ya está montado.
+      autoStart: false,
+    );
+
+    setState(() {
+      _controller = controller;
+      _listo = true;
+      _error = null;
+    });
+
+    // Un frame más para que MobileScanner enlace el texture/surface.
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+    if (!mounted || _controller != controller) return;
+
+    try {
+      await controller.start();
+    } catch (e) {
+      // Un reintento tras breve pausa cubre el NPE intermitente de 6.x.
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      if (!mounted || _controller != controller) return;
+      try {
+        await controller.start();
+      } catch (e2) {
+        if (!mounted) return;
+        setState(() {
+          _error =
+              'No se pudo abrir la cámara.\n'
+              'Si el permiso está concedido, cierre otras apps que usen la '
+              'cámara y pulse Reintentar.\n\n$e2';
+          _listo = false;
+        });
+        try {
+          await controller.dispose();
+        } catch (_) {}
+        if (_controller == controller) _controller = null;
+      }
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final c = _controller;
-    if (c == null || !_listo) return;
-
-    // Evita crashes al ir a segundo plano / volver
+    if (c == null) return;
     switch (state) {
       case AppLifecycleState.resumed:
-        c.start().catchError((_) {});
+        if (_listo && _error == null && !_yaLeido) {
+          unawaited(c.start().catchError((_) {}));
+        }
         break;
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
-        c.stop().catchError((_) {});
+        unawaited(c.stop().catchError((_) {}));
         break;
       case AppLifecycleState.detached:
         break;
@@ -124,7 +175,16 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     WidgetsBinding.instance.removeObserver(this);
     final c = _controller;
     _controller = null;
-    c?.dispose();
+    if (c != null) {
+      unawaited(() async {
+        try {
+          await c.stop();
+        } catch (_) {}
+        try {
+          await c.dispose();
+        } catch (_) {}
+      }());
+    }
     super.dispose();
   }
 
@@ -135,13 +195,22 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     final raw = barcodes.first.rawValue?.trim();
     if (raw == null || raw.isEmpty) return;
     _yaLeido = true;
-    // Parar la cámara antes de salir evita fugas / crashes
-    _controller?.stop().catchError((_) {});
+    final c = _controller;
+    unawaited(c?.stop().catchError((_) {}) ?? Future.value());
     Navigator.of(context).pop(raw);
   }
 
   Future<void> _abrirAjustes() async {
     await openAppSettings();
+  }
+
+  Future<void> _reintentar() async {
+    setState(() {
+      _error = null;
+      _listo = false;
+      _yaLeido = false;
+    });
+    await _prepararCamara();
   }
 
   @override
@@ -159,16 +228,20 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           ),
         ),
         actions: [
-          if (_controller != null) ...[
+          if (_controller != null && _error == null) ...[
             IconButton(
               tooltip: 'Linterna',
               icon: const Icon(Icons.flash_on),
-              onPressed: () => _controller?.toggleTorch(),
+              onPressed: () => unawaited(
+                _controller?.toggleTorch().catchError((_) {}) ?? Future.value(),
+              ),
             ),
             IconButton(
               tooltip: 'Cambiar cámara',
               icon: const Icon(Icons.cameraswitch_outlined),
-              onPressed: () => _controller?.switchCamera(),
+              onPressed: () => unawaited(
+                _controller?.switchCamera().catchError((_) {}) ?? Future.value(),
+              ),
             ),
           ],
         ],
@@ -199,13 +272,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     ),
                     const SizedBox(height: 12),
                     TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _error = null;
-                          _listo = false;
-                        });
-                        _prepararCamara();
-                      },
+                      onPressed: _reintentar,
                       child: const Text(
                         'Reintentar',
                         style: TextStyle(color: Colors.white70),
@@ -224,20 +291,22 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
               controller: _controller!,
               onDetect: _onDetect,
               errorBuilder: (context, error, child) {
+                // No setState durante build: programar en el siguiente frame.
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted) return;
+                  if (!mounted || _yaLeido) return;
                   setState(() {
                     _error =
                         'No se pudo abrir la cámara.\n'
-                        'Revise el permiso de cámara en Ajustes.\n\n'
+                        'Revise el permiso o cierre otras apps que usen la cámara.\n\n'
                         '$error';
+                    _listo = false;
                   });
                 });
-                return const SizedBox.shrink();
+                return const Center(
+                  child: CircularProgressIndicator(color: Colors.white54),
+                );
               },
             ),
-
-          // Marco guía (solo si la cámara está activa)
           if (_listo && _error == null)
             IgnorePointer(
               child: CustomPaint(
@@ -245,7 +314,6 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 child: const SizedBox.expand(),
               ),
             ),
-
           Positioned(
             left: 16,
             right: 16,
