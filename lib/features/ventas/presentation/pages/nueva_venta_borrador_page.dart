@@ -229,16 +229,16 @@ class _NuevaVentaBorradorPageState
         } catch (_) {}
         estado = ref.read(productoControllerProvider);
       }
-      final todos = estado.maybeWhen(
+      final List<Producto> todos = estado.maybeWhen<List<Producto>>(
         data: (lista) => lista,
-        orElse: () => [],
+        orElse: () => <Producto>[],
       );
-      dynamic exacto;
+      Producto? exacto;
       for (final p in todos) {
         try {
           if (p.activo == false) continue;
-          final cb = ('${p.codigoBarras ?? ''}').trim().toLowerCase();
-          final c = ('${p.codigo ?? ''}').trim().toLowerCase();
+          final cb = (p.codigoBarras ?? '').trim().toLowerCase();
+          final c = p.codigo.trim().toLowerCase();
           if ((cb.isNotEmpty && cb == q) || c == q) {
             exacto = p;
             break;
@@ -250,8 +250,8 @@ class _NuevaVentaBorradorPageState
         for (final p in todos) {
           try {
             if (p.activo == false) continue;
-            final cb = ('${p.codigoBarras ?? ''}').toLowerCase();
-            final c = ('${p.codigo ?? ''}').toLowerCase();
+            final cb = (p.codigoBarras ?? '').toLowerCase();
+            final c = p.codigo.toLowerCase();
             if (cb == q || c == q || cb.contains(q) || c.contains(q)) {
               exacto = p;
               break;
@@ -260,7 +260,7 @@ class _NuevaVentaBorradorPageState
         }
       }
       if (exacto != null) {
-        await _agregarProductoACotizacion(exacto as Producto, 1);
+        await _agregarProductoACotizacion(exacto, 1);
         if (mounted) _buscadorController.clear();
       }
     } catch (e) {

@@ -33,7 +33,7 @@ class UsbBarcodeScannerService {
   static const Duration timeoutBuffer = Duration(milliseconds: 120);
 
   bool _activo = false;
-  bool _habilitado = true;
+  bool habilitado = true;
 
   /// Activa el listener global (llamar una vez al iniciar la app en desktop).
   void start() {
@@ -50,11 +50,9 @@ class UsbBarcodeScannerService {
   }
 
   /// Permite desactivar temporalmente (p.ej. diálogos de texto libre).
-  set habilitado(bool v) => _habilitado = v;
-  bool get habilitado => _habilitado;
 
   bool _onKey(KeyEvent event) {
-    if (!_habilitado) return false;
+    if (!habilitado) return false;
     if (event is! KeyDownEvent) return false;
 
     final now = DateTime.now();
