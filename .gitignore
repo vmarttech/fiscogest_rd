@@ -62,3 +62,7 @@ android/key.properties
 *.jks
 *.keystore
 lib/core/sync/supabase/supabase_secrets.dart
+
+# Archivos de respaldo Dart
+*.dart.bak*
+.backup_notificaciones_*/
