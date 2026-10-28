@@ -41,8 +41,7 @@ class BarcodeScannerPage extends StatefulWidget {
   State<BarcodeScannerPage> createState() => _BarcodeScannerPageState();
 }
 
-class _BarcodeScannerPageState extends State<BarcodeScannerPage>
-    with WidgetsBindingObserver {
+class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
   MobileScannerController? _controller;
   bool _yaLeido = false;
   bool _listo = false;
@@ -52,8 +51,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    // Tras el primer frame: Activity/surface más estables en Android.
+    // Esperar al primer frame antes de solicitar el permiso.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_prepararCamara());
     });
@@ -93,13 +91,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }
 
   Future<void> _recrearControllerYArrancar() async {
-    // Destruir instancia previa (reintento / resume problemático).
     final prev = _controller;
     _controller = null;
+
     if (prev != null) {
-      try {
-        await prev.stop();
-      } catch (_) {}
       try {
         await prev.dispose();
       } catch (_) {}
@@ -111,8 +106,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       detectionSpeed: DetectionSpeed.normal,
       facing: CameraFacing.back,
       torchEnabled: false,
-      // Crítico: no autoStart; arrancamos cuando el widget ya está montado.
-      autoStart: false,
+      // MobileScanner gestiona el inicio y el ciclo de vida.
+      autoStart: true,
     );
 
     setState(() {
@@ -120,70 +115,14 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       _listo = true;
       _error = null;
     });
-
-    // Un frame más para que MobileScanner enlace el texture/surface.
-    await Future<void>.delayed(const Duration(milliseconds: 80));
-    if (!mounted || _controller != controller) return;
-
-    try {
-      await controller.start();
-    } catch (e) {
-      // Un reintento tras breve pausa cubre el NPE intermitente de 6.x.
-      await Future<void>.delayed(const Duration(milliseconds: 250));
-      if (!mounted || _controller != controller) return;
-      try {
-        await controller.start();
-      } catch (e2) {
-        if (!mounted) return;
-        setState(() {
-          _error =
-              'No se pudo abrir la cámara.\n'
-              'Si el permiso está concedido, cierre otras apps que usen la '
-              'cámara y pulse Reintentar.\n\n$e2';
-          _listo = false;
-        });
-        try {
-          await controller.dispose();
-        } catch (_) {}
-        if (_controller == controller) _controller = null;
-      }
-    }
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final c = _controller;
-    if (c == null) return;
-    switch (state) {
-      case AppLifecycleState.resumed:
-        if (_listo && _error == null && !_yaLeido) {
-          unawaited(c.start().catchError((_) {}));
-        }
-        break;
-      case AppLifecycleState.inactive:
-      case AppLifecycleState.paused:
-      case AppLifecycleState.hidden:
-        unawaited(c.stop().catchError((_) {}));
-        break;
-      case AppLifecycleState.detached:
-        break;
-    }
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     final c = _controller;
     _controller = null;
     if (c != null) {
-      unawaited(() async {
-        try {
-          await c.stop();
-        } catch (_) {}
-        try {
-          await c.dispose();
-        } catch (_) {}
-      }());
+      unawaited(c.dispose());
     }
     super.dispose();
   }

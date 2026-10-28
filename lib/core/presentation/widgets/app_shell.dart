@@ -1,3 +1,4 @@
+import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'dart:io';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
@@ -31,6 +32,20 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final modoSimplificado = ref.watch(modoSimplificadoProvider);
     final sesion = ref.watch(sesionProvider);
+    if (sesion != null && !UpdateChecker.promptsEnabled) {
+      UpdateChecker.promptsEnabled = true;
+    }
+    if (sesion != null && !_UpdatePromptGate.done) {
+      _UpdatePromptGate.done = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future<void>.delayed(const Duration(milliseconds: 600), () {
+          if (context.mounted && UpdateChecker.promptsEnabled) {
+            UpdateChecker.checkAndPrompt(context);
+          }
+        });
+      });
+    }
+
     final esAdmin = sesion?.esAdmin ?? false;
     final pendientesAsync = ref.watch(pedidosPendientesCountProvider);
     final pedidosPendientes = pendientesAsync.maybeWhen(
@@ -96,7 +111,8 @@ class AppShell extends ConsumerWidget {
               rolUsuario: sesion?.rol ?? '',
               usernameSesion: sesion?.username ?? '',
               onLogout: () {
-                ref.read(sesionProvider.notifier).state = null;
+                UpdateChecker.promptsEnabled = false;
+      ref.read(sesionProvider.notifier).state = null;
                 SesionNube.clear();
                 context.go('/login');
               },
@@ -120,7 +136,8 @@ class AppShell extends ConsumerWidget {
                     direccionEmpresa: direccionEmpresa,
                     operadorLabel: operadorLabel,
                     onLogout: () {
-                      ref.read(sesionProvider.notifier).state = null;
+                      UpdateChecker.promptsEnabled = false;
+      ref.read(sesionProvider.notifier).state = null;
                       SesionNube.clear();
                       context.go('/login');
                     },
@@ -161,7 +178,8 @@ class AppShell extends ConsumerWidget {
               rolUsuario: sesion?.rol ?? '',
               usernameSesion: sesion?.username ?? '',
               onLogout: () {
-                ref.read(sesionProvider.notifier).state = null;
+                UpdateChecker.promptsEnabled = false;
+      ref.read(sesionProvider.notifier).state = null;
                 SesionNube.clear();
                 context.go('/login');
               },
@@ -956,4 +974,9 @@ class AppShell extends ConsumerWidget {
             ),
     );
   }
+}
+
+
+class _UpdatePromptGate {
+  static bool done = false;
 }

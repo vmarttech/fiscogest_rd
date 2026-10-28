@@ -252,7 +252,6 @@ class _NuevaVentaBorradorPageState
             if (p.activo == false) continue;
             final cb = ('${p.codigoBarras ?? ''}').toLowerCase();
             final c = ('${p.codigo ?? ''}').toLowerCase();
-            final n = ('${p.nombre ?? ''}').toLowerCase();
             if (cb == q || c == q || cb.contains(q) || c.contains(q)) {
               exacto = p;
               break;

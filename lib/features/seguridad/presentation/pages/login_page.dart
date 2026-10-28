@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/sync/supabase/emitir_token.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/auth/login_prefs.dart';
 import 'package:fiscogest_rd/core/auth/biometric_auth.dart';
@@ -332,7 +333,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 : '/ventas/cobro',
           );
         } else {
-          context.go(sesion?.rutaInicio ?? '/');
+          UpdateChecker.promptsEnabled = true;
+      context.go(sesion?.rutaInicio ?? '/');
         }
       }
     } catch (e) {
@@ -400,7 +402,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 : '/ventas/cobro',
           );
         } else {
-          context.go(sesion?.rutaInicio ?? '/');
+          UpdateChecker.promptsEnabled = true;
+      context.go(sesion?.rutaInicio ?? '/');
         }
       }
     } catch (e) {

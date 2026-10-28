@@ -40,6 +40,9 @@ class UpdateInfo {
 }
 
 class UpdateChecker {
+  /// false en login; true tras sesión iniciada.
+  static bool promptsEnabled = false;
+
   /// Comprueba si hay versión nueva. Devuelve null si no hay update o hay error.
   static Future<UpdateInfo?> check() async {
     try {
@@ -153,9 +156,12 @@ class UpdateChecker {
     if (!context.mounted) return;
 
     // NO usar await showDialog: bloquearía la descarga hasta cerrar el diálogo.
+    // ignore: avoid_print
+    print('[UpdateChecker] inicio descarga APK...');
     unawaited(showDialog<void>(
       context: context,
       barrierDismissible: false,
+      useRootNavigator: true,
       builder: (_) => const PopScope(
         canPop: false,
         child: AlertDialog(
@@ -212,6 +218,11 @@ class UpdateChecker {
 
   /// Llamar al arrancar la app (después del primer frame).
   static Future<void> checkAndPrompt(BuildContext context) async {
+    if (!promptsEnabled) {
+      // ignore: avoid_print
+      print('[UpdateChecker] prompts deshabilitados (sin sesión)');
+      return;
+    }
     final update = await check();
     if (update != null && context.mounted) {
       await showUpdateDialog(context, update);

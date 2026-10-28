@@ -1,4 +1,5 @@
 /// Textos legales FiscoGest RD - alineados con la web publicada.
+library;
 
 const kUrlPrivacidad = 'https://fiscogest-web.web.app/privacidad.html';
 const kUrlTerminos = 'https://fiscogest-web.web.app/terminos.html';
