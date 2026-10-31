@@ -23,7 +23,6 @@ class VentasDao {
       ..where(
         (final t) =>
             t.estadoDocumento.equals('facturado') |
-            t.estadoDocumento.equals('enCredito') |
             t.estadoDocumento.equals('anulado'),
       )
       ..orderBy([(final t) => OrderingTerm.desc(t.fechaRegistro)]);

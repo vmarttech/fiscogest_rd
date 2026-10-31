@@ -30,7 +30,7 @@ class ReportesRepository {
 
   final AppDatabase _db;
 
-  static const _estadosVenta = "('facturado','enCredito')";
+  static const _estadosVenta = "('facturado')";
 
   Future<DashboardSnapshot> cargarDashboard() async {
     final now = DateTime.now();
